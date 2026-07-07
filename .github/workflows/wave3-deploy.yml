@@ -1,0 +1,32 @@
+name: Wave 3 — Execution Engine Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "09-EXECUTION/**"
+      - "06-AGENTS/**"
+      - "run_api.py"
+
+jobs:
+  notify:
+    name: Wave 3 Deployment Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Wave 3 readiness
+        run: |
+          echo "Wave 3 components:"
+          ls -la 09-EXECUTION/ 2>/dev/null || echo "  09-EXECUTION: not yet created"
+          ls -la 06-AGENTS/ 2>/dev/null || echo "  06-AGENTS: present"
+          echo ""
+          echo "Wave 3 checklist:"
+          echo "  [ ] Execution Engine (execution_engine.py)"
+          echo "  [ ] Developer Agent (developer.py)"
+          echo "  [ ] Tester Agent (tester.py)"
+          echo "  [ ] Reviewer Agent (reviewer.py)"
+          echo "  [ ] Quality Engine scoring"
+          echo "  [ ] Git Agent (commit + push)"
+          echo "  [ ] Fix Loop (max 5 retries)"

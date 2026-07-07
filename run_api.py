@@ -1014,6 +1014,102 @@ Return ONLY valid JSON:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
+
+
+# ── Wave 3: Execution Engine ──────────────────────────────────────────────────
+
+@app.post("/api/v1/tasks/{task_id}/run", status_code=200, tags=["Execution"])
+async def run_task_pipeline(task_id: UUID, workspace_id: UUID = Query(...)):
+    """
+    Trigger the full autonomous execution pipeline for a task.
+    Context Pack → Code Generation → Lint → Quality Gate → Commit → Memory
+    """
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            text("SELECT id, project_id, status FROM tasks WHERE id=:tid AND workspace_id=:wid"),
+            {"tid": str(task_id), "wid": str(workspace_id)},
+        )
+        row = result.fetchone()
+        if not row:
+            return JSONResponse(status_code=404, content={"error": "Task not found"})
+        run_group = uuid4()
+        await session.execute(
+            text("UPDATE tasks SET run_group=:rg, status='executing' WHERE id=:tid"),
+            {"rg": str(run_group), "tid": str(task_id)},
+        )
+        await session.commit()
+        project_id = row.project_id
+
+    import importlib.util as _ilu
+    import asyncio as _asyncio
+
+    _ee_spec = _ilu.spec_from_file_location(
+        "execution_engine",
+        "/home/amr/AI-COMPANY-OS/09-EXECUTION/execution_engine.py",
+    )
+    _ee_mod = _ilu.module_from_spec(_ee_spec)
+    _ee_spec.loader.exec_module(_ee_mod)
+    engine = _ee_mod.ExecutionEngine()
+
+    report = await engine.run_pipeline(task_id, workspace_id, project_id, run_group)
+    return report
+
+@app.get("/api/v1/executions", tags=["Execution"])
+async def list_executions(workspace_id: UUID = Query(...), limit: int = Query(default=20)):
+    """List recent execution runs for a workspace."""
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            text("""
+                SELECT run_group, task_id, stage, is_ok, duration_ms, created_at
+                FROM builder_runs
+                WHERE workspace_id = :wid
+                ORDER BY created_at DESC
+                LIMIT :limit
+            """),
+            {"wid": str(workspace_id), "limit": limit},
+        )
+        runs = [
+            {
+                "run_group": str(r.run_group),
+                "task_id": str(r.task_id),
+                "stage": r.stage,
+                "is_ok": r.is_ok,
+                "duration_ms": r.duration_ms,
+                "created_at": str(r.created_at),
+            }
+            for r in result.fetchall()
+        ]
+    return {"workspace_id": str(workspace_id), "executions": runs, "total": len(runs)}
+
+@app.get("/api/v1/quality", tags=["Execution"])
+async def list_quality_scores(workspace_id: UUID = Query(...), limit: int = Query(default=10)):
+    """List recent quality gate results."""
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            text("""
+                SELECT qs.run_group, qs.overall_score, qs.passed_gate,
+                       qs.architecture_score, qs.security_score, qs.created_at
+                FROM quality_scores qs
+                JOIN builder_runs br ON br.run_group = qs.run_group
+                WHERE br.workspace_id = :wid
+                ORDER BY qs.created_at DESC
+                LIMIT :limit
+            """),
+            {"wid": str(workspace_id), "limit": limit},
+        )
+        scores = [
+            {
+                "run_group": str(r.run_group),
+                "overall_score": float(r.overall_score),
+                "passed_gate": r.passed_gate,
+                "architecture_score": float(r.architecture_score),
+                "security_score": float(r.security_score),
+            }
+            for r in result.fetchall()
+        ]
+    return {"workspace_id": str(workspace_id), "quality_scores": scores}
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
