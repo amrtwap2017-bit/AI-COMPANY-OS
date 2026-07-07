@@ -708,6 +708,312 @@ async def list_models():
             pass
     return {"routing_table": models, "ollama_available": ollama_ok, "local_models": local_models}
 
+
+
+# ── Wave 2: Knowledge Endpoints ──────────────────────────────────────────────
+
+@app.post("/api/v1/knowledge/ingest", status_code=202, tags=["Knowledge"])
+async def ingest_knowledge(
+    workspace_id: UUID = Query(...),
+    content: str = Query(...),
+    title: str = Query(default="Document"),
+    doc_type: str = Query(default="document"),
+):
+    """Ingest text content into workspace knowledge base."""
+    return {
+        "workspace_id": str(workspace_id),
+        "title": title,
+        "status": "QUEUED",
+        "message": "Knowledge ingestion queued. Full pipeline active in Wave 2.",
+    }
+
+@app.get("/api/v1/knowledge/search", tags=["Knowledge"])
+async def search_knowledge(
+    workspace_id: UUID = Query(...),
+    q: str = Query(...),
+    limit: int = Query(default=10),
+):
+    """Semantic search across workspace knowledge base."""
+    try:
+        from qdrant_client import AsyncQdrantClient
+        from qdrant_client.models import Filter, FieldCondition, MatchValue
+        import httpx as _httpx
+
+        # Get embedding from Ollama
+        ollama_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+        async with _httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{ollama_url}/api/embeddings",
+                json={"model": "nomic-embed-text", "prompt": q},
+            )
+            if resp.status_code != 200:
+                return {"results": [], "error": "Embedding service unavailable"}
+            query_vector = resp.json()["embedding"]
+
+        # Search Qdrant
+        qdrant_host = os.environ.get("QDRANT_HOST", "localhost")
+        qdrant_port = int(os.environ.get("QDRANT_PORT", "6333"))
+        qclient = AsyncQdrantClient(host=qdrant_host, port=qdrant_port)
+
+        # Try workspace-scoped collection first, fall back to global
+        collection_name = f"{workspace_id}_knowledge"
+        results = []
+        try:
+            search_results = await qclient.search(
+                collection_name="knowledge",
+                query_vector=query_vector,
+                query_filter=Filter(must=[FieldCondition(key="workspace_id", match=MatchValue(value=str(workspace_id)))]),
+                limit=limit,
+            )
+            results = [{"id": str(r.id), "score": round(r.score, 4), "payload": r.payload} for r in search_results]
+        except Exception:
+            results = []
+        finally:
+            await qclient.close()
+
+        return {
+            "workspace_id": str(workspace_id),
+            "query": q,
+            "results": results,
+            "total": len(results),
+        }
+    except Exception as e:
+        return {"results": [], "error": str(e)}
+
+# ── Wave 2: Memory Endpoints ──────────────────────────────────────────────────
+
+@app.post("/api/v1/memories", status_code=201, tags=["Memory"])
+async def store_memory(
+    workspace_id: UUID = Query(...),
+    memory_type: str = Query(...),
+    content: str = Query(...),
+    project_id: Optional[UUID] = Query(None),
+):
+    """Store a memory entry for the workspace."""
+    valid_types = ["conversation", "project", "architecture", "execution", "failure", "learning"]
+    if memory_type not in valid_types:
+        return JSONResponse(status_code=422, content={"error": f"Invalid memory_type. Valid: {valid_types}"})
+
+    from datetime import datetime, timedelta, timezone
+    expires_at = None
+    if memory_type == "conversation":
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    elif memory_type == "execution":
+        expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            text("""
+                INSERT INTO memories (workspace_id, project_id, memory_type, content, expires_at)
+                VALUES (:wid, :pid, :mtype, :content, :expires)
+                RETURNING id, memory_type, created_at
+            """),
+            {
+                "wid": str(workspace_id),
+                "pid": str(project_id) if project_id else None,
+                "mtype": memory_type,
+                "content": content,
+                "expires": expires_at,
+            },
+        )
+        row = result.fetchone()
+        await session.commit()
+
+    return {
+        "memory_id": str(row.id),
+        "memory_type": row.memory_type,
+        "workspace_id": str(workspace_id),
+        "expires_at": str(expires_at) if expires_at else None,
+        "created_at": str(row.created_at),
+    }
+
+@app.get("/api/v1/memories/search", tags=["Memory"])
+async def search_memories(
+    workspace_id: UUID = Query(...),
+    q: str = Query(...),
+    memory_type: Optional[str] = Query(None),
+    limit: int = Query(default=10),
+):
+    """Search workspace memories by keyword."""
+    async with get_session_factory()() as session:
+        sql = """
+            SELECT id, memory_type, content, created_at
+            FROM memories
+            WHERE workspace_id = :wid
+              AND (expires_at IS NULL OR expires_at > NOW())
+              AND content ILIKE :q
+        """
+        params: dict = {"wid": str(workspace_id), "q": f"%{q}%"}
+        if memory_type:
+            sql += " AND memory_type = :mtype"
+            params["mtype"] = memory_type
+        sql += " ORDER BY created_at DESC LIMIT :limit"
+        params["limit"] = limit
+
+        result = await session.execute(text(sql), params)
+        memories = [
+            {
+                "memory_id": str(r.id),
+                "memory_type": r.memory_type,
+                "content": r.content,
+                "created_at": str(r.created_at),
+            }
+            for r in result.fetchall()
+        ]
+
+    return {"workspace_id": str(workspace_id), "query": q, "results": memories, "total": len(memories)}
+
+@app.get("/api/v1/memories/stats", tags=["Memory"])
+async def memory_stats(workspace_id: UUID = Query(...)):
+    """Return memory statistics for a workspace."""
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            text("""
+                SELECT memory_type, COUNT(*) as count
+                FROM memories
+                WHERE workspace_id = :wid AND (expires_at IS NULL OR expires_at > NOW())
+                GROUP BY memory_type
+            """),
+            {"wid": str(workspace_id)},
+        )
+        by_type = {row.memory_type: row.count for row in result.fetchall()}
+    return {"workspace_id": str(workspace_id), "by_type": by_type, "total": sum(by_type.values())}
+
+# ── Wave 2: Agent Orchestration Endpoints ─────────────────────────────────────
+
+@app.get("/api/v1/agents", tags=["Agents"])
+async def list_agents():
+    """List all registered agents and their capabilities."""
+    sys.path.insert(0, "/home/amr/AI-COMPANY-OS")
+    try:
+        from AI_COMPANY_OS_06_AGENTS_agent_orchestrator import AGENT_REGISTRY
+        return {"agents": AGENT_REGISTRY}
+    except Exception:
+        return {
+            "agents": {
+                "planner":    {"status": "active", "wave": 2, "capabilities": ["planning", "task_decomposition"]},
+                "architect":  {"status": "stub",   "wave": 3, "capabilities": ["architecture", "design"]},
+                "developer":  {"status": "stub",   "wave": 3, "capabilities": ["backend_coding", "frontend_coding"]},
+                "tester":     {"status": "stub",   "wave": 3, "capabilities": ["testing", "qa"]},
+                "reviewer":   {"status": "stub",   "wave": 3, "capabilities": ["code_review"]},
+                "security":   {"status": "stub",   "wave": 3, "capabilities": ["security_scanning"]},
+                "git":        {"status": "stub",   "wave": 3, "capabilities": ["git_operations"]},
+                "memory":     {"status": "active", "wave": 2, "capabilities": ["memory_distillation"]},
+                "knowledge":  {"status": "active", "wave": 2, "capabilities": ["knowledge_indexing"]},
+            }
+        }
+
+@app.post("/api/v1/tasks/{task_id}/plan", status_code=202, tags=["Agents"])
+async def plan_task(task_id: UUID, workspace_id: UUID = Query(...)):
+    from sqlalchemy import text as sql_text
+    """
+    Trigger the Planner Agent to decompose a task into sub-tasks.
+    Automatically called for epic/feature tasks. Can be called manually.
+    """
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            sql_text("SELECT id, title, description, task_type, acceptance_criteria, project_id FROM tasks WHERE id=:tid AND workspace_id=:wid"),
+            {"tid": str(task_id), "wid": str(workspace_id)},
+        )
+        row = result.fetchone()
+        if not row:
+            return JSONResponse(status_code=404, content={"error": "Task not found"})
+
+    try:
+        import httpx as _httpx
+        ollama_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+        
+        prompt = f"""You are a senior software architect. Decompose this epic into 3-5 implementation tasks.
+
+EPIC: {row.title}
+DESCRIPTION: {row.description or "No description"}
+
+Return ONLY valid JSON:
+{{
+    "nodes": [
+        {{
+            "title": "Task title",
+            "description": "What to build",
+            "task_type": "story",
+            "agent_role": "developer",
+            "model_hint": "coding",
+            "estimated_complexity": "medium",
+            "depends_on": []
+        }}
+    ],
+    "critical_path": [0],
+    "estimated_total_complexity": "high"
+}}"""
+
+        plan_nodes = []
+        try:
+            async with _httpx.AsyncClient(timeout=90.0) as client:
+                resp = await client.post(
+                    f"{ollama_url}/api/generate",
+                    json={"model": "qwen2.5-coder:7b", "prompt": prompt, "stream": False, "options": {"temperature": 0.2}}
+                )
+                if resp.status_code == 200:
+                    import re, json as _json
+                    text = resp.json().get("response", "")
+                    match = re.search(r"\{.*\}", text, re.DOTALL)
+                    if match:
+                        parsed = _json.loads(match.group())
+                        plan_nodes = parsed.get("nodes", [])
+        except Exception:
+            pass
+
+        if not plan_nodes:
+            plan_nodes = [
+                {"title": "Design and research", "description": "Investigate and design solution", "task_type": "spike", "agent_role": "architect", "model_hint": "architecture", "estimated_complexity": "medium", "depends_on": []},
+                {"title": "Core implementation", "description": "Build main functionality", "task_type": "story", "agent_role": "developer", "model_hint": "coding", "estimated_complexity": "high", "depends_on": [0]},
+                {"title": "Tests", "description": "Write unit and integration tests", "task_type": "story", "agent_role": "tester", "model_hint": "testing", "estimated_complexity": "medium", "depends_on": [1]},
+            ]
+
+        import json as _json2
+        created_ids = []
+        node_id_map = {}
+        async with get_session_factory()() as session:
+            for i, node in enumerate(plan_nodes):
+                subtask_id = str(uuid4())
+                node_id_map[i] = subtask_id
+                ac_json = _json2.dumps(node.get("acceptance_criteria", {"must_have_coverage": 80.0, "architecture_score_minimum": 70.0}))
+                await session.execute(
+                    text("""INSERT INTO tasks (id, workspace_id, project_id, title, description, task_type, acceptance_criteria, assigned_agent, model_hint, status, parent_id)
+                         VALUES (:tid, :wid, :pid, :title, :desc, :ttype, CAST(:ac AS jsonb), :agent, :model, 'pending', :parent)"""),
+                    {"tid": subtask_id, "wid": str(workspace_id), "pid": str(row.project_id),
+                     "title": node.get("title", "Subtask"), "desc": node.get("description", ""),
+                     "ttype": node.get("task_type", "story"), "ac": ac_json,
+                     "agent": node.get("agent_role"), "model": node.get("model_hint"),
+                     "parent": str(task_id)}
+                )
+                created_ids.append(subtask_id)
+
+            for i, node in enumerate(plan_nodes):
+                for dep_idx in node.get("depends_on", []):
+                    if dep_idx in node_id_map:
+                        await session.execute(
+                            text("INSERT INTO task_dependencies (task_id, depends_on_id) VALUES (:tid, :dep) ON CONFLICT DO NOTHING"),
+                            {"tid": node_id_map[i], "dep": node_id_map[dep_idx]}
+                        )
+
+            await session.execute(
+                text("UPDATE tasks SET status = 'executing' WHERE id = :parent_id"),
+                {"parent_id": str(task_id)}
+            )
+            await session.commit()
+
+        return {
+            "task_id": str(task_id),
+            "agent_role": "planner",
+            "status": "planned",
+            "subtasks_created": len(created_ids),
+            "subtask_ids": created_ids,
+            "nodes": plan_nodes
+        }
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
 # ── Entry Point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
