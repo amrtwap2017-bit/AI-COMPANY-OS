@@ -41,7 +41,8 @@ except ImportError:
 import httpx
 from fastapi import FastAPI, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -335,6 +336,10 @@ async def telemetry(request: Request, call_next):
     return response
 
 # ── Platform Routes ───────────────────────────────────────────────────────────
+@app.get("/dashboard", include_in_schema=False)
+async def get_dashboard():
+    return FileResponse("/home/amr/AI-COMPANY-OS/10-ENGINEERING-HUB/web/index.html")
+
 
 @app.get("/", tags=["Platform"])
 async def root():
@@ -371,6 +376,18 @@ async def metrics():
 
 # ── Workspace Endpoints ───────────────────────────────────────────────────────
 
+
+@app.get("/api/v1/workspaces", tags=["Workspaces"])
+async def list_all_workspaces():
+    """List all workspaces in the platform."""
+    async with get_session_factory()() as session:
+        result = await session.execute(
+            text("SELECT id, name, slug, lifecycle_state, created_at FROM workspaces WHERE lifecycle_state != 'DELETED' ORDER BY created_at DESC")
+        )
+        return [
+            {"id": str(r.id), "name": r.name, "slug": r.slug, "lifecycle_state": r.lifecycle_state, "created_at": str(r.created_at)}
+            for r in result.fetchall()
+        ]
 @app.post("/api/v1/workspaces", status_code=201, tags=["Workspaces"])
 async def create_workspace(body: WorkspaceCreate):
     from fastapi import Depends
