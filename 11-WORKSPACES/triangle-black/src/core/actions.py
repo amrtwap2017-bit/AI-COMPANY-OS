@@ -379,3 +379,54 @@ def agent_performance(agent_id: str, db: Session = Depends(get_db),
             "conversion_rate": rate, "conversion_pct": f"{rate*100:.1f}%",
         },
     }
+
+
+# ─── USERS (admin) ────────────────────────────────────────────────────────────
+
+@router.get("/users")
+def list_users(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_manager),
+):
+    from src.commercial.auth.models import User as UserModel
+    users = db.query(UserModel).order_by(UserModel.created_at.desc()).all()
+    return [
+        {
+            "id": u.id, "name": u.name, "email": u.email,
+            "role": u.role, "is_active": u.is_active,
+            "created_at": u.created_at.isoformat(),
+            "updated_at": u.updated_at.isoformat(),
+        }
+        for u in users
+    ]
+
+
+@router.post("/users")
+def create_user(payload: dict, db: Session = Depends(get_db),
+                _: User = Depends(require_manager)):
+    import bcrypt as _bcrypt
+    import uuid as _uuid
+    from src.commercial.auth.models import User as UserModel
+    existing = db.query(UserModel).filter(UserModel.email == payload["email"]).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    pw = payload.get("password", "")
+    hashed = _bcrypt.hashpw(pw.encode(), _bcrypt.gensalt()).decode()
+    user = UserModel(
+        id=str(_uuid.uuid4()),
+        name=payload["name"],
+        email=payload["email"],
+        hashed_password=hashed,
+        role=payload.get("role", "agent"),
+        is_active=True,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {
+        "id": user.id, "name": user.name, "email": user.email,
+        "role": user.role, "is_active": user.is_active,
+        "created_at": user.created_at.isoformat(),
+    }

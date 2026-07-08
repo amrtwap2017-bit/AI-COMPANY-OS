@@ -1,0 +1,5 @@
+@import "tailwindcss";
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #F8FAFC; }
+:focus-visible { outline: 3px solid #7C3AED; outline-offset: 2px; border-radius: 4px; }
+.skip-nav { position: absolute; top: -40px; left: 0; background: #1e1b4b; color: white; padding: 8px 16px; z-index: 9999; }
+.skip-nav:focus { top: 0; }
