@@ -1,0 +1,25 @@
+# Maintenance Traceability
+
+## Asset Management
+**Chain:** Asset Management → Asset Registry & Lifecycle → AssetForm, AssetList, AssetDetail, AssetHierarchyView, AssetLifecycleView → POST /assets, GET /assets, GET /assets/:id, PUT /assets/:id, POST /assets/:id/depreciate, POST /assets/:id/dispose → Asset, AssetCategory, AssetComponent, AssetDocument, AssetDepreciation → AssetDepreciationRule, AssetStatusTransitionRule, AssetHierarchyRule, AssetWarrantyRule → Assets.Create, Assets.View, Assets.Edit, Assets.Delete, Assets.Dispose → AssetWarrantyExpiryNotification, AssetDepreciationNotification → AssetRegisterReport, AssetDepreciationSchedule, AssetUtilizationReport → MaintenanceDashboard → AssetLifecyclePredictionAI
+**Status:** ✅ Full Trace
+
+## Preventive Maintenance
+**Chain:** Preventive Maintenance → Schedule & Task Management → PMScheduleForm, PMScheduleList, PMTaskForm, PMCalendarView, PMChecklistView → POST /maintenance/preventive, GET /maintenance/preventive, GET /maintenance/preventive/:id, PUT /maintenance/preventive/:id, POST /maintenance/preventive/:id/generate-tasks, GET /maintenance/preventive/calendar → PreventiveSchedule, PreventiveTask, PMChecklist, PMTrigger, PMCycle → PMFrequencyRule, PMTriggerRule, PMPriorityRule, PMChecklistComplianceRule → PreventiveMaintenance.Create, PreventiveMaintenance.View, PreventiveMaintenance.Edit, PreventiveMaintenance.Delete, PreventiveMaintenance.GenerateTasks → PMTaskDueNotification, PMTaskOverdueNotification, PMScheduleUpdatedNotification → PMComplianceReport, PMTaskCompletionReport, PMCostReport → MaintenanceDashboard → PMSchedulingOptimizationAI
+**Status:** ✅ Full Trace
+
+## Corrective Maintenance
+**Chain:** Corrective Maintenance → Work Request & Repair → WorkRequestForm, WorkRequestList, CorrectiveTaskForm, RepairHistoryView, BreakdownAnalysisView → POST /maintenance/corrective, GET /maintenance/corrective, GET /maintenance/corrective/:id, PUT /maintenance/corrective/:id, POST /maintenance/corrective/:id/assign, POST /maintenance/corrective/:id/complete → CorrectiveWorkRequest, BreakdownRecord, RepairAction, SparePartUsed, DowntimeLog → BreakdownPriorityRule, AssignmentRule, RepairEscalationRule, SparePartUsageRule → CorrectiveMaintenance.Create, CorrectiveMaintenance.View, CorrectiveMaintenance.Edit, CorrectiveMaintenance.Assign, CorrectiveMaintenance.Complete → WorkRequestSubmittedNotification, WorkAssignedNotification, BreakdownEscalatedNotification, RepairCompletedNotification → BreakdownAnalysisReport, MTBFReport, MTTRReport, DowntimeReport → MaintenanceDashboard → BreakdownPredictionAI
+**Status:** ✅ Full Trace
+
+## Work Order Management
+**Chain:** Work Order Management → WO Lifecycle & Resource Planning → WOForm, WOList, WODetail, WOResourceAllocationView, WOScheduleView → POST /work-orders, GET /work-orders, GET /work-orders/:id, PUT /work-orders/:id, POST /work-orders/:id/approve, POST /work-orders/:id/start, POST /work-orders/:id/complete, POST /work-orders/:id/close → WorkOrder, WorkOrderTask, WorkOrderResource, WorkOrderLabor, WorkOrderPart, WorkOrderTimeEntry → WOPriorityRule, WOAuthorizationRule, ResourceAllocationRule, OvertimeApprovalRule, WOCloseValidationRule → WorkOrders.Create, WorkOrders.View, WorkOrders.Edit, WorkOrders.Delete, WorkOrders.Approve, WorkOrders.Close → WOCreatedNotification, WOAssignedNotification, WOStartedNotification, WOCompletedNotification → WOSummaryReport, ResourceUtilizationReport, LaborCostReport, WOAgingReport → MaintenanceDashboard → WOResourceOptimizationAI
+**Status:** ✅ Full Trace
+
+## SLA Management
+**Chain:** SLA Management → SLA Definition & Compliance → SLAForm, SLAFarList, SLADetail, SLAComplianceView, SLAViolationView → POST /slas, GET /slas, GET /slas/:id, PUT /slas/:id, POST /slas/:id/check-compliance, GET /slas/:id/violations → SLA, SLATerm, SLAComplianceRecord, SLAViolation, SLAPenalty → SLAResponseTimeRule, SLAResolutionTimeRule, SLAEscalationRule, SLAPenaltyCalculationRule → SLAs.Create, SLAs.View, SLAs.Edit, SLAs.Delete, SLAs.Monitor → SLAViolationNotification, SLAWarningNotification, SLAEscalationNotification, SLAPenaltyAppliedNotification → SLAComplianceReport, SLAViolationTrendReport, SLAPenaltySummaryReport → MaintenanceDashboard, ExecutiveDashboard → SLACompliancePredictionAI
+**Status:** ✅ Full Trace
+
+## Spare Parts Management
+**Chain:** Spare Parts Management → Parts Inventory & Replenishment → SparePartForm, SparePartList, SparePartDetail, PartsConsumptionView, ReorderLevelView → POST /spare-parts, GET /spare-parts, GET /spare-parts/:id, PUT /spare-parts/:id, POST /spare-parts/:id/reorder, GET /spare-parts/:id/consumption → SparePart, SparePartInventory, SparePartSupplier, SparePartConsumption → MinMaxLevelRule, ReorderPointRule, PartSubstitutionRule, CriticalSpareRule → SpareParts.Create, SpareParts.View, SpareParts.Edit, SpareParts.Delete, SpareParts.Reorder → SparePartLowStockNotification, ReorderGeneratedNotification, CriticalSpareAlertNotification → SparePartInventoryReport, PartsConsumptionReport, ReorderForecastReport → MaintenanceDashboard, InventoryDashboard → SparePartDemandForecastAI
+**Status:** ✅ Full Trace

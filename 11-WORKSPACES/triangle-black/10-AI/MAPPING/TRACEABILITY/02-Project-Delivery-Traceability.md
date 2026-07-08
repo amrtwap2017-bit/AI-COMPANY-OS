@@ -1,0 +1,33 @@
+# Project Delivery Traceability
+
+## Project Creation & Setup
+**Chain:** Project Creation → Project Intake & Configuration → NewProjectForm, ProjectList, ProjectDetail, ProjectTemplateSelector, ProjectWizard → POST /projects, GET /projects, GET /projects/:id, PUT /projects/:id, POST /projects/:id/activate, GET /projects/templates → Project, ProjectPhase, ProjectTeam, ProjectSetting, ProjectTemplate → ProjectCreationRule, ProjectCodeGenerationRule, ProjectStatusTransitionRule, TemplateAssignmentRule → Projects.Create, Projects.View, Projects.Edit, Projects.Delete, Projects.Activate → ProjectCreatedNotification, ProjectAssignedNotification → ProjectPortfolioReport, ProjectStatusReport → ProjectDashboard → ProjectPlanGeneratorAI
+**Status:** ✅ Full Trace
+
+## Milestone Management
+**Chain:** Milestone Management → Milestone Planning & Tracking → MilestoneForm, MilestoneList, MilestoneGanttView, MilestoneProgressView → POST /milestones, GET /milestones, GET /milestones/:id, PUT /milestones/:id, PATCH /milestones/:id/status, POST /milestones/:id/complete → Milestone, MilestoneDependency, MilestoneChecklist, MilestoneApproval → MilestoneDateValidationRule, MilestoneDependencyRule, MilestoneCompletionRule, MilestoneDelayRule → Milestones.Create, Milestones.View, Milestones.Edit, Milestones.Delete, Milestones.Complete, Milestones.Approve → MilestoneDueNotification, MilestoneCompletedNotification, MilestoneDelayedNotification, MilestoneApprovalRequiredNotification → MilestoneProgressReport, MilestoneDelayAnalysis, MilestoneBurnDownChart → ProjectDashboard → MilestoneDelayPredictionAI
+**Status:** ✅ Full Trace
+
+## Engineering Management
+**Chain:** Engineering Management → Engineering Design & Change Control → EngineeringForm, EngineeringList, EngineeringDetail, ChangeRequestForm, ChangeOrderList → POST /engineering, GET /engineering, GET /engineering/:id, PUT /engineering/:id, POST /engineering/:id/change-requests, GET /engineering/change-orders → EngineeringItem, EngineeringRevision, ChangeRequest, ChangeOrder, EngineeringApproval → ChangeImpactRule, RevisionControlRule, ApprovalRoutingRule, EngineeringStatusRule → Engineering.Create, Engineering.View, Engineering.Edit, Engineering.Delete, Engineering.ApproveChange → ChangeRequestSubmittedNotification, ChangeOrderApprovedNotification, EngineeringRevisionNotification → EngineeringChangeReport, RevisionHistoryReport, ImpactAnalysisReport → EngineeringDashboard → ChangeImpactAI, DesignValidationAI
+**Status:** ✅ Full Trace
+
+## NCR Management
+**Chain:** NCR Management → Non-Conformance Reporting & Resolution → NCRForm, NCRList, NCRDetail, NCRAnalysisView, RootCauseAnalysisForm → POST /ncrs, GET /ncrs, GET /ncrs/:id, PUT /ncrs/:id, POST /ncrs/:id/root-cause, POST /ncrs/:id/close → NCR, NCRCategory, NCRRootCause, NCRAction, NCRApproval → NCRSeverityRule, NCREscalationRule, NCRActionDeadlineRule, NCRClosureValidationRule → NCRs.Create, NCRs.View, NCRs.Edit, NCRs.Delete, NCRs.Close, NCRs.Escalate → NCRCreatedNotification, NCRAssignedNotification, NCREscalatedNotification, NCROverdueNotification → NCRTrendReport, NCRByCategoryReport, NCRAgingReport, RootCauseAnalysisReport → QualityDashboard → NCRAutoClassificationAI, RootCauseSuggestionAI
+**Status:** ✅ Full Trace
+
+## Daily Report Management
+**Chain:** Daily Report Management → Daily Site Reporting & Distribution → DailyReportForm, DailyReportList, DailyReportDetail, DailyReportSummaryView → POST /daily-reports, GET /daily-reports, GET /daily-reports/:id, PUT /daily-reports/:id, POST /daily-reports/:id/submit, GET /daily-reports/summary → DailyReport, DailyReportSection, DailyReportPhoto, DailyReportWeather, DailyReportResource → ReportSubmissionDeadlineRule, ReportCompletionValidationRule, WeatherDataIntegrationRule → DailyReports.Create, DailyReports.View, DailyReports.Edit, DailyReports.Delete, DailyReports.Submit → DailyReportSubmittedNotification, DailyReportReminderNotification → DailyReportSummary, WeeklyProgressReport, ResourceUtilizationReport → ProjectDashboard → DailyReportAutoGenerationAI, PhotoAnalysisAI
+**Status:** ✅ Full Trace
+
+## Project Close-Out
+**Chain:** Project Close-Out → Project Completion & Handover → CloseOutForm, CloseOutChecklist, HandoverDocumentList, FinalApprovalWorkflow → POST /close-out, GET /close-out/:projectId, PUT /close-out/:id, POST /close-out/:id/verify, POST /close-out/:id/approve, GET /close-out/documents → CloseOut, CloseOutChecklistItem, HandoverDocument, FinalApproval → CloseOutValidationRule, DocumentCompletenessRule, FinalBillingRule, ProjectArchivalRule → CloseOut.Create, CloseOut.View, CloseOut.Edit, CloseOut.Verify, CloseOut.Approve → CloseOutReadyNotification, CloseOutApprovedNotification, ProjectArchivedNotification → CloseOutSummaryReport, LessonsLearnedReport, FinalProjectReport → ExecutiveDashboard → CloseOutReadinessAI, LessonsLearnedAI
+**Status:** ✅ Full Trace
+
+## Variation Management
+**Chain:** Variation Management → Change Order & Variation Control → VariationForm, VariationList, VariationDetail, VariationImpactView, VariationApprovalWorkflow → POST /variations, GET /variations, GET /variations/:id, PUT /variations/:id, POST /variations/:id/assess, POST /variations/:id/approve → Variation, VariationImpact, VariationApproval, VariationLineItem → VariationCostImpactRule, VariationScheduleImpactRule, VariationApprovalThresholdRule, VariationDocumentationRule → Variations.Create, Variations.View, Variations.Edit, Variations.Delete, Variations.Approve → VariationSubmittedNotification, VariationApprovedNotification, VariationRejectedNotification, VariationImpactAlert → VariationSummaryReport, VariationImpactAnalysis, VariationTrendReport → ProjectDashboard, FinancialDashboard → VariationImpactPredictionAI
+**Status:** ✅ Full Trace
+
+## Subcontractor Management
+**Chain:** Subcontractor Management → Subcontractor Onboarding & Performance → SubcontractorForm, SubcontractorList, SubcontractorDetail, SubcontractorEvaluationForm, SubcontractorPaymentView → POST /subcontractors, GET /subcontractors, GET /subcontractors/:id, PUT /subcontractors/:id, POST /subcontractors/:id/evaluate, GET /subcontractors/:id/payments → Subcontractor, SubcontractorAgreement, SubcontractorEvaluation, SubcontractorPayment → SubcontractorQualificationRule, EvaluationScoringRule, PaymentMilestoneRule → Subcontractors.Create, Subcontractors.View, Subcontractors.Edit, Subcontractors.Delete, Subcontractors.Evaluate → SubcontractorOnboardedNotification, EvaluationDueNotification → SubcontractorPerformanceReport, SubcontractorPaymentReport → ProcurementDashboard → SubcontractorRiskAI
+**Status:** ✅ Full Trace
