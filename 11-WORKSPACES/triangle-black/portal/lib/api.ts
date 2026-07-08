@@ -110,3 +110,23 @@ export const searchApi = {
 export const usersApi = {
   list: () => api.get("/users/?limit=100"),
 };
+
+// ─── PDF ─────────────────────────────────────────────────────────────────────
+export const pdfApi = {
+  downloadQuote: async (quoteId: string, token: string): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/actions/quotes/${quoteId}/pdf`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error("PDF generation failed");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `TB-${quoteId.slice(0,8).toUpperCase()}-Proposal.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+};

@@ -430,3 +430,50 @@ def create_user(payload: dict, db: Session = Depends(get_db),
         "role": user.role, "is_active": user.is_active,
         "created_at": user.created_at.isoformat(),
     }
+
+
+# ─── PDF GENERATION ──────────────────────────────────────────────────────────
+
+@router.get("/quotes/{quote_id}/pdf")
+def download_quote_pdf(
+    quote_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+):
+    """Generate and download enterprise PDF quote."""
+    from fastapi.responses import Response
+    from src.core.pdf.generator import generate_quote_pdf
+
+    quote = db.query(Quote).filter(Quote.id == quote_id).first()
+    if not quote:
+        raise HTTPException(status_code=404, detail="Quote not found")
+
+    lead = None
+    if quote.lead_id:
+        lead = db.query(Lead).filter(Lead.id == quote.lead_id).first()
+
+    pdf_bytes = generate_quote_pdf(
+        quote_id=quote.id,
+        quote_title=quote.title,
+        quote_description=quote.description or "",
+        items=quote.items or [],
+        total=quote.total,
+        status=quote.status,
+        validity_date=quote.validity_date.isoformat() if quote.validity_date else None,
+        created_at=quote.created_at.isoformat(),
+        lead_name=lead.name if lead else "",
+        lead_email=lead.email if lead else "",
+        lead_phone=lead.phone if lead else "",
+        lead_company=lead.company if lead else "",
+        prepared_by=current_user.name,
+    )
+
+    filename = f"TB-{quote.id[:8].upper()}-Proposal.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Length": str(len(pdf_bytes)),
+        }
+    )
