@@ -90,3 +90,25 @@ export interface Dashboard {
   conversion_rate: number;
   revenue_pipeline: number;
 }
+
+export type ContractStatus =
+  | "pending_signature" | "active" | "renewed" | "expired" | "cancelled";
+
+export interface Contract {
+  id: string;
+  quote_id: string;
+  lead_id: string;
+  title: string;
+  description?: string;
+  services: QuoteItem[];
+  total_value: number;
+  monthly_value: number;
+  status: ContractStatus;
+  start_date?: string;
+  end_date?: string;
+  duration_months: number;
+  renewal_count: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}

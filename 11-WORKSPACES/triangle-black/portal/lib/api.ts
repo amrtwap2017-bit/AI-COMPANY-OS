@@ -78,3 +78,35 @@ export const dashboardApi = {
   summary: () => api.get("/actions/reports/dashboard"),
   pipeline: () => api.get("/actions/pipeline/summary"),
 };
+
+// ─── Contracts ───────────────────────────────────────────────────────────────
+export const contractsApi = {
+  list: (status?: string) =>
+    api.get(`/contracts/?limit=100${status ? `&status=${status}` : ""}`),
+  get: (id: string) => api.get(`/contracts/${id}`),
+  activate: (id: string, start_date?: string) =>
+    api.post(`/contracts/${id}/activate`, { start_date }),
+  renew: (id: string, months: number = 12) =>
+    api.post(`/contracts/${id}/renew`, { duration_months: months }),
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/contracts/${id}`, data),
+};
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+export const searchApi = {
+  leads: (q: string, filters?: {
+    status?: string; source?: string; priority?: string;
+  }) => api.get(`/actions/leads/search?q=${encodeURIComponent(q)}${
+    filters?.status ? `&status=${filters.status}` : ""
+  }${filters?.source ? `&source=${filters.source}` : ""
+  }${filters?.priority ? `&priority=${filters.priority}` : ""}`),
+  checkDuplicate: (email: string, excludeId?: string) =>
+    api.get(`/actions/leads/check-duplicate?email=${encodeURIComponent(email)}${
+      excludeId ? `&exclude_id=${excludeId}` : ""
+    }`),
+};
+
+// ─── Users (admin) ───────────────────────────────────────────────────────────
+export const usersApi = {
+  list: () => api.get("/users/?limit=100"),
+};

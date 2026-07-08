@@ -53,3 +53,16 @@ export const PRIORITY_CONFIG: Record<LeadPriority, { label: string; color: strin
   medium: { label: "Medium", color: "text-amber-600" },
   low:    { label: "Low",    color: "text-gray-500" },
 };
+
+export type ContractStatus =
+  | "pending_signature" | "active" | "renewed" | "expired" | "cancelled";
+
+export const CONTRACT_STATUS_CONFIG: Record<ContractStatus, {
+  label: string; color: string; bg: string;
+}> = {
+  pending_signature: { label: "Pending Signature", color: "text-amber-700",  bg: "bg-amber-100" },
+  active:            { label: "Active",             color: "text-green-700",  bg: "bg-green-100" },
+  renewed:           { label: "Renewed",            color: "text-blue-700",   bg: "bg-blue-100" },
+  expired:           { label: "Expired",            color: "text-gray-600",   bg: "bg-gray-100" },
+  cancelled:         { label: "Cancelled",          color: "text-red-700",    bg: "bg-red-100" },
+};
