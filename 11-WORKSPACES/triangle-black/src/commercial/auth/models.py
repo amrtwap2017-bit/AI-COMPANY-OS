@@ -1,20 +1,16 @@
-"""
-User SQLAlchemy model — Triangle Black
-"""
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, DateTime, Text, Float, JSON
+from sqlalchemy import Column, String, Boolean, DateTime
 from src.core.base import Base
-
 
 class User(Base):
     __tablename__ = "users"
-
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    status = Column(String(50), nullable=False, default="active")
-    extra = Column(JSON, nullable=True, default=dict)
+    email = Column(String(255), nullable=False, unique=True)
+    hashed_password = Column(String(255), nullable=False, default="")
+    role = Column(String(50), nullable=False, default="agent")
+    is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
