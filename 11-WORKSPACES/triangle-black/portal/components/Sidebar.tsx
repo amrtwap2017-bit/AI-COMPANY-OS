@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, FileText, UserCheck,
   BarChart3, LogOut, Building2, ChevronRight,
-  FileCheck, Bell, Check,
+  FileCheck, Bell, Check, Receipt,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +19,7 @@ const navItems = [
   { href: "/agents",         label: "Agents",         icon: UserCheck,       roles: ["admin","manager"]         },
   { href: "/reports",        label: "Reports",        icon: BarChart3,       roles: ["admin","manager"]         },
   { href: "/notifications",  label: "Notifications",  icon: Bell,            roles: ["admin","manager","agent"] },
+  { href: "/invoices",       label: "Invoices",       icon: Receipt,         roles: ["admin","manager"]         },
 ];
 
 export function Sidebar() {

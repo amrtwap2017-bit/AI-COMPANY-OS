@@ -14,6 +14,9 @@ from src.commercial.contracts.schemas import ContractResponse, ContractUpdate
 from src.commercial.quotation.models import Quote
 from src.commercial.activity_tracking.models import Activity
 import uuid
+from datetime import timedelta as _td
+from src.commercial.invoices.models import Invoice
+from src.commercial.invoices.repository import InvoiceRepository
 
 router = APIRouter(prefix="/contracts", tags=["contracts"])
 
@@ -106,6 +109,29 @@ def activate_contract(
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     ))
+    # ── Auto-create invoice ──────────────────────────────────────────────
+    inv_repo = InvoiceRepository(db)
+    tax_rate = 0.14
+    tax_amt = round(c.total_value * tax_rate, 2)
+    total_amt = round(c.total_value + tax_amt, 2)
+    invoice = Invoice(
+        id=str(uuid.uuid4()),
+        invoice_number=inv_repo.next_invoice_number(),
+        contract_id=c.id,
+        lead_id=c.lead_id,
+        title=f"Annual Contract Invoice — {c.title}",
+        description=f"Engineering services contract. Duration: {c.duration_months} months.",
+        amount=c.total_value,
+        tax_amount=tax_amt,
+        total_amount=total_amt,
+        status="draft",
+        issue_date=start,
+        due_date=start + timedelta(days=30),
+        renewal_number=c.renewal_count,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(invoice)
     db.commit()
     db.refresh(c)
     return c

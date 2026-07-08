@@ -144,3 +144,16 @@ export const notificationsApi = {
   delete: (id: string) =>
     api.delete(`/notifications/${id}`),
 };
+
+// ─── Invoices ─────────────────────────────────────────────────────────────────
+export const invoicesApi = {
+  list: (status?: string, contract_id?: string) =>
+    api.get(`/invoices/?limit=100${status ? `&status=${status}` : ""}${contract_id ? `&contract_id=${contract_id}` : ""}`),
+  get: (id: string) => api.get(`/invoices/${id}`),
+  update: (id: string, data: Record<string, unknown>) =>
+    api.patch(`/invoices/${id}`, data),
+  markPaid: (id: string, paid_date?: string, notes?: string) =>
+    api.post(`/invoices/${id}/mark-paid`, { paid_date, notes }),
+  send: (id: string) =>
+    api.post(`/invoices/${id}/send`, {}),
+};
