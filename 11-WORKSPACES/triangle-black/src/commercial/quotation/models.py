@@ -1,21 +1,22 @@
-"""
-Quote SQLAlchemy model — Triangle Black
-"""
-from __future__ import annotations
-import uuid
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, DateTime, Text, Float
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
-
+from src.database import Base
 
 class Quote(Base):
-    __tablename__ = "quotes"
+    __tablename__ = 'quotes'
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    status = Column(String(50), nullable=False, default="active")
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    description = Column(String)
+    status = Column(String, default='draft')
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, onupdate=datetime.utcnow)
+
+    manager_id = Column(Integer, ForeignKey('managers.id'))
+    client_id = Column(Integer, ForeignKey('clients.id'))
+
+    manager = relationship('Manager', back_populates='quotes')
+    client = relationship('Client', back_populates='quotes')
+
+    approvals = relationship('ApprovalAction', back_populates='quote')

@@ -1,31 +1,20 @@
-"""
-Quote Pydantic schemas
-"""
-from __future__ import annotations
-from typing import Optional
-from datetime import datetime
-from pydantic import BaseModel
-
+from pydantic import BaseModel, Field
 
 class QuoteCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    status: str = "active"
-
+    title: str = Field(...)
+    description: str = None
 
 class QuoteUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
+    title: str = None
+    description: str = None
 
-
-class QuoteResponse(BaseModel):
-    id: str
-    name: str
-    description: Optional[str]
+class QuoteResponse(QuoteCreate):
+    id: int
     status: str
     created_at: datetime
     updated_at: datetime
+    manager_id: int
+    client_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
