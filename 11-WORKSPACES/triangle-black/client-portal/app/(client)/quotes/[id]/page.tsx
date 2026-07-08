@@ -2,18 +2,30 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { clientQuotesApi } from "@/lib/api";
+import { clientQuotesApi, clientPdfApi } from "@/lib/api";
 import { formatEGP, formatDate, QUOTE_STATUS, QuoteStatus } from "@/lib/utils";
-import { ArrowLeft, CheckCircle, XCircle, Download, AlertCircle } from "lucide-react";
+import {
+  ArrowLeft, CheckCircle, XCircle, Download, AlertCircle,
+} from "lucide-react";
 
 interface Quote {
-  id: string; lead_id?: string; title: string; description?: string;
+  id: string;
+  lead_id?: string;
+  title: string;
+  description?: string;
   items: { service: string; qty: number; unit_price: number; total: number }[];
-  total: number; status: string; validity_date?: string;
-  created_at: string; updated_at: string;
+  total: number;
+  status: string;
+  validity_date?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export default function ClientQuoteDetail({ params }: { params: Promise<{ id: string }> }) {
+export default function ClientQuoteDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const router = useRouter();
   const qc = useQueryClient();
@@ -21,6 +33,7 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
   const [rejectNote, setRejectNote] = useState("");
   const [showReject, setShowReject] = useState(false);
   const [actionDone, setActionDone] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const { data: quote, isLoading } = useQuery({
     queryKey: ["client-quote", id],
@@ -34,12 +47,18 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
       qc.invalidateQueries({ queryKey: ["client-quote", id] });
       qc.invalidateQueries({ queryKey: ["client-quotes"] });
       setActionDone("approved");
-    } catch { alert("Failed to approve. Please try again."); }
-    finally { setLoading(null); }
+    } catch {
+      alert("Failed to approve. Please try again.");
+    } finally {
+      setLoading(null);
+    }
   }
 
   async function doReject() {
-    if (!rejectNote.trim()) { alert("Please provide a reason for rejection."); return; }
+    if (!rejectNote.trim()) {
+      alert("Please provide a reason for rejection.");
+      return;
+    }
     setLoading("reject");
     try {
       await clientQuotesApi.reject(id, rejectNote);
@@ -47,18 +66,39 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
       qc.invalidateQueries({ queryKey: ["client-quotes"] });
       setActionDone("rejected");
       setShowReject(false);
-    } catch { alert("Failed to reject. Please try again."); }
-    finally { setLoading(null); }
+    } catch {
+      alert("Failed to reject. Please try again.");
+    } finally {
+      setLoading(null);
+    }
   }
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center h-64" role="status">
-      <div className="w-8 h-8 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin" />
-      <span className="sr-only">Loading proposal...</span>
-    </div>
-  );
+  async function downloadPdf() {
+    setLoading("pdf");
+    setPdfError(null);
+    try {
+      await clientPdfApi.downloadQuote(id);
+    } catch {
+      setPdfError("PDF generation failed. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  }
 
-  if (!quote) return <div role="alert" className="text-red-600">Proposal not found.</div>;
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-64" role="status">
+        <div className="w-8 h-8 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin" />
+        <span className="sr-only">Loading proposal...</span>
+      </div>
+    );
+
+  if (!quote)
+    return (
+      <div role="alert" className="text-red-600">
+        Proposal not found.
+      </div>
+    );
 
   const cfg = QUOTE_STATUS[quote.status as QuoteStatus];
   const canAct = quote.status === "sent" && !actionDone;
@@ -77,17 +117,19 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
       {/* Success Banner */}
       {actionDone && (
         <div
-          role="alert" aria-live="assertive"
-          className={`flex items-center gap-3 p-4 rounded-xl border font-medium
-            ${actionDone === "approved"
+          role="alert"
+          aria-live="assertive"
+          className={`flex items-center gap-3 p-4 rounded-xl border font-medium ${
+            actionDone === "approved"
               ? "bg-green-50 border-green-200 text-green-800"
               : "bg-gray-50 border-gray-200 text-gray-700"
-            }`}
+          }`}
         >
-          {actionDone === "approved"
-            ? <CheckCircle className="w-5 h-5 text-green-600" aria-hidden="true" />
-            : <XCircle className="w-5 h-5 text-gray-500" aria-hidden="true" />
-          }
+          {actionDone === "approved" ? (
+            <CheckCircle className="w-5 h-5 text-green-600" aria-hidden="true" />
+          ) : (
+            <XCircle className="w-5 h-5 text-gray-500" aria-hidden="true" />
+          )}
           {actionDone === "approved"
             ? "Proposal approved! Triangle Black will be in touch shortly."
             : "Proposal rejected. Triangle Black has been notified."}
@@ -100,7 +142,10 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
           role="alert"
           className="flex items-center gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl"
         >
-          <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0" aria-hidden="true" />
+          <AlertCircle
+            className="w-6 h-6 text-amber-600 flex-shrink-0"
+            aria-hidden="true"
+          />
           <div>
             <p className="font-semibold text-amber-800">Action Required</p>
             <p className="text-sm text-amber-700">
@@ -116,7 +161,9 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
           <div>
             <div className="flex items-center gap-3 flex-wrap mb-2">
               <h1 className="text-2xl font-bold text-gray-900">{quote.title}</h1>
-              <span className={`text-sm font-medium px-3 py-1 rounded-full ${cfg.color} ${cfg.bg}`}>
+              <span
+                className={`text-sm font-medium px-3 py-1 rounded-full ${cfg.color} ${cfg.bg}`}
+              >
                 {cfg.label}
               </span>
             </div>
@@ -125,26 +172,48 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
             )}
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold text-[#1B2B4B]">{formatEGP(quote.total)}</p>
+            <p className="text-3xl font-bold text-[#1B2B4B]">
+              {formatEGP(quote.total)}
+            </p>
             <p className="text-sm text-gray-500 mt-1">Total contract value</p>
           </div>
         </div>
 
-        {/* Meta */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-6 border-t border-gray-100">
-          <div>
-            <p className="text-xs text-gray-500 mb-1">Created</p>
-            <p className="text-sm font-medium">{formatDate(quote.created_at)}</p>
-          </div>
-          {quote.validity_date && (
+        {/* Meta + PDF Download */}
+        <div className="flex flex-wrap items-end justify-between gap-4 pt-6 border-t border-gray-100">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm flex-1">
             <div>
-              <p className="text-xs text-gray-500 mb-1">Valid Until</p>
-              <p className="text-sm font-medium">{formatDate(quote.validity_date)}</p>
+              <p className="text-xs text-gray-500 mb-1">Created</p>
+              <p className="font-medium">{formatDate(quote.created_at)}</p>
             </div>
-          )}
-          <div>
-            <p className="text-xs text-gray-500 mb-1">Services</p>
-            <p className="text-sm font-medium">{quote.items.length} items</p>
+            {quote.validity_date && (
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Valid Until</p>
+                <p className="font-medium">{formatDate(quote.validity_date)}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Services</p>
+              <p className="font-medium">{quote.items.length} items</p>
+            </div>
+          </div>
+
+          {/* ── PDF DOWNLOAD BUTTON ── */}
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={downloadPdf}
+              disabled={loading === "pdf"}
+              aria-busy={loading === "pdf"}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#1B2B4B] text-white text-sm font-semibold rounded-xl hover:bg-[#243552] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]"
+            >
+              <Download className="w-4 h-4" aria-hidden="true" />
+              {loading === "pdf" ? "Generating PDF..." : "Download PDF Proposal"}
+            </button>
+            {pdfError && (
+              <p role="alert" className="text-xs text-red-500 mt-1">
+                {pdfError}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -153,7 +222,9 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-8 py-5 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Service Breakdown</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Detailed pricing for each service</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Detailed pricing for each service
+          </p>
         </div>
         <table className="w-full text-sm" aria-label="Service breakdown table">
           <thead>
@@ -166,17 +237,31 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
           </thead>
           <tbody>
             {quote.items.map((item, i) => (
-              <tr key={i} className="border-t border-gray-50 hover:bg-gray-50/50">
-                <td className="px-8 py-4 font-medium text-gray-900">{item.service}</td>
-                <td className="px-8 py-4 text-right text-gray-600">{item.qty} months</td>
-                <td className="px-8 py-4 text-right text-gray-600">{formatEGP(item.unit_price)}/mo</td>
-                <td className="px-8 py-4 text-right font-semibold text-gray-900">{formatEGP(item.total)}</td>
+              <tr
+                key={i}
+                className="border-t border-gray-50 hover:bg-gray-50/50"
+              >
+                <td className="px-8 py-4 font-medium text-gray-900">
+                  {item.service}
+                </td>
+                <td className="px-8 py-4 text-right text-gray-600">
+                  {item.qty} months
+                </td>
+                <td className="px-8 py-4 text-right text-gray-600">
+                  {formatEGP(item.unit_price)}/mo
+                </td>
+                <td className="px-8 py-4 text-right font-semibold text-gray-900">
+                  {formatEGP(item.total)}
+                </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-gray-200 bg-[#1B2B4B]">
-              <td colSpan={3} className="px-8 py-5 font-bold text-white text-right text-base">
+              <td
+                colSpan={3}
+                className="px-8 py-5 font-bold text-white text-right text-base"
+              >
                 Annual Contract Total
               </td>
               <td className="px-8 py-5 font-bold text-[#F59E0B] text-right text-xl">
@@ -217,15 +302,19 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
           ) : (
             <div className="space-y-4">
               <div>
-                <label htmlFor="reject-note" className="block text-sm font-medium text-gray-700 mb-2">
-                  Reason for rejection <span className="text-red-500" aria-hidden="true">*</span>
+                <label
+                  htmlFor="reject-note"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Reason for rejection{" "}
+                  <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <textarea
                   id="reject-note"
                   rows={4}
                   value={rejectNote}
                   onChange={(e) => setRejectNote(e.target.value)}
-                  placeholder="Please explain why you are rejecting this proposal or what changes you'd like..."
+                  placeholder="Please explain why you are rejecting or what changes you'd like..."
                   required
                   aria-required="true"
                   className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
@@ -259,9 +348,8 @@ export default function ClientQuoteDetail({ params }: { params: Promise<{ id: st
             {quote.status === "approved"
               ? "✅ You approved this proposal. Triangle Black will contact you to proceed."
               : quote.status === "rejected"
-                ? "This proposal was rejected. Contact us to discuss alternatives."
-                : "This proposal is currently under review by Triangle Black."
-            }
+              ? "This proposal was rejected. Contact us to discuss alternatives."
+              : "This proposal is currently under review by Triangle Black."}
           </p>
         </div>
       )}

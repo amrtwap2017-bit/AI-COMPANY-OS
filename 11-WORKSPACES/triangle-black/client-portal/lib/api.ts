@@ -26,7 +26,8 @@ api.interceptors.response.use(
 
 export const clientAuth = {
   login: (email: string, password: string) =>
-    api.post("/auth/login",
+    api.post(
+      "/auth/login",
       new URLSearchParams({ username: email, password }),
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     ),
@@ -41,6 +42,15 @@ export const clientQuotesApi = {
     api.post(`/actions/quotes/${id}/reject`, { note }),
 };
 
+export const clientContractsApi = {
+  list: () => api.get("/contracts/?limit=100"),
+  get: (id: string) => api.get(`/contracts/${id}`),
+  activate: (id: string, start_date?: string) =>
+    api.post(`/contracts/${id}/activate`, { start_date }),
+  renew: (id: string, months = 12) =>
+    api.post(`/contracts/${id}/renew`, { duration_months: months }),
+};
+
 export const clientLeadsApi = {
   myLead: (id: string) => api.get(`/leads/${id}`),
   timeline: (id: string) => api.get(`/actions/leads/${id}/timeline`),
@@ -48,4 +58,26 @@ export const clientLeadsApi = {
 
 export const clientDashboardApi = {
   pipeline: () => api.get("/actions/pipeline/summary"),
+};
+
+export const clientPdfApi = {
+  downloadQuote: async (quoteId: string): Promise<void> => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("client_token") || ""
+        : "";
+    const res = await fetch(`${BASE}/actions/quotes/${quoteId}/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("PDF generation failed");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `TB-${quoteId.slice(0, 8).toUpperCase()}-Proposal.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 };

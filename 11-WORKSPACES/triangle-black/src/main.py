@@ -40,7 +40,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform",
-    version="0.9.0",
+    version="1.3.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -74,11 +74,11 @@ def health():
     return {
         "ok": db_ok,
         "service": "triangle-black-api",
-        "version": "0.9.0",
+        "version": "1.3.0",
         "database": "connected" if db_ok else "unreachable",
     }
 
 
 @app.get("/")
 def root():
-    return {"service": "Triangle Black API", "version": "0.9.0", "docs": "/docs"}
+    return {"service": "Triangle Black API", "version": "1.3.0", "docs": "/docs"}

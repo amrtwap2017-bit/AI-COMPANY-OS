@@ -5,16 +5,21 @@ import { useClientAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import {
   Building2, LayoutDashboard, FileText,
-  Activity, LogOut, Bell,
+  Activity, LogOut, FileCheck,
 } from "lucide-react";
 
 const nav = [
-  { href: "/dashboard", label: "Overview",   icon: LayoutDashboard },
-  { href: "/quotes",    label: "Proposals",  icon: FileText },
-  { href: "/activities",label: "History",    icon: Activity },
+  { href: "/dashboard",  label: "Overview",   icon: LayoutDashboard },
+  { href: "/quotes",     label: "Proposals",  icon: FileText        },
+  { href: "/contracts",  label: "Contracts",  icon: FileCheck       },
+  { href: "/activities", label: "History",    icon: Activity        },
 ];
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, isLoading, logout } = useClientAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -23,20 +28,20 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     if (!isLoading && !user) router.push("/login");
   }, [user, isLoading, router]);
 
-  if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div role="status" aria-live="polite" className="text-center">
-        <div className="w-10 h-10 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm text-gray-500">Loading your portal...</p>
+  if (isLoading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div role="status" aria-live="polite" className="text-center">
+          <div className="w-10 h-10 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-500">Loading your portal...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
       <header className="bg-[#1B2B4B] shadow-lg" role="banner">
         <div className="max-w-6xl mx-auto px-6 py-0">
           <div className="flex items-center justify-between h-16">
@@ -46,13 +51,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <Building2 className="w-4 h-4 text-white" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-white font-bold text-sm leading-none">Triangle Black</p>
+                <p className="text-white font-bold text-sm leading-none">
+                  Triangle Black
+                </p>
                 <p className="text-white/50 text-xs">Client Portal</p>
               </div>
             </div>
 
-            {/* Nav */}
-            <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+            {/* Desktop Nav */}
+            <nav
+              className="hidden md:flex items-center gap-1"
+              aria-label="Main navigation"
+            >
               {nav.map((item) => {
                 const active = pathname.startsWith(item.href);
                 return (
@@ -61,9 +71,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                      ${active
-                        ? "bg-white/15 text-white"
-                        : "text-white/60 hover:bg-white/10 hover:text-white"
+                      ${
+                        active
+                          ? "bg-white/15 text-white"
+                          : "text-white/60 hover:bg-white/10 hover:text-white"
                       }`}
                   >
                     <item.icon className="w-4 h-4" aria-hidden="true" />
@@ -73,7 +84,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               })}
             </nav>
 
-            {/* User */}
+            {/* User + Logout */}
             <div className="flex items-center gap-4">
               <div className="text-right hidden md:block">
                 <p className="text-white text-sm font-medium">{user.name}</p>
@@ -90,8 +101,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             </div>
           </div>
 
-          {/* Mobile nav */}
-          <nav className="md:hidden flex gap-1 pb-2" aria-label="Mobile navigation">
+          {/* Mobile Nav */}
+          <nav
+            className="md:hidden flex gap-1 pb-2"
+            aria-label="Mobile navigation"
+          >
             {nav.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -111,7 +125,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
 
-      <main id="main-content" className="max-w-6xl mx-auto px-6 py-8" tabIndex={-1}>
+      <main
+        id="main-content"
+        className="max-w-6xl mx-auto px-6 py-8"
+        tabIndex={-1}
+      >
         {children}
       </main>
 
