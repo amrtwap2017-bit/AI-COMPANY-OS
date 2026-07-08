@@ -1,18 +1,15 @@
 """
-LeadSearch FastAPI router
+LeadSearch FastAPI router — Triangle Black
 """
 from __future__ import annotations
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from src.core.database import get_db
 from .schemas import LeadSearchCreate, LeadSearchUpdate, LeadSearchResponse
 from .repository import LeadSearchRepository
 
-router = APIRouter(prefix="/leadsearchs", tags=["leadsearchs"])
-
-
-def get_db():
-    raise NotImplementedError("Configure DB session in app factory")
+router = APIRouter(prefix="/searches", tags=["searches"])
 
 
 @router.post("/", response_model=LeadSearchResponse, status_code=201)

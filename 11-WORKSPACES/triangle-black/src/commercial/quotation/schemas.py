@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 class QuoteCreate(BaseModel):
@@ -17,4 +18,4 @@ class QuoteResponse(QuoteCreate):
     client_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

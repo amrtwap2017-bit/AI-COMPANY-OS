@@ -1,18 +1,15 @@
 """
-Report FastAPI router
+Report FastAPI router — Triangle Black
 """
 from __future__ import annotations
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from src.core.database import get_db
 from .schemas import ReportCreate, ReportUpdate, ReportResponse
 from .repository import ReportRepository
 
 router = APIRouter(prefix="/reports", tags=["reports"])
-
-
-def get_db():
-    raise NotImplementedError("Configure DB session in app factory")
 
 
 @router.post("/", response_model=ReportResponse, status_code=201)

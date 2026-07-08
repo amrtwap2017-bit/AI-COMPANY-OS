@@ -1,18 +1,15 @@
 """
-User FastAPI router
+User FastAPI router — Triangle Black
 """
 from __future__ import annotations
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from src.core.database import get_db
 from .schemas import UserCreate, UserUpdate, UserResponse
 from .repository import UserRepository
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-def get_db():
-    raise NotImplementedError("Configure DB session in app factory")
 
 
 @router.post("/", response_model=UserResponse, status_code=201)

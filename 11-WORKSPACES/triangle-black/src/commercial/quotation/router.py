@@ -1,33 +1,44 @@
-from fastapi import APIRouter, Depends, HTTPException
+"""
+Quote FastAPI router — Triangle Black
+"""
+from __future__ import annotations
+from typing import List
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from src.database import get_db
-from src.commercial.quotation.models import Quote
-from src.commercial.quotation.schemas import QuoteCreate, QuoteUpdate, QuoteResponse
-from src.commercial.quotation.repository import QuoteRepository
+from src.core.database import get_db
+from .schemas import QuoteCreate, QuoteUpdate, QuoteResponse
+from .repository import QuoteRepository
 
-router = APIRouter()
+router = APIRouter(prefix="/quotes", tags=["quotes"])
 
-@router.post('/quotes/', response_model=QuoteResponse)
-def create_quote(quote_data: QuoteCreate, db: Session = Depends(get_db)) -> QuoteResponse:
-    quote_repo = QuoteRepository(db)
-    quote = quote_repo.create(quote_data.dict())
-    return QuoteResponse.from_orm(quote)
 
-@router.get('/quotes/{id}', response_model=QuoteResponse)
-def get_quote(id: int, db: Session = Depends(get_db)) -> QuoteResponse:
-    quote_repo = QuoteRepository(db)
-    quote = quote_repo.get(id)
-    if not quote:
-        raise HTTPException(status_code=404, detail='Quote not found')
-    return QuoteResponse.from_orm(quote)
+@router.post("/", response_model=QuoteResponse, status_code=201)
+def create(payload: QuoteCreate, db: Session = Depends(get_db)):
+    return QuoteRepository(db).create(payload.model_dump())
 
-@router.put('/quotes/{id}', response_model=QuoteResponse)
-def update_quote(id: int, quote_data: QuoteUpdate, db: Session = Depends(get_db)) -> QuoteResponse:
-    quote_repo = QuoteRepository(db)
-    quote = quote_repo.update(id, quote_data.dict())
-    return QuoteResponse.from_orm(quote)
 
-@router.delete('/quotes/{id}', status_code=204)
-def delete_quote(id: int, db: Session = Depends(get_db)) -> None:
-    quote_repo = QuoteRepository(db)
-    quote_repo.delete(id)
+@router.get("/", response_model=List[QuoteResponse])
+def list_all(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return QuoteRepository(db).list(skip=skip, limit=limit)
+
+
+@router.get("/{quote_id}", response_model=QuoteResponse)
+def get(quote_id: str, db: Session = Depends(get_db)):
+    obj = QuoteRepository(db).get(quote_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    return obj
+
+
+@router.patch("/{quote_id}", response_model=QuoteResponse)
+def update(quote_id: str, payload: QuoteUpdate, db: Session = Depends(get_db)):
+    obj = QuoteRepository(db).update(quote_id, payload.model_dump(exclude_none=True))
+    if not obj:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    return obj
+
+
+@router.delete("/{quote_id}", status_code=204)
+def delete(quote_id: str, db: Session = Depends(get_db)):
+    if not QuoteRepository(db).delete(quote_id):
+        raise HTTPException(status_code=404, detail="Quote not found")

@@ -1,18 +1,15 @@
 """
-Pipeline FastAPI router
+Pipeline FastAPI router — Triangle Black
 """
 from __future__ import annotations
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from src.core.database import get_db
 from .schemas import PipelineCreate, PipelineUpdate, PipelineResponse
 from .repository import PipelineRepository
 
 router = APIRouter(prefix="/pipelines", tags=["pipelines"])
-
-
-def get_db():
-    raise NotImplementedError("Configure DB session in app factory")
 
 
 @router.post("/", response_model=PipelineResponse, status_code=201)
