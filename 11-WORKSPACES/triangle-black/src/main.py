@@ -3,7 +3,6 @@ Triangle Black — Main FastAPI Application
 Hotel Engineering Platform
 """
 from __future__ import annotations
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -32,13 +31,16 @@ from src.commercial.quotation.router import router as quotation_router
 from src.commercial.auth.router import router as auth_router
 from src.commercial.reporting.router import router as reporting_router
 
-# Create tables
+# Business logic actions router
+from src.core.actions import router as actions_router
+
+# Create all tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform — Commercial Domain",
-    version="0.2.0",
+    version="0.5.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -51,8 +53,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register all routers
 API_PREFIX = "/api/v1"
+
+# CRUD routers
 app.include_router(leads_router,    prefix=API_PREFIX)
 app.include_router(agents_router,   prefix=API_PREFIX)
 app.include_router(pipeline_router, prefix=API_PREFIX)
@@ -63,6 +66,9 @@ app.include_router(quotation_router,prefix=API_PREFIX)
 app.include_router(auth_router,     prefix=API_PREFIX)
 app.include_router(reporting_router,prefix=API_PREFIX)
 
+# Business action routers
+app.include_router(actions_router,  prefix=API_PREFIX)
+
 
 @app.get("/health")
 def health():
@@ -70,7 +76,7 @@ def health():
     return {
         "ok": db_ok,
         "service": "triangle-black-api",
-        "version": "0.2.0",
+        "version": "0.5.0",
         "database": "connected" if db_ok else "unreachable",
     }
 
@@ -79,17 +85,19 @@ def health():
 def root():
     return {
         "service": "Triangle Black API",
+        "version": "0.5.0",
         "docs": "/docs",
         "health": "/health",
-        "endpoints": [
-            f"{API_PREFIX}/leads",
-            f"{API_PREFIX}/agents",
-            f"{API_PREFIX}/pipelines",
-            f"{API_PREFIX}/activities",
-            f"{API_PREFIX}/searches",
-            f"{API_PREFIX}/webhooks",
-            f"{API_PREFIX}/quotes",
-            f"{API_PREFIX}/users",
-            f"{API_PREFIX}/reports",
+        "business_actions": [
+            f"{API_PREFIX}/actions/leads/{{id}}/qualify",
+            f"{API_PREFIX}/actions/leads/{{id}}/assign",
+            f"{API_PREFIX}/actions/leads/{{id}}/quote",
+            f"{API_PREFIX}/actions/leads/{{id}}/timeline",
+            f"{API_PREFIX}/actions/quotes/{{id}}/submit",
+            f"{API_PREFIX}/actions/quotes/{{id}}/send",
+            f"{API_PREFIX}/actions/quotes/{{id}}/approve",
+            f"{API_PREFIX}/actions/quotes/{{id}}/reject",
+            f"{API_PREFIX}/actions/pipeline/summary",
+            f"{API_PREFIX}/actions/reports/dashboard",
         ],
     }
