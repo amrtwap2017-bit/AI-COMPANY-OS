@@ -33,6 +33,7 @@ from src.commercial.auth.router import router as auth_router
 from src.commercial.reporting.router import router as reporting_router
 from src.commercial.contracts.router import router as contracts_router
 from src.core.actions import router as actions_router
+from src.commercial.notifications.router import router as notifications_router
 
 # Create all tables
 # REMOVED: Base.metadata.create_all(bind=engine)
@@ -65,7 +66,8 @@ app.include_router(quotation_router, prefix=API_PREFIX)
 app.include_router(auth_router,      prefix=API_PREFIX)
 app.include_router(reporting_router, prefix=API_PREFIX)
 app.include_router(contracts_router, prefix=API_PREFIX)
-app.include_router(actions_router,   prefix=API_PREFIX)
+app.include_router(actions_router,       prefix=API_PREFIX)
+app.include_router(notifications_router, prefix=API_PREFIX)
 
 
 @app.get("/health")

@@ -130,3 +130,17 @@ export const pdfApi = {
     URL.revokeObjectURL(url);
   },
 };
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+export const notificationsApi = {
+  list: (unread_only = false) =>
+    api.get(`/notifications/?unread_only=${unread_only}&limit=50`),
+  unreadCount: () =>
+    api.get("/notifications/unread"),
+  markRead: (id: string) =>
+    api.patch(`/notifications/${id}/read`, {}),
+  markAllRead: () =>
+    api.post("/notifications/read-all", {}),
+  delete: (id: string) =>
+    api.delete(`/notifications/${id}`),
+};

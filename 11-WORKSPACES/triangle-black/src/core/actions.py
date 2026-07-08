@@ -24,6 +24,7 @@ from src.commercial.contracts.models import Contract
 from src.commercial.auth.models import User
 
 from src.core.email_service import send_quote_email
+from src.commercial.notifications.models import Notification
 
 router = APIRouter(prefix="/actions", tags=["business-actions"])
 
@@ -34,6 +35,27 @@ def _log(db, lead_id, type, description, actor="system"):
         description=description, actor=actor,
         created_at=datetime.utcnow(), updated_at=datetime.utcnow(),
     ))
+
+
+def _notify(db, title: str, message: str, ntype: str,
+            entity_id: str, entity_type: str, recipient_role: str):
+    """Create a notification record. Never raises."""
+    try:
+        db.add(Notification(
+            id=str(uuid.uuid4()),
+            title=title,
+            message=message,
+            type=ntype,
+            entity_id=entity_id,
+            entity_type=entity_type,
+            recipient_role=recipient_role,
+            is_read=False,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+        ))
+    except Exception as exc:
+        import logging
+        logging.getLogger("triangle_black").error("_notify failed: %s", exc)
 
 
 # ─── QUALIFY ─────────────────────────────────────────────────────────────────
@@ -203,6 +225,15 @@ def send_quote(quote_id: str, payload: QuoteActionIn,
 
         background_tasks.add_task(_send_email_task)
 
+    _notify(db,
+        title=f"Quote Sent: {quote.title}",
+        message=f"Proposal sent to {lead.name if lead else 'client'} for EGP {quote.total:,.0f}. Awaiting approval.",
+        ntype="quote_sent",
+        entity_id=quote_id,
+        entity_type="quote",
+        recipient_role="manager",
+    )
+    db.commit()
     return {
         "ok": True,
         "quote_id": quote_id,
@@ -260,6 +291,14 @@ def approve_quote(quote_id: str, payload: QuoteActionIn,
              f"Contract ID: {contract.id}. Value: EGP {quote.total:,.2f}",
              actor="system")
 
+    _notify(db,
+        title=f"Quote Approved: {quote.title}",
+        message=f"EGP {quote.total:,.0f} contract approved. Contract {contract.id[:8].upper()} created automatically.",
+        ntype="quote_approved",
+        entity_id=quote_id,
+        entity_type="quote",
+        recipient_role="all",
+    )
     db.commit()
     return {
         "ok": True, "quote_id": quote_id, "status": "approved",
