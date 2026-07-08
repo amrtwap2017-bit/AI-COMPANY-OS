@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,8 @@ from src.commercial.quotation.models import Quote
 from src.commercial.activity_tracking.models import Activity
 from src.commercial.contracts.models import Contract
 from src.commercial.auth.models import User
+
+from src.core.email_service import send_quote_email
 
 router = APIRouter(prefix="/actions", tags=["business-actions"])
 
@@ -146,6 +148,7 @@ def submit_quote(quote_id: str, payload: QuoteActionIn,
 
 @router.post("/quotes/{quote_id}/send")
 def send_quote(quote_id: str, payload: QuoteActionIn,
+               background_tasks: BackgroundTasks,
                db: Session = Depends(get_db),
                current_user: User = Depends(require_manager)):
     quote = db.query(Quote).filter(Quote.id == quote_id).first()
@@ -155,12 +158,57 @@ def send_quote(quote_id: str, payload: QuoteActionIn,
         raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}'")
     quote.status = "sent"
     quote.updated_at = datetime.utcnow()
+
+    # Fetch lead for email
+    lead = None
     if quote.lead_id:
+        lead = db.query(Lead).filter(Lead.id == quote.lead_id).first()
         _log(db, quote.lead_id, "quote_sent",
              f"Quote '{quote.title}' sent to client. EGP {quote.total:,.2f}",
              actor=current_user.email)
+
     db.commit()
-    return {"ok": True, "quote_id": quote_id, "status": "sent"}
+
+    # Send PDF email in background (non-blocking, never fails the request)
+    if lead and lead.email:
+        def _send_email_task():
+            try:
+                from src.core.pdf.generator import generate_quote_pdf
+                pdf_bytes = generate_quote_pdf(
+                    quote_id=quote.id,
+                    lead_name=lead.name,
+                    lead_email=lead.email,
+                    lead_company=lead.company or "",
+                    lead_phone=lead.phone or "",
+                    quote_title=quote.title,
+                    quote_description=quote.description or "",
+                    items=quote.items or [],
+                    total=quote.total,
+                    validity_date=str(quote.validity_date)[:10] if quote.validity_date else "",
+                    generated_by=current_user.name if hasattr(current_user, "name") else current_user.email,
+                )
+                send_quote_email(
+                    to_email=lead.email,
+                    to_name=lead.name,
+                    quote_title=quote.title,
+                    quote_total=quote.total,
+                    quote_id=quote.id,
+                    pdf_bytes=pdf_bytes,
+                )
+            except Exception as exc:
+                import logging
+                logging.getLogger("triangle_black.email").error(
+                    "Background email task failed: %s", exc
+                )
+
+        background_tasks.add_task(_send_email_task)
+
+    return {
+        "ok": True,
+        "quote_id": quote_id,
+        "status": "sent",
+        "email_queued": bool(lead and lead.email),
+    }
 
 
 @router.post("/quotes/{quote_id}/approve")
