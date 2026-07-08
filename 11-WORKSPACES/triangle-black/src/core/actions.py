@@ -73,6 +73,14 @@ def qualify(lead_id: str, db: Session = Depends(get_db),
     _log(db, lead_id, "qualification",
          f"Lead qualified. Score: {result['score']}/100. Grade: {result['grade']}.",
          actor=current_user.email)
+    _notify(db,
+        title=f"Lead Qualified: {lead.name}",
+        message=f"{lead.name} scored {result['score']}/100 ({result['grade']}). Ready to assign.",
+        ntype="lead_qualified",
+        entity_id=lead_id,
+        entity_type="lead",
+        recipient_role="manager",
+    )
     db.commit()
     return {"ok": True, "lead_id": lead_id, **result}
 
@@ -109,6 +117,14 @@ def assign(lead_id: str, payload: AssignIn, db: Session = Depends(get_db),
          f"Lead assigned to {agent.name} ({agent.email}). "
          f"Capacity: {agent.current_leads}/{agent.max_leads}",
          actor=current_user.email)
+    _notify(db,
+        title=f"Lead Assigned: {lead.name}",
+        message=f"{lead.name} assigned to {agent.name}. Capacity: {agent.current_leads}/{agent.max_leads}.",
+        ntype="lead_assigned",
+        entity_id=lead_id,
+        entity_type="lead",
+        recipient_role="agent",
+    )
     db.commit()
     return {"ok": True, "lead_id": lead_id, "agent_id": agent.id,
             "agent_name": agent.name, "agent_email": agent.email,

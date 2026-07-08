@@ -31,22 +31,19 @@ class NotificationRepository:
         unread_only: bool = False,
         limit: int = 50,
     ) -> list[Notification]:
-        q = self.db.query(Notification).filter(
-            Notification.recipient_role.in_([role, "all"])
-        )
+        # admin sees all notifications regardless of recipient_role
+        q = self.db.query(Notification)
+        if role != "admin":
+            q = q.filter(Notification.recipient_role.in_([role, "all"]))
         if unread_only:
             q = q.filter(Notification.is_read == False)
         return q.order_by(Notification.created_at.desc()).limit(limit).all()
 
     def unread_count(self, role: str) -> int:
-        return (
-            self.db.query(Notification)
-            .filter(
-                Notification.recipient_role.in_([role, "all"]),
-                Notification.is_read == False,
-            )
-            .count()
-        )
+        q = self.db.query(Notification).filter(Notification.is_read == False)
+        if role != "admin":
+            q = q.filter(Notification.recipient_role.in_([role, "all"]))
+        return q.count()
 
     def mark_read(self, obj_id: str) -> Optional[Notification]:
         obj = self.get(obj_id)
