@@ -1,30 +1,27 @@
-from sqlalchemy import Column, Integer, String, Enum, Float
-from sqlalchemy.ext.declarative import declarative_base
+"""
+Lead domain models — Triangle Black
+"""
+from __future__ import annotations
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, Integer, DateTime, Text
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-class LeadStatus(Enum):
-    new = 'new'
-    qualified = 'qualified'
-    assigned = 'assigned'
-    converted = 'converted'
-    lost = 'lost'
-
-class Priority(Enum):
-    high = 'high'
-    medium = 'medium'
-    low = 'low'
 
 class Lead(Base):
-    __tablename__ = 'leads'
+    __tablename__ = "leads"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    phone = Column(String, nullable=False)
-    company = Column(String, nullable=False)
-    source = Column(Enum(Source), nullable=False)
-    status = Column(Enum(LeadStatus), default=LeadStatus.new, nullable=False)
-    priority = Column(Enum(Priority), nullable=False)
-    score = Column(Float, nullable=False)
-    notes = Column(String)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False)
+    phone = Column(String(50), nullable=True)
+    company = Column(String(255), nullable=True)
+    source = Column(String(50), nullable=False, default="web")
+    status = Column(String(50), nullable=False, default="new")
+    priority = Column(String(20), nullable=False, default="medium")
+    score = Column(Integer, nullable=False, default=0)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

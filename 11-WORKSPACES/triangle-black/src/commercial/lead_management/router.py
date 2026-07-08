@@ -1,44 +1,53 @@
-from fastapi import APIRouter, Depends, HTTPException
+"""
+Lead FastAPI router
+"""
+from __future__ import annotations
+from typing import List
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from src.commercial.lead_management.models import LeadStatus, Priority, Source
-from src.commercial.lead_management.repository import LeadRepository
-from src.commercial.lead_management.schemas import LeadCreate, LeadUpdate, LeadResponse
-from src.database import get_db
+from .schemas import LeadCreate, LeadUpdate, LeadResponse
+from .repository import LeadRepository
 
-router = APIRouter()
+router = APIRouter(prefix="/leads", tags=["leads"])
 
-@router.post('/leads', response_model=LeadResponse)
-def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)) -> LeadResponse:
-    lead_repo = LeadRepository(db)
-    new_lead = lead_repo.create_lead(lead_data)
-    return LeadResponse.from_orm(new_lead)
 
-@router.get('/leads/{lead_id}', response_model=LeadResponse)
-def get_lead(lead_id: int, db: Session = Depends(get_db)) -> LeadResponse:
-    lead_repo = LeadRepository(db)
-    lead = lead_repo.get_lead(lead_id)
-    if not lead:
-        raise HTTPException(status_code=404, detail='Lead not found')
-    return LeadResponse.from_orm(lead)
+def get_db():
+    """Dependency — override in app startup."""
+    raise NotImplementedError("Configure DB session in app factory")
 
-@router.get('/leads', response_model=list[LeadResponse])
-def list_leads(db: Session = Depends(get_db)) -> list[LeadResponse]:
-    lead_repo = LeadRepository(db)
-    leads = lead_repo.list_leads()
-    return [LeadResponse.from_orm(lead) for lead in leads]
 
-@router.patch('/leads/{lead_id}', response_model=LeadResponse)
-def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_db)) -> LeadResponse:
-    lead_repo = LeadRepository(db)
-    updated_lead = lead_repo.update_lead(lead_id, lead_data)
-    if not updated_lead:
-        raise HTTPException(status_code=404, detail='Lead not found')
-    return LeadResponse.from_orm(updated_lead)
+@router.post("/", response_model=LeadResponse, status_code=201)
+def create_lead(payload: LeadCreate, db: Session = Depends(get_db)):
+    repo = LeadRepository(db)
+    return repo.create(payload.model_dump())
 
-@router.delete('/leads/{lead_id}', response_model=bool)
-def delete_lead(lead_id: int, db: Session = Depends(get_db)) -> bool:
-    lead_repo = LeadRepository(db)
-    deleted = lead_repo.delete_lead(lead_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail='Lead not found')
-    return deleted
+
+@router.get("/", response_model=List[LeadResponse])
+def list_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    repo = LeadRepository(db)
+    return repo.list(skip=skip, limit=limit)
+
+
+@router.get("/{lead_id}", response_model=LeadResponse)
+def get_lead(lead_id: str, db: Session = Depends(get_db)):
+    repo = LeadRepository(db)
+    obj = repo.get(lead_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return obj
+
+
+@router.patch("/{lead_id}", response_model=LeadResponse)
+def update_lead(lead_id: str, payload: LeadUpdate, db: Session = Depends(get_db)):
+    repo = LeadRepository(db)
+    obj = repo.update(lead_id, payload.model_dump(exclude_none=True))
+    if not obj:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return obj
+
+
+@router.delete("/{lead_id}", status_code=204)
+def delete_lead(lead_id: str, db: Session = Depends(get_db)):
+    repo = LeadRepository(db)
+    if not repo.delete(lead_id):
+        raise HTTPException(status_code=404, detail="Lead not found")

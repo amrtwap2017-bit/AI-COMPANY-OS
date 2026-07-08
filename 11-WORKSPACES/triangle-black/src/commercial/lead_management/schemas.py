@@ -1,39 +1,44 @@
-from pydantic import BaseModel
+"""
+Lead Pydantic schemas
+"""
+from __future__ import annotations
 from typing import Optional
-from src.commercial.lead_management.models import LeadStatus, Priority, Source
+from datetime import datetime
+from pydantic import BaseModel, EmailStr
+
 
 class LeadCreate(BaseModel):
     name: str
     email: str
-    phone: str
-    company: str
-    source: Source
-    priority: Priority
-    score: float
+    phone: Optional[str] = None
+    company: Optional[str] = None
+    source: str = "web"
+    priority: str = "medium"
     notes: Optional[str] = None
 
+
 class LeadUpdate(BaseModel):
-    name: Optional[str]
-    email: Optional[str]
-    phone: Optional[str]
-    company: Optional[str]
-    source: Optional[Source]
-    status: Optional[LeadStatus]
-    priority: Optional[Priority]
-    score: Optional[float]
-    notes: Optional[str]
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    notes: Optional[str] = None
+
 
 class LeadResponse(BaseModel):
-    id: int
+    id: str
     name: str
     email: str
-    phone: str
-    company: str
-    source: Source
-    status: LeadStatus
-    priority: Priority
-    score: float
+    phone: Optional[str]
+    company: Optional[str]
+    source: str
+    status: str
+    priority: str
+    score: int
     notes: Optional[str]
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
