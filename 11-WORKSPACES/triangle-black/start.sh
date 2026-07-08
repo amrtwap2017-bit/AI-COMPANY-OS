@@ -96,13 +96,13 @@ sleep 1
 cd "$TB_ROOT"
 export TRIANGLE_BLACK_DB_URL="postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black"
 export PYTHONPATH="$TB_ROOT"
-.venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8020 \
+.venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8030 \
   > /tmp/tb-api.log 2>&1 &
 API_PID=$!
 sleep 4
-if curl -sf http://127.0.0.1:8020/health > /dev/null 2>&1; then
+if curl -sf http://127.0.0.1:8030/health > /dev/null 2>&1; then
   ok "Triangle Black API (pid $API_PID) → http://127.0.0.1:8020"
-  ok "API Docs → http://127.0.0.1:8020/docs"
+  ok "API Docs → http://127.0.0.1:8030/docs"
 else
   warn "API may still be starting — check /tmp/tb-api.log"
 fi
@@ -148,7 +148,7 @@ echo ""
 echo -e "  ${BLUE}AICOS API${NC}          http://127.0.0.1:8000"
 [ "$NO_HUB" = false ] && \
 echo -e "  ${BLUE}AI Hub${NC}             http://127.0.0.1:8010"
-echo -e "  ${BLUE}Triangle Black API${NC} http://127.0.0.1:8020/docs"
+echo -e "  ${BLUE}Triangle Black API${NC} http://127.0.0.1:8030/docs"
 [ "$NO_PORTAL" = false ] && \
 echo -e "  ${BLUE}Ops Portal${NC}         http://127.0.0.1:3200"
 [ "$NO_CLIENT" = false ] && [ -d "$TB_ROOT/client-portal" ] && \
