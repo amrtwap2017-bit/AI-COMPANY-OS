@@ -35,7 +35,7 @@ from src.commercial.contracts.router import router as contracts_router
 from src.core.actions import router as actions_router
 
 # Create all tables
-Base.metadata.create_all(bind=engine)
+# REMOVED: Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Triangle Black API",
