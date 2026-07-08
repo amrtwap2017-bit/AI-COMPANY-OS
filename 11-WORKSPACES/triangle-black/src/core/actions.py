@@ -13,24 +13,28 @@ from src.core.database import get_db
 from src.core.auth import require_agent, require_manager, get_current_user
 from src.core.business import (
     qualify_lead, find_best_agent, generate_quote_from_lead,
-    compute_pipeline, compute_dashboard,
+    compute_pipeline, compute_dashboard, release_agent_capacity,
+    search_leads, check_duplicate_lead, expire_overdue_quotes,
 )
 from src.commercial.lead_management.models import Lead
 from src.commercial.agent_management.models import Agent
 from src.commercial.quotation.models import Quote
 from src.commercial.activity_tracking.models import Activity
+from src.commercial.contracts.models import Contract
 from src.commercial.auth.models import User
 
 router = APIRouter(prefix="/actions", tags=["business-actions"])
 
 
-def _log_activity(db, lead_id, type, description, actor="system"):
+def _log(db, lead_id, type, description, actor="system"):
     db.add(Activity(
         id=str(uuid.uuid4()), lead_id=lead_id, type=type,
         description=description, actor=actor,
         created_at=datetime.utcnow(), updated_at=datetime.utcnow(),
     ))
 
+
+# ─── QUALIFY ─────────────────────────────────────────────────────────────────
 
 @router.post("/leads/{lead_id}/qualify")
 def qualify(lead_id: str, db: Session = Depends(get_db),
@@ -42,14 +46,14 @@ def qualify(lead_id: str, db: Session = Depends(get_db),
     lead.score = result["score"]
     lead.status = result["status"]
     lead.updated_at = datetime.utcnow()
-    _log_activity(db, lead_id, "qualification",
-        f"Lead qualified. Score: {result['score']}/100. Grade: {result['grade']}.",
-        actor=current_user.email)
+    _log(db, lead_id, "qualification",
+         f"Lead qualified. Score: {result['score']}/100. Grade: {result['grade']}.",
+         actor=current_user.email)
     db.commit()
-    return {"ok": True, "lead_id": lead_id, "score": result["score"],
-            "grade": result["grade"], "status": result["status"],
-            "reasoning": result["reasoning"]}
+    return {"ok": True, "lead_id": lead_id, **result}
 
+
+# ─── ASSIGN ──────────────────────────────────────────────────────────────────
 
 class AssignIn(BaseModel):
     agent_id: Optional[str] = None
@@ -77,14 +81,17 @@ def assign(lead_id: str, payload: AssignIn, db: Session = Depends(get_db),
     lead.updated_at = datetime.utcnow()
     agent.current_leads += 1
     agent.updated_at = datetime.utcnow()
-    _log_activity(db, lead_id, "assignment",
-        f"Lead assigned to {agent.name} ({agent.email}). Capacity: {agent.current_leads}/{agent.max_leads}",
-        actor=current_user.email)
+    _log(db, lead_id, "assignment",
+         f"Lead assigned to {agent.name} ({agent.email}). "
+         f"Capacity: {agent.current_leads}/{agent.max_leads}",
+         actor=current_user.email)
     db.commit()
     return {"ok": True, "lead_id": lead_id, "agent_id": agent.id,
             "agent_name": agent.name, "agent_email": agent.email,
             "agent_capacity": f"{agent.current_leads}/{agent.max_leads}"}
 
+
+# ─── GENERATE QUOTE ───────────────────────────────────────────────────────────
 
 class QuoteFromLeadIn(BaseModel):
     contract_months: int = 12
@@ -101,15 +108,18 @@ def quote_from_lead(lead_id: str, payload: QuoteFromLeadIn,
     quote = Quote(id=str(uuid.uuid4()), created_at=datetime.utcnow(),
                   updated_at=datetime.utcnow(), **quote_data)
     db.add(quote)
-    _log_activity(db, lead_id, "quote_generated",
-        f"Quote generated: '{quote_data['title']}'. Total: EGP {quote_data['total']:,.2f}",
-        actor=current_user.email)
+    _log(db, lead_id, "quote_generated",
+         f"Quote generated: '{quote_data['title']}'. "
+         f"Total: EGP {quote_data['total']:,.2f}",
+         actor=current_user.email)
     db.commit()
     db.refresh(quote)
     return {"ok": True, "quote_id": quote.id, "title": quote.title,
             "total": quote.total, "status": quote.status, "items": quote.items,
             "validity_date": quote.validity_date.isoformat() if quote.validity_date else None}
 
+
+# ─── QUOTE WORKFLOW ───────────────────────────────────────────────────────────
 
 class QuoteActionIn(BaseModel):
     note: Optional[str] = None
@@ -123,13 +133,13 @@ def submit_quote(quote_id: str, payload: QuoteActionIn,
     if not quote:
         raise HTTPException(status_code=404, detail="Quote not found")
     if quote.status != "draft":
-        raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}', must be 'draft'")
+        raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}'")
     quote.status = "review"
     quote.updated_at = datetime.utcnow()
     if quote.lead_id:
-        _log_activity(db, quote.lead_id, "quote_submitted",
-            f"Quote '{quote.title}' submitted for review. Value: EGP {quote.total:,.2f}",
-            actor=current_user.email)
+        _log(db, quote.lead_id, "quote_submitted",
+             f"Quote '{quote.title}' submitted for review. EGP {quote.total:,.2f}",
+             actor=current_user.email)
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "review"}
 
@@ -142,13 +152,13 @@ def send_quote(quote_id: str, payload: QuoteActionIn,
     if not quote:
         raise HTTPException(status_code=404, detail="Quote not found")
     if quote.status != "review":
-        raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}', must be 'review'")
+        raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}'")
     quote.status = "sent"
     quote.updated_at = datetime.utcnow()
     if quote.lead_id:
-        _log_activity(db, quote.lead_id, "quote_sent",
-            f"Quote '{quote.title}' sent to client. Value: EGP {quote.total:,.2f}",
-            actor=current_user.email)
+        _log(db, quote.lead_id, "quote_sent",
+             f"Quote '{quote.title}' sent to client. EGP {quote.total:,.2f}",
+             actor=current_user.email)
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "sent"}
 
@@ -161,20 +171,53 @@ def approve_quote(quote_id: str, payload: QuoteActionIn,
     if not quote:
         raise HTTPException(status_code=404, detail="Quote not found")
     if quote.status != "sent":
-        raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}', must be 'sent'")
+        raise HTTPException(status_code=400, detail=f"Quote is '{quote.status}'")
+
     quote.status = "approved"
     quote.updated_at = datetime.utcnow()
+
+    # Convert lead
+    lead = None
     if quote.lead_id:
         lead = db.query(Lead).filter(Lead.id == quote.lead_id).first()
         if lead:
+            release_agent_capacity(db, lead)
             lead.status = "converted"
             lead.updated_at = datetime.utcnow()
-        _log_activity(db, quote.lead_id, "quote_approved",
-            f"Quote '{quote.title}' APPROVED. Contract: EGP {quote.total:,.2f}. Lead converted.",
-            actor=current_user.email)
+        _log(db, quote.lead_id, "quote_approved",
+             f"Quote '{quote.title}' APPROVED. EGP {quote.total:,.2f}. Lead converted.",
+             actor=current_user.email)
+
+    # Auto-create contract
+    contract = Contract(
+        id=str(uuid.uuid4()),
+        quote_id=quote.id,
+        lead_id=quote.lead_id or "",
+        title=quote.title,
+        description=quote.description,
+        services=quote.items,
+        total_value=quote.total,
+        monthly_value=round(quote.total / 12, 2),
+        status="pending_signature",
+        duration_months=12,
+        renewal_count=0,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(contract)
+
+    if quote.lead_id:
+        _log(db, quote.lead_id, "contract_created",
+             f"Contract auto-created from approved quote. "
+             f"Contract ID: {contract.id}. Value: EGP {quote.total:,.2f}",
+             actor="system")
+
     db.commit()
-    return {"ok": True, "quote_id": quote_id, "status": "approved",
-            "message": "Quote approved — lead converted to client"}
+    return {
+        "ok": True, "quote_id": quote_id, "status": "approved",
+        "contract_id": contract.id,
+        "message": "Quote approved — lead converted — contract created",
+    }
 
 
 @router.post("/quotes/{quote_id}/reject")
@@ -185,21 +228,26 @@ def reject_quote(quote_id: str, payload: QuoteActionIn,
     if not quote:
         raise HTTPException(status_code=404, detail="Quote not found")
     if quote.status not in ("sent", "review"):
-        raise HTTPException(status_code=400, detail=f"Cannot reject quote in '{quote.status}'")
+        raise HTTPException(status_code=400,
+                            detail=f"Cannot reject quote in '{quote.status}'")
     quote.status = "rejected"
     quote.updated_at = datetime.utcnow()
     if quote.lead_id:
         lead = db.query(Lead).filter(Lead.id == quote.lead_id).first()
         if lead:
+            release_agent_capacity(db, lead)
             lead.status = "lost"
             lead.updated_at = datetime.utcnow()
-        _log_activity(db, quote.lead_id, "quote_rejected",
-            f"Quote '{quote.title}' rejected. Note: {payload.note or 'No reason'}. Lead lost.",
-            actor=current_user.email)
+        _log(db, quote.lead_id, "quote_rejected",
+             f"Quote '{quote.title}' rejected. "
+             f"Note: {payload.note or 'No reason'}. Lead lost.",
+             actor=current_user.email)
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "rejected",
             "message": "Quote rejected — lead marked as lost"}
 
+
+# ─── TIMELINE ────────────────────────────────────────────────────────────────
 
 @router.get("/leads/{lead_id}/timeline")
 def lead_timeline(lead_id: str, db: Session = Depends(get_db),
@@ -209,14 +257,23 @@ def lead_timeline(lead_id: str, db: Session = Depends(get_db),
         raise HTTPException(status_code=404, detail="Lead not found")
     activities = (db.query(Activity).filter(Activity.lead_id == lead_id)
                   .order_by(Activity.created_at.desc()).all())
+    contract = db.query(Contract).filter(Contract.lead_id == lead_id).first()
     return {
         "lead_id": lead_id, "lead_name": lead.name,
         "lead_status": lead.status, "lead_score": lead.score,
-        "timeline": [{"id": a.id, "type": a.type, "description": a.description,
-                      "actor": a.actor, "created_at": a.created_at.isoformat()}
-                     for a in activities],
+        "contract": {
+            "id": contract.id, "status": contract.status,
+            "total_value": contract.total_value,
+        } if contract else None,
+        "timeline": [
+            {"id": a.id, "type": a.type, "description": a.description,
+             "actor": a.actor, "created_at": a.created_at.isoformat()}
+            for a in activities
+        ],
     }
 
+
+# ─── PIPELINE + DASHBOARD ─────────────────────────────────────────────────────
 
 @router.get("/pipeline/summary")
 def pipeline_summary(db: Session = Depends(get_db),
@@ -228,3 +285,97 @@ def pipeline_summary(db: Session = Depends(get_db),
 def dashboard(db: Session = Depends(get_db),
               _: User = Depends(require_manager)):
     return compute_dashboard(db)
+
+
+# ─── SEARCH ──────────────────────────────────────────────────────────────────
+
+@router.get("/leads/search")
+def lead_search(
+    q: str = "", status: str = "", source: str = "",
+    priority: str = "", limit: int = 50,
+    db: Session = Depends(get_db), _: User = Depends(require_agent),
+):
+    results = search_leads(
+        db, q=q, status=status or None,
+        source=source or None, priority=priority or None, limit=limit,
+    )
+    return {
+        "count": len(results), "query": q,
+        "results": [
+            {"id": l.id, "name": l.name, "email": l.email,
+             "company": l.company, "status": l.status,
+             "priority": l.priority, "score": l.score,
+             "created_at": l.created_at.isoformat()}
+            for l in results
+        ],
+    }
+
+
+# ─── DUPLICATE CHECK ─────────────────────────────────────────────────────────
+
+@router.get("/leads/check-duplicate")
+def check_duplicate(
+    email: str, exclude_id: str = "",
+    db: Session = Depends(get_db), _: User = Depends(require_agent),
+):
+    existing = check_duplicate_lead(db, email, exclude_id or None)
+    return {
+        "is_duplicate": existing is not None,
+        "existing_lead": {
+            "id": existing.id, "name": existing.name,
+            "status": existing.status,
+        } if existing else None,
+    }
+
+
+# ─── EXPIRE OVERDUE ───────────────────────────────────────────────────────────
+
+@router.post("/quotes/expire-overdue")
+def expire_overdue(db: Session = Depends(get_db),
+                   _: User = Depends(require_manager)):
+    count = expire_overdue_quotes(db)
+    return {"ok": True, "expired_count": count}
+
+
+# ─── AGENT LEADS + PERFORMANCE ────────────────────────────────────────────────
+
+@router.get("/agents/{agent_id}/leads")
+def agent_leads(agent_id: str, db: Session = Depends(get_db),
+                _: User = Depends(require_manager)):
+    agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    leads = db.query(Lead).filter(Lead.status == "assigned").all()
+    return {
+        "agent_id": agent_id, "agent_name": agent.name,
+        "current_leads": agent.current_leads, "max_leads": agent.max_leads,
+        "leads": [
+            {"id": l.id, "name": l.name, "company": l.company,
+             "priority": l.priority, "score": l.score,
+             "created_at": l.created_at.isoformat()}
+            for l in leads
+        ],
+    }
+
+
+@router.get("/agents/{agent_id}/performance")
+def agent_performance(agent_id: str, db: Session = Depends(get_db),
+                      _: User = Depends(require_manager)):
+    agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    all_leads = db.query(Lead).filter(
+        Lead.status.in_(["assigned","converted","lost"])
+    ).all()
+    total = len(all_leads)
+    converted = len([l for l in all_leads if l.status == "converted"])
+    lost = len([l for l in all_leads if l.status == "lost"])
+    rate = round(converted / total, 3) if total > 0 else 0.0
+    return {
+        "agent_id": agent_id, "agent_name": agent.name, "email": agent.email,
+        "capacity": f"{agent.current_leads}/{agent.max_leads}",
+        "metrics": {
+            "total_assigned": total, "converted": converted, "lost": lost,
+            "conversion_rate": rate, "conversion_pct": f"{rate*100:.1f}%",
+        },
+    }

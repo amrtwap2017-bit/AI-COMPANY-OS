@@ -1,6 +1,6 @@
 """
 Triangle Black — Business Logic Engine
-Core revenue loop: capture → qualify → assign → quote → approve
+Core revenue loop: capture → qualify → assign → quote → approve → contract
 """
 from __future__ import annotations
 import uuid
@@ -17,85 +17,52 @@ from src.commercial.activity_tracking.models import Activity
 # ─── QUALIFICATION ENGINE ────────────────────────────────────────────────────
 
 QUALIFICATION_RULES = {
-    # Source scoring
-    "source": {"referral": 30, "direct": 20, "web": 10},
-    # Priority scoring
-    "priority": {"high": 30, "medium": 20, "low": 10},
-    # Company name present
+    "source":     {"referral": 30, "direct": 20, "web": 10},
+    "priority":   {"high": 30, "medium": 20, "low": 10},
     "has_company": 20,
-    # Phone present
-    "has_phone": 10,
-    # Notes present
-    "has_notes": 10,
+    "has_phone":   10,
+    "has_notes":   10,
 }
 
 
 def qualify_lead(lead: Lead) -> dict:
-    """
-    Score a lead 0-100 based on business rules.
-    Returns score, grade, reasoning.
-    """
     score = 0
     reasoning = []
 
-    # Source
     source_score = QUALIFICATION_RULES["source"].get(lead.source, 5)
     score += source_score
     reasoning.append(f"Source '{lead.source}': +{source_score}")
 
-    # Priority
     priority_score = QUALIFICATION_RULES["priority"].get(lead.priority, 10)
     score += priority_score
     reasoning.append(f"Priority '{lead.priority}': +{priority_score}")
 
-    # Company
     if lead.company:
         score += QUALIFICATION_RULES["has_company"]
         reasoning.append(f"Company provided: +{QUALIFICATION_RULES['has_company']}")
 
-    # Phone
     if lead.phone:
         score += QUALIFICATION_RULES["has_phone"]
         reasoning.append(f"Phone provided: +{QUALIFICATION_RULES['has_phone']}")
 
-    # Notes
     if lead.notes:
         score += QUALIFICATION_RULES["has_notes"]
         reasoning.append(f"Notes provided: +{QUALIFICATION_RULES['has_notes']}")
 
     score = min(score, 100)
+    grade = "qualified" if score >= 70 else "warm" if score >= 40 else "cold"
+    status = "qualified" if score >= 40 else "new"
 
-    if score >= 70:
-        grade = "qualified"
-        status = "qualified"
-    elif score >= 40:
-        grade = "warm"
-        status = "qualified"
-    else:
-        grade = "cold"
-        status = "new"
-
-    return {
-        "score": score,
-        "grade": grade,
-        "status": status,
-        "reasoning": reasoning,
-    }
+    return {"score": score, "grade": grade, "status": status, "reasoning": reasoning}
 
 
 # ─── AGENT ASSIGNMENT ENGINE ──────────────────────────────────────────────────
 
 def find_best_agent(db: Session) -> Optional[Agent]:
-    """
-    Round-robin assignment: pick active agent with most capacity.
-    capacity = max_leads - current_leads
-    """
     agents = (
         db.query(Agent)
         .filter(Agent.is_active == True)
-        .order_by(
-            (Agent.max_leads - Agent.current_leads).desc()
-        )
+        .order_by((Agent.max_leads - Agent.current_leads).desc())
         .all()
     )
     for agent in agents:
@@ -104,80 +71,135 @@ def find_best_agent(db: Session) -> Optional[Agent]:
     return None
 
 
+def release_agent_capacity(db: Session, lead: Lead) -> None:
+    """Decrement agent capacity when lead is converted or lost."""
+    if lead.status == "assigned":
+        agents = db.query(Agent).filter(
+            Agent.current_leads > 0,
+            Agent.is_active == True
+        ).all()
+        if agents:
+            agent = agents[0]
+            agent.current_leads = max(0, agent.current_leads - 1)
+            agent.updated_at = datetime.utcnow()
+
+
 # ─── QUOTE GENERATOR ─────────────────────────────────────────────────────────
 
 SERVICE_PRICING = {
-    "hvac": {"name": "HVAC Maintenance", "unit_price": 3500.0, "unit": "month"},
-    "electrical": {"name": "Electrical Systems", "unit_price": 2800.0, "unit": "month"},
-    "plumbing": {"name": "Plumbing Systems", "unit_price": 2200.0, "unit": "month"},
-    "fire": {"name": "Fire Fighting Systems", "unit_price": 1800.0, "unit": "month"},
-    "general": {"name": "General Engineering", "unit_price": 4500.0, "unit": "month"},
-    "procurement": {"name": "Procurement Services", "unit_price": 1500.0, "unit": "month"},
+    "hvac":        {"name": "HVAC Maintenance",      "unit_price": 3500.0, "unit": "month"},
+    "electrical":  {"name": "Electrical Systems",    "unit_price": 2800.0, "unit": "month"},
+    "plumbing":    {"name": "Plumbing Systems",      "unit_price": 2200.0, "unit": "month"},
+    "fire":        {"name": "Fire Fighting Systems", "unit_price": 1800.0, "unit": "month"},
+    "general":     {"name": "General Engineering",   "unit_price": 4500.0, "unit": "month"},
+    "procurement": {"name": "Procurement Services",  "unit_price": 1500.0, "unit": "month"},
+    "kitchen":     {"name": "Kitchen Equipment",     "unit_price": 3000.0, "unit": "month"},
+    "laundry":     {"name": "Laundry Systems",       "unit_price": 2500.0, "unit": "month"},
+    "pool":        {"name": "Pool Systems",           "unit_price": 2000.0, "unit": "month"},
 }
 
 PRIORITY_MULTIPLIER = {"high": 1.2, "medium": 1.0, "low": 0.9}
 
 
 def generate_quote_from_lead(lead: Lead, contract_months: int = 12) -> dict:
-    """
-    Auto-generate a draft quote from lead data.
-    Detects service type from notes/company name.
-    """
     notes_lower = (lead.notes or "").lower()
     company_lower = (lead.company or "").lower()
     combined = notes_lower + " " + company_lower
 
-    # Detect services from text
-    detected_services = []
-    for key, service in SERVICE_PRICING.items():
-        if key in combined:
-            detected_services.append(key)
-
-    # Default to general if nothing detected
-    if not detected_services:
-        detected_services = ["general"]
+    detected = [k for k in SERVICE_PRICING if k in combined]
+    if not detected:
+        detected = ["general"]
 
     multiplier = PRIORITY_MULTIPLIER.get(lead.priority, 1.0)
     items = []
     total = 0.0
 
-    for key in detected_services:
-        service = SERVICE_PRICING[key]
-        unit_price = round(service["unit_price"] * multiplier, 2)
+    for key in detected:
+        s = SERVICE_PRICING[key]
+        unit_price = round(s["unit_price"] * multiplier, 2)
         line_total = round(unit_price * contract_months, 2)
         items.append({
-            "service": service["name"],
-            "unit": service["unit"],
+            "service": s["name"],
+            "unit": s["unit"],
             "qty": contract_months,
             "unit_price": unit_price,
             "total": line_total,
         })
         total += line_total
 
-    validity_date = datetime.utcnow() + timedelta(days=30)
-
     return {
         "title": f"Engineering Services Contract — {lead.company or lead.name}",
         "description": (
             f"Annual engineering maintenance contract for {lead.company or lead.name}. "
-            f"Contract duration: {contract_months} months. "
-            f"Priority: {lead.priority}. Source: {lead.source}."
+            f"Duration: {contract_months} months. Priority: {lead.priority}."
         ),
         "lead_id": lead.id,
         "items": items,
         "total": round(total, 2),
         "status": "draft",
-        "validity_date": validity_date,
+        "validity_date": datetime.utcnow() + timedelta(days=30),
     }
+
+
+# ─── DUPLICATE DETECTION ─────────────────────────────────────────────────────
+
+def check_duplicate_lead(db: Session, email: str, exclude_id: str = None) -> Optional[Lead]:
+    q = db.query(Lead).filter(Lead.email == email)
+    if exclude_id:
+        q = q.filter(Lead.id != exclude_id)
+    return q.first()
+
+
+# ─── QUOTE EXPIRY ────────────────────────────────────────────────────────────
+
+def expire_overdue_quotes(db: Session) -> int:
+    now = datetime.utcnow()
+    expired = (
+        db.query(Quote)
+        .filter(
+            Quote.status == "sent",
+            Quote.validity_date < now,
+        )
+        .all()
+    )
+    for q in expired:
+        q.status = "rejected"
+        q.updated_at = now
+    db.commit()
+    return len(expired)
+
+
+# ─── LEAD SEARCH ─────────────────────────────────────────────────────────────
+
+def search_leads(db: Session, q: str, status: str = None,
+                 source: str = None, priority: str = None,
+                 limit: int = 50) -> list[Lead]:
+    query = db.query(Lead)
+    if q:
+        search = f"%{q}%"
+        from sqlalchemy import or_
+        query = query.filter(
+            or_(
+                Lead.name.ilike(search),
+                Lead.email.ilike(search),
+                Lead.company.ilike(search),
+                Lead.notes.ilike(search),
+            )
+        )
+    if status:
+        query = query.filter(Lead.status == status)
+    if source:
+        query = query.filter(Lead.source == source)
+    if priority:
+        query = query.filter(Lead.priority == priority)
+    return query.order_by(Lead.created_at.desc()).limit(limit).all()
 
 
 # ─── PIPELINE AGGREGATOR ──────────────────────────────────────────────────────
 
 def compute_pipeline(db: Session) -> dict:
-    """Compute real pipeline metrics from DB."""
     leads = db.query(Lead).all()
     quotes = db.query(Quote).all()
-
     total_leads = len(leads)
     by_status = {}
     for lead in leads:
@@ -185,8 +207,7 @@ def compute_pipeline(db: Session) -> dict:
 
     total_quote_value = sum(q.total for q in quotes)
     approved_value = sum(q.total for q in quotes if q.status == "approved")
-    pending_value = sum(q.total for q in quotes if q.status in ("draft", "review", "sent"))
-
+    pending_value = sum(q.total for q in quotes if q.status in ("draft","review","sent"))
     converted = by_status.get("converted", 0)
     conversion_rate = round(converted / total_leads, 3) if total_leads > 0 else 0.0
 
@@ -197,18 +218,16 @@ def compute_pipeline(db: Session) -> dict:
         "approved_value": round(approved_value, 2),
         "pending_value": round(pending_value, 2),
         "conversion_rate": conversion_rate,
-        "active_quotes": len([q for q in quotes if q.status not in ("rejected",)]),
+        "active_quotes": len([q for q in quotes if q.status != "rejected"]),
     }
 
 
-# ─── REPORT AGGREGATOR ────────────────────────────────────────────────────────
+# ─── DASHBOARD ───────────────────────────────────────────────────────────────
 
 def compute_dashboard(db: Session) -> dict:
-    """Full executive dashboard metrics."""
     leads = db.query(Lead).all()
     quotes = db.query(Quote).all()
     agents = db.query(Agent).all()
-
     now = datetime.utcnow()
     this_month = [l for l in leads if l.created_at.month == now.month]
 
@@ -217,37 +236,26 @@ def compute_dashboard(db: Session) -> dict:
         "leads": {
             "total": len(leads),
             "this_month": len(this_month),
-            "by_status": {
-                s: len([l for l in leads if l.status == s])
-                for s in ["new", "qualified", "assigned", "converted", "lost"]
-            },
-            "by_source": {
-                s: len([l for l in leads if l.source == s])
-                for s in ["web", "referral", "direct"]
-            },
-            "by_priority": {
-                p: len([l for l in leads if l.priority == p])
-                for p in ["high", "medium", "low"]
-            },
+            "by_status": {s: len([l for l in leads if l.status == s])
+                          for s in ["new","qualified","assigned","converted","lost"]},
+            "by_source": {s: len([l for l in leads if l.source == s])
+                          for s in ["web","referral","direct"]},
+            "by_priority": {p: len([l for l in leads if l.priority == p])
+                            for p in ["high","medium","low"]},
         },
         "quotes": {
             "total": len(quotes),
             "total_value": round(sum(q.total for q in quotes), 2),
             "approved_value": round(sum(q.total for q in quotes if q.status == "approved"), 2),
-            "by_status": {
-                s: len([q for q in quotes if q.status == s])
-                for s in ["draft", "review", "sent", "approved", "rejected"]
-            },
+            "by_status": {s: len([q for q in quotes if q.status == s])
+                          for s in ["draft","review","sent","approved","rejected"]},
         },
         "agents": {
             "total": len(agents),
             "active": len([a for a in agents if a.is_active]),
             "capacity": {
-                a.name: {
-                    "current": a.current_leads,
-                    "max": a.max_leads,
-                    "available": a.max_leads - a.current_leads,
-                }
+                a.name: {"current": a.current_leads, "max": a.max_leads,
+                         "available": a.max_leads - a.current_leads}
                 for a in agents
             },
         },

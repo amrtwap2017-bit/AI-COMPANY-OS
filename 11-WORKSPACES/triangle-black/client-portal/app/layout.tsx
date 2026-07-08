@@ -1,0 +1,25 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
+import { Providers } from "./providers";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Triangle Black | Client Portal",
+  description: "View and manage your engineering service proposals",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={inter.className}>
+      <body>
+        <a href="#main-content" className="skip-nav">Skip to main content</a>
+        <AuthProvider>
+          <Providers>{children}</Providers>
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
