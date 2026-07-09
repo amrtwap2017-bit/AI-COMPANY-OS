@@ -1,9 +1,14 @@
+"""
+Pipeline repository — Triangle Black
+"""
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from sqlalchemy.orm import Session
 from .models import Pipeline
+
+DEFAULT_HOTEL = "tb-default-hotel-000000000001"
 
 
 class PipelineRepository:
@@ -11,7 +16,7 @@ class PipelineRepository:
         self.db = db
 
     def create(self, data: dict) -> Pipeline:
-        data.setdefault("hotel_id", "tb-default-hotel-000000000001")
+        data.setdefault("hotel_id", DEFAULT_HOTEL)
         obj = Pipeline(
             id=str(uuid.uuid4()),
             created_at=datetime.utcnow(),
@@ -24,7 +29,7 @@ class PipelineRepository:
         self.db.refresh(obj)
         return obj
 
-    def get(self, obj_id: str, hotel_id: str = "tb-default-hotel-000000000001") -> Optional[Pipeline]:
+    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Pipeline]:
         return (
             self.db.query(Pipeline)
             .filter(Pipeline.id == obj_id, Pipeline.hotel_id == hotel_id)
@@ -35,17 +40,20 @@ class PipelineRepository:
         self,
         skip: int = 0,
         limit: int = 100,
-        hotel_id: str = "tb-default-hotel-000000000001"
-    ) -> List[Pipeline]:
+        hotel_id: str = DEFAULT_HOTEL,
+    ) -> list[Pipeline]:
         return (
             self.db.query(Pipeline)
             .filter(Pipeline.hotel_id == hotel_id)
+            .order_by(Pipeline.created_at.desc())
             .offset(skip)
             .limit(limit)
             .all()
         )
 
-    def update(self, obj_id: str, data: dict, hotel_id: str = "tb-default-hotel-000000000001") -> Optional[Pipeline]:
+    def update(
+        self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL
+    ) -> Optional[Pipeline]:
         obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return None
@@ -57,7 +65,7 @@ class PipelineRepository:
         self.db.refresh(obj)
         return obj
 
-    def delete(self, obj_id: str, hotel_id: str = "tb-default-hotel-000000000001") -> bool:
+    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
         obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return False

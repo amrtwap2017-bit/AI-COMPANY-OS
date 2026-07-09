@@ -1,62 +1,78 @@
+"""
+Pipeline FastAPI router — Triangle Black
+"""
 from __future__ import annotations
-from typing import List, Optional
-import uuid
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from src.core.auth import get_current_user
 from src.core.database import get_db
-from .models import Pipeline
-from .repository import PipelineRepository
+from src.core.auth import require_agent, require_manager
+from src.core.tenant import get_hotel_id
+from src.commercial.auth.models import User
 from .schemas import PipelineCreate, PipelineUpdate, PipelineResponse
+from .repository import PipelineRepository
+
+router = APIRouter(prefix="/pipelines", tags=["pipelines"])
 
 
-router = APIRouter()
-
-@router.post("/pipeline", response_model=PipelineResponse)
-def create_pipeline(
-    pipeline: PipelineCreate,
+@router.post("/", response_model=PipelineResponse, status_code=201)
+def create(
+    payload: PipelineCreate,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return PipelineRepository(db).create(pipeline.dict())
+    data = payload.model_dump()
+    data["hotel_id"] = hotel_id
+    return PipelineRepository(db).create(data)
 
-@router.get("/pipeline/{pipeline_id}", response_model=PipelineResponse)
-def get_pipeline(
-    pipeline_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    pipeline = PipelineRepository(db).get(pipeline_id)
-    if not pipeline:
-        raise HTTPException(status_code=404, detail="Pipeline not found")
-    return pipeline
 
-@router.get("/pipeline", response_model=List[PipelineResponse])
-def list_pipelines(
+@router.get("/", response_model=List[PipelineResponse])
+def list_all(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return PipelineRepository(db).list(skip, limit)
+    return PipelineRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
-@router.put("/pipeline/{pipeline_id}", response_model=PipelineResponse)
-def update_pipeline(
+
+@router.get("/{pipeline_id}", response_model=PipelineResponse)
+def get(
     pipeline_id: str,
-    pipeline_update: PipelineUpdate,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    pipeline = PipelineRepository(db).update(pipeline_id, pipeline_update.dict())
-    if not pipeline:
+    obj = PipelineRepository(db).get(pipeline_id, hotel_id=hotel_id)
+    if not obj:
         raise HTTPException(status_code=404, detail="Pipeline not found")
-    return pipeline
+    return obj
 
-@router.delete("/pipeline/{pipeline_id}", response_model=bool)
-def delete_pipeline(
+
+@router.patch("/{pipeline_id}", response_model=PipelineResponse)
+def update(
+    pipeline_id: str,
+    payload: PipelineUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    obj = PipelineRepository(db).update(
+        pipeline_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
+    )
+    if not obj:
+        raise HTTPException(status_code=404, detail="Pipeline not found")
+    return obj
+
+
+@router.delete("/{pipeline_id}", status_code=204)
+def delete(
     pipeline_id: str,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return PipelineRepository(db).delete(pipeline_id)
+    if not PipelineRepository(db).delete(pipeline_id, hotel_id=hotel_id):
+        raise HTTPException(status_code=404, detail="Pipeline not found")

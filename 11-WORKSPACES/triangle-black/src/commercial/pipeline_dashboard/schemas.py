@@ -1,3 +1,6 @@
+"""
+Pipeline Pydantic schemas — Triangle Black
+"""
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
@@ -5,20 +8,23 @@ from pydantic import BaseModel
 
 
 class PipelineCreate(BaseModel):
-    stage: str
-    quote_total: float = 0.0
+    name: str
+    status: str = "active"
+    notes: Optional[str] = None
 
 
 class PipelineUpdate(BaseModel):
-    stage: Optional[str] = None
-    quote_total: Optional[float] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class PipelineResponse(BaseModel):
     id: str
     hotel_id: str
-    stage: str
-    quote_total: float
+    name: str
+    status: str
+    notes: Optional[str]
     created_at: datetime
     updated_at: datetime
 
