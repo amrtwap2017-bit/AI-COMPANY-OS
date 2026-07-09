@@ -20,7 +20,7 @@ class Agent(Base):
                         onupdate=datetime.utcnow, nullable=False)
 
     @property
-def current_load(self) -> int:
+    def current_load(self) -> int:
         return self.assigned_leads
 
     __table_args__ = (
