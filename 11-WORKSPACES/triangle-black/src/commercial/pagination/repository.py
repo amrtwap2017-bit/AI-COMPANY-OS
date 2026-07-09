@@ -1,11 +1,13 @@
 """
 PaginationLog repository — Triangle Black
+Uses actual DB columns: id, hotel_id, data, skip, limit, total_count, created_at
 """
 from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from .models import PaginationLog
 
 DEFAULT_HOTEL = "tb-default-hotel-000000000001"
@@ -15,12 +17,13 @@ class PaginationLogRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def log(self, hotel_id: str, endpoint: str, skip: int, limit: int, total: int) -> PaginationLog:
-        """Log a paginated query for performance monitoring."""
+    def log(
+        self, hotel_id: str, skip: int, limit: int, total: int, data: str = "{}"
+    ) -> PaginationLog:
         obj = PaginationLog(
             id=str(uuid.uuid4()),
             hotel_id=hotel_id,
-            endpoint=endpoint,
+            data=data,
             skip=skip,
             limit=limit,
             total_count=total,
@@ -38,28 +41,29 @@ class PaginationLogRepository:
         hotel_id: str = DEFAULT_HOTEL,
         endpoint: Optional[str] = None,
     ) -> list[PaginationLog]:
-        q = (
+        return (
             self.db.query(PaginationLog)
             .filter(PaginationLog.hotel_id == hotel_id)
-        )
-        if endpoint:
-            q = q.filter(PaginationLog.endpoint == endpoint)
-        return q.order_by(PaginationLog.created_at.desc()).offset(skip).limit(limit).all()
-
-    def get_stats(self, hotel_id: str = DEFAULT_HOTEL) -> dict:
-        """Return average total_count per endpoint for performance analysis."""
-        from sqlalchemy import func
-        rows = (
-            self.db.query(
-                PaginationLog.endpoint,
-                func.avg(PaginationLog.total_count).label("avg_total"),
-                func.count(PaginationLog.id).label("query_count"),
-            )
-            .filter(PaginationLog.hotel_id == hotel_id)
-            .group_by(PaginationLog.endpoint)
+            .order_by(PaginationLog.created_at.desc())
+            .offset(skip)
+            .limit(limit)
             .all()
         )
+
+    def get_stats(self, hotel_id: str = DEFAULT_HOTEL) -> dict:
+        rows = (
+            self.db.query(
+                func.avg(PaginationLog.total_count).label("avg_total"),
+                func.count(PaginationLog.id).label("query_count"),
+                func.max(PaginationLog.total_count).label("max_total"),
+            )
+            .filter(PaginationLog.hotel_id == hotel_id)
+            .first()
+        )
+        if not rows or rows.query_count == 0:
+            return {"avg_total": 0.0, "queries": 0, "max_total": 0}
         return {
-            r.endpoint: {"avg_total": round(float(r.avg_total), 1), "queries": r.query_count}
-            for r in rows
+            "avg_total": round(float(rows.avg_total or 0), 1),
+            "queries": rows.query_count,
+            "max_total": rows.max_total or 0,
         }

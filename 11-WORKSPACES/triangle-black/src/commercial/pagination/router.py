@@ -3,7 +3,7 @@ Pagination FastAPI router — Triangle Black
 Exposes pagination stats and log endpoints.
 """
 from __future__ import annotations
-from typing import List, Optional
+from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.core.database import get_db
@@ -22,7 +22,7 @@ def get_stats(
     _: User = Depends(require_manager),
     hotel_id: str = Depends(get_hotel_id),
 ):
-    """Get pagination performance stats per endpoint."""
+    """Get pagination performance stats."""
     return PaginationLogRepository(db).get_stats(hotel_id=hotel_id)
 
 
@@ -30,12 +30,9 @@ def get_stats(
 def list_logs(
     skip: int = 0,
     limit: int = 100,
-    endpoint: Optional[str] = None,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
     hotel_id: str = Depends(get_hotel_id),
 ):
     """List pagination query logs."""
-    return PaginationLogRepository(db).list(
-        skip=skip, limit=limit, hotel_id=hotel_id, endpoint=endpoint
-    )
+    return PaginationLogRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)

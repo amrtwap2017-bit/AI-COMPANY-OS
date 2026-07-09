@@ -30,9 +30,9 @@ from src.commercial.notifications.models import Notification
 router = APIRouter(prefix="/actions", tags=["business-actions"])
 
 
-def _log(db, lead_id, type, description, actor="system"):
+def _log(db, lead_id, type, description, actor="system", hotel_id="tb-default-hotel-000000000001"):
     db.add(Activity(
-        id=str(uuid.uuid4()), lead_id=lead_id, type=type,
+        id=str(uuid.uuid4()), hotel_id=hotel_id, lead_id=lead_id, type=type,
         description=description, actor=actor,
         created_at=datetime.utcnow(), updated_at=datetime.utcnow(),
     ))

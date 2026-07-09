@@ -1,9 +1,9 @@
 """
 Pagination Pydantic schemas — Triangle Black
-Provides reusable paginated response wrappers.
+Matches actual paginated_responses table: id, hotel_id, data, skip, limit, total_count, created_at
 """
 from __future__ import annotations
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, List, TypeVar
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -11,7 +11,7 @@ T = TypeVar("T")
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    """Generic paginated response wrapper — use this in all list endpoints."""
+    """Generic paginated response wrapper for list endpoints."""
     items: List[T]
     total: int
     skip: int
@@ -30,16 +30,16 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
 
 class PaginationLogCreate(BaseModel):
-    endpoint: str
     skip: int = 0
     limit: int = 100
     total_count: int = 0
+    data: str = "{}"
 
 
 class PaginationLogResponse(BaseModel):
     id: str
     hotel_id: str
-    endpoint: str
+    data: str
     skip: int
     limit: int
     total_count: int
