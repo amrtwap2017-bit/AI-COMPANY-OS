@@ -1,6 +1,6 @@
 """
 Hotel repository — Triangle Black
-Hotels are tenants — no hotel_id scoping applied to Hotel queries.
+Hotels are tenants — queries by Hotel.id only, no hotel_id scoping.
 """
 from __future__ import annotations
 import uuid
@@ -42,7 +42,7 @@ class HotelRepository:
     ) -> list[Hotel]:
         q = self.db.query(Hotel)
         if active_only:
-            q = q.filter(Hotel.is_active == True)
+            q = q.filter(Hotel.is_active.is_(True))
         return q.order_by(Hotel.name).offset(skip).limit(limit).all()
 
     def update(self, hotel_id: str, data: dict) -> Optional[Hotel]:

@@ -15,7 +15,9 @@ def test_hotel_id(client, auth):
         "/api/v1/hotels/",
         json={
             "name": f"{TEST_PREFIX} Hotel {unique}",
-            "status": "active",
+            "slug": f"test-hotel-{unique}",
+            "city": "Cairo",
+            "country": "Egypt",
         },
         headers=auth,
     )
@@ -35,13 +37,16 @@ def test_create_hotel(client, auth):
     unique = str(uuid.uuid4())[:8]
     res = client.post(
         "/api/v1/hotels/",
-        json={"name": f"{TEST_PREFIX} Create {unique}", "status": "active"},
+        json={
+            "name": f"{TEST_PREFIX} Create {unique}",
+            "slug": f"create-{unique}",
+        },
         headers=auth,
     )
     assert res.status_code == 201
     data = res.json()
     assert "id" in data
-    assert data["status"] == "active"
+    assert data["is_active"] is True
     client.delete(f"/api/v1/hotels/{data['id']}", headers=auth)
 
 
@@ -59,11 +64,11 @@ def test_get_hotel_not_found(client, auth):
 def test_update_hotel(client, auth, test_hotel_id):
     res = client.patch(
         f"/api/v1/hotels/{test_hotel_id}",
-        json={"status": "inactive"},
+        json={"city": "Alexandria"},
         headers=auth,
     )
     assert res.status_code == 200
-    assert res.json()["status"] == "inactive"
+    assert res.json()["city"] == "Alexandria"
 
 
 def test_hotels_requires_auth(client):

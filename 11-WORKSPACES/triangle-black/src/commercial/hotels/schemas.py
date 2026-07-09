@@ -3,33 +3,53 @@ Hotel Pydantic schemas — Triangle Black
 Hotels are top-level tenants — no hotel_id scoping.
 """
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel
 
 
 class HotelCreate(BaseModel):
     name: str
-    code: Optional[str] = None
+    slug: str
+    brand: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
     address: Optional[str] = None
-    subscription_tier: Optional[str] = "basic"
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    rooms: Optional[str] = None
+    stars: Optional[str] = None
+    settings: Dict[str, Any] = {}
 
 
 class HotelUpdate(BaseModel):
     name: Optional[str] = None
-    code: Optional[str] = None
+    brand: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
     address: Optional[str] = None
-    subscription_tier: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    rooms: Optional[str] = None
+    stars: Optional[str] = None
     is_active: Optional[bool] = None
+    settings: Optional[Dict[str, Any]] = None
 
 
 class HotelResponse(BaseModel):
     id: str
     name: str
-    code: Optional[str]
+    slug: str
+    brand: Optional[str]
+    city: Optional[str]
+    country: Optional[str]
     address: Optional[str]
-    subscription_tier: Optional[str]
+    phone: Optional[str]
+    email: Optional[str]
+    rooms: Optional[str]
+    stars: Optional[str]
     is_active: bool
+    settings: Dict[str, Any]
     created_at: datetime
     updated_at: datetime
 
