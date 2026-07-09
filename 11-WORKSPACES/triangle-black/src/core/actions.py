@@ -39,10 +39,12 @@ def _log(db, lead_id, type, description, actor="system", hotel_id="tb-default-ho
 
 
 def _notify(db, title: str, message: str, ntype: str,
-            entity_id: str, entity_type: str, recipient_role: str):
+            entity_id: str, entity_type: str, recipient_role: str,
+            hotel_id: str = "tb-default-hotel-000000000001"):
     try:
         db.add(Notification(
             id=str(uuid.uuid4()),
+            hotel_id=hotel_id,
             title=title, message=message, type=ntype,
             entity_id=entity_id, entity_type=entity_type,
             recipient_role=recipient_role, is_read=False,
