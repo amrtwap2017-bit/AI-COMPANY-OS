@@ -271,6 +271,7 @@ def send_quote(
         message=f"Proposal sent to {lead.name if lead else 'client'} for EGP {quote.total:,.0f}. Awaiting approval.",
         ntype="quote_sent", entity_id=quote_id,
         entity_type="quote", recipient_role="manager",
+        hotel_id=hotel_id,
     )
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "sent",
@@ -330,6 +331,7 @@ def approve_quote(
         message=f"EGP {quote.total:,.0f} contract approved. Contract {contract.id[:8].upper()} created automatically.",
         ntype="quote_approved", entity_id=quote_id,
         entity_type="quote", recipient_role="all",
+        hotel_id=hotel_id,
     )
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "approved",

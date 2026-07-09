@@ -1,7 +1,7 @@
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, DateTime, Float
+from sqlalchemy import Column, String, Integer, DateTime, Float, Index
 from src.core.base import Base
 
 
