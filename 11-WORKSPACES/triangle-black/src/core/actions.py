@@ -609,7 +609,8 @@ def download_quote_pdf(
     lead = None
     if quote.lead_id:
         lead = db.query(Lead).filter(
-            Lead.id == quote.lead     Lead.hotel_id == hotel_id,
+            Lead.id == quote.lead_id,
+            Lead.hotel_id == hotel_id,
         ).first()
     pdf_bytes = generate_quote_pdf(
         quote_id=quote.id, quote_title=quote.title,

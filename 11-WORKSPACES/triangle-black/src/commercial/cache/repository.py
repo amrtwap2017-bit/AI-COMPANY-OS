@@ -1,3 +1,6 @@
+"""
+CacheConfig repository — Triangle Black
+"""
 from __future__ import annotations
 import uuid
 from datetime import datetime
@@ -33,21 +36,32 @@ class CacheConfigRepository:
             .first()
         )
 
+    def get_by_key(self, cache_key: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[CacheConfig]:
+        return (
+            self.db.query(CacheConfig)
+            .filter(CacheConfig.cache_key == cache_key,
+                    CacheConfig.hotel_id == hotel_id)
+            .first()
+        )
+
     def list(
         self,
         skip: int = 0,
         limit: int = 100,
-        hotel_id: str = DEFAULT_HOTEL
-    ) -> Optional[CacheConfig]:
+        hotel_id: str = DEFAULT_HOTEL,
+    ) -> list[CacheConfig]:
         return (
             self.db.query(CacheConfig)
             .filter(CacheConfig.hotel_id == hotel_id)
+            .order_by(CacheConfig.cache_key)
             .offset(skip)
             .limit(limit)
             .all()
         )
 
-    def update(self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL) -> Optional[CacheConfig]:
+    def update(
+        self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL
+    ) -> Optional[CacheConfig]:
         obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return None

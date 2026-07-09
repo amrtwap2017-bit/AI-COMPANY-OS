@@ -21,6 +21,9 @@ from src.commercial.auth import models as auth_models
 from src.commercial.reporting import models as reporting_models
 from src.commercial.contracts import models as contract_models
 from src.commercial.hotels import models as hotel_models
+from src.commercial.cache import models as cache_models
+from src.commercial.pagination import models as pagination_models
+from src.commercial.email_notifications import models as email_notification_models
 
 # Import all routers
 from src.commercial.lead_management.router import router as leads_router
@@ -73,6 +76,9 @@ app.include_router(actions_router,       prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(invoices_router,      prefix=API_PREFIX)
 app.include_router(hotels_router,        prefix=API_PREFIX)
+app.include_router(cache_router,              prefix=API_PREFIX)
+app.include_router(pagination_router,         prefix=API_PREFIX)
+app.include_router(email_notification_router, prefix=API_PREFIX)
 
 
 @app.get("/health")

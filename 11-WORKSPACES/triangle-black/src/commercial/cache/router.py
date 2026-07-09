@@ -1,55 +1,82 @@
+"""
+CacheConfig FastAPI router — Triangle Black
+Manages per-hotel cache configuration (TTL, enabled flags).
+No external Redis dependency — configuration stored in PostgreSQL.
+"""
 from __future__ import annotations
-import uuid
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from aioredis import Redis, create_redis_pool
-from src.core.auth import get_current_user
 from src.core.database import get_db
-from src.commercial.cache.models import CacheConfig
-from src.commercial.cache.schemas import CacheConfigCreate, CacheConfigUpdate, CacheConfigResponse
-from src.commercial.cache.repository import CacheConfigRepository
+from src.core.auth import require_agent, require_manager
+from src.core.tenant import get_hotel_id
+from src.commercial.auth.models import User
+from .schemas import CacheConfigCreate, CacheConfigUpdate, CacheConfigResponse
+from .repository import CacheConfigRepository
 
-router = APIRouter()
+router = APIRouter(prefix="/cache-configs", tags=["cache-configs"])
 
-@router.post("/cache_configs", response_model=CacheConfigResponse)
-def create_cache_config(
-    cache_config: CacheConfigCreate,
+
+@router.post("/", response_model=CacheConfigResponse, status_code=201)
+def create(
+    payload: CacheConfigCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return CacheConfigRepository(db).create(cache_config.dict())
+    """Create a new cache configuration entry."""
+    data = payload.model_dump()
+    data["hotel_id"] = hotel_id
+    return CacheConfigRepository(db).create(data)
 
-@router.get("/cache_configs", response_model=list[CacheConfigResponse])
-def get_cache_configs(
+
+@router.get("/", response_model=List[CacheConfigResponse])
+def list_all(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return CacheConfigRepository(db).list(skip, limit)
+    """List all cache configurations for this hotel."""
+    return CacheConfigRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
-@router.get("/cache_configs/{obj_id}", response_model=CacheConfigResponse)
-def get_cache_config(
-    obj_id: str,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-    return CacheConfigRepository(db).get(obj_id)
 
-@router.put("/cache_configs/{obj_id}", response_model=CacheConfigResponse)
-def update_cache_config(
-    obj_id: str,
-    cache_config: CacheConfigUpdate,
+@router.get("/{config_id}", response_model=CacheConfigResponse)
+def get(
+    config_id: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return CacheConfigRepository(db).update(obj_id, cache_config.dict())
+    obj = CacheConfigRepository(db).get(config_id, hotel_id=hotel_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="CacheConfig not found")
+    return obj
 
-@router.delete("/cache_configs/{obj_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_cache_config(
-    obj_id: str,
+
+@router.patch("/{config_id}", response_model=CacheConfigResponse)
+def update(
+    config_id: str,
+    payload: CacheConfigUpdate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    CacheConfigRepository(db).delete(obj_id)
+    obj = CacheConfigRepository(db).update(
+        config_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
+    )
+    if not obj:
+        raise HTTPException(status_code=404, detail="CacheConfig not found")
+    return obj
+
+
+@router.delete("/{config_id}", status_code=204)
+def delete(
+    config_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    if not CacheConfigRepository(db).delete(config_id, hotel_id=hotel_id):
+        raise HTTPException(status_code=404, detail="CacheConfig not found")

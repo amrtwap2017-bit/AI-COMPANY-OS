@@ -1,3 +1,6 @@
+"""
+CacheConfig Pydantic schemas — Triangle Black
+"""
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
@@ -5,25 +8,27 @@ from pydantic import BaseModel
 
 
 class CacheConfigCreate(BaseModel):
-    endpoint: str
-    ttl: int
-    # add domain-specific fields here
+    cache_key: str
+    ttl_seconds: int = 300
+    enabled: bool = True
+    description: Optional[str] = None
 
 
 class CacheConfigUpdate(BaseModel):
-    endpoint: Optional[str] = None
-    ttl: Optional[int] = None
-    # add domain-specific fields here — all Optional
+    ttl_seconds: Optional[int] = None
+    enabled: Optional[bool] = None
+    description: Optional[str] = None
 
 
 class CacheConfigResponse(BaseModel):
     id: str
     hotel_id: str
-    endpoint: str
-    ttl: int
+    cache_key: str
+    ttl_seconds: int
+    enabled: bool
+    description: Optional[str]
     created_at: datetime
     updated_at: datetime
-    # add domain-specific fields here
 
     class Config:
         from_attributes = True
