@@ -1,179 +1,78 @@
+"""
+Contract FastAPI router — Triangle Black
+"""
 from __future__ import annotations
-from typing import List, Optional
-from datetime import datetime, timedelta
+from typing import List
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
 from src.core.database import get_db
 from src.core.auth import require_agent, require_manager
+from src.core.tenant import get_hotel_id
 from src.commercial.auth.models import User
-from src.commercial.contracts.models import Contract
-from src.commercial.contracts.repository import ContractRepository
-from src.commercial.contracts.schemas import ContractResponse, ContractUpdate
-from src.commercial.quotation.models import Quote
-from src.commercial.activity_tracking.models import Activity
-import uuid
-from datetime import timedelta as _td
-from src.commercial.invoices.models import Invoice
-from src.commercial.invoices.repository import InvoiceRepository
+from .schemas import ContractCreate, ContractUpdate, ContractResponse
+from .repository import ContractRepository
 
 router = APIRouter(prefix="/contracts", tags=["contracts"])
 
 
-class ActivateIn(BaseModel):
-    start_date: Optional[datetime] = None
-    notes: Optional[str] = None
-
-
-class RenewIn(BaseModel):
-    duration_months: int = 12
-    notes: Optional[str] = None
+@router.post("/", response_model=ContractResponse, status_code=201)
+def create(
+    payload: ContractCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    data = payload.model_dump()
+    data["hotel_id"] = hotel_id
+    return ContractRepository(db).create(data)
 
 
 @router.get("/", response_model=List[ContractResponse])
-def list_contracts(
-    skip: int = 0, limit: int = 100, status: str = "",
+def list_all(
+    skip: int = 0,
+    limit: int = 100,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    return ContractRepository(db).list(
-        skip=skip, limit=limit, status=status or None
-    )
+    return ContractRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
 
 @router.get("/{contract_id}", response_model=ContractResponse)
-def get_contract(
+def get(
     contract_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    c = ContractRepository(db).get(contract_id)
-    if not c:
+    obj = ContractRepository(db).get(contract_id, hotel_id=hotel_id)
+    if not obj:
         raise HTTPException(status_code=404, detail="Contract not found")
-    return c
+    return obj
 
 
 @router.patch("/{contract_id}", response_model=ContractResponse)
-def update_contract(
+def update(
     contract_id: str,
     payload: ContractUpdate,
     db: Session = Depends(get_db),
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    obj = ContractRepository(db).update(
+        contract_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
+    )
+    if not obj:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    return obj
+
+
+@router.delete("/{contract_id}", status_code=204)
+def delete(
+    contract_id: str,
+    db: Session = Depends(get_db),
     _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
 ):
-    c = ContractRepository(db).update(
-        contract_id, payload.model_dump(exclude_none=True)
-    )
-    if not c:
+    if not ContractRepository(db).delete(contract_id, hotel_id=hotel_id):
         raise HTTPException(status_code=404, detail="Contract not found")
-    return c
-
-
-@router.post("/{contract_id}/activate", response_model=ContractResponse)
-def activate_contract(
-    contract_id: str,
-    payload: ActivateIn,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_manager),
-):
-    c = ContractRepository(db).get(contract_id)
-    if not c:
-        raise HTTPException(status_code=404, detail="Contract not found")
-    if c.status != "pending_signature":
-        raise HTTPException(
-            status_code=400,
-            detail=f"Contract is '{c.status}', must be 'pending_signature'"
-        )
-
-    start = payload.start_date or datetime.utcnow()
-    end = start + timedelta(days=30 * c.duration_months)
-
-    c.status = "active"
-    c.start_date = start
-    c.end_date = end
-    c.updated_at = datetime.utcnow()
-    if payload.notes:
-        c.notes = payload.notes
-
-    db.add(Activity(
-        id=str(uuid.uuid4()),
-        lead_id=c.lead_id,
-        type="contract_activated",
-        description=(
-            f"Contract '{c.title}' ACTIVATED by {current_user.email}. "
-            f"Start: {start.strftime('%Y-%m-%d')}. "
-            f"End: {end.strftime('%Y-%m-%d')}. "
-            f"Value: EGP {c.total_value:,.2f}"
-        ),
-        actor=current_user.email,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    ))
-    # ── Auto-create invoice ──────────────────────────────────────────────
-    inv_repo = InvoiceRepository(db)
-    tax_rate = 0.14
-    tax_amt = round(c.total_value * tax_rate, 2)
-    total_amt = round(c.total_value + tax_amt, 2)
-    invoice = Invoice(
-        id=str(uuid.uuid4()),
-        invoice_number=inv_repo.next_invoice_number(),
-        contract_id=c.id,
-        lead_id=c.lead_id,
-        title=f"Annual Contract Invoice — {c.title}",
-        description=f"Engineering services contract. Duration: {c.duration_months} months.",
-        amount=c.total_value,
-        tax_amount=tax_amt,
-        total_amount=total_amt,
-        status="draft",
-        issue_date=start,
-        due_date=start + timedelta(days=30),
-        renewal_number=c.renewal_count,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    )
-    db.add(invoice)
-    db.commit()
-    db.refresh(c)
-    return c
-
-
-@router.post("/{contract_id}/renew", response_model=ContractResponse)
-def renew_contract(
-    contract_id: str,
-    payload: RenewIn,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_manager),
-):
-    c = ContractRepository(db).get(contract_id)
-    if not c:
-        raise HTTPException(status_code=404, detail="Contract not found")
-    if c.status != "active":
-        raise HTTPException(
-            status_code=400, detail="Only active contracts can be renewed"
-        )
-
-    new_start = c.end_date or datetime.utcnow()
-    new_end = new_start + timedelta(days=30 * payload.duration_months)
-
-    c.status = "renewed"
-    c.end_date = new_end
-    c.duration_months = payload.duration_months
-    c.renewal_count += 1
-    c.updated_at = datetime.utcnow()
-
-    db.add(Activity(
-        id=str(uuid.uuid4()),
-        lead_id=c.lead_id,
-        type="contract_renewed",
-        description=(
-            f"Contract '{c.title}' RENEWED by {current_user.email}. "
-            f"Renewal #{c.renewal_count}. "
-            f"New end: {new_end.strftime('%Y-%m-%d')}."
-        ),
-        actor=current_user.email,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
-    ))
-    db.commit()
-    db.refresh(c)
-    return c

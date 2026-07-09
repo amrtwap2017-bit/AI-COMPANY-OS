@@ -93,12 +93,13 @@ def qualify(
     lead.updated_at = datetime.utcnow()
     _log(db, lead_id, "qualification",
          f"Lead qualified. Score: {result['score']}/100. Grade: {result['grade']}.",
-         actor=current_user.email)
+         actor=current_user.email, hotel_id=hotel_id)
     _notify(db,
         title=f"Lead Qualified: {lead.name}",
         message=f"{lead.name} scored {result['score']}/100 ({result['grade']}). Ready to assign.",
         ntype="lead_qualified", entity_id=lead_id,
         entity_type="lead", recipient_role="manager",
+        hotel_id=hotel_id,
     )
     db.commit()
     return {"ok": True, "lead_id": lead_id, **result}
@@ -141,12 +142,13 @@ def assign(
     _log(db, lead_id, "assignment",
          f"Lead assigned to {agent.name} ({agent.email}). "
          f"Capacity: {agent.current_leads}/{agent.max_leads}",
-         actor=current_user.email)
+         actor=current_user.email, hotel_id=hotel_id)
     _notify(db,
         title=f"Lead Assigned: {lead.name}",
         message=f"{lead.name} assigned to {agent.name}. Capacity: {agent.current_leads}/{agent.max_leads}.",
         ntype="lead_assigned", entity_id=lead_id,
         entity_type="lead", recipient_role="agent",
+        hotel_id=hotel_id,
     )
     db.commit()
     return {"ok": True, "lead_id": lead_id, "agent_id": agent.id,
@@ -181,7 +183,7 @@ def quote_from_lead(
     _log(db, lead_id, "quote_generated",
          f"Quote generated: '{quote_data['title']}'. "
          f"Total: EGP {quote_data['total']:,.2f}",
-         actor=current_user.email)
+         actor=current_user.email, hotel_id=hotel_id)
     db.commit()
     db.refresh(quote)
     return {"ok": True, "quote_id": quote.id, "title": quote.title,
@@ -211,7 +213,7 @@ def submit_quote(
     if quote.lead_id:
         _log(db, quote.lead_id, "quote_submitted",
              f"Quote '{quote.title}' submitted for review. EGP {quote.total:,.2f}",
-             actor=current_user.email)
+             actor=current_user.email, hotel_id=hotel_id)
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "review"}
 
@@ -239,7 +241,7 @@ def send_quote(
         if lead:
             _log(db, quote.lead_id, "quote_sent",
                  f"Quote '{quote.title}' sent to client. EGP {quote.total:,.2f}",
-                 actor=current_user.email)
+                 actor=current_user.email, hotel_id=hotel_id)
     db.commit()
     if lead and lead.email:
         def _send_email_task():
@@ -300,7 +302,7 @@ def approve_quote(
             lead.updated_at = datetime.utcnow()
         _log(db, quote.lead_id, "quote_approved",
              f"Quote '{quote.title}' APPROVED. EGP {quote.total:,.2f}. Lead converted.",
-             actor=current_user.email)
+             actor=current_user.email, hotel_id=hotel_id)
     contract = Contract(
         id=str(uuid.uuid4()),
         hotel_id=hotel_id,
@@ -322,7 +324,7 @@ def approve_quote(
         _log(db, quote.lead_id, "contract_created",
              f"Contract auto-created from approved quote. "
              f"Contract ID: {contract.id}. Value: EGP {quote.total:,.2f}",
-             actor="system")
+             actor="system", hotel_id=hotel_id)
     _notify(db,
         title=f"Quote Approved: {quote.title}",
         message=f"EGP {quote.total:,.0f} contract approved. Contract {contract.id[:8].upper()} created automatically.",
@@ -361,7 +363,7 @@ def reject_quote(
         _log(db, quote.lead_id, "quote_rejected",
              f"Quote '{quote.title}' rejected. "
              f"Note: {payload.note or 'No reason'}. Lead lost.",
-             actor=current_user.email)
+             actor=current_user.email, hotel_id=hotel_id)
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "rejected",
             "message": "Quote rejected — lead marked as lost"}

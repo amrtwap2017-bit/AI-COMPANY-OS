@@ -1,44 +1,61 @@
-"""
-Pipeline FastAPI router — Triangle Black
-"""
 from __future__ import annotations
-from typing import List
-from fastapi import APIRouter, HTTPException, Depends
+import uuid
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from src.core.auth import get_current_user
 from src.core.database import get_db
-from .schemas import PipelineCreate, PipelineUpdate, PipelineResponse
+from .models import Pipeline
 from .repository import PipelineRepository
-
-router = APIRouter(prefix="/pipelines", tags=["pipelines"])
-
-
-@router.post("/", response_model=PipelineResponse, status_code=201)
-def create(payload: PipelineCreate, db: Session = Depends(get_db)):
-    return PipelineRepository(db).create(payload.model_dump())
+from .schemas import PipelineCreate, PipelineUpdate, PipelineResponse
 
 
-@router.get("/", response_model=List[PipelineResponse])
-def list_all(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return PipelineRepository(db).list(skip=skip, limit=limit)
+router = APIRouter()
 
+@router.post("/pipeline", response_model=PipelineResponse)
+def create_pipeline(
+    pipeline: PipelineCreate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    return PipelineRepository(db).create(pipeline.dict())
 
-@router.get("/{pipeline_id}", response_model=PipelineResponse)
-def get(pipeline_id: str, db: Session = Depends(get_db)):
-    obj = PipelineRepository(db).get(pipeline_id)
-    if not obj:
+@router.get("/pipeline/{pipeline_id}", response_model=PipelineResponse)
+def get_pipeline(
+    pipeline_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    pipeline = PipelineRepository(db).get(pipeline_id)
+    if not pipeline:
         raise HTTPException(status_code=404, detail="Pipeline not found")
-    return obj
+    return pipeline
 
+@router.get("/pipeline", response_model=List[PipelineResponse])
+def list_pipelines(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    return PipelineRepository(db).list(skip, limit)
 
-@router.patch("/{pipeline_id}", response_model=PipelineResponse)
-def update(pipeline_id: str, payload: PipelineUpdate, db: Session = Depends(get_db)):
-    obj = PipelineRepository(db).update(pipeline_id, payload.model_dump(exclude_none=True))
-    if not obj:
+@router.put("/pipeline/{pipeline_id}", response_model=PipelineResponse)
+def update_pipeline(
+    pipeline_id: str,
+    pipeline_update: PipelineUpdate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    pipeline = PipelineRepository(db).update(pipeline_id, pipeline_update.dict())
+    if not pipeline:
         raise HTTPException(status_code=404, detail="Pipeline not found")
-    return obj
+    return pipeline
 
-
-@router.delete("/{pipeline_id}", status_code=204)
-def delete(pipeline_id: str, db: Session = Depends(get_db)):
-    if not PipelineRepository(db).delete(pipeline_id):
-        raise HTTPException(status_code=404, detail="Pipeline not found")
+@router.delete("/pipeline/{pipeline_id}", response_model=bool)
+def delete_pipeline(
+    pipeline_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    return PipelineRepository(db).delete(pipeline_id)

@@ -1,3 +1,6 @@
+"""
+Lead repository — Triangle Black
+"""
 from __future__ import annotations
 import uuid
 from datetime import datetime
@@ -14,21 +17,22 @@ class LeadRepository:
 
     def create(self, data: dict) -> Lead:
         data.setdefault("hotel_id", DEFAULT_HOTEL)
-        lead = Lead(
+        obj = Lead(
             id=str(uuid.uuid4()),
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
-            **data,
+            **{k: v for k, v in data.items()
+               if k not in ("id", "created_at", "updated_at")},
         )
-        self.db.add(lead)
+        self.db.add(obj)
         self.db.commit()
-        self.db.refresh(lead)
-        return lead
+        self.db.refresh(obj)
+        return obj
 
-    def get(self, lead_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Lead]:
+    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Lead]:
         return (
             self.db.query(Lead)
-            .filter(Lead.id == lead_id, Lead.hotel_id == hotel_id)
+            .filter(Lead.id == obj_id, Lead.hotel_id == hotel_id)
             .first()
         )
 
@@ -37,34 +41,34 @@ class LeadRepository:
         skip: int = 0,
         limit: int = 100,
         hotel_id: str = DEFAULT_HOTEL,
-        status: Optional[str] = None,
     ) -> list[Lead]:
-        q = self.db.query(Lead).filter(Lead.hotel_id == hotel_id)
-        if status:
-            q = q.filter(Lead.status == status)
-        return q.order_by(Lead.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Lead)
+            .filter(Lead.hotel_id == hotel_id)
+            .order_by(Lead.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def update(
-        self,
-        lead_id: str,
-        data: dict,
-        hotel_id: str = DEFAULT_HOTEL,
+        self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL
     ) -> Optional[Lead]:
-        lead = self.get(lead_id, hotel_id=hotel_id)
-        if not lead:
+        obj = self.get(obj_id, hotel_id=hotel_id)
+        if not obj:
             return None
         for k, v in data.items():
-            if v is not None and k != "hotel_id":
-                setattr(lead, k, v)
-        lead.updated_at = datetime.utcnow()
+            if v is not None and k not in ("id", "hotel_id", "created_at"):
+                setattr(obj, k, v)
+        obj.updated_at = datetime.utcnow()
         self.db.commit()
-        self.db.refresh(lead)
-        return lead
+        self.db.refresh(obj)
+        return obj
 
-    def delete(self, lead_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
-        lead = self.get(lead_id, hotel_id=hotel_id)
-        if not lead:
+    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
+        obj = self.get(obj_id, hotel_id=hotel_id)
+        if not obj:
             return False
-        self.db.delete(lead)
+        self.db.delete(obj)
         self.db.commit()
         return True

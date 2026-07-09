@@ -1,6 +1,3 @@
-"""
-Pipeline Pydantic schemas
-"""
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
@@ -8,22 +5,20 @@ from pydantic import BaseModel
 
 
 class PipelineCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    status: str = "active"
+    stage: str
+    quote_total: float = 0.0
 
 
 class PipelineUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
+    stage: Optional[str] = None
+    quote_total: Optional[float] = None
 
 
 class PipelineResponse(BaseModel):
     id: str
-    name: str
-    description: Optional[str]
-    status: str
+    hotel_id: str
+    stage: str
+    quote_total: float
     created_at: datetime
     updated_at: datetime
 

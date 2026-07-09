@@ -1,13 +1,12 @@
 """
-Triangle Black — Leads Router
-All queries filtered by hotel_id for complete tenant isolation.
+Lead FastAPI router — Triangle Black
 """
 from __future__ import annotations
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from src.core.database import get_db
-from src.core.auth import require_agent, require_manager, get_current_user
+from src.core.auth import require_agent, require_manager
 from src.core.tenant import get_hotel_id
 from src.commercial.auth.models import User
 from .schemas import LeadCreate, LeadUpdate, LeadResponse
@@ -36,9 +35,7 @@ def list_all(
     _: User = Depends(require_agent),
     hotel_id: str = Depends(get_hotel_id),
 ):
-    return LeadRepository(db).list(
-        skip=skip, limit=limit, hotel_id=hotel_id
-    )
+    return LeadRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
 
 @router.get("/{lead_id}", response_model=LeadResponse)
@@ -63,9 +60,7 @@ def update(
     hotel_id: str = Depends(get_hotel_id),
 ):
     obj = LeadRepository(db).update(
-        lead_id,
-        payload.model_dump(exclude_none=True),
-        hotel_id=hotel_id,
+        lead_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
     )
     if not obj:
         raise HTTPException(status_code=404, detail="Lead not found")
