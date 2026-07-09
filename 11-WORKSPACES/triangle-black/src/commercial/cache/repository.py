@@ -3,16 +3,18 @@ import uuid
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
-from .models import Hotel
+from .models import CacheConfig
+
+DEFAULT_HOTEL = "tb-default-hotel-000000000001"
 
 
-class HotelRepository:
+class CacheConfigRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create(self, data: dict) -> Hotel:
-        data.setdefault("hotel_id", "tb-default-hotel-000000000001")
-        obj = Hotel(
+    def create(self, data: dict) -> CacheConfig:
+        data.setdefault("hotel_id", DEFAULT_HOTEL)
+        obj = CacheConfig(
             id=str(uuid.uuid4()),
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
@@ -24,21 +26,28 @@ class HotelRepository:
         self.db.refresh(obj)
         return obj
 
-    def get(self, obj_id: str, hotel_id: str = "tb-default-hotel-000000000001") -> Optional[Hotel]:
+    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[CacheConfig]:
         return (
-            self.db.query(Hotel)
-            .filter(Hotel.id == obj_id, Hotel.hotel_id == hotel_id)
+            self.db.query(CacheConfig)
+            .filter(CacheConfig.id == obj_id, CacheConfig.hotel_id == hotel_id)
             .first()
         )
 
-    def list(self, hotel_id: str = "tb-default-hotel-000000000001") -> list[Hotel]:
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        hotel_id: str = DEFAULT_HOTEL
+    ) -> Optional[CacheConfig]:
         return (
-            self.db.query(Hotel)
-            .filter(Hotel.hotel_id == hotel_id)
+            self.db.query(CacheConfig)
+            .filter(CacheConfig.hotel_id == hotel_id)
+            .offset(skip)
+            .limit(limit)
             .all()
         )
 
-    def update(self, obj_id: str, data: dict, hotel_id: str = "tb-default-hotel-000000000001") -> Optional[Hotel]:
+    def update(self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL) -> Optional[CacheConfig]:
         obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return None
@@ -50,7 +59,7 @@ class HotelRepository:
         self.db.refresh(obj)
         return obj
 
-    def delete(self, obj_id: str, hotel_id: str = "tb-default-hotel-000000000001") -> bool:
+    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
         obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return False

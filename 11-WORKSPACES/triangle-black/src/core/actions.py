@@ -549,7 +549,7 @@ def list_users(
         UserModel.hotel_id == hotel_id,
     ).order_by(UserModel.created_at.desc()).all()
     return [
-        {"id": u.id, "name": u.name,u.email,
+        {"id": u.id, "name": u.name, "email": u.email,
          "role": u.role, "is_active": u.is_active,
          "created_at": u.created_at.isoformat(),
          "updated_at": u.updated_at.isoformat()}

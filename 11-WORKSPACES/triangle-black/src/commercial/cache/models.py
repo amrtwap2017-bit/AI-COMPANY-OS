@@ -5,21 +5,19 @@ from sqlalchemy import Column, String, Integer, DateTime, Text, Index
 from src.core.base import Base
 
 
-class Hotel(Base):
-    __tablename__ = "hotels"
+class CacheConfig(Base):
+    __tablename__ = "cache_configs"
 
     id         = Column(String(36), primary_key=True,
                         default=lambda: str(uuid.uuid4()))
     hotel_id   = Column(String(36), nullable=False,
                         default="tb-default-hotel-000000000001")
-    name       = Column(String(255), nullable=False)
-    code       = Column(String(50), nullable=True)
-    address    = Column(Text, nullable=True)
-    subscription_tier = Column(String(50), nullable=True)
+    endpoint   = Column(String(255), nullable=False)
+    ttl        = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow,
                         onupdate=datetime.utcnow, nullable=False)
 
     __table_args__ = (
-        Index("ix_hotels_hotel_id", "hotel_id"),
+        Index("ix_cache_configs_endpoint", "endpoint"),
     )

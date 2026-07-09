@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# TB Agent — Autonomous AI development assistant
+# Usage: ./tb-agent <command> [args] [--auto] [--dry]
+
+cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+
+export TRIANGLE_BLACK_DB_URL="postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black"
+export PYTHONPATH="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black"
+
+exec .venv/bin/python -m agent.cli "$@"

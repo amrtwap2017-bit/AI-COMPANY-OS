@@ -37,6 +37,9 @@ from src.core.actions import router as actions_router
 from src.commercial.notifications.router import router as notifications_router
 from src.commercial.invoices.router import router as invoices_router
 from src.commercial.hotels.router import router as hotels_router
+from src.commercial.cache.router import router as cache_router
+from src.commercial.pagination.router import router as pagination_router
+from src.commercial.email_notifications.router import router as email_notification_router
 
 app = FastAPI(
     title="Triangle Black API",
