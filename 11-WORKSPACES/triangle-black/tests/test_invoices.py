@@ -58,25 +58,63 @@ def test_list_invoices_manager(client):
 
 def test_invoice_auto_created_on_contract_activate(client):
     """
-    Verify that at least one invoice exists in the DB.
-    Invoice auto-creation on contract activate requires the activate endpoint
-    which is not yet implemented — this test verifies invoice schema integrity.
+    Full flow test: create lead → qualify → assign → quote → approve → activate
+    Verify invoice is auto-created on contract activation.
     """
+    import uuid
     auth = _admin(client)
+    unique = str(uuid.uuid4())[:8]
+
+    # Create lead
+    lead = client.post("/api/v1/leads/", json={
+        "name": f"INV-TEST Hotel {unique}",
+        "email": f"inv_{unique}@test.com",
+        "source": "direct", "priority": "high",
+    }, headers=auth).json()
+    lead_id = lead["id"]
+
+    # Qualify
+    client.post(f"/api/v1/actions/leads/{lead_id}/qualify", headers=auth)
+
+    # Assign to first agent
+    agents = client.get("/api/v1/agents/", headers=auth).json()
+    assert agents, "No agents in DB"
+    client.post(f"/api/v1/actions/leads/{lead_id}/assign",
+                json={"agent_id": agents[0]["id"]}, headers=auth)
+
+    # Generate quote
+    gen_res = client.post(
+        f"/api/v1/actions/leads/{lead_id}/quote",
+        json={"contract_months": 12},
+        headers=auth,
+    )
+    assert gen_res.status_code == 200, f"Quote gen failed: {gen_res.text}"
+    quote_id = gen_res.json()["quote_id"]
+
+    # Submit → send → approve (creates contract)
+    client.post(f"/api/v1/actions/quotes/{quote_id}/submit", json={}, headers=auth)
+    client.post(f"/api/v1/actions/quotes/{quote_id}/send",   json={}, headers=auth)
+    approve = client.post(f"/api/v1/actions/quotes/{quote_id}/approve", json={}, headers=auth)
+    assert approve.status_code == 200, f"Approve failed: {approve.text}"
+    contract_id = approve.json()["contract_id"]
+
+    # Activate contract — NOW builds the endpoint
+    act = client.post(
+        f"/api/v1/contracts/{contract_id}/activate",
+        json={},
+        headers=auth,
+    )
+    assert act.status_code == 200, f"Activate failed {act.status_code}: {act.text}"
+    assert act.json()["status"] == "active"
+
+    # Invoice must now exist
     invoices = client.get("/api/v1/invoices/", headers=auth).json()
-    assert isinstance(invoices, list), "Invoices endpoint should return a list"
-    # If invoices exist, verify their structure
-    if invoices:
-        inv = invoices[0]
-        assert "id" in inv
-        assert "invoice_number" in inv
-        assert inv["invoice_number"].startswith("TB-INV-"), \
-            f"Bad invoice number: {inv['invoice_number']}"
-        assert inv["total_amount"] > 0
-        assert inv["tax_amount"] > 0
-        assert "status" in inv
-    # Mark test as passing — invoice structure verified
-    assert True
+    inv = next((i for i in invoices if i.get("contract_id") == contract_id), None)
+    assert inv is not None, "Invoice was not auto-created on activate"
+    assert inv["status"] == "draft"
+    assert inv["total_amount"] > 0
+    assert inv["tax_amount"] > 0
+    assert inv["invoice_number"].startswith("TB-INV-")
 
 
 # ── 3. Invoice detail ─────────────────────────────────────────────────────────
