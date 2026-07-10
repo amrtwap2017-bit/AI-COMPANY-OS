@@ -5,7 +5,7 @@ MT-002: All queries scoped to hotel_id for tenant isolation.
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Any
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -1764,3 +1764,633 @@ def approve_purchase_order(
     db.commit()
 
     return {"ok": True, "po_id": po_id, "po_number": po.po_number, "status": "approved"}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROCUREMENT WORKFLOW ACTIONS — Sprint 17
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _log_procurement_event(db, hotel_id: str, entity_type: str, entity_id: str,
+                            event_type: str, created_by: str = None,
+                            old_value: str = None, new_value: str = None,
+                            comment: str = None):
+    """Log a procurement audit event."""
+    from src.commercial.procurement_events.models import ProcurementEvent
+    import uuid
+    ev = ProcurementEvent(
+        id=str(uuid.uuid4()),
+        hotel_id=hotel_id,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        event_type=event_type,
+        old_value=old_value,
+        new_value=new_value,
+        comment=comment,
+        created_by=created_by,
+        created_at=datetime.utcnow(),
+    )
+    db.add(ev)
+
+
+# ── PR → PO Conversion ────────────────────────────────────────────────────────
+
+@router.post("/procurement/purchase-requests/{pr_id}/convert-to-po")
+def convert_pr_to_po(
+    pr_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Convert an approved PR directly to a PO (when vendor is already known)."""
+    from src.commercial.purchase_requests.models import PurchaseRequest
+    from src.commercial.purchase_orders.models import PurchaseOrder
+    import uuid
+
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == pr_id,
+        PurchaseRequest.hotel_id == hotel_id
+    ).first()
+    if not pr:
+        raise HTTPException(status_code=404, detail="Purchase request not found")
+    if pr.status != "approved":
+        raise HTTPException(
+            status_code=400,
+            detail=f"PR must be approved before converting to PO. Current: {pr.status}"
+        )
+
+    now    = datetime.utcnow()
+    prefix = f"TB-PO-{now.strftime('%Y%m')}-"
+    count  = db.query(PurchaseOrder).filter(
+        PurchaseOrder.po_number.like(f"{prefix}%")
+    ).count()
+    po_num = f"{prefix}{str(count + 1).zfill(4)}"
+
+    # Calculate totals from lines
+    lines    = pr.lines or []
+    subtotal = sum(float(l.get("estimated_cost", 0)) * float(l.get("qty", 0))
+                   for l in lines if isinstance(l, dict))
+    vat      = round(subtotal * 0.14, 2)
+    total    = round(subtotal + vat, 2)
+
+    # Get vendor_id from PR lines if available, otherwise use first active vendor
+    from src.commercial.inventory_vendors.models import InventoryVendor
+    first_vendor = db.query(InventoryVendor).filter(
+        InventoryVendor.hotel_id == hotel_id,
+        InventoryVendor.is_active == True
+    ).first()
+    vendor_id_for_po = first_vendor.id if first_vendor else "tb-default-vendor-000000000001"
+
+    po = PurchaseOrder(
+        id           = str(uuid.uuid4()),
+        hotel_id     = hotel_id,
+        po_number    = po_num,
+        vendor_id    = vendor_id_for_po,  # auto-assigned, update via PATCH if needed
+        pr_id        = pr.id,
+        status       = "draft",
+        lines        = lines,
+        subtotal     = subtotal,
+        vat_amount   = vat,
+        total_amount = total,
+        payment_terms = "net30",
+        created_at   = now,
+        updated_at   = now,
+    )
+    db.add(po)
+
+    pr.status     = "po_created"
+    pr.updated_at = now
+
+    _log_procurement_event(db, hotel_id, "purchase_request", pr_id,
+                           "converted_to_po", created_by=current_user.email,
+                           new_value=po_num)
+    db.commit()
+    db.refresh(po)
+
+    return {
+        "ok": True,
+        "pr_id": pr_id,
+        "pr_number": pr.pr_number,
+        "po_id": po.id,
+        "po_number": po_num,
+        "total_amount": total,
+    }
+
+
+# ── GRN → Stock Update (Receive Goods) ───────────────────────────────────────
+
+class GRNReceiveIn(BaseModel):
+    warehouse_id: str
+    notes: Optional[str] = None
+
+
+@router.post("/procurement/goods-receipts/{grn_id}/receive")
+def receive_goods(
+    grn_id: str,
+    payload: GRNReceiveIn,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """
+    Mark a GRN as received and update stock balances.
+    Each line in the GRN must have: item_id, qty_received, unit_cost.
+    """
+    from src.commercial.goods_receipts.models import GoodsReceipt
+    from src.commercial.inventory_items.models import InventoryItem
+    from src.commercial.stock_movements.models import StockMovement
+    from src.commercial.inventory_vendors.models import InventoryVendor
+    import uuid
+
+    grn = db.query(GoodsReceipt).filter(
+        GoodsReceipt.id == grn_id,
+        GoodsReceipt.hotel_id == hotel_id
+    ).first()
+    if not grn:
+        raise HTTPException(status_code=404, detail="GRN not found")
+    if grn.status == "received":
+        raise HTTPException(status_code=400, detail="GRN already received")
+
+    now          = datetime.utcnow()
+    movements    = []
+    errors       = []
+
+    for line in (grn.lines or []):
+        if not isinstance(line, dict):
+            continue
+        item_id      = line.get("item_id")
+        qty_received = float(line.get("qty_received", line.get("qty", 0)))
+        unit_cost    = float(line.get("unit_cost", 0))
+
+        if not item_id or qty_received <= 0:
+            continue
+
+        item = db.query(InventoryItem).filter(
+            InventoryItem.id == item_id,
+            InventoryItem.hotel_id == hotel_id
+        ).first()
+
+        if not item:
+            errors.append(f"Item {item_id} not found — skipped")
+            continue
+
+        # Generate movement number
+        prefix = f"TB-MOV-{now.strftime('%Y%m')}-"
+        count  = db.query(StockMovement).filter(
+            StockMovement.movement_number.like(f"{prefix}%")
+        ).count() + len(movements)
+        mv_num = f"{prefix}{str(count + 1).zfill(4)}"
+
+        mv = StockMovement(
+            id              = str(uuid.uuid4()),
+            hotel_id        = hotel_id,
+            movement_number = mv_num,
+            item_id         = item_id,
+            warehouse_id    = payload.warehouse_id,
+            movement_type   = "purchase_receipt",
+            qty             = qty_received,
+            unit_cost       = unit_cost,
+            total_cost      = qty_received * unit_cost,
+            qty_before      = 0,
+            qty_after       = qty_received,
+            reference_type  = "goods_receipt",
+            reference_id    = grn_id,
+            reason          = f"GRN {grn.grn_number}",
+            notes           = payload.notes,
+            created_by      = current_user.email,
+            created_at      = now,
+        )
+        db.add(mv)
+        movements.append(mv_num)
+
+        # Update item cost
+        if unit_cost > 0:
+            item.last_purchase_cost = unit_cost
+            item.average_cost       = unit_cost
+            item.updated_at         = now
+
+    # Mark GRN received
+    grn.status      = "received"
+    grn.received_by = current_user.email
+    grn.updated_at  = now
+
+    _log_procurement_event(db, hotel_id, "goods_receipt", grn_id,
+                           "received", created_by=current_user.email,
+                           new_value=f"{len(movements)} movements created")
+    db.commit()
+
+    return {
+        "ok":            True,
+        "grn_id":        grn_id,
+        "grn_number":    grn.grn_number,
+        "status":        "received",
+        "movements":     movements,
+        "errors":        errors,
+        "total_lines":   len(movements) + len(errors),
+    }
+
+
+# ── RFQ Actions ───────────────────────────────────────────────────────────────
+
+class RFQCreateIn(BaseModel):
+    title: str
+    pr_id: Optional[str] = None
+    required_date: Optional[datetime] = None
+    lines: List[Any] = []
+    notes: Optional[str] = None
+    vendor_ids: List[str] = []
+
+
+@router.post("/procurement/rfqs")
+def create_rfq(
+    payload: RFQCreateIn,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Create an RFQ and invite vendors."""
+    from src.commercial.rfqs.models import RFQ, RFQVendorQuote
+    import uuid
+
+    now    = datetime.utcnow()
+    prefix = f"TB-RFQ-{now.strftime('%Y%m')}-"
+    count  = db.query(RFQ).filter(RFQ.rfq_number.like(f"{prefix}%")).count()
+    rfq_num = f"{prefix}{str(count + 1).zfill(4)}"
+
+    rfq = RFQ(
+        id            = str(uuid.uuid4()),
+        hotel_id      = hotel_id,
+        rfq_number    = rfq_num,
+        pr_id         = payload.pr_id,
+        title         = payload.title,
+        status        = "open",
+        required_date = payload.required_date,
+        lines         = payload.lines,
+        notes         = payload.notes,
+        created_by    = current_user.email,
+        created_at    = now,
+        updated_at    = now,
+    )
+    db.add(rfq)
+    db.flush()
+
+    # Create vendor quote placeholders
+    for vendor_id in (payload.vendor_ids or []):
+        vq = RFQVendorQuote(
+            id         = str(uuid.uuid4()),
+            hotel_id   = hotel_id,
+            rfq_id     = rfq.id,
+            vendor_id  = vendor_id,
+            status     = "invited",
+            lines      = [],
+            created_at = now,
+            updated_at = now,
+        )
+        db.add(vq)
+
+    db.commit()
+    return {
+        "ok":        True,
+        "rfq_id":    rfq.id,
+        "rfq_number": rfq_num,
+        "vendors_invited": len(payload.vendor_ids),
+        "status":    "open",
+    }
+
+
+@router.get("/procurement/rfqs/{rfq_id}/compare")
+def compare_rfq_quotes(
+    rfq_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Compare vendor quotes for an RFQ."""
+    from src.commercial.rfqs.models import RFQ, RFQVendorQuote
+    from src.commercial.inventory_vendors.models import InventoryVendor
+
+    rfq = db.query(RFQ).filter(
+        RFQ.id == rfq_id, RFQ.hotel_id == hotel_id
+    ).first()
+    if not rfq:
+        raise HTTPException(status_code=404, detail="RFQ not found")
+
+    quotes = db.query(RFQVendorQuote).filter(
+        RFQVendorQuote.rfq_id == rfq_id
+    ).all()
+
+    # Build comparison table
+    comparison = []
+    for q in quotes:
+        vendor = db.query(InventoryVendor).filter(
+            InventoryVendor.id == q.vendor_id
+        ).first()
+        comparison.append({
+            "quote_id":      q.id,
+            "vendor_id":     q.vendor_id,
+            "vendor_name":   vendor.name if vendor else "Unknown",
+            "status":        q.status,
+            "subtotal":      q.subtotal,
+            "vat_amount":    q.vat_amount,
+            "total_amount":  q.total_amount,
+            "lead_time_days": q.lead_time_days,
+            "validity_date": q.validity_date.isoformat() if q.validity_date else None,
+            "is_winner":     q.is_winner,
+            "lines":         q.lines,
+        })
+
+    # Sort by total_amount ascending
+    comparison.sort(key=lambda x: x["total_amount"])
+
+    # Tag the cheapest
+    if comparison:
+        comparison[0]["is_cheapest"] = True
+
+    return {
+        "rfq_id":     rfq_id,
+        "rfq_number": rfq.rfq_number,
+        "title":      rfq.title,
+        "quotes":     comparison,
+        "total_vendors": len(comparison),
+    }
+
+
+@router.post("/procurement/rfqs/{rfq_id}/award/{vendor_quote_id}")
+def award_rfq(
+    rfq_id: str,
+    vendor_quote_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Award RFQ to a vendor and auto-create PO."""
+    from src.commercial.rfqs.models import RFQ, RFQVendorQuote
+    from src.commercial.purchase_orders.models import PurchaseOrder
+    import uuid
+
+    rfq = db.query(RFQ).filter(
+        RFQ.id == rfq_id, RFQ.hotel_id == hotel_id
+    ).first()
+    if not rfq:
+        raise HTTPException(status_code=404, detail="RFQ not found")
+
+    winner_q = db.query(RFQVendorQuote).filter(
+        RFQVendorQuote.id == vendor_quote_id,
+        RFQVendorQuote.rfq_id == rfq_id,
+    ).first()
+    if not winner_q:
+        raise HTTPException(status_code=404, detail="Vendor quote not found")
+
+    now    = datetime.utcnow()
+    prefix = f"TB-PO-{now.strftime('%Y%m')}-"
+    count  = db.query(PurchaseOrder).filter(
+        PurchaseOrder.po_number.like(f"{prefix}%")
+    ).count()
+    po_num = f"{prefix}{str(count + 1).zfill(4)}"
+
+    # Mark winner
+    winner_q.is_winner = True
+    winner_q.status    = "awarded"
+    winner_q.updated_at = now
+
+    rfq.status     = "awarded"
+    rfq.updated_at = now
+
+    # Create PO from winning quote
+    po = PurchaseOrder(
+        id           = str(uuid.uuid4()),
+        hotel_id     = hotel_id,
+        po_number    = po_num,
+        vendor_id    = winner_q.vendor_id,
+        pr_id        = rfq.pr_id,
+        status       = "draft",
+        expected_date = rfq.required_date,
+        lines         = winner_q.lines,
+        subtotal      = winner_q.subtotal,
+        vat_amount    = winner_q.vat_amount,
+        total_amount  = winner_q.total_amount,
+        created_at    = now,
+        updated_at    = now,
+    )
+    db.add(po)
+
+    _log_procurement_event(db, hotel_id, "rfq", rfq_id, "awarded",
+                           created_by=current_user.email,
+                           new_value=f"PO {po_num} created")
+    db.commit()
+
+    return {
+        "ok":         True,
+        "rfq_id":     rfq_id,
+        "rfq_number": rfq.rfq_number,
+        "winner_vendor_id": winner_q.vendor_id,
+        "po_id":      po.id,
+        "po_number":  po_num,
+        "total_amount": winner_q.total_amount,
+    }
+
+
+# ── Vendor Scorecard Update ───────────────────────────────────────────────────
+
+@router.get("/procurement/vendors/{vendor_id}/scorecard")
+def get_vendor_scorecard(
+    vendor_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Get or compute vendor scorecard."""
+    from src.commercial.vendor_scorecards.models import VendorScorecard
+    from src.commercial.inventory_vendors.models import InventoryVendor
+    from src.commercial.purchase_orders.models import PurchaseOrder
+    from src.commercial.goods_receipts.models import GoodsReceipt
+    from sqlalchemy import func
+
+    vendor = db.query(InventoryVendor).filter(
+        InventoryVendor.id == vendor_id,
+        InventoryVendor.hotel_id == hotel_id
+    ).first()
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+
+    # Compute from PO/GRN data
+    total_pos = db.query(func.count(PurchaseOrder.id)).filter(
+        PurchaseOrder.vendor_id == vendor_id,
+        PurchaseOrder.hotel_id == hotel_id,
+    ).scalar() or 0
+
+    total_spend = db.query(func.sum(PurchaseOrder.total_amount)).filter(
+        PurchaseOrder.vendor_id == vendor_id,
+        PurchaseOrder.hotel_id == hotel_id,
+    ).scalar() or 0
+
+    # Upsert scorecard
+    sc = db.query(VendorScorecard).filter(
+        VendorScorecard.vendor_id == vendor_id
+    ).first()
+
+    if sc:
+        sc.total_pos   = total_pos
+        sc.total_spend = float(total_spend)
+        sc.updated_at  = datetime.utcnow()
+    else:
+        import uuid
+        sc = VendorScorecard(
+            id         = str(uuid.uuid4()),
+            hotel_id   = hotel_id,
+            vendor_id  = vendor_id,
+            total_pos  = total_pos,
+            total_spend = float(total_spend),
+            updated_at = datetime.utcnow(),
+        )
+        db.add(sc)
+
+    db.commit()
+    db.refresh(sc)
+
+    return {
+        "vendor_id":          vendor_id,
+        "vendor_name":        vendor.name,
+        "total_pos":          sc.total_pos,
+        "total_spend":        sc.total_spend,
+        "on_time_deliveries": sc.on_time_deliveries,
+        "late_deliveries":    sc.late_deliveries,
+        "on_time_pct":        sc.on_time_pct,
+        "quality_score":      sc.quality_score,
+        "price_score":        sc.price_score,
+        "overall_score":      sc.overall_score,
+        "last_po_date":       sc.last_po_date.isoformat() if sc.last_po_date else None,
+    }
+
+
+# ── Full Procurement Dashboard ────────────────────────────────────────────────
+
+@router.get("/procurement/dashboard")
+def procurement_dashboard(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Full procurement operations dashboard."""
+    from src.commercial.purchase_requests.models import PurchaseRequest
+    from src.commercial.purchase_orders.models import PurchaseOrder
+    from src.commercial.goods_receipts.models import GoodsReceipt
+    from src.commercial.inventory_vendors.models import InventoryVendor
+    from src.commercial.rfqs.models import RFQ
+    from sqlalchemy import func
+
+    # PR summary
+    pr_by_status = dict(
+        db.query(PurchaseRequest.status, func.count(PurchaseRequest.id))
+        .filter(PurchaseRequest.hotel_id == hotel_id)
+        .group_by(PurchaseRequest.status).all()
+    )
+
+    # PO summary
+    po_by_status = dict(
+        db.query(PurchaseOrder.status, func.count(PurchaseOrder.id))
+        .filter(PurchaseOrder.hotel_id == hotel_id)
+        .group_by(PurchaseOrder.status).all()
+    )
+
+    # Total PO spend
+    total_po_spend = db.query(func.sum(PurchaseOrder.total_amount)).filter(
+        PurchaseOrder.hotel_id == hotel_id
+    ).scalar() or 0
+
+    # GRN pending
+    pending_grn = db.query(func.count(GoodsReceipt.id)).filter(
+        GoodsReceipt.hotel_id == hotel_id,
+        GoodsReceipt.status == "draft"
+    ).scalar() or 0
+
+    # Open RFQs
+    open_rfqs = db.query(func.count(RFQ.id)).filter(
+        RFQ.hotel_id == hotel_id,
+        RFQ.status == "open"
+    ).scalar() or 0
+
+    # Top vendors by spend
+    top_vendors_raw = (
+        db.query(
+            PurchaseOrder.vendor_id,
+            func.sum(PurchaseOrder.total_amount).label("spend"),
+            func.count(PurchaseOrder.id).label("pos"),
+        )
+        .filter(PurchaseOrder.hotel_id == hotel_id)
+        .group_by(PurchaseOrder.vendor_id)
+        .order_by(func.sum(PurchaseOrder.total_amount).desc())
+        .limit(5).all()
+    )
+
+    top_vendors = []
+    for row in top_vendors_raw:
+        v = db.query(InventoryVendor).filter(
+            InventoryVendor.id == row[0]).first()
+        top_vendors.append({
+            "vendor_id":   row[0],
+            "vendor_name": v.name if v else "Unknown",
+            "total_spend": float(row[1] or 0),
+            "total_pos":   row[2],
+        })
+
+    return {
+        "purchase_requests": {
+            "total":     sum(pr_by_status.values()),
+            "by_status": pr_by_status,
+            "pending_approval": pr_by_status.get("draft", 0),
+        },
+        "purchase_orders": {
+            "total":     sum(po_by_status.values()),
+            "by_status": po_by_status,
+            "total_spend": float(total_po_spend),
+        },
+        "goods_receipts": {
+            "pending": pending_grn,
+        },
+        "rfqs": {
+            "open": open_rfqs,
+        },
+        "top_vendors": top_vendors,
+    }
+
+
+# ── Procurement Audit Log ─────────────────────────────────────────────────────
+
+@router.get("/procurement/events/{entity_type}/{entity_id}")
+def get_procurement_events(
+    entity_type: str,
+    entity_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Get audit log for a procurement entity."""
+    from src.commercial.procurement_events.models import ProcurementEvent
+
+    events = (
+        db.query(ProcurementEvent)
+        .filter(
+            ProcurementEvent.hotel_id   == hotel_id,
+            ProcurementEvent.entity_type == entity_type,
+            ProcurementEvent.entity_id   == entity_id,
+        )
+        .order_by(ProcurementEvent.created_at.asc())
+        .all()
+    )
+
+    return {
+        "entity_type": entity_type,
+        "entity_id":   entity_id,
+        "events": [
+            {
+                "id":         e.id,
+                "event_type": e.event_type,
+                "old_value":  e.old_value,
+                "new_value":  e.new_value,
+                "comment":    e.comment,
+                "created_by": e.created_by,
+                "created_at": e.created_at.isoformat(),
+            }
+            for e in events
+        ],
+    }

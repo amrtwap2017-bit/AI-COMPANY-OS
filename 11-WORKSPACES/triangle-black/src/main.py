@@ -69,6 +69,12 @@ from src.commercial.purchase_requests.router import router as purchase_requests_
 from src.commercial.purchase_orders.router import router as purchase_orders_router
 from src.commercial.goods_receipts.router import router as goods_receipts_router
 
+
+# ── Procurement Workflow Models — Sprint 17 ───────────────────────────────────
+from src.commercial.rfqs.models import RFQ, RFQVendorQuote  # noqa
+from src.commercial.vendor_scorecards.models import VendorScorecard  # noqa
+from src.commercial.procurement_events.models import ProcurementEvent  # noqa
+
 from src.commercial.notifications.router import router as notifications_router
 from src.commercial.invoices.router import router as invoices_router
 from src.commercial.hotels.router import router as hotels_router
