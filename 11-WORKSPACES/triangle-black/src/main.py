@@ -47,7 +47,7 @@ from src.commercial.email_notifications.router import router as email_notificati
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform — Multi-Hotel",
-    version="1.4.0",
+    version="3.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
