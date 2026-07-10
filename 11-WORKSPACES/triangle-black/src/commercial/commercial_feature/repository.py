@@ -1,23 +1,23 @@
 """
-Agent repository — Triangle Black
+Entity repository — Triangle Black
 """
 from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
-from .models import Agent
+from .models import Entity
 
 DEFAULT_HOTEL = "tb-default-hotel-000000000001"
 
 
-class AgentRepository:
+class EntityRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def create(self, data: dict) -> Agent:
+    def create(self, data: dict) -> Entity:
         data.setdefault("hotel_id", DEFAULT_HOTEL)
-        obj = Agent(
+        obj = Entity(
             id=str(uuid.uuid4()),
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
@@ -29,10 +29,10 @@ class AgentRepository:
         self.db.refresh(obj)
         return obj
 
-    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Agent]:
+    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Entity]:
         return (
-            self.db.query(Agent)
-            .filter(Agent.id == obj_id, Agent.hotel_id == hotel_id)
+            self.db.query(Entity)
+            .filter(Entity.id == obj_id, Entity.hotel_id == hotel_id)
             .first()
         )
 
@@ -41,11 +41,11 @@ class AgentRepository:
         skip: int = 0,
         limit: int = 100,
         hotel_id: str = DEFAULT_HOTEL,
-    ) -> list[Agent]:
+    ) -> list[Entity]:
         return (
-            self.db.query(Agent)
-            .filter(Agent.hotel_id == hotel_id)
-            .order_by(Agent.created_at.desc())
+            self.db.query(Entity)
+            .filter(Entity.hotel_id == hotel_id)
+            .order_by(Entity.created_at.desc())
             .offset(skip)
             .limit(limit)
             .all()
@@ -53,7 +53,7 @@ class AgentRepository:
 
     def update(
         self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL
-    ) -> Optional[Agent]:
+    ) -> Optional[Entity]:
         obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return None

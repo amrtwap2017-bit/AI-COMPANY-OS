@@ -1,5 +1,5 @@
 """
-Activity Pydantic schemas — Triangle Black
+Entity Pydantic schemas — Triangle Black
 """
 from __future__ import annotations
 from typing import Optional
@@ -7,19 +7,19 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class ActivityCreate(BaseModel):
+class EntityCreate(BaseModel):
     name: str
     status: str = "active"
     notes: Optional[str] = None
 
 
-class ActivityUpdate(BaseModel):
+class EntityUpdate(BaseModel):
     name: Optional[str] = None
     status: Optional[str] = None
     notes: Optional[str] = None
 
 
-class ActivityResponse(BaseModel):
+class EntityResponse(BaseModel):
     id: str
     hotel_id: str
     name: str

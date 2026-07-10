@@ -1,5 +1,5 @@
 """
-Activity repository
+Activity repository — Triangle Black
 """
 from __future__ import annotations
 import uuid
@@ -8,39 +8,65 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from .models import Activity
 
+DEFAULT_HOTEL = "tb-default-hotel-000000000001"
+
 
 class ActivityRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
     def create(self, data: dict) -> Activity:
-        obj = Activity(id=str(uuid.uuid4()), created_at=datetime.utcnow(),
-                       updated_at=datetime.utcnow(), **data)
+        data.setdefault("hotel_id", DEFAULT_HOTEL)
+        obj = Activity(
+            id=str(uuid.uuid4()),
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            **{k: v for k, v in data.items()
+               if k not in ("id", "created_at", "updated_at")},
+        )
         self.db.add(obj)
         self.db.commit()
         self.db.refresh(obj)
         return obj
 
-    def get(self, obj_id: str) -> Optional[Activity]:
-        return self.db.query(Activity).filter(Activity.id == obj_id).first()
+    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Activity]:
+        return (
+            self.db.query(Activity)
+            .filter(Activity.id == obj_id, Activity.hotel_id == hotel_id)
+            .first()
+        )
 
-    def list(self, skip: int = 0, limit: int = 100) -> list[Activity]:
-        return self.db.query(Activity).offset(skip).limit(limit).all()
+    def list(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        hotel_id: str = DEFAULT_HOTEL,
+    ) -> list[Activity]:
+        return (
+            self.db.query(Activity)
+            .filter(Activity.hotel_id == hotel_id)
+            .order_by(Activity.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def update(self, obj_id: str, data: dict) -> Optional[Activity]:
-        obj = self.get(obj_id)
+    def update(
+        self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL
+    ) -> Optional[Activity]:
+        obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return None
         for k, v in data.items():
-            if v is not None:
+            if v is not None and k not in ("id", "hotel_id", "created_at"):
                 setattr(obj, k, v)
         obj.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(obj)
         return obj
 
-    def delete(self, obj_id: str) -> bool:
-        obj = self.get(obj_id)
+    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
+        obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return False
         self.db.delete(obj)

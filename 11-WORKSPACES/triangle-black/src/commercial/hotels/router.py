@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.auth import require_agent, require_manager
+from src.core.tenant import get_hotel_id
 from src.commercial.auth.models import User
 from .schemas import HotelCreate, HotelUpdate, HotelResponse
 from .repository import HotelRepository
@@ -19,6 +20,7 @@ def create(
     payload: HotelCreate,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
     data = payload.model_dump()
     data["hotel_id"] = hotel_id
@@ -31,6 +33,7 @@ def list_all(
     limit: int = 100,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
     return HotelRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
@@ -40,6 +43,7 @@ def get(
     hotel_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
     obj = HotelRepository(db).get(hotel_id, hotel_id=hotel_id)
     if not obj:
@@ -53,6 +57,7 @@ def update(
     payload: HotelUpdate,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
 ):
     obj = HotelRepository(db).update(
         hotel_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
@@ -67,6 +72,7 @@ def delete(
     hotel_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
 ):
     if not HotelRepository(db).delete(hotel_id, hotel_id=hotel_id):
         raise HTTPException(status_code=404, detail="Hotel not found")

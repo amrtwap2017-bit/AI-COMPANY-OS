@@ -1,5 +1,5 @@
 """
-Lead SQLAlchemy model — Triangle Black
+Entity SQLAlchemy model — Triangle Black
 """
 from __future__ import annotations
 import uuid
@@ -10,8 +10,8 @@ from src.core.base import Base
 DEFAULT_HOTEL = "tb-default-hotel-000000000001"
 
 
-class Lead(Base):
-    __tablename__ = "leads"
+class Entity(Base):
+    __tablename__ = "entitys"
 
     id         = Column(String(36), primary_key=True,
                         default=lambda: str(uuid.uuid4()))
@@ -24,6 +24,6 @@ class Lead(Base):
                         onupdate=datetime.utcnow, nullable=False)
 
     __table_args__ = (
-        Index("ix_leads_hotel_id", "hotel_id"),
-        Index("ix_leads_hotel_status", "hotel_id", "status"),
+        Index("ix_entitys_hotel_id", "hotel_id"),
+        Index("ix_entitys_hotel_status", "hotel_id", "status"),
     )
