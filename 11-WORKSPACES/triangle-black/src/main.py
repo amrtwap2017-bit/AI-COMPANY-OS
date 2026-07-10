@@ -37,6 +37,21 @@ from src.commercial.auth.router import router as auth_router
 from src.commercial.reporting.router import router as reporting_router
 from src.commercial.contracts.router import router as contracts_router
 from src.core.actions import router as actions_router
+
+# ── Service Operations OS — Sprint 15 ────────────────────────────────────────
+from src.commercial.technicians.models import Technician  # noqa
+from src.commercial.sites.models import Site  # noqa
+from src.commercial.assets.models import Asset  # noqa
+from src.commercial.work_orders.models import WorkOrder  # noqa
+from src.commercial.service_requests.models import ServiceRequest  # noqa
+from src.commercial.service_reports.models import ServiceReport  # noqa
+from src.commercial.technicians.router import router as technicians_router
+from src.commercial.sites.router import router as sites_router
+from src.commercial.assets.router import router as assets_router
+from src.commercial.work_orders.router import router as work_orders_router
+from src.commercial.service_requests.router import router as service_requests_router
+from src.commercial.service_reports.router import router as service_reports_router
+
 from src.commercial.notifications.router import router as notifications_router
 from src.commercial.invoices.router import router as invoices_router
 from src.commercial.hotels.router import router as hotels_router

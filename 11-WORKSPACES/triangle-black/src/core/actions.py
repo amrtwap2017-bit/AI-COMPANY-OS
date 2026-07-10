@@ -1347,3 +1347,190 @@ def export_contracts_csv(
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={fname}"},
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SERVICE OPERATIONS DASHBOARD — Sprint 15
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/dashboard/service-ops")
+def service_ops_dashboard(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    """
+    Service operations summary for management dashboard.
+    Returns work order stats, overdue alerts, and technician utilization.
+    """
+    from src.commercial.work_orders.models import WorkOrder
+    from src.commercial.technicians.models import Technician
+    from src.commercial.service_requests.models import ServiceRequest
+    from src.commercial.sites.models import Site
+    from src.commercial.assets.models import Asset
+    from datetime import datetime
+    from sqlalchemy import func
+
+    now = datetime.utcnow()
+
+    # Work order counts by status
+    wo_counts = dict(
+        db.query(WorkOrder.status, func.count(WorkOrder.id))
+        .group_by(WorkOrder.status)
+        .all()
+    )
+
+    # Overdue: scheduled but not completed and past due date
+    overdue = (
+        db.query(func.count(WorkOrder.id))
+        .filter(
+            WorkOrder.status.notin_(["completed", "closed", "cancelled"]),
+            WorkOrder.scheduled_date < now,
+            WorkOrder.scheduled_date.isnot(None),
+        )
+        .scalar() or 0
+    )
+
+    # Due today
+    from datetime import timedelta
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end   = today_start + timedelta(days=1)
+    due_today = (
+        db.query(func.count(WorkOrder.id))
+        .filter(
+            WorkOrder.scheduled_date >= today_start,
+            WorkOrder.scheduled_date < today_end,
+            WorkOrder.status.notin_(["completed", "closed", "cancelled"]),
+        )
+        .scalar() or 0
+    )
+
+    # Technician utilization
+    technicians = db.query(Technician).filter(Technician.is_active == True).all()
+    tech_summary = [
+        {
+            "id":              t.id,
+            "name":            t.name,
+            "current_wo":      t.current_work_orders,
+            "max_wo":          t.max_work_orders,
+            "utilization_pct": round((t.current_work_orders / (t.max_work_orders or 1)) * 100, 1),
+        }
+        for t in technicians
+    ]
+
+    # Service request summary
+    sr_counts = dict(
+        db.query(ServiceRequest.status, func.count(ServiceRequest.id))
+        .group_by(ServiceRequest.status)
+        .all()
+    )
+
+    return {
+        "work_orders": {
+            "total":     sum(wo_counts.values()),
+            "by_status": wo_counts,
+            "overdue":   overdue,
+            "due_today": due_today,
+        },
+        "service_requests": {
+            "total":     sum(sr_counts.values()),
+            "by_status": sr_counts,
+            "open":      sr_counts.get("new", 0) + sr_counts.get("triaged", 0),
+        },
+        "technicians": {
+            "total":       len(technicians),
+            "utilization": tech_summary,
+        },
+        "assets": {
+            "total": db.query(func.count(Asset.id)).scalar() or 0,
+        },
+        "sites": {
+            "total": db.query(func.count(Site.id)).scalar() or 0,
+        },
+    }
+
+
+@router.post("/work-orders/{work_order_id}/assign")
+def assign_work_order(
+    work_order_id: str,
+    payload: AssignIn,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Assign a technician to a work order."""
+    from src.commercial.work_orders.models import WorkOrder
+    from src.commercial.technicians.models import Technician
+
+    wo = db.query(WorkOrder).filter(
+        WorkOrder.id == work_order_id,
+        WorkOrder.hotel_id == hotel_id
+    ).first()
+    if not wo:
+        raise HTTPException(status_code=404, detail="Work order not found")
+
+    tech = db.query(Technician).filter(
+        Technician.id == payload.agent_id,
+        Technician.hotel_id == hotel_id
+    ).first()
+    if not tech:
+        raise HTTPException(status_code=404, detail="Technician not found")
+
+    # Update work order
+    old_tech_id = wo.technician_id
+    wo.technician_id = tech.id
+    wo.status = "assigned"
+    wo.updated_at = datetime.utcnow()
+
+    # Update technician capacity
+    if old_tech_id != tech.id:
+        tech.current_work_orders = max(0, (tech.current_work_orders or 0) + 1)
+        # Release old technician if previously assigned
+        if old_tech_id:
+            old_tech = db.query(Technician).filter(
+                Technician.id == old_tech_id).first()
+            if old_tech:
+                old_tech.current_work_orders = max(
+                    0, (old_tech.current_work_orders or 0) - 1)
+
+    db.commit()
+    return {"ok": True, "work_order_id": work_order_id,
+            "technician_id": tech.id, "technician_name": tech.name,
+            "status": "assigned"}
+
+
+@router.post("/work-orders/{work_order_id}/complete")
+def complete_work_order(
+    work_order_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Mark a work order as completed."""
+    from src.commercial.work_orders.models import WorkOrder
+    from src.commercial.technicians.models import Technician
+
+    wo = db.query(WorkOrder).filter(
+        WorkOrder.id == work_order_id,
+        WorkOrder.hotel_id == hotel_id
+    ).first()
+    if not wo:
+        raise HTTPException(status_code=404, detail="Work order not found")
+    if wo.status in ("completed", "closed", "cancelled"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Work order already {wo.status}")
+
+    wo.status = "completed"
+    wo.completed_at = datetime.utcnow()
+    wo.updated_at = datetime.utcnow()
+
+    # Release technician capacity
+    if wo.technician_id:
+        tech = db.query(Technician).filter(
+            Technician.id == wo.technician_id).first()
+        if tech:
+            tech.current_work_orders = max(0, (tech.current_work_orders or 0) - 1)
+
+    db.commit()
+    return {"ok": True, "work_order_id": work_order_id, "status": "completed",
+            "completed_at": wo.completed_at.isoformat()}
