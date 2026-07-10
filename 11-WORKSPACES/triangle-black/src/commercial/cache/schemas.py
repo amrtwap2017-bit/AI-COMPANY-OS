@@ -8,25 +8,23 @@ from pydantic import BaseModel
 
 
 class CacheConfigCreate(BaseModel):
-    cache_key: str
-    ttl_seconds: int = 300
-    enabled: bool = True
-    description: Optional[str] = None
+    name: str
+    status: str = "active"
+    notes: Optional[str] = None
 
 
 class CacheConfigUpdate(BaseModel):
-    ttl_seconds: Optional[int] = None
-    enabled: Optional[bool] = None
-    description: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class CacheConfigResponse(BaseModel):
     id: str
     hotel_id: str
-    cache_key: str
-    ttl_seconds: int
-    enabled: bool
-    description: Optional[str]
+    name: str
+    status: str
+    notes: Optional[str]
     created_at: datetime
     updated_at: datetime
 

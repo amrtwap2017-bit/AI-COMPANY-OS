@@ -1,6 +1,5 @@
 """
 Hotel repository — Triangle Black
-Hotels are tenants — queries by Hotel.id only, no hotel_id scoping.
 """
 from __future__ import annotations
 import uuid
@@ -9,12 +8,15 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from .models import Hotel
 
+DEFAULT_HOTEL = "tb-default-hotel-000000000001"
+
 
 class HotelRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
     def create(self, data: dict) -> Hotel:
+        data.setdefault("hotel_id", DEFAULT_HOTEL)
         obj = Hotel(
             id=str(uuid.uuid4()),
             created_at=datetime.utcnow(),
@@ -27,10 +29,10 @@ class HotelRepository:
         self.db.refresh(obj)
         return obj
 
-    def get(self, hotel_id: str) -> Optional[Hotel]:
+    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[Hotel]:
         return (
             self.db.query(Hotel)
-            .filter(Hotel.id == hotel_id)
+            .filter(Hotel.id == obj_id, Hotel.hotel_id == hotel_id)
             .first()
         )
 
@@ -38,27 +40,33 @@ class HotelRepository:
         self,
         skip: int = 0,
         limit: int = 100,
-        active_only: bool = False,
+        hotel_id: str = DEFAULT_HOTEL,
     ) -> list[Hotel]:
-        q = self.db.query(Hotel)
-        if active_only:
-            q = q.filter(Hotel.is_active.is_(True))
-        return q.order_by(Hotel.name).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Hotel)
+            .filter(Hotel.hotel_id == hotel_id)
+            .order_by(Hotel.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-    def update(self, hotel_id: str, data: dict) -> Optional[Hotel]:
-        obj = self.get(hotel_id)
+    def update(
+        self, obj_id: str, data: dict, hotel_id: str = DEFAULT_HOTEL
+    ) -> Optional[Hotel]:
+        obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return None
         for k, v in data.items():
-            if v is not None and k not in ("id", "created_at"):
+            if v is not None and k not in ("id", "hotel_id", "created_at"):
                 setattr(obj, k, v)
         obj.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(obj)
         return obj
 
-    def delete(self, hotel_id: str) -> bool:
-        obj = self.get(hotel_id)
+    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
+        obj = self.get(obj_id, hotel_id=hotel_id)
         if not obj:
             return False
         self.db.delete(obj)

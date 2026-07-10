@@ -36,14 +36,6 @@ class CacheConfigRepository:
             .first()
         )
 
-    def get_by_key(self, cache_key: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[CacheConfig]:
-        return (
-            self.db.query(CacheConfig)
-            .filter(CacheConfig.cache_key == cache_key,
-                    CacheConfig.hotel_id == hotel_id)
-            .first()
-        )
-
     def list(
         self,
         skip: int = 0,
@@ -53,7 +45,7 @@ class CacheConfigRepository:
         return (
             self.db.query(CacheConfig)
             .filter(CacheConfig.hotel_id == hotel_id)
-            .order_by(CacheConfig.cache_key)
+            .order_by(CacheConfig.created_at.desc())
             .offset(skip)
             .limit(limit)
             .all()

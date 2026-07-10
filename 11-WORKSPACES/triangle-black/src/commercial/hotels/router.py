@@ -1,6 +1,5 @@
 """
-Hotels FastAPI router — Triangle Black
-Hotels are top-level tenants — admin-only operations, no hotel_id scoping.
+Hotel FastAPI router — Triangle Black
 """
 from __future__ import annotations
 from typing import List
@@ -19,20 +18,21 @@ router = APIRouter(prefix="/hotels", tags=["hotels"])
 def create(
     payload: HotelCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_manager),
+    _: User = Depends(require_agent),
 ):
-    return HotelRepository(db).create(payload.model_dump())
+    data = payload.model_dump()
+    data["hotel_id"] = hotel_id
+    return HotelRepository(db).create(data)
 
 
 @router.get("/", response_model=List[HotelResponse])
 def list_all(
     skip: int = 0,
     limit: int = 100,
-    active_only: bool = False,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
 ):
-    return HotelRepository(db).list(skip=skip, limit=limit, active_only=active_only)
+    return HotelRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
 
 @router.get("/{hotel_id}", response_model=HotelResponse)
@@ -41,7 +41,7 @@ def get(
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
 ):
-    obj = HotelRepository(db).get(hotel_id)
+    obj = HotelRepository(db).get(hotel_id, hotel_id=hotel_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Hotel not found")
     return obj
@@ -52,10 +52,10 @@ def update(
     hotel_id: str,
     payload: HotelUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_manager),
+    _: User = Depends(require_agent),
 ):
     obj = HotelRepository(db).update(
-        hotel_id, payload.model_dump(exclude_none=True)
+        hotel_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
     )
     if not obj:
         raise HTTPException(status_code=404, detail="Hotel not found")
@@ -68,5 +68,5 @@ def delete(
     db: Session = Depends(get_db),
     _: User = Depends(require_manager),
 ):
-    if not HotelRepository(db).delete(hotel_id):
+    if not HotelRepository(db).delete(hotel_id, hotel_id=hotel_id):
         raise HTTPException(status_code=404, detail="Hotel not found")

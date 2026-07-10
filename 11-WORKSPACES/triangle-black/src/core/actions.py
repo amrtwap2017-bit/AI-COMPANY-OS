@@ -637,3 +637,387 @@ def download_quote_pdf(
         headers={"Content-Disposition": f'attachment; filename="{filename}"',
                  "Content-Length": str(len(pdf_bytes))},
     )
+
+
+# ─── WORKFLOW ACTIONS ──────────────────────────────────────────────────────────
+# These are the human-triggered actions the portal needs to work
+
+class CreateLeadIn(BaseModel):
+    name: str
+    email: str
+    phone: str | None = None
+    company: str | None = None
+    source: str = "web"
+    priority: str = "medium"
+    notes: str | None = None
+
+
+@router.post("/leads/create", status_code=201)
+def create_lead_action(
+    payload: CreateLeadIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Create a new lead from the portal."""
+    from src.commercial.lead_management.models import Lead
+    import uuid
+    lead = Lead(
+        id=str(uuid.uuid4()),
+        hotel_id=hotel_id,
+        name=payload.name,
+        email=payload.email,
+        phone=payload.phone,
+        company=payload.company,
+        source=payload.source,
+        priority=payload.priority,
+        notes=payload.notes,
+        status="new",
+        score=0,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+    _log(db, lead.id, "lead_created",
+         f"Lead created: {payload.name} ({payload.email})",
+         actor=current_user.email, hotel_id=hotel_id)
+    db.commit()
+    return {"ok": True, "lead_id": lead.id, "name": lead.name, "status": lead.status}
+
+
+class UpdateLeadIn(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    company: str | None = None
+    source: str | None = None
+    priority: str | None = None
+    status: str | None = None
+    notes: str | None = None
+
+
+@router.patch("/leads/{lead_id}")
+def update_lead_action(
+    lead_id: str,
+    payload: UpdateLeadIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Update lead fields from the portal."""
+    lead = _get_lead(db, lead_id, hotel_id)
+    updates = payload.model_dump(exclude_none=True)
+    for k, v in updates.items():
+        setattr(lead, k, v)
+    lead.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(lead)
+    return {"ok": True, "lead_id": lead_id, "updated": list(updates.keys())}
+
+
+class CreateAgentIn(BaseModel):
+    name: str
+    email: str
+    phone: str | None = None
+    max_leads: int = 20
+
+
+@router.post("/agents/create", status_code=201)
+def create_agent_action(
+    payload: CreateAgentIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Create a new agent from the portal."""
+    from src.commercial.agent_management.models import Agent
+    import uuid
+    agent = Agent(
+        id=str(uuid.uuid4()),
+        hotel_id=hotel_id,
+        name=payload.name,
+        email=payload.email,
+        phone=payload.phone,
+        max_leads=payload.max_leads,
+        current_leads=0,
+        is_active=True,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(agent)
+    db.commit()
+    db.refresh(agent)
+    return {"ok": True, "agent_id": agent.id, "name": agent.name}
+
+
+@router.get("/agents/{agent_id}/leads")
+def get_agent_leads_action(
+    agent_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Get all leads assigned to an agent."""
+    from src.commercial.lead_management.models import Lead
+    leads = db.query(Lead).filter(
+        Lead.hotel_id == hotel_id
+    ).all()
+    # Filter by agent activities
+    from src.commercial.activity_tracking.models import Activity
+    assigned_lead_ids = {
+        a.lead_id for a in db.query(Activity).filter(
+            Activity.hotel_id == hotel_id,
+            Activity.type == "assignment",
+            Activity.actor == agent_id,
+        ).all()
+    }
+    agent_leads = [l for l in leads if l.id in assigned_lead_ids]
+    return {
+        "agent_id": agent_id,
+        "leads": [
+            {"id": l.id, "name": l.name, "email": l.email,
+             "status": l.status, "priority": l.priority, "score": l.score}
+            for l in agent_leads
+        ]
+    }
+
+
+class AddNoteIn(BaseModel):
+    note: str
+
+
+@router.post("/leads/{lead_id}/note")
+def add_note(
+    lead_id: str,
+    payload: AddNoteIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Add a manual note to a lead's activity timeline."""
+    _get_lead(db, lead_id, hotel_id)  # validates existence
+    _log(db, lead_id, "note", payload.note,
+         actor=current_user.email, hotel_id=hotel_id)
+    db.commit()
+    return {"ok": True, "lead_id": lead_id}
+
+
+@router.get("/dashboard/stats")
+def dashboard_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Quick stats for the portal header."""
+    from src.commercial.lead_management.models import Lead
+    from src.commercial.quotation.models import Quote
+    from src.commercial.notifications.models import Notification
+
+    leads = db.query(Lead).filter(Lead.hotel_id == hotel_id).count()
+    open_quotes = db.query(Quote).filter(
+        Quote.hotel_id == hotel_id,
+        Quote.status.in_(["draft", "review", "sent"])
+    ).count()
+    unread = db.query(Notification).filter(
+        Notification.hotel_id == hotel_id,
+        Notification.is_read == False,
+    ).count()
+    return {
+        "total_leads": leads,
+        "open_quotes": open_quotes,
+        "unread_notifications": unread,
+    }
+
+
+# ─── WORKFLOW ACTIONS ──────────────────────────────────────────────────────────
+# These are the human-triggered actions the portal needs to work
+
+class CreateLeadIn(BaseModel):
+    name: str
+    email: str
+    phone: str | None = None
+    company: str | None = None
+    source: str = "web"
+    priority: str = "medium"
+    notes: str | None = None
+
+
+@router.post("/leads/create", status_code=201)
+def create_lead_action(
+    payload: CreateLeadIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Create a new lead from the portal."""
+    from src.commercial.lead_management.models import Lead
+    import uuid
+    lead = Lead(
+        id=str(uuid.uuid4()),
+        hotel_id=hotel_id,
+        name=payload.name,
+        email=payload.email,
+        phone=payload.phone,
+        company=payload.company,
+        source=payload.source,
+        priority=payload.priority,
+        notes=payload.notes,
+        status="new",
+        score=0,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+    _log(db, lead.id, "lead_created",
+         f"Lead created: {payload.name} ({payload.email})",
+         actor=current_user.email, hotel_id=hotel_id)
+    db.commit()
+    return {"ok": True, "lead_id": lead.id, "name": lead.name, "status": lead.status}
+
+
+class UpdateLeadIn(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    company: str | None = None
+    source: str | None = None
+    priority: str | None = None
+    status: str | None = None
+    notes: str | None = None
+
+
+@router.patch("/leads/{lead_id}")
+def update_lead_action(
+    lead_id: str,
+    payload: UpdateLeadIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Update lead fields from the portal."""
+    lead = _get_lead(db, lead_id, hotel_id)
+    updates = payload.model_dump(exclude_none=True)
+    for k, v in updates.items():
+        setattr(lead, k, v)
+    lead.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(lead)
+    return {"ok": True, "lead_id": lead_id, "updated": list(updates.keys())}
+
+
+class CreateAgentIn(BaseModel):
+    name: str
+    email: str
+    phone: str | None = None
+    max_leads: int = 20
+
+
+@router.post("/agents/create", status_code=201)
+def create_agent_action(
+    payload: CreateAgentIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Create a new agent from the portal."""
+    from src.commercial.agent_management.models import Agent
+    import uuid
+    agent = Agent(
+        id=str(uuid.uuid4()),
+        hotel_id=hotel_id,
+        name=payload.name,
+        email=payload.email,
+        phone=payload.phone,
+        max_leads=payload.max_leads,
+        current_leads=0,
+        is_active=True,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(agent)
+    db.commit()
+    db.refresh(agent)
+    return {"ok": True, "agent_id": agent.id, "name": agent.name}
+
+
+@router.get("/agents/{agent_id}/leads")
+def get_agent_leads_action(
+    agent_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Get all leads assigned to an agent."""
+    from src.commercial.lead_management.models import Lead
+    leads = db.query(Lead).filter(
+        Lead.hotel_id == hotel_id
+    ).all()
+    # Filter by agent activities
+    from src.commercial.activity_tracking.models import Activity
+    assigned_lead_ids = {
+        a.lead_id for a in db.query(Activity).filter(
+            Activity.hotel_id == hotel_id,
+            Activity.type == "assignment",
+            Activity.actor == agent_id,
+        ).all()
+    }
+    agent_leads = [l for l in leads if l.id in assigned_lead_ids]
+    return {
+        "agent_id": agent_id,
+        "leads": [
+            {"id": l.id, "name": l.name, "email": l.email,
+             "status": l.status, "priority": l.priority, "score": l.score}
+            for l in agent_leads
+        ]
+    }
+
+
+class AddNoteIn(BaseModel):
+    note: str
+
+
+@router.post("/leads/{lead_id}/note")
+def add_note(
+    lead_id: str,
+    payload: AddNoteIn,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Add a manual note to a lead's activity timeline."""
+    _get_lead(db, lead_id, hotel_id)  # validates existence
+    _log(db, lead_id, "note", payload.note,
+         actor=current_user.email, hotel_id=hotel_id)
+    db.commit()
+    return {"ok": True, "lead_id": lead_id}
+
+
+@router.get("/dashboard/stats")
+def dashboard_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Quick stats for the portal header."""
+    from src.commercial.lead_management.models import Lead
+    from src.commercial.quotation.models import Quote
+    from src.commercial.notifications.models import Notification
+
+    leads = db.query(Lead).filter(Lead.hotel_id == hotel_id).count()
+    open_quotes = db.query(Quote).filter(
+        Quote.hotel_id == hotel_id,
+        Quote.status.in_(["draft", "review", "sent"])
+    ).count()
+    unread = db.query(Notification).filter(
+        Notification.hotel_id == hotel_id,
+        Notification.is_read == False,
+    ).count()
+    return {
+        "total_leads": leads,
+        "open_quotes": open_quotes,
+        "unread_notifications": unread,
+    }

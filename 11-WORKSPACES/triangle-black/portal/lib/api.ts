@@ -55,6 +55,9 @@ export const leadsApi = {
   generateQuote: (id: string, months = 12) =>
     api.post(`/actions/leads/${id}/quote`, { contract_months: months }),
   timeline: (id: string) => api.get(`/actions/leads/${id}/timeline`),
+  addNote: (id: string, note: string) =>
+    api.post(`/actions/leads/${id}/note`, { note }),
+  delete: (id: string) => api.delete(`/leads/${id}`),
 };
 
 // ─── Quotes ──────────────────────────────────────────────────────────────────
@@ -71,6 +74,10 @@ export const quotesApi = {
 // ─── Agents ──────────────────────────────────────────────────────────────────
 export const agentsApi = {
   list: () => api.get("/agents/?limit=100"),
+  get: (id: string) => api.get(`/agents/${id}`),
+  create: (data: Record<string, unknown>) => api.post("/actions/agents/create", data),
+  leads: (id: string) => api.get(`/actions/agents/${id}/leads`),
+  update: (id: string, data: Record<string, unknown>) => api.patch(`/agents/${id}`, data),
 };
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
