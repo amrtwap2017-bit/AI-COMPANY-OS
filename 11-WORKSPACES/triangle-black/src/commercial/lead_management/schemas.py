@@ -1,30 +1,49 @@
 """
 Lead Pydantic schemas — Triangle Black
+Matches actual leads table in DB.
 """
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class LeadCreate(BaseModel):
-    name: str
-    status: str = "active"
-    notes: Optional[str] = None
+    name:     str
+    email:    str
+    phone:    Optional[str] = None
+    company:  Optional[str] = None
+    source:   str = "direct"
+    status:   str = "new"
+    priority: str = "medium"
+    score:    int = 0
+    notes:    Optional[str] = None
 
 
 class LeadUpdate(BaseModel):
-    name: Optional[str] = None
-    status: Optional[str] = None
-    notes: Optional[str] = None
+    name:     Optional[str] = None
+    email:    Optional[str] = None
+    phone:    Optional[str] = None
+    company:  Optional[str] = None
+    source:   Optional[str] = None
+    status:   Optional[str] = None
+    priority: Optional[str] = None
+    score:    Optional[int] = None
+    notes:    Optional[str] = None
 
 
 class LeadResponse(BaseModel):
-    id: str
-    hotel_id: str
-    name: str
-    status: str
-    notes: Optional[str]
+    id:         str
+    hotel_id:   str
+    name:       str
+    email:      str
+    phone:      Optional[str]
+    company:    Optional[str]
+    source:     str
+    status:     str
+    priority:   str
+    score:      int
+    notes:      Optional[str]
     created_at: datetime
     updated_at: datetime
 

@@ -164,3 +164,72 @@ export const invoicesApi = {
   send: (id: string) =>
     api.post(`/invoices/${id}/send`, {}),
 };
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SPRINT 13B — Advanced Reports API
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const reportsApi = {
+  getRevenueTrend: async (months = 12) => {
+    const token = localStorage.getItem("tb_token");
+    const res = await fetch(
+      `${API_BASE}/actions/reports/revenue-trend?months=${months}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error("Failed to fetch revenue trend");
+    return res.json();
+  },
+
+  getLeadFunnel: async () => {
+    const token = localStorage.getItem("tb_token");
+    const res = await fetch(`${API_BASE}/actions/reports/lead-funnel`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to fetch lead funnel");
+    return res.json();
+  },
+
+  getAgentLeaderboard: async () => {
+    const token = localStorage.getItem("tb_token");
+    const res = await fetch(`${API_BASE}/actions/reports/agent-leaderboard`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to fetch agent leaderboard");
+    return res.json();
+  },
+
+  exportInvoicesCsv: async () => {
+    const token = localStorage.getItem("tb_token");
+    const res = await fetch(`${API_BASE}/actions/reports/export/invoices.csv`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to export invoices");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoices_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  },
+
+  exportContractsCsv: async () => {
+    const token = localStorage.getItem("tb_token");
+    const res = await fetch(`${API_BASE}/actions/reports/export/contracts.csv`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to export contracts");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contracts_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  },
+};

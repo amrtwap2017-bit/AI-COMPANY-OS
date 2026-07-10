@@ -1021,3 +1021,320 @@ def dashboard_stats(
         "open_quotes": open_quotes,
         "unread_notifications": unread,
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SPRINT 13B — ADVANCED REPORTS + CSV EXPORT
+# ─────────────────────────────────────────────────────────────────────────────
+
+import csv
+import io
+from dateutil.relativedelta import relativedelta
+from fastapi.responses import StreamingResponse
+from sqlalchemy import func
+
+
+def _safe_pct(numerator: float, denominator: float) -> float:
+    """Return percentage rounded to 2dp, or 0.0 if denominator is zero."""
+    if not denominator:
+        return 0.0
+    return round((numerator / denominator) * 100, 2)
+
+
+# ── 1. Monthly Revenue Trend ──────────────────────────────────────────────────
+
+@router.get("/reports/revenue-trend")
+def revenue_trend_report(
+    months: int = 12,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    from src.commercial.quotation.models import Quote
+    from src.commercial.contracts.models import Contract
+    from src.commercial.invoices.models import Invoice
+    from datetime import datetime
+
+    today = datetime.utcnow()
+    cutoff = today - relativedelta(months=months)
+
+    # Build ordered month label list oldest→newest
+    month_labels = []
+    for i in range(months - 1, -1, -1):
+        month_labels.append((today - relativedelta(months=i)).strftime("%Y-%m"))
+
+    def _to_dict(rows):
+        return {row[0]: float(row[1] or 0) for row in rows if row[0]}
+
+    # approved quotes — Quote.total (confirmed field name)
+    q_approved = (
+        db.query(
+            func.to_char(Quote.updated_at, "YYYY-MM").label("month"),
+            func.sum(Quote.total).label("total"),
+        )
+        .filter(Quote.status == "approved")
+        .filter(Quote.updated_at >= cutoff)
+        .group_by("month")
+        .all()
+    )
+
+    # active contracts — Contract.start_date + Contract.total_value
+    c_active = (
+        db.query(
+            func.to_char(Contract.start_date, "YYYY-MM").label("month"),
+            func.sum(Contract.total_value).label("total"),
+        )
+        .filter(Contract.status == "active")
+        .filter(Contract.start_date >= cutoff)
+        .group_by("month")
+        .all()
+    )
+
+    # invoices "sent" — use issue_date (confirmed field, no sent_at exists)
+    i_sent = (
+        db.query(
+            func.to_char(Invoice.issue_date, "YYYY-MM").label("month"),
+            func.sum(Invoice.total_amount).label("total"),
+        )
+        .filter(Invoice.status.in_(["sent", "paid"]))
+        .filter(Invoice.issue_date >= cutoff)
+        .group_by("month")
+        .all()
+    )
+
+    # invoices paid — use paid_date (confirmed field, not paid_at)
+    i_paid = (
+        db.query(
+            func.to_char(Invoice.paid_date, "YYYY-MM").label("month"),
+            func.sum(Invoice.total_amount).label("total"),
+        )
+        .filter(Invoice.status == "paid")
+        .filter(Invoice.paid_date >= cutoff)
+        .group_by("month")
+        .all()
+    )
+
+    aq = _to_dict(q_approved)
+    ac = _to_dict(c_active)
+    is_ = _to_dict(i_sent)
+    ip = _to_dict(i_paid)
+
+    series = []
+    totals = {"approved_quotes": 0.0, "active_contracts": 0.0,
+               "invoices_sent": 0.0, "invoices_paid": 0.0}
+
+    for m in month_labels:
+        row = {
+            "month": m,
+            "approved_quotes":  aq.get(m, 0.0),
+            "active_contracts": ac.get(m, 0.0),
+            "invoices_sent":    is_.get(m, 0.0),
+            "invoices_paid":    ip.get(m, 0.0),
+        }
+        series.append(row)
+        for k in totals:
+            totals[k] += row[k]
+
+    return {"months": months, "currency": "EGP", "series": series, "totals": totals}
+
+
+# ── 2. Lead Conversion Funnel ─────────────────────────────────────────────────
+
+@router.get("/reports/lead-funnel")
+def lead_funnel_report(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    from src.commercial.lead_management.models import Lead
+    from src.commercial.quotation.models import Quote
+    from src.commercial.contracts.models import Contract
+
+    def _cnt(model, **kw):
+        q = db.query(func.count(model.id))
+        for col, val in kw.items():
+            q = q.filter(getattr(model, col) == val)
+        return q.scalar() or 0
+
+    total_leads      = db.query(func.count(Lead.id)).scalar() or 0
+    new_leads        = _cnt(Lead,     status="new")
+    qualified_leads  = _cnt(Lead,     status="qualified")
+    assigned_leads   = _cnt(Lead,     status="assigned")
+    quotes_sent      = _cnt(Quote,    status="sent")
+    quotes_approved  = _cnt(Quote,    status="approved")
+    contracts_active = _cnt(Contract, status="active")
+
+    stages = [
+        {"key": "new",              "label": "New Leads",        "count": new_leads},
+        {"key": "qualified",        "label": "Qualified",        "count": qualified_leads},
+        {"key": "assigned",         "label": "Assigned",         "count": assigned_leads},
+        {"key": "quote_sent",       "label": "Quotes Sent",      "count": quotes_sent},
+        {"key": "quote_approved",   "label": "Quotes Approved",  "count": quotes_approved},
+        {"key": "contracts_active", "label": "Active Contracts", "count": contracts_active},
+    ]
+
+    conversion_rates = {
+        "lead_to_qualified":  _safe_pct(qualified_leads,  total_leads),
+        "qualified_to_sent":  _safe_pct(quotes_sent,      qualified_leads),
+        "sent_to_approved":   _safe_pct(quotes_approved,  quotes_sent),
+        "approved_to_active": _safe_pct(contracts_active, quotes_approved),
+    }
+
+    return {"stages": stages, "conversion_rates": conversion_rates,
+             "total_leads": total_leads}
+
+
+# ── 3. Agent Performance Leaderboard ─────────────────────────────────────────
+
+@router.get("/reports/agent-leaderboard")
+def agent_leaderboard_report(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    from src.commercial.agent_management.models import Agent
+    from src.commercial.lead_management.models import Lead
+    from src.commercial.quotation.models import Quote
+    from src.commercial.contracts.models import Contract
+
+    agents = db.query(Agent).all()
+    leaderboard = []
+
+    for agent in agents:
+        # Use current_leads directly from agents table (no assigned_agent_id on leads)
+        current_leads = agent.current_leads
+
+        # Quotes linked to this agent's leads via lead.hotel_id match
+        # Since leads have no agent FK, derive via hotel_id scoping
+        # and cross-reference quotes on same hotel
+        quotes_sent_count = (
+            db.query(func.count(Quote.id))
+            .filter(Quote.hotel_id == agent.hotel_id)
+            .filter(Quote.status.in_(["sent", "approved"]))
+            .scalar() or 0
+        )
+        quotes_approved_count = (
+            db.query(func.count(Quote.id))
+            .filter(Quote.hotel_id == agent.hotel_id)
+            .filter(Quote.status == "approved")
+            .scalar() or 0
+        )
+        active_contracts_count = (
+            db.query(func.count(Contract.id))
+            .filter(Contract.hotel_id == agent.hotel_id)
+            .filter(Contract.status == "active")
+            .scalar() or 0
+        )
+
+        leaderboard.append({
+            "agent_id":         agent.id,
+            "name":             agent.name,
+            "email":            agent.email,
+            "current_leads":    current_leads,
+            "max_leads":        agent.max_leads,
+            "utilization_pct":  _safe_pct(current_leads, agent.max_leads or 1),
+            "quotes_sent":      quotes_sent_count,
+            "quotes_approved":  quotes_approved_count,
+            "contracts_active": active_contracts_count,
+            "approval_rate":    _safe_pct(quotes_approved_count, quotes_sent_count),
+        })
+
+    leaderboard.sort(key=lambda x: (-x["approval_rate"], x["utilization_pct"]))
+    return {"agents": leaderboard, "total_agents": len(leaderboard)}
+
+
+# ── 4. Invoice CSV Export ─────────────────────────────────────────────────────
+
+@router.get("/reports/export/invoices.csv")
+def export_invoices_csv(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    from src.commercial.invoices.models import Invoice
+    from datetime import datetime
+
+    invoices = db.query(Invoice).order_by(Invoice.created_at.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "invoice_number", "invoice_id", "contract_id", "lead_id",
+        "title", "status",
+        "amount", "tax_amount", "total_amount",
+        "issue_date", "due_date", "paid_date", "created_at",
+    ])
+
+    for inv in invoices:
+        writer.writerow([
+            inv.invoice_number,
+            str(inv.id),
+            str(inv.contract_id or ""),
+            str(inv.lead_id or ""),
+            inv.title or "",
+            inv.status,
+            inv.amount,
+            inv.tax_amount,
+            inv.total_amount,
+            str(inv.issue_date or ""),
+            str(inv.due_date or ""),
+            str(inv.paid_date or ""),
+            str(inv.created_at),
+        ])
+
+    output.seek(0)
+    fname = f"invoices_{datetime.utcnow().strftime('%Y%m%d')}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={fname}"},
+    )
+
+
+# ── 5. Contract CSV Export ────────────────────────────────────────────────────
+
+@router.get("/reports/export/contracts.csv")
+def export_contracts_csv(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    from src.commercial.contracts.models import Contract
+    from src.commercial.lead_management.models import Lead
+    from datetime import datetime
+
+    contracts = db.query(Contract).order_by(Contract.created_at.desc()).all()
+
+    lead_ids = list({c.lead_id for c in contracts if c.lead_id})
+    lead_map = {}
+    if lead_ids:
+        leads = db.query(Lead).filter(Lead.id.in_(lead_ids)).all()
+        lead_map = {l.id: l.name for l in leads}   # leads.name confirmed field
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "contract_id", "quote_id", "lead_id", "customer_name",
+        "status", "total_value", "monthly_value", "duration_months",
+        "start_date", "end_date", "renewal_count", "created_at",
+    ])
+
+    for c in contracts:
+        writer.writerow([
+            str(c.id),
+            str(c.quote_id or ""),
+            str(c.lead_id or ""),
+            lead_map.get(c.lead_id, ""),
+            c.status,
+            c.total_value,
+            c.monthly_value,
+            c.duration_months,
+            str(c.start_date or ""),
+            str(c.end_date or ""),
+            c.renewal_count,
+            str(c.created_at),
+        ])
+
+    output.seek(0)
+    fname = f"contracts_{datetime.utcnow().strftime('%Y%m%d')}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={fname}"},
+    )

@@ -1,7 +1,4 @@
-"""
-Lead endpoint tests — Triangle Black live API tests.
-Requires: TB API running at 127.0.0.1:8030 and authenticated client fixture.
-"""
+"""Tests for commercial leads endpoints."""
 import uuid
 import pytest
 
@@ -13,13 +10,18 @@ def test_lead_id(client, auth):
     unique = str(uuid.uuid4())[:8]
     res = client.post(
         "/api/v1/leads/",
-        json={"name": f"{TEST_PREFIX} {unique}", "status": "active"},
+        json={
+            "name": f"{TEST_PREFIX} {unique}",
+            "email": f"commercial_{unique}@pytest.com",
+            "source": "web",
+            "priority": "medium",
+        },
         headers=auth,
     )
     assert res.status_code == 201, f"Create failed: {res.text}"
-    obj_id = res.json()["id"]
-    yield obj_id
-    client.delete(f"/api/v1/leads/{obj_id}", headers=auth)
+    lead_id = res.json()["id"]
+    yield lead_id
+    client.delete(f"/api/v1/leads/{lead_id}", headers=auth)
 
 
 def test_list_leads(client, auth):
@@ -32,13 +34,18 @@ def test_create_lead(client, auth):
     unique = str(uuid.uuid4())[:8]
     res = client.post(
         "/api/v1/leads/",
-        json={"name": f"{TEST_PREFIX} Create {unique}"},
+        json={
+            "name": f"{TEST_PREFIX} Create {unique}",
+            "email": f"create_{unique}@pytest.com",
+            "source": "referral",
+            "priority": "high",
+        },
         headers=auth,
     )
     assert res.status_code == 201
     data = res.json()
     assert "id" in data
-    assert data["status"] == "active"
+    assert data["status"] == "new"
     client.delete(f"/api/v1/leads/{data['id']}", headers=auth)
 
 
@@ -56,11 +63,11 @@ def test_get_lead_not_found(client, auth):
 def test_update_lead(client, auth, test_lead_id):
     res = client.patch(
         f"/api/v1/leads/{test_lead_id}",
-        json={"status": "inactive"},
+        json={"priority": "high", "notes": "Updated by commercial pytest"},
         headers=auth,
     )
     assert res.status_code == 200
-    assert res.json()["status"] == "inactive"
+    assert res.json()["priority"] == "high"
 
 
 def test_leads_requires_auth(client):
