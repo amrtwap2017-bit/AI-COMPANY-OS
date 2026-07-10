@@ -52,6 +52,23 @@ from src.commercial.work_orders.router import router as work_orders_router
 from src.commercial.service_requests.router import router as service_requests_router
 from src.commercial.service_reports.router import router as service_reports_router
 
+
+# ── Inventory, Procurement & Stock Control OS — Sprint 16 ────────────────────
+from src.commercial.inventory_items.models import InventoryItem  # noqa
+from src.commercial.warehouses.models import Warehouse  # noqa
+from src.commercial.inventory_vendors.models import InventoryVendor  # noqa
+from src.commercial.stock_movements.models import StockMovement  # noqa
+from src.commercial.purchase_requests.models import PurchaseRequest  # noqa
+from src.commercial.purchase_orders.models import PurchaseOrder  # noqa
+from src.commercial.goods_receipts.models import GoodsReceipt  # noqa
+from src.commercial.inventory_items.router import router as inv_items_router
+from src.commercial.warehouses.router import router as warehouses_router
+from src.commercial.inventory_vendors.router import router as inv_vendors_router
+from src.commercial.stock_movements.router import router as stock_movements_router
+from src.commercial.purchase_requests.router import router as purchase_requests_router
+from src.commercial.purchase_orders.router import router as purchase_orders_router
+from src.commercial.goods_receipts.router import router as goods_receipts_router
+
 from src.commercial.notifications.router import router as notifications_router
 from src.commercial.invoices.router import router as invoices_router
 from src.commercial.hotels.router import router as hotels_router
@@ -94,6 +111,15 @@ app.include_router(hotels_router,        prefix=API_PREFIX)
 app.include_router(cache_router,              prefix=API_PREFIX)
 app.include_router(pagination_router,         prefix=API_PREFIX)
 app.include_router(email_notification_router, prefix=API_PREFIX)
+
+# Inventory & Procurement
+app.include_router(inv_items_router, prefix="/api/v1")
+app.include_router(warehouses_router, prefix="/api/v1")
+app.include_router(inv_vendors_router, prefix="/api/v1")
+app.include_router(stock_movements_router, prefix="/api/v1")
+app.include_router(purchase_requests_router, prefix="/api/v1")
+app.include_router(purchase_orders_router, prefix="/api/v1")
+app.include_router(goods_receipts_router, prefix="/api/v1")
 
 
 @app.get("/health")

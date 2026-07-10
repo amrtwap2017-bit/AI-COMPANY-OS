@@ -1,0 +1,23 @@
+"""Warehouse model — Triangle Black"""
+from __future__ import annotations
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, Boolean, DateTime, Text, Index
+from src.core.base import Base
+
+DEFAULT_HOTEL = "tb-default-hotel-000000000001"
+
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+    id           = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    hotel_id     = Column(String(36), nullable=False, default=DEFAULT_HOTEL)
+    code         = Column(String(50), nullable=False)
+    name         = Column(String(255), nullable=False)
+    type         = Column(String(50), nullable=False, default="main")
+    address      = Column(Text, nullable=True)
+    manager_name = Column(String(255), nullable=True)
+    is_active    = Column(Boolean, nullable=False, default=True)
+    notes        = Column(Text, nullable=True)
+    created_at   = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at   = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    __table_args__ = (Index("ix_warehouses_hotel_id", "hotel_id"),)

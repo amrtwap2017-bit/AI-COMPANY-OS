@@ -1534,3 +1534,233 @@ def complete_work_order(
     db.commit()
     return {"ok": True, "work_order_id": work_order_id, "status": "completed",
             "completed_at": wo.completed_at.isoformat()}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INVENTORY ACTIONS — Sprint 16
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/inventory/dashboard")
+def inventory_dashboard(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    """Inventory summary dashboard."""
+    from src.commercial.inventory_items.models import InventoryItem
+    from src.commercial.warehouses.models import Warehouse
+    from src.commercial.inventory_vendors.models import InventoryVendor
+    from src.commercial.stock_movements.models import StockMovement
+    from src.commercial.purchase_requests.models import PurchaseRequest
+    from src.commercial.purchase_orders.models import PurchaseOrder
+    from src.commercial.goods_receipts.models import GoodsReceipt
+    from sqlalchemy import func
+
+    total_items     = db.query(func.count(InventoryItem.id)).scalar() or 0
+    active_items    = db.query(func.count(InventoryItem.id)).filter(InventoryItem.is_active == True).scalar() or 0
+    total_warehouses = db.query(func.count(Warehouse.id)).scalar() or 0
+    total_vendors   = db.query(func.count(InventoryVendor.id)).scalar() or 0
+
+    # Low stock items (min_stock > 0 and avg_cost — simple placeholder)
+    low_stock_items = (
+        db.query(func.count(InventoryItem.id))
+        .filter(InventoryItem.min_stock > 0)
+        .filter(InventoryItem.average_cost == 0)
+        .scalar() or 0
+    )
+
+    # PR/PO summary
+    open_prs = db.query(func.count(PurchaseRequest.id)).filter(
+        PurchaseRequest.status.in_(["draft", "pending_approval"])
+    ).scalar() or 0
+
+    open_pos = db.query(func.count(PurchaseOrder.id)).filter(
+        PurchaseOrder.status.in_(["draft", "approved", "sent"])
+    ).scalar() or 0
+
+    pending_grn = db.query(func.count(GoodsReceipt.id)).filter(
+        GoodsReceipt.status == "draft"
+    ).scalar() or 0
+
+    # Recent movements
+    recent_movements = db.query(func.count(StockMovement.id)).scalar() or 0
+
+    return {
+        "items": {
+            "total":    total_items,
+            "active":   active_items,
+            "low_stock": low_stock_items,
+        },
+        "warehouses":   {"total": total_warehouses},
+        "vendors":      {"total": total_vendors},
+        "procurement": {
+            "open_prs":    open_prs,
+            "open_pos":    open_pos,
+            "pending_grn": pending_grn,
+        },
+        "movements": {"total": recent_movements},
+    }
+
+
+class StockAdjustIn(BaseModel):
+    item_id: str
+    warehouse_id: str
+    qty: float
+    unit_cost: float = 0
+    reason: Optional[str] = "manual_adjustment"
+    notes: Optional[str] = None
+
+
+@router.post("/inventory/adjust")
+def adjust_stock(
+    payload: StockAdjustIn,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Manually adjust stock quantity for an item in a warehouse."""
+    from src.commercial.inventory_items.models import InventoryItem
+    from src.commercial.stock_movements.models import StockMovement
+    from src.commercial.warehouses.models import Warehouse
+    import uuid
+
+    item = db.query(InventoryItem).filter(
+        InventoryItem.id == payload.item_id,
+        InventoryItem.hotel_id == hotel_id
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    wh = db.query(Warehouse).filter(
+        Warehouse.id == payload.warehouse_id,
+        Warehouse.hotel_id == hotel_id
+    ).first()
+    if not wh:
+        raise HTTPException(status_code=404, detail="Warehouse not found")
+
+    now    = datetime.utcnow()
+    prefix = f"TB-MOV-{now.strftime('%Y%m')}-"
+    count  = db.query(StockMovement).filter(
+        StockMovement.movement_number.like(f"{prefix}%")
+    ).count()
+    mv_num = f"{prefix}{str(count + 1).zfill(4)}"
+
+    movement = StockMovement(
+        id              = str(uuid.uuid4()),
+        hotel_id        = hotel_id,
+        movement_number = mv_num,
+        item_id         = payload.item_id,
+        warehouse_id    = payload.warehouse_id,
+        movement_type   = "stock_adjustment",
+        qty             = payload.qty,
+        unit_cost       = payload.unit_cost,
+        total_cost      = abs(payload.qty) * payload.unit_cost,
+        qty_before      = 0,
+        qty_after       = payload.qty,
+        reason          = payload.reason,
+        notes           = payload.notes,
+        created_by      = current_user.email,
+        created_at      = now,
+    )
+    db.add(movement)
+
+    # Update item average cost if provided
+    if payload.unit_cost > 0:
+        item.last_purchase_cost = payload.unit_cost
+        item.average_cost       = payload.unit_cost
+        item.updated_at         = now
+
+    db.commit()
+    return {
+        "ok": True,
+        "movement_number": mv_num,
+        "item_id":    payload.item_id,
+        "warehouse_id": payload.warehouse_id,
+        "qty":        payload.qty,
+        "unit_cost":  payload.unit_cost,
+    }
+
+
+@router.get("/inventory/low-stock")
+def low_stock_report(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+):
+    """Items at or below minimum stock level."""
+    from src.commercial.inventory_items.models import InventoryItem
+    items = (
+        db.query(InventoryItem)
+        .filter(InventoryItem.is_active == True)
+        .filter(InventoryItem.min_stock > 0)
+        .all()
+    )
+    # Simple: flag items with average_cost = 0 as "not yet stocked"
+    low = [
+        {
+            "id":            i.id,
+            "item_code":     i.item_code,
+            "name":          i.name,
+            "category":      i.category,
+            "unit":          i.unit_of_measure,
+            "min_stock":     i.min_stock,
+            "reorder_qty":   i.reorder_qty,
+            "lead_time_days": i.lead_time_days,
+            "preferred_vendor_id": i.preferred_vendor_id,
+        }
+        for i in items
+    ]
+    return {"count": len(low), "items": low}
+
+
+@router.post("/inventory/purchase-requests/{pr_id}/approve")
+def approve_purchase_request(
+    pr_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Approve a purchase request."""
+    from src.commercial.purchase_requests.models import PurchaseRequest
+
+    pr = db.query(PurchaseRequest).filter(
+        PurchaseRequest.id == pr_id,
+        PurchaseRequest.hotel_id == hotel_id
+    ).first()
+    if not pr:
+        raise HTTPException(status_code=404, detail="Purchase request not found")
+    if pr.status != "draft":
+        raise HTTPException(status_code=400, detail=f"PR is {pr.status}, must be draft to approve")
+
+    pr.status      = "approved"
+    pr.approved_by = current_user.email
+    pr.approved_at = datetime.utcnow()
+    pr.updated_at  = datetime.utcnow()
+    db.commit()
+
+    return {"ok": True, "pr_id": pr_id, "pr_number": pr.pr_number, "status": "approved"}
+
+
+@router.post("/inventory/purchase-orders/{po_id}/approve")
+def approve_purchase_order(
+    po_id: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Approve and send a purchase order."""
+    from src.commercial.purchase_orders.models import PurchaseOrder
+
+    po = db.query(PurchaseOrder).filter(
+        PurchaseOrder.id == po_id,
+        PurchaseOrder.hotel_id == hotel_id
+    ).first()
+    if not po:
+        raise HTTPException(status_code=404, detail="Purchase order not found")
+    if po.status not in ("draft",):
+        raise HTTPException(status_code=400, detail=f"PO is {po.status}")
+
+    po.status      = "approved"
+    po.approved_by = current_user.email
+    po.approved_at = datetime.utcnow()
+    po.updated_at  = datetime.utcnow()
+    db.commit()
+
+    return {"ok": True, "po_id": po_id, "po_number": po.po_number, "status": "approved"}
