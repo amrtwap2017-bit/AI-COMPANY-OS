@@ -5,13 +5,14 @@ import { useClientAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import {
   Building2, LayoutDashboard, FileText,
-  Activity, LogOut, FileCheck,
+  Activity, LogOut, FileCheck, Receipt,
 } from "lucide-react";
 
 const nav = [
   { href: "/dashboard",  label: "Overview",   icon: LayoutDashboard },
   { href: "/quotes",     label: "Proposals",  icon: FileText        },
   { href: "/contracts",  label: "Contracts",  icon: FileCheck       },
+  { href: "/invoices",   label: "Invoices",   icon: Receipt         },
   { href: "/activities", label: "History",    icon: Activity        },
 ];
 

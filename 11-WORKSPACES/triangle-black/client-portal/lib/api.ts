@@ -81,3 +81,12 @@ export const clientPdfApi = {
     URL.revokeObjectURL(url);
   },
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CLIENT PORTAL — Invoices API
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const invoicesApi = {
+  list: () => api.get("/invoices/").then((r) => r.data),
+  get:  (id: string) => api.get(`/invoices/${id}`).then((r) => r.data),
+};

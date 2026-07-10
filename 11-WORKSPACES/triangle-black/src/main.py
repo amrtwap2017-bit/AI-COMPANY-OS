@@ -87,11 +87,11 @@ def health():
     return {
         "ok": db_ok,
         "service": "triangle-black-api",
-        "version": "1.4.0",
+        "version": "3.0.0",
         "database": "connected" if db_ok else "unreachable",
     }
 
 
 @app.get("/")
 def root():
-    return {"service": "Triangle Black API", "version": "1.4.0", "docs": "/docs"}
+    return {"service": "Triangle Black API", "version": "3.0.0", "docs": "/docs"}
