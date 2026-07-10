@@ -366,6 +366,15 @@ def reject_quote(
              f"Quote '{quote.title}' rejected. "
              f"Note: {payload.note or 'No reason'}. Lead lost.",
              actor=current_user.email, hotel_id=hotel_id)
+    _notify(db,
+            title="Quote Rejected",
+            message=f"Quote '{quote.title}' was rejected. "
+                    f"Reason: {payload.note or 'No reason provided'}",
+            ntype="quote_rejected",
+            entity_id=quote_id,
+            entity_type="quote",
+            recipient_role="agent",
+            hotel_id=hotel_id)
     db.commit()
     return {"ok": True, "quote_id": quote_id, "status": "rejected",
             "message": "Quote rejected — lead marked as lost"}
