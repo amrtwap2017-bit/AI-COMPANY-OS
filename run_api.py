@@ -922,14 +922,14 @@ async def list_agents():
 
 @app.post("/api/v1/tasks/{task_id}/plan", status_code=202, tags=["Agents"])
 async def plan_task(task_id: UUID, workspace_id: UUID = Query(...)):
-    from sqlalchemy import text as sql_text
+    from sqlalchemy import text
     """
     Trigger the Planner Agent to decompose a task into sub-tasks.
     Automatically called for epic/feature tasks. Can be called manually.
     """
     async with get_session_factory()() as session:
         result = await session.execute(
-            sql_text("SELECT id, title, description, task_type, acceptance_criteria, project_id FROM tasks WHERE id=:tid AND workspace_id=:wid"),
+            text("SELECT id, title, description, task_type, acceptance_criteria, project_id FROM tasks WHERE id=:tid AND workspace_id=:wid"),
             {"tid": str(task_id), "wid": str(workspace_id)},
         )
         row = result.fetchone()
