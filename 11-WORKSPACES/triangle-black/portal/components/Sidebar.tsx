@@ -17,7 +17,10 @@ const navItems = [
   { href: "/quotes",         label: "Quotes",         icon: FileText,        roles: ["admin","manager","agent"] },
   { href: "/contracts",      label: "Contracts",      icon: FileCheck,       roles: ["admin","manager","agent"] },
   { href: "/agents",         label: "Agents",         icon: UserCheck,       roles: ["admin","manager"]         },
-  { href: "/reports",        label: "Reports",        icon: BarChart3,       roles: ["admin","manager"]         },
+  { href: "/inventory",      label: "Inventory",      icon: BarChart3,       roles: ["admin","manager"]         },
+  { href: "/work-orders",    label: "Work Orders",    icon: FileCheck,       roles: ["admin","manager"]         },
+  { href: "/technicians",    label: "Technicians",    icon: UserCheck,       roles: ["admin","manager"]         },
+    { href: "/reports",        label: "Reports",        icon: BarChart3,       roles: ["admin","manager"]         },
   { href: "/notifications",  label: "Notifications",  icon: Bell,            roles: ["admin","manager","agent"] },
   { href: "/invoices",       label: "Invoices",       icon: Receipt,         roles: ["admin","manager"]         },
 ];

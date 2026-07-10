@@ -233,3 +233,128 @@ export const reportsApi = {
     window.URL.revokeObjectURL(url);
   },
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INVENTORY & PROCUREMENT API — v4.3.0
+// ─────────────────────────────────────────────────────────────────────────────
+
+const getToken = () =>
+  typeof window !== 'undefined' ? localStorage.getItem('tb_token') : null;
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${getToken()}`,
+  'Content-Type': 'application/json',
+});
+
+export const inventoryApi = {
+  // Items
+  getItems:    (skip = 0, limit = 100) =>
+    fetch(`${API_BASE}/inventory/items/?skip=${skip}&limit=${limit}`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createItem:  (data: any) =>
+    fetch(`${API_BASE}/inventory/items/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+  updateItem:  (id: string, data: any) =>
+    fetch(`${API_BASE}/inventory/items/${id}`,
+      { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+
+  // Warehouses
+  getWarehouses: () =>
+    fetch(`${API_BASE}/inventory/warehouses/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createWarehouse: (data: any) =>
+    fetch(`${API_BASE}/inventory/warehouses/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+
+  // Vendors
+  getVendors: () =>
+    fetch(`${API_BASE}/inventory/vendors/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createVendor: (data: any) =>
+    fetch(`${API_BASE}/inventory/vendors/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+  getVendorScorecard: (id: string) =>
+    fetch(`${API_BASE}/actions/procurement/vendors/${id}/scorecard`,
+      { headers: authHeaders() }).then(r => r.json()),
+
+  // Purchase Requests
+  getPurchaseRequests: () =>
+    fetch(`${API_BASE}/inventory/purchase-requests/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createPurchaseRequest: (data: any) =>
+    fetch(`${API_BASE}/inventory/purchase-requests/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+  approvePR: (id: string) =>
+    fetch(`${API_BASE}/actions/inventory/purchase-requests/${id}/approve`,
+      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
+  convertPRtoPO: (id: string) =>
+    fetch(`${API_BASE}/actions/procurement/purchase-requests/${id}/convert-to-po`,
+      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
+
+  // Purchase Orders
+  getPurchaseOrders: () =>
+    fetch(`${API_BASE}/inventory/purchase-orders/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  approvePO: (id: string) =>
+    fetch(`${API_BASE}/actions/inventory/purchase-orders/${id}/approve`,
+      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
+
+  // Dashboards
+  getInventoryDashboard: () =>
+    fetch(`${API_BASE}/actions/inventory/dashboard`,
+      { headers: authHeaders() }).then(r => r.json()),
+  getProcurementDashboard: () =>
+    fetch(`${API_BASE}/actions/procurement/dashboard`,
+      { headers: authHeaders() }).then(r => r.json()),
+  getLowStock: () =>
+    fetch(`${API_BASE}/actions/inventory/low-stock`,
+      { headers: authHeaders() }).then(r => r.json()),
+
+  // Stock adjustment
+  adjustStock: (data: any) =>
+    fetch(`${API_BASE}/actions/inventory/adjust`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+};
+
+export const serviceOpsApi = {
+  // Technicians
+  getTechnicians: () =>
+    fetch(`${API_BASE}/technicians/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createTechnician: (data: any) =>
+    fetch(`${API_BASE}/technicians/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+
+  // Sites
+  getSites: () =>
+    fetch(`${API_BASE}/sites/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createSite: (data: any) =>
+    fetch(`${API_BASE}/sites/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+
+  // Work Orders
+  getWorkOrders: () =>
+    fetch(`${API_BASE}/work-orders/`,
+      { headers: authHeaders() }).then(r => r.json()),
+  createWorkOrder: (data: any) =>
+    fetch(`${API_BASE}/work-orders/`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+  assignWorkOrder: (id: string, techId: string) =>
+    fetch(`${API_BASE}/actions/work-orders/${id}/assign`,
+      { method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ agent_id: techId }) }).then(r => r.json()),
+  completeWorkOrder: (id: string) =>
+    fetch(`${API_BASE}/actions/work-orders/${id}/complete`,
+      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
+
+  // Service Requests
+  getServiceRequests: () =>
+    fetch(`${API_BASE}/service-requests/`,
+      { headers: authHeaders() }).then(r => r.json()),
+
+  // Service Dashboard
+  getServiceDashboard: () =>
+    fetch(`${API_BASE}/actions/dashboard/service-ops`,
+      { headers: authHeaders() }).then(r => r.json()),
+};
