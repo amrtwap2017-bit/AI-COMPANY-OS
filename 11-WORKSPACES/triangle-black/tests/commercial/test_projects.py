@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 import pytest
 datetime = pytest.importorskip('datetime')

@@ -142,3 +142,94 @@ def health():
 @app.get("/")
 def root():
     return {"service": "Triangle Black API", "version": "3.0.0", "docs": "/docs"}
+
+# ── Sprint 20 Modules ─────────────────────────────────────────────────────────
+try:
+    from src.commercial.payment_tracking.router import router as payment_tracking_router
+    from src.commercial.projects.router import router as projects_router
+    from src.commercial.dashboard.router import router as dashboard_router
+    from src.commercial.system_notifications.router import router as notifications_router
+
+    app.include_router(payment_tracking_router, prefix="/api/v1")
+    app.include_router(projects_router,          prefix="/api/v1")
+    app.include_router(dashboard_router,         prefix="/api/v1")
+    app.include_router(notifications_router,     prefix="/api/v1")
+except ImportError as e:
+    print(f"[WARN] Sprint 20 module import failed: {e}")
+
+# ── Auto-wired Sprint 20-22 modules ──────────────────────────────────────
+try:
+    from src.commercial.activity_tracking.router import router as activity_tracking_router
+    app.include_router(activity_tracking_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] activity_tracking: {e}")
+try:
+    from src.commercial.agent_management.router import router as agent_management_router
+    app.include_router(agent_management_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] agent_management: {e}")
+try:
+    from src.commercial.documents.router import router as documents_router
+    app.include_router(documents_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] documents: {e}")
+try:
+    from src.commercial.email_notifications.router import router as email_notifications_router
+    app.include_router(email_notifications_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] email_notifications: {e}")
+try:
+    from src.commercial.email_service.router import router as email_service_router
+    app.include_router(email_service_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] email_service: {e}")
+try:
+    from src.commercial.inventory_alerts.router import router as inventory_alerts_router
+    app.include_router(inventory_alerts_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] inventory_alerts: {e}")
+try:
+    from src.commercial.inventory_items.router import router as inventory_items_router
+    app.include_router(inventory_items_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] inventory_items: {e}")
+try:
+    from src.commercial.inventory_vendors.router import router as inventory_vendors_router
+    app.include_router(inventory_vendors_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] inventory_vendors: {e}")
+try:
+    from src.commercial.lead_management.router import router as lead_management_router
+    app.include_router(lead_management_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] lead_management: {e}")
+try:
+    from src.commercial.pdf_service.router import router as pdf_service_router
+    app.include_router(pdf_service_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] pdf_service: {e}")
+try:
+    from src.commercial.pipeline_dashboard.router import router as pipeline_dashboard_router
+    app.include_router(pipeline_dashboard_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] pipeline_dashboard: {e}")
+try:
+    from src.commercial.search_filters.router import router as search_filters_router
+    app.include_router(search_filters_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] search_filters: {e}")
+try:
+    from src.commercial.system_notifications.router import router as system_notifications_router
+    app.include_router(system_notifications_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] system_notifications: {e}")
+try:
+    from src.commercial.vendor_portal.router import router as vendor_portal_router
+    app.include_router(vendor_portal_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] vendor_portal: {e}")
+try:
+    from src.commercial.webhook_notifications.router import router as webhook_notifications_router
+    app.include_router(webhook_notifications_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] webhook_notifications: {e}")

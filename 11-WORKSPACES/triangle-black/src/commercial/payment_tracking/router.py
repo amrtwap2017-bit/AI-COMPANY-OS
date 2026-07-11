@@ -1,3 +1,4 @@
+from src.auth.models import User
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.core.database import get_db

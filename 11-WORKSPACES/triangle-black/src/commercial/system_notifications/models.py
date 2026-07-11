@@ -1,3 +1,5 @@
+import uuid
+from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Boolean
 from src.core.base import Base
 

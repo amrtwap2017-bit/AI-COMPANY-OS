@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import Column, String, DateTime, Float, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from src.core.base import Base

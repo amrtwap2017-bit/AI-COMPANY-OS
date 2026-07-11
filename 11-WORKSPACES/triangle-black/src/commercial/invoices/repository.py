@@ -1,74 +1,40 @@
-from __future__ import annotations
-import uuid
-from datetime import datetime
-from typing import Optional
 from sqlalchemy.orm import Session
-from .models import Invoice
-
+from src.core.database import get_db
+from src.commercial.invoices.models import Invoice
 
 class InvoiceRepository:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session):
         self.db = db
 
-    def create(self, data: dict) -> Invoice:
-        obj = Invoice(
-            id=str(uuid.uuid4()),
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            **data,
-        )
-        self.db.add(obj)
+    def create_invoice(self, invoice_data: dict):
+        invoice = Invoice(**invoice_data)
+        self.db.add(invoice)
         self.db.commit()
-        self.db.refresh(obj)
-        return obj
+        self.db.refresh(invoice)
+        return invoice
 
-    def get(self, obj_id: str) -> Optional[Invoice]:
-        return self.db.query(Invoice).filter(Invoice.id == obj_id).first()
+    def get_invoice(self, invoice_id: str):
+        return self.db.query(Invoice).filter(Invoice.id == invoice_id).first()
 
-    def get_by_number(self, number: str) -> Optional[Invoice]:
-        return self.db.query(Invoice).filter(
-            Invoice.invoice_number == number
-        ).first()
+    def list_invoices(self, hotel_id: str = None):
+        query = self.db.query(Invoice)
+        if hotel_id:
+            query = query.filter(Invoice.hotel_id == hotel_id)
+        return query.all()
 
-    def list(
-        self,
-        skip: int = 0,
-        limit: int = 100,
-        status: Optional[str] = None,
-        contract_id: Optional[str] = None,
-    ) -> list[Invoice]:
-        q = self.db.query(Invoice)
-        if status:
-            q = q.filter(Invoice.status == status)
-        if contract_id:
-            q = q.filter(Invoice.contract_id == contract_id)
-        return q.order_by(Invoice.created_at.desc()).offset(skip).limit(limit).all()
-
-    def update(self, obj_id: str, data: dict) -> Optional[Invoice]:
-        obj = self.get(obj_id)
-        if not obj:
+    def update_invoice(self, invoice_id: str, invoice_data: dict):
+        invoice = self.db.query(Invoice).filter(Invoice.id == invoice_id).first()
+        if not invoice:
             return None
-        for k, v in data.items():
-            if v is not None:
-                setattr(obj, k, v)
-        obj.updated_at = datetime.utcnow()
+        for key, value in invoice_data.items():
+            setattr(invoice, key, value)
         self.db.commit()
-        self.db.refresh(obj)
-        return obj
+        self.db.refresh(invoice)
+        return invoice
 
-    def count_for_contract(self, contract_id: str) -> int:
-        return (
-            self.db.query(Invoice)
-            .filter(Invoice.contract_id == contract_id)
-            .count()
-        )
-
-    def next_invoice_number(self) -> str:
-        now = datetime.utcnow()
-        prefix = f"TB-INV-{now.year}{now.month:02d}"
-        count = (
-            self.db.query(Invoice)
-            .filter(Invoice.invoice_number.like(f"{prefix}%"))
-            .count()
-        )
-        return f"{prefix}-{count + 1:04d}"
+    def delete_invoice(self, invoice_id: str):
+        invoice = self.db.query(Invoice).filter(Invoice.id == invoice_id).first()
+        if not invoice:
+            return None
+        self.db.delete(invoice)
+        self.db.commit()

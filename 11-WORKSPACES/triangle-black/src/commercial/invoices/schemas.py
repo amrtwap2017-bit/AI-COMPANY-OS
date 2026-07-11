@@ -1,32 +1,27 @@
-from __future__ import annotations
-from datetime import datetime
-from typing import Optional
 from pydantic import BaseModel
 
-
-class InvoiceResponse(BaseModel):
-    id:             str
+class InvoiceCreate(BaseModel):
+    hotel_id: str
     invoice_number: str
-    contract_id:    str
-    lead_id:        str
-    title:          str
-    description:    Optional[str] = None
-    amount:         float
-    tax_amount:     float
-    total_amount:   float
-    status:         str
-    issue_date:     datetime
-    due_date:       Optional[datetime] = None
-    paid_date:      Optional[datetime] = None
-    notes:          Optional[str] = None
-    renewal_number: int
-    created_at:     datetime
-    updated_at:     datetime
-
-    model_config = {"from_attributes": True}
-
+    total_amount: float
+    status: str
+    due_date: datetime
 
 class InvoiceUpdate(BaseModel):
-    status:    Optional[str] = None
-    paid_date: Optional[datetime] = None
-    notes:     Optional[str] = None
+    invoice_number: str = None
+    total_amount: float = None
+    status: str = None
+    due_date: datetime = None
+
+class InvoiceResponse(BaseModel):
+    id: str
+    hotel_id: str
+    invoice_number: str
+    total_amount: float
+    status: str
+    due_date: datetime
+    paid_date: datetime = None
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

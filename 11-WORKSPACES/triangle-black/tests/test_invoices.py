@@ -1,3 +1,4 @@
+import uuid
 from fastapi.testclient import TestClient
 from src.main import app
 from sqlalchemy.orm import Session

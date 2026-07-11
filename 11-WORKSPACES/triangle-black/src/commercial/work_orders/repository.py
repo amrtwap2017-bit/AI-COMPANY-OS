@@ -1,75 +1,37 @@
-"""
-WorkOrder repository — Triangle Black
-"""
-from __future__ import annotations
-import uuid
-from datetime import datetime
-from typing import Optional, List
 from sqlalchemy.orm import Session
+from src.core.database import get_db
 from .models import WorkOrder
 
-DEFAULT_HOTEL = "tb-default-hotel-000000000001"
-
-
 class WorkOrderRepository:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session):
         self.db = db
 
-    def create(self, data: dict) -> WorkOrder:
-        data.setdefault("hotel_id", DEFAULT_HOTEL)
-        # Auto-generate work_order_number if applicable
-        if "work_order_number" in WorkOrder.__table__.columns.keys() and "work_order_number" not in data:
-            now = datetime.utcnow()
-            prefix = f"TB-WO-{now.strftime('%Y%m')}-"
-            count = self.db.query(WorkOrder).filter(
-                WorkOrder.work_order_number.like(f"{prefix}%")
-            ).count()
-            data["work_order_number"] = f"{prefix}{str(count + 1).zfill(4)}"
-        obj = WorkOrder(
-            id=str(uuid.uuid4()),
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            **{k: v for k, v in data.items()
-               if k not in ("id", "created_at", "updated_at")},
-        )
-        self.db.add(obj)
+    def create_work_order(self, work_order_data: dict):
+        work_order = WorkOrder(**work_order_data)
+        self.db.add(work_order)
         self.db.commit()
-        self.db.refresh(obj)
-        return obj
+        self.db.refresh(work_order)
+        return work_order
 
-    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[WorkOrder]:
-        return (
-            self.db.query(WorkOrder)
-            .filter(WorkOrder.id == obj_id, WorkOrder.hotel_id == hotel_id)
-            .first()
-        )
+    def get_work_orders(self):
+        return self.db.query(WorkOrder).all()
 
-    def list(self, skip: int = 0, limit: int = 100,
-             hotel_id: str = DEFAULT_HOTEL) -> List[WorkOrder]:
-        return (
-            self.db.query(WorkOrder)
-            .filter(WorkOrder.hotel_id == hotel_id)
-            .order_by(WorkOrder.created_at.desc())
-            .offset(skip).limit(limit).all()
-        )
+    def get_work_order_by_id(self, work_order_id: int):
+        return self.db.query(WorkOrder).filter(WorkOrder.id == work_order_id).first()
 
-    def update(self, obj_id: str, data: dict,
-               hotel_id: str = DEFAULT_HOTEL) -> Optional[WorkOrder]:
-        obj = self.get(obj_id, hotel_id=hotel_id)
-        if not obj:
+    def update_work_order(self, work_order_id: int, work_order_data: dict):
+        work_order = self.get_work_order_by_id(work_order_id)
+        if not work_order:
             return None
-        for k, v in data.items():
-            if v is not None and k not in ("id", "hotel_id", "created_at"):
-                setattr(obj, k, v)
-        obj.updated_at = datetime.utcnow()
+        for key, value in work_order_data.items():
+            setattr(work_order, key, value)
         self.db.commit()
-        self.db.refresh(obj)
-        return obj
+        self.db.refresh(work_order)
+        return work_order
 
-    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
-        obj = self.get(obj_id, hotel_id=hotel_id)
-        if not obj:
-            return False
-        self.db.delete(obj)
+    def delete_work_order(self, work_order_id: int):
+        work_order = self.get_work_order_by_id(work_order_id)
+        if not work_order:
+            return None
+        self.db.delete(work_order)
         self.db.commit()
-        return True
