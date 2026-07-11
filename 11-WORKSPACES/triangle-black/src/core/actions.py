@@ -1668,6 +1668,16 @@ def adjust_stock(
         item.average_cost       = payload.unit_cost
         item.updated_at         = now
 
+    # Update stock balance
+    _update_stock_balance(
+        db,
+        hotel_id     = hotel_id,
+        item_id      = payload.item_id,
+        warehouse_id = payload.warehouse_id,
+        qty_delta    = payload.qty,
+        unit_cost    = payload.unit_cost,
+    )
+
     db.commit()
     return {
         "ok": True,
@@ -1961,6 +1971,16 @@ def receive_goods(
         )
         db.add(mv)
         movements.append(mv_num)
+
+        # Update stock balance for this line
+        _update_stock_balance(
+            db,
+            hotel_id     = hotel_id,
+            item_id      = item_id,
+            warehouse_id = payload.warehouse_id,
+            qty_delta    = qty_received,
+            unit_cost    = unit_cost,
+        )
 
         # Update item cost
         if unit_cost > 0:
@@ -2393,4 +2413,223 @@ def get_procurement_events(
             }
             for e in events
         ],
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STOCK BALANCE ENGINE — Sprint A
+# Auto-updates stock_balances after every movement
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _update_stock_balance(db, hotel_id: str, item_id: str,
+                           warehouse_id: str, qty_delta: float,
+                           unit_cost: float = 0) -> None:
+    """
+    Core stock balance updater.
+    Call this after EVERY stock movement (receipt, issue, adjustment).
+    Uses weighted average cost calculation.
+    """
+    import uuid as _uuid
+    from src.commercial.stock_movements.models import StockMovement as _SM
+    from sqlalchemy import text as _text
+
+    # Get or create balance row
+    balance = db.execute(
+        _text("""
+            SELECT id, qty_on_hand, avg_cost, total_value
+            FROM stock_balances
+            WHERE item_id = :item_id AND warehouse_id = :warehouse_id
+        """),
+        {"item_id": item_id, "warehouse_id": warehouse_id}
+    ).fetchone()
+
+    if balance:
+        old_qty   = float(balance.qty_on_hand or 0)
+        old_cost  = float(balance.avg_cost or 0)
+        new_qty   = old_qty + qty_delta
+
+        # Weighted average cost (only update on positive receipts)
+        if qty_delta > 0 and unit_cost > 0:
+            total_old_value = old_qty * old_cost
+            total_new_value = qty_delta * unit_cost
+            new_avg_cost = (total_old_value + total_new_value) / new_qty if new_qty > 0 else unit_cost
+        else:
+            new_avg_cost = old_cost
+
+        new_qty   = max(0, new_qty)
+        new_value = new_qty * new_avg_cost
+
+        db.execute(
+            _text("""
+                UPDATE stock_balances
+                SET qty_on_hand   = :qty,
+                    qty_available = :qty,
+                    avg_cost      = :cost,
+                    total_value   = :value,
+                    updated_at    = now()
+                WHERE item_id = :item_id AND warehouse_id = :warehouse_id
+            """),
+            {
+                "qty":          new_qty,
+                "cost":         new_avg_cost,
+                "value":        new_value,
+                "item_id":      item_id,
+                "warehouse_id": warehouse_id,
+            }
+        )
+    else:
+        # First movement for this item/warehouse combo
+        qty   = max(0, qty_delta)
+        cost  = unit_cost if unit_cost > 0 else 0
+        value = qty * cost
+        db.execute(
+            _text("""
+                INSERT INTO stock_balances
+                (id, hotel_id, item_id, warehouse_id, qty_on_hand,
+                 qty_reserved, qty_available, avg_cost, total_value, updated_at)
+                VALUES
+                (:id, :hotel_id, :item_id, :warehouse_id, :qty,
+                 0, :qty, :cost, :value, now())
+            """),
+            {
+                "id":           str(_uuid.uuid4()),
+                "hotel_id":     hotel_id,
+                "item_id":      item_id,
+                "warehouse_id": warehouse_id,
+                "qty":          qty,
+                "cost":         cost,
+                "value":        value,
+            }
+        )
+
+
+@router.get("/inventory/stock-balances")
+def get_stock_balances(
+    warehouse_id: str = "",
+    item_id: str = "",
+    db: Session = Depends(get_db),
+    current_user=Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """Get current stock levels for all items."""
+    from sqlalchemy import text as _text
+
+    filters = ["hotel_id = :hotel_id"]
+    params  = {"hotel_id": hotel_id}
+
+    if warehouse_id:
+        filters.append("warehouse_id = :warehouse_id")
+        params["warehouse_id"] = warehouse_id
+    if item_id:
+        filters.append("item_id = :item_id")
+        params["item_id"] = item_id
+
+    where = " AND ".join(filters)
+    rows  = db.execute(
+        _text(f"""
+            SELECT sb.id, sb.item_id, sb.warehouse_id,
+                   sb.qty_on_hand, sb.qty_reserved, sb.qty_available,
+                   sb.avg_cost, sb.total_value, sb.updated_at,
+                   ii.item_code, ii.name as item_name,
+                   ii.unit_of_measure, ii.min_stock, ii.reorder_qty,
+                   w.name as warehouse_name, w.code as warehouse_code
+            FROM stock_balances sb
+            LEFT JOIN inventory_items ii ON ii.id = sb.item_id
+            LEFT JOIN warehouses w       ON w.id  = sb.warehouse_id
+            WHERE {where}
+            ORDER BY ii.name, w.name
+        """),
+        params
+    ).fetchall()
+
+    result = []
+    for r in rows:
+        row = dict(r._mapping)
+        row["is_low_stock"] = (
+            float(row.get("min_stock") or 0) > 0 and
+            float(row.get("qty_available") or 0) <= float(row.get("min_stock") or 0)
+        )
+        result.append(row)
+
+    return {
+        "count":       len(result),
+        "total_value": sum(float(r.get("total_value") or 0) for r in result),
+        "low_stock":   sum(1 for r in result if r["is_low_stock"]),
+        "balances":    result,
+    }
+
+
+@router.post("/inventory/rebuild-balances")
+def rebuild_stock_balances(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    """
+    Rebuild ALL stock_balances from scratch using stock_movements history.
+    Run this once to initialize balances from existing movement data.
+    """
+    from src.commercial.stock_movements.models import StockMovement as _SM
+    from sqlalchemy import text as _text
+
+    # Clear all existing balances for this hotel
+    db.execute(
+        _text("DELETE FROM stock_balances WHERE hotel_id = :hotel_id"),
+        {"hotel_id": hotel_id}
+    )
+    db.commit()
+
+    # Replay all movements in chronological order
+    movements = (
+        db.query(_SM)
+        .filter(_SM.hotel_id == hotel_id)
+        .order_by(_SM.created_at.asc())
+        .all()
+    )
+
+    INBOUND  = {"purchase_receipt", "opening_balance", "stock_adjustment",
+                "return_from_site", "transfer_in"}
+    OUTBOUND = {"issue_to_contract", "issue_to_project", "issue_to_technician",
+                "transfer_out", "write_off", "damaged", "lost"}
+
+    processed = 0
+    for mv in movements:
+        if mv.movement_type in INBOUND:
+            qty_delta = abs(float(mv.qty or 0))
+        elif mv.movement_type in OUTBOUND:
+            qty_delta = -abs(float(mv.qty or 0))
+        else:
+            # stock_adjustment can be positive or negative
+            qty_delta = float(mv.qty or 0)
+
+        _update_stock_balance(
+            db,
+            hotel_id     = hotel_id,
+            item_id      = mv.item_id,
+            warehouse_id = mv.warehouse_id,
+            qty_delta    = qty_delta,
+            unit_cost    = float(mv.unit_cost or 0),
+        )
+        processed += 1
+
+    db.commit()
+
+    # Get summary
+    from sqlalchemy import text as _text2
+    summary = db.execute(
+        _text2("""
+            SELECT COUNT(*) as rows,
+                   SUM(qty_on_hand) as total_qty,
+                   SUM(total_value) as total_value
+            FROM stock_balances WHERE hotel_id = :hotel_id
+        """),
+        {"hotel_id": hotel_id}
+    ).fetchone()
+
+    return {
+        "ok":             True,
+        "movements_replayed": processed,
+        "balance_rows":   int(summary.rows or 0),
+        "total_qty":      float(summary.total_qty or 0),
+        "total_value":    float(summary.total_value or 0),
     }

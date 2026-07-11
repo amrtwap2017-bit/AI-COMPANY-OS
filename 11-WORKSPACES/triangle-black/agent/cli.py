@@ -174,7 +174,7 @@ Output a step-by-step implementation plan."""
 
 
 def _cmd_ask(question: str):
-    """Ask AI about the codebase — short focused prompt."""
+    """Ask AI about Triangle Black — identity-first context loading."""
     if not question:
         print("Usage: ./tb-agent ask \"your question\"")
         return
@@ -184,32 +184,43 @@ def _cmd_ask(question: str):
         from agent.memory.indexer import CodebaseIndexer
         import os
 
-        # Get 3 most relevant code chunks only
-        context = ""
+        brain_dir = "/home/amr/AI-COMPANY-OS/brains/triangle-black"
+
+        # ALWAYS load identity + implementation first (non-negotiable context)
+        identity = ""
+        for fname in [
+            "01-PROJECT-IDENTITY.md",
+            "00-BRAIN-BOOTSTRAP.md",
+            "04-CURRENT-IMPLEMENTATION.md",
+        ]:
+            fpath = os.path.join(brain_dir, fname)
+            if os.path.exists(fpath):
+                with open(fpath) as f:
+                    identity += f"\n=== {fname} ===\n" + f.read()[:600]
+
+        # Then get relevant code chunks for the specific question
+        code_context = ""
         indexer = CodebaseIndexer()
         if indexer.count() > 0:
             results = indexer.search(question, n_results=3)
             parts = [f"[{r['file']}]\n{r['content'][:300]}" for r in results]
-            context = "\n---\n".join(parts)
-            print(f"📚 {len(results)} relevant chunks found")
+            code_context = "\n---\n".join(parts)
+            print(f"📚 {len(results)} code chunks loaded")
 
-        # Read only bootstrap (tiny)
-        bootstrap = ""
-        bpath = "/home/amr/AI-COMPANY-OS/brains/triangle-black/00-BRAIN-BOOTSTRAP.md"
-        if os.path.exists(bpath):
-            with open(bpath) as f:
-                bootstrap = f.read()[:500]
+        prompt = f"""You are a senior engineer on Triangle Black.
+Triangle Black is a REAL SOFTWARE PLATFORM — a hotel engineering services CRM
+built with FastAPI + PostgreSQL + Next.js. It is NOT a meme or slang term.
 
-        prompt = f"""You are an engineer on Triangle Black (hotel CRM, v4.3.0, FastAPI+Next.js).
-
-PROJECT: {bootstrap}
+MANDATORY PROJECT IDENTITY (read this first):
+{identity}
 
 RELEVANT CODE:
-{context}
+{code_context}
 
 QUESTION: {question}
 
-Answer in 3-5 sentences using the project context above."""
+Answer ONLY about Triangle Black the software platform using the context above.
+Be specific — reference real file names, endpoints, versions, and features."""
 
         client = OllamaClient()
         print("⏳ Thinking...")
