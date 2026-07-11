@@ -52,8 +52,10 @@ def _cmd_status():
 
     # Check Ollama
     try:
-        with urllib.request.urlopen("http://localhost:11434/api/tags", timeout=3) as r:
-            data = json.loads(r.read())
+        import urllib.request as _ur
+        import json as _json
+        with _ur.urlopen("http://localhost:11434/api/tags", timeout=3) as r:
+            data = _json.loads(r.read())
             models = [m["name"] for m in data.get("models", [])]
             print(f"  ✅ Ollama  → {len(models)} models: {', '.join(models[:4])}")
     except Exception as e:
@@ -100,20 +102,47 @@ def _cmd_index(force: bool = False):
 
 
 def _cmd_analyze():
-    """AI analyzes codebase and reports gaps."""
-    print("🧠 Analyzing codebase...")
+    """AI analyzes codebase — minimal prompt to avoid timeout."""
+    print("🧠 Analyzing Triangle Black...")
     try:
         from agent.core.llm import OllamaClient
+        import os
+
+        # Load just the backlog and blockers (small files)
+        brain_dir = "/home/amr/AI-COMPANY-OS/brains/triangle-black"
+        backlog  = ""
+        blockers = ""
+        bootstrap = ""
+        for fname, var in [
+            ("08-CURRENT-BACKLOG.md",   "backlog"),
+            ("09-CURRENT-BLOCKERS.md",  "blockers"),
+            ("00-BRAIN-BOOTSTRAP.md",   "bootstrap"),
+        ]:
+            fpath = os.path.join(brain_dir, fname)
+            if os.path.exists(fpath):
+                with open(fpath) as f:
+                    txt = f.read()[:600]
+                if var == "backlog":   backlog   = txt
+                if var == "blockers":  blockers  = txt
+                if var == "bootstrap": bootstrap = txt
+
+        prompt = f"""Triangle Black is a hotel engineering CRM at v4.3.0.
+Stack: FastAPI + PostgreSQL + Next.js. Tests: 111 passing.
+
+BACKLOG:
+{backlog}
+
+BLOCKERS:
+{blockers}
+
+In 5 bullet points, what are the top priorities to work on next?
+Be brief and specific."""
+
         client = OllamaClient()
-        prompt = """You are analyzing the Triangle Black hotel CRM codebase.
-Based on a FastAPI backend with leads, quotes, contracts, invoices, and 3 portals,
-identify the top 5 most important missing features or bugs to fix next.
-Be specific and practical."""
+        print("⏳ Thinking (using qwen2.5-coder)...")
         response = client.plan(prompt)
         print()
         print(response)
-    except ImportError as e:
-        print(f"❌ LLM client not available: {e}")
     except Exception as e:
         print(f"❌ Analysis failed: {e}")
 
@@ -145,15 +174,46 @@ Output a step-by-step implementation plan."""
 
 
 def _cmd_ask(question: str):
-    """Ask AI about the codebase."""
+    """Ask AI about the codebase — short focused prompt."""
     if not question:
         print("Usage: ./tb-agent ask \"your question\"")
         return
-    print(f"💬 Asking: {question}")
+    print(f"💬 {question}")
     try:
         from agent.core.llm import OllamaClient
+        from agent.memory.indexer import CodebaseIndexer
+        import os
+
+        # Get 3 most relevant code chunks only
+        context = ""
+        indexer = CodebaseIndexer()
+        if indexer.count() > 0:
+            results = indexer.search(question, n_results=3)
+            parts = [f"[{r['file']}]\n{r['content'][:300]}" for r in results]
+            context = "\n---\n".join(parts)
+            print(f"📚 {len(results)} relevant chunks found")
+
+        # Read only bootstrap (tiny)
+        bootstrap = ""
+        bpath = "/home/amr/AI-COMPANY-OS/brains/triangle-black/00-BRAIN-BOOTSTRAP.md"
+        if os.path.exists(bpath):
+            with open(bpath) as f:
+                bootstrap = f.read()[:500]
+
+        prompt = f"""You are an engineer on Triangle Black (hotel CRM, v4.3.0, FastAPI+Next.js).
+
+PROJECT: {bootstrap}
+
+RELEVANT CODE:
+{context}
+
+QUESTION: {question}
+
+Answer in 3-5 sentences using the project context above."""
+
         client = OllamaClient()
-        response = client.plan(question)
+        print("⏳ Thinking...")
+        response = client.ask(prompt)
         print()
         print(response)
     except Exception as e:

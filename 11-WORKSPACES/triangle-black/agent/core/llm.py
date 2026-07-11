@@ -1,83 +1,73 @@
 """
-TB Agent — LLM interface
-Wraps Ollama with streaming, retries, and model routing.
+TB Agent LLM Client — wraps Ollama API directly
 """
 from __future__ import annotations
-import ollama
-from rich.console import Console
-from rich.markup import escape
-from .config import PLANNER_MODEL, CODER_MODEL, REVIEWER_MODEL, OLLAMA_HOST
-
-console = Console()
+import json
+import urllib.request
+import urllib.error
 
 
-def _call(model: str, prompt: str, system: str = "", stream: bool = True) -> str:
-    """Call Ollama model. Returns full response string."""
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    client = ollama.Client(host=OLLAMA_HOST)
-    full = ""
-
-    if stream:
-        for chunk in client.chat(model=model, messages=messages, stream=True):
-            text = chunk["message"]["content"]
-            print(text, end="", flush=True)
-            full += text
-        print()
-    else:
-        resp = client.chat(model=model, messages=messages, stream=False)
-        full = resp["message"]["content"]
-
-    return full
+OLLAMA_BASE = "http://localhost:11434"
+PLAN_MODEL  = "qwen2.5-coder:7b"
+CODE_MODEL  = "qwen2.5-coder:7b"
 
 
-def plan(prompt: str) -> str:
-    """Use deepseek-r1 for planning and reasoning."""
-    console.rule(f"[bold blue]PLANNER ({PLANNER_MODEL})")
-    return _call(
-        PLANNER_MODEL,
-        prompt,
-        system=(
-            "You are an expert software architect analyzing the Triangle Black "
-            "hotel engineering platform (FastAPI + Next.js + PostgreSQL). "
-            "Be precise, structured, and actionable. "
-            "When listing tasks, number them clearly."
-        ),
-        stream=True,
+def _ollama_generate(model: str, prompt: str, timeout: int = 120) -> str:
+    """Call Ollama /api/generate and return the full response text."""
+    payload = json.dumps({
+        "model":  model,
+        "prompt": prompt,
+        "stream": False,
+    }).encode()
+
+    req = urllib.request.Request(
+        f"{OLLAMA_BASE}/api/generate",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
     )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = json.loads(resp.read())
+            return data.get("response", "").strip()
+    except urllib.error.URLError as e:
+        return f"❌ Ollama not reachable: {e}"
+    except Exception as e:
+        return f"❌ LLM error: {e}"
 
 
-def code(prompt: str) -> str:
-    """Use qwen2.5-coder for code generation."""
-    console.rule(f"[bold green]CODER ({CODER_MODEL})")
-    return _call(
-        CODER_MODEL,
-        prompt,
-        system=(
-            "You are an expert Python and TypeScript developer. "
-            "Write complete, production-ready code. "
-            "Never write stubs or TODO comments. "
-            "Return ONLY the code, no explanation before or after. "
-            "For Python: follow existing patterns in src/commercial/. "
-            "For TypeScript/TSX: use Tailwind CSS, match existing Navy #1B2B4B theme."
-        ),
-        stream=True,
-    )
+class OllamaClient:
+    """Simple Ollama wrapper used by TB Agent commands."""
 
+    def plan(self, prompt: str) -> str:
+        """Use planning model (deepseek-r1) for analysis and reasoning."""
+        return _ollama_generate(PLAN_MODEL, prompt)
 
-def review(prompt: str) -> str:
-    """Use qwen3.5 for fast review."""
-    return _call(REVIEWER_MODEL, prompt, stream=False)
+    def code(self, prompt: str) -> str:
+        """Use coding model (qwen2.5-coder) for code generation."""
+        return _ollama_generate(CODE_MODEL, prompt)
 
+    def ask(self, question: str) -> str:
+        """Ask either model a question — uses planning model."""
+        return _ollama_generate(PLAN_MODEL, question)
 
-def embed(texts: list[str]) -> list[list[float]]:
-    """Generate embeddings using nomic-embed-text."""
-    client = ollama.Client(host=OLLAMA_HOST)
-    results = []
-    for text in texts:
-        resp = client.embeddings(model="nomic-embed-text", prompt=text[:2000])
-        results.append(resp["embedding"])
-    return results
+    def is_available(self) -> bool:
+        """Check if Ollama is reachable."""
+        try:
+            with urllib.request.urlopen(
+                f"{OLLAMA_BASE}/api/tags", timeout=3
+            ) as resp:
+                return resp.status == 200
+        except Exception:
+            return False
+
+    def list_models(self) -> list[str]:
+        """Return list of available model names."""
+        try:
+            with urllib.request.urlopen(
+                f"{OLLAMA_BASE}/api/tags", timeout=3
+            ) as resp:
+                data = json.loads(resp.read())
+                return [m["name"] for m in data.get("models", [])]
+        except Exception:
+            return []
