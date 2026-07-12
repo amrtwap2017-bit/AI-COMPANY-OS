@@ -1,7 +1,10 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Report repository
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Optional

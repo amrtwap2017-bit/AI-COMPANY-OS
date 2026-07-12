@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Agent SQLAlchemy model — Triangle Black
 Matches actual agents table in DB.
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, Boolean, DateTime, Index

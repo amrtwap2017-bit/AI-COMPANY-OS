@@ -1,5 +1,8 @@
-"""Service Report SQLAlchemy model — Triangle Black"""
 from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
+"""Service Report SQLAlchemy model — Triangle Black"""
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime, Text, JSON, Index

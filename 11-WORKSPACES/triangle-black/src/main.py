@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 """
 Triangle Black — Main FastAPI Application v1.4.0
 Hotel Engineering Platform — Multi-hotel tenant isolation
 """
-from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

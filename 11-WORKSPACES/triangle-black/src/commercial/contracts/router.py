@@ -1,7 +1,15 @@
+from __future__ import annotations
+
+from src.core.auth import require_agent, require_manager
+
+from src.commercial.auth.models import User
+
+from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
 """
 Contract FastAPI router — Triangle Black
 """
-from __future__ import annotations
 from typing import List, Optional
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -10,9 +18,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from src.core.database import get_db
-from src.core.auth import require_agent, require_manager
 from src.core.tenant import get_hotel_id
-from src.commercial.auth.models import User
 from .schemas import ContractCreate, ContractUpdate, ContractResponse
 from .repository import ContractRepository
 from src.commercial.contracts.models import Contract
@@ -21,7 +27,6 @@ from src.commercial.invoices.models import Invoice
 router = APIRouter(prefix="/contracts", tags=["contracts"])
 
 DEFAULT_HOTEL = "tb-default-hotel-000000000001"
-
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -35,7 +40,6 @@ def _next_invoice_number(db: Session) -> str:
         .count()
     )
     return f"{prefix}{str(count + 1).zfill(4)}"
-
 
 def _create_invoice_for_contract(db: Session, contract: Contract,
                                   hotel_id: str, renewal_number: int = 0) -> Invoice:
@@ -66,7 +70,6 @@ def _create_invoice_for_contract(db: Session, contract: Contract,
     db.add(inv)
     return inv
 
-
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=ContractResponse, status_code=201)
@@ -80,7 +83,6 @@ def create(
     data["hotel_id"] = hotel_id
     return ContractRepository(db).create(data)
 
-
 @router.get("/", response_model=List[ContractResponse])
 def list_all(
     skip: int = 0,
@@ -90,7 +92,6 @@ def list_all(
     hotel_id: str = Depends(get_hotel_id),
 ):
     return ContractRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
-
 
 @router.get("/{contract_id}", response_model=ContractResponse)
 def get(
@@ -103,7 +104,6 @@ def get(
     if not obj:
         raise HTTPException(status_code=404, detail="Contract not found")
     return obj
-
 
 @router.patch("/{contract_id}", response_model=ContractResponse)
 def update(
@@ -120,7 +120,6 @@ def update(
         raise HTTPException(status_code=404, detail="Contract not found")
     return obj
 
-
 @router.delete("/{contract_id}", status_code=204)
 def delete(
     contract_id: str,
@@ -130,7 +129,6 @@ def delete(
 ):
     if not ContractRepository(db).delete(contract_id, hotel_id=hotel_id):
         raise HTTPException(status_code=404, detail="Contract not found")
-
 
 # ── ACTIVATE ──────────────────────────────────────────────────────────────────
 
@@ -172,12 +170,10 @@ def activate(
 
     return contract
 
-
 # ── RENEW ─────────────────────────────────────────────────────────────────────
 
 class RenewIn(BaseModel):
     duration_months: Optional[int] = None  # override duration, defaults to same
-
 
 @router.post("/{contract_id}/renew", response_model=ContractResponse)
 def renew(

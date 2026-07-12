@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Activity SQLAlchemy model — Triangle Black
 Matches actual activities table in DB.
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Index

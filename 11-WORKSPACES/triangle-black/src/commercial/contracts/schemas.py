@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Contract Pydantic schemas — Triangle Black
 Matches actual contracts table in DB.
 """
-from __future__ import annotations
 from typing import Optional, List, Any
 from datetime import datetime
 from pydantic import BaseModel

@@ -1,5 +1,8 @@
-"""Procurement Event (Audit Log) model — Triangle Black"""
 from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
+"""Procurement Event (Audit Log) model — Triangle Black"""
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Index

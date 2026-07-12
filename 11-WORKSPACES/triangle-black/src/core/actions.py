@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
 """
 Triangle Black — Business Action Endpoints (JWT Protected)
 MT-002: All queries scoped to hotel_id for tenant isolation.
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Optional, List, Any

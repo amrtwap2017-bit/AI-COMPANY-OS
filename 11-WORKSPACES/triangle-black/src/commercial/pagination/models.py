@@ -1,9 +1,12 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 PaginationLog model — Triangle Black
 Matches the actual paginated_responses table in DB:
   id, hotel_id, data, skip, limit, total_count, created_at
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime, Text, Index

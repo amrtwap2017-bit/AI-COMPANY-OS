@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 EmailNotification SQLAlchemy model — Triangle Black
 Stores sent email audit log with hotel_id tenant isolation.
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Boolean, Index

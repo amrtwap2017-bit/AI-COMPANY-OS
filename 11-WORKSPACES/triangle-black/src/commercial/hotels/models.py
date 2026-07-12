@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Hotel SQLAlchemy model — Triangle Black
 Matches actual hotels table in DB (all 15 columns).
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime, Text, JSON, Index

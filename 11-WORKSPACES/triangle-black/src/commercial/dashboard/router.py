@@ -1,3 +1,7 @@
+from src.core.auth import require_agent, require_manager
+
+from src.commercial.auth.models import User
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from src.core.database import get_db

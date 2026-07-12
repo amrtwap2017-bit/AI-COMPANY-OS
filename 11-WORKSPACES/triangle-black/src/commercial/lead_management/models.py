@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import datetime
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from src.core.base import Base

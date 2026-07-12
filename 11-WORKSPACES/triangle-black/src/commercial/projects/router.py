@@ -1,8 +1,11 @@
+from src.core.auth import require_agent, require_manager
+
+from src.commercial.auth.models import User
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
-from src.core.auth import require_agent, require_manager
 from src.commercial.projects.models import Project
 from src.commercial.projects.repository import ProjectRepository
 from src.commercial.projects.schemas import ProjectCreate, ProjectUpdate, ProjectResponse

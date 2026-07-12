@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from src.commercial.auth.models import User
+
 """
 Notifications router — Triangle Black
 GET    /notifications/           → list for current user role
@@ -6,18 +10,15 @@ PATCH  /notifications/{id}/read  → mark one as read
 POST   /notifications/read-all   → mark all as read for role
 DELETE /notifications/{id}       → delete one
 """
-from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
 from src.core.auth import get_current_user
-from src.commercial.auth.models import User
 from .repository import NotificationRepository
 from .schemas import NotificationResponse, NotificationList
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
-
 
 @router.get("/", response_model=NotificationList)
 def list_notifications(
@@ -38,7 +39,6 @@ def list_notifications(
         unread_count=unread,
     )
 
-
 @router.get("/unread", response_model=dict)
 def unread_count(
     db: Session = Depends(get_db),
@@ -47,7 +47,6 @@ def unread_count(
     repo = NotificationRepository(db)
     count = repo.unread_count(current_user.role)
     return {"unread_count": count, "role": current_user.role}
-
 
 @router.patch("/{notification_id}/read", response_model=NotificationResponse)
 def mark_read(
@@ -61,7 +60,6 @@ def mark_read(
         raise HTTPException(status_code=404, detail="Notification not found")
     return NotificationResponse.model_validate(obj)
 
-
 @router.post("/read-all", response_model=dict)
 def mark_all_read(
     db: Session = Depends(get_db),
@@ -70,7 +68,6 @@ def mark_all_read(
     repo = NotificationRepository(db)
     count = repo.mark_all_read(current_user.role)
     return {"ok": True, "marked_read": count}
-
 
 @router.delete("/{notification_id}", response_model=dict)
 def delete_notification(

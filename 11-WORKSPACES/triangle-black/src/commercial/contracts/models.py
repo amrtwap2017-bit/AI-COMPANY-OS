@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Contract SQLAlchemy model — Triangle Black
 Matches actual contracts table in DB (all 17 columns).
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Float, Integer, JSON, Index

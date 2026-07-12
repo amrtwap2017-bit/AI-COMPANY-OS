@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 """
 Triangle Black — Tenant (Hotel) Isolation
 Every authenticated request carries hotel context.
 Inject get_hotel_id as a dependency in any endpoint that needs isolation.
 """
-from __future__ import annotations
 from typing import Optional
 from fastapi import Depends, HTTPException, Header
 from sqlalchemy.orm import Session

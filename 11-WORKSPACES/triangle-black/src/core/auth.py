@@ -1,7 +1,10 @@
+from __future__ import annotations
+from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
 """
 Triangle Black — JWT Authentication System
 """
-from __future__ import annotations
 import os
 import bcrypt
 from datetime import datetime, timedelta

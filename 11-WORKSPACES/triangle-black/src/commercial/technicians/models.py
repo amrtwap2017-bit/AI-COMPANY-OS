@@ -1,5 +1,8 @@
-"""Technician SQLAlchemy model — Triangle Black"""
 from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
+"""Technician SQLAlchemy model — Triangle Black"""
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, JSON, Index

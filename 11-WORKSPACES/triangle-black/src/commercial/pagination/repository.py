@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 PaginationLog repository — Triangle Black
 Uses actual DB columns: id, hotel_id, data, skip, limit, total_count, created_at
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import Optional

@@ -1,4 +1,10 @@
 from __future__ import annotations
+
+from src.commercial.auth.models import User
+
+from datetime import datetime
+
+from datetime import datetime
 import uuid
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, status
@@ -12,7 +18,6 @@ from src.core.auth import (
     create_access_token, create_refresh_token, decode_token,
     get_current_user, require_admin,
 )
-from src.commercial.auth.models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

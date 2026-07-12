@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 """
 Triangle Black — Email Service
 Sends quote PDF proposals to hotel clients via SMTP.
 Runs in FastAPI BackgroundTasks — never blocks the API response.
 If SMTP is not configured, logs a warning and exits gracefully.
 """
-from __future__ import annotations
 import os
 import smtplib
 import logging

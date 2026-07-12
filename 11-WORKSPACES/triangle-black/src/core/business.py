@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
 """
 Triangle Black — Business Logic Engine
 MT-002: All queries accept hotel_id for tenant isolation.
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional

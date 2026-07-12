@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Notification — Triangle Black
 Auto-created on key business events. Role-based fan-out.
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Boolean, Index

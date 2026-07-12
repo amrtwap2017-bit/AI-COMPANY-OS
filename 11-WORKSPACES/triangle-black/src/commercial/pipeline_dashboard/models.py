@@ -1,7 +1,10 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Pipeline SQLAlchemy model — Triangle Black
 """
-from __future__ import annotations
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Index

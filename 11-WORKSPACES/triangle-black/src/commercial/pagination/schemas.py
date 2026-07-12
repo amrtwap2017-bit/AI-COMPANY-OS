@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Pagination Pydantic schemas — Triangle Black
 Matches actual paginated_responses table: id, hotel_id, data, skip, limit, total_count, created_at
 """
-from __future__ import annotations
 from typing import Generic, List, TypeVar
 from pydantic import BaseModel
 from datetime import datetime

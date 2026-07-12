@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Triangle Black — Enterprise PDF Quote Generator
 World-class engineering services proposal document
 """
-from __future__ import annotations
 import io
 from datetime import datetime
 from typing import Optional

@@ -1,8 +1,11 @@
+from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
 """
 Email sending service — Triangle Black
 Uses smtplib for SMTP delivery. Logs all attempts to DB.
 """
-from __future__ import annotations
 import os
 import smtplib
 from datetime import datetime

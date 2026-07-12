@@ -1,5 +1,8 @@
-"""Inventory Vendor model — Triangle Black"""
 from __future__ import annotations
+from datetime import datetime
+
+from datetime import datetime
+"""Inventory Vendor model — Triangle Black"""
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime, Text, Integer, Index
