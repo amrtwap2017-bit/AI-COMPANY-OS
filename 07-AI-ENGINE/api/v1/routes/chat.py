@@ -96,7 +96,7 @@ class ChatRequest(BaseModel):
     agent: Optional[str] = None
 
 
-async def _stream_tokens(message: str, model: str, system: str, history: list) -> AsyncGenerator[str, None]:
+async def _stream_tokens(message: str, model: str, system: str, history: list, agent: str = "") -> AsyncGenerator[str, None]:
     # Inject RAG knowledge context into system prompt
     rag_context  = _get_rag_context(message)
     agent_mem    = _get_agent_memory(agent if agent else "")
@@ -147,7 +147,7 @@ async def chat(req: ChatRequest):
     if req.stream:
         async def _stream_with_save():
             full_response = []
-            async for chunk in _stream_tokens(req.message, req.model, req.system, req.history):
+            async for chunk in _stream_tokens(req.message, req.model, req.system, req.history, req.agent or ""):
                 yield chunk
                 try:
                     import json as _json

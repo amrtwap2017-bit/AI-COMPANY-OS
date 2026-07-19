@@ -16,7 +16,7 @@ import os as _os
 
 _DB_URL = _os.environ.get(
     "TRIANGLE_BLACK_DB_URL",
-    "postgresql+psycopg2://triangleblack:tb123@127.0.0.1:5434/triangle_black"
+    "postgresql+psycopg2://triangleblack:tb123@127.0.0.1:5432/triangle_black"
 )
 
 engine = _create_engine(_DB_URL, pool_pre_ping=True)
