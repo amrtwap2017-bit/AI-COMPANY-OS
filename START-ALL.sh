@@ -32,3 +32,10 @@ echo "  TB Portal:      http://localhost:3001"
 echo "  AI Engine API:  http://localhost:8001/docs"
 echo "  TB Admin API:   http://localhost:8030/docs"
 echo "  OpenWebUI:      http://localhost:3400"
+
+# === Ensure Nginx HTTPS proxy is running ===
+if command -v nginx >/dev/null 2>&1; then
+    sudo systemctl is-active nginx >/dev/null 2>&1 \
+        || sudo systemctl start nginx 2>/dev/null
+    echo "Nginx: $(sudo systemctl is-active nginx 2>/dev/null || echo 'check manually')"
+fi
