@@ -2,7 +2,7 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { invoicesApi, extendedInvoicesApi, extendedInvoicesApi, extendedInvoicesApi } from "@/lib/api";
+import {invoicesApi, extendedInvoicesApi} from "@/lib/api";
 import { formatEGP, formatDate } from "@/lib/utils";
 import {
   ArrowLeft, Receipt, CheckCircle, Send,

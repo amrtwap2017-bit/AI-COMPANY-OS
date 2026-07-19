@@ -111,12 +111,13 @@ async function request<T = any>(
     signal,
   })
 
-  // DEV: 401 bypass
-    }
+  // Handle 401 — DEV MODE: throw error, no redirect
+  if (response.status === 401) {
     throw new TBApiError(401, 'Session expired. Please log in again.')
   }
 
   // Handle 403
+
   if (response.status === 403) {
     throw new TBApiError(403, 'Access denied. Insufficient permissions.')
   }

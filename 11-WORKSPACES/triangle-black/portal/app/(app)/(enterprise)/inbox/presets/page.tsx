@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { RoleWorkbenchHero } from "../../../../../components/workspace/RoleWorkbenchHero";
 import { InboxPresetCards } from "../../../../../components/workspace/InboxPresetCards";
 import { InsightStack } from "../../../../../components/workspace/InsightStack";

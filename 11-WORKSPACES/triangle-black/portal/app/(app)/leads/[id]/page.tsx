@@ -2,7 +2,7 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { leadsApi, extendedLeadsApi, extendedLeadsApi, extendedLeadsApi } from "@/lib/api";
+import {leadsApi, extendedLeadsApi} from "@/lib/api";
 import { Lead, Activity } from "@/lib/types";
 import { Card, CardHeader } from "@/components/Card";
 import { Badge } from "@/components/Badge";

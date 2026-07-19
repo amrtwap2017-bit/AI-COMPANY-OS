@@ -13,3 +13,14 @@ export const WorkOrderSchema = z.object({
 });
 
 export type WorkOrderFormData = z.infer<typeof WorkOrderSchema>;
+
+export const WO_CATEGORIES = [
+  "electrical", "plumbing", "hvac", "mechanical",
+  "civil", "it", "cleaning", "security", "other",
+] as const;
+
+export const WO_PRIORITIES = [
+  "low", "medium", "high", "critical", "emergency",
+] as const;
+
+export const createWorkOrderSchema = WorkOrderSchema;

@@ -11,7 +11,7 @@ async function safe(url: string, fallback: unknown = null) {
 
 export default async function OrchestratorPage() {
   const [status, runs, obs] = await Promise.all([
-    safe(`${ENGINE}/orchestrator/status`, {}),
+    safe(`${ENGINE}/orchestrator/status`, {}) as Record<string, string>,
     safe(`${ENGINE}/orchestrator/runs`, { runs: [], total: 0 }),
     safe(`${ENGINE}/orchestrator/observability`, {}),
   ]);

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 
 import { entityBackendMatrix } from "../../../../../lib/entity-backend-matrix";
 import { BackendAlignmentPanel } from "../../../../../components/workspace/BackendAlignmentPanel";

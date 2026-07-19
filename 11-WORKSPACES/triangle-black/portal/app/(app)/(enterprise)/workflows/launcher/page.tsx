@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 
 import { RoleWorkspaceBanner } from "../../../../../components/workspace/RoleWorkspaceBanner";
 import { WorkflowLauncherPanel } from "../../../../../components/workspace/WorkflowLauncherPanel";

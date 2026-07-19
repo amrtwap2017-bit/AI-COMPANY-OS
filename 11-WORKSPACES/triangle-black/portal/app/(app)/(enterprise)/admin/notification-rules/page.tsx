@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { RoleWorkbenchHero } from "../../../../../components/workspace/RoleWorkbenchHero";
 import { NotificationRuleStudio } from "../../../../../components/workspace/NotificationRuleStudio";
 import { InsightStack } from "../../../../../components/workspace/InsightStack";

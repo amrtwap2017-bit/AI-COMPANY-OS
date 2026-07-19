@@ -2,7 +2,7 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { contractsApi, extendedContractsApi, extendedContractsApi, extendedContractsApi } from "@/lib/api";
+import {contractsApi, extendedContractsApi} from "@/lib/api";
 import { Contract } from "@/lib/types";
 import { Card, CardHeader } from "@/components/Card";
 import { Badge } from "@/components/Badge";
