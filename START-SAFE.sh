@@ -1,109 +1,47 @@
 #!/bin/bash
-# ═══════════════════════════════════════════════
-#  AI COMPANY OS — SAFE MODE STARTUP
-#  Designed for: 16GB RAM / RTX 3000 6GB
-#  Rule: Never exceed 12GB RAM / 70% CPU
-# ═══════════════════════════════════════════════
+# CPU-SAFE startup — limits resource usage
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/.local/bin:$HOME/bin"
 
-echo "╔══════════════════════════════════════╗"
-echo "║   AI COMPANY OS — SAFE MODE START   ║"
-echo "╚══════════════════════════════════════╝"
+echo "=== CPU-SAFE STARTUP ==="
 
-# ── 1. Set Ollama limits BEFORE anything starts ──
-export OLLAMA_MAX_LOADED_MODELS=1
-export OLLAMA_KEEP_ALIVE="5m"
-export OLLAMA_NUM_PARALLEL=1
-export OLLAMA_MAX_QUEUE=5
+# Limit Docker containers
+docker update --cpus="2" ai-ollama   2>/dev/null && echo "  Ollama: max 2 CPUs"
+docker update --cpus="2" ai-postgres 2>/dev/null && echo "  Postgres: max 2 CPUs"
+docker update --cpus="1" ai-qdrant   2>/dev/null && echo "  Qdrant: max 1 CPU"
+docker update --cpus="1" ai-redis    2>/dev/null && echo "  Redis: max 1 CPU"
 
-# ── 2. Start Docker (lightweight services only) ──
-echo "=== Starting Docker services ==="
-docker start ai-postgres 2>/dev/null && echo "  ✅ Postgres"
-docker start ai-redis    2>/dev/null && echo "  ✅ Redis"
-docker start ai-qdrant   2>/dev/null && echo "  ✅ Qdrant"
-# OpenWebUI stays OFF by default — it eats 500MB+ RAM
-# To start: docker start ai-open-webui
+# Start Docker services
+docker start ai-qdrant ai-postgres ai-redis ai-ollama 2>/dev/null
 sleep 3
 
-# ── 3. Start Ollama (if not running) ──
-echo "=== Starting Ollama ==="
-pgrep -f "ollama serve" >/dev/null || {
-    nohup ollama serve > /tmp/ollama.log 2>&1 &
-    sleep 3
-}
-echo "  Ollama: $(ollama ps 2>/dev/null | wc -l) models loaded"
-
-# ── 4. Kill old processes ──
-echo "=== Cleaning old processes ==="
-pkill -f "07-AI-ENGINE" 2>/dev/null
-fuser -k 8001/tcp 2>/dev/null
-fuser -k 8030/tcp 2>/dev/null
-fuser -k 3000/tcp 2>/dev/null
-fuser -k 3001/tcp 2>/dev/null
-sleep 2
-
-# ── 5. Start AI Engine ──
-echo "=== Starting AI Engine ==="
+# Start AI Engine with low priority
+echo "=== Starting AI Engine (low priority) ==="
 cd /home/amr/AI-COMPANY-OS/07-AI-ENGINE
-nohup .venv/bin/python3 -m uvicorn main:app \
-  --host 0.0.0.0 --port 8001 \
-  --workers 1 \
-  --log-level warning > /tmp/ai-engine.log 2>&1 &
-echo "  Engine PID: $!"
+POSTGRES_PASSWORD=postgres \
+POSTGRES_USER=postgres \
+POSTGRES_DB=ai_company_os \
+POSTGRES_HOST=localhost \
+nice -n 10 nohup .venv/bin/python3 -m uvicorn main:app \
+  --host 0.0.0.0 --port 8001 --workers 1 \
+  > /tmp/ai-engine.log 2>&1 &
+echo "Engine PID: $! (nice +10)"
 
-# ── 6. Start TB Admin ──
-echo "=== Starting TB Admin ==="
+# Start TB Admin with low priority
+echo "=== Starting TB Admin (low priority) ==="
 cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
-nohup .venv/bin/python3 -m uvicorn src.main:app \
-  --host 0.0.0.0 --port 8030 \
-  --workers 1 \
-  --log-level warning > /tmp/tb-admin.log 2>&1 &
-echo "  TB Admin PID: $!"
+TRIANGLE_BLACK_DB_URL="postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black" \
+PYTHONPATH="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black" \
+nice -n 10 nohup .venv/bin/uvicorn main:app \
+  --host 0.0.0.0 --port 8030 --workers 1 \
+  > /tmp/tb-admin.log 2>&1 &
+echo "TB PID: $! (nice +10)"
 
-# ── 7. Wait for APIs before starting frontends ──
-echo "=== Waiting for APIs (10s) ==="
-sleep 10
+sleep 12
 
-# ── 8. Start Hub (1 frontend at a time) ──
-echo "=== Starting Hub Dashboard ==="
-cd /home/amr/AI-COMPANY-OS/hub/dashboard
-nohup node node_modules/.bin/next start -p 3000 > /tmp/hub.log 2>&1 &
-echo "  Hub PID: $!"
-sleep 3
+# Health check
+/usr/bin/curl -s -o /dev/null -w "Engine:   %{http_code}\n" http://localhost:8001/api/v1/ai/health
+/usr/bin/curl -s -o /dev/null -w "TB Admin: %{http_code}\n" http://localhost:8030/api/health
+/usr/bin/curl -s -o /dev/null -w "Qdrant:   %{http_code}\n" http://localhost:6333/healthz
 
-# ── 9. Start Portal ──
-echo "=== Starting Portal ==="
-cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/portal
-nohup node node_modules/.bin/next start -p 3001 > /tmp/portal.log 2>&1 &
-echo "  Portal PID: $!"
-sleep 3
-
-# ── 10. Health check ──
-echo ""
-echo "=== Health Check ==="
-for svc in \
-  "http://localhost:8001/api/v1/ai/health Engine" \
-  "http://localhost:8030/api/health TBAdmin" \
-  "http://localhost:3000 Hub" \
-  "http://localhost:3001/dashboard Portal"; do
-  url=$(echo $svc | /usr/bin/awk '{print $1}')
-  name=$(echo $svc | /usr/bin/awk '{print $2}')
-  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 $url)
-  [ "$code" = "200" ] && echo "  ✅ $name" || echo "  ❌ $name ($code)"
-done
-
-# ── 11. RAM report ──
-echo ""
-echo "=== Resource Usage ==="
-free -h | /usr/bin/awk 'NR==2{printf "  RAM: %s used / %s total (Free: %s)\n",$3,$2,$4}'
-echo "  Ollama models loaded: $(ollama ps 2>/dev/null | tail -n +2 | wc -l)"
-echo ""
-echo "╔══════════════════════════════════════╗"
-echo "║  SAFE MODE ACTIVE                   ║"
-echo "║  Hub:    http://localhost:3000       ║"
-echo "║  Portal: http://localhost:3001       ║"
-echo "║  Engine: http://localhost:8001/docs  ║"
-echo "║                                     ║"
-echo "║  ⚠️  Task processor: DISABLED        ║"
-echo "║  ⚠️  OpenWebUI: OFF (saves 500MB)   ║"
-echo "║  To enable: docker start ai-open-webui  ║"
-echo "╚══════════════════════════════════════╝"
+echo "=== CPU USAGE NOW ==="
+ps aux --sort=-%cpu | head -8

@@ -1,2 +1,17 @@
 07-AI-ENGINE/qdrant_storage/
 90-ARCHIVE/
+
+# Security auto-added
+*.env
+.env
+.env.local
+.env.production
+.env*.local
+*.pem
+*.key
+*.crt
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+reports/*.md

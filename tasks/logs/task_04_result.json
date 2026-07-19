@@ -1,0 +1,25 @@
+{
+  "created": [
+    "app/error.tsx \u2014 global error boundary",
+    "app/not-found.tsx \u2014 404 page",
+    "app/(app)/dashboard/loading.tsx",
+    "app/(app)/leads/loading.tsx",
+    "app/(app)/work-orders/loading.tsx",
+    "app/(app)/technicians/loading.tsx",
+    "app/(app)/assets/loading.tsx",
+    "app/(app)/warehouses/loading.tsx",
+    "components/ui/StatusBadge.tsx",
+    "ui/index.ts updated"
+  ],
+  "verified": [
+    "lib/utils.ts",
+    "lib/types.ts",
+    "lib/api.ts",
+    "lib/api/client.ts",
+    "lib/api/auth.ts",
+    "components/ui/EmptyState.tsx",
+    "app/error.tsx",
+    "app/not-found.tsx"
+  ],
+  "warnings": []
+}

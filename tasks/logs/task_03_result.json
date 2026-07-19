@@ -1,0 +1,38 @@
+{
+  "fixed": [
+    "done->completed",
+    "executing->in_progress",
+    "paused->pending"
+  ],
+  "warnings": [],
+  "data": {
+    "tasks": "37",
+    "breakdown": "pending|23\ncompleted|10\nplanning|3\nfailed|1",
+    "agents": "16",
+    "memories": "26",
+    "reflections": "10",
+    "leads": 74,
+    "qdrant": [
+      "knowledge",
+      "memory",
+      "os-architecture",
+      "os-domain",
+      "os-engineering",
+      "os-playbooks",
+      "os-skills",
+      "triangle-black-adr",
+      "triangle-black-architecture",
+      "triangle-black-backend",
+      "triangle-black-business",
+      "triangle-black-database",
+      "triangle-black-frontend",
+      "triangle-black-knowledge",
+      "triangle-black-memory",
+      "triangle-black-sprints",
+      "triangle-black_code",
+      "triangle-black_knowledge",
+      "triangle-black_memory"
+    ],
+    "redis": "healthy"
+  }
+}
