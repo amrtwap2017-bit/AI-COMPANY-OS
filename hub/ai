@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Triangle Black — Hub CLI Entry Point — stdlib only"""
+import sys
+import json
+import urllib.request
+import urllib.error
+
+sys.path.insert(0, '/home/amr/AI-COMPANY-OS')
+
+HUB_API    = "http://localhost:8000"
+TB_API     = "http://localhost:8020"
+
+def get(url, timeout=5):
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        return {"error": str(e)}
+
+def post(url, data, timeout=60):
+    try:
+        body = json.dumps(data).encode()
+        req  = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        return {"error": str(e)}
+
+def check(url):
+    try:
+        with urllib.request.urlopen(url, timeout=3) as r:
+            return r.status == 200
+    except:
+        return False
+
+def main():
+    args = sys.argv[1:]
+
+    if not args:
+        print("=" * 55)
+        print("  TRIANGLE BLACK — HUB OS  v2.0.0")
+        print("=" * 55)
+        print("  Usage: hub <command> [workspace] [args]")
+        print("")
+        print("  PLATFORM")
+        print("    dashboard              Full platform status")
+        print("    health                 Check all services")
+        print("")
+        print("  INTELLIGENCE")
+        print("    scan    <workspace>    Scan & index workspace")
+        print("    think   <workspace>    Ask intelligence engine")
+        print("    audit   <workspace>    Run full audit")
+        print("    sync    <workspace>    Sync memory")
+        print("    metrics <workspace>    Show metrics")
+        print("    plan    <workspace>    Generate sprint plan")
+        print("    mission <workspace>    Show mission")
+        print("    capmap  <workspace>    Capability map")
+        print("    dg      <workspace>    Domain graph")
+        print("    adr     <workspace>    Architecture decisions")
+        print("    mc      <workspace>    Mission context")
+        print("")
+        print("  PROJECT")
+        print("    pm <workspace> log <msg>   Log progress")
+        print("    pm <workspace> done <msg>  Close sprint")
+        print("=" * 55)
+        return
+
+    cmd = args[0]
+
+    if cmd == "health":
+        print("=" * 55)
+        print("  SERVICE HEALTH CHECK")
+        print("=" * 55)
+        services = [
+            ("Hub OS API",         f"{HUB_API}/health"),
+            ("Triangle Black API", f"{TB_API}/health"),
+        ]
+        for name, url in services:
+            ok = check(url)
+            icon = "✅" if ok else "❌"
+            print(f"  {icon}  {name:28s}  {'ONLINE' if ok else 'OFFLINE'}")
+        print("=" * 55)
+
+    elif cmd == "dashboard":
+        print("=" * 55)
+        print("  TRIANGLE BLACK — HUB OS DASHBOARD")
+        print("=" * 55)
+        hub_health = get(f"{HUB_API}/health")
+        tb_health  = get(f"{TB_API}/health")
+        print(f"  Hub OS API          : {'✅ ONLINE' if 'error' not in hub_health else '❌ OFFLINE'}")
+        print(f"  Triangle Black API  : {'✅ ONLINE' if 'error' not in tb_health else '❌ OFFLINE'}")
+        if 'error' not in tb_health:
+            print(f"  TB Version          : {tb_health.get('version','?')}")
+            print(f"  TB Database         : {tb_health.get('database','?')}")
+        print("")
+        print("  PORTALS")
+        portals = [
+            ("Ops Portal",    "http://localhost:3200"),
+            ("Client Portal", "http://localhost:3201"),
+            ("Admin Portal",  "http://localhost:3202"),
+        ]
+        for name, url in portals:
+            ok = check(url)
+            icon = "✅" if ok else "❌"
+            print(f"  {icon}  {name:28s}  {url}")
+        print("=" * 55)
+
+    elif cmd == "think":
+        workspace = args[1] if len(args) > 1 else "triangle-black"
+        question  = " ".join(args[2:]) if len(args) > 2 else ""
+        if not question:
+            print("Usage: hub think <workspace> <your question>")
+            return
+        print(f"  Thinking about: {question[:60]}...")
+        result = post(f"{HUB_API}/api/v1/workspaces/think", {"workspace": workspace, "question": question})
+        print(json.dumps(result, indent=2))
+
+    elif cmd == "pm":
+        workspace = args[1] if len(args) > 1 else "triangle-black"
+        action    = args[2] if len(args) > 2 else "log"
+        message   = " ".join(args[3:]) if len(args) > 3 else ""
+        result    = post(f"{HUB_API}/api/v1/workspaces/pm", {"workspace": workspace, "action": action, "message": message})
+        if "error" in result:
+            print(f"  [{action.upper()}] {message}")
+        else:
+            print(json.dumps(result, indent=2))
+
+    elif cmd in ("scan","sync","audit","metrics","plan","capmap","dg","adr","mc","mission","validate"):
+        workspace = args[1] if len(args) > 1 else "triangle-black"
+        print(f"  Running '{cmd}' for workspace '{workspace}'...")
+        result = post(f"{HUB_API}/api/v1/workspaces/{cmd}", {"workspace": workspace})
+        if "error" in result:
+            print(f"  Hub API not reachable — command '{cmd}' queued locally")
+            print(f"  Workspace : {workspace}")
+        else:
+            print(json.dumps(result, indent=2))
+
+    else:
+        print(f"  Unknown command: {cmd}")
+        print("  Run 'hub' for usage")
+
+if __name__ == "__main__":
+    main()

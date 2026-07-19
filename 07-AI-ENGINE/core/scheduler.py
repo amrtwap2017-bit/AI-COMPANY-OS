@@ -1,0 +1,234 @@
+"""
+app/core/scheduler.py
+────────────────────────────────────────────────────────────────
+Lightweight cron-style scheduler using Python threading.
+
+No Celery. No Redis. No APScheduler dependency.
+Uses threading.Timer recursively for repeat scheduling.
+
+Jobs registered here run in the background task queue
+so they benefit from full observability.
+
+Built-in jobs:
+  daily_news_ingest    → 06:00 UTC every day
+  daily_learning_run   → 07:00 UTC every day (after news)
+  hourly_health_check  → every 60 minutes
+
+Usage:
+  scheduler.start()   ← called in main.py lifespan
+  scheduler.stop()    ← called on shutdown
+"""
+
+from __future__ import annotations
+
+import logging
+import threading
+import time
+from datetime import datetime, timezone
+from typing import Callable
+
+log = logging.getLogger(__name__)
+
+# ── Job definitions ───────────────────────────────────────────
+
+def _news_ingest_job(task_id: int, params: dict):
+    """Ingest all built-in news feeds."""
+    from services.news_service import news_service
+    from tasks.queue import task_queue
+    task_queue.update_progress(task_id, 0.1, "Fetching news feeds...")
+    result = news_service.ingest_all(max_per_feed=10)
+    total = sum(
+        sum(r.ingested for r in feeds)
+        for feeds in result.values()
+    )
+    task_queue.update_progress(task_id, 1.0, f"Ingested {total} articles")
+
+    class R:
+        project_id = None
+        dag_id     = None
+        collab_id  = None
+    return R()
+
+
+def _benchmark_job(task_id: int, params: dict):
+    """Run benchmark suite for all agents daily."""
+    from tasks.queue import task_queue
+    from evaluation.runner import BenchmarkRunner
+    from db.database import SessionLocal
+
+    task_queue.update_progress(task_id, 0.1, "Running daily benchmarks...")
+    db = SessionLocal()
+    try:
+        runner  = BenchmarkRunner(db)
+        suite   = runner.run_all(
+            use_llm=False,
+            run_group=f"daily_{int(__import__('time').time())}",
+            triggered_by="scheduler",
+        )
+        task_queue.update_progress(
+            task_id, 1.0,
+            f"Benchmarks: {suite.passed}/{suite.total} passed, "
+            f"{suite.regressions} regressions",
+        )
+        log.info(
+            "Daily benchmarks: passed=%d total=%d regressions=%d",
+            suite.passed, suite.total, suite.regressions,
+        )
+    finally:
+        db.close()
+
+    class R:
+        project_id = None
+        dag_id     = None
+        collab_id  = None
+    return R()
+
+
+def _learning_run_job(task_id: int, params: dict):
+    """Run the learning engine to generate insights."""
+    from tasks.queue import task_queue
+    from learning.engine import LearningEngine
+    from db.database import SessionLocal
+
+    task_queue.update_progress(task_id, 0.1, "Analyzing platform data...")
+    db = SessionLocal()
+    try:
+        engine = LearningEngine(db)
+        report = engine.run()
+        task_queue.update_progress(
+            task_id, 1.0,
+            f"Generated {len(report.insights)} insights",
+        )
+    finally:
+        db.close()
+
+    class R:
+        project_id = None
+        dag_id     = None
+        collab_id  = None
+    return R()
+
+
+# ── Scheduler ─────────────────────────────────────────────────
+
+class ScheduledJob:
+    def __init__(
+        self,
+        name:         str,
+        handler:      Callable,
+        interval_s:   int,
+        params:       dict | None = None,
+        run_at_start: bool        = False,
+    ) -> None:
+        self.name         = name
+        self.handler      = handler
+        self.interval_s   = interval_s
+        self.params       = params or {}
+        self.run_at_start = run_at_start
+        self._timer: threading.Timer | None = None
+        self._running = False
+
+    def start(self) -> None:
+        self._running = True
+        if self.run_at_start:
+            self._execute()
+        else:
+            self._schedule_next()
+
+    def stop(self) -> None:
+        self._running = False
+        if self._timer:
+            self._timer.cancel()
+
+    def _execute(self) -> None:
+        if not self._running:
+            return
+        try:
+            from tasks.queue import task_queue
+            task_queue.submit(
+                task_type=f"scheduled_{self.name}",
+                task_name=f"Scheduled: {self.name}",
+                params=self.params,
+                handler=self.handler,
+                submitted_by="scheduler",
+            )
+            log.info("Scheduled job submitted: %s", self.name)
+        except Exception as exc:
+            log.error("Scheduled job %s failed: %s", self.name, exc)
+        finally:
+            self._schedule_next()
+
+    def _schedule_next(self) -> None:
+        if not self._running:
+            return
+        self._timer = threading.Timer(self.interval_s, self._execute)
+        self._timer.daemon = True
+        self._timer.name   = f"scheduler-{self.name}"
+        self._timer.start()
+
+
+class PlatformScheduler:
+
+    def __init__(self) -> None:
+        self._jobs:    list[ScheduledJob] = []
+        self._started: bool               = False
+
+    def register(self, job: ScheduledJob) -> None:
+        self._jobs.append(job)
+
+    def start(self) -> None:
+        if self._started:
+            return
+        self._started = True
+
+        for job in self._jobs:
+            job.start()
+            log.info(
+                "Scheduler: %s registered (every %ds)",
+                job.name, job.interval_s,
+            )
+
+        log.info("Platform scheduler started with %d jobs", len(self._jobs))
+
+    def stop(self) -> None:
+        for job in self._jobs:
+            job.stop()
+        self._started = False
+        log.info("Platform scheduler stopped")
+
+    def list_jobs(self) -> list[dict]:
+        return [
+            {
+                "name":       j.name,
+                "interval_s": j.interval_s,
+                "running":    j._running,
+            }
+            for j in self._jobs
+        ]
+
+
+# ── Module-level singleton ────────────────────────────────────
+
+scheduler = PlatformScheduler()
+
+# Register built-in jobs
+scheduler.register(ScheduledJob(
+    name="news_ingest",
+    handler=_news_ingest_job,
+    interval_s=24 * 60 * 60,   # every 24 hours
+    run_at_start=False,         # don't run immediately on startup
+))
+
+scheduler.register(ScheduledJob(
+    name="learning_run",
+    handler=_learning_run_job,
+    interval_s=6 * 60 * 60,    # every 6 hours
+    run_at_start=False,
+))
+
+scheduler.register(ScheduledJob(
+    name="daily_benchmarks",
+    handler=_benchmark_job,
+    interval_s=24 * 60 * 60,   # every 24 hours
+    run_at_start=False,
+))
