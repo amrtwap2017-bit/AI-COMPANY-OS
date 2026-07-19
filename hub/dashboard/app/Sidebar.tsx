@@ -1,113 +1,161 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard, MessageSquare, Bot, BookOpen,
-  Workflow, Brain, BarChart3, Rocket, Activity,
-  User, Key, LogOut, Settings,
-} from "lucide-react";
-import { useAuth } from "@/lib/auth";
 
 const NAV = [
-  { href: "/",            label: "Overview",    icon: LayoutDashboard },
-  { href: "/chat",        label: "Chat",        icon: MessageSquare, badge: "AI" },
-  { href: "/agents",      label: "Agents",      icon: Bot },
-  { href: "/projects",    label: "Projects",    icon: Rocket },
-  { href: "/workflows",   label: "Workflows",   icon: Workflow },
-  { href: "/memory",      label: "Memory",      icon: Brain },
-  { href: "/reflections", label: "Reflections", icon: Activity },
-  { href: "/analytics",   label: "Analytics",   icon: BarChart3 },
-  { href: "/knowledge",   label: "Knowledge",   icon: BookOpen },
+  {
+    group: "Command",
+    items: [
+      { href: "/",            icon: "🏠", label: "Dashboard" },
+      { href: "/chat",        icon: "💬", label: "Agent Chat",   badge: "AI" },
+      { href: "/agents",      icon: "🤖", label: "Agents" },
+      { href: "/analytics",   icon: "📊", label: "Analytics" },
+      { href: "/memory",      icon: "🧠", label: "Memory" },
+    ],
+  },
+  {
+    group: "Work",
+    items: [
+      { href: "/tasks",       icon: "✅", label: "Tasks" },
+      { href: "/workflows",   icon: "⚙️", label: "Workflows" },
+      { href: "/projects",    icon: "📁", label: "Projects" },
+      { href: "/reflections", icon: "🔍", label: "Reflections" },
+      { href: "/knowledge",   icon: "📚", label: "Knowledge" },
+      { href: "/models",      icon: "🎛️", label: "Models" },
+    ],
+  },
+  {
+    group: "Triangle Black",
+    items: [
+      { href: "/triangle-black", icon: "🏨", label: "TB Dashboard" },
+      { href: "/workspaces/triangle-black", icon: "🏢", label: "TB Workspace" },
+      { href: "/tb-admin",       icon: "🔧", label: "TB Admin" },
+    ],
+  },
+  {
+    group: "Orchestrator",
+    items: [
+      { href: "/orchestrator",                 icon: "🧠", label: "Orchestrator" },
+      { href: "/orchestrator/briefing",        icon: "📋", label: "Briefing" },
+      { href: "/orchestrator/run-task",        icon: "▶️", label: "Run Task" },
+      { href: "/orchestrator/observability",   icon: "📡", label: "Observability" },
+      { href: "/runs",                         icon: "🏃", label: "Runs" },
+      { href: "/executions",                   icon: "⚡", label: "Executions" },
+    ],
+  },
+  {
+    group: "Quick Actions",
+    items: [
+      { href: "/new-task",  icon: "➕", label: "New Task" },
+      { href: "/settings",  icon: "⚙️", label: "Settings" },
+    ],
+  },
 ];
 
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export default function Sidebar() {
-  const path     = usePathname();
-  const { user, logout, loading } = useAuth();
-
-  // Don't show sidebar on auth pages
+  const path = usePathname();
   if (path === "/login" || path === "/register") return null;
 
   return (
-    <aside className="w-56 bg-gray-900 border-r border-gray-800 flex flex-col h-full flex-shrink-0">
-
+    <aside style={{
+      width: 220,
+      minHeight: "100vh",
+      background: "#020617",
+      borderRight: "1px solid #1e293b",
+      display: "flex",
+      flexDirection: "column",
+      position: "fixed",
+      top: 0, left: 0,
+      zIndex: 50,
+      overflowY: "auto",
+    }}>
       {/* Logo */}
-      <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-blue-400 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-white">AI Company OS</p>
-            <p className="text-xs text-gray-500">Persistent Intelligence</p>
-          </div>
+      <div style={{
+        padding: "18px 16px 14px",
+        borderBottom: "1px solid #1e293b",
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 800, color: "#f1f5f9",
+          display: "flex", alignItems: "center", gap: 8 }}>
+          <span>⚙</span> AI Company OS
+        </div>
+        <div style={{ fontSize: 10, color: "#334155", marginTop: 3 }}>
+          v2.0.0 · Intelligent Platform
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {NAV.map(({ href, label, icon: Icon, badge }: any) => {
-          const active = path === href;
-          return (
-            <Link key={href} href={href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                active
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="flex-1">{label}</span>
-              {badge && (
-                <span className="text-xs bg-blue-900 text-blue-300 px-1.5 py-0.5 rounded-full">
-                  {badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: "8px" }}>
+        {NAV.map(group => (
+          <div key={group.group} style={{ marginBottom: 12 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, color: "#334155",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              padding: "6px 8px 3px",
+            }}>
+              {group.group}
+            </div>
+            {group.items.map(item => {
+              const active = path === item.href ||
+                (item.href !== "/" && path.startsWith(item.href));
+              return (
+                <Link key={item.href} href={item.href}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "7px 10px",
+                    borderRadius: 7,
+                    marginBottom: 1,
+                    textDecoration: "none",
+                    fontSize: 13,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? "#f1f5f9" : "#64748b",
+                    background: active ? "#1e293b" : "transparent",
+                    borderLeft: `3px solid ${active ? "#6366f1" : "transparent"}`,
+                    transition: "all 0.12s",
+                  }}>
+                  <span style={{ fontSize: 14, width: 18, textAlign: "center", flexShrink: 0 }}>
+                    {item.icon}
+                  </span>
+                  <span style={{ flex: 1 }}>{item.label}</span>
+                  {(item as any).badge && (
+                    <span style={{
+                      fontSize: 9, background: "#1d4ed8", color: "#93c5fd",
+                      padding: "1px 5px", borderRadius: 99, fontWeight: 700,
+                    }}>
+                      {(item as any).badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
-      {/* User section */}
-      <div className="p-3 border-t border-gray-800 space-y-1">
-        {loading ? (
-          <div className="h-8 bg-gray-800 rounded animate-pulse" />
-        ) : user ? (
-          <>
-            <Link href="/profile"
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                path === "/profile"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )}
-            >
-              <User className="w-4 h-4 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="truncate font-medium">{user.username}</p>
-                <p className="text-xs opacity-60 truncate">{user.role}</p>
-              </div>
-            </Link>
-            <button onClick={logout}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm
-                         text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors">
-              <LogOut className="w-4 h-4" />
-              Sign out
-            </button>
-          </>
-        ) : (
-          <Link href="/login"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm
-                       text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
-            <User className="w-4 h-4" />
-            Sign in
-          </Link>
-        )}
+      {/* Footer links */}
+      <div style={{
+        padding: "10px 12px 14px",
+        borderTop: "1px solid #1e293b",
+        fontSize: 11,
+      }}>
+        <div style={{ color: "#334155", marginBottom: 4 }}>Quick Links</div>
+        {[
+          ["AI Engine API", "http://localhost:8001/docs"],
+          ["TB Admin API",  "http://localhost:8030/docs"],
+          ["TB Portal",     "http://localhost:3001"],
+          ["OpenWebUI",     "http://localhost:3400"],
+        ].map(([label, url]) => (
+          <a key={url} href={url} target="_blank"
+            style={{ display: "block", color: "#475569",
+              textDecoration: "none", marginBottom: 2,
+              fontSize: 11 }}
+            onMouseOver={e => (e.currentTarget.style.color = "#6366f1")}
+            onMouseOut={e => (e.currentTarget.style.color = "#475569")}>
+            ↗ {label}
+          </a>
+        ))}
       </div>
-
     </aside>
   );
 }
