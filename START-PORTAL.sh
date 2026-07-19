@@ -5,6 +5,7 @@ export PATH="$FNM:$PATH"
 eval "$($FNM/fnm env 2>/dev/null)"
 
 pkill -f "next-server.*3001" 2>/dev/null
+pkill -f "portal.*3001" 2>/dev/null
 sleep 2
 
 cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/portal

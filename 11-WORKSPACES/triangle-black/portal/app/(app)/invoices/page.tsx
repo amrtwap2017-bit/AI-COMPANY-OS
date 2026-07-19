@@ -42,7 +42,7 @@ export default function InvoicesPage() {
     queryFn: () =>
       invoicesApi
         .list(statusFilter === "all" ? undefined : statusFilter)
-        .then((r) => r.data as Invoice[]),
+        .then((r) => r as Invoice[]),
     refetchInterval: 30_000,
   });
 

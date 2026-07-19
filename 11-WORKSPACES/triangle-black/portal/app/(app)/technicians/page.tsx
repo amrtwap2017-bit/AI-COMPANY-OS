@@ -9,7 +9,7 @@ export default function TechniciansPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", max_work_orders: 10 });
   const [specInput, setSpecInput] = useState("HVAC");
 
-  const safe = (d) => Array.isArray(d) ? d : (d && d.items) ? d.items : [];
+  const safe = (d: any) => Array.isArray(d) ? d : (d && d.items) ? d.items : [];
   const load = () => serviceOpsApi.getTechnicians().then(d => setTechs(safe(d))).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 

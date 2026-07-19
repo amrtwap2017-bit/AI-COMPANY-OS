@@ -1,6 +1,13 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User } from "./types";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -10,39 +17,64 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
+const DEV_USER: User = {
+  id: "dev-admin",
+  name: "Admin User",
+  email: "admin@triangle-black.com",
+  role: "admin",
+};
+
 const AuthContext = createContext<AuthContextType>({
   user: null, token: null,
   login: () => {}, logout: () => {}, isLoading: true,
 });
 
+const IS_DEV = process.env.NEXT_PUBLIC_APP_ENV === "development";
+const USER_KEY = "tb_user";
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(IS_DEV ? DEV_USER : null);
+  const [token, setToken] = useState<string | null>(IS_DEV ? "dev-token-bypass" : null);
+  const [isLoading, setIsLoading] = useState(!IS_DEV);
 
   useEffect(() => {
-    const t = localStorage.getItem("tb_token");
-    const u = localStorage.getItem("tb_user");
+    if (IS_DEV) {
+      setIsLoading(false);
+      return;
+    }
+    const t = typeof window !== "undefined"
+      ? sessionStorage.getItem("tb_access_token") ?? localStorage.getItem("tb_token")
+      : null;
+    const u = typeof window !== "undefined"
+      ? sessionStorage.getItem(USER_KEY) ?? localStorage.getItem(USER_KEY)
+      : null;
     if (t && u) {
       setToken(t);
-      setUser(JSON.parse(u));
+      try { setUser(JSON.parse(u)); } catch { setUser(null); }
     }
     setIsLoading(false);
   }, []);
 
   const login = (t: string, u: User) => {
-    localStorage.setItem("tb_token", t);
-    localStorage.setItem("tb_user", JSON.stringify(u));
     setToken(t);
     setUser(u);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("tb_access_token", t);
+      sessionStorage.setItem(USER_KEY, JSON.stringify(u));
+      document.cookie = `tb_access_token=${t}; path=/; max-age=86400; samesite=lax`;
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("tb_token");
-    localStorage.removeItem("tb_user");
     setToken(null);
     setUser(null);
-    window.location.href = "/login";
+    if (typeof window !== "undefined") {
+      sessionStorage.clear();
+      localStorage.removeItem("tb_token");
+      localStorage.removeItem("tb_user");
+      document.cookie = "tb_access_token=; path=/; max-age=0";
+      window.location.href = "/login";
+    }
   };
 
   return (
@@ -52,4 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

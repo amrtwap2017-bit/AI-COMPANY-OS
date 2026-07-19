@@ -1,360 +1,141 @@
-import axios from "axios";
+/**
+ * Triangle Black — Master API Barrel
+ * Single source of truth for all API imports across the portal.
+ */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030/api/v1";
+export { api as default, api, setAccessToken, getAccessToken, clearTokens, buildParams, TBApiError } from "./api/client";
+export type { ApiResponse, ApiError } from "./api/client";
+export { authApi }                                             from "./api/auth";
+export { contractsApi, invoicesApi, customersApi, leadsApi }   from "./api/commercial";
+export type { Contract, Invoice, Customer, Lead }              from "./api/commercial";
+export { workOrdersApi, techniciansApi, serviceRequestsApi, sitesApi } from "./api/operations";
+export type { WorkOrder, Technician, ServiceRequest, ListResponse, WOStatus, WorkOrderCreate } from "./api/operations";
+export { assetsApi, pmPlansApi }                               from "./api/maintenance";
+export type { Asset, PMPlan }                                  from "./api/maintenance";
+export { purchaseOrdersApi, suppliersApi, inventoryApi, rfqsApi } from "./api/supply-chain";
+export type { PurchaseOrder, Supplier, InventoryItem }         from "./api/supply-chain";
+export { analyticsApi, executiveApi }                          from "./api/analytics";
+export { workflowsApi }                                        from "./api/workflows";
 
-export const api = axios.create({
-  baseURL: API_BASE,
-  headers: { "Content-Type": "application/json" },
-});
+export interface ListParams {
+  page?:   number;
+  limit?:  number;
+  search?: string;
+  status?: string;
+  sort?:   string;
+  order?:  "asc" | "desc";
+  [key: string]: string | number | boolean | undefined | null;
+}
 
-// Attach JWT token to every request
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("tb_token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+export interface LoginRequest { email: string; password: string; }
 
-// Redirect to login on 401
-api.interceptors.response.use(
-  (r) => r,
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("tb_token");
-      localStorage.removeItem("tb_user");
-      window.location.href = "/login";
-    }
-    return Promise.reject(error);
-  }
-);
+import { api as _a } from "./api/client";
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
-export const authApi = {
-  login: (email: string, password: string) =>
-    api.post("/auth/login", new URLSearchParams({ username: email, password }), {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    }),
-  me: () => api.get("/auth/me"),
-  logout: () => {
-    localStorage.removeItem("tb_token");
-    localStorage.removeItem("tb_user");
-    window.location.href = "/login";
-  },
-};
-
-// ─── Leads ───────────────────────────────────────────────────────────────────
-export const leadsApi = {
-  list: (skip = 0, limit = 100) => api.get(`/leads/?skip=${skip}&limit=${limit}`),
-  get: (id: string) => api.get(`/leads/${id}`),
-  create: (data: Record<string, unknown>) => api.post("/leads/", data),
-  update: (id: string, data: Record<string, unknown>) => api.patch(`/leads/${id}`, data),
-  qualify: (id: string) => api.post(`/actions/leads/${id}/qualify`),
-  assign: (id: string, agent_id?: string) =>
-    api.post(`/actions/leads/${id}/assign`, { agent_id }),
-  generateQuote: (id: string, months = 12) =>
-    api.post(`/actions/leads/${id}/quote`, { contract_months: months }),
-  timeline: (id: string) => api.get(`/actions/leads/${id}/timeline`),
-  addNote: (id: string, note: string) =>
-    api.post(`/actions/leads/${id}/note`, { note }),
-  delete: (id: string) => api.delete(`/leads/${id}`),
-};
-
-// ─── Quotes ──────────────────────────────────────────────────────────────────
-export const quotesApi = {
-  list: () => api.get("/quotes/?limit=100"),
-  get: (id: string) => api.get(`/quotes/${id}`),
-  submit: (id: string) => api.post(`/actions/quotes/${id}/submit`, {}),
-  send: (id: string) => api.post(`/actions/quotes/${id}/send`, {}),
-  approve: (id: string) => api.post(`/actions/quotes/${id}/approve`, {}),
-  reject: (id: string, note?: string) =>
-    api.post(`/actions/quotes/${id}/reject`, { note }),
-};
-
-// ─── Agents ──────────────────────────────────────────────────────────────────
-export const agentsApi = {
-  list: () => api.get("/agents/?limit=100"),
-  get: (id: string) => api.get(`/agents/${id}`),
-  create: (data: Record<string, unknown>) => api.post("/actions/agents/create", data),
-  leads: (id: string) => api.get(`/actions/agents/${id}/leads`),
-  update: (id: string, data: Record<string, unknown>) => api.patch(`/agents/${id}`, data),
-};
-
-// ─── Dashboard ───────────────────────────────────────────────────────────────
+// ─── Dashboard API ────────────────────────────────────────────────
 export const dashboardApi = {
-  summary: () => api.get("/actions/reports/dashboard"),
-  pipeline: () => api.get("/actions/pipeline/summary"),
+  summary:   () => _a.get<any>("/actions/dashboard/stats"),
+  serviceOps:() => _a.get<any>("/actions/dashboard/service-ops"),
 };
 
-// ─── Contracts ───────────────────────────────────────────────────────────────
-export const contractsApi = {
-  list: (status?: string) =>
-    api.get(`/contracts/?limit=100${status ? `&status=${status}` : ""}`),
-  get: (id: string) => api.get(`/contracts/${id}`),
-  activate: (id: string, start_date?: string) =>
-    api.post(`/contracts/${id}/activate`, { start_date }),
-  renew: (id: string, months: number = 12) =>
-    api.post(`/contracts/${id}/renew`, { duration_months: months }),
-  update: (id: string, data: Record<string, unknown>) =>
-    api.patch(`/contracts/${id}`, data),
+// ─── Quotes API ───────────────────────────────────────────────────
+export const quotesApi = {
+  list:    (p?: any) => _a.get<any>("/quotes/", { params: p }),
+  get:     (id: string) => _a.get<any>(`/quotes/${id}`),
+  create:  (d: any)  => _a.post<any>("/quotes/", d),
+  submit:  (id: string) => _a.post<any>(`/actions/quotes/${id}/submit`),
+  send:    (id: string) => _a.post<any>(`/actions/quotes/${id}/send`),
+  approve: (id: string) => _a.post<any>(`/actions/quotes/${id}/approve`),
+  reject:  (id: string) => _a.post<any>(`/actions/quotes/${id}/reject`),
+  pdf:     (id: string) => _a.get<any>(`/actions/quotes/${id}/pdf`),
 };
 
-// ─── Search ──────────────────────────────────────────────────────────────────
-export const searchApi = {
-  leads: (q: string, filters?: {
-    status?: string; source?: string; priority?: string;
-  }) => api.get(`/actions/leads/search?q=${encodeURIComponent(q)}${
-    filters?.status ? `&status=${filters.status}` : ""
-  }${filters?.source ? `&source=${filters.source}` : ""
-  }${filters?.priority ? `&priority=${filters.priority}` : ""}`),
-  checkDuplicate: (email: string, excludeId?: string) =>
-    api.get(`/actions/leads/check-duplicate?email=${encodeURIComponent(email)}${
-      excludeId ? `&exclude_id=${excludeId}` : ""
-    }`),
-};
-
-// ─── Users (admin) ───────────────────────────────────────────────────────────
-export const usersApi = {
-  list: () => api.get("/users/?limit=100"),
-};
-
-// ─── PDF ─────────────────────────────────────────────────────────────────────
+// ─── PDF API ──────────────────────────────────────────────────────
 export const pdfApi = {
-  downloadQuote: async (quoteId: string, token: string): Promise<void> => {
-    const res = await fetch(
-      `${API_BASE}/actions/quotes/${quoteId}/pdf`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error("PDF generation failed");
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `TB-${quoteId.slice(0,8).toUpperCase()}-Proposal.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  },
+  quote:    (id: string) => _a.get<any>(`/actions/quotes/${id}/pdf`),
+  contract: (id: string) => _a.get<any>(`/actions/contracts/${id}/pdf`),
+  invoice:  (id: string) => _a.get<any>(`/actions/invoices/${id}/pdf`),
 };
 
-// ─── Notifications ────────────────────────────────────────────────────────────
-export const notificationsApi = {
-  list: (unread_only = false) =>
-    api.get(`/notifications/?unread_only=${unread_only}&limit=50`),
-  unreadCount: () =>
-    api.get("/notifications/unread"),
-  markRead: (id: string) =>
-    api.patch(`/notifications/${id}/read`, {}),
-  markAllRead: () =>
-    api.post("/notifications/read-all", {}),
-  delete: (id: string) =>
-    api.delete(`/notifications/${id}`),
-};
-
-// ─── Invoices ─────────────────────────────────────────────────────────────────
-export const invoicesApi = {
-  list: (status?: string, contract_id?: string) =>
-    api.get(`/invoices/?limit=100${status ? `&status=${status}` : ""}${contract_id ? `&contract_id=${contract_id}` : ""}`),
-  get: (id: string) => api.get(`/invoices/${id}`),
-  update: (id: string, data: Record<string, unknown>) =>
-    api.patch(`/invoices/${id}`, data),
-  markPaid: (id: string, paid_date?: string, notes?: string) =>
-    api.post(`/invoices/${id}/mark-paid`, { paid_date, notes }),
-  send: (id: string) =>
-    api.post(`/invoices/${id}/send`, {}),
-};
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SPRINT 13B — Advanced Reports API
-// ─────────────────────────────────────────────────────────────────────────────
-
+// ─── Reports API ──────────────────────────────────────────────────
 export const reportsApi = {
-  getRevenueTrend: async (months = 12) => {
-    const token = localStorage.getItem("tb_token");
-    const res = await fetch(
-      `${API_BASE}/actions/reports/revenue-trend?months=${months}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error("Failed to fetch revenue trend");
-    return res.json();
-  },
-
-  getLeadFunnel: async () => {
-    const token = localStorage.getItem("tb_token");
-    const res = await fetch(`${API_BASE}/actions/reports/lead-funnel`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error("Failed to fetch lead funnel");
-    return res.json();
-  },
-
-  getAgentLeaderboard: async () => {
-    const token = localStorage.getItem("tb_token");
-    const res = await fetch(`${API_BASE}/actions/reports/agent-leaderboard`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error("Failed to fetch agent leaderboard");
-    return res.json();
-  },
-
-  exportInvoicesCsv: async () => {
-    const token = localStorage.getItem("tb_token");
-    const res = await fetch(`${API_BASE}/actions/reports/export/invoices.csv`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error("Failed to export invoices");
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `invoices_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  },
-
-  exportContractsCsv: async () => {
-    const token = localStorage.getItem("tb_token");
-    const res = await fetch(`${API_BASE}/actions/reports/export/contracts.csv`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error("Failed to export contracts");
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `contracts_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  },
+  list:          (p?: any) => _a.get<any>("/reports/", { params: p }),
+  revenueTrend:  () => _a.get<any>("/actions/reports/revenue-trend"),
+  leadFunnel:    () => _a.get<any>("/actions/reports/lead-funnel"),
+  agentLeaderboard: () => _a.get<any>("/actions/reports/agent-leaderboard"),
+  dashboard:     () => _a.get<any>("/actions/reports/dashboard"),
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// INVENTORY & PROCUREMENT API — v4.3.0
-// ─────────────────────────────────────────────────────────────────────────────
-
-const getToken = () =>
-  typeof window !== 'undefined' ? localStorage.getItem('tb_token') : null;
-
-const authHeaders = () => ({
-  Authorization: `Bearer ${getToken()}`,
-  'Content-Type': 'application/json',
-});
-
-export const inventoryApi = {
-  // Items
-  getItems:    (skip = 0, limit = 100) =>
-    fetch(`${API_BASE}/inventory/items/?skip=${skip}&limit=${limit}`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createItem:  (data: any) =>
-    fetch(`${API_BASE}/inventory/items/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
-  updateItem:  (id: string, data: any) =>
-    fetch(`${API_BASE}/inventory/items/${id}`,
-      { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
-
-  // Warehouses
-  getWarehouses: () =>
-    fetch(`${API_BASE}/inventory/warehouses/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createWarehouse: (data: any) =>
-    fetch(`${API_BASE}/inventory/warehouses/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
-
-  // Vendors
-  getVendors: () =>
-    fetch(`${API_BASE}/inventory/vendors/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createVendor: (data: any) =>
-    fetch(`${API_BASE}/inventory/vendors/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
-  getVendorScorecard: (id: string) =>
-    fetch(`${API_BASE}/actions/procurement/vendors/${id}/scorecard`,
-      { headers: authHeaders() }).then(r => r.json()),
-
-  // Purchase Requests
-  getPurchaseRequests: () =>
-    fetch(`${API_BASE}/inventory/purchase-requests/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createPurchaseRequest: (data: any) =>
-    fetch(`${API_BASE}/inventory/purchase-requests/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
-  approvePR: (id: string) =>
-    fetch(`${API_BASE}/actions/inventory/purchase-requests/${id}/approve`,
-      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
-  convertPRtoPO: (id: string) =>
-    fetch(`${API_BASE}/actions/procurement/purchase-requests/${id}/convert-to-po`,
-      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
-
-  // Purchase Orders
-  getPurchaseOrders: () =>
-    fetch(`${API_BASE}/inventory/purchase-orders/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  approvePO: (id: string) =>
-    fetch(`${API_BASE}/actions/inventory/purchase-orders/${id}/approve`,
-      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
-
-  // Dashboards
-  getInventoryDashboard: () =>
-    fetch(`${API_BASE}/actions/inventory/dashboard`,
-      { headers: authHeaders() }).then(r => r.json()),
-  getProcurementDashboard: () =>
-    fetch(`${API_BASE}/actions/procurement/dashboard`,
-      { headers: authHeaders() }).then(r => r.json()),
-  getLowStock: () =>
-    fetch(`${API_BASE}/actions/inventory/low-stock`,
-      { headers: authHeaders() }).then(r => r.json()),
-
-  // Stock adjustment
-  adjustStock: (data: any) =>
-    fetch(`${API_BASE}/actions/inventory/adjust`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+// ─── Agents API ───────────────────────────────────────────────────
+export const agentsApi = {
+  list:        (p?: any) => _a.get<any>("/agents/", { params: p }),
+  get:         (id: string) => _a.get<any>(`/agents/${id}`),
+  create:      (d: any)  => _a.post<any>("/actions/agents/create", d),
+  leads:       (id: string) => _a.get<any>(`/actions/agents/${id}/leads`),
+  performance: (id: string) => _a.get<any>(`/actions/agents/${id}/performance`),
 };
 
+// ─── Search API ───────────────────────────────────────────────────
+export const searchApi = {
+  leads:   (q: string) => _a.get<any>("/actions/leads/search", { params: { q } }),
+  global:  (q: string) => _a.get<any>("/searches/", { params: { q } }),
+};
+
+// ─── Service Ops API ──────────────────────────────────────────────
 export const serviceOpsApi = {
-  // Technicians
-  getTechnicians: () =>
-    fetch(`${API_BASE}/technicians/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createTechnician: (data: any) =>
-    fetch(`${API_BASE}/technicians/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+  workOrders:   { list: (p?: any) => _a.get<any>("/work-orders/", { params: p }), get: (id: string) => _a.get<any>(`/work-orders/${id}`), assign: (woId: string, techId: string) => _a.post<any>(`/actions/work-orders/${woId}/assign`, { technician_id: techId }), complete: (woId: string) => _a.post<any>(`/actions/work-orders/${woId}/complete`) },
+  technicians:  { list: (p?: any) => _a.get<any>("/technicians/", { params: p }), get: (id: string) => _a.get<any>(`/technicians/${id}`), create: (d: any) => _a.post<any>("/technicians/", d) },
+  assets:       { list: (p?: any) => _a.get<any>("/assets/", { params: p }) },
+  serviceRequests: { list: (p?: any) => _a.get<any>("/service-requests/", { params: p }) },
+  warehouses:   { list: (p?: any) => _a.get<any>("/warehouses/", { params: p }), create: (d: any) => _a.post<any>("/warehouses/", d) },
+  inventory:    { getItems: (p?: any) => _a.get<any>("/inventory-items/", { params: p }), createItem: (d: any) => _a.post<any>("/inventory-items/", d), getInventoryDashboard: () => _a.get<any>("/actions/inventory/dashboard"), getLowStock: () => _a.get<any>("/actions/inventory/low-stock") },
+  purchaseOrders: { getPurchaseOrders: (p?: any) => _a.get<any>("/purchase-orders/", { params: p }), approvePO: (id: string) => _a.post<any>(`/actions/inventory/purchase-requests/${id}/approve`) },
+  purchaseRequests: { getPurchaseRequests: (p?: any) => _a.get<any>("/purchase-requests/", { params: p }), createPurchaseRequest: (d: any) => _a.post<any>("/purchase-requests/", d), approvePR: (id: string) => _a.post<any>(`/purchase-requests/${id}/approve`), convertPRtoPO: (id: string) => _a.post<any>(`/purchase-requests/${id}/convert`) },
+  vendors: { getVendors: (p?: any) => _a.get<any>("/inventory-vendors/", { params: p }), createVendor: (d: any) => _a.post<any>("/inventory-vendors/", d) },
+};
 
-  // Sites
-  getSites: () =>
-    fetch(`${API_BASE}/sites/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createSite: (data: any) =>
-    fetch(`${API_BASE}/sites/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
+// ─── Notifications API ────────────────────────────────────────────
+export const notificationsApi = {
+  list:          (limit = 20) => _a.get<any>(`/notifications/?limit=${limit}`),
+  markRead:      (id: string) => _a.patch<any>(`/notifications/${id}/read`),
+  markAllRead:   ()           => _a.post<any>("/notifications/bulk-read"),
+  unreadCount:   ()           => _a.get<any>("/notifications/unread-count"),
+  getUnreadCount:()           => _a.get<any>("/notifications/unread-count"),
+};
 
-  // Work Orders
-  getWorkOrders: () =>
-    fetch(`${API_BASE}/work-orders/`,
-      { headers: authHeaders() }).then(r => r.json()),
-  createWorkOrder: (data: any) =>
-    fetch(`${API_BASE}/work-orders/`,
-      { method: 'POST', headers: authHeaders(), body: JSON.stringify(data) }).then(r => r.json()),
-  assignWorkOrder: (id: string, techId: string) =>
-    fetch(`${API_BASE}/actions/work-orders/${id}/assign`,
-      { method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({ agent_id: techId }) }).then(r => r.json()),
-  completeWorkOrder: (id: string) =>
-    fetch(`${API_BASE}/actions/work-orders/${id}/complete`,
-      { method: 'POST', headers: authHeaders() }).then(r => r.json()),
+// ─── Extended contractsApi methods ───────────────────────────────
+import { contractsApi as _cApi } from "./api/commercial";
+export const extendedContractsApi = {
+  ..._cApi,
+  activate: (id: string) => _a.post<any>(`/contracts/${id}/activate`),
+  renew:    (id: string) => _a.post<any>(`/contracts/${id}/renew`),
+};
 
-  // Service Requests
-  getServiceRequests: () =>
-    fetch(`${API_BASE}/service-requests/`,
-      { headers: authHeaders() }).then(r => r.json()),
+// ─── Extended leadsApi methods ────────────────────────────────────
+import { leadsApi as _lApi } from "./api/commercial";
+export const extendedLeadsApi = {
+  ..._lApi,
+  update:       (id: string, d: any) => _a.put<any>(`/actions/leads/${id}`, d),
+  timeline:     (id: string) => _a.get<any>(`/actions/leads/${id}/timeline`),
+  qualify:      (id: string) => _a.post<any>(`/actions/leads/${id}/qualify`),
+  assign:       (id: string, agentId: string) => _a.post<any>(`/actions/leads/${id}/assign`, { agent_id: agentId }),
+  generateQuote:(id: string) => _a.post<any>(`/actions/leads/${id}/quote`),
+};
 
-  // Service Dashboard
-  getServiceDashboard: () =>
-    fetch(`${API_BASE}/actions/dashboard/service-ops`,
-      { headers: authHeaders() }).then(r => r.json()),
+// ─── Extended invoicesApi methods ─────────────────────────────────
+import { invoicesApi as _iApi } from "./api/commercial";
+export const extendedInvoicesApi = {
+  ..._iApi,
+  send:    (id: string) => _a.post<any>(`/invoices/${id}/send`),
+  markPaid:(id: string) => _a.post<any>(`/invoices/${id}/mark-paid`),
+};
+
+// ─── scApi (supply chain page compatibility) ──────────────────────
+export const scApi = {
+  kpis:     () => _a.get<any>("/actions/inventory/dashboard"),
+  pos:      (p?: any) => _a.get<any>("/purchase-orders/", { params: p }),
+  vendors:  (p?: any) => _a.get<any>("/inventory-vendors/", { params: p }),
+  purchaseRequests: { list: (skip = 0, limit = 25) => _a.get<any>(`/purchase-requests/?skip=${skip}&limit=${limit}`), get: (id: string) => _a.get<any>(`/purchase-requests/${id}`), create: (d: any) => _a.post<any>("/purchase-requests/", d), update: (id: string, d: any) => _a.put<any>(`/purchase-requests/${id}`, d), approve: (id: string) => _a.post<any>(`/purchase-requests/${id}/approve`) },
+  rfqs:     { list: (skip = 0, limit = 25) => _a.get<any>(`/rfqs/?skip=${skip}&limit=${limit}`), get: (id: string) => _a.get<any>(`/rfqs/${id}`) },
+  goodsReceipts: { list: (skip = 0, limit = 25) => _a.get<any>(`/goods-receipts/?skip=${skip}&limit=${limit}`) },
+  warehouses: { list: (skip = 0, limit = 25) => _a.get<any>(`/warehouses/?skip=${skip}&limit=${limit}`) },
 };

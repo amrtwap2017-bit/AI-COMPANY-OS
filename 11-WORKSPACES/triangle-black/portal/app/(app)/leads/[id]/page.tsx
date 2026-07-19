@@ -2,7 +2,7 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { leadsApi } from "@/lib/api";
+import { leadsApi, extendedLeadsApi, extendedLeadsApi, extendedLeadsApi } from "@/lib/api";
 import { Lead, Activity } from "@/lib/types";
 import { Card, CardHeader } from "@/components/Card";
 import { Badge } from "@/components/Badge";
@@ -40,12 +40,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
   const { data: lead, isLoading: leadLoading } = useQuery({
     queryKey: ["lead", id],
-    queryFn: () => leadsApi.get(id).then((r) => r.data as Lead),
+    queryFn: () => leadsApi.get(id).then((r) => r as Lead),
   });
 
   const { data: timeline } = useQuery({
     queryKey: ["timeline", id],
-    queryFn: () => leadsApi.timeline(id).then((r) => r.data as Timeline),
+    queryFn: () => extendedLeadsApi.timeline(id).then((r) => r.data as Timeline),
   });
 
   async function doAction(action: string, fn: () => Promise<unknown>) {
@@ -187,7 +187,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 variant={canQualify ? "primary" : "ghost"}
                 disabled={!canQualify}
                 loading={actionLoading === "qualify"}
-                onClick={() => doAction("qualify", () => leadsApi.qualify(id))}
+                onClick={() => doAction("qualify", () => extendedLeadsApi.qualify(id))}
                 aria-label="Qualify this lead"
               >
                 <Zap className="w-4 h-4" aria-hidden="true" />
@@ -199,7 +199,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 variant={canAssign ? "primary" : "ghost"}
                 disabled={!canAssign}
                 loading={actionLoading === "assign"}
-                onClick={() => doAction("assign", () => leadsApi.assign(id))}
+                onClick={() => doAction("assign", () => extendedLeadsApi.assign(id))}
                 aria-label="Auto-assign to best available agent"
               >
                 <UserCheck className="w-4 h-4" aria-hidden="true" />
@@ -211,7 +211,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 variant={canQuote ? "primary" : "ghost"}
                 disabled={!canQuote}
                 loading={actionLoading === "quote"}
-                onClick={() => doAction("quote", () => leadsApi.generateQuote(id, 12))}
+                onClick={() => doAction("quote", () => extendedLeadsApi.generateQuote(id, 12))}
                 aria-label="Generate a quote from this lead"
               >
                 <FileText className="w-4 h-4" aria-hidden="true" />

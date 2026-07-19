@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { inventoryApi } from "@/lib/api";
+import {serviceOpsApi,  inventoryApi } from "@/lib/api";
 
 const TYPES = ["spare_part","consumable","tool","equipment","chemical","cable","service_non_stock"];
 const UNITS = ["piece","meter","liter","kg","box","roll","set","pair"];
@@ -15,7 +15,7 @@ export default function ItemsPage() {
     item_type:"spare_part", min_stock:0, reorder_qty:0, standard_cost:0,
   });
 
-  const load = () => inventoryApi.getItems().then(setItems).finally(() => setLoading(false));
+  const load = () => serviceOpsApi.inventory.getItems().then(setItems).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const filtered = items.filter(i =>
@@ -25,7 +25,7 @@ export default function ItemsPage() {
   );
 
   const handleCreate = async () => {
-    await inventoryApi.createItem(form);
+    await serviceOpsApi.inventory.createItem(form);
     setShowForm(false);
     setForm({ item_code:"", name:"", category:"HVAC", unit_of_measure:"piece",
               item_type:"spare_part", min_stock:0, reorder_qty:0, standard_cost:0 });

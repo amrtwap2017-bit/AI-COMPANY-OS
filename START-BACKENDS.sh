@@ -24,8 +24,10 @@ echo "Engine PID: $ENGINE_PID"
 
 echo "=== Starting TB Admin ==="
 cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+TRIANGLE_BLACK_DB_URL="postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black" \
 PYTHONPATH="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black" \
-  .venv/bin/uvicorn main:app --host 0.0.0.0 --port 8030 \
+nohup .venv/bin/uvicorn main:app \
+  --host 0.0.0.0 --port 8030 \
   > /tmp/tb-admin.log 2>&1 &
 TB_PID=$!
 echo "TB Admin PID: $TB_PID"
@@ -39,10 +41,10 @@ echo "=== Health Check ==="
 /usr/bin/curl -s -o /dev/null -w "Qdrant:  %{http_code}\n" http://localhost:6333/healthz
 
 echo "=== Checking if processes alive ==="
-kill -0 $ENGINE_PID 2>/dev/null && echo "Engine: ALIVE" || echo "Engine: DEAD - check /tmp/ai-engine.log"
-kill -0 $TB_PID    2>/dev/null && echo "TB Admin: ALIVE" || echo "TB Admin: DEAD - check /tmp/tb-admin.log"
+kill -0 $ENGINE_PID 2>/dev/null && echo "Engine: ALIVE" || echo "Engine: DEAD - tail /tmp/ai-engine.log"
+kill -0 $TB_PID    2>/dev/null && echo "TB Admin: ALIVE" || echo "TB Admin: DEAD - tail /tmp/tb-admin.log"
 
-echo "=== Warming up Ollama model ==="
+echo "=== Warming up Ollama ==="
 /usr/bin/curl -s http://localhost:11434/api/generate \
   -d '{"model":"qwen2.5-coder:7b","prompt":"hi","stream":false}' \
   --connect-timeout 10 > /dev/null 2>&1 && echo "Ollama: warm" || echo "Ollama: skip"

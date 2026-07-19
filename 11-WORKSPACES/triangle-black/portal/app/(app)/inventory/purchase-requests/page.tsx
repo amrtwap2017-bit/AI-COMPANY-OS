@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { inventoryApi } from "@/lib/api";
+import {serviceOpsApi,  inventoryApi } from "@/lib/api";
 
 const STATUS_STYLES: Record<string, string> = {
   draft:      "bg-gray-100 text-gray-600",
@@ -26,22 +26,22 @@ export default function PurchaseRequestsPage() {
   });
   const [msg, setMsg] = useState("");
 
-  const load = () => inventoryApi.getPurchaseRequests()
+  const load = () => serviceOpsApi.purchaseRequests.getPurchaseRequests()
     .then(setPrs).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const handleCreate = async () => {
-    await inventoryApi.createPurchaseRequest({ ...form, lines: [] });
+    await serviceOpsApi.purchaseRequests.createPurchaseRequest({ ...form, lines: [] });
     setShowForm(false); setMsg(""); load();
   };
 
   const handleApprove = async (id: string) => {
-    await inventoryApi.approvePR(id);
+    await serviceOpsApi.purchaseRequests.approvePR(id);
     load();
   };
 
   const handleConvert = async (id: string) => {
-    const res = await inventoryApi.convertPRtoPO(id);
+    const res = await serviceOpsApi.purchaseRequests.convertPRtoPO(id);
     setMsg(`✅ PO created: ${res.po_number}`);
     load();
   };

@@ -2,7 +2,7 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { invoicesApi } from "@/lib/api";
+import { invoicesApi, extendedInvoicesApi, extendedInvoicesApi, extendedInvoicesApi } from "@/lib/api";
 import { formatEGP, formatDate } from "@/lib/utils";
 import {
   ArrowLeft, Receipt, CheckCircle, Send,
@@ -46,13 +46,13 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
   const { data: invoice, isLoading } = useQuery({
     queryKey: ["invoice", id],
-    queryFn: () => invoicesApi.get(id).then((r) => r.data as Invoice),
+    queryFn: () => invoicesApi.get(id).then((r) => r as Invoice),
   });
 
   async function doSend() {
     setLoading("send"); setError(null);
     try {
-      await invoicesApi.send(id);
+      await extendedInvoicesApi.send(id);
       qc.invalidateQueries({ queryKey: ["invoice", id] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
     } catch { setError("Failed to send invoice."); }
@@ -62,7 +62,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   async function doMarkPaid() {
     setLoading("paid"); setError(null);
     try {
-      await invoicesApi.markPaid(id);
+      await extendedInvoicesApi.markPaid(id);
       qc.invalidateQueries({ queryKey: ["invoice", id] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
     } catch { setError("Failed to mark invoice as paid."); }

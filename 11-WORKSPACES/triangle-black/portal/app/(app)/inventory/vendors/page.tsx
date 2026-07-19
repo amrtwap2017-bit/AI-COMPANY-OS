@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { inventoryApi } from "@/lib/api";
+import {serviceOpsApi,  inventoryApi } from "@/lib/api";
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<any[]>([]);
@@ -12,12 +12,12 @@ export default function VendorsPage() {
     payment_terms:"net30", lead_time_days:7,
   });
 
-  const load = () => inventoryApi.getVendors()
+  const load = () => serviceOpsApi.vendors.getVendors()
     .then(setVendors).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const handleCreate = async () => {
-    await inventoryApi.createVendor(form);
+    await serviceOpsApi.vendors.createVendor(form);
     setShowForm(false);
     setForm({ vendor_code:"", name:"", category:"HVAC",
               contact_person:"", phone:"", email:"", payment_terms:"net30", lead_time_days:7 });

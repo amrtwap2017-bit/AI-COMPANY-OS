@@ -2,7 +2,7 @@
 import { use, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { leadsApi } from "@/lib/api";
+import { leadsApi, extendedLeadsApi, extendedLeadsApi, extendedLeadsApi } from "@/lib/api";
 import { Lead } from "@/lib/types";
 import { Card, CardHeader } from "@/components/Card";
 import { Input } from "@/components/Input";
@@ -19,7 +19,7 @@ export default function EditLeadPage({ params }: { params: Promise<{ id: string 
 
   const { data: lead } = useQuery({
     queryKey: ["lead", id],
-    queryFn: () => leadsApi.get(id).then((r) => r.data as Lead),
+    queryFn: () => leadsApi.get(id).then((r) => r as Lead),
   });
 
   const [form, setForm] = useState({
@@ -51,7 +51,7 @@ export default function EditLeadPage({ params }: { params: Promise<{ id: string 
     setError("");
     setLoading(true);
     try {
-      await leadsApi.update(id, {
+      await extendedLeadsApi.update(id, {
         name: form.name, email: form.email,
         phone: form.phone || undefined,
         company: form.company || undefined,

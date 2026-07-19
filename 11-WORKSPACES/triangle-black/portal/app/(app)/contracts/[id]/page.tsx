@@ -2,7 +2,7 @@
 import { use, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { contractsApi } from "@/lib/api";
+import { contractsApi, extendedContractsApi, extendedContractsApi, extendedContractsApi } from "@/lib/api";
 import { Contract } from "@/lib/types";
 import { Card, CardHeader } from "@/components/Card";
 import { Badge } from "@/components/Badge";
@@ -21,7 +21,7 @@ export default function ContractDetailPage({
 
   const { data: contract, isLoading } = useQuery({
     queryKey: ["contract", id],
-    queryFn: () => contractsApi.get(id).then((r) => r.data as Contract),
+    queryFn: () => contractsApi.get(id).then((r) => r as Contract),
   });
 
   async function doAction(action: string, fn: () => Promise<unknown>) {
@@ -163,7 +163,7 @@ export default function ContractDetailPage({
                 <Button className="w-full" variant="success"
                   loading={loading === "activate"}
                   onClick={() => doAction("activate", () =>
-                    contractsApi.activate(id))}
+                    extendedContractsApi.activate(id))}
                 >
                   <Play className="w-4 h-4" /> Activate Contract
                 </Button>
@@ -187,7 +187,7 @@ export default function ContractDetailPage({
                   <Button className="w-full" variant="secondary"
                     loading={loading === "renew"}
                     onClick={() => doAction("renew", () =>
-                      contractsApi.renew(id, renewMonths))}
+                      extendedContractsApi.renew(id, renewMonths))}
                   >
                     <RefreshCw className="w-4 h-4" /> Renew Contract
                   </Button>

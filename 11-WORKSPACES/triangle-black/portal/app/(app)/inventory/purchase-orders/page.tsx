@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { inventoryApi } from "@/lib/api";
+import {serviceOpsApi,  inventoryApi } from "@/lib/api";
 
 const STATUS = { draft:"bg-gray-100 text-gray-600", approved:"bg-green-100 text-green-700", sent:"bg-blue-100 text-blue-700", received:"bg-purple-100 text-purple-700", closed:"bg-slate-100 text-slate-500", cancelled:"bg-red-100 text-red-700" };
 const EGP = (n) => new Intl.NumberFormat("en-EG",{style:"currency",currency:"EGP",maximumFractionDigits:0}).format(n||0);
@@ -11,11 +11,11 @@ export default function PurchaseOrdersPage() {
   const [msg, setMsg]   = useState("");
 
   const safe = (d) => Array.isArray(d) ? d : (d && d.items) ? d.items : [];
-  const load = () => inventoryApi.getPurchaseOrders().then(d => setPos(safe(d))).finally(() => setLoading(false));
+  const load = () => serviceOpsApi.purchaseOrders.getPurchaseOrders().then(d => setPos(safe(d))).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const handleApprove = async (id) => {
-    const res = await inventoryApi.approvePO(id);
+    const res = await serviceOpsApi.purchaseOrders.approvePO(id);
     setMsg("PO approved: " + (res.po_number || id));
     load();
   };

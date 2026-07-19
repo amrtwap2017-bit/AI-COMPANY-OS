@@ -23,7 +23,7 @@ export default function ContractsPage() {
 
   const { data: contracts = [], isLoading } = useQuery({
     queryKey: ["contracts", filter],
-    queryFn: () => contractsApi.list(filter || undefined).then((r) => r.data as Contract[]),
+    queryFn: () => contractsApi.list(filter || undefined).then((r) => r as Contract[]),
     refetchInterval: 15000,
   });
 

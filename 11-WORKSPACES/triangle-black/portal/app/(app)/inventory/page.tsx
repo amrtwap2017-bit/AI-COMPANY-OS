@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { inventoryApi } from "@/lib/api";
+import {serviceOpsApi,  inventoryApi } from "@/lib/api";
 
 export default function InventoryDashboardPage() {
   const [dash, setDash]   = useState<any>(null);
@@ -9,7 +9,7 @@ export default function InventoryDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([inventoryApi.getInventoryDashboard(), inventoryApi.getLowStock()])
+    Promise.all([serviceOpsApi.inventory.getInventoryDashboard(), serviceOpsApi.inventory.getLowStock()])
       .then(([d, l]) => { setDash(d); setLow(l.items || []); })
       .finally(() => setLoading(false));
   }, []);

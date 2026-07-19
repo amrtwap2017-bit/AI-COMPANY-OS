@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { inventoryApi } from "@/lib/api";
+import {serviceOpsApi,  inventoryApi } from "@/lib/api";
 
 const TYPES = { main:"Main Warehouse", branch:"Branch", project:"Project Store", technician:"Tech Van", quarantine:"Quarantine" };
 
@@ -11,11 +11,11 @@ export default function WarehousesPage() {
   const [form, setForm] = useState({ code:"", name:"", type:"main", address:"", manager_name:"" });
 
   const safe = (d) => Array.isArray(d) ? d : (d && d.items) ? d.items : [];
-  const load = () => inventoryApi.getWarehouses().then(d => setWhs(safe(d))).finally(() => setLoading(false));
+  const load = () => serviceOpsApi.warehouses.getWarehouses().then(d => setWhs(safe(d))).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
 
   const handleCreate = async () => {
-    await inventoryApi.createWarehouse(form);
+    await serviceOpsApi.warehouses.createWarehouse(form);
     setShowForm(false);
     setForm({ code:"", name:"", type:"main", address:"", manager_name:"" });
     load();
