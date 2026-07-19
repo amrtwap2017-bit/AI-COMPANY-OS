@@ -31,7 +31,7 @@ export function useAuth() {
     qc.clear()
     clearTokens()
     toast.info('Signed out successfully')
-    router.push('/login')
+    // DEV: no redirect
   }
 
   return {

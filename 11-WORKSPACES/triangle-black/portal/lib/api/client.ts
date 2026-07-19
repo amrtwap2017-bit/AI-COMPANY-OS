@@ -111,11 +111,7 @@ async function request<T = any>(
     signal,
   })
 
-  // Handle 401 — redirect to login
-  if (response.status === 401) {
-    clearTokens()
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login'
+  // DEV: 401 bypass
     }
     throw new TBApiError(401, 'Session expired. Please log in again.')
   }
