@@ -1,6 +1,10 @@
 #!/bin/bash
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$HOME/.local/bin:$HOME/bin"
 
+echo "=== Starting Docker services ==="
+docker start ai-qdrant ai-postgres ai-redis 2>/dev/null || true
+sleep 3
+
 echo "=== Killing old processes ==="
 kill $(lsof -t -i:8001) 2>/dev/null
 kill $(lsof -t -i:8030) 2>/dev/null
