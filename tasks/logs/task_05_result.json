@@ -1,16 +1,15 @@
 {
   "healthy": [
+    "AI Engine :8001",
     "TB Admin :8030",
+    "Hub :3000",
+    "Portal :3001",
     "Qdrant :6333",
     "Ollama :11434",
     "Ollama chat"
   ],
-  "fixed": [
-    "START-SAFE.sh: node path fixed"
-  ],
+  "fixed": [],
   "broken": [
-    "AI Engine :8001: <urlopen error [Errno 111] Connection refused>",
-    "Hub :3000: <urlopen error [Errno 111] Connection refused>",
-    "Portal :3001: <urlopen error [Errno 111] Connection refused>"
+    "next dev still running (should be next start)"
   ]
 }

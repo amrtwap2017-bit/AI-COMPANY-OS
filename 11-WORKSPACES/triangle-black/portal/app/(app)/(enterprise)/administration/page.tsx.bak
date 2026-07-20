@@ -18,8 +18,8 @@ export default function AdministrationPage() {
   const healthQ = useQuery({ queryKey:["api-health"], queryFn:()=>api.get("/workflow/health") });
 
   const metrics = [
-    { label:"Users", value:(usersQ.data as any)?.length||(usersQ.data as any)?.count||"—", icon:<Users className="w-4 h-4"/>, color:"blue" },
-    { label:"Hotels", value:(hotelsQ.data as any)?.length||(hotelsQ.data as any)?.count||1, icon:<Hotel className="w-4 h-4"/>, color:"amber" },
+    { label:"Users", value:usersQ.data?.length||usersQ.data?.count||"—", icon:<Users className="w-4 h-4"/>, color:"blue" },
+    { label:"Hotels", value:hotelsQ.data?.length||hotelsQ.data?.count||1, icon:<Hotel className="w-4 h-4"/>, color:"amber" },
     { label:"API Status", value:"Online", icon:<Activity className="w-4 h-4"/>, color:"emerald" },
     { label:"Version", value:"v3.19.0", icon:<Database className="w-4 h-4"/>, color:"slate" },
   ];

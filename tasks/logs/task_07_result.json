@@ -1,0 +1,11 @@
+{
+  "generated": [
+    "secrets file: /home/amr/.ai-company-os-secrets"
+  ],
+  "updated": [
+    ".env SECRET_KEY updated",
+    "07-AI-ENGINE/.env SECRET_KEY updated",
+    "TB .env TB_SECRET_KEY updated"
+  ],
+  "warnings": []
+}

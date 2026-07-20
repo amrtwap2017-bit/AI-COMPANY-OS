@@ -1,18 +1,8 @@
 {
   "fixed": [
-    ".gitignore: 13 entries added",
-    ".env.example: portal",
     "SECURITY_TODO.md created"
   ],
   "warnings": [
-    ".env.production.template line 5: POSTGRES_HOST = WEAK",
-    ".env.production.template line 6: POSTGRES_PORT = WEAK",
-    ".env.production.template line 7: POSTGRES_DB = WEAK",
-    ".env.production.template line 8: POSTGRES_USER = WEAK",
-    ".env.production.template line 9: POSTGRES_PASSWORD = WEAK",
-    ".env.production.template line 9: POSTGRES_PASSWORD = WEAK",
-    ".env.production.template line 25: SECRET_KEY = WEAK",
-    ".env.production.template line 28: TB_SECRET_KEY = WEAK",
     ".env line 5: DATABASE_URL = WEAK",
     ".env line 6: SYNC_DATABASE_URL = WEAK",
     ".env line 7: POSTGRES_HOST = WEAK",
@@ -22,7 +12,6 @@
     ".env line 11: POSTGRES_DB = WEAK",
     ".env line 32: SECRET_KEY = WEAK",
     ".env line 50: TRIANGLE_BLACK_DB_URL = WEAK",
-    "90-ARCHIVE/AI-ENGINEERING-HUB-archived/.env line 4: POSTGRES_DSN = WEAK",
     "11-WORKSPACES/triangle-black/.env line 5: POSTGRES_URL = WEAK",
     "07-AI-ENGINE/.env line 1: DATABASE_URL = WEAK",
     "07-AI-ENGINE/.env line 2: POSTGRES_HOST = WEAK",

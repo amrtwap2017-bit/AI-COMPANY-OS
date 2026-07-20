@@ -91,3 +91,4 @@ with open(ROOT + "/logs/master_summary.json", "w") as f:
 
 log(f"\nFull logs: {ROOT}/logs/")
 log(f"Summary:   {ROOT}/logs/master_summary.json")
+# Tasks 09-11 are appended automatically

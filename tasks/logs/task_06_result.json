@@ -1,0 +1,13 @@
+{
+  "fixed": [
+    "next dev killed",
+    "Hub running prod",
+    "no next dev"
+  ],
+  "warnings": [
+    "Portal build failed"
+  ],
+  "built": [
+    "hub"
+  ]
+}

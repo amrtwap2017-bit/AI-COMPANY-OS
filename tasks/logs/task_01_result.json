@@ -1,7 +1,5 @@
 {
-  "fixed": [
-    "next.config.ts \u2014 removed ignoreBuildErrors"
-  ],
+  "fixed": [],
   "skipped": [],
   "errors": []
 }

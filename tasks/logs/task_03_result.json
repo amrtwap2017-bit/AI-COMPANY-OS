@@ -7,10 +7,10 @@
   "warnings": [],
   "data": {
     "tasks": "37",
-    "breakdown": "pending|23\ncompleted|10\nplanning|3\nfailed|1",
+    "breakdown": "completed|23\nfailed|8\nin_progress|3\nplanning|3",
     "agents": "16",
     "memories": "26",
-    "reflections": "10",
+    "reflections": "14",
     "leads": 74,
     "qdrant": [
       "knowledge",

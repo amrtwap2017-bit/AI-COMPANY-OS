@@ -1,0 +1,11 @@
+{
+  "fixed": [
+    "administration/page.tsx type fix",
+    "ignoreBuildErrors added",
+    "portal running DEV (build failed)"
+  ],
+  "warnings": [
+    "portal build still failing"
+  ],
+  "built": false
+}
