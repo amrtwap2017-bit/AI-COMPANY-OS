@@ -1,4 +1,25 @@
-// @ts-nocheck
+# X4 — Leads Page: Full UX Upgrade
+import os, json, datetime
+
+LOG    = '/home/amr/AI-COMPANY-OS/tasks/logs/x4.log'
+PORTAL = '/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/portal'
+results = {'created':[], 'fixed':[]}
+
+def log(m):
+    ts=datetime.datetime.now().strftime('%H:%M:%S')
+    out='['+ts+'] '+str(m)
+    print(out,flush=True)
+    open(LOG,'a').write(out+chr(10))
+
+def write(path, content, label):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path,'w') as f: f.write(content)
+    log('  CREATED: '+label)
+    results['created'].append(label)
+
+log('X4 START — Leads Page Full UX Upgrade')
+
+leads_page = '''// @ts-nocheck
 "use client";
 
 import { useMemo, useState } from "react";
@@ -205,3 +226,11 @@ export default function LeadsPage() {
     </div>
   );
 }
+'''
+write(PORTAL+'/app/(app)/leads/page.tsx', leads_page, 'leads/page.tsx (full UX upgrade)')
+
+log('='*40)
+log('X4 COMPLETE — Created: '+str(len(results['created'])))
+for c in results['created']: log('  OK '+c)
+with open('/home/amr/AI-COMPANY-OS/tasks/logs/x4_result.json','w') as f:
+    json.dump(results,f,indent=2)
