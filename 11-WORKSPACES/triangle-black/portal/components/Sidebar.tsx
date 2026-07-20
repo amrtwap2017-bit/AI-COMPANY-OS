@@ -7,9 +7,9 @@ import {
   LayoutDashboard, Users, Wrench, UserCheck, Package,
   Warehouse, ClipboardList, BarChart3, Building2,
   ChevronDown, ChevronRight, Settings, LogOut,
-  TrendingUp, Tool, ShoppingCart, FileText,
+  TrendingUp, ShoppingCart, FileText,
   Calendar, GitBranch, Shield, Activity,
-  Hammer, Cpu, Star, Menu, X,
+  HardHat, Cpu, Star, Menu, X, Bell, Home,
 } from "lucide-react";
 
 interface NavItem {
@@ -41,7 +41,7 @@ const NAV: NavItem[] = [
     { label: "SLA Review",       href: "/operations/sla-review" },
   ]},
 
-  { label: "Maintenance", icon: Hammer, badge: "MNT", children: [
+  { label: "Maintenance", icon: HardHat, badge: "MNT", children: [
     { label: "Assets",        href: "/assets" },
     { label: "PM Plans",      href: "/maintenance/pm-plans" },
     { label: "Schedule",      href: "/maintenance/schedule" },
@@ -60,7 +60,7 @@ const NAV: NavItem[] = [
     { label: "RFQs",            href: "/supply-chain/rfqs" },
   ]},
 
-  { label: "Engineering",  icon: Cpu, badge: "ENG", children: [
+  { label: "Engineering",  icon: Activity, badge: "ENG", children: [
     { label: "AI Assistant",    href: "/engineering/ai" },
     { label: "Intelligence",    href: "/engineering/intelligence" },
     { label: "Projects",        href: "/projects-center" },

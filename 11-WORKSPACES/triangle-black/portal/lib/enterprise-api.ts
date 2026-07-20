@@ -43,3 +43,8 @@ export const enterpriseApi = {
 };
 
 export { toList };
+
+
+// Backward compat exports
+export const apiJson = safeFetch;
+export const safeApiJson = safeFetch;

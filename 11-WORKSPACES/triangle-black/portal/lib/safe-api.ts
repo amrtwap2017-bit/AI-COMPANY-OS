@@ -1,6 +1,7 @@
+"use client";
 // @ts-nocheck
-// Safe Enterprise API — never throws, always returns graceful data
-// Handles 404, 401, network errors → returns empty arrays/objects
+// Safe API — maps portal needs to REAL TB Admin routes
+// TB Admin base: /api/v1/actions/* and /api/v1/*
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -9,67 +10,68 @@ function getToken(): string {
   return localStorage.getItem("tb_access_token") || "";
 }
 
-async function safeFetch(path: string, fallback: any = null) {
+export async function safeFetch(path: string, options?: any): Promise<any> {
   const token = getToken();
   const headers: any = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   try {
-    const res = await fetch(API_URL + path, { headers, cache: "no-store" });
-    if (res.status === 404) return fallback ?? { ok: false, error: "Not found", data: [] };
-    if (res.status === 401) return fallback ?? { ok: false, error: "Unauthorized", data: [] };
-    if (!res.ok) return fallback ?? { ok: false, error: `HTTP ${res.status}`, data: [] };
+    const res = await fetch(API_URL + path, {
+      ...options,
+      headers: { ...headers, ...options?.headers },
+      cache: "no-store",
+    });
+    if (res.status === 404) return { ok: false, data: [], error: "Not found", status: 404 };
+    if (res.status === 401) return { ok: false, data: [], error: "Unauthorized", status: 401 };
+    if (!res.ok) return { ok: false, data: [], error: `HTTP ${res.status}`, status: res.status };
     const data = await res.json();
     return { ok: true, data, error: null };
   } catch (e) {
-    return fallback ?? { ok: false, error: String(e), data: [] };
+    return { ok: false, data: [], error: String(e), status: 0 };
   }
 }
 
-function toList(result: any): any[] {
+export function toList(result: any): any[] {
   if (!result) return [];
-  if (Array.isArray(result)) return result;
-  if (Array.isArray(result.data)) return result.data;
-  if (Array.isArray(result.items)) return result.items;
-  if (result.data && typeof result.data === "object") {
-    const vals = Object.values(result.data);
-    if (vals.length && Array.isArray(vals[0])) return vals[0] as any[];
-  }
+  const d = result?.data ?? result;
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.data)) return d.data;
   return [];
 }
 
-// ── API endpoints ─────────────────────────────────────────
+// ── REAL TB Admin API routes (from /openapi.json audit) ──────
 export const safeApi = {
-  // Commercial
-  leads:          () => safeFetch("/api/v1/leads"),
-  customers:      () => safeFetch("/api/v1/customers"),
-  contracts:      () => safeFetch("/api/v1/contracts"),
-  invoices:       () => safeFetch("/api/v1/invoices"),
-  quotes:         () => safeFetch("/api/v1/quotes"),
+  // Leads — /api/v1/actions/leads/
+  leads:           () => safeFetch("/api/v1/actions/leads/search"),
+  leadCreate:      (data: any) => safeFetch("/api/v1/actions/leads/create", { method: "POST", body: JSON.stringify(data) }),
+  leadGet:         (id: string) => safeFetch(`/api/v1/actions/leads/${id}`),
+  leadTimeline:    (id: string) => safeFetch(`/api/v1/actions/leads/${id}/timeline`),
+  pipelineSummary: () => safeFetch("/api/v1/actions/pipeline/summary"),
 
-  // Operations
-  workOrders:     () => safeFetch("/api/v1/work-orders"),
-  serviceRequests:() => safeFetch("/api/v1/service-requests"),
-  technicians:    () => safeFetch("/api/v1/technicians"),
+  // Dashboard stats
+  dashboardStats:  () => safeFetch("/api/v1/actions/dashboard/stats"),
+  serviceOps:      () => safeFetch("/api/v1/actions/dashboard/service-ops"),
 
-  // Assets & Maintenance
-  assets:         () => safeFetch("/api/v1/assets"),
-  pmPlans:        () => safeFetch("/api/v1/pm-plans"),
+  // Inventory
+  inventory:       () => safeFetch("/api/v1/actions/inventory/dashboard"),
+  stockBalances:   () => safeFetch("/api/v1/actions/inventory/stock-balances"),
+  lowStock:        () => safeFetch("/api/v1/actions/inventory/low-stock"),
 
-  // Supply Chain
-  inventory:      () => safeFetch("/api/v1/inventory"),
-  warehouses:     () => safeFetch("/api/v1/warehouses"),
-  purchaseOrders: () => safeFetch("/api/v1/purchase-orders"),
-  suppliers:      () => safeFetch("/api/v1/suppliers"),
-  rfqs:           () => safeFetch("/api/v1/rfqs"),
+  // Procurement
+  purchaseOrders:  () => safeFetch("/api/v1/actions/procurement/dashboard"),
+  rfqs:            () => safeFetch("/api/v1/actions/procurement/rfqs"),
 
-  // Analytics
-  analytics:      () => safeFetch("/api/v1/analytics"),
-  kpis:           () => safeFetch("/api/v1/analytics/kpis"),
+  // Quotes
+  quotes:          (id: string) => safeFetch(`/api/v1/actions/quotes/${id}`),
 
-  // Generic
-  get: (path: string) => safeFetch(path),
-  toList,
+  // Reports
+  agentLeaderboard:() => safeFetch("/api/v1/actions/reports/agent-leaderboard"),
+  reportDashboard: () => safeFetch("/api/v1/actions/reports/dashboard"),
+
+  // Notifications
+  notifications:   () => safeFetch("/api/v1/actions/leads/search"),
 };
 
-export { safeFetch, toList };
+export default safeApi;

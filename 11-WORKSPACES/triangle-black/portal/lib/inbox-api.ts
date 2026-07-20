@@ -1,5 +1,7 @@
 // @ts-nocheck
-import { apiJson, safeApiJson } from "./enterprise-api";
+import { safeFetch } from "./safe-api";
+const apiJson = safeFetch;
+const safeApiJson = safeFetch;
 
 export const inboxApi = {
   list: () => safeApiJson("/notifications/"),
