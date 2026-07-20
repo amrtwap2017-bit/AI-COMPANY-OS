@@ -70,6 +70,57 @@ def approval_queue(hotel_id: Optional[str] = None, db: Session = Depends(get_db)
         },
     }
 
+@router.get("", summary="Unified approval queue")
+def approval_queue_noslash(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
+    queue = []
+
+    # Quotes pending review or sent
+    q_quotes = rows(db.execute(text(
+        "SELECT id, title, total AS amount, 'quote' AS approval_type,"
+        " status, created_at, updated_at"
+        " FROM quotes WHERE hotel_id=:hotel_id"
+        " AND status IN ('review','sent') ORDER BY created_at DESC LIMIT 10"
+    ), h).fetchall())
+    queue.extend(q_quotes)
+
+    # Purchase requests pending
+    # Columns: pr_number, requester, urgency, status, created_at, updated_at
+    q_prs = rows(db.execute(text(
+        "SELECT id, pr_number AS title, requester,"
+        " urgency, 0 AS amount,"
+        " 'purchase_request' AS approval_type,"
+        " status, created_at, updated_at"
+        " FROM purchase_requests WHERE hotel_id=:hotel_id"
+        " AND status IN ('draft','pending') ORDER BY created_at DESC LIMIT 10"
+    ), h).fetchall())
+    queue.extend(q_prs)
+
+    # Purchase orders pending
+    # Columns: po_number, vendor_id, total_amount, status, created_at, updated_at
+    q_pos = rows(db.execute(text(
+        "SELECT id, po_number AS title, vendor_id,"
+        " total_amount AS amount,"
+        " 'purchase_order' AS approval_type,"
+        " status, created_at, updated_at"
+        " FROM purchase_orders WHERE hotel_id=:hotel_id"
+        " AND status IN ('draft','pending') ORDER BY created_at DESC LIMIT 10"
+    ), h).fetchall())
+    queue.extend(q_pos)
+
+    queue.sort(key=lambda x: str(x.get("created_at") or ""), reverse=True)
+    return {
+        "queue":  queue,
+        "total":  len(queue),
+        "counts": {
+            "quotes":            len(q_quotes),
+            "purchase_requests": len(q_prs),
+            "purchase_orders":   len(q_pos),
+        },
+    }
+
+
 @router.get("/count", summary="Pending approval count")
 def approval_count(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):

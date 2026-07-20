@@ -34,6 +34,24 @@ def list_technicians(
     rows = db.execute(text(q), params).fetchall()
     return [row_to_dict(r) for r in rows]
 
+
+@router.get("", summary="List technicians")
+def list_technicians_root(
+    hotel_id:  Optional[str] = None,
+    is_active: Optional[bool] = None,
+    skip:      int = 0,
+    limit:     int = Query(default=50, le=200),
+    db: Session = Depends(get_db),
+):
+    q = "SELECT * FROM technicians WHERE 1=1"
+    params: dict = {}
+    if hotel_id:             q += " AND hotel_id = :hotel_id";    params["hotel_id"]  = hotel_id
+    if is_active is not None:q += " AND is_active = :is_active";  params["is_active"] = is_active
+    q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
+    params["limit"] = limit; params["skip"] = skip
+    rows = db.execute(text(q), params).fetchall()
+    return [row_to_dict(r) for r in rows]
+
 @router.get("/{technician_id}", summary="Get technician")
 def get_technician(technician_id: str, db: Session = Depends(get_db)):
     row = db.execute(text("SELECT * FROM technicians WHERE id = :id"), {"id": technician_id}).fetchone()

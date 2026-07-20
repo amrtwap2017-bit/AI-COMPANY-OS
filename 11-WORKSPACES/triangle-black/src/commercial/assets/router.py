@@ -36,6 +36,26 @@ def list_assets(
     rows = db.execute(text(q), params).fetchall()
     return [row_to_dict(r) for r in rows]
 
+
+@router.get("", summary="List assets")
+def list_assets_root(
+    hotel_id: Optional[str] = None,
+    category: Optional[str] = None,
+    status:   Optional[str] = None,
+    skip:     int = 0,
+    limit:    int = Query(default=50, le=200),
+    db: Session = Depends(get_db),
+):
+    q = "SELECT * FROM assets WHERE 1=1"
+    params: dict = {}
+    if hotel_id: q += " AND hotel_id = :hotel_id"; params["hotel_id"] = hotel_id
+    if category: q += " AND category = :category"; params["category"] = category
+    if status:   q += " AND status = :status";     params["status"]   = status
+    q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
+    params["limit"] = limit; params["skip"] = skip
+    rows = db.execute(text(q), params).fetchall()
+    return [row_to_dict(r) for r in rows]
+
 @router.get("/tree", summary="Asset hierarchy tree")
 def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
     q = "SELECT * FROM assets WHERE 1=1"

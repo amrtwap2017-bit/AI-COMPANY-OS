@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-07-20 16:57:34.101589",
+  "passed": 17,
+  "failed": 3,
+  "score": 85,
+  "results": [
+    {
+      "endpoint": "/api/v1/work-orders",
+      "status": "PASS (50)"
+    },
+    {
+      "endpoint": "/api/v1/technicians",
+      "status": "PASS (25)"
+    },
+    {
+      "endpoint": "/api/v1/assets",
+      "status": "PASS (46)"
+    },
+    {
+      "endpoint": "/api/v1/projects",
+      "status": "PASS (12)"
+    },
+    {
+      "endpoint": "/api/v1/agents",
+      "status": "PASS (12)"
+    },
+    {
+      "endpoint": "/api/v1/customers",
+      "status": "PASS (11)"
+    },
+    {
+      "endpoint": "/api/v1/inventory/items",
+      "status": "PASS (60)"
+    },
+    {
+      "endpoint": "/api/v1/inventory/warehouses",
+      "status": "PASS (2)"
+    },
+    {
+      "endpoint": "/api/v1/notifications",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/approvals",
+      "status": "FAIL (detail: Method Not Allowed)"
+    },
+    {
+      "endpoint": "/api/v1/approvals/count",
+      "status": "FAIL (detail: Not Found)"
+    },
+    {
+      "endpoint": "/api/v1/maintenance/dashboard",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/maintenance/pm-plans",
+      "status": "PASS (30)"
+    },
+    {
+      "endpoint": "/api/v1/analytics/kpis",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/analytics/sla",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/actions/leads/search",
+      "status": "WARN shape=dict count=50"
+    },
+    {
+      "endpoint": "/api/v1/actions/dashboard/stats",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/actions/executive/dashboard",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/actions/executive/risks",
+      "status": "PASS (0)"
+    },
+    {
+      "endpoint": "/api/v1/actions/pipeline/summary",
+      "status": "PASS (0)"
+    }
+  ]
+}

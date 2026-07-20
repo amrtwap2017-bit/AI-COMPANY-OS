@@ -2,7 +2,7 @@
 // Triangle Black API Client — Authenticated
 // All portal API calls go through this client
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const API_BASE = "";  // Relative URL - routes through Next.js proxy
 const SESSION_KEY = "tb_access_token";
 
 function getToken(): string {

@@ -38,6 +38,28 @@ def list_work_orders(
     rows = db.execute(text(q), params).fetchall()
     return [row_to_dict(r) for r in rows]
 
+
+@router.get("", summary="List work orders")
+def list_work_orders_root(
+    hotel_id:      Optional[str] = None,
+    status:        Optional[str] = None,
+    priority:      Optional[str] = None,
+    technician_id: Optional[str] = None,
+    skip:          int = 0,
+    limit:         int = Query(default=50, le=200),
+    db: Session = Depends(get_db),
+):
+    q = "SELECT * FROM work_orders WHERE 1=1"
+    params: dict = {}
+    if hotel_id:      q += " AND hotel_id = :hotel_id";           params["hotel_id"]      = hotel_id
+    if status:        q += " AND status = :status";               params["status"]        = status
+    if priority:      q += " AND priority = :priority";           params["priority"]      = priority
+    if technician_id: q += " AND technician_id = :technician_id"; params["technician_id"] = technician_id
+    q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
+    params["limit"] = limit; params["skip"] = skip
+    rows = db.execute(text(q), params).fetchall()
+    return [row_to_dict(r) for r in rows]
+
 @router.get("/{work_order_id}", summary="Get work order")
 def get_work_order(work_order_id: str, db: Session = Depends(get_db)):
     row = db.execute(text("SELECT * FROM work_orders WHERE id = :id"), {"id": work_order_id}).fetchone()

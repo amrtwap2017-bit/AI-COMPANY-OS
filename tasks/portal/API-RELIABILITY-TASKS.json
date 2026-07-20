@@ -1,0 +1,66 @@
+{
+  "epic": "API Reliability and Portal Data Integrity",
+  "generated": "2026-07-20 16:52",
+  "tasks": [
+    {
+      "id": "API-001",
+      "title": "Full Endpoint Inventory and Classification",
+      "priority": "CRITICAL",
+      "estimate": "2h"
+    },
+    {
+      "id": "API-002",
+      "title": "Collection Route Normalization",
+      "priority": "CRITICAL",
+      "estimate": "3h"
+    },
+    {
+      "id": "API-003",
+      "title": "Approval Center Endpoint Repair",
+      "priority": "CRITICAL",
+      "estimate": "1h"
+    },
+    {
+      "id": "API-004",
+      "title": "Frontend API Client Consolidation",
+      "priority": "HIGH",
+      "estimate": "4h"
+    },
+    {
+      "id": "API-005",
+      "title": "Portal Proxy Contract Audit",
+      "priority": "HIGH",
+      "estimate": "2h"
+    },
+    {
+      "id": "API-006",
+      "title": "Response Shape Standardization",
+      "priority": "HIGH",
+      "estimate": "3h"
+    },
+    {
+      "id": "API-007",
+      "title": "Direct Fetch Elimination",
+      "priority": "HIGH",
+      "estimate": "3h"
+    },
+    {
+      "id": "API-008",
+      "title": "Browser-Facing API Smoke Test",
+      "priority": "HIGH",
+      "estimate": "2h"
+    },
+    {
+      "id": "API-009",
+      "title": "Backend Contract Test Suite",
+      "priority": "HIGH",
+      "estimate": "4h"
+    },
+    {
+      "id": "API-010",
+      "title": "Production Data Seeding Completeness",
+      "priority": "MEDIUM",
+      "estimate": "3h"
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "generated": "2026-07-20 16:56:24.501321",
+  "results": [
+    {
+      "endpoint": "/api/v1/work-orders/",
+      "direct_code": "200",
+      "direct_shape": "array[50]",
+      "proxy_code": "200",
+      "proxy_shape": "array[50]"
+    },
+    {
+      "endpoint": "/api/v1/work-orders",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "200",
+      "proxy_shape": "array[50]"
+    },
+    {
+      "endpoint": "/api/v1/technicians/",
+      "direct_code": "200",
+      "direct_shape": "array[25]",
+      "proxy_code": "200",
+      "proxy_shape": "array[25]"
+    },
+    {
+      "endpoint": "/api/v1/technicians",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "200",
+      "proxy_shape": "array[25]"
+    },
+    {
+      "endpoint": "/api/v1/assets/",
+      "direct_code": "200",
+      "direct_shape": "array[46]",
+      "proxy_code": "200",
+      "proxy_shape": "array[46]"
+    },
+    {
+      "endpoint": "/api/v1/assets",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "200",
+      "proxy_shape": "array[46]"
+    },
+    {
+      "endpoint": "/api/v1/projects/",
+      "direct_code": "200",
+      "direct_shape": "array[12]",
+      "proxy_code": "200",
+      "proxy_shape": "array[12]"
+    },
+    {
+      "endpoint": "/api/v1/projects",
+      "direct_code": "200",
+      "direct_shape": "array[12]",
+      "proxy_code": "200",
+      "proxy_shape": "array[12]"
+    },
+    {
+      "endpoint": "/api/v1/agents/",
+      "direct_code": "200",
+      "direct_shape": "array[12]",
+      "proxy_code": "200",
+      "proxy_shape": "array[12]"
+    },
+    {
+      "endpoint": "/api/v1/agents",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "200",
+      "proxy_shape": "array[12]"
+    },
+    {
+      "endpoint": "/api/v1/customers/",
+      "direct_code": "200",
+      "direct_shape": "dict['customers', 'total']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['customers', 'total']"
+    },
+    {
+      "endpoint": "/api/v1/customers",
+      "direct_code": "200",
+      "direct_shape": "dict['customers', 'total']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['customers', 'total']"
+    },
+    {
+      "endpoint": "/api/v1/notifications/",
+      "direct_code": "200",
+      "direct_shape": "dict['notifications', 'unread_count']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['notifications', 'unread_count']"
+    },
+    {
+      "endpoint": "/api/v1/notifications",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "200",
+      "proxy_shape": "dict['notifications', 'unread_count']"
+    },
+    {
+      "endpoint": "/api/v1/inventory/items/",
+      "direct_code": "200",
+      "direct_shape": "array[60]",
+      "proxy_code": "200",
+      "proxy_shape": "array[60]"
+    },
+    {
+      "endpoint": "/api/v1/inventory/warehouses/",
+      "direct_code": "200",
+      "direct_shape": "array[2]",
+      "proxy_code": "200",
+      "proxy_shape": "array[2]"
+    },
+    {
+      "endpoint": "/api/v1/inventory/vendors/",
+      "direct_code": "200",
+      "direct_shape": "array[13]",
+      "proxy_code": "200",
+      "proxy_shape": "array[13]"
+    },
+    {
+      "endpoint": "/api/v1/inventory/purchase-orders/",
+      "direct_code": "200",
+      "direct_shape": "array[21]",
+      "proxy_code": "200",
+      "proxy_shape": "array[21]"
+    },
+    {
+      "endpoint": "/api/v1/inventory/purchase-requests/",
+      "direct_code": "200",
+      "direct_shape": "array[1]",
+      "proxy_code": "200",
+      "proxy_shape": "array[1]"
+    },
+    {
+      "endpoint": "/api/v1/approvals/",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "405",
+      "proxy_shape": "ERROR:Method Not Allowed"
+    },
+    {
+      "endpoint": "/api/v1/approvals",
+      "direct_code": "405",
+      "direct_shape": "ERROR:Method Not Allowed",
+      "proxy_code": "405",
+      "proxy_shape": "ERROR:Method Not Allowed"
+    },
+    {
+      "endpoint": "/api/v1/approvals/count",
+      "direct_code": "404",
+      "direct_shape": "ERROR:Not Found",
+      "proxy_code": "404",
+      "proxy_shape": "ERROR:Not Found"
+    },
+    {
+      "endpoint": "/api/v1/maintenance/dashboard",
+      "direct_code": "200",
+      "direct_shape": "dict['total_assets', 'open_work_orders', 'in_progress']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['total_assets', 'open_work_orders', 'in_progress']"
+    },
+    {
+      "endpoint": "/api/v1/maintenance/pm-plans",
+      "direct_code": "200",
+      "direct_shape": "array[30]",
+      "proxy_code": "200",
+      "proxy_shape": "array[30]"
+    },
+    {
+      "endpoint": "/api/v1/maintenance/asset-tree",
+      "direct_code": "200",
+      "direct_shape": "dict['tree', 'total_assets']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['tree', 'total_assets']"
+    },
+    {
+      "endpoint": "/api/v1/analytics/kpis",
+      "direct_code": "200",
+      "direct_shape": "dict['commercial', 'operations', 'generated_at']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['commercial', 'operations', 'generated_at']"
+    },
+    {
+      "endpoint": "/api/v1/analytics/sla",
+      "direct_code": "200",
+      "direct_shape": "dict['compliance_rate', 'total_work_orders', 'completed']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['compliance_rate', 'total_work_orders', 'completed']"
+    },
+    {
+      "endpoint": "/api/v1/analytics/scorecards",
+      "direct_code": "200",
+      "direct_shape": "dict['scorecards', 'snapshots']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['scorecards', 'snapshots']"
+    },
+    {
+      "endpoint": "/api/v1/actions/leads/search",
+      "direct_code": "200",
+      "direct_shape": "dict['count', 'query', 'results']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['count', 'query', 'results']"
+    },
+    {
+      "endpoint": "/api/v1/actions/dashboard/stats",
+      "direct_code": "200",
+      "direct_shape": "dict['total_leads', 'open_quotes', 'unread_notifications']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['total_leads', 'open_quotes', 'unread_notifications']"
+    },
+    {
+      "endpoint": "/api/v1/actions/executive/dashboard",
+      "direct_code": "200",
+      "direct_shape": "dict['kpis', 'health', 'period']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['kpis', 'health', 'period']"
+    },
+    {
+      "endpoint": "/api/v1/actions/executive/alerts/predictive",
+      "direct_code": "200",
+      "direct_shape": "dict['alerts', 'total', 'generated_at']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['alerts', 'total', 'generated_at']"
+    },
+    {
+      "endpoint": "/api/v1/actions/executive/risks",
+      "direct_code": "200",
+      "direct_shape": "dict['risks', 'total_risks', 'risk_score']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['risks', 'total_risks', 'risk_score']"
+    },
+    {
+      "endpoint": "/api/v1/actions/executive/intelligence",
+      "direct_code": "200",
+      "direct_shape": "dict['hot_deals', 'overdue_invoices', 'critical_ops']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['hot_deals', 'overdue_invoices', 'critical_ops']"
+    },
+    {
+      "endpoint": "/api/v1/actions/pipeline/summary",
+      "direct_code": "200",
+      "direct_shape": "dict['total_leads', 'by_status', 'total_quote_value']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['total_leads', 'by_status', 'total_quote_value']"
+    },
+    {
+      "endpoint": "/api/v1/actions/inventory/dashboard",
+      "direct_code": "200",
+      "direct_shape": "dict['items', 'warehouses', 'vendors']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['items', 'warehouses', 'vendors']"
+    },
+    {
+      "endpoint": "/api/v1/actions/inventory/low-stock",
+      "direct_code": "200",
+      "direct_shape": "dict['count', 'items']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['count', 'items']"
+    },
+    {
+      "endpoint": "/api/v1/actions/procurement/dashboard",
+      "direct_code": "200",
+      "direct_shape": "dict['purchase_requests', 'purchase_orders', 'goods_receipts']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['purchase_requests', 'purchase_orders', 'goods_receipts']"
+    },
+    {
+      "endpoint": "/api/v1/actions/reports/dashboard",
+      "direct_code": "200",
+      "direct_shape": "dict['period', 'leads', 'quotes']",
+      "proxy_code": "200",
+      "proxy_shape": "dict['period', 'leads', 'quotes']"
+    }
+  ]
+}

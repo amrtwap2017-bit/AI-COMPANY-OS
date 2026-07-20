@@ -203,22 +203,6 @@ async def leads_list(skip: int = 0, limit: int = 50):
         return _JSONResponse(status_code=500, content={"error": str(e)})
 
 
-# ── BE-003/004/005/006: Fixed routers with correct prefixes ──────────────
-# These replace the old safe_include calls that had wrong prefixes
-try:
-    from src.commercial.work_orders.router     import router as wo_router
-    from src.commercial.technicians.router     import router as tech_router
-    from src.commercial.assets.router          import router as assets_router
-    from src.commercial.service_requests.router import router as sr_router
-    app.include_router(wo_router,     prefix="/api/v1")
-    app.include_router(tech_router,   prefix="/api/v1")
-    app.include_router(assets_router, prefix="/api/v1")
-    app.include_router(sr_router,     prefix="/api/v1")
-    print("  OK: work-orders, technicians, assets, service-requests")
-except Exception as e:
-    print(f"  WARN: fixed routers: {e}")
-
-
 # ── BE-104 to BE-109: Sprint BE-B Routers ────────────────────────────────
 print("Registering Sprint BE-B routers...")
 _be_b = [

@@ -7,7 +7,7 @@ import { tokenManager } from "@/lib/auth/token-manager";
 
 // Use relative URL so calls go through Next.js proxy rewrite
 // next.config.ts: /api/v1/* -> http://localhost:8030/api/v1/*
-const API_URL = "";  // empty = relative URL = goes through proxy
+const API_URL = "";  // Relative URL - routes through Next.js proxy
 
 export async function safeFetch(path: string, options?: RequestInit): Promise<any> {
   const token = tokenManager.getToken();

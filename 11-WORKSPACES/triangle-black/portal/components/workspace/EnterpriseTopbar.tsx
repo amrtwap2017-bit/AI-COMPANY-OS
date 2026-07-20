@@ -23,6 +23,7 @@ export function EnterpriseTopbar() {
     const token = tokenManager.getToken() || "";
     if (!token) return;
     fetch("/api/v1/notifications/?limit=20", {
+      redirect: "follow",
       headers: { Authorization: "Bearer " + token }
     })
       .then(r => r.json())
