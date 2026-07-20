@@ -1,98 +1,55 @@
 // @ts-nocheck
 "use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import {serviceOpsApi,  inventoryApi } from "@/lib/api";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { PageHeader, DataTable, LoadingState, EmptyState, AlertBanner, SearchInput } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { useSearch } from "@/lib/hooks/useSearch";
 
-export default function InventoryDashboardPage() {
-  const [dash, setDash]   = useState<any>(null);
-  const [low, setLow]     = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([serviceOpsApi.inventory.getInventoryDashboard(), serviceOpsApi.inventory.getLowStock()])
-      .then(([d, l]) => { setDash(d); setLow(l.items || []); })
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <div className="p-8 text-center text-gray-400">Loading inventory…</div>;
-
-  const cards = [
-    { label: "Total Items",    value: dash?.items?.total ?? 0,    color: "text-[#1B2B4B]", bg: "bg-slate-50" },
-    { label: "Active Items",   value: dash?.items?.active ?? 0,   color: "text-green-600", bg: "bg-green-50" },
-    { label: "Low Stock",      value: dash?.items?.low_stock ?? 0, color: "text-red-500",   bg: "bg-red-50"   },
-    { label: "Warehouses",     value: dash?.warehouses?.total ?? 0,color: "text-blue-600",  bg: "bg-blue-50"  },
-    { label: "Vendors",        value: dash?.vendors?.total ?? 0,   color: "text-purple-600",bg: "bg-purple-50"},
-    { label: "Open PRs",       value: dash?.procurement?.open_prs ?? 0, color: "text-amber-500", bg: "bg-amber-50"},
-    { label: "Open POs",       value: dash?.procurement?.open_pos ?? 0, color: "text-indigo-600", bg: "bg-indigo-50"},
-    { label: "Pending GRN",    value: dash?.procurement?.pending_grn ?? 0,color: "text-orange-500",bg: "bg-orange-50"},
+export default function InventoryPage() {
+  const { data=[], isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["inventory"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/inventory");
+      if (!res.ok) return [];
+      const d = await res.json();
+      return Array.isArray(d) ? d : d?.items || d?.data || [];
+    },
+    staleTime: 30_000,
+  });
+  const { query, setQuery, filtered } = useSearch(data, ["name","sku","category"]);
+  const { page, totalPages, items, goToPage } = usePagination(filtered, 25);
+  const lowStock = useMemo(()=>data.filter((i:any)=>(i.quantity||0)<(i.min_quantity||5)).length,[data]);
+  const columns = [
+    { key:"name",     label:"Item",
+      render:(row:any)=>(<div><p className="font-semibold text-sm">{row.name}</p><p className="text-xs text-slate-500">{row.sku||"—"}</p></div>)},
+    { key:"category", label:"Category",
+      render:(row:any)=>(<span className="text-xs bg-slate-100 px-2 py-0.5 rounded">{row.category||"—"}</span>)},
+    { key:"quantity", label:"Quantity",
+      render:(row:any)=>{
+        const qty=(row.quantity||0), min=(row.min_quantity||5);
+        return <span className={`text-sm font-bold ${qty<min?"text-red-600":"text-emerald-600"}`}>{qty}</span>}},
+    { key:"unit", label:"Unit",     render:(row:any)=>(<span className="text-xs text-slate-500">{row.unit||"pc"}</span>)},
+    { key:"location", label:"Location",render:(row:any)=>(<span className="text-xs">{row.location||row.warehouse||"—"}</span>)},
   ];
-
-  const navItems = [
-    { href: "/inventory/items",     label: "Items Catalog",      icon: "📦" },
-    { href: "/inventory/warehouses",label: "Warehouses",          icon: "🏭" },
-    { href: "/inventory/vendors",   label: "Vendors",             icon: "🤝" },
-    { href: "/inventory/purchase-requests", label: "Purchase Requests", icon: "📋" },
-    { href: "/inventory/purchase-orders",   label: "Purchase Orders",   icon: "🛒" },
-  ];
-
   return (
-    <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
-      <div>
-        <h1 className="text-2xl font-bold text-[#1B2B4B]">Inventory Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Stock control, procurement and vendor management</p>
+    <div className="space-y-5 pb-12">
+      <Breadcrumb/>
+      <PageHeader title="Inventory" subtitle={`${data.length} items tracked`} badge="INV"
+        actions={<button onClick={()=>refetch()} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">↺</button>}/>
+      {lowStock>0&&(<div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">⚠️ {lowStock} item(s) below minimum stock level</div>)}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4">
+        <SearchInput value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search inventory..." className="w-full sm:w-72"/>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {cards.map(({ label, value, color, bg }) => (
-          <div key={label} className={`${bg} rounded-xl p-4 shadow-sm border border-gray-100`}>
-            <p className="text-xs text-gray-500 mb-1">{label}</p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-          </div>
-        ))}
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         items.length===0?<EmptyState icon="📦" title="No inventory" description="No inventory items found"/>:
+         <DataTable columns={columns} data={items}/>}
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {navItems.map(({ href, label, icon }) => (
-          <Link key={href} href={href}
-            className="bg-white rounded-xl p-5 shadow-sm border border-gray-100
-                       hover:border-[#1B2B4B] hover:shadow-md transition-all text-center group">
-            <div className="text-3xl mb-2">{icon}</div>
-            <p className="text-sm font-semibold text-[#1B2B4B] group-hover:text-amber-500
-                          transition-colors">{label}</p>
-          </Link>
-        ))}
-      </div>
-
-      {low.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-red-100 p-6">
-          <h2 className="text-lg font-semibold text-red-600 mb-4">⚠ Low Stock Alerts ({low.length})</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-gray-500 border-b border-gray-100">
-                  <th className="pb-2 pr-4">Code</th>
-                  <th className="pb-2 pr-4">Item</th>
-                  <th className="pb-2 pr-4">Category</th>
-                  <th className="pb-2 pr-4 text-right">Min Stock</th>
-                  <th className="pb-2 text-right">Reorder Qty</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {low.slice(0, 10).map((item: any) => (
-                  <tr key={item.id} className="hover:bg-red-50">
-                    <td className="py-2 pr-4 font-mono text-xs text-gray-500">{item.item_code}</td>
-                    <td className="py-2 pr-4 font-medium text-gray-800">{item.name}</td>
-                    <td className="py-2 pr-4 text-gray-500">{item.category}</td>
-                    <td className="py-2 pr-4 text-right text-red-500 font-semibold">{item.min_stock} {item.unit}</td>
-                    <td className="py-2 text-right text-gray-600">{item.reorder_qty} {item.unit}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </div>
   );
 }
