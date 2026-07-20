@@ -8,3 +8,6 @@ export * from './useAnalytics'
 export * from './useAuth'
 
 export * from './useWorkflows'
+
+export { usePagination } from './usePagination';
+export { useSearch } from './useSearch';

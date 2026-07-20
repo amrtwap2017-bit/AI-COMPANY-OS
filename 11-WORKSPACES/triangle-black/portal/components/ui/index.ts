@@ -18,3 +18,5 @@ export { NotificationDrawer } from "./NotificationDrawer";
 export { EntityShell } from "./EntityShell";
 
 export { StatusBadge } from "./StatusBadge";
+
+export { Pagination } from './Pagination';
