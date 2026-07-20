@@ -154,6 +154,7 @@ export default function Contract360Page() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <Entity360Hero
         eyebrow="Commercial + Operations"
         title={focusTitle}

@@ -110,6 +110,7 @@ export default function ProcurementIntelligencePage() {
                 const pct = total > 0 ? Math.round((cat.total / total) * 100) : 0;
                 return (
                   <div key={i} className="space-y-1">
+      <Breadcrumb/>
                     <div className="flex justify-between text-sm">
                       <span className="font-medium text-gray-700 capitalize">{cat.category || "Uncategorized"}</span>
                       <span className="text-gray-500">{fmt(cat.total || 0)} · {pct}%</span>

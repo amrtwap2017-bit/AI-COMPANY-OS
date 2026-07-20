@@ -1,31 +1,21 @@
 // @ts-nocheck
-type InsightItem = {
-  title: string;
-  detail: string;
-};
-
-type InsightStackProps = {
-  title: string;
-  subtitle: string;
-  items: InsightItem[];
-};
-
-export function InsightStack({ title, subtitle, items }: InsightStackProps) {
+"use client";
+export function InsightStack({ title, subtitle, items=[] }:any) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
-      </div>
-
-      <div className="mt-5 space-y-3">
-        {items.map((item) => (
-          <div key={item.title} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-sm font-semibold text-slate-900">{item.title}</div>
-            <div className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</div>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      <div className="space-y-3">
+        {items.map((item:any,i:number)=>(
+          <div key={i} className="flex gap-3 p-3 bg-slate-50 rounded-xl">
+            <span className="text-amber-500 mt-0.5 flex-shrink-0">→</span>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+              {item.detail && <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>}
+            </div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

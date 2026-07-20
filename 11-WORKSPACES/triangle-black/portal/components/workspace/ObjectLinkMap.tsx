@@ -1,60 +1,25 @@
 // @ts-nocheck
-type ObjectNode = {
-  title: string;
-  value: string;
-  detail: string;
-  connections: string[];
-  tone?: "neutral" | "success" | "warning";
-};
-
-type ObjectLinkMapProps = {
-  title: string;
-  subtitle: string;
-  nodes: ObjectNode[];
-};
-
-function toneClasses(tone?: ObjectNode["tone"]) {
-  if (tone === "success") return "border-emerald-200";
-  if (tone === "warning") return "border-amber-200";
-  return "border-slate-200";
-}
-
-export function ObjectLinkMap({ title, subtitle, nodes }: ObjectLinkMapProps) {
+"use client";
+export function ObjectLinkMap({ title, subtitle, nodes=[] }:any) {
+  const tones:any = { warning:"border-amber-300 bg-amber-50", success:"border-emerald-300 bg-emerald-50", neutral:"border-slate-200 bg-slate-50" };
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
-      </div>
-
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {nodes.map((node) => (
-          <div key={node.title} className={"rounded-2xl border bg-slate-50 p-5 " + toneClasses(node.tone)}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="text-sm font-semibold text-slate-900">{node.title}</div>
-              <div className="text-2xl font-semibold tracking-tight text-slate-950">{node.value}</div>
-            </div>
-
-            <div className="mt-3 text-sm leading-6 text-slate-600">{node.detail}</div>
-
-            <div className="mt-4">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Connected To
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        {nodes.map((node:any,i:number)=>(
+          <div key={i} className={"p-3 rounded-xl border "+(tones[node.tone]||tones.neutral)}>
+            <p className="text-lg font-bold text-slate-900">{node.value}</p>
+            <p className="text-xs font-semibold text-slate-700">{node.title}</p>
+            {node.detail && <p className="text-[10px] text-slate-500 mt-1">{node.detail}</p>}
+            {node.connections?.length>0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {node.connections.slice(0,3).map((c:string)=>(<span key={c} className="text-[9px] bg-white border px-1.5 py-0.5 rounded text-slate-500">{c}</span>))}
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {node.connections.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

@@ -182,6 +182,7 @@ export default function Customer360Page() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <Entity360Hero
         eyebrow="Customer Success Center"
         title={focusName}

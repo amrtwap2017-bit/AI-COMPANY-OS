@@ -12,6 +12,7 @@ import {
   AlertBanner,
   Button,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { executiveIntelligenceApi } from "@/lib";
 import {
   Activity,
@@ -82,6 +83,7 @@ export default function ExecutiveDashboard() {
 
   return (
     <div className="space-y-8 pb-12">
+      <Breadcrumb/>
       <PageHeader
         title="Executive Command Center"
         subtitle="One Identity. One Mission. Real-time business intelligence."

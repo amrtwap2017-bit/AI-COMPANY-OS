@@ -87,6 +87,7 @@ export default function CommercialReviewBoardPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Commercial Center"
         title="Commercial Review Board"

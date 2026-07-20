@@ -10,6 +10,7 @@ import {
   ArrowRight, ChevronRight, Bell, CheckSquare, Shield,
 } from "lucide-react";
 import { MetricStrip, AlertBanner, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 import { enterpriseCenters } from "@/components/workspace/nav";
 
@@ -68,6 +69,7 @@ export default function WorkspacePage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
 
       {/* Header */}
       <div className="flex items-start justify-between">

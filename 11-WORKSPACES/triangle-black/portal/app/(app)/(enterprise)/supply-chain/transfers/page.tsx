@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { PageHeader, SectionCard, EmptyState, LoadingState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 import { ArrowRightLeft, Plus, X, Package, Warehouse, CheckCircle2 } from "lucide-react";
 import {
@@ -94,6 +95,7 @@ export default function TransfersPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Warehouse Transfers"
         subtitle="Move inventory between warehouses"

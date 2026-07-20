@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { scApi } from "@/lib/supply-chain-api";
 import { PageHeader, Button, DataTable, SearchInput, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate, fmtCurrency, getStatus } from "@/lib/design-tokens";
 import Link from "next/link";
 import { RefreshCw, Plus, ChevronRight, FileText, AlertCircle, CheckCircle } from "lucide-react";
@@ -59,6 +60,7 @@ export default function SupplierInvoicesPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader title="Supplier Invoices" subtitle={`${total} invoices tracked · 3-Way Matching`} badge="INV"
         actions={
           <div className="flex items-center gap-2">

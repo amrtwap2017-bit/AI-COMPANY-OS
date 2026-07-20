@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { maintenanceApi } from "@/lib/maintenance-api";
 import { PageHeader, Button, DataTable, SearchInput, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency, getStatus } from "@/lib/design-tokens";
 import Link from "next/link";
 import { RefreshCw, Plus, ChevronRight, Calendar, Clock, Wrench } from "lucide-react";
@@ -78,6 +79,7 @@ export default function PMPlansPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader
         title="Preventive Maintenance Plans"
         subtitle={`${total} recurring maintenance templates`}

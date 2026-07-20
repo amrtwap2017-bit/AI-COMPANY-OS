@@ -53,6 +53,7 @@ export default function EntityIntegrationWorkspacePage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkspaceBanner
         role="Backend Entity Validation"
         title="Entity integration workspace is active"

@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   PageHeader, SectionCard, MetricCard, EmptyState, LoadingState, AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 import {
   TrendingUp, TrendingDown, Award, AlertTriangle,
@@ -108,6 +109,7 @@ export default function VendorAnalyticsPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Vendor Performance Analytics"
         subtitle="Spend analysis, scorecards, and procurement KPIs"

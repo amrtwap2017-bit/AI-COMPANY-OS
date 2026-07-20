@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { maintenanceApi } from "@/lib/maintenance-api";
 import { PageHeader, Button, DataTable, SearchInput, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate, getStatus } from "@/lib/design-tokens";
 import Link from "next/link";
 import { RefreshCw, Plus, ChevronRight, MapPin, AlertCircle } from "lucide-react";
@@ -86,6 +87,7 @@ const all: any[] = rawAll.map((r: any) => ({
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader
         title="PM Schedule & Dispatch"
         subtitle={`${total} upcoming preventive maintenance tasks`}

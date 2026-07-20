@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { PageHeader, SectionCard, MetricCard, EmptyState, LoadingState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Activity, Clock, ShieldCheck, AlertTriangle, RefreshCw, Briefcase } from "lucide-react";
 import { fetchSlaSummary, fetchContractSlas, type SlaSummary, type ContractSla } from "@/lib/sla-api";
 
@@ -48,6 +49,7 @@ export default function SlaTrackingPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="SLA Tracking Dashboard"
         subtitle="Response and resolution performance across active contracts"

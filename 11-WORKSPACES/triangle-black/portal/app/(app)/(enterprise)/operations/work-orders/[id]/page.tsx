@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { maintenanceApi } from "@/lib/maintenance-api";
 import { PageHeader, Button, SectionCard, StatusPill, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate, getStatus, getPriority } from "@/lib/design-tokens";
 import { ArrowLeft, Printer, Download, CheckCircle, Clock, MapPin } from "lucide-react";
 
@@ -51,6 +52,7 @@ export default function WorkOrderDetailPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader
         title={wo.wo_number || "Work Order"}
         subtitle={`${wo.title} · Created ${fmtDate(wo.created_at)}`}

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import {
   PageHeader, SectionCard, MetricCard, EmptyState, LoadingState, AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 import {
   FileText, AlertTriangle, Clock, CheckCircle2,
@@ -153,6 +154,7 @@ export default function ContractRenewalPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Contract Renewal Pipeline"
         subtitle="30/60/90 day expiry alerts and one-click renewal"

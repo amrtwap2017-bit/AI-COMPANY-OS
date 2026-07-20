@@ -75,6 +75,7 @@ export default function CustomerReviewBoardPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Customer Success Center"
         title="Customer Success Review Board"

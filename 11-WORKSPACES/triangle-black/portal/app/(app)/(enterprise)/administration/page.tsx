@@ -2,6 +2,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader, MetricStrip, SectionCard, DataTable, StatusPill, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate } from "@/lib/design-tokens";
 import { Settings, Users, Hotel, Database, Shield, Activity } from "lucide-react";
 import axios from "axios";
@@ -38,6 +39,7 @@ export default function AdministrationPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <PageHeader title="Administration" subtitle="Platform configuration, users, and system management" />
 
       <MetricStrip metrics={metrics} cols={4} />

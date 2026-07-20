@@ -12,6 +12,7 @@ import {
   LoadingState,
   AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 import {
   Package,
@@ -83,6 +84,7 @@ export default function StockBalancesPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Stock Balances"
         subtitle="Live inventory levels across all warehouses"

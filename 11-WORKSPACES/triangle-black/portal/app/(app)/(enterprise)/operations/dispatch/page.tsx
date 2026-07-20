@@ -90,6 +90,7 @@ export default function OperationsDispatchPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Operations Center"
         title="Dispatch Board Workspace"

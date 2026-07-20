@@ -12,6 +12,7 @@ import {
   AlertBanner,
   SearchInput,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { techniciansApi, type Technician } from "@/lib";
 import { RefreshCw } from "lucide-react";
 
@@ -74,6 +75,7 @@ export default function TechniciansPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Technicians"
         subtitle="Field team roster and assignment load"

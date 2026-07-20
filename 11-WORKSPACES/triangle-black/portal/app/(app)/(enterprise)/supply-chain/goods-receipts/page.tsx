@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { scApi } from "@/lib/supply-chain-api";
 import { PageHeader, Button, DataTable, SearchInput, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate, getStatus } from "@/lib/design-tokens";
 import Link from "next/link";
 import { RefreshCw, Plus, ChevronRight, Truck, Warehouse, MapPin } from "lucide-react";
@@ -61,6 +62,7 @@ export default function GoodsReceiptsPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader title="Goods Receipts (GRN)" subtitle={`${total} delivery notes tracked`} badge="GRN"
         actions={
           <div className="flex items-center gap-2">

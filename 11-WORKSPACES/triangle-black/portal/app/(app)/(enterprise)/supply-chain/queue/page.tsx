@@ -98,6 +98,7 @@ export default function SupplyChainQueuePage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Supply Chain Center"
         title="Supply Chain Queue Board"

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { customerSuccessApi } from "@/lib/customer-success-api";
 import { EntityShell, MetricStrip, SectionCard, DataTable, StatusPill, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency, fmtDate, fmtDateShort, timeAgo } from "@/lib/design-tokens";
 import { TrendingUp, Users, FileText, Wrench, BarChart3, Activity, CheckCircle, AlertTriangle } from "lucide-react";
 
@@ -25,6 +26,7 @@ const healthBarColor = (n: number) =>
 function HealthBar({ label, value }: { label: string; value: number }) {
   return (
     <div className="space-y-1">
+      <Breadcrumb/>
       <div className="flex justify-between text-xs">
         <span className="text-slate-500">{label}</span>
         <span className={`font-bold ${value >= 75 ? "text-emerald-600" : value >= 50 ? "text-amber-600" : "text-red-600"}`}>{value}%</span>

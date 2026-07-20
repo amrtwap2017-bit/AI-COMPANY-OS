@@ -12,6 +12,7 @@ import {
   AlertBanner,
   SearchInput,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { workOrdersApi, techniciansApi, type WorkOrder } from "@/lib";
 import { fmtDate } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
@@ -123,6 +124,7 @@ export default function WorkOrdersPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Work Orders"
         subtitle="Dispatch and track field work orders"

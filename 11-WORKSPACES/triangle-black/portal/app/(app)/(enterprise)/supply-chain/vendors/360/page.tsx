@@ -177,6 +177,7 @@ export default function Vendor360Page() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <Entity360Hero
         eyebrow="Vendor Center"
         title={focusTitle}

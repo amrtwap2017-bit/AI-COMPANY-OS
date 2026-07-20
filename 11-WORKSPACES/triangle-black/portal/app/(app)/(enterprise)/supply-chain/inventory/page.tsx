@@ -12,6 +12,7 @@ import {
   AlertBanner,
   SearchInput,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { inventoryApi, type InventoryItem } from "@/lib";
 import { fmtCurrency } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
@@ -82,6 +83,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader
         title="Inventory Items"
         subtitle="Spare parts and materials catalog"

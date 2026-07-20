@@ -1,46 +1,59 @@
 // @ts-nocheck
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { analyticsApi } from "@/lib/analytics-api";
-import { PageHeader, MetricStrip, LoadingState, Button } from "@/components/ui";
-import { RefreshCw, ChevronRight } from "lucide-react";
+import { PageHeader, MetricStrip, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { safeFetch, toList } from "@/lib/safe-api";
+import { Wrench, Calendar, Package, BarChart3, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function MaintenancePage() {
-  const kpiQ = useQuery({ queryKey:["maint-kpis"], queryFn:()=>analyticsApi.maintenanceKpis() });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+  const [assets,  setAssets]  = useState<any[]>([]);
+  const [pmPlans, setPmPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const metrics = kpis.slice(0,4).map((k:any) => ({
-    label:k.label, value:k.value ?? "—",
-    color: k.status==="critical"?"red":k.status==="warning"?"amber":"orange",
-  }));
+  useEffect(()=>{
+    Promise.all([safeFetch("/api/v1/assets"), safeFetch("/api/v1/pm-plans")])
+      .then(([a,p])=>{ setAssets(toList(a?.data||a)); setPmPlans(toList(p?.data||p)); })
+      .finally(()=>setLoading(false));
+  },[]);
 
-  const modules = [
-    { label:"Asset Tree",        href:"/maintenance/asset-tree",          icon:"🌳", desc:"Hierarchical asset view" },
-    { label:"PM Plans",          href:"/maintenance/review",               icon:"📅", desc:"Preventive maintenance planning" },
-    { label:"Work Items",        href:"/maintenance/actions",              icon:"🔧", desc:"Active maintenance work items" },
-    { label:"Asset 360",         href:"/maintenance/assets/360",          icon:"🔭", desc:"Full asset detail view" },
-    { label:"Intelligence",      href:"/maintenance/intelligence",         icon:"🧠", desc:"Maintenance analytics" },
-    { label:"Cost Review",       href:"/maintenance/costs/review",         icon:"💰", desc:"Maintenance cost analysis" },
+  const kpis = [
+    { label:"Total Assets",   value: loading?"...":String(assets.length||"0"),  sub:"tracked",     color:"blue"    as const },
+    { label:"PM Plans Active",value: loading?"...":String(pmPlans.length||"0"), sub:"scheduled",   color:"emerald" as const },
+    { label:"Due This Week",  value: loading?"...":"—",                          sub:"maintenance", color:"amber"   as const },
+    { label:"Overdue",        value: loading?"...":"—",                          sub:"past due",    color:"red"     as const },
+  ];
+
+  const MODULES = [
+    { label:"Assets",         href:"/assets",                         icon:Package,       desc:"All hotel assets & equipment" },
+    { label:"Asset Tree",     href:"/maintenance/asset-tree",         icon:Wrench,        desc:"Hierarchical asset structure" },
+    { label:"PM Plans",       href:"/maintenance/pm-plans",           icon:Calendar,      desc:"Preventive maintenance plans" },
+    { label:"Schedule",       href:"/maintenance/schedule",           icon:Calendar,      desc:"Maintenance schedule & calendar" },
+    { label:"Maintenance Hub",href:"/maintenance",                    icon:Wrench,        desc:"Full maintenance overview" },
+    { label:"Intelligence",   href:"/maintenance/intelligence",       icon:BarChart3,     desc:"Predictive maintenance insights" },
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Maintenance Center" subtitle="Assets · PM Plans · Work Items · Cost Analysis"
-        actions={<Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5"/>} onClick={()=>kpiQ.refetch()}>Refresh</Button>} />
-
-      {kpiQ.isLoading ? <LoadingState type="cards" rows={4} cols={4}/> : <MetricStrip metrics={metrics} cols={4}/>}
-
-      <div className="grid grid-cols-3 gap-3">
-        {modules.map(mod => (
-          <Link key={mod.label} href={mod.href}
-            className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-amber-300 hover:shadow-md transition-all group">
-            <div className="text-3xl mb-3">{mod.icon}</div>
-            <div className="font-bold text-slate-900 text-sm">{mod.label}</div>
-            <div className="text-xs text-slate-400 mt-1">{mod.desc}</div>
-            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-600 mt-3 transition-colors"/>
-          </Link>
-        ))}
+    <div className="space-y-5 pb-12">
+      <Breadcrumb/>
+      <PageHeader title="Maintenance Center" subtitle="Asset management and preventive maintenance" badge="MNT"/>
+      {loading ? <LoadingState type="cards" rows={4} cols={4}/> : <MetricStrip metrics={kpis} cols={4}/>}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {MODULES.map(mod=>{
+          const Icon = mod.icon;
+          return (
+            <Link key={mod.href} href={mod.href}
+              className="group bg-white rounded-2xl border border-slate-200 p-5 hover:border-amber-300 hover:shadow-sm transition-all">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3 group-hover:bg-amber-50">
+                <Icon className="w-5 h-5 text-slate-500 group-hover:text-amber-600"/>
+              </div>
+              <p className="font-semibold text-sm text-slate-900">{mod.label}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{mod.desc}</p>
+              <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 mt-3 transition-colors"/>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

@@ -93,6 +93,7 @@ export default function EngineeringAIPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
 
       {/* Header */}
       <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">

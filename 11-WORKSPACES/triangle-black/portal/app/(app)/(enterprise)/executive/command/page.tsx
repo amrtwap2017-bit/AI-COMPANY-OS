@@ -110,6 +110,7 @@ export default function ExecutiveCommandPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkspaceBanner
         role="Executive / Admin"
         title="Executive command mode is active"

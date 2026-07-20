@@ -165,6 +165,7 @@ export default function WorkOrder360Page() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <Entity360Hero
         eyebrow="Operations Center"
         title={focusTitle}

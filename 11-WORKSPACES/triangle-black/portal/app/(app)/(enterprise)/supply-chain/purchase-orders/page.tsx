@@ -11,6 +11,7 @@ import {
   EmptyState,
   AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { purchaseOrdersApi, vendorsApi, type PurchaseOrder } from "@/lib";
 import { fmtCurrency, fmtDate } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
@@ -85,6 +86,7 @@ export default function PurchaseOrdersPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader
         title="Purchase Orders"
         subtitle="Supply chain purchase order tracking"

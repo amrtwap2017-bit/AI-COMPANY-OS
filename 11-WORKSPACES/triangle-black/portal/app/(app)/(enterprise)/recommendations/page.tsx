@@ -99,6 +99,7 @@ export default function RecommendationsPage() {
 
   return (
     <div className="space-y-6 pb-12">
+      <Breadcrumb/>
 
       {/* Header */}
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">

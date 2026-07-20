@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { aiAssistantApi } from "@/lib/ai-assistant-api";
 import { Send, Search, Lightbulb, Database, ChevronRight, Zap, MessageSquare, RefreshCw, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { PageHeader, SectionCard, Button, SearchInput, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 
 const domainExamples = [
   { label:"Finance", examples:["What is our collection rate?","Show overdue invoices","How much have we invoiced?"] },
@@ -158,6 +159,7 @@ export default function AIAssistantPage() {
               <div>
                 <div className="text-sm text-slate-500 mb-3">{searchMut.data.count} result{searchMut.data.count!==1?"s":""} for "{searchMut.data.query}"</div>
                 <div className="space-y-2">
+      <Breadcrumb/>
                   {searchMut.data.results.map((r:any)=>(
                     <div key={r.id} className="bg-white rounded-2xl border border-slate-200 px-4 py-3.5 flex items-center justify-between hover:border-amber-300 transition-colors shadow-sm">
                       <div className="flex items-center gap-3">

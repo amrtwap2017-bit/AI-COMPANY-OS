@@ -41,6 +41,7 @@ export default function ExecutiveWorkbenchPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Executive Center"
         title="Executive Workbench"

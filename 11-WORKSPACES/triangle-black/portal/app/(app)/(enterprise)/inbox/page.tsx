@@ -114,6 +114,7 @@ export default function InboxPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Inbox"
         title="Role Inbox"

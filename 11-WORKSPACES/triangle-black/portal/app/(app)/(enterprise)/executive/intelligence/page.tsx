@@ -96,6 +96,7 @@ export default function ExecutiveIntelligencePage() {
 
   return (
     <div className="space-y-6 pb-12">
+      <Breadcrumb/>
       {/* Header */}
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Executive Center</div>

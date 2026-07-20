@@ -41,6 +41,7 @@ export default function AlertsCenterPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Enterprise Alerts"
         title="Alert Center"

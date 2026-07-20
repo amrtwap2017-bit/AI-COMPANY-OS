@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader, Button, DataTable } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency, fmtDate } from "@/lib/design-tokens";
 import { RefreshCw, Plus, ChevronRight, TrendingUp, Users, FileText } from "lucide-react";
 
@@ -70,6 +71,7 @@ export default function PipelinePage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader title="Sales Pipeline" subtitle="Track opportunities from lead to closed project" badge="PIPE"
         actions={
           <div className="flex items-center gap-2">

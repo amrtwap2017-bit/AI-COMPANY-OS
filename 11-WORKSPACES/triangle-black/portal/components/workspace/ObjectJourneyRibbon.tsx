@@ -1,44 +1,22 @@
 // @ts-nocheck
-type JourneyStep = {
-  label: string;
-  detail: string;
-  tone?: "neutral" | "success" | "warning";
-};
-
-type ObjectJourneyRibbonProps = {
-  title: string;
-  subtitle: string;
-  steps: JourneyStep[];
-};
-
-function toneClasses(tone?: JourneyStep["tone"]) {
-  if (tone === "success") return "border-emerald-200 bg-emerald-50 text-emerald-900";
-  if (tone === "warning") return "border-amber-200 bg-amber-50 text-amber-900";
-  return "border-slate-200 bg-slate-50 text-slate-900";
-}
-
-export function ObjectJourneyRibbon({ title, subtitle, steps }: ObjectJourneyRibbonProps) {
+"use client";
+export function ObjectJourneyRibbon({ title, subtitle, steps=[] }:any) {
+  const tones:any = { success:"bg-emerald-100 text-emerald-700", warning:"bg-amber-100 text-amber-700", neutral:"bg-slate-100 text-slate-600" };
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
-      </div>
-
-      <div className="mt-5 grid gap-3 lg:grid-cols-6">
-        {steps.map((step, index) => (
-          <div key={step.label} className="relative">
-            <div className={"h-full rounded-2xl border p-4 " + toneClasses(step.tone)}>
-              <div className="text-sm font-semibold">{step.label}</div>
-              <div className="mt-2 text-sm leading-6 text-slate-600">{step.detail}</div>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      <div className="flex items-start gap-2 flex-wrap">
+        {steps.map((step:any,i:number)=>(
+          <div key={i} className="flex items-center gap-2">
+            <div className={"rounded-xl px-3 py-2 "+(tones[step.tone]||tones.neutral)}>
+              <p className="text-xs font-bold">{step.label}</p>
+              {step.detail && <p className="text-[10px] opacity-75">{step.detail}</p>}
             </div>
-
-            {index < steps.length - 1 ? (
-              <div className="hidden lg:block absolute -right-2 top-1/2 z-10 h-0.5 w-4 -translate-y-1/2 bg-slate-300" />
-            ) : null}
+            {i<steps.length-1 && <span className="text-slate-300 text-sm">→</span>}
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

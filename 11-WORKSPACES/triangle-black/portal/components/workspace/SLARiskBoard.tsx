@@ -1,43 +1,20 @@
 // @ts-nocheck
-type SLARiskCard = {
-  title: string;
-  value: string;
-  detail: string;
-  severity?: "neutral" | "success" | "warning";
-};
-
-type SLARiskBoardProps = {
-  title: string;
-  subtitle: string;
-  items: SLARiskCard[];
-};
-
-function severityClasses(severity?: SLARiskCard["severity"]) {
-  if (severity === "success") return "border-emerald-200 bg-emerald-50";
-  if (severity === "warning") return "border-amber-200 bg-amber-50";
-  return "border-slate-200 bg-slate-50";
-}
-
-export function SLARiskBoard({ title, subtitle, items }: SLARiskBoardProps) {
+"use client";
+export function SLARiskBoard({ title, subtitle, items=[] }:any) {
+  const colors:any = { warning:"bg-amber-50 border-amber-200 text-amber-700", success:"bg-emerald-50 border-emerald-200 text-emerald-700", neutral:"bg-slate-50 border-slate-200 text-slate-600" };
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-          SLA Review
-        </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
-      </div>
-
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item, index) => (
-          <div key={`${item.title}-${index}`} className={"rounded-2xl border p-4 " + severityClasses(item.severity)}>
-            <div className="text-sm font-semibold text-slate-900">{item.title}</div>
-            <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{item.value}</div>
-            <div className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</div>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {items.map((item:any,i:number)=>(
+          <div key={i} className={"rounded-xl border p-3 "+(colors[item.severity]||colors.neutral)}>
+            <p className="text-xl font-bold">{item.value}</p>
+            <p className="text-xs font-semibold mt-0.5">{item.title}</p>
+            {item.detail && <p className="text-[10px] mt-1 opacity-75">{item.detail}</p>}
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

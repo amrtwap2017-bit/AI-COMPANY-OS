@@ -11,6 +11,7 @@ import {
   EmptyState,
   AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { purchaseRequestsApi, type PurchaseRequest } from "@/lib";
 import { fmtDate } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
@@ -81,6 +82,7 @@ export default function PurchaseRequestsPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <PageHeader
         title="Purchase Requests"
         subtitle="Procurement request intake and approval"

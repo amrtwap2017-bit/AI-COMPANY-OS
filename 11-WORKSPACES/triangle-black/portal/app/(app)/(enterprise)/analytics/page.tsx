@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { PageHeader, Button, SectionCard } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency, fmtDate } from "@/lib/design-tokens";
 import { 
   TrendingUp, TrendingDown, Activity, DollarSign, 
@@ -114,6 +115,7 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      <Breadcrumb/>
       {/* 1. Header with Global Date Range */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>

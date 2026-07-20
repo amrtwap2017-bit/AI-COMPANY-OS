@@ -11,6 +11,7 @@ import {
   EmptyState,
   AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { serviceRequestsApi, type ServiceRequest } from "@/lib";
 import { fmtDate } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
@@ -69,6 +70,7 @@ export default function ServiceRequestsPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Service Requests"
         subtitle="Hotel engineering service request queue"

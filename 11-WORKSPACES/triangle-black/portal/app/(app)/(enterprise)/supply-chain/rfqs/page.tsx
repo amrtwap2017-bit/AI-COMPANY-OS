@@ -82,6 +82,7 @@ export default function RFQsPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader title="RFQs & Sourcing" subtitle={`${total} requests for quotation · Supply Chain`} badge="RFQ"
         actions={
           <div className="flex items-center gap-2">

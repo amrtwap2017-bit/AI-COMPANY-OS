@@ -1,85 +1,69 @@
 // @ts-nocheck
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { analyticsApi } from "@/lib/analytics-api";
-import { PageHeader, MetricStrip, LoadingState, Button } from "@/components/ui";
-import {
-  LayoutDashboard, ClipboardList, Wrench, MapPin,
-  Timer, Calendar, GitBranch, RefreshCw
-} from "lucide-react";
+import { PageHeader, MetricStrip, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { safeFetch, toList } from "@/lib/safe-api";
+import { Wrench, Users, MapPin, Clock, Calendar, GitBranch, LayoutDashboard, ArrowRight } from "lucide-react";
 
 export default function OperationsPage() {
-  const kpiQ = useQuery({ queryKey:["ops-kpis"], queryFn:()=>analyticsApi.operationalKpis() });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+  const [wos,   setWos]   = useState<any[]>([]);
+  const [techs, setTechs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const metrics = kpis.slice(0,4).map((k:any) => ({
-    label: k.label, value: k.value ?? "—",
-    sub: k.unit && k.unit !== "WOs" && k.unit !== "tickets" ? k.unit : undefined,
-    color: k.status === "critical" ? "red" : k.status === "warning" ? "amber" : "slate",
-  }));
+  useEffect(()=>{
+    Promise.all([
+      safeFetch("/api/v1/actions/dashboard/service-ops"),
+      safeFetch("/api/v1/technicians"),
+    ]).then(([ops, t])=>{
+      setWos(toList(ops?.data?.work_orders||ops?.data||ops));
+      setTechs(toList(t?.data||t));
+    }).finally(()=>setLoading(false));
+  },[]);
 
-  const modules = [
-    { label: "Operations Workbench", href: "/operations/workbench", icon: LayoutDashboard, desc: "Real-time command center for engineering ops", highlight: true },
-    { label: "Service Requests", href: "/operations/service-requests", icon: ClipboardList, desc: "Incoming requests from clients and staff" },
-    { label: "Work Orders", href: "/operations/work-orders", icon: Wrench, desc: "Manage all open and in-progress work orders" },
-    { label: "Dispatch Board", href: "/operations/dispatch", icon: MapPin, desc: "Assign technicians and manage scheduling" },
-    { label: "SLA Monitor", href: "/operations/sla-review", icon: Timer, desc: "Track SLA compliance and breach risks" },
-    { label: "Calendar", href: "/operations/calendar", icon: Calendar, desc: "Work order calendar and schedule view" },
-    { label: "Workflows", href: "/operations/workflows", icon: GitBranch, desc: "Approval and business process workflows" },
+  const critical = wos.filter((w:any)=>w.priority==="critical"||w.priority==="emergency").length;
+  const kpis = [
+    { label:"Open Work Orders",  value:loading?"...":String(wos.filter((w:any)=>w.status==="open").length||"0"),        sub:"need attention", color:"amber"   as const },
+    { label:"In Progress",       value:loading?"...":String(wos.filter((w:any)=>w.status==="in_progress").length||"0"), sub:"active",         color:"blue"    as const },
+    { label:"Active Technicians",value:loading?"...":String(techs.filter((t:any)=>t.is_active).length||"0"),            sub:"on roster",      color:"emerald" as const },
+    { label:"Critical",          value:loading?"...":String(critical),                                                   sub:"urgent",         color: critical>0?"red":"slate" as const },
+  ];
+
+  const MODULES = [
+    { label:"Operations Workbench",href:"/operations/workbench",          icon:LayoutDashboard, desc:"Daily operations command center",    highlight:true },
+    { label:"Work Orders",         href:"/work-orders",                   icon:Wrench,          desc:"All work orders & history" },
+    { label:"New Work Order",      href:"/operations/work-orders/new",    icon:Wrench,          desc:"Create a new work order" },
+    { label:"Service Requests",    href:"/operations/service-requests",   icon:Wrench,          desc:"Incoming service requests" },
+    { label:"Dispatch Board",      href:"/operations/dispatch",           icon:MapPin,          desc:"Assign technicians to jobs" },
+    { label:"SLA Review",          href:"/operations/sla-review",        icon:Clock,           desc:"SLA compliance monitoring" },
+    { label:"Calendar",            href:"/operations/calendar",           icon:Calendar,        desc:"Schedule & calendar view" },
+    { label:"Workflows",           href:"/operations/workflows",          icon:GitBranch,       desc:"Approval workflows" },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <PageHeader
-        title="Operations Center"
-        subtitle="Work orders · Dispatch · SLA · Service requests · Workflows"
-        actions={
-          <Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5"/>} onClick={()=>kpiQ.refetch()}>
-            Refresh
-          </Button>
-        }
-      />
-
-      {kpiQ.isLoading ? (
-        <LoadingState type="cards" rows={4} cols={4}/>
-      ) : (
-        <MetricStrip metrics={metrics} cols={4}/>
-      )}
-
-      <div>
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Operations Modules</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {modules.map(mod => {
-            const Icon = mod.icon;
-            return (
-              <Link
-                key={mod.label}
-                href={mod.href}
-                className={`
-                  group relative flex flex-col p-5 rounded-2xl border transition-all duration-200
-                  ${mod.highlight
-                    ? "bg-slate-900 border-slate-800 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10"
-                    : "bg-white border-slate-200 hover:border-amber-300 hover:shadow-md"
-                  }
-                `}
-              >
-                <div className={`
-                  w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors
-                  ${mod.highlight ? "bg-amber-500/20 text-amber-400" : "bg-slate-100 text-slate-600 group-hover:bg-amber-50 group-hover:text-amber-600"}
-                `}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className={`font-bold text-sm mb-1 ${mod.highlight ? "text-white" : "text-slate-900"}`}>
-                  {mod.label}
-                </div>
-                <div className={`text-xs leading-relaxed ${mod.highlight ? "text-slate-400" : "text-slate-500"}`}>
-                  {mod.desc}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+    <div className="space-y-5 pb-12">
+      <Breadcrumb/>
+      <PageHeader title="Operations Center" subtitle="Work orders, dispatch, SLA and field operations" badge="OPS"/>
+      {loading ? <LoadingState type="cards" rows={4} cols={4}/> : <MetricStrip metrics={kpis} cols={4}/>}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {MODULES.map(mod=>{
+          const Icon = mod.icon;
+          return (
+            <Link key={mod.href} href={mod.href}
+              className={`group flex flex-col p-4 rounded-2xl border transition-all ${
+                mod.highlight
+                  ? "bg-slate-900 border-slate-800 hover:border-amber-500/50"
+                  : "bg-white border-slate-200 hover:border-amber-300 hover:shadow-sm"
+              }`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${mod.highlight?"bg-amber-500/20 text-amber-400":"bg-slate-100 text-slate-500 group-hover:bg-amber-50 group-hover:text-amber-600"}`}>
+                <Icon className="w-4 h-4"/>
+              </div>
+              <p className={`font-semibold text-sm ${mod.highlight?"text-white":"text-slate-900"}`}>{mod.label}</p>
+              <p className={`text-[11px] mt-0.5 ${mod.highlight?"text-slate-400":"text-slate-500"}`}>{mod.desc}</p>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

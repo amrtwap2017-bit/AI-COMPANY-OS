@@ -100,6 +100,7 @@ export default function CommercialCommandPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkspaceBanner
         role="Commercial Manager / Admin"
         title="Commercial command mode is active"

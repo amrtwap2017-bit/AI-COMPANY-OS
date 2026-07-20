@@ -118,6 +118,7 @@ export default function OperationsCalendarPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Operations Center"
         title="Enterprise Service Calendar"

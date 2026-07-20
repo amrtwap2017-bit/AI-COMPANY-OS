@@ -1,89 +1,71 @@
 // @ts-nocheck
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { scApi } from "@/lib/supply-chain-api";
-import { PageHeader, MetricStrip, LoadingState, Button } from "@/components/ui";
-import {
-  FileText, ShoppingCart, TrendingUp, Scale,
-  Users, Truck, Warehouse, RefreshCw
-} from "lucide-react";
+import { PageHeader, MetricStrip, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { safeFetch, toList } from "@/lib/safe-api";
+import { ShoppingCart, Package, Truck, FileText, BarChart3, ArrowRight, Users2 } from "lucide-react";
 
 export default function SupplyChainPage() {
-  const kpiQ = useQuery({ 
-    queryKey: ["sc-kpis"], 
-    queryFn: () => scApi.kpis ? scApi.kpis().then(r=>r.data) : Promise.resolve({ kpis: [] }) 
-  });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [pos,       setPOs]       = useState<any[]>([]);
+  const [loading,   setLoading]   = useState(true);
 
-  const metrics = kpis.slice(0,4).map((k:any) => ({
-    label: k.label, value: k.value ?? "—",
-    sub: k.unit,
-    color: k.status === "critical" ? "red" : k.status === "warning" ? "amber" : "slate",
-  }));
+  useEffect(()=>{
+    Promise.all([
+      safeFetch("/api/v1/actions/inventory/stock-balances"),
+      safeFetch("/api/v1/actions/procurement/dashboard"),
+    ]).then(([inv,proc])=>{
+      setInventory(toList(inv?.data?.stock_balances||inv?.data||inv));
+      setPOs(toList(proc?.data?.purchase_orders||proc?.data||proc));
+    }).finally(()=>setLoading(false));
+  },[]);
 
-  const modules = [
-    { label: "RFQs & Sourcing", href: "/supply-chain/rfqs", icon: FileText, desc: "Create, manage, and award Requests for Quotation", highlight: true },
-    { label: "Purchase Orders", href: "/supply-chain/purchase-orders", icon: ShoppingCart, desc: "Track all active and completed purchase orders" },
-    { label: "Purchase Requests", href: "/supply-chain/purchase-requests", icon: TrendingUp, desc: "Internal requisitions and approval workflows" },
-    { label: "Quotations", href: "/supply-chain/quotations", icon: Scale, desc: "Compare vendor quotes and pricing" },
-    { label: "Suppliers", href: "/supply-chain/suppliers", icon: Users, desc: "Vendor directory, scorecards, and performance" },
-    { label: "Goods Receipts", href: "/supply-chain/goods-receipts", icon: Truck, desc: "Inbound delivery tracking and GRN creation" },
-    { label: "Inventory", href: "/supply-chain/inventory", icon: Warehouse, desc: "Stock levels, movements, and warehouse management" },
-    { label: "Invoice Matching", href: "/supply-chain/invoice-matching", icon: FileText, desc: "3-way matching and payment processing" },
+  const lowStock = inventory.filter((i:any)=>(i.quantity||i.balance||0)<5).length;
+
+  const kpis = [
+    { label:"Inventory Items", value:loading?"...":String(inventory.length||"0"), sub:"tracked",   color:"blue"    as const },
+    { label:"Purchase Orders", value:loading?"...":String(pos.length||"0"),       sub:"active",    color:"amber"   as const },
+    { label:"Low Stock",       value:loading?"...":String(lowStock),              sub:"need reorder",color:"red"   as const },
+    { label:"Suppliers",       value:loading?"...":"—",                           sub:"registered",color:"emerald" as const },
+  ];
+
+  const MODULES = [
+    { label:"Inventory",         href:"/inventory",                        icon:Package,    desc:"Stock levels & items" },
+    { label:"Warehouses",        href:"/warehouses",                       icon:ShoppingCart, desc:"Warehouse management" },
+    { label:"Purchase Orders",   href:"/supply-chain/purchase-orders",     icon:FileText,   desc:"PO management" },
+    { label:"Purchase Requests", href:"/supply-chain/purchase-requests",   icon:FileText,   desc:"Request for purchase" },
+    { label:"Suppliers",         href:"/supply-chain/suppliers",           icon:Users2,     desc:"Vendor & supplier directory" },
+    { label:"RFQs",              href:"/supply-chain/rfqs",                icon:FileText,   desc:"Request for quotations" },
+    { label:"Intelligence",      href:"/supply-chain/intelligence",        icon:BarChart3,  desc:"Supply chain analytics" },
+    { label:"SC Command",        href:"/supply-chain/command",             icon:BarChart3,  desc:"Supply chain command center" },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <PageHeader
-        title="Supply Chain & Procurement"
-        subtitle="Sourcing · Purchasing · Inventory · Vendor Management"
-        actions={
-          <Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5"/>} onClick={()=>kpiQ.refetch()}>
-            Refresh
-          </Button>
-        }
-      />
-
-      {kpiQ.isLoading ? (
-        <LoadingState type="cards" rows={4} cols={4}/>
-      ) : metrics.length > 0 ? (
-        <MetricStrip metrics={metrics} cols={4}/>
-      ) : null}
-
-      <div>
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Procurement Modules</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {modules.map(mod => {
-            const Icon = mod.icon;
-            return (
-              <Link
-                key={mod.label}
-                href={mod.href}
-                className={`
-                  group relative flex flex-col p-5 rounded-2xl border transition-all duration-200
-                  ${mod.highlight
-                    ? "bg-slate-900 border-slate-800 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10"
-                    : "bg-white border-slate-200 hover:border-amber-300 hover:shadow-md"
-                  }
-                `}
-              >
-                <div className={`
-                  w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors
-                  ${mod.highlight ? "bg-amber-500/20 text-amber-400" : "bg-slate-100 text-slate-600 group-hover:bg-amber-50 group-hover:text-amber-600"}
-                `}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className={`font-bold text-sm mb-1 ${mod.highlight ? "text-white" : "text-slate-900"}`}>
-                  {mod.label}
-                </div>
-                <div className={`text-xs leading-relaxed ${mod.highlight ? "text-slate-400" : "text-slate-500"}`}>
-                  {mod.desc}
-                </div>
-              </Link>
-            );
-          })}
+    <div className="space-y-5 pb-12">
+      <Breadcrumb/>
+      <PageHeader title="Supply Chain & Procurement" subtitle="Inventory, purchasing and vendor management" badge="SCM"/>
+      {loading ? <LoadingState type="cards" rows={4} cols={4}/> : <MetricStrip metrics={kpis} cols={4}/>}
+      {lowStock>0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800">
+          ⚠️ <strong>{lowStock} items</strong> below minimum stock level — review inventory
         </div>
+      )}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {MODULES.map(mod=>{
+          const Icon = mod.icon;
+          return (
+            <Link key={mod.href} href={mod.href}
+              className="group bg-white rounded-2xl border border-slate-200 p-4 hover:border-amber-300 hover:shadow-sm transition-all">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center mb-3 group-hover:bg-amber-50">
+                <Icon className="w-4 h-4 text-slate-500 group-hover:text-amber-600"/>
+              </div>
+              <p className="font-semibold text-sm text-slate-900">{mod.label}</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">{mod.desc}</p>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

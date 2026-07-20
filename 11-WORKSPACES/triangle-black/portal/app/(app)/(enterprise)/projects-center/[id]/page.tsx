@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { projectsEnterpriseApi } from "@/lib/projects-enterprise-api";
 import { PageHeader, Button, SectionCard, StatusPill, LoadingState, EmptyState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate, fmtCurrency, getStatus } from "@/lib/design-tokens";
 import { ArrowLeft, HardHat, Building2, FileText, DollarSign, CheckCircle, AlertTriangle, Calendar } from "lucide-react";
 
@@ -34,6 +35,7 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
             <PageHeader title={p.name} subtitle={`${p.type} · Client: ${p.client}`} badge={undefined}
         actions={
           <div className="flex items-center gap-2">

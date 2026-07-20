@@ -1,45 +1,26 @@
 // @ts-nocheck
-type LinkedScenario = {
-  title: string;
-  detail: string;
-  chain: string[];
-};
-
-type LinkedScenarioPanelProps = {
-  title: string;
-  subtitle: string;
-  scenarios: LinkedScenario[];
-};
-
-export function LinkedScenarioPanel({ title, subtitle, scenarios }: LinkedScenarioPanelProps) {
+"use client";
+export function LinkedScenarioPanel({ title, subtitle, scenarios=[] }:any) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
-      </div>
-
-      <div className="mt-5 space-y-4">
-        {scenarios.map((scenario) => (
-          <div key={scenario.title} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-sm font-semibold text-slate-900">{scenario.title}</div>
-            <div className="mt-2 text-sm leading-6 text-slate-600">{scenario.detail}</div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {scenario.chain.map((item, index) => (
-                <div key={item + index} className="flex items-center gap-2">
-                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
-                    {item}
-                  </span>
-                  {index < scenario.chain.length - 1 ? (
-                    <span className="text-slate-400">→</span>
-                  ) : null}
-                </div>
-              ))}
-            </div>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      <div className="space-y-4">
+        {scenarios.map((s:any,i:number)=>(
+          <div key={i} className="p-4 bg-slate-50 rounded-xl">
+            <p className="text-sm font-bold text-slate-800">{s.title}</p>
+            {s.detail && <p className="text-xs text-slate-500 mt-1">{s.detail}</p>}
+            {s.chain?.length>0 && (
+              <div className="flex items-center gap-1 flex-wrap mt-3">
+                {s.chain.map((c:string,j:number)=>(<>
+                  <span key={j} className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-medium text-slate-600">{c}</span>
+                  {j<s.chain.length-1 && <span className="text-slate-300 text-[10px]">→</span>}
+                </>))}
+              </div>
+            )}
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

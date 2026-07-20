@@ -34,6 +34,7 @@ export default function CommercialWorkbenchPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Commercial Center"
         title="Commercial Workbench"

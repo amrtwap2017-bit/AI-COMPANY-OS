@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader, Button, SectionCard } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate } from "@/lib/design-tokens";
 import { RefreshCw, Wrench, AlertTriangle, CheckCircle, Clock, ArrowRight, FileText } from "lucide-react";
 
@@ -33,6 +34,7 @@ export default function OperationsWorkbenchPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      <Breadcrumb/>
       <PageHeader title="Operations Workbench" subtitle="Real-time command center for engineering operations" badge="OPS"
         actions={
           <div className="flex items-center gap-2">

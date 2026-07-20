@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   PageHeader, SectionCard, MetricCard, EmptyState, LoadingState, AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import {
   Shield, Activity, AlertTriangle, CheckCircle2,
   Wrench, Clock, RefreshCw, ChevronRight, Zap,
@@ -152,6 +153,7 @@ export default function AssetHealthPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <Breadcrumb/>
       <PageHeader
         title="Asset Health Monitoring"
         subtitle="Real-time health scores and maintenance status per asset"

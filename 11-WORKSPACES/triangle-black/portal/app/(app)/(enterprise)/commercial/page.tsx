@@ -11,6 +11,7 @@ import {
   AlertBanner,
   Button,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { api } from "@/lib";
 import {
   Users,
@@ -131,6 +132,7 @@ export default function CommercialCenterPage() {
 
   return (
     <div className="space-y-8 pb-12">
+      <Breadcrumb/>
       <PageHeader
         title="Commercial Center"
         subtitle="One Identity. One Mission. Driving revenue and client success."

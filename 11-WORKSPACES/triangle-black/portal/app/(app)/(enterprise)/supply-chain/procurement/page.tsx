@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { scApi } from "@/lib/supply-chain-api";
 import { PageHeader, Button, SectionCard, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtDate, fmtCurrency } from "@/lib/design-tokens";
 import Link from "next/link";
 import { FileText, Truck, CheckCircle, AlertTriangle, Clock, DollarSign, ArrowRight } from "lucide-react";
@@ -36,6 +37,7 @@ export default function ProcurementWorkbenchPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader 
         title="Procurement Workbench" 
         subtitle="Unified view of purchasing, receiving, and invoice matching" 

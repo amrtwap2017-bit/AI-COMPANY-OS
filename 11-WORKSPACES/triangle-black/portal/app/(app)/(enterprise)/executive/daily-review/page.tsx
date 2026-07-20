@@ -104,6 +104,7 @@ export default function ExecutiveDailyReviewPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Executive Center"
         title="Executive Daily Review Board"

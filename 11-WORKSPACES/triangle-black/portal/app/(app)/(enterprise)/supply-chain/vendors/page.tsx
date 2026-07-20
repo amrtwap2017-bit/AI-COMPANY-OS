@@ -33,6 +33,7 @@ export default function VendorsPage() {
 
   return (
     <div className="space-y-5">
+      <Breadcrumb/>
       <PageHeader title="Vendor Directory" subtitle="Approved and active procurement vendors" badge="Vendors"
         actions={
           <div className="flex items-center gap-2">

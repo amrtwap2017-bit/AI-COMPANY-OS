@@ -101,6 +101,7 @@ export default function ExecutiveExceptionsPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Executive Center"
         title="Executive Exception Dashboard"

@@ -1,36 +1,25 @@
 // @ts-nocheck
-type QueueCard = { title: string; value: string; detail: string };
-type QueueColumn = { title: string; subtitle: string; cards: QueueCard[] };
-type QueueBoardProps = { title: string; subtitle: string; columns: QueueColumn[] };
-
-export function QueueBoard({ title, subtitle, columns }: QueueBoardProps) {
+"use client";
+export function QueueBoard({ title, subtitle, columns=[] }:any) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-4">
-        <h2 className="text-sm font-bold text-slate-900">{title}</h2>
-        <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
-      </div>
-      <div className="grid gap-4 xl:grid-cols-3">
-        {columns.map((col) => (
-          <div key={col.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div className="mb-3">
-              <div className="text-sm font-bold text-slate-900">{col.title}</div>
-              <div className="text-xs text-slate-500">{col.subtitle}</div>
-            </div>
-            <div className="space-y-2.5">
-              {col.cards.map((card) => (
-                <div key={card.title} className="rounded-lg border border-slate-200 bg-white p-3.5">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-xs font-semibold text-slate-800">{card.title}</span>
-                    <span className="text-lg font-bold text-slate-950 leading-none">{card.value}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">{card.detail}</p>
-                </div>
-              ))}
-            </div>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {columns.map((col:any,i:number)=>(
+          <div key={i} className="space-y-2">
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">{col.title}</p>
+            <p className="text-[10px] text-slate-400 mb-2">{col.subtitle}</p>
+            {(col.cards||[]).map((card:any,j:number)=>(
+              <div key={j} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-xs font-semibold text-slate-800">{card.title}</p>
+                <p className="text-2xl font-bold text-amber-600 mt-1">{card.value}</p>
+                {card.detail && <p className="text-[10px] text-slate-500 mt-1">{card.detail}</p>}
+              </div>
+            ))}
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

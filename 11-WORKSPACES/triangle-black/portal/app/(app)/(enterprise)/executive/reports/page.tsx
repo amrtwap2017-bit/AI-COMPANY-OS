@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   PageHeader, SectionCard, MetricCard, LoadingState, AlertBanner,
 } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 import {
   TrendingUp, DollarSign, Users, Wrench,

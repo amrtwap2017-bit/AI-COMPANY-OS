@@ -115,6 +115,7 @@ export default function SupplyChainCommandPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkspaceBanner
         role="Procurement / Supply Chain"
         title="Supply chain command mode is active"

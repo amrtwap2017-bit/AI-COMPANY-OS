@@ -100,6 +100,7 @@ export default function OperationsCommandPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkspaceBanner
         role="Operations Manager / Dispatch"
         title="Operations command mode is active"

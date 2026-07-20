@@ -6,6 +6,7 @@ import Link from "next/link";
 import { RefreshCw, Users, TrendingUp, AlertTriangle, CheckCircle, ChevronRight } from "lucide-react";
 import { customerSuccessApi } from "@/lib/customer-success-api";
 import { PageHeader, MetricStrip, DataTable, FilterBar, StatusPill, LoadingState, Button } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency } from "@/lib/design-tokens";
 
 const signalDot: Record<string,string> = { green:"bg-emerald-500", yellow:"bg-amber-500", red:"bg-red-500" };
@@ -57,6 +58,7 @@ export default function CustomersPage() {
   ];
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <PageHeader title="Customer Success" subtitle="Health scores, renewals and relationship intelligence" actions={<Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5"/>} onClick={()=>refetch()}>Refresh</Button>}/>
       {isLoading?<LoadingState type="cards" rows={4} cols={4}/>:<MetricStrip metrics={metrics} cols={4}/>}
       <FilterBar search={{value:search,onChange:setSearch,placeholder:"Search clients..."}} filters={[{label:"Signal",value:signal,onChange:setSignal,options:[{label:"Healthy",value:"green"},{label:"At Risk",value:"yellow"},{label:"Critical",value:"red"}]}]} count={customers.length}/>

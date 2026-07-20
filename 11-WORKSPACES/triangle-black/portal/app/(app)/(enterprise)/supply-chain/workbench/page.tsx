@@ -34,6 +34,7 @@ export default function SupplyChainWorkbenchPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Supply Chain Center"
         title="Supply Chain Workbench"

@@ -12,6 +12,7 @@ import { ActionQueueList } from "../../../../../components/workspace/ActionQueue
 export default function MyDayWorkspacePage() {
   return (
     <div className="space-y-6">
+      <Breadcrumb/>
       <RoleWorkbenchHero
         eyebrow="Workspace Hub"
         title="My Day Workspace"

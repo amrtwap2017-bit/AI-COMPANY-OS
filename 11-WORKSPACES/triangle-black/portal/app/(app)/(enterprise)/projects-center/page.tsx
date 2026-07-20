@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader, Button, DataTable, SearchInput } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { fmtCurrency, fmtDate, getStatus } from "@/lib/design-tokens";
 import { RefreshCw, Plus, ChevronRight, HardHat, Building2, FileText, Wrench, DollarSign } from "lucide-react";
 
@@ -73,6 +74,7 @@ export default function ProjectsCenterPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Breadcrumb/>
       <PageHeader title="Projects & Contracts" subtitle={`${total} active engagements · Engineering Partner`} badge="PRJ"
         actions={
           <div className="flex items-center gap-2">

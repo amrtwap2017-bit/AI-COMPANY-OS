@@ -1,46 +1,20 @@
 // @ts-nocheck
-type SignalItem = {
-  label: string;
-  value: string;
-  detail: string;
-  tone?: "neutral" | "success" | "warning";
-};
-
-type SignalStripProps = {
-  title: string;
-  subtitle: string;
-  items: SignalItem[];
-};
-
-function toneClasses(tone?: SignalItem["tone"]) {
-  if (tone === "success") return "border-emerald-200 bg-emerald-50";
-  if (tone === "warning") return "border-amber-200 bg-amber-50";
-  return "border-slate-200 bg-slate-50";
-}
-
-export function SignalStrip({ title, subtitle, items }: SignalStripProps) {
+"use client";
+export function SignalStrip({ title, subtitle, items=[] }:any) {
+  const tones:any = { warning:"text-amber-600 bg-amber-50", success:"text-emerald-600 bg-emerald-50", neutral:"text-slate-600 bg-slate-50" };
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
-      </div>
-
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.label} className={"rounded-2xl border p-4 " + toneClasses(item.tone)}>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              {item.label}
-            </div>
-            <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-              {item.value}
-            </div>
-            <div className="mt-2 text-sm leading-6 text-slate-600">
-              {item.detail}
-            </div>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-3">{subtitle}</p>}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {items.map((item:any,i:number)=>(
+          <div key={i} className={"rounded-xl p-3 "+(tones[item.tone]||tones.neutral)}>
+            <p className="text-xl font-bold">{item.value}</p>
+            <p className="text-xs font-semibold mt-0.5">{item.label}</p>
+            {item.detail && <p className="text-[10px] mt-0.5 opacity-75">{item.detail}</p>}
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
