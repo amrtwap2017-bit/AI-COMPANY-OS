@@ -7,7 +7,7 @@ import { RefreshCw, ChevronRight } from "lucide-react";
 
 export default function MaintenancePage() {
   const kpiQ = useQuery({ queryKey:["maint-kpis"], queryFn:()=>analyticsApi.maintenanceKpis() });
-  const kpis = kpiQ.data?.kpis || [];
+  const kpis = (kpiQ.data as any)?.kpis || [];
 
   const metrics = kpis.slice(0,4).map((k:any) => ({
     label:k.label, value:k.value ?? "—",

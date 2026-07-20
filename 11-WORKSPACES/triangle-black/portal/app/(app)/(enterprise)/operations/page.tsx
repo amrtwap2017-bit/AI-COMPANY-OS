@@ -10,7 +10,7 @@ import {
 
 export default function OperationsPage() {
   const kpiQ = useQuery({ queryKey:["ops-kpis"], queryFn:()=>analyticsApi.operationalKpis() });
-  const kpis = kpiQ.data?.kpis || [];
+  const kpis = (kpiQ.data as any)?.kpis || [];
 
   const metrics = kpis.slice(0,4).map((k:any) => ({
     label: k.label, value: k.value ?? "—",

@@ -7,7 +7,7 @@ import { RefreshCw, ChevronRight } from "lucide-react";
 
 export default function EngineeringPage() {
   const kpiQ = useQuery({ queryKey:["eng-kpis"], queryFn:()=>analyticsApi.engineeringKpis() });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+  const kpis = kpiQ.data?.kpis || [];
 
   const metrics = kpis.slice(0,4).map((k:any) => ({
     label:k.label, value:k.value ?? "—",

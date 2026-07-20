@@ -47,7 +47,7 @@ export default function AIAssistantPage() {
     askMut.mutate(q);
   };
 
-  const summary = (knowledgeQ.data as any)?.data_summary||{};
+  const summary = knowledgeQ.data?.data_summary||{};
 
   return (
     <div className="flex h-[calc(100vh-112px)] gap-0 -mx-6 -my-6">
@@ -183,10 +183,10 @@ export default function AIAssistantPage() {
               <Button variant="secondary" size="sm" icon={<RefreshCw className={`w-3.5 h-3.5 ${recsQ.isFetching?"animate-spin":""}`}/>} onClick={()=>recsQ.refetch()}>Refresh</Button>
             </div>
             {recsQ.isLoading&&<div className="text-center py-12 text-slate-400 text-sm">Analyzing platform data...</div>}
-            {!recsQ.isLoading&&((recsQ.data as any)?.recommendations||[]).length===0&&(
+            {!recsQ.isLoading&&(recsQ.data?.recommendations||[]).length===0&&(
               <div className="text-center py-16"><CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3"/><div className="font-bold text-slate-900">All Clear</div><div className="text-sm text-slate-500 mt-1">No immediate actions required</div></div>
             )}
-            {((recsQ.data as any)?.recommendations||[]).map((rec:any)=>(
+            {(recsQ.data?.recommendations||[]).map((rec:any)=>(
               <div key={rec.id} className={`rounded-2xl border p-5 ${priorityStyle[rec.priority]||"bg-slate-50 border-slate-200 text-slate-700"}`}>
                 <div className="flex items-start gap-3">
                   <div>

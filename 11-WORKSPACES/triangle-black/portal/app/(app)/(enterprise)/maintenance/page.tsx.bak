@@ -5,27 +5,27 @@ import { analyticsApi } from "@/lib/analytics-api";
 import { PageHeader, MetricStrip, LoadingState, Button } from "@/components/ui";
 import { RefreshCw, ChevronRight } from "lucide-react";
 
-export default function EngineeringPage() {
-  const kpiQ = useQuery({ queryKey:["eng-kpis"], queryFn:()=>analyticsApi.engineeringKpis() });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+export default function MaintenancePage() {
+  const kpiQ = useQuery({ queryKey:["maint-kpis"], queryFn:()=>analyticsApi.maintenanceKpis() });
+  const kpis = kpiQ.data?.kpis || [];
 
   const metrics = kpis.slice(0,4).map((k:any) => ({
     label:k.label, value:k.value ?? "—",
-    color: k.status==="critical"?"red":k.status==="warning"?"amber":"purple",
+    color: k.status==="critical"?"red":k.status==="warning"?"amber":"orange",
   }));
 
   const modules = [
-    { label:"Documents",       href:"/engineering",               icon:"📄", desc:"Technical documents and specifications" },
-    { label:"Drawings",        href:"/engineering",               icon:"📐", desc:"Engineering drawings and BOQs" },
-    { label:"Inspections",     href:"/engineering/review",        icon:"🔍", desc:"Inspection records and results" },
-    { label:"Site Visits",     href:"/engineering/review",        icon:"🏗️", desc:"Site visit logs and observations" },
-    { label:"Intelligence",    href:"/engineering/intelligence",  icon:"🧠", desc:"Engineering analytics" },
-    { label:"AI Engineering",  href:"/engineering/ai",            icon:"🤖", desc:"AI-powered engineering insights" },
+    { label:"Asset Tree",        href:"/maintenance/asset-tree",          icon:"🌳", desc:"Hierarchical asset view" },
+    { label:"PM Plans",          href:"/maintenance/review",               icon:"📅", desc:"Preventive maintenance planning" },
+    { label:"Work Items",        href:"/maintenance/actions",              icon:"🔧", desc:"Active maintenance work items" },
+    { label:"Asset 360",         href:"/maintenance/assets/360",          icon:"🔭", desc:"Full asset detail view" },
+    { label:"Intelligence",      href:"/maintenance/intelligence",         icon:"🧠", desc:"Maintenance analytics" },
+    { label:"Cost Review",       href:"/maintenance/costs/review",         icon:"💰", desc:"Maintenance cost analysis" },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Engineering Center" subtitle="Documents · Drawings · Inspections · Site Management"
+      <PageHeader title="Maintenance Center" subtitle="Assets · PM Plans · Work Items · Cost Analysis"
         actions={<Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5"/>} onClick={()=>kpiQ.refetch()}>Refresh</Button>} />
 
       {kpiQ.isLoading ? <LoadingState type="cards" rows={4} cols={4}/> : <MetricStrip metrics={metrics} cols={4}/>}

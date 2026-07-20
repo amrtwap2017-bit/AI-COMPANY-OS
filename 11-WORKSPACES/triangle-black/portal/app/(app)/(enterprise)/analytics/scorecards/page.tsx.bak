@@ -29,8 +29,8 @@ function ScoreCard({ label, value, unit, status, target }: any) {
 
 export default function ScorecardsPage() {
   const allQ = useQuery({ queryKey: ["analytics-all"], queryFn: () => analyticsApi.allKpis() });
-  const domains = (allQ.data as any)?.domains || {};
-  const meta = (allQ.data as any)?.meta || {};
+  const domains = allQ.data?.domains || {};
+  const meta = allQ.data?.meta || {};
 
   return (
     <div className="p-6 space-y-6">

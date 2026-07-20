@@ -1,0 +1,10 @@
+{
+  "fixed": [
+    "AI fixed: app/(app)/(enterprise)/maintenance/schedule/page.t",
+    "portal UP DEV"
+  ],
+  "warnings": [
+    "build still failing"
+  ],
+  "built": false
+}

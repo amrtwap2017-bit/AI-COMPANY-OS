@@ -161,13 +161,13 @@ export default function Customer360Page() {
         <SectionCard title="Event Timeline" subtitle="Full history of all events for this customer">
           <div className="p-4">
             {timelineQ.isLoading && <LoadingState rows={6} />}
-            {!timelineQ.isLoading && ((timelineQ.data as any)?.events || []).length === 0 && (
+            {!timelineQ.isLoading && (timelineQ.data?.events || []).length === 0 && (
               <EmptyState icon="📅" title="No timeline events" description="Events will appear as interactions are recorded." />
             )}
             <div className="relative">
               <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-200" />
               <div className="space-y-0">
-                {((timelineQ.data as any)?.events || []).map((e:any, i:number) => {
+                {(timelineQ.data?.events || []).map((e:any, i:number) => {
                   const typeIcon: Record<string,string> = { activity:"💬", contract:"📋", invoice:"💰", meeting:"🤝", satisfaction:"⭐" };
                   return (
                     <div key={e.id || i} className="flex gap-4 pl-2 pb-4">
@@ -214,7 +214,7 @@ export default function Customer360Page() {
                 { key:"scheduled_at", label:"Date", render:(r:any)=>fmtDate(r.scheduled_at||r.held_at) },
                 { key:"created_by", label:"By" },
               ]}
-              data={(meetingsQ.data as any)?.items || []}
+              data={meetingsQ.data?.items || []}
               empty="No meetings recorded"
             />
           )}
@@ -237,7 +237,7 @@ export default function Customer360Page() {
                   { key:"respondent_name", label:"Respondent" },
                   { key:"survey_date", label:"Date", render:(r:any)=>fmtDate(r.survey_date) },
                 ]}
-                data={(satQ.data as any)?.items || []}
+                data={satQ.data?.items || []}
                 empty="No satisfaction surveys recorded"
               />
             )}
@@ -259,7 +259,7 @@ export default function Customer360Page() {
                 { key:"assigned_to", label:"Assigned To" },
                 { key:"due_date", label:"Due", render:(r:any)=>fmtDate(r.due_date) },
               ]}
-              data={(tasksQ.data as any)?.items || []}
+              data={tasksQ.data?.items || []}
               empty="No tasks found"
             />
           )}

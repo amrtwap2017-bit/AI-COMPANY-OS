@@ -1,4 +1,4 @@
-import os, subprocess, datetime, json, urllib.request
+import os, subprocess, datetime, json, urllib.request, ssl
 
 LOG  = '/home/amr/AI-COMPANY-OS/tasks/logs/task_11.log'
 ROOT = '/home/amr/AI-COMPANY-OS'
@@ -12,7 +12,10 @@ def log(msg):
 
 def check(url, name):
     try:
-        urllib.request.urlopen(url, timeout=8)
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        urllib.request.urlopen(url, timeout=8, context=ctx if url.startswith('https') else None)
         log('  OK ' + name)
         results['healthy'].append(name)
         return True

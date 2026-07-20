@@ -51,7 +51,7 @@ export default function WorkspacePage() {
   const comm = data.commercial || {};
   const ops = data.operations || {};
   const proc = data.procurement || {};
-  const alerts = ((alertsQ.data as any)?.alerts || []).slice(0, 2);
+  const alerts = (alertsQ.data?.alerts || []).slice(0, 2);
 
   const summaryMetrics = [
     { label: "Revenue Pipeline",    value: fmtCurrency(rev.pipeline_value || 0),  sub: `${rev.collection_rate || 0}% collected`,                                        color: "emerald" },

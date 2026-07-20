@@ -1,42 +1,38 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { scApi } from "@/lib/supply-chain-api";
+import { analyticsApi } from "@/lib/analytics-api";
 import { PageHeader, MetricStrip, LoadingState, Button } from "@/components/ui";
 import {
-  FileText, ShoppingCart, TrendingUp, Scale,
-  Users, Truck, Warehouse, RefreshCw
+  LayoutDashboard, ClipboardList, Wrench, MapPin,
+  Timer, Calendar, GitBranch, RefreshCw
 } from "lucide-react";
 
-export default function SupplyChainPage() {
-  const kpiQ = useQuery({ 
-    queryKey: ["sc-kpis"], 
-    queryFn: () => scApi.kpis ? scApi.kpis().then(r=>r.data) : Promise.resolve({ kpis: [] }) 
-  });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+export default function OperationsPage() {
+  const kpiQ = useQuery({ queryKey:["ops-kpis"], queryFn:()=>analyticsApi.operationalKpis() });
+  const kpis = kpiQ.data?.kpis || [];
 
   const metrics = kpis.slice(0,4).map((k:any) => ({
     label: k.label, value: k.value ?? "—",
-    sub: k.unit,
+    sub: k.unit && k.unit !== "WOs" && k.unit !== "tickets" ? k.unit : undefined,
     color: k.status === "critical" ? "red" : k.status === "warning" ? "amber" : "slate",
   }));
 
   const modules = [
-    { label: "RFQs & Sourcing", href: "/supply-chain/rfqs", icon: FileText, desc: "Create, manage, and award Requests for Quotation", highlight: true },
-    { label: "Purchase Orders", href: "/supply-chain/purchase-orders", icon: ShoppingCart, desc: "Track all active and completed purchase orders" },
-    { label: "Purchase Requests", href: "/supply-chain/purchase-requests", icon: TrendingUp, desc: "Internal requisitions and approval workflows" },
-    { label: "Quotations", href: "/supply-chain/quotations", icon: Scale, desc: "Compare vendor quotes and pricing" },
-    { label: "Suppliers", href: "/supply-chain/suppliers", icon: Users, desc: "Vendor directory, scorecards, and performance" },
-    { label: "Goods Receipts", href: "/supply-chain/goods-receipts", icon: Truck, desc: "Inbound delivery tracking and GRN creation" },
-    { label: "Inventory", href: "/supply-chain/inventory", icon: Warehouse, desc: "Stock levels, movements, and warehouse management" },
-    { label: "Invoice Matching", href: "/supply-chain/invoice-matching", icon: FileText, desc: "3-way matching and payment processing" },
+    { label: "Operations Workbench", href: "/operations/workbench", icon: LayoutDashboard, desc: "Real-time command center for engineering ops", highlight: true },
+    { label: "Service Requests", href: "/operations/service-requests", icon: ClipboardList, desc: "Incoming requests from clients and staff" },
+    { label: "Work Orders", href: "/operations/work-orders", icon: Wrench, desc: "Manage all open and in-progress work orders" },
+    { label: "Dispatch Board", href: "/operations/dispatch", icon: MapPin, desc: "Assign technicians and manage scheduling" },
+    { label: "SLA Monitor", href: "/operations/sla-review", icon: Timer, desc: "Track SLA compliance and breach risks" },
+    { label: "Calendar", href: "/operations/calendar", icon: Calendar, desc: "Work order calendar and schedule view" },
+    { label: "Workflows", href: "/operations/workflows", icon: GitBranch, desc: "Approval and business process workflows" },
   ];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <PageHeader
-        title="Supply Chain & Procurement"
-        subtitle="Sourcing · Purchasing · Inventory · Vendor Management"
+        title="Operations Center"
+        subtitle="Work orders · Dispatch · SLA · Service requests · Workflows"
         actions={
           <Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5"/>} onClick={()=>kpiQ.refetch()}>
             Refresh
@@ -46,12 +42,12 @@ export default function SupplyChainPage() {
 
       {kpiQ.isLoading ? (
         <LoadingState type="cards" rows={4} cols={4}/>
-      ) : metrics.length > 0 ? (
+      ) : (
         <MetricStrip metrics={metrics} cols={4}/>
-      ) : null}
+      )}
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Procurement Modules</h2>
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Operations Modules</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {modules.map(mod => {
             const Icon = mod.icon;

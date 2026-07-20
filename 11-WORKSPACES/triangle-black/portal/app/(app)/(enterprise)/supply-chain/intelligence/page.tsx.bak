@@ -51,13 +51,13 @@ export default function ProcurementIntelligencePage() {
   const recQ = useQuery({ queryKey: ["pi-rfq-rec", rfqCategory], queryFn: () => procurementIntelligenceApi.rfqRecommendations(rfqCategory) });
   const benchQ = useQuery({ queryKey: ["pi-benchmark"], queryFn: () => procurementIntelligenceApi.priceBenchmark("MEP") });
 
-  const kpis = (kpiQ.data as any)?.kpis || {};
+  const kpis = kpiQ.data?.kpis || {};
   const summary = summaryQ.data || {};
-  const categories = (catQ.data as any)?.items || [];
-  const topSuppliers = (supQ.data as any)?.items || [];
-  const intelligence = (intQ.data as any)?.items || [];
-  const recommendations = (recQ.data as any)?.recommendations || [];
-  const benchmarks = (benchQ.data as any)?.items || [];
+  const categories = catQ.data?.items || [];
+  const topSuppliers = supQ.data?.items || [];
+  const intelligence = intQ.data?.items || [];
+  const recommendations = recQ.data?.recommendations || [];
+  const benchmarks = benchQ.data?.items || [];
 
   const fmt = (n: number) => n >= 1000000 ? `EGP ${(n/1000000).toFixed(1)}M` : n >= 1000 ? `EGP ${(n/1000).toFixed(0)}K` : `EGP ${n}`;
 

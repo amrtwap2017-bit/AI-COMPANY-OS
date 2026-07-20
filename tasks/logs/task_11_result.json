@@ -1,0 +1,19 @@
+{
+  "healthy": [
+    "Engine :8001",
+    "TBAdmin :8030",
+    "Hub :3000",
+    "Portal :3001",
+    "Qdrant :6333",
+    "Ollama :11434",
+    "OpenWebUI :3400",
+    "CEO agent"
+  ],
+  "fixed": [
+    "CEO cron scheduled",
+    "git committed"
+  ],
+  "warnings": [
+    "Nginx HTTPS down"
+  ]
+}

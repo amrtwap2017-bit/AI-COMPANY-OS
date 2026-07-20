@@ -13,7 +13,7 @@ export default function SupplyChainPage() {
     queryKey: ["sc-kpis"], 
     queryFn: () => scApi.kpis ? scApi.kpis().then(r=>r.data) : Promise.resolve({ kpis: [] }) 
   });
-  const kpis = (kpiQ.data as any)?.kpis || [];
+  const kpis = kpiQ.data?.kpis || [];
 
   const metrics = kpis.slice(0,4).map((k:any) => ({
     label: k.label, value: k.value ?? "—",
