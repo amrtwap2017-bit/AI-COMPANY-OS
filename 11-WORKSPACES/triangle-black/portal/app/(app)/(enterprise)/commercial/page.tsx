@@ -1,216 +1,85 @@
-// @ts-nocheck
-
 "use client";
-import Link from "next/link";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageHeader,
-  MetricCard,
-  SectionCard,
-  LoadingState,
-  AlertBanner,
-  Button,
-} from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { api } from "@/lib";
-import {
-  Users,
-  FileText,
-  Briefcase,
-  Target,
-  RefreshCw,
-  Plus,
-  BarChart3,
-  Building2,
-  DollarSign,
-  ArrowRight,
-} from "lucide-react";
-
-interface PipelineSummary {
-  total_leads: number;
-  by_status?: Record<string, number>;
-  total_quote_value?: number;
-  approved_value?: number;
-  pending_value?: number;
-  conversion_rate?: number;
-  active_quotes?: number;
-}
-
-interface CommercialKpis {
-  total_leads: number;
-  active_leads: number;
-  total_quotes: number;
-  total_contracts: number;
-}
-
-async function fetchCommercialKpis(): Promise<CommercialKpis> {
-  const [pipeline, contracts] = await Promise.all([
-    api.get<PipelineSummary>("/actions/pipeline/summary"),
-    api.get<unknown>("/contracts/", { params: { limit: 500 } }),
-  ]);
-
-  const byStatus = pipeline.by_status ?? {};
-  const lost = byStatus.lost ?? 0;
-  const activeLeads = Math.max(0, (pipeline.total_leads ?? 0) - lost);
-
-  const contractList = Array.isArray(contracts)
-    ? contracts
-    : Array.isArray((contracts as { items?: unknown[] })?.items)
-      ? (contracts as { items: unknown[] }).items
-      : Array.isArray((contracts as { data?: unknown[] })?.data)
-        ? (contracts as { data: unknown[] }).data
-        : [];
-
-  return {
-    total_leads: pipeline.total_leads ?? 0,
-    active_leads: activeLeads,
-    total_quotes: pipeline.active_quotes ?? 0,
-    total_contracts: contractList.length,
-  };
-}
+import Link from "next/link";
+import { PageHeader, PageWrapper, LoadingState } from "@/components/ui";
+import { executiveApi } from "@/lib/api/enterprise";
+import { TrendingUp, Users, FileText, Receipt, DollarSign,
+  GitBranch, ArrowRight, RefreshCw } from "lucide-react";
+import { fmtCurrency } from "@/lib/design-tokens";
+import { toast } from "@/lib/toast";
 
 const MODULES = [
-  {
-    id: "pipeline",
-    title: "Sales Pipeline",
-    subtitle: "Lead and opportunity pipeline",
-    icon: BarChart3,
-    link: "/commercial/pipeline",
-  },
-  {
-    id: "leads",
-    title: "Leads & Prospects",
-    subtitle: "All leads and prospects",
-    icon: Users,
-    link: "/commercial/leads",
-  },
-  {
-    id: "proposals",
-    title: "Proposals",
-    subtitle: "Quotations and proposals",
-    icon: FileText,
-    link: "/commercial/proposals",
-  },
-  {
-    id: "contracts",
-    title: "Contracts",
-    subtitle: "Active contract management",
-    icon: Briefcase,
-    link: "/commercial/contracts",
-  },
-  {
-    id: "invoices",
-    title: "Invoices",
-    subtitle: "Invoice lifecycle and collection",
-    icon: DollarSign,
-    link: "/commercial/invoices",
-  },
-  {
-    id: "customers",
-    title: "Customers 360",
-    subtitle: "Full customer relationship view",
-    icon: Building2,
-    link: "/commercial/customers",
-  },
+  { label: "Leads",           href: "/leads",                         icon: TrendingUp, desc: "CRM pipeline and lead management", highlight: true },
+  { label: "Customers",       href: "/customers",                     icon: Users,      desc: "Customer success and 360 view" },
+  { label: "Contracts",       href: "/contracts",                     icon: FileText,   desc: "Contract lifecycle management" },
+  { label: "Invoices",        href: "/invoices",                      icon: Receipt,    desc: "Invoice tracking and payments" },
+  { label: "Quotes",          href: "/quotes",                        icon: FileText,   desc: "Quotation management" },
+  { label: "Pipeline",        href: "/commercial/pipeline",           icon: GitBranch,  desc: "Sales pipeline overview" },
+  { label: "Workbench",       href: "/commercial/workbench",          icon: DollarSign, desc: "Daily commercial workbench" },
+  { label: "Review Board",    href: "/commercial/review",             icon: TrendingUp, desc: "Commercial review signals" },
 ];
 
-export default function CommercialCenterPage() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["commercial-pipeline-summary"],
-    queryFn: fetchCommercialKpis,
-    staleTime: 30_000,
+export default function CommercialPage() {
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["commercial-kpis"],
+    queryFn:  () => executiveApi.dashboard(),
+    refetchInterval: 60_000,
   });
 
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-6">
-        <PageHeader title="Commercial Center" subtitle="Pipeline and revenue command" />
-        <LoadingState type="cards" rows={1} cols={4} />
-      </div>
-    );
-  }
+  const kpis = data?.data?.kpis || {};
+
+  const metrics = [
+    { label: "Active Leads",     value: kpis.active_leads      ?? 0,  color: "bg-blue-50 border-blue-100",       val: "text-blue-700" },
+    { label: "Active Contracts", value: kpis.active_contracts  ?? 0,  color: "bg-emerald-50 border-emerald-100", val: "text-emerald-700" },
+    { label: "Total Quotes",     value: kpis.total_quotes      ?? 0,  color: "bg-amber-50 border-amber-100",     val: "text-amber-700" },
+    { label: "Revenue",          value: kpis.revenue_collected ? fmtCurrency(kpis.revenue_collected) : "—", color: "bg-slate-50 border-slate-200", val: "text-slate-900" },
+  ];
 
   return (
-    <div className="space-y-8 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader
         title="Commercial Center"
-        subtitle="One Identity. One Mission. Driving revenue and client success."
+        subtitle="CRM, quotations, contracts and relationships"
+        badge="CRM"
         actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />}
-              onClick={() => refetch()}
-            >
-              Refresh
-            </Button>
-            <Link href="/commercial/leads/new">
-              <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}>
-                Add New Lead
-              </Button>
-            </Link>
-          </div>
-        }
-      />
+          <button onClick={() => { refetch(); toast.success("Refreshed"); }}
+            disabled={isFetching}
+            className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
+            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
+          </button>
+        } />
 
-      {isError && (
-        <AlertBanner
-          type="error"
-          title={error instanceof Error ? error.message : "Failed to load commercial summary"}
-        />
+      {isLoading ? <LoadingState type="cards" rows={4} cols={4} /> : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {metrics.map(m => (
+            <div key={m.label} className={"rounded-2xl border p-4 " + m.color}>
+              <div className={"text-2xl font-bold " + m.val}>{m.value}</div>
+              <div className="text-xs text-slate-500 mt-0.5">{m.label}</div>
+            </div>
+          ))}
+        </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Total Leads"
-          value={data?.total_leads ?? 0}
-          icon={<Users className="h-5 w-5" />}
-          color="blue"
-        />
-        <MetricCard
-          label="Active Leads"
-          value={data?.active_leads ?? 0}
-          icon={<Target className="h-5 w-5" />}
-          color="amber"
-        />
-        <MetricCard
-          label="Total Quotes"
-          value={data?.total_quotes ?? 0}
-          icon={<FileText className="h-5 w-5" />}
-          color="purple"
-        />
-        <MetricCard
-          label="Total Contracts"
-          value={data?.total_contracts ?? 0}
-          icon={<Briefcase className="h-5 w-5" />}
-          color="green"
-        />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {MODULES.map(mod => {
+          const Icon = mod.icon;
+          return (
+            <Link key={mod.href} href={mod.href}
+              className={
+                "group rounded-2xl border p-5 hover:shadow-sm transition-all " +
+                (mod.highlight ? "bg-amber-50 border-amber-200 hover:border-amber-400" : "bg-white border-slate-200 hover:border-amber-300")
+              }>
+              <div className={"w-10 h-10 rounded-xl flex items-center justify-center mb-3 " + (mod.highlight ? "bg-amber-200" : "bg-slate-100 group-hover:bg-amber-50")}>
+                <Icon className={"w-5 h-5 " + (mod.highlight ? "text-amber-700" : "text-slate-500 group-hover:text-amber-600")} />
+              </div>
+              <p className="font-semibold text-sm text-slate-900">{mod.label}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{mod.desc}</p>
+              <ArrowRight className={"w-4 h-4 mt-3 transition-colors " + (mod.highlight ? "text-amber-500" : "text-slate-300 group-hover:text-amber-500")} />
+            </Link>
+          );
+        })}
       </div>
-
-      <div>
-        <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <Target className="w-5 h-5 text-amber-500" /> Commercial Modules
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MODULES.map((mod) => {
-            const Icon = mod.icon;
-            return (
-              <Link key={mod.id} href={mod.link} className="block group">
-                <SectionCard title={mod.title} subtitle={mod.subtitle}>
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-600 transition-colors" />
-                  </div>
-                </SectionCard>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+    </PageWrapper>
   );
 }

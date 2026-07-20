@@ -1,49 +1,46 @@
-// @ts-nocheck
 "use client";
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { PageHeader } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Cpu, Brain, BarChart3, Wrench, FileText, ArrowRight, Zap } from "lucide-react";
+import { PageHeader, PageWrapper, LoadingState } from "@/components/ui";
+import { maintenanceApi } from "@/lib/maintenance-api";
+import { Wrench, Zap, BarChart3, FileText, ArrowRight, RefreshCw } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const MODULES = [
-  { label:"AI Assistant",    href:"/engineering/ai",           icon:Brain,    desc:"AI-powered engineering support",          badge:"AI",    highlight:true },
-  { label:"Intelligence",    href:"/engineering/intelligence", icon:Zap,      desc:"Smart insights for engineering ops",       badge:"INTEL" },
-  { label:"Engineering Hub", href:"/engineering",             icon:Cpu,      desc:"Full engineering dashboard & overview",    badge:"ENG" },
-  { label:"Actions",         href:"/engineering/actions",     icon:Wrench,   desc:"Engineering action center",               badge:"ACT" },
-  { label:"Review",          href:"/engineering/review",      icon:BarChart3,desc:"Engineering performance review",           badge:"REV" },
-  { label:"Projects Center", href:"/projects-center",         icon:FileText, desc:"All engineering projects overview",        badge:"PRJ" },
+  { label: "AI Assistant",  href: "/engineering/ai",          icon: Zap,      desc: "Engineering AI workspace",     highlight: true },
+  { label: "Intelligence",  href: "/engineering/intelligence", icon: BarChart3,desc: "Cross-section intelligence" },
+  { label: "Actions",       href: "/engineering/actions",      icon: Wrench,   desc: "Site visit and inspection actions" },
+  { label: "Review",        href: "/engineering/review",       icon: FileText, desc: "Inspection and quality review" },
 ];
 
-export default function EngineeringCenterPage() {
+export default function EngineeringPage() {
   return (
-    <div className="space-y-6 pb-12">
-      <Breadcrumb/>
-      <PageHeader title="Engineering Center" subtitle="AI-powered hotel engineering management" badge="ENG"/>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {MODULES.map(mod=>{
+    <PageWrapper>
+      <PageHeader
+        title="Engineering Center"
+        subtitle="Projects, documents, inspections, and site management"
+        badge="ENG" />
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {MODULES.map(mod => {
           const Icon = mod.icon;
           return (
             <Link key={mod.href} href={mod.href}
-              className={`group flex flex-col p-5 rounded-2xl border transition-all duration-200 ${
-                mod.highlight
-                  ? "bg-slate-900 border-slate-700 hover:border-amber-500/60 hover:shadow-lg hover:shadow-amber-500/10"
-                  : "bg-white border-slate-200 hover:border-amber-300 hover:shadow-md"
-              }`}>
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${
-                mod.highlight ? "bg-amber-500/20 text-amber-400" : "bg-slate-100 text-slate-600 group-hover:bg-amber-50 group-hover:text-amber-600"
-              }`}>
-                <Icon className="w-5 h-5"/>
+              className={
+                "group rounded-2xl border p-5 hover:shadow-sm transition-all " +
+                (mod.highlight ? "bg-amber-50 border-amber-200" : "bg-white border-slate-200 hover:border-amber-300")
+              }>
+              <div className={"w-10 h-10 rounded-xl flex items-center justify-center mb-3 " + (mod.highlight ? "bg-amber-200" : "bg-slate-100 group-hover:bg-amber-50")}>
+                <Icon className={"w-5 h-5 " + (mod.highlight ? "text-amber-700" : "text-slate-500 group-hover:text-amber-600")} />
               </div>
-              <div className="flex items-start justify-between mb-1">
-                <p className={`font-bold text-sm ${mod.highlight?"text-white":"text-slate-900"}`}>{mod.label}</p>
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${mod.highlight?"bg-amber-500/20 text-amber-400":"bg-slate-100 text-slate-500"}`}>{mod.badge}</span>
-              </div>
-              <p className={`text-xs ${mod.highlight?"text-slate-400":"text-slate-500"}`}>{mod.desc}</p>
-              <ArrowRight className={`w-4 h-4 mt-auto pt-3 ${mod.highlight?"text-amber-400 opacity-0 group-hover:opacity-100":"text-slate-300 group-hover:text-amber-500"} transition-all`}/>
+              <p className="font-semibold text-sm text-slate-900">{mod.label}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{mod.desc}</p>
+              <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 mt-3 transition-colors" />
             </Link>
           );
         })}
       </div>
-    </div>
+    </PageWrapper>
   );
 }
