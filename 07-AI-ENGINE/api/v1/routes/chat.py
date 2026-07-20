@@ -117,7 +117,7 @@ async def _stream_tokens(message: str, model: str, system: str, history: list, a
     }
 
     try:
-        async with httpx.AsyncClient(timeout=120.0) as client:
+        async with httpx.AsyncClient(timeout=45.0) as client:
             async with client.stream("POST", f"{OLLAMA_BASE}/api/chat", json=payload) as response:
                 if response.status_code != 200:
                     yield f"data: {json.dumps({'error': f'Ollama {response.status_code}'})}\n\n"
@@ -197,7 +197,7 @@ async def chat(req: ChatRequest):
         )
     else:
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with httpx.AsyncClient(timeout=45.0) as client:
                 resp = await client.post(
                     f"{OLLAMA_BASE}/api/chat",
                     json={
