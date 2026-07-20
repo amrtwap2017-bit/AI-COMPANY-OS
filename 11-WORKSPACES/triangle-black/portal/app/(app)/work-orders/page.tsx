@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
   PageHeader, DataTable, LoadingState, EmptyState, AlertBanner,
-} from "@/components/ui";
+} from "@/components/ui"
+import { PageWrapper } from "@/components/ui";
 import { ActionBar } from "@/components/ui/ActionBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -86,8 +87,7 @@ export default function WorkOrdersPage() {
   ];
 
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb />
+    <PageWrapper>
       <PageHeader title="Work Orders" subtitle={`${kpis.total} total work orders`} badge="WO"
         actions={
           <div className="flex items-center gap-2">
@@ -148,6 +148,6 @@ export default function WorkOrdersPage() {
          <DataTable columns={columns} data={items}/>}
       </div>
       <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </div>
+    </PageWrapper>
   );
 }

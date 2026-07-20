@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { enterpriseApi } from "../../../../../lib/enterprise-api";
 import { formatCount, formatCurrency, toCount, toList, toNumber } from "../../../../../lib/enterprise-format";

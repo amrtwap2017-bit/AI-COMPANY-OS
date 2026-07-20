@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useMemo, useState } from "react";
 import { RoleWorkbenchHero } from "../../../../components/workspace/RoleWorkbenchHero";
 import { WorkbenchSummaryGrid } from "../../../../components/workspace/WorkbenchSummaryGrid";

@@ -1,32 +1,36 @@
 // @ts-nocheck
-import { cn } from "@/lib/utils";
+// Triangle Black - Card (enterprise-aligned)
+// Maps legacy Card API to enterprise design tokens
+// Keeps same props so existing pages work unchanged
 
 interface CardProps {
-  children: React.ReactNode;
+  children:   React.ReactNode;
   className?: string;
-  padding?: boolean;
+  padding?:   boolean;
 }
 
-export function Card({ children, className, padding = true }: CardProps) {
+export function Card({ children, className = "", padding = true }: CardProps) {
   return (
-    <div className={cn(
-      "bg-white rounded-xl border border-gray-200 shadow-sm",
-      padding && "p-6",
-      className
-    )}>
-      {children}
+    <div className={"bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden " + className}>
+      <div className={padding ? "p-5" : ""}>
+        {children}
+      </div>
     </div>
   );
 }
 
-export function CardHeader({ title, subtitle, action }: {
-  title: string; subtitle?: string; action?: React.ReactNode;
+export function CardHeader({
+  title, subtitle, action,
+}: {
+  title:     string;
+  subtitle?: string;
+  action?:   React.ReactNode;
 }) {
   return (
     <div className="flex items-start justify-between mb-4">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+        {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
       </div>
       {action && <div>{action}</div>}
     </div>

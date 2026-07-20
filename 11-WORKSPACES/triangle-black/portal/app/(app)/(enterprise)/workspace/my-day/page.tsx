@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { RecentEntitiesPanel } from "../../../../../components/workspace/RecentEntitiesPanel";
 import { PinnedEntitiesPanel } from "../../../../../components/workspace/PinnedEntitiesPanel";
 import { RoleWorkbenchHero } from "../../../../../components/workspace/RoleWorkbenchHero";

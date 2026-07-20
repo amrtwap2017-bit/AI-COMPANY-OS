@@ -72,7 +72,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64" role="status">
-      <div className="w-8 h-8 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
       <span className="sr-only">Loading invoice...</span>
     </div>
   );
@@ -87,7 +87,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     <div className="max-w-4xl space-y-6">
       {/* Back */}
       <button onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B] rounded">
+        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded">
         <ArrowLeft className="w-4 h-4" /> Back to Invoices
       </button>
 
@@ -105,12 +105,12 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                   {isOverdue ? "Overdue" : displayCfg.label}
                 </span>
               </div>
-              <p className="font-mono text-sm text-[#1B2B4B] font-medium">{invoice.invoice_number}</p>
+              <p className="font-mono text-sm text-amber-700 font-medium">{invoice.invoice_number}</p>
               {invoice.description && <p className="text-gray-500 text-sm mt-1">{invoice.description}</p>}
             </div>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold text-[#1B2B4B]">{formatEGP(invoice.total_amount)}</p>
+            <p className="text-3xl font-bold text-amber-700">{formatEGP(invoice.total_amount)}</p>
             <p className="text-sm text-gray-500 mt-1">Total inc. VAT</p>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               </button>
             )}
             <button onClick={() => router.push(`/contracts/${invoice.contract_id}`)}
-              className="flex items-center gap-2 px-5 py-2.5 border-2 border-[#1B2B4B] text-[#1B2B4B] text-sm font-semibold rounded-xl hover:bg-[#1B2B4B] hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]">
+              className="flex items-center gap-2 px-5 py-2.5 border-2 border-amber-600 text-amber-700 text-sm font-semibold rounded-xl hover:bg-amber-600 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
               View Contract
             </button>
           </div>

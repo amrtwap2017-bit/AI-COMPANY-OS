@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { suppliersApi } from "../../../../../lib/suppliers-api";
 import { supplyIntelligenceApi } from "../../../../../lib/supply-intelligence-api";

@@ -37,7 +37,7 @@ export default function ContractDetailPage({
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64" role="status">
-      <div className="w-8 h-8 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!contract) return <div role="alert">Contract not found</div>;
@@ -49,7 +49,7 @@ export default function ContractDetailPage({
     <div className="max-w-4xl space-y-6">
       <button onClick={() => router.back()}
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-4
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B] rounded"
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Contracts
       </button>
@@ -71,7 +71,7 @@ export default function ContractDetailPage({
           )}
         </div>
         <div className="text-right">
-          <p className="text-3xl font-bold text-[#1B2B4B]">{formatEGP(contract.total_value)}</p>
+          <p className="text-3xl font-bold text-amber-700">{formatEGP(contract.total_value)}</p>
           <p className="text-sm text-gray-500">{formatEGP(contract.monthly_value)}/month</p>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function ContractDetailPage({
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-gray-200 bg-[#1B2B4B]">
+                <tr className="border-t-2 border-gray-200 bg-amber-600">
                   <td colSpan={3} className="px-6 py-4 text-white font-bold text-right">Annual Total</td>
                   <td className="px-6 py-4 text-[#F59E0B] font-bold text-right text-lg">
                     {formatEGP(contract.total_value)}
@@ -139,7 +139,7 @@ export default function ContractDetailPage({
               )}
               <div>
                 <dt className="text-gray-500">Monthly Value</dt>
-                <dd className="font-medium text-[#1B2B4B]">{formatEGP(contract.monthly_value)}</dd>
+                <dd className="font-medium text-amber-700">{formatEGP(contract.monthly_value)}</dd>
               </div>
               <div>
                 <dt className="text-gray-500">Renewals</dt>
@@ -178,7 +178,7 @@ export default function ContractDetailPage({
                     value={renewMonths}
                     onChange={(e) => setRenewMonths(Number(e.target.value))}
                     className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2
-                      focus:outline-none focus:ring-2 focus:ring-[#1B2B4B]"
+                      focus:outline-none focus:ring-2 focus:ring-amber-500"
                     aria-label="Renewal duration in months"
                   >
                     {[6,12,24,36].map((m) => (
@@ -207,9 +207,9 @@ export default function ContractDetailPage({
                 return (
                   <div key={s} className="flex items-center gap-2 mb-1.5">
                     <div className={`w-2 h-2 rounded-full
-                      ${active ? "bg-[#1B2B4B]" : done ? "bg-green-500" : "bg-gray-200"}`} />
+                      ${active ? "bg-amber-600" : done ? "bg-green-500" : "bg-gray-200"}`} />
                     <span className={`text-xs
-                      ${active ? "font-semibold text-[#1B2B4B]"
+                      ${active ? "font-semibold text-amber-700"
                         : done ? "text-green-600" : "text-gray-400"}`}>
                       {c.label}
                     </span>
@@ -229,7 +229,7 @@ export default function ContractDetailPage({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Annual</span>
-                <span className="font-bold text-[#1B2B4B]">{formatEGP(contract.total_value)}</span>
+                <span className="font-bold text-amber-700">{formatEGP(contract.total_value)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Services</span>

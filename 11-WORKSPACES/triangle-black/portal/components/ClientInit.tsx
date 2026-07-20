@@ -1,13 +1,13 @@
 // @ts-nocheck
+// Triangle Black - Client Init
+// Program A - Task A1: Uses tokenManager for dev auto-login
 "use client";
 import { useEffect } from "react";
-import { devAutoLogin } from "@/lib/token-store";
+import { tokenManager } from "@/lib/auth/token-manager";
 
 export function ClientInit() {
   useEffect(() => {
-    // Auto-login in dev mode
-    devAutoLogin();
+    tokenManager.devAutoLogin();
   }, []);
-
-  return null; // no UI
+  return null;
 }

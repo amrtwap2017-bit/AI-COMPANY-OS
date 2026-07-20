@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader, LoadingState } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { PageWrapper } from "@/components/ui";
 import { dashboardApi } from "@/lib/dashboard-api";
 import { BarChart3, TrendingUp, Users, Wrench, Package, ArrowUp, ArrowDown } from "lucide-react";
 
@@ -40,8 +41,7 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="space-y-6 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Reports" subtitle="Business intelligence and KPIs" badge="RPT"/>
 
       {isLoading ? <LoadingState type="cards" rows={8} cols={4}/> : (
@@ -88,6 +88,6 @@ export default function ReportsPage() {
           ))}
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

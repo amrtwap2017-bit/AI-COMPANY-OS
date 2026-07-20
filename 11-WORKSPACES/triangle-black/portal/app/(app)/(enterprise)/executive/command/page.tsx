@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useMemo, useState } from "react";
 import { IntegrationStatusPanel } from "../../../../../components/workspace/IntegrationStatusPanel";
 import { RecordListCard } from "../../../../../components/workspace/RecordListCard";

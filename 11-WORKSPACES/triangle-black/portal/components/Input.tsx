@@ -1,48 +1,49 @@
 // @ts-nocheck
-import { cn } from "@/lib/utils";
-import { InputHTMLAttributes, forwardRef } from "react";
+// Triangle Black - Input (enterprise-aligned)
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  hint?: string;
+interface InputProps {
+  label?:       string;
+  placeholder?: string;
+  value?:       string;
+  onChange?:    (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?:        string;
+  required?:    boolean;
+  disabled?:    boolean;
+  className?:   string;
+  id?:          string;
+  name?:        string;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, className, id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
-    const errorId = error ? `${inputId}-error` : undefined;
-    return (
-      <div className="space-y-1">
-        {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
-            {label}
-            {props.required && <span className="text-red-500 ml-1" aria-hidden="true">*</span>}
-          </label>
-        )}
-        <input
-          ref={ref}
-          id={inputId}
-          aria-describedby={errorId}
-          aria-invalid={!!error}
-          className={cn(
-            "block w-full rounded-lg border px-3 py-2 text-sm shadow-sm",
-            "placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B2B4B]",
-            error
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:border-[#1B2B4B]",
-            className
-          )}
-          {...props}
-        />
-        {error && (
-          <p id={errorId} role="alert" className="text-xs text-red-600 flex items-center gap-1">
-            <span aria-hidden="true">⚠</span> {error}
-          </p>
-        )}
-        {hint && !error && <p className="text-xs text-gray-500">{hint}</p>}
-      </div>
-    );
-  }
-);
-Input.displayName = "Input";
+export function Input({
+  label, placeholder, value, onChange,
+  type = "text", required, disabled, className = "", id, name,
+}: InputProps) {
+  const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
+  return (
+    <div className="w-full">
+      {label && (
+        <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 mb-1.5">
+          {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+      )}
+      <input
+        id={inputId}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        disabled={disabled}
+        className={[
+          "block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm",
+          "text-slate-900 placeholder-slate-400 bg-white",
+          "focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent",
+          "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
+          "transition-colors",
+          className,
+        ].join(" ")}
+      />
+    </div>
+  );
+}

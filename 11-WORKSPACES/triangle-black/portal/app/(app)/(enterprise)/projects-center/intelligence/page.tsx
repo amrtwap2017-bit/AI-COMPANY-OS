@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { projectsEnterpriseApi } from "../../../../../lib/projects-enterprise-api";
 

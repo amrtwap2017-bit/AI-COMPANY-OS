@@ -66,7 +66,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   if (leadLoading) {
     return (
       <div className="flex items-center justify-center h-64" role="status">
-        <div className="w-8 h-8 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
         <span className="sr-only">Loading lead...</span>
       </div>
     );
@@ -86,7 +86,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       <div>
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B] rounded"
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
           aria-label="Go back to leads list"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to Leads
@@ -105,7 +105,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             )}
           </div>
           {lead.score > 0 && (
-            <div className="text-center px-4 py-2 bg-[#1B2B4B] rounded-xl text-white">
+            <div className="text-center px-4 py-2 bg-amber-600 rounded-xl text-white">
               <p className="text-2xl font-bold">{lead.score}</p>
               <p className="text-xs text-white/70">Score</p>
             </div>
@@ -233,10 +233,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   return (
                     <div key={s} className="flex items-center gap-2">
                       <CheckCircle
-                        className={`w-3.5 h-3.5 ${lead.status === s ? "text-[#1B2B4B]" : done ? "text-green-500" : "text-gray-200"}`}
+                        className={`w-3.5 h-3.5 ${lead.status === s ? "text-amber-700" : done ? "text-green-500" : "text-gray-200"}`}
                         aria-hidden="true"
                       />
-                      <span className={`text-xs ${lead.status === s ? "font-semibold text-[#1B2B4B]" : done ? "text-green-600" : "text-gray-400"}`}>
+                      <span className={`text-xs ${lead.status === s ? "font-semibold text-amber-700" : done ? "text-green-600" : "text-gray-400"}`}>
                         {cfg.label}
                       </span>
                     </div>

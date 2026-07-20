@@ -1,6 +1,6 @@
-// @ts-nocheck
-export const dynamic = "force-dynamic";
+// Triangle Black - Root redirect
 import { redirect } from "next/navigation";
-export default function Root() {
-  redirect("/dashboard");
+
+export default function RootPage() {
+  redirect("/workspace");
 }

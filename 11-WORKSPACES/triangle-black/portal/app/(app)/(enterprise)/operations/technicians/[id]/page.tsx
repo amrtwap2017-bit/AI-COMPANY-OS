@@ -1,6 +1,5 @@
 // @ts-nocheck
 "use client";
-"use client"
 import * as React from "react"
 import Link from "next/link"
 import { ChevronRight, Search, RefreshCw, Download } from "lucide-react"

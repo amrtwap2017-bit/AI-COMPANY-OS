@@ -24,7 +24,7 @@ export default function PurchaseOrdersPage() {
   return (
     <div className="p-6 space-y-5 bg-slate-50 min-h-screen">
       <div>
-        <h1 className="text-2xl font-bold text-[#1B2B4B]">Purchase Orders</h1>
+        <h1 className="text-2xl font-bold text-amber-700">Purchase Orders</h1>
         <p className="text-sm text-gray-500 mt-1">{pos.length} orders</p>
       </div>
 
@@ -54,7 +54,7 @@ export default function PurchaseOrdersPage() {
                       <td className="px-6 py-3"><span className={"px-2 py-0.5 rounded text-xs font-medium " + (STATUS[po.status] || "bg-gray-100 text-gray-600")}>{po.status}</span></td>
                       <td className="px-6 py-3 text-right text-gray-700">{EGP(po.subtotal)}</td>
                       <td className="px-6 py-3 text-right text-gray-500">{EGP(po.vat_amount)}</td>
-                      <td className="px-6 py-3 text-right font-semibold text-[#1B2B4B]">{EGP(po.total_amount)}</td>
+                      <td className="px-6 py-3 text-right font-semibold text-amber-700">{EGP(po.total_amount)}</td>
                       <td className="px-6 py-3 text-xs text-gray-500">{new Date(po.created_at).toLocaleDateString("en-GB")}</td>
                       <td className="px-6 py-3">
                         {po.status === "draft" && (

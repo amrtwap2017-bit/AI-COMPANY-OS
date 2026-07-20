@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { maintenanceDetailApi } from "../../../../../../lib/maintenance-detail-api";

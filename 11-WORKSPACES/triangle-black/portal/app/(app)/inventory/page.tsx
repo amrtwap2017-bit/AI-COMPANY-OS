@@ -2,7 +2,8 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PageHeader, DataTable, LoadingState, EmptyState, AlertBanner, SearchInput } from "@/components/ui";
+import { PageHeader, DataTable, LoadingState, EmptyState, AlertBanner, SearchInput } from "@/components/ui"
+import { PageWrapper } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
@@ -35,8 +36,7 @@ export default function InventoryPage() {
     { key:"location", label:"Location",render:(row:any)=>(<span className="text-xs">{row.location||row.warehouse||"—"}</span>)},
   ];
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Inventory" subtitle={`${data.length} items tracked`} badge="INV"
         actions={<button onClick={()=>refetch()} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">↺</button>}/>
       {lowStock>0&&(<div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">⚠️ {lowStock} item(s) below minimum stock level</div>)}
@@ -50,6 +50,6 @@ export default function InventoryPage() {
          <DataTable columns={columns} data={items}/>}
       </div>
       <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </div>
+    </PageWrapper>
   );
 }

@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { projectsEnterpriseApi } from "@/lib/projects-enterprise-api";

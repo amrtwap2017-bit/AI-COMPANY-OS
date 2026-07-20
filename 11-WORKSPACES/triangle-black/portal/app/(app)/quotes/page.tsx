@@ -1,118 +1,109 @@
 // @ts-nocheck
 "use client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { PageHeader, PageWrapper, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
 import { quotesApi } from "@/lib/api";
-import { Quote, QuoteStatus } from "@/lib/types";
-import { Card } from "@/components/Card";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
-import { QUOTE_STATUS_CONFIG, formatEGP, formatDate } from "@/lib/utils";
-import { FileText, ChevronRight } from "lucide-react";
+import { fmtCurrency, fmtDate } from "@/lib/design-tokens";
+import { ChevronRight, Plus, RefreshCw, FileText } from "lucide-react";
 
-const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "draft", label: "Draft" },
-  { value: "review", label: "Review" },
-  { value: "sent", label: "Sent" },
-  { value: "approved", label: "Approved" },
-  { value: "rejected", label: "Rejected" },
-];
+const STATUS: Record<string, { label: string; cls: string }> = {
+  draft:    { label: "Draft",    cls: "bg-slate-100 text-slate-600" },
+  review:   { label: "Review",   cls: "bg-blue-50 text-blue-700" },
+  sent:     { label: "Sent",     cls: "bg-indigo-50 text-indigo-700" },
+  approved: { label: "Approved", cls: "bg-emerald-50 text-emerald-700" },
+  rejected: { label: "Rejected", cls: "bg-red-50 text-red-600" },
+};
+
+const FILTERS = ["all", "draft", "review", "sent", "approved", "rejected"];
 
 export default function QuotesPage() {
   const [filter, setFilter] = useState("all");
   const router = useRouter();
 
-  const { data: quotes = [], isLoading } = useQuery({
+  const { data: quotes = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["quotes"],
-    queryFn: () => quotesApi.list().then((r) => r.data as Quote[]),
-    refetchInterval: 15000,
+    queryFn: () => quotesApi.list().then((r: any) => Array.isArray(r) ? r : r?.data || r?.items || []),
+    staleTime: 30_000,
   });
 
-  const filtered = filter === "all" ? quotes : quotes.filter((q) => q.status === filter);
-  const totalValue = filtered.reduce((s, q) => s + q.total, 0);
+  const filtered  = filter === "all" ? quotes : quotes.filter((q: any) => q.status === filter);
+  const totalVal  = filtered.reduce((s: number, q: any) => s + (q.total || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quotes</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {filtered.length} quotes · {formatEGP(totalValue)} total
-          </p>
-        </div>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Quotes"
+        subtitle={filtered.length + " quotes · " + fmtCurrency(totalVal)}
+        badge="QUOTE"
+        actions={
+          <div className="flex items-center gap-2">
+            <button onClick={() => refetch()} disabled={isFetching}
+              className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+              <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
+            </button>
+            <Link href="/quotes/new"
+              className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 transition-colors">
+              <Plus className="w-4 h-4" /> New Quote
+            </Link>
+          </div>
+        }
+      />
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Filter quotes by status">
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.value}
-            role="tab"
-            aria-selected={filter === f.value}
-            onClick={() => setFilter(f.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]
-              ${filter === f.value
-                ? "bg-[#1B2B4B] text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-          >
-            {f.label}
-            {f.value !== "all" && (
-              <span className="ml-1.5 text-xs opacity-70">
-                {quotes.filter((q) => q.status === f.value).length}
-              </span>
+      {isError && <AlertBanner type="error" title={error instanceof Error ? error.message : "Failed"} />}
+
+      {/* Status filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        {FILTERS.map(f => (
+          <button key={f} onClick={() => setFilter(f)}
+            className={"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all " + (filter === f ? "bg-amber-600 text-white" : "text-slate-500 hover:bg-slate-100")}>
+            {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f !== "all" && (
+              <span className="ml-1.5 opacity-70">{quotes.filter((q: any) => q.status === f).length}</span>
             )}
           </button>
         ))}
       </div>
 
-      {isLoading && (
-        <div role="status" className="text-center py-12 text-gray-400">Loading quotes...</div>
-      )}
-
-      {!isLoading && (
-        <div className="space-y-3">
-          {filtered.length === 0 ? (
-            <Card>
-              <div className="text-center py-12 text-gray-400">
-                <FileText className="w-10 h-10 mx-auto mb-3 text-gray-300" aria-hidden="true" />
-                <p>No quotes found</p>
-              </div>
-            </Card>
-          ) : (
-            filtered.map((quote) => {
-              const cfg = QUOTE_STATUS_CONFIG[quote.status as QuoteStatus];
-              return (
-                <button
-                  key={quote.id}
-                  onClick={() => router.push(`/quotes/${quote.id}`)}
-                  className="w-full text-left bg-white border border-gray-200 rounded-xl p-5 hover:border-[#1B2B4B] hover:shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]"
-                  aria-label={`Quote: ${quote.title}, status: ${quote.status}, value: ${formatEGP(quote.total)}`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 flex-wrap mb-1">
-                        <p className="font-semibold text-gray-900 truncate">{quote.title}</p>
-                        <Badge color={cfg.color} bg={cfg.bg}>{cfg.label}</Badge>
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        {quote.items.length} line items · Created {formatDate(quote.created_at)}
-                        {quote.validity_date && ` · Valid until ${formatDate(quote.validity_date)}`}
-                      </p>
+      {isLoading ? (
+        <LoadingState type="table" rows={5} />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon="📝"
+          title="No quotes"
+          description="Create your first quote"
+          action={<Link href="/quotes/new" className="px-4 py-2 bg-amber-600 text-white text-sm rounded-xl">New Quote</Link>}
+        />
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((q: any) => {
+            const st = STATUS[q.status] || { label: q.status, cls: "bg-slate-100 text-slate-600" };
+            return (
+              <button key={q.id} onClick={() => router.push("/quotes/" + q.id)}
+                className="w-full text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-amber-300 hover:shadow-sm transition-all group">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <p className="font-semibold text-sm text-slate-900 group-hover:text-amber-700 truncate">{q.title}</p>
+                      <span className={"text-[10px] px-2 py-0.5 rounded-full font-semibold " + st.cls}>{st.label}</span>
                     </div>
-                    <div className="flex items-center gap-4 flex-shrink-0">
-                      <p className="text-xl font-bold text-[#1B2B4B]">{formatEGP(quote.total)}</p>
-                      <ChevronRight className="w-5 h-5 text-gray-400" aria-hidden="true" />
-                    </div>
+                    <p className="text-xs text-slate-500">
+                      {(q.items || []).length} items · {fmtDate(q.created_at)}
+                      {q.validity_date ? " · Valid until " + fmtDate(q.validity_date) : ""}
+                    </p>
                   </div>
-                </button>
-              );
-            })
-          )}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <p className="text-lg font-bold text-slate-900">{fmtCurrency(q.total || 0)}</p>
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-amber-500" />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }

@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useQuery } from "@tanstack/react-query";
 import { scApi, extractList } from "@/lib/supply-chain-api";
 import { exportToCSV } from "@/lib/csv-utils";

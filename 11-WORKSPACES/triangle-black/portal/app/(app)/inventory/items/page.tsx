@@ -37,18 +37,18 @@ export default function ItemsPage() {
     <div className="p-6 space-y-5 bg-slate-50 min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B2B4B]">Items Catalog</h1>
+          <h1 className="text-2xl font-bold text-amber-700">Items Catalog</h1>
           <p className="text-sm text-gray-500 mt-1">{items.length} items registered</p>
         </div>
         <button onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-[#1B2B4B] text-white rounded-lg text-sm font-medium hover:bg-[#152239] transition-colors">
+          className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-[#152239] transition-colors">
           + Add Item
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-[#1B2B4B]">New Item</h2>
+          <h2 className="text-lg font-semibold text-amber-700">New Item</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { key:"item_code", label:"Item Code", type:"text" },
@@ -59,14 +59,14 @@ export default function ItemsPage() {
                 <label className="text-xs text-gray-500 mb-1 block">{label}</label>
                 <input type={type} value={(form as any)[key]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600" />
               </div>
             ))}
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Item Type</label>
               <select value={form.item_type}
                 onChange={e => setForm(f => ({ ...f, item_type: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]">
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600">
                 {TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g," ")}</option>)}
               </select>
             </div>
@@ -74,7 +74,7 @@ export default function ItemsPage() {
               <label className="text-xs text-gray-500 mb-1 block">Unit</label>
               <select value={form.unit_of_measure}
                 onChange={e => setForm(f => ({ ...f, unit_of_measure: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]">
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600">
                 {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
               </select>
             </div>
@@ -87,13 +87,13 @@ export default function ItemsPage() {
                 <label className="text-xs text-gray-500 mb-1 block">{label}</label>
                 <input type="number" value={(form as any)[key]}
                   onChange={e => setForm(f => ({ ...f, [key]: parseFloat(e.target.value) || 0 }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600" />
               </div>
             ))}
           </div>
           <div className="flex gap-3">
             <button onClick={handleCreate}
-              className="px-5 py-2 bg-[#1B2B4B] text-white rounded-lg text-sm font-medium hover:bg-[#152239]">
+              className="px-5 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-[#152239]">
               Save Item
             </button>
             <button onClick={() => setShowForm(false)}
@@ -108,7 +108,7 @@ export default function ItemsPage() {
         <div className="p-4 border-b border-gray-50">
           <input placeholder="Search items by name, code or category…"
             value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]" />
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600" />
         </div>
         {loading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>

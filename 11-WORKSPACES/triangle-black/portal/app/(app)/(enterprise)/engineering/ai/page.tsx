@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useState, useRef, useEffect } from "react";
 
 const AI_BASE = "http://localhost:8001/api/v1/ai";
@@ -189,7 +189,7 @@ export default function EngineeringAIPage() {
                   </div>
                   <div className={`max-w-2xl rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap
                     ${m.role === "user"
-                      ? "bg-[#1B2B4B] text-white"
+                      ? "bg-amber-600 text-white"
                       : "bg-slate-50 border border-slate-200 text-slate-800"}`}>
                     {m.content}
                   </div>
@@ -218,7 +218,7 @@ export default function EngineeringAIPage() {
                 onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
                 placeholder={`Ask ${selectedAgent.label}…`}
                 className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm
-                           focus:outline-none focus:border-[#1B2B4B] text-slate-900"
+                           focus:outline-none focus:border-amber-600 text-slate-900"
               />
               <button onClick={() => send()} disabled={streaming || !input.trim()}
                 className="px-5 py-3 rounded-xl text-white text-sm font-semibold transition-all

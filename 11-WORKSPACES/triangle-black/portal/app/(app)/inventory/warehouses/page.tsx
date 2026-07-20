@@ -26,10 +26,10 @@ export default function WarehousesPage() {
     <div className="p-6 space-y-5 bg-slate-50 min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B2B4B]">Warehouses</h1>
+          <h1 className="text-2xl font-bold text-amber-700">Warehouses</h1>
           <p className="text-sm text-gray-500 mt-1">{whs.length} locations</p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-[#1B2B4B] text-white rounded-lg text-sm font-medium hover:bg-[#152239]">+ Add Warehouse</button>
+        <button onClick={() => setShowForm(!showForm)} className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-[#152239]">+ Add Warehouse</button>
       </div>
 
       {showForm && (
@@ -38,7 +38,7 @@ export default function WarehousesPage() {
             {[{key:"code",label:"Code"},{key:"name",label:"Name"},{key:"manager_name",label:"Manager"},{key:"address",label:"Address"}].map(({key,label}) => (
               <div key={key}>
                 <label className="text-xs text-gray-500 mb-1 block">{label}</label>
-                <input value={form[key]} onChange={e => setForm(f => ({...f,[key]:e.target.value}))} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]" />
+                <input value={form[key]} onChange={e => setForm(f => ({...f,[key]:e.target.value}))} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600" />
               </div>
             ))}
             <div>
@@ -49,7 +49,7 @@ export default function WarehousesPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button onClick={handleCreate} className="px-5 py-2 bg-[#1B2B4B] text-white rounded-lg text-sm font-medium">Save Warehouse</button>
+            <button onClick={handleCreate} className="px-5 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium">Save Warehouse</button>
             <button onClick={() => setShowForm(false)} className="px-5 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium">Cancel</button>
           </div>
         </div>

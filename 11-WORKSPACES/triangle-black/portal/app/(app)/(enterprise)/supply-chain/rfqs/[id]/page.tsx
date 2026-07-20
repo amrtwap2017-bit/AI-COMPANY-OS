@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { sourcingApi } from "../../../../../../lib/sourcing-api";

@@ -1,61 +1,53 @@
 // @ts-nocheck
-'use client'
-
-/**
- * AuthGuard — Client-side route protection
- * Wraps protected pages. Shows loading while checking auth.
- * Redirects to /login if not authenticated.
- *
- * Usage:
- *   <AuthGuard>
- *     <YourPage />
- *   </AuthGuard>
- *
- * Note: Middleware handles server-side protection.
- * This handles the client-side hydration gap.
- */
-import * as React from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { getAccessToken } from '@/lib/api/client'
+// Triangle Black - Auth Guard Component
+// Program A - Task A4: Client-side route protection
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { tokenManager } from "@/lib/auth/token-manager";
 
 interface AuthGuardProps {
-  children: React.ReactNode
-  fallback?: React.ReactNode
+  children:      React.ReactNode;
+  requiredRole?: string | string[];
+  fallback?:     React.ReactNode;
 }
 
-export function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const router       = useRouter()
-  const searchParams = useSearchParams()
-  const [checked, setChecked] = React.useState(false)
-  const [authed,  setAuthed]  = React.useState(false)
+export function AuthGuard({ children, requiredRole, fallback }: AuthGuardProps) {
+  const { user, isLoading } = useAuth();
+  const router               = useRouter();
 
-  React.useEffect(() => {
-    const token = getAccessToken()
-    if (!token) {
-      const from = searchParams.get('from') ?? '/operations'
-      router.replace(`/login?from=${encodeURIComponent(from)}`)
-    } else {
-      setAuthed(true)
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_AUTH_BYPASS === "true") return;
+    if (!isLoading && !tokenManager.isAuthenticated()) {
+      router.replace("/login");
     }
-    setChecked(true)
-  }, [router, searchParams])
+  }, [isLoading, router]);
 
-  if (!checked) {
-    return fallback ?? (
-      <div className="flex h-screen w-full items-center justify-center"
-        style={{ background:'var(--tb-surface-base)' }}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin"
-            style={{ borderColor:'var(--tb-brand-accent)' }} />
-          <p className="text-sm" style={{ color:'var(--tb-text-tertiary)' }}>
-            Checking session...
-          </p>
-        </div>
-      </div>
-    )
+  if (process.env.NEXT_PUBLIC_AUTH_BYPASS === "true") {
+    return <>{children}</>;
   }
 
-  if (!authed) return null
+  if (isLoading) return <>{fallback || null}</>;
+  if (!user)     return <>{fallback || null}</>;
 
-  return <>{children}</>
+  if (requiredRole) {
+    const roles   = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    const hasRole = roles.includes(user.role);
+    if (!hasRole) {
+      return (
+        <div className="flex items-center justify-center min-h-[40vh]">
+          <div className="text-center">
+            <p className="text-3xl mb-3">🔒</p>
+            <p className="text-sm font-semibold text-slate-700">Access Restricted</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Your role does not have access to this section.
+            </p>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  return <>{children}</>;
 }

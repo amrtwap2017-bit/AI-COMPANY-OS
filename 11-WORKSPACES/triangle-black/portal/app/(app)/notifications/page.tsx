@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { PageWrapper } from "@/components/ui";
 import { Bell, CheckCircle, AlertTriangle, Info, X } from "lucide-react";
 
 interface Notification {
@@ -44,8 +45,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Notifications" subtitle={`${unread} unread notifications`} badge="NOTIF"
         actions={unread>0&&(
           <button onClick={markAllRead}
@@ -84,6 +84,6 @@ export default function NotificationsPage() {
           );
         })}
       </div>
-    </div>
+    </PageWrapper>
   );
 }

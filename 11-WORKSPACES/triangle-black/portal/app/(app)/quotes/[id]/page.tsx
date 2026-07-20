@@ -60,7 +60,7 @@ export default function QuoteDetailPage({
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-64" role="status">
-        <div className="w-8 h-8 border-4 border-[#1B2B4B] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
         <span className="sr-only">Loading quote...</span>
       </div>
     );
@@ -74,7 +74,7 @@ export default function QuoteDetailPage({
       <div>
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B] rounded"
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
         >
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
@@ -89,7 +89,7 @@ export default function QuoteDetailPage({
             )}
           </div>
           <div className="flex flex-col items-end gap-2">
-            <p className="text-3xl font-bold text-[#1B2B4B]">
+            <p className="text-3xl font-bold text-amber-700">
               {formatEGP(quote.total)}
             </p>
             {/* ── PDF DOWNLOAD BUTTON ── */}
@@ -97,7 +97,7 @@ export default function QuoteDetailPage({
               onClick={downloadPdf}
               disabled={loading === "pdf"}
               aria-busy={loading === "pdf"}
-              className="flex items-center gap-2 px-4 py-2 bg-[#1B2B4B] text-white text-sm font-medium rounded-lg hover:bg-[#243552] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]"
+              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-[#243552] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               <Download className="w-4 h-4" aria-hidden="true" />
               {loading === "pdf" ? "Generating PDF..." : "Download PDF Proposal"}
@@ -149,7 +149,7 @@ export default function QuoteDetailPage({
                   >
                     Total
                   </td>
-                  <td className="px-6 py-4 font-bold text-[#1B2B4B] text-right text-lg">
+                  <td className="px-6 py-4 font-bold text-amber-700 text-right text-lg">
                     {formatEGP(quote.total)}
                   </td>
                 </tr>
@@ -237,7 +237,7 @@ export default function QuoteDetailPage({
                 <button
                   onClick={downloadPdf}
                   disabled={loading === "pdf"}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-[#1B2B4B] text-[#1B2B4B] text-sm font-medium rounded-lg hover:bg-[#1B2B4B] hover:text-white transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-amber-600 text-amber-700 text-sm font-medium rounded-lg hover:bg-amber-600 hover:text-white transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                 >
                   <Download className="w-4 h-4" aria-hidden="true" />
                   {loading === "pdf" ? "Generating..." : "Download PDF"}
@@ -262,7 +262,7 @@ export default function QuoteDetailPage({
                     <div
                       className={`w-2 h-2 rounded-full ${
                         active
-                          ? "bg-[#1B2B4B]"
+                          ? "bg-amber-600"
                           : done
                           ? "bg-green-500"
                           : "bg-gray-200"
@@ -272,7 +272,7 @@ export default function QuoteDetailPage({
                     <span
                       className={`text-xs ${
                         active
-                          ? "font-semibold text-[#1B2B4B]"
+                          ? "font-semibold text-amber-700"
                           : done
                           ? "text-green-600"
                           : "text-gray-400"

@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { PageHeader, MetricStrip, LoadingState } from "@/components/ui";
+import { PageHeader, MetricStrip, LoadingState, PageWrapper } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { safeFetch, toList } from "@/lib/safe-api";
 import { Wrench, Users, MapPin, Clock, Calendar, GitBranch, LayoutDashboard, ArrowRight } from "lucide-react";
@@ -42,8 +42,7 @@ export default function OperationsPage() {
   ];
 
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Operations Center" subtitle="Work orders, dispatch, SLA and field operations" badge="OPS"/>
       {loading ? <LoadingState type="cards" rows={4} cols={4}/> : <MetricStrip metrics={kpis} cols={4}/>}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -65,6 +64,6 @@ export default function OperationsPage() {
           );
         })}
       </div>
-    </div>
+    </PageWrapper>
   );
 }

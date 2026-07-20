@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { executiveIntelligenceApi } from "../../../../lib/executive-intelligence-api";
 import { RoleWorkbenchHero } from "../../../../components/workspace/RoleWorkbenchHero";

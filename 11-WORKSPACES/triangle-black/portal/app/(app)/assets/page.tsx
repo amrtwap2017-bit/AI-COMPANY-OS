@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageHeader, DataTable, StatusPill, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
 import { Pagination } from "@/components/ui/Pagination";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { PageWrapper } from "@/components/ui";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
 import { assetsApi } from "@/lib/api";
@@ -37,8 +38,7 @@ export default function AssetsPage() {
       render:(row:any)=>(<span className="text-xs text-slate-400">{row.model||row.manufacturer||"—"}</span>)},
   ];
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Assets" subtitle={`${data.length} assets tracked`} badge="ASSET"
         actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
       <div className="bg-white rounded-2xl border border-slate-200 p-4">
@@ -56,6 +56,6 @@ export default function AssetsPage() {
          <DataTable columns={columns} data={items}/>}
       </div>
       <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </div>
+    </PageWrapper>
   );
 }

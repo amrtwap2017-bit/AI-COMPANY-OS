@@ -51,11 +51,11 @@ export default function PurchaseRequestsPage() {
     <div className="p-6 space-y-5 bg-slate-50 min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B2B4B]">Purchase Requests</h1>
+          <h1 className="text-2xl font-bold text-amber-700">Purchase Requests</h1>
           <p className="text-sm text-gray-500 mt-1">{prs.length} requests</p>
         </div>
         <button onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-[#1B2B4B] text-white rounded-lg text-sm font-medium hover:bg-[#152239]">
+          className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-[#152239]">
           + New Request
         </button>
       </div>
@@ -68,7 +68,7 @@ export default function PurchaseRequestsPage() {
 
       {showForm && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-[#1B2B4B]">New Purchase Request</h2>
+          <h2 className="text-lg font-semibold text-amber-700">New Purchase Request</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { key:"requester",   label:"Requester" },
@@ -78,14 +78,14 @@ export default function PurchaseRequestsPage() {
                 <label className="text-xs text-gray-500 mb-1 block">{label}</label>
                 <input value={(form as any)[key]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600" />
               </div>
             ))}
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Urgency</label>
               <select value={form.urgency}
                 onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]">
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600">
                 {["low","normal","high","emergency"].map(u => (
                   <option key={u} value={u}>{u}</option>
                 ))}
@@ -95,12 +95,12 @@ export default function PurchaseRequestsPage() {
               <label className="text-xs text-gray-500 mb-1 block">Justification</label>
               <input value={form.justification}
                 onChange={e => setForm(f => ({ ...f, justification: e.target.value }))}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B4B]" />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-600" />
             </div>
           </div>
           <div className="flex gap-3">
             <button onClick={handleCreate}
-              className="px-5 py-2 bg-[#1B2B4B] text-white rounded-lg text-sm font-medium hover:bg-[#152239]">
+              className="px-5 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-[#152239]">
               Submit Request
             </button>
             <button onClick={() => setShowForm(false)}

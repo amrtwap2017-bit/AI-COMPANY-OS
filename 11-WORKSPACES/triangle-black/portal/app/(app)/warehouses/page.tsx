@@ -1,7 +1,8 @@
 // @ts-nocheck
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui"
+import { PageWrapper } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
@@ -27,8 +28,7 @@ export default function WarehousesPage() {
     { key:"items",    label:"Items",      render:(row:any)=>(<span className="text-sm font-semibold">{row.item_count||row.items||0}</span>)},
   ];
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Warehouses" subtitle={`${data.length||0} warehouses`} badge="WH"/>
       {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
@@ -37,6 +37,6 @@ export default function WarehousesPage() {
          <DataTable columns={columns} data={items}/>}
       </div>
       <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </div>
+    </PageWrapper>
   );
 }

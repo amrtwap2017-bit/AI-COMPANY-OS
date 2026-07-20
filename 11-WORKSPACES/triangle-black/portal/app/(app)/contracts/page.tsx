@@ -1,151 +1,126 @@
 // @ts-nocheck
 "use client";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { PageHeader, PageWrapper, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
 import { contractsApi } from "@/lib/api";
-import { Contract } from "@/lib/types";
-import { Badge } from "@/components/Badge";
-import { Card } from "@/components/Card";
-import { CONTRACT_STATUS_CONFIG, formatEGP, formatDate } from "@/lib/utils";
-import { FileCheck, ChevronRight, TrendingUp } from "lucide-react";
+import { fmtCurrency, fmtDate } from "@/lib/design-tokens";
+import { ChevronRight, FileCheck, RefreshCw } from "lucide-react";
+
+const STATUS: Record<string, { label: string; cls: string }> = {
+  pending_signature: { label: "Pending Signature", cls: "bg-amber-50 text-amber-700" },
+  active:            { label: "Active",            cls: "bg-emerald-50 text-emerald-700" },
+  renewed:           { label: "Renewed",           cls: "bg-blue-50 text-blue-700" },
+  expired:           { label: "Expired",           cls: "bg-slate-100 text-slate-500" },
+  cancelled:         { label: "Cancelled",         cls: "bg-red-50 text-red-600" },
+};
 
 const FILTERS = [
-  { value: "", label: "All" },
-  { value: "pending_signature", label: "Pending Signature" },
-  { value: "active", label: "Active" },
-  { value: "renewed", label: "Renewed" },
-  { value: "expired", label: "Expired" },
+  { value: "",                   label: "All" },
+  { value: "pending_signature",  label: "Pending" },
+  { value: "active",             label: "Active" },
+  { value: "renewed",            label: "Renewed" },
+  { value: "expired",            label: "Expired" },
 ];
 
 export default function ContractsPage() {
   const [filter, setFilter] = useState("");
   const router = useRouter();
 
-  const { data: contracts = [], isLoading } = useQuery({
+  const { data: contracts = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["contracts", filter],
-    queryFn: () => contractsApi.list(filter || undefined).then((r) => r as Contract[]),
-    refetchInterval: 15000,
+    queryFn: () => contractsApi.list(filter || undefined).then((r: any) => Array.isArray(r) ? r : r?.data || r?.items || []),
+    staleTime: 30_000,
   });
 
-  const totalValue = contracts.reduce((s, c) => s + c.total_value, 0);
   const activeValue = contracts
-    .filter((c) => ["active","renewed"].includes(c.status))
-    .reduce((s, c) => s + c.total_value, 0);
+    .filter((c: any) => ["active", "renewed"].includes(c.status))
+    .reduce((s: number, c: any) => s + (c.total_value || 0), 0);
+
+  const kpis = [
+    { label: "Total",   value: contracts.length },
+    { label: "Active",  value: contracts.filter((c: any) => c.status === "active").length },
+    { label: "Pending", value: contracts.filter((c: any) => c.status === "pending_signature").length },
+    { label: "Renewed", value: contracts.filter((c: any) => c.status === "renewed").length },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Contracts</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {contracts.length} contracts · {formatEGP(activeValue)} active value
-          </p>
-        </div>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Contracts"
+        subtitle={contracts.length + " contracts · " + fmtCurrency(activeValue) + " active value"}
+        badge="CONTRACT"
+        actions={
+          <button onClick={() => refetch()} disabled={isFetching}
+            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
+          </button>
+        }
+      />
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total Contracts", value: contracts.length, sub: formatEGP(totalValue) },
-          { label: "Active", value: contracts.filter(c => c.status === "active").length,
-            sub: "Running contracts" },
-          { label: "Pending Signature", value: contracts.filter(c => c.status === "pending_signature").length,
-            sub: "Awaiting activation" },
-          { label: "Renewals", value: contracts.filter(c => c.status === "renewed").length,
-            sub: "Renewed contracts" },
-        ].map((stat) => (
-          <Card key={stat.label}>
-            <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-            <p className="text-2xl font-bold text-[#1B2B4B]">{stat.value}</p>
-            <p className="text-xs text-gray-400 mt-1">{stat.sub}</p>
-          </Card>
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {kpis.map(k => (
+          <div key={k.label} className="bg-white rounded-2xl border border-slate-200 p-4">
+            <div className="text-2xl font-bold text-slate-900">{k.value}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+          </div>
         ))}
       </div>
 
+      {isError && <AlertBanner type="error" title={error instanceof Error ? error.message : "Failed to load"} />}
+
       {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap" role="tablist">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            role="tab"
-            aria-selected={filter === f.value}
-            onClick={() => setFilter(f.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]
-              ${filter === f.value
-                ? "bg-[#1B2B4B] text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-          >
+      <div className="flex gap-1.5 flex-wrap">
+        {FILTERS.map(f => (
+          <button key={f.value} onClick={() => setFilter(f.value)}
+            className={"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all " + (filter === f.value ? "bg-amber-600 text-white" : "text-slate-500 hover:bg-slate-100")}>
             {f.label}
           </button>
         ))}
       </div>
 
-      {isLoading && (
-        <div role="status" className="text-center py-12 text-gray-400">Loading contracts...</div>
-      )}
-
-      {!isLoading && contracts.length === 0 && (
-        <Card>
-          <div className="text-center py-12">
-            <FileCheck className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-            <p className="text-gray-500">No contracts yet</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Contracts are created automatically when quotes are approved
-            </p>
-          </div>
-        </Card>
-      )}
-
-      <div className="space-y-3">
-        {contracts.map((contract) => {
-          const cfg = CONTRACT_STATUS_CONFIG[contract.status as keyof typeof CONTRACT_STATUS_CONFIG]
-            || { label: contract.status, color: "text-gray-600", bg: "bg-gray-100" };
-          return (
-            <button
-              key={contract.id}
-              onClick={() => router.push(`/contracts/${contract.id}`)}
-              className="w-full text-left bg-white border border-gray-200 rounded-xl p-5
-                hover:border-[#1B2B4B] hover:shadow-md transition-all group
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B2B4B]"
-              aria-label={`Contract: ${contract.title}`}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 flex-wrap mb-1">
-                    <p className="font-semibold text-gray-900 group-hover:text-[#1B2B4B] transition-colors truncate">
-                      {contract.title}
+      {/* List */}
+      {isLoading ? (
+        <LoadingState type="table" rows={5} />
+      ) : contracts.length === 0 ? (
+        <EmptyState icon="📄" title="No contracts" description="Contracts are created when quotes are approved" />
+      ) : (
+        <div className="space-y-2">
+          {contracts.map((c: any) => {
+            const st = STATUS[c.status] || { label: c.status, cls: "bg-slate-100 text-slate-600" };
+            return (
+              <button key={c.id} onClick={() => router.push("/contracts/" + c.id)}
+                className="w-full text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-amber-300 hover:shadow-sm transition-all group">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <p className="font-semibold text-sm text-slate-900 group-hover:text-amber-700 truncate">{c.title}</p>
+                      <span className={"text-[10px] px-2 py-0.5 rounded-full font-semibold " + st.cls}>{st.label}</span>
+                      {c.renewal_count > 0 && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold">
+                          Renewed x{c.renewal_count}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      {c.duration_months} months · {fmtCurrency(c.monthly_value || 0)}/mo · {fmtDate(c.created_at)}
                     </p>
-                    <Badge color={cfg.color} bg={cfg.bg}>{cfg.label}</Badge>
-                    {contract.renewal_count > 0 && (
-                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                        Renewed ×{contract.renewal_count}
-                      </span>
-                    )}
                   </div>
-                  <p className="text-sm text-gray-500">
-                    {contract.duration_months} months ·{" "}
-                    {formatEGP(contract.monthly_value)}/mo ·{" "}
-                    Created {formatDate(contract.created_at)}
-                    {contract.end_date && ` · Ends ${formatDate(contract.end_date)}`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4 flex-shrink-0">
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-[#1B2B4B]">
-                      {formatEGP(contract.total_value)}
-                    </p>
-                    <p className="text-xs text-gray-400">annual value</p>
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-slate-900">{fmtCurrency(c.total_value || 0)}</p>
+                      <p className="text-[10px] text-slate-400">annual</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-amber-500" />
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#1B2B4B]" />
                 </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </PageWrapper>
   );
 }

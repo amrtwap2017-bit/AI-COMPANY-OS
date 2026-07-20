@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useState, useEffect, useRef } from "react";
 import {
   PageHeader, SectionCard, MetricCard, LoadingState, AlertBanner,

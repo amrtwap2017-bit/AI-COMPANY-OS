@@ -8,6 +8,7 @@ import {
 import { ActionBar } from "@/components/ui/ActionBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { PageWrapper } from "@/components/ui";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
 import { techniciansApi, type Technician } from "@/lib";
@@ -66,8 +67,7 @@ export default function TechniciansPage() {
   ];
 
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader title="Technicians" subtitle={`${kpis.active} active of ${kpis.total} total`} badge="TECH"
         actions={
           <button onClick={()=>refetch()} disabled={isFetching}
@@ -98,6 +98,6 @@ export default function TechniciansPage() {
          <DataTable columns={columns} data={items}/>}
       </div>
       <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </div>
+    </PageWrapper>
   );
 }

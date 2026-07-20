@@ -1,13 +1,14 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
   PageHeader, DataTable, StatusPill, LoadingState,
   EmptyState, AlertBanner, SearchInput,
-} from "@/components/ui";
+} from "@/components/ui"
+import { PageWrapper } from "@/components/ui";
 import { ActionBar } from "@/components/ui/ActionBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
@@ -112,8 +113,7 @@ export default function LeadsPage() {
   }), [data]);
 
   return (
-    <div className="space-y-5 pb-12">
-      <Breadcrumb />
+    <PageWrapper>
 
       <PageHeader
         title="Leads"
@@ -202,6 +202,6 @@ export default function LeadsPage() {
 
       {/* Pagination */}
       <Pagination page={page} totalPages={totalPages} onPage={goToPage} />
-    </div>
+    </PageWrapper>
   );
 }

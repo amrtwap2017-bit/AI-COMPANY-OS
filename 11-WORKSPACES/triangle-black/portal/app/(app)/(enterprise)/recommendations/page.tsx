@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Brain, RefreshCw, Lightbulb, AlertTriangle, CheckCircle, Info } from "lucide-react";

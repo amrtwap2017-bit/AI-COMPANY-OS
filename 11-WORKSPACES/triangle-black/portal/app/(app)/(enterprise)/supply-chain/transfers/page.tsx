@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useState, useEffect } from "react";
 import { PageHeader, SectionCard, EmptyState, LoadingState, AlertBanner } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";

@@ -1,6 +1,6 @@
 // @ts-nocheck
-"use client";
 
+"use client";
 import { useMemo, useState } from "react";
 import { RoleWorkspaceBanner } from "../../../../../components/workspace/RoleWorkspaceBanner";
 import { BackendAlignmentPanel } from "../../../../../components/workspace/BackendAlignmentPanel";

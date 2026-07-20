@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Bell, ChevronDown, Zap, User, LogOut, Settings, Search } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { tokenManager } from "@/lib/auth/token-manager";
 import { enterpriseCenters } from "./nav";
 import { CommandBar } from "@/components/ui/CommandBar";
 import { NotificationDrawer } from "@/components/ui/NotificationDrawer";
@@ -17,7 +18,7 @@ export function EnterpriseTopbar() {
   const { user, logout } = useAuth();
   const [realNotifs, setRealNotifs] = useState<any[]>([]);
   useEffect(() => {
-    const token = localStorage.getItem("tb_token") || "";
+    const token = tokenManager.getToken() || "";
     if (!token) return;
     fetch(process.env.NEXT_PUBLIC_API_URL + "/notifications/?limit=20", {
       headers: { Authorization: "Bearer " + token }
