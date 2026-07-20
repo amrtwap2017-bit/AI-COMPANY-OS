@@ -1,5 +1,5 @@
-// Triangle Black - UI Component Library v2
-// UI Sprint UI-1: Full enterprise component set
+// Triangle Black - UI Component Library v3
+// Sprint UI-5: Final complete export list
 
 // Core feedback
 export { AlertBanner }       from "./AlertBanner";

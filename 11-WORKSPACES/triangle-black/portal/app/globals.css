@@ -148,3 +148,17 @@ body {
   40%         { transform: scale(1);   opacity: 1; }
 }
 .bounce-dot { animation: bounce-dot 1.2s infinite ease-in-out; }
+
+/* ── Interactive element focus rings ────────────────── */
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Print styles ──────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+  header, nav, aside { display: none !important; }
+  main { width: 100% !important; }
+}

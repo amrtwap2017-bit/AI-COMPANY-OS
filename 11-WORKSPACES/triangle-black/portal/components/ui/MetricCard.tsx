@@ -1,61 +1,65 @@
 // @ts-nocheck
+// Triangle Black - MetricCard
+// UI-030: Improved trend display, skeleton variant
 import { ReactNode } from "react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface Props {
-  label: string;
-  value: string | number | ReactNode;
-  sub?: string;
-  icon?: ReactNode;
-  trend?: "up" | "down" | "stable" | null;
+  label:       string;
+  value:       string | number | ReactNode;
+  sub?:        string;
+  icon?:       ReactNode;
+  trend?:      "up" | "down" | "stable" | null;
   trendValue?: string;
-  color?: string;
-  highlight?: string;
-  onClick?: () => void;
+  color?:      string;
+  highlight?:  string;
+  onClick?:    () => void;
+  loading?:    boolean;
+  href?:       string;
 }
 
-const colorMap: Record<string, { icon: string; bar: string }> = {
-  amber:   { icon: "bg-amber-50 text-amber-600",     bar: "bg-amber-500"   },
-  blue:    { icon: "bg-blue-50 text-blue-600",       bar: "bg-blue-500"    },
-  green:   { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500" },
-  red:     { icon: "bg-red-50 text-red-600",         bar: "bg-red-500"     },
-  slate:   { icon: "bg-slate-100 text-slate-600",    bar: "bg-slate-400"   },
-  purple:  { icon: "bg-purple-50 text-purple-600",   bar: "bg-purple-500"  },
-  orange:  { icon: "bg-orange-50 text-orange-600",   bar: "bg-orange-500"  },
+const colorMap: Record<string, { icon: string; bar: string; trend_up: string; trend_down: string }> = {
+  amber:   { icon: "bg-amber-50 text-amber-600",     bar: "bg-amber-500",   trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  blue:    { icon: "bg-blue-50 text-blue-600",       bar: "bg-blue-500",    trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  green:   { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  emerald: { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  red:     { icon: "bg-red-50 text-red-600",         bar: "bg-red-500",     trend_up: "text-red-600 bg-red-50",         trend_down: "text-emerald-600 bg-emerald-50" },
+  slate:   { icon: "bg-slate-100 text-slate-600",    bar: "bg-slate-400",   trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  purple:  { icon: "bg-purple-50 text-purple-600",   bar: "bg-purple-500",  trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
 };
 
 export function MetricCard({
-  label,
-  value,
-  sub,
-  icon,
-  trend,
-  trendValue,
-  color = "amber",
-  highlight,
-  onClick,
+  label, value, sub, icon, trend, trendValue,
+  color = "amber", highlight, onClick, loading = false,
 }: Props) {
   const c = colorMap[color] ?? colorMap.amber;
-  const trendColor =
-    trend === "up"   ? "text-emerald-600 bg-emerald-50" :
-    trend === "down" ? "text-red-600 bg-red-50"         :
-                       "text-slate-500 bg-slate-50";
-  const trendIcon = trend === "up" ? "↑" : trend === "down" ? "↓" : "→";
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-5">
+        <div className="skeleton h-3 w-2/3 mb-4" />
+        <div className="skeleton h-8 w-1/2 mb-3" />
+        <div className="skeleton h-3 w-3/4" />
+      </div>
+    );
+  }
 
   return (
     <div
       onClick={onClick}
-      className={`group relative bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-200 ${
-        onClick ? "cursor-pointer hover:border-amber-300 hover:shadow-lg hover:-translate-y-0.5" : "hover:shadow-md"
-      }`}
+      className={
+        "group relative bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-200 " +
+        (onClick ? "cursor-pointer hover:border-amber-300 hover:shadow-lg hover:-translate-y-0.5" : "hover:shadow-md")
+      }
     >
-      <div className={`h-0.5 w-full ${c.bar} opacity-60`} />
+      <div className={"h-0.5 w-full " + c.bar + " opacity-60"} />
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest leading-none">
             {label}
           </span>
           {icon && (
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${c.icon}`}>
+            <div className={"w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 " + c.icon}>
               <span className="[&>svg]:w-4 [&>svg]:h-4">{icon}</span>
             </div>
           )}
@@ -64,9 +68,20 @@ export function MetricCard({
           {value}
         </div>
         <div className="flex items-center gap-2 min-h-[20px]">
-          {trendValue && trend && (
-            <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md ${trendColor}`}>
-              {trendIcon} {trendValue}
+          {trendValue && trend && trend !== "stable" && (
+            <span className={
+              "inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md " +
+              (trend === "up" ? c.trend_up : c.trend_down)
+            }>
+              {trend === "up"
+                ? <TrendingUp className="w-3 h-3" />
+                : <TrendingDown className="w-3 h-3" />}
+              {trendValue}
+            </span>
+          )}
+          {trend === "stable" && (
+            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md text-slate-500 bg-slate-50">
+              <Minus className="w-3 h-3" /> Stable
             </span>
           )}
           {highlight && (
