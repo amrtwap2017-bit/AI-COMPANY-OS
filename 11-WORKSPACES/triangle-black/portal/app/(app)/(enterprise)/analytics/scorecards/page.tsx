@@ -1,62 +1,53 @@
-// @ts-nocheck
 "use client";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { analyticsApi } from "@/lib/analytics-api";
-import Link from "next/link";
-import { ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
-
-function ScoreCard({ label, value, unit, status, target }: any) {
-  const colors: Record<string, string> = {
-    ok: "border-l-emerald-500 bg-emerald-50",
-    warning: "border-l-amber-500 bg-amber-50",
-    critical: "border-l-red-500 bg-red-50",
-  };
-  const textColors: Record<string, string> = {
-    ok: "text-emerald-700",
-    warning: "text-amber-700",
-    critical: "text-red-700",
-  };
-  return (
-    <div className={`border-l-4 rounded-r-xl p-4 ${colors[status] || "border-l-gray-300 bg-gray-50"}`}>
-      <div className="text-xs text-gray-500 font-medium mb-1">{label}</div>
-      <div className={`text-2xl font-bold ${textColors[status] || "text-gray-900"}`}>
-        {typeof value === "number" && value > 10000 ? `${(value/1000).toFixed(0)}K` : value ?? "—"}
-        {unit && <span className="text-sm font-normal text-gray-400 ml-1">{unit}</span>}
-      </div>
-      {target && <div className="text-xs text-gray-400 mt-1">Target: {target}</div>}
-    </div>
-  );
-}
+import { PageHeader, PageWrapper, LoadingState, Progress, SectionCard } from "@/components/ui";
+import { analyticsApi } from "@/lib/api/enterprise";
+import { RefreshCw, Target } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 export default function ScorecardsPage() {
-  const allQ = useQuery({ queryKey: ["analytics-all"], queryFn: () => analyticsApi.allKpis() });
-  const domains = (allQ.data as any)?.domains || {};
-  const meta = (allQ.data as any)?.meta || {};
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["analytics-scorecards"],
+    queryFn:  () => analyticsApi.scorecards(),
+    refetchInterval: 60_000,
+  });
+
+  const scorecards = data?.data?.scorecards || [];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Link href="/analytics" className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50">
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">KPI Scorecards</h1>
-          <p className="text-sm text-gray-500">{meta.total_kpis || 0} KPIs · {meta.critical || 0} critical · {meta.warnings || 0} warnings</p>
-        </div>
-      </div>
+    <PageWrapper>
+      <PageHeader title="Enterprise Scorecards" subtitle="Cross-center health and performance metrics" badge="KPI"
+        actions={<button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl"><RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} /></button>} />
 
-      {Object.entries(domains).map(([domain, data]: [string, any]) => (
-        <div key={domain} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 className="font-semibold text-gray-900 capitalize">{domain} KPIs</h2>
-          </div>
-          <div className="p-4 grid grid-cols-4 gap-4">
-            {(data?.kpis || []).map((kpi: any) => (
-              <ScoreCard key={kpi.key} label={kpi.label} value={kpi.value} unit={kpi.unit} status={kpi.status} />
-            ))}
-          </div>
+      {isLoading ? <LoadingState type="cards" rows={4} cols={2} /> : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {scorecards.length === 0 ? (
+            <div className="col-span-2 bg-white rounded-2xl border border-slate-200 p-12 text-center">
+              <Target className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+              <p className="text-slate-500">No scorecard data yet</p>
+              <p className="text-xs text-slate-400 mt-1">Scorecards are generated from live operational data</p>
+            </div>
+          ) : scorecards.map((sc:any) => {
+            const isGood = sc.score >= sc.target;
+            return (
+              <div key={sc.domain} className={"bg-white rounded-2xl border p-5 " + (isGood ? "border-emerald-200" : "border-amber-200")}>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-semibold text-slate-900">{sc.domain}</p>
+                  <span className={"text-lg font-bold " + (isGood ? "text-emerald-600" : "text-amber-600")}>{sc.score}%</span>
+                </div>
+                <Progress value={sc.score} max={100} size="md"
+                  color={isGood ? "emerald" : "amber"}
+                  showValue={false} />
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-slate-400">{sc.label}</p>
+                  <p className="text-xs text-slate-400">Target: {sc.target}%</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      ))}
-    </div>
+      )}
+    </PageWrapper>
   );
 }

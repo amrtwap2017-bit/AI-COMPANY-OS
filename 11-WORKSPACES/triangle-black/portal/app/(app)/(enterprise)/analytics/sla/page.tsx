@@ -1,163 +1,107 @@
-// @ts-nocheck
-
 "use client";
-import { useState, useEffect } from "react";
-import { PageHeader, SectionCard, MetricCard, EmptyState, LoadingState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Activity, Clock, ShieldCheck, AlertTriangle, RefreshCw, Briefcase } from "lucide-react";
-import { fetchSlaSummary, fetchContractSlas, type SlaSummary, type ContractSla } from "@/lib/sla-api";
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
+import { PageHeader, PageWrapper, LoadingState, Progress, SectionCard } from "@/components/ui";
+import { analyticsApi } from "@/lib/api/enterprise";
+import { RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "@/lib/toast";
 
-function ComplianceBadge({ pct }: { pct: number }) {
-  const cls = pct >= 95 ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-            : pct >= 85 ? "bg-amber-50 text-amber-700 border-amber-200"
-            : "bg-red-50 text-red-700 border-red-200";
-  return (
-    <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border " + cls}>
-      {pct.toFixed(1)}%
-    </span>
-  );
-}
+export default function SLAPage() {
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["analytics-sla-page"],
+    queryFn:  () => analyticsApi.sla(),
+    refetchInterval: 60_000,
+  });
 
-export default function SlaTrackingPage() {
-  const [summary, setSummary] = useState<SlaSummary | null>(null);
-  const [contracts, setContracts] = useState<ContractSla[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const sla         = data?.data || {};
+  const compliance  = Number(sla.compliance_rate  || 0);
+  const target      = Number(sla.sla_target       || 95);
+  const isCompliant = compliance >= target;
 
-  async function load(showRefresh = false) {
-    try {
-      if (showRefresh) setRefreshing(true);
-      else setLoading(true);
-      setError(null);
-      const [sum, con] = await Promise.all([fetchSlaSummary(), fetchContractSlas()]);
-      setSummary(sum);
-      setContracts(con);
-    } catch (e: any) {
-      setError(e?.response?.data?.detail ?? e?.message ?? "Failed to load SLA data");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }
+  const statusCls = isCompliant
+    ? "flex items-center gap-3 p-4 rounded-xl bg-emerald-50"
+    : "flex items-center gap-3 p-4 rounded-xl bg-red-50";
 
-  useEffect(() => { load(); }, []);
+  const statusText = isCompliant
+    ? "font-semibold text-emerald-800"
+    : "font-semibold text-red-800";
 
-  if (loading) return <LoadingState message="Loading SLA analytics..." />;
-
-  const isHealthy = (summary?.compliance_pct ?? 0) >= 95;
+  const statusSub = isCompliant
+    ? "text-sm text-emerald-600"
+    : "text-sm text-red-600";
 
   return (
-    <div className="space-y-6 p-6">
-      <Breadcrumb/>
+    <PageWrapper>
       <PageHeader
-        title="SLA Tracking Dashboard"
-        subtitle="Response and resolution performance across active contracts"
+        title="SLA Performance"
+        subtitle="Service level agreement compliance and metrics"
+        badge="SLA"
         actions={
           <button
-            onClick={() => load(true)}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            onClick={() => { refetch(); toast.success("Refreshed"); }}
+            disabled={isFetching}
+            className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl"
           >
-            <RefreshCw className={"h-4 w-4 " + (refreshing ? "animate-spin" : "")} />
-            Refresh
+            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
           </button>
         }
       />
 
-      {error && <AlertBanner type="error" title={error} onClose={() => setError(null)} />}
-      
-      {!isHealthy && summary && summary.compliance_pct > 0 && (
-        <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-amber-800">
-              SLA Compliance is below 95% threshold ({summary.compliance_pct.toFixed(1)}%)
-            </p>
-            <p className="text-xs text-amber-600 mt-0.5">
-              Review the contract breakdown below to identify lagging performance.
-            </p>
+      {isLoading ? (
+        <LoadingState type="cards" rows={4} cols={2} />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className={isCompliant ? "rounded-2xl border p-4 bg-emerald-50 border-emerald-200" : "rounded-2xl border p-4 bg-red-50 border-red-200"}>
+              <div className={isCompliant ? "text-2xl font-bold text-emerald-700" : "text-2xl font-bold text-red-700"}>
+                {compliance}%
+              </div>
+              <div className="text-xs font-medium mt-1 text-slate-600">Compliance Rate</div>
+            </div>
+            <div className="rounded-2xl border p-4 bg-slate-50 border-slate-200">
+              <div className="text-2xl font-bold text-slate-700">{target}%</div>
+              <div className="text-xs font-medium mt-1 text-slate-600">SLA Target</div>
+            </div>
+            <div className="rounded-2xl border p-4 bg-blue-50 border-blue-200">
+              <div className="text-2xl font-bold text-blue-700">{sla.total_work_orders || 0}</div>
+              <div className="text-xs font-medium mt-1 text-slate-600">Total WOs</div>
+            </div>
+            <div className={(sla.critical_open || 0) > 0 ? "rounded-2xl border p-4 bg-red-50 border-red-200" : "rounded-2xl border p-4 bg-emerald-50 border-emerald-200"}>
+              <div className={(sla.critical_open || 0) > 0 ? "text-2xl font-bold text-red-700" : "text-2xl font-bold text-emerald-700"}>
+                {sla.critical_open || 0}
+              </div>
+              <div className="text-xs font-medium mt-1 text-slate-600">Critical Open</div>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* KPI Strip */}
-      {summary && (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <MetricCard
-            label="Overall Compliance"
-            value={summary.compliance_pct.toFixed(1) + "%"}
-            icon={<ShieldCheck className="h-5 w-5 text-emerald-600" />}
-            
-            highlight={summary.compliance_pct >= 95 ? "good" : "warn"}
-          />
-          <MetricCard
-            label="Avg Response Time"
-            value={summary.avg_response_hrs.toFixed(1) + "h"}
-            icon={<Activity className="h-5 w-5 text-blue-600" />}
-            
-          />
-          <MetricCard
-            label="Avg Resolution Time"
-            value={summary.avg_resolution_hrs.toFixed(1) + "h"}
-            icon={<Clock className="h-5 w-5 text-slate-600" />}
-            
-          />
-          <MetricCard
-            label="Total Breaches"
-            value={String(summary.total_breaches)}
-            icon={<AlertTriangle className="h-5 w-5 text-red-600" />}
-            
-            highlight={summary.total_breaches > 0 ? "warn" : undefined}
-          />
-        </div>
+          <SectionCard title="Compliance Overview">
+            <div className="space-y-4">
+              <div className={statusCls}>
+                {isCompliant
+                  ? <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                  : <XCircle className="w-6 h-6 text-red-600" />
+                }
+                <div>
+                  <p className={statusText}>
+                    SLA Status: {sla.sla_status === "compliant" ? "Compliant" : "At Risk"}
+                  </p>
+                  <p className={statusSub}>
+                    {compliance}% compliance vs {target}% target
+                  </p>
+                </div>
+              </div>
+              <Progress
+                value={compliance}
+                max={100}
+                size="lg"
+                label="Overall Compliance"
+                showValue
+                color={isCompliant ? "emerald" : "red"}
+              />
+            </div>
+          </SectionCard>
+        </>
       )}
-
-      <SectionCard title="Performance by Contract" subtitle={contracts.length + " tracked contracts"}>
-        {contracts.length === 0 ? (
-          <EmptyState title="No contract data" description="No work orders linked to contracts found." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Contract</th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Total WOs</th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Avg Response</th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Avg Resolution</th>
-                  <th className="text-right py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Breaches</th>
-                  <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Compliance</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {contracts.map(c => (
-                  <tr key={c.contract_id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4 text-slate-400" />
-                        <span className="font-medium text-slate-900">{c.contract_name || "Unassigned / General"}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right text-slate-700">{c.total_wos}</td>
-                    <td className="py-3 px-4 text-right text-slate-700 font-mono">{c.avg_response_hrs.toFixed(1)}h</td>
-                    <td className="py-3 px-4 text-right text-slate-700 font-mono">{c.avg_resolution_hrs.toFixed(1)}h</td>
-                    <td className="py-3 px-4 text-right">
-                      {c.breaches > 0 ? (
-                        <span className="text-red-600 font-semibold">{c.breaches}</span>
-                      ) : (
-                        <span className="text-slate-400">0</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <ComplianceBadge pct={c.compliance_pct} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </SectionCard>
-    </div>
+    </PageWrapper>
   );
 }
