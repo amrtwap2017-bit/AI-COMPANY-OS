@@ -1,292 +1,222 @@
-// @ts-nocheck
 "use client";
+// @ts-nocheck
 import { use, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { quotesApi, pdfApi } from "@/lib/api";
-import { Quote, QuoteStatus } from "@/lib/types";
-import { Card, CardHeader } from "@/components/Card";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
-import { QUOTE_STATUS_CONFIG, formatEGP, formatDate } from "@/lib/utils";
-import { ArrowLeft, Send, CheckCircle, XCircle, Eye, Download } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import {
+  PageHeader, PageWrapper, SectionCard, LoadingState,
+  AlertBanner, StatusBadge,
+} from "@/components/ui";
+import { Button } from "@/components/ui/Button";
+import { tokenManager } from "@/lib/auth/token-manager";
+import { fmtDate, fmtCurrency } from "@/lib/design-tokens";
+import { toast } from "@/lib/toast";
+import { ArrowLeft, Download, CheckCircle2, XCircle, Send, FileText } from "lucide-react";
 
-export default function QuoteDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-  const router = useRouter();
-  const qc = useQueryClient();
-  const [loading, setLoading] = useState<string | null>(null);
-  const [pdfError, setPdfError] = useState<string | null>(null);
+async function apiAction(path: string, method = "POST") {
+  const token = tokenManager.getToken();
+  const res = await fetch(path, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: "Bearer " + token } : {}),
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    throw new Error(d.detail || "HTTP " + res.status);
+  }
+  return res;
+}
 
-  const { data: quote, isLoading } = useQuery({
+export default function QuoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id }         = use(params);
+  const [acting, setActing]     = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const { data: quote, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["quote", id],
-    queryFn: () => quotesApi.get(id).then((r) => r.data as Quote),
+    queryFn: async () => {
+      const token = tokenManager.getToken();
+      const res = await fetch("/api/v1/quotes/" + id, {
+        headers: token ? { Authorization: "Bearer " + token } : {},
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error("Quote not found");
+      return res.json();
+    },
+    staleTime: 30_000,
   });
 
-  async function doAction(action: string, fn: () => Promise<unknown>) {
-    setLoading(action);
+  async function doAction(label: string, path: string) {
+    setActing(label);
     try {
-      await fn();
-      qc.invalidateQueries({ queryKey: ["quote", id] });
-      qc.invalidateQueries({ queryKey: ["quotes"] });
-    } catch (e) {
-      console.error(e);
+      await apiAction(path);
+      await refetch();
+      toast.success(label + " successful");
+    } catch (e: any) {
+      toast.error(e.message || label + " failed");
     } finally {
-      setLoading(null);
+      setActing(null);
     }
   }
 
-  async function downloadPdf() {
-    if (!quote) return;
-    setLoading("pdf");
-    setPdfError(null);
+  async function downloadPDF() {
+    setDownloading(true);
     try {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("tb_token") || ""
-          : "";
-      await pdfApi.downloadQuote(id, token);
-    } catch {
-      setPdfError("PDF generation failed. Please try again.");
+      const res = await apiAction("/api/v1/actions/quotes/" + id + "/pdf", "GET");
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = "quote-" + id.slice(0, 8) + ".pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF downloaded");
+    } catch (e: any) {
+      toast.error(e.message || "PDF download failed");
     } finally {
-      setLoading(null);
+      setDownloading(false);
     }
   }
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center h-64" role="status">
-        <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
-        <span className="sr-only">Loading quote...</span>
-      </div>
-    );
+  if (isLoading) return <PageWrapper><LoadingState type="detail" /></PageWrapper>;
+  if (isError || !quote) return (
+    <PageWrapper>
+      <AlertBanner type="error" title={error instanceof Error ? error.message : "Quote not found"} />
+    </PageWrapper>
+  );
 
-  if (!quote) return <div role="alert">Quote not found</div>;
-
-  const cfg = QUOTE_STATUS_CONFIG[quote.status as QuoteStatus];
+  const q = quote;
+  const lineItems = Array.isArray(q.items) ? q.items : [];
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <div>
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-gray-900">{quote.title}</h1>
-              <Badge color={cfg.color} bg={cfg.bg}>{cfg.label}</Badge>
-            </div>
-            {quote.description && (
-              <p className="text-gray-500 mt-1">{quote.description}</p>
-            )}
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <p className="text-3xl font-bold text-amber-700">
-              {formatEGP(quote.total)}
-            </p>
-            {/* ── PDF DOWNLOAD BUTTON ── */}
-            <button
-              onClick={downloadPdf}
-              disabled={loading === "pdf"}
-              aria-busy={loading === "pdf"}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-[#243552] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+    <PageWrapper>
+      <PageHeader
+        title={q.title || "Quote"}
+        subtitle={fmtCurrency(q.total || 0) + " total"}
+        badge="QUOTE"
+        back={
+          <Link href="/quotes"
+            className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700">
+            <ArrowLeft className="w-4 h-4" /> All Quotes
+          </Link>
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Download className="w-4 h-4" />}
+              onClick={downloadPDF}
+              loading={downloading}
             >
-              <Download className="w-4 h-4" aria-hidden="true" />
-              {loading === "pdf" ? "Generating PDF..." : "Download PDF Proposal"}
-            </button>
-            {pdfError && (
-              <p role="alert" className="text-xs text-red-500">{pdfError}</p>
-            )}
+              Download PDF
+            </Button>
+            <StatusBadge status={q.status} />
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Line Items */}
-          <Card padding={false}>
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Line Items</h2>
-            </div>
-            <table className="w-full text-sm" aria-label="Quote line items">
-              <thead>
-                <tr className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                  <th scope="col" className="px-6 py-3 text-left">Service</th>
-                  <th scope="col" className="px-6 py-3 text-right">Qty</th>
-                  <th scope="col" className="px-6 py-3 text-right">Unit Price</th>
-                  <th scope="col" className="px-6 py-3 text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quote.items.map((item, i) => (
-                  <tr key={i} className="border-t border-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {item.service}
-                    </td>
-                    <td className="px-6 py-4 text-right text-gray-500">{item.qty}</td>
-                    <td className="px-6 py-4 text-right text-gray-500">
-                      {formatEGP(item.unit_price)}
-                    </td>
-                    <td className="px-6 py-4 text-right font-semibold text-gray-900">
-                      {formatEGP(item.total)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-gray-200 bg-gray-50">
-                  <td
-                    colSpan={3}
-                    className="px-6 py-4 font-bold text-gray-900 text-right"
-                  >
-                    Total
-                  </td>
-                  <td className="px-6 py-4 font-bold text-amber-700 text-right text-lg">
-                    {formatEGP(quote.total)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 space-y-5">
 
-          {/* Details */}
-          <Card>
-            <CardHeader title="Quote Details" />
-            <dl className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <dt className="text-gray-500">Created</dt>
-                <dd className="font-medium">{formatDate(quote.created_at)}</dd>
-              </div>
-              {quote.validity_date && (
-                <div>
-                  <dt className="text-gray-500">Valid Until</dt>
-                  <dd className="font-medium">{formatDate(quote.validity_date)}</dd>
-                </div>
-              )}
-              <div>
-                <dt className="text-gray-500">Status</dt>
-                <dd>
-                  <Badge color={cfg.color} bg={cfg.bg}>{cfg.label}</Badge>
-                </dd>
-              </div>
-              <div>
-                <dt className="text-gray-500">Items</dt>
-                <dd className="font-medium">{quote.items.length} services</dd>
-              </div>
-            </dl>
-          </Card>
-        </div>
-
-        {/* Actions */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader title="Actions" />
-            <div className="space-y-3">
-              <Button
-                className="w-full"
-                variant="secondary"
-                disabled={quote.status !== "draft"}
-                loading={loading === "submit"}
-                onClick={() =>
-                  doAction("submit", () => quotesApi.submit(id))
-                }
-              >
-                <Eye className="w-4 h-4" /> Submit for Review
-              </Button>
-              <Button
-                className="w-full"
-                disabled={quote.status !== "review"}
-                loading={loading === "send"}
-                onClick={() => doAction("send", () => quotesApi.send(id))}
-              >
-                <Send className="w-4 h-4" /> Send to Client
-              </Button>
-              <Button
-                className="w-full"
-                variant="success"
-                disabled={quote.status !== "sent"}
-                loading={loading === "approve"}
-                onClick={() =>
-                  doAction("approve", () => quotesApi.approve(id))
-                }
-              >
-                <CheckCircle className="w-4 h-4" /> Approve
-              </Button>
-              <Button
-                className="w-full"
-                variant="danger"
-                disabled={!["sent", "review"].includes(quote.status)}
-                loading={loading === "reject"}
-                onClick={() =>
-                  doAction("reject", () => quotesApi.reject(id))
-                }
-              >
-                <XCircle className="w-4 h-4" /> Reject
-              </Button>
-
-              {/* PDF in actions panel too */}
-              <div className="pt-2 border-t border-gray-100">
-                <button
-                  onClick={downloadPdf}
-                  disabled={loading === "pdf"}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-amber-600 text-amber-700 text-sm font-medium rounded-lg hover:bg-amber-600 hover:text-white transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-                >
-                  <Download className="w-4 h-4" aria-hidden="true" />
-                  {loading === "pdf" ? "Generating..." : "Download PDF"}
-                </button>
-              </div>
-            </div>
-
-            {/* Status flow */}
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-500 mb-3 font-medium">Quote Flow</p>
-              {(["draft", "review", "sent", "approved"] as QuoteStatus[]).map((s) => {
-                const c = QUOTE_STATUS_CONFIG[s];
-                const active = quote.status === s;
-                const done =
-                  ["review", "sent", "approved"].includes(quote.status) &&
-                  (s === "draft" ||
-                    (s === "review" &&
-                      ["sent", "approved"].includes(quote.status)) ||
-                    (s === "sent" && quote.status === "approved"));
-                return (
-                  <div key={s} className="flex items-center gap-2 mb-1.5">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        active
-                          ? "bg-amber-600"
-                          : done
-                          ? "bg-green-500"
-                          : "bg-gray-200"
-                      }`}
-                      aria-hidden="true"
-                    />
-                    <span
-                      className={`text-xs ${
-                        active
-                          ? "font-semibold text-amber-700"
-                          : done
-                          ? "text-green-600"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {c.label}
-                    </span>
+          <SectionCard title="Quote Summary">
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Total Value",   value: fmtCurrency(q.total || 0) },
+                { label: "Status",        value: <StatusBadge status={q.status} /> },
+                { label: "Valid Until",   value: q.validity_date ? fmtDate(q.validity_date) : "—" },
+                { label: "Created",       value: fmtDate(q.created_at) },
+              ].map(f => (
+                <div key={f.label} className="p-3 bg-slate-50 rounded-xl">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider">{f.label}</p>
+                  <div className="text-sm font-semibold text-slate-900 mt-0.5">
+                    {typeof f.value === "string" ? f.value : f.value}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
-          </Card>
+          </SectionCard>
+
+          {lineItems.length > 0 && (
+            <SectionCard title="Line Items" subtitle={lineItems.length + " services"}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100">
+                      {["Service", "Qty", "Unit Price", "Total"].map(h => (
+                        <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lineItems.map((item: any, i: number) => (
+                      <tr key={i} className="border-b border-slate-50 hover:bg-slate-50">
+                        <td className="px-3 py-3 font-medium text-slate-900">{item.service}</td>
+                        <td className="px-3 py-3 text-slate-600">{item.qty} months</td>
+                        <td className="px-3 py-3 text-slate-600">{fmtCurrency(item.unit_price || 0)}</td>
+                        <td className="px-3 py-3 font-semibold text-slate-900">{fmtCurrency(item.total || 0)}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-amber-50 border-t-2 border-amber-200">
+                      <td colSpan={3} className="px-3 py-3 font-bold text-slate-900 text-right">Total</td>
+                      <td className="px-3 py-3 font-bold text-amber-700 text-lg">{fmtCurrency(q.total || 0)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </SectionCard>
+          )}
+
+        </div>
+
+        <div>
+          <SectionCard title="Actions">
+            <div className="space-y-2">
+              {q.status === "draft" && (
+                <Button variant="primary" className="w-full justify-start"
+                  icon={<Send className="w-4 h-4" />}
+                  loading={acting === "Submitted"}
+                  onClick={() => doAction("Submitted", "/api/v1/actions/quotes/" + id + "/submit")}>
+                  Submit for Review
+                </Button>
+              )}
+              {q.status === "review" && (
+                <>
+                  <Button variant="success" className="w-full justify-start"
+                    icon={<CheckCircle2 className="w-4 h-4" />}
+                    loading={acting === "Approved"}
+                    onClick={() => doAction("Approved", "/api/v1/actions/quotes/" + id + "/approve")}>
+                    Approve Quote
+                  </Button>
+                  <Button variant="danger" className="w-full justify-start"
+                    icon={<XCircle className="w-4 h-4" />}
+                    loading={acting === "Rejected"}
+                    onClick={() => doAction("Rejected", "/api/v1/actions/quotes/" + id + "/reject")}>
+                    Reject Quote
+                  </Button>
+                </>
+              )}
+              {q.status === "approved" && (
+                <Button variant="primary" className="w-full justify-start"
+                  icon={<Send className="w-4 h-4" />}
+                  loading={acting === "Sent"}
+                  onClick={() => doAction("Sent", "/api/v1/actions/quotes/" + id + "/send")}>
+                  Send to Client
+                </Button>
+              )}
+              <Button variant="ghost" className="w-full justify-start"
+                icon={<Download className="w-4 h-4" />}
+                loading={downloading}
+                onClick={downloadPDF}>
+                Download PDF
+              </Button>
+            </div>
+          </SectionCard>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

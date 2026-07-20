@@ -1,0 +1,20 @@
+[Unit]
+Description=Triangle Black Admin API
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=amr
+WorkingDirectory=/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+ExecStart=/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8030 --workers 1
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/tb-admin.log
+StandardError=append:/var/log/tb-admin.log
+Environment=DATABASE_URL=postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black
+Environment=TRIANGLE_BLACK_DB_URL=postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black
+Environment=ENVIRONMENT=production
+
+[Install]
+WantedBy=multi-user.target

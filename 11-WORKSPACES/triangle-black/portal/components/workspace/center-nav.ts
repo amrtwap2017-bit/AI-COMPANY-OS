@@ -84,6 +84,8 @@ export const CENTER_SUB_NAV: Record<string, { label: string; href: string }[]> =
     { label: "Overview",            href: "/administration" },
     { label: "Hotels & Properties", href: "/administration/hotels" },
     { label: "Notification Rules",  href: "/admin/notification-rules" },
+    { label: "User Management",     href: "/administration/users" },
+    { label: "Audit Log",           href: "/administration/audit" },
     { label: "Profile",             href: "/profile" },
     { label: "Settings",            href: "/settings" },
   ],

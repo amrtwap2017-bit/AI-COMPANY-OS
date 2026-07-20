@@ -1,0 +1,45 @@
+{
+  "name": "Triangle Black Enterprise",
+  "short_name": "Triangle Black",
+  "description": "Hotel Engineering Operations Platform",
+  "start_url": "/workspace",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#b45309",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "Go to enterprise dashboard",
+      "url": "/workspace"
+    },
+    {
+      "name": "Work Orders",
+      "short_name": "Work Orders",
+      "description": "View open work orders",
+      "url": "/operations/work-orders"
+    },
+    {
+      "name": "Leads",
+      "short_name": "Leads",
+      "description": "View leads pipeline",
+      "url": "/leads"
+    }
+  ]
+}

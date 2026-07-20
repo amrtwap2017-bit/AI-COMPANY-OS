@@ -10,6 +10,7 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
   title: "Triangle Black",
   description: "Enterprise Operations Platform",
 };
