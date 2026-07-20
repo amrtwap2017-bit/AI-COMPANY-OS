@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 import { useQuery } from '@tanstack/react-query'
 import { contractsApi, invoicesApi, customersApi, leadsApi, type ListParams } from '@/lib/api'
