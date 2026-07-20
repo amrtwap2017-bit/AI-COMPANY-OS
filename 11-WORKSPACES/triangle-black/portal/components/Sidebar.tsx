@@ -1,5 +1,4 @@
 // @ts-nocheck
-// Triangle Black - Sidebar (DEPRECATED)
-// TB-004: Null shim — EnterpriseSidebar in EnterpriseShell handles nav
+// DEPRECATED TB-004 — null shim, EnterpriseSidebar handles navigation
 export function Sidebar({ collapsed = false }: { collapsed?: boolean }) { return null; }
 export default Sidebar;
