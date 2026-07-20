@@ -11,15 +11,11 @@ export { Button } from "./Button";
 export { SearchInput } from "./SearchInput";
 export { FilterBar } from "./FilterBar";
 export { AlertBanner } from "./AlertBanner";
-export { CommandBar } from "./CommandBar";
-export { ContextRail } from "./ContextRail";
-export { Breadcrumb } from "./Breadcrumb";
-export { NotificationDrawer } from "./NotificationDrawer";
-export { EntityShell } from "./EntityShell";
-
 export { StatusBadge } from "./StatusBadge";
-
-export { Pagination } from './Pagination';
-export { MobileNav } from './MobileNav';
-export { Breadcrumb } from './Breadcrumb';
-export { ConfirmDialog, useConfirm } from './ConfirmDialog';
+export { EntityShell } from "./EntityShell";
+export { Pagination } from "./Pagination";
+export { Breadcrumb } from "./Breadcrumb";
+// Client-only: import directly → import { MobileNav } from "@/components/ui/MobileNav"
+// Client-only: import directly → import { ExportButton } from "@/components/ui/ExportButton"
+// Client-only: import directly → import { ActionBar } from "@/components/ui/ActionBar"
+// Client-only: import directly → import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
