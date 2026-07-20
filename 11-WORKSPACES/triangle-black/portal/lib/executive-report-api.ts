@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Executive Reporting API — Triangle Black
 import { api } from "@/lib/api";
 

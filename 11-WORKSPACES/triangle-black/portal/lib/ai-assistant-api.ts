@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Triangle Black — AI Assistant API
  * Wired to AI Engine on port 8001

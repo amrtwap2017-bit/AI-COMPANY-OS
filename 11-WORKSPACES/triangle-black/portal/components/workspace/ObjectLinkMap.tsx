@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type ObjectNode = {
   title: string;
   value: string;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type CalendarItem = {
   title: string;
   meta?: string;

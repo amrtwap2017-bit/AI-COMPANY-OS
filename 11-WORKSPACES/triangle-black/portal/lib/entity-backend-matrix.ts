@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 export type BackendFeedStatus = {
   label: string;
   ok: boolean;

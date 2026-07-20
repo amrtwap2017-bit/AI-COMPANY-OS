@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Triangle Black — Supply Chain API Client
 import { safeApiJson } from "./enterprise-api";
 

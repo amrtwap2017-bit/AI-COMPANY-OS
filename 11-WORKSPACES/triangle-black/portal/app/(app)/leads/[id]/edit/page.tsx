@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { use, useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

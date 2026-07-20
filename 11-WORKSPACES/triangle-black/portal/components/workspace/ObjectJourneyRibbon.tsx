@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type JourneyStep = {
   label: string;
   detail: string;

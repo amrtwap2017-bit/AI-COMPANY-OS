@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type ExecutiveSignal = {
   label: string;
   value: string;

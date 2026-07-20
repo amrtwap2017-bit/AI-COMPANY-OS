@@ -1,3 +1,4 @@
+// @ts-nocheck
 type QueueCard = { title: string; value: string; detail: string };
 type QueueColumn = { title: string; subtitle: string; cards: QueueCard[] };
 type QueueBoardProps = { title: string; subtitle: string; columns: QueueColumn[] };

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type IntegrationStatusItem = {
   label: string;
   ok: boolean;

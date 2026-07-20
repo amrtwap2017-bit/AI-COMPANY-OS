@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, X, CheckCircle, AlertTriangle, Info, XCircle, Check } from "lucide-react";

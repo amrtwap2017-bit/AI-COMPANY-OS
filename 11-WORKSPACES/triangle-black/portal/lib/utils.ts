@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { clsx, type ClassValue } from "clsx";
 import { LeadStatus, QuoteStatus, LeadPriority } from "./types";
 

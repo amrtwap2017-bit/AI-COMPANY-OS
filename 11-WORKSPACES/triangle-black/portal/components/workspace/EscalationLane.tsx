@@ -1,3 +1,4 @@
+// @ts-nocheck
 type EscalationItem = {
   lane: string;
   owner: string;

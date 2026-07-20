@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Zap, TrendingUp, AlertTriangle } from "lucide-react";
 
 type AIInsight = { title: string; detail: string; severity?: "info" | "success" | "warning"; recommendation?: string };

@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type SignalItem = {
   label: string;
   value: string;

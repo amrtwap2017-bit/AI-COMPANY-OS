@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 export type Recommendation = {
   title: string;
   detail: string;

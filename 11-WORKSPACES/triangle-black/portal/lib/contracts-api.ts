@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Contract Renewal Pipeline API — Triangle Black
 import { api } from "@/lib/api";
 

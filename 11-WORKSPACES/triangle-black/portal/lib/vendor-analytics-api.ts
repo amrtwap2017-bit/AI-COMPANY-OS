@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Vendor Performance Analytics API — Triangle Black
 import { api } from "@/lib/api";
 

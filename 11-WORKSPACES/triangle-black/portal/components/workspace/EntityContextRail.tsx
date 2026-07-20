@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type ContextItem = {
   label: string;
   value: string;

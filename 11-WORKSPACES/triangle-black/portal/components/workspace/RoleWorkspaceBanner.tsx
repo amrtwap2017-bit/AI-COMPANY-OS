@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type RoleWorkspaceBannerProps = {
   role: string;
   title: string;

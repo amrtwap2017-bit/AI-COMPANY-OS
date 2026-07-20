@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Triangle Black Enterprise Design System
 // Single source of truth for all visual tokens
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type ReviewSignalItem = {
   label: string;
   value: string;

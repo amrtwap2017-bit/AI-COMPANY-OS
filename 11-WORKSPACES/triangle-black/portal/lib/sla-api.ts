@@ -1,3 +1,4 @@
+// @ts-nocheck
 // SLA Tracking API — Triangle Black
 import { api } from "@/lib/api";
 

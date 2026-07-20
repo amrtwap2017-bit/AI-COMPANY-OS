@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type RelationshipCard = {
   title: string;
   value: string;

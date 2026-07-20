@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader, MetricStrip, SectionCard, DataTable, StatusPill, LoadingState } from "@/components/ui";

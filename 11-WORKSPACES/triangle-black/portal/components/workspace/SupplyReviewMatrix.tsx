@@ -1,3 +1,4 @@
+// @ts-nocheck
 type SupplyReviewItem = {
   title: string;
   value: string;

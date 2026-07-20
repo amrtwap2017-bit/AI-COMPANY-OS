@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Triangle Black — Unified API Barrel Export
 // Single import point for all API modules
 

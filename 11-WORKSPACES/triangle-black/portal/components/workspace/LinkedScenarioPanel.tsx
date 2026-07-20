@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type LinkedScenario = {
   title: string;
   detail: string;

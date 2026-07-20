@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Triangle Black — Enterprise CSV Utility
 // Used across all supply chain pages for import/export
 

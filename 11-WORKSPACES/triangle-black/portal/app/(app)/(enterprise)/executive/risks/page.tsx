@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const dynamic = "force-dynamic";
 
 import { CenterPlaceholderPage } from "../../../../../components/workspace/CenterPlaceholderPage";

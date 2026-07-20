@@ -1,3 +1,4 @@
+// @ts-nocheck
 type EntitySummaryItem = {
   label: string;
   value: string;

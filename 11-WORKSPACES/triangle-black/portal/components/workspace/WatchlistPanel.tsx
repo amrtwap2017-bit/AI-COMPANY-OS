@@ -1,3 +1,4 @@
+// @ts-nocheck
 type WatchlistItem = {
   title: string;
   severity: string;

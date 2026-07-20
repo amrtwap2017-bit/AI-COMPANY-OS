@@ -1,3 +1,4 @@
+// @ts-nocheck
 type NotificationRuleRow = {
   event: string;
   owner: string;

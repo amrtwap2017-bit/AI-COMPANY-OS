@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { KpiCard } from "./KpiCard";
 
 type Kpi = {

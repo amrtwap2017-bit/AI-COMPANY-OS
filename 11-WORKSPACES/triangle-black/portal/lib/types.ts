@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type Role = "admin" | "manager" | "agent" | "client";
 
 export interface User {

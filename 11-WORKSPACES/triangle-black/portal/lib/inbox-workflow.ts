@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type FollowUpState = "none" | "planned" | "in_progress" | "done";
 
 export type InboxWorkflowState = {

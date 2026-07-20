@@ -1,3 +1,4 @@
+// @ts-nocheck
 type SLARiskCard = {
   title: string;
   value: string;

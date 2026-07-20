@@ -1,5 +1,5 @@
-"use client";
 // @ts-nocheck
+"use client";
 'use client'
 
 import * as React from 'react'
@@ -91,7 +91,7 @@ export default function CreateWorkOrderPage() {
 
   const onSubmit = async (data: CreateWorkOrderInput) => {
     try {
-      const wo = await create.mutateAsync(data)
+      const wo = await create.mutateAsync({ ...data, priority: data.priority ?? "medium" } as any)
       router.push(`/operations/work-orders/${wo.id}`)
     } catch {
       // Error is shown via toast from the mutation

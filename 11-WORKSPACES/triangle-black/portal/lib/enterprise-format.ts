@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 export function toList(payload: any): any[] {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;

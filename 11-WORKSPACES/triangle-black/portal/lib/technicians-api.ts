@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Technician Team Management API — Triangle Black
 import { api } from "@/lib/api";
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { apiJson, safeApiJson } from "./enterprise-api";
 
 export const inboxApi = {

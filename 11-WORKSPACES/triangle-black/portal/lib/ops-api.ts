@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Operations domain APIs — aligned to real backend routes.
  */

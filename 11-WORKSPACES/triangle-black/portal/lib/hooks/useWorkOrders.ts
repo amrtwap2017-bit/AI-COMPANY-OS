@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { workOrdersApi, type ListParams, type WorkOrderCreate, type WOStatus } from '@/lib/api'

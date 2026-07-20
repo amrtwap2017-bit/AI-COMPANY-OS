@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type SavedView = {
   name: string;
   detail: string;

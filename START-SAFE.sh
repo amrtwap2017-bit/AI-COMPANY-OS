@@ -90,7 +90,7 @@ echo "── Step 5: Waiting for APIs (15s) ──"
 sleep 15
 
 for url_name in "http://localhost:8001/api/v1/ai/health Engine" \
-                "http://localhost:8030/api/health TBAdmin"; do
+                "http://localhost:8030/ TBAdmin"; do
     url=$(echo $url_name | /usr/bin/awk '{print $1}')
     name=$(echo $url_name | /usr/bin/awk '{print $2}')
     code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url")
@@ -138,7 +138,7 @@ ALL_OK=true
 
 for svc in \
     "http://localhost:8001/api/v1/ai/health Engine:8001" \
-    "http://localhost:8030/api/health TBAdmin:8030" \
+    "http://localhost:8030/ TBAdmin:8030" \
     "http://localhost:3000 Hub:3000" \
     "http://localhost:3001/dashboard Portal:3001" \
     "https://localhost/nginx-health Nginx:443"; do

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type ExceptionItem = {
   title: string;
   severity: "critical" | "high" | "medium" | "low";

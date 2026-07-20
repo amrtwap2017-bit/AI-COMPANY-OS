@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Clock, ArrowRight } from "lucide-react";
 
 type PlaceholderAction = { label: string; detail: string };

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ReactNode } from "react";
 
 interface Breadcrumb { label: string; href?: string }

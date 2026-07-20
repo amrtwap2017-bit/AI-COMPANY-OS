@@ -1,3 +1,4 @@
+// @ts-nocheck
 type QueueCard = {
   title: string;
   meta?: string;

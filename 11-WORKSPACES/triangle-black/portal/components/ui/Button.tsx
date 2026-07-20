@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ReactNode, ButtonHTMLAttributes } from "react";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {

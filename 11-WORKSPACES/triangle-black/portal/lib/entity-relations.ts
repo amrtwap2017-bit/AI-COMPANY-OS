@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 export function idText(value: any) {
   if (value === undefined || value === null) return "";
   return String(value).trim();

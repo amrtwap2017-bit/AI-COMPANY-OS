@@ -76,7 +76,7 @@ while true; do
     echo ""
     echo -e "${BLUE}── Services ──${NC}"
     check_service "http://localhost:8001/api/v1/ai/health" "AI Engine   :8001"
-    check_service "http://localhost:8030/api/health"        "TB Admin    :8030"
+    check_service "http://localhost:8030/"        "TB Admin    :8030"
     check_service "http://localhost:3000"                   "Hub         :3000"
     check_service "http://localhost:3001/dashboard"         "Portal      :3001"
     check_service "https://localhost/nginx-health"          "Nginx HTTPS :443"

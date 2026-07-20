@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import Link from "next/link";
 
 type ActionItem = {

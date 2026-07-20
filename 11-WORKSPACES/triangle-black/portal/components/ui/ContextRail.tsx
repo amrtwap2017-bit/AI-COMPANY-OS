@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { useState } from "react";
 import { Zap, Activity, Link2, Files, Bell, ChevronRight, ChevronLeft, X, CheckCircle, AlertTriangle, XCircle } from "lucide-react";

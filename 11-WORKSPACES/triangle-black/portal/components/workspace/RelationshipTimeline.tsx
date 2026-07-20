@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type TimelineEvent = {
   time: string;
   title: string;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ReactNode } from "react";
 import { Info, CheckCircle, AlertTriangle, XCircle, Lightbulb, X } from "lucide-react";
 

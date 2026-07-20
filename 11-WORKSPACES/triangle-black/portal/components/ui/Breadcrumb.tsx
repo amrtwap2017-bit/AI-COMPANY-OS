@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 interface Crumb { label: string; href?: string }

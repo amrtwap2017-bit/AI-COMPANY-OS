@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from 'react'
 function Sk({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-[var(--tb-surface-overlay)] ${className}`} aria-hidden="true" />

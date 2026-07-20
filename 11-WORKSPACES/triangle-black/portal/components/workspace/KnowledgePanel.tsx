@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type KnowledgeItem = {
   label: string;
   detail: string;

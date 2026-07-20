@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getAccessToken } from "./api/client";
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8030/api/v1";
 

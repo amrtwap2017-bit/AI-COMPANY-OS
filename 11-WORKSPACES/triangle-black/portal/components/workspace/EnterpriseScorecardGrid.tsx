@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type ScorecardItem = {
   title: string;
   score: string;

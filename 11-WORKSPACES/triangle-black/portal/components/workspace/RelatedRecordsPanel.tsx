@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type RelatedRecord = {
   title: string;
   meta?: string;

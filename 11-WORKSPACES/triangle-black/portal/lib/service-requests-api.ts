@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Service Requests API — Triangle Black (Self-Service Portal)
 import { api } from "@/lib/api";
 

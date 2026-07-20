@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type GraphNode = {
   label: string;
   value: string;

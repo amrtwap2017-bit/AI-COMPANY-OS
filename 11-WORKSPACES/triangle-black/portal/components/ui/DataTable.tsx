@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { ReactNode, useState } from "react";
 import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";

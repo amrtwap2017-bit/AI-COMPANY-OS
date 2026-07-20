@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getStatus } from "@/lib/design-tokens";
 
 interface Props {

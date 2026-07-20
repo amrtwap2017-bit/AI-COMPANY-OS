@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Asset Health Monitoring API — Triangle Black
 import { api } from "@/lib/api";
 

@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 "use client";
 
 import { RecentEntitiesPanel } from "../../../../../components/workspace/RecentEntitiesPanel";

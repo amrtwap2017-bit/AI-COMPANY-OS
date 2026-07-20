@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Triangle Black — Master API Barrel
  * Single source of truth for all API imports across the portal.

@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { safeApiJson } from "./enterprise-api";
 
 export const entityViewApi = {

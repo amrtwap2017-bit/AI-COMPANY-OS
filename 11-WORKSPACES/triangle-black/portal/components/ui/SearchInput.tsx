@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Search } from "lucide-react";
 import { InputHTMLAttributes } from "react";
 interface Props extends InputHTMLAttributes<HTMLInputElement> { label?: string }

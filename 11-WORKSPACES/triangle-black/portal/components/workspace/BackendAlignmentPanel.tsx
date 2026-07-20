@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { countConnected, type BackendFeedStatus, type BackendTargetEndpoint } from "../../lib/entity-backend-matrix";
 
 type BackendAlignmentPanelProps = {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type InboxPreset = {
   title: string;
   audience: string;

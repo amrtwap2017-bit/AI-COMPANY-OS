@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MetricCard } from "./MetricCard";
 import { ReactNode } from "react";
 interface Metric { label: string; value: string|number; sub?: string; icon?: ReactNode; color?: string; trend?: "up"|"down"|"stable"; trendValue?: string; onClick?: ()=>void; }

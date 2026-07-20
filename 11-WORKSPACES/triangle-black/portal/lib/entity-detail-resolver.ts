@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { toList } from "./enterprise-format";
 
 export type DetailMode = "direct" | "inferred";

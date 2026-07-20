@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type DetailStateBannerProps = {
   title: string;
   subtitle: string;

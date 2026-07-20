@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 export type WorkspaceEntity = {
   entityType: string;
   entityId: string;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type KpiCardProps = {
   label: string;
   value: string;

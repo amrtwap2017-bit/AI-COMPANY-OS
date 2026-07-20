@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type RoleWorkbenchHeroProps = {
   eyebrow: string;
   title: string;

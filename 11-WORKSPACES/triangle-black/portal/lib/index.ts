@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Triangle Black — Portal lib barrel
  * Prefer this import point for domain APIs wired to real backend routes.

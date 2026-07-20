@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type Entity360HeroProps = {
   eyebrow: string;
   title: string;

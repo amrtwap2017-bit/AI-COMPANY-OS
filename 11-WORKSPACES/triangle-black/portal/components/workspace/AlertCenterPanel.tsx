@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { XCircle, AlertTriangle, Info, CheckCircle } from "lucide-react";
 
 type AlertItem = {

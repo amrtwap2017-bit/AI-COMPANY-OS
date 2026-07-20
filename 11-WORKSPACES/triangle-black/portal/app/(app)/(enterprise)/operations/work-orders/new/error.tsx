@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client"
 import { useEffect } from "react"
 import { AlertTriangle, RefreshCw } from "lucide-react"

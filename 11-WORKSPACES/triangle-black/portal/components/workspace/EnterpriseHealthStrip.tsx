@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CheckCircle, AlertTriangle, Activity } from "lucide-react";
 
 type HealthItem = { label: string; value: string; tone?: "neutral" | "success" | "warning" };

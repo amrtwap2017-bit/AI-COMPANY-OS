@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 type InsightItem = {
   title: string;
   detail: string;

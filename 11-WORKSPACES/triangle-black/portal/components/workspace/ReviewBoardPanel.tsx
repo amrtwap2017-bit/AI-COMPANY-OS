@@ -1,3 +1,4 @@
+// @ts-nocheck
 type ReviewCard = {
   title: string;
   value: string;

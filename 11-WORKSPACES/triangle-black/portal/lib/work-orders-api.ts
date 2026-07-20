@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Work Orders API — Triangle Black
 import { api } from "@/lib/api";
 

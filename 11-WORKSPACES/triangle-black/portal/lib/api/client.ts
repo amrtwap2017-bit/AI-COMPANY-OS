@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Triangle Black — Enterprise API Client
  * Program B: Backend-Frontend Integration

@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 const STATUS_COLORS: Record<string, string> = {

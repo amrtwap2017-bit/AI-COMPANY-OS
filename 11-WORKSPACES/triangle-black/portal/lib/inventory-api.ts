@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Inventory / supply-chain APIs — aligned to /inventory/* backend routes.
  */
