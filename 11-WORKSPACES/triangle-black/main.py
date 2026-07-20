@@ -196,3 +196,38 @@ async def leads_list(skip: int = 0, limit: int = 50):
         return [dict(r) for r in rows]
     except Exception as e:
         return _JSONResponse(status_code=500, content={"error": str(e)})
+
+
+# ── BE-003/004/005/006: Fixed routers with correct prefixes ──────────────
+# These replace the old safe_include calls that had wrong prefixes
+try:
+    from src.commercial.work_orders.router     import router as wo_router
+    from src.commercial.technicians.router     import router as tech_router
+    from src.commercial.assets.router          import router as assets_router
+    from src.commercial.service_requests.router import router as sr_router
+    app.include_router(wo_router,     prefix="/api/v1")
+    app.include_router(tech_router,   prefix="/api/v1")
+    app.include_router(assets_router, prefix="/api/v1")
+    app.include_router(sr_router,     prefix="/api/v1")
+    print("  OK: work-orders, technicians, assets, service-requests")
+except Exception as e:
+    print(f"  WARN: fixed routers: {e}")
+
+
+# ── BE-104 to BE-109: Sprint BE-B Routers ────────────────────────────────
+print("Registering Sprint BE-B routers...")
+_be_b = [
+    ("src.commercial.maintenance_enterprise.router",  "maintenance"),
+    ("src.commercial.executive_intelligence.router",  "executive_intelligence"),
+    ("src.commercial.analytics_platform.router",      "analytics"),
+    ("src.commercial.approval_center.router",         "approvals"),
+    ("src.commercial.customer_success.router",        "customers"),
+    ("src.commercial.projects.router",               "projects"),
+]
+for _mod_path, _name in _be_b:
+    try:
+        _mod = __import__(_mod_path, fromlist=["router"])
+        app.include_router(_mod.router, prefix="/api/v1")
+        print(f"  OK: {_name}")
+    except Exception as _e:
+        print(f"  WARN: {_name}: {_e}")

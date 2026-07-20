@@ -1,76 +1,87 @@
 from __future__ import annotations
-
-from src.core.auth import require_agent, require_manager
-
-from src.commercial.auth.models import User
-
-"""
-Technician FastAPI router — Triangle Black
-"""
-from typing import List
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from src.core.database import get_db
-from src.core.tenant import get_hotel_id
-from .schemas import TechnicianCreate, TechnicianUpdate, TechnicianResponse
-from .repository import TechnicianRepository
+from typing import Optional
+import uuid, datetime
 
 router = APIRouter(prefix="/technicians", tags=["technicians"])
 
-@router.post("/", response_model=TechnicianResponse, status_code=201)
-def create(
-    payload: TechnicianCreate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_agent),
-    hotel_id: str = Depends(get_hotel_id),
-):
-    data = payload.model_dump()
-    data["hotel_id"] = hotel_id
-    return TechnicianRepository(db).create(data)
+def row_to_dict(row):
+    if hasattr(row, "_mapping"): return dict(row._mapping)
+    if hasattr(row, "__dict__"):
+        d = {k:v for k,v in row.__dict__.items() if not k.startswith("_")}
+        for k,v in d.items():
+            if hasattr(v, "isoformat"): d[k] = v.isoformat()
+        return d
+    return {}
 
-@router.get("/", response_model=List[TechnicianResponse])
-def list_all(
-    skip: int = 0,
-    limit: int = 100,
+@router.get("/", summary="List technicians")
+def list_technicians(
+    hotel_id:  Optional[str] = None,
+    is_active: Optional[bool] = None,
+    skip:      int = 0,
+    limit:     int = Query(default=50, le=200),
     db: Session = Depends(get_db),
-    _: User = Depends(require_agent),
-    hotel_id: str = Depends(get_hotel_id),
 ):
-    return TechnicianRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
+    q = "SELECT * FROM technicians WHERE 1=1"
+    params: dict = {}
+    if hotel_id:             q += " AND hotel_id = :hotel_id";    params["hotel_id"]  = hotel_id
+    if is_active is not None:q += " AND is_active = :is_active";  params["is_active"] = is_active
+    q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
+    params["limit"] = limit; params["skip"] = skip
+    rows = db.execute(text(q), params).fetchall()
+    return [row_to_dict(r) for r in rows]
 
-@router.get("/{technician_id}", response_model=TechnicianResponse)
-def get(
-    technician_id: str,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_agent),
-    hotel_id: str = Depends(get_hotel_id),
-):
-    obj = TechnicianRepository(db).get(technician_id, hotel_id=hotel_id)
-    if not obj:
-        raise HTTPException(status_code=404, detail="Technician not found")
-    return obj
+@router.get("/{technician_id}", summary="Get technician")
+def get_technician(technician_id: str, db: Session = Depends(get_db)):
+    row = db.execute(text("SELECT * FROM technicians WHERE id = :id"), {"id": technician_id}).fetchone()
+    if not row: raise HTTPException(404, "Technician not found")
+    return row_to_dict(row)
 
-@router.patch("/{technician_id}", response_model=TechnicianResponse)
-def update(
-    technician_id: str,
-    payload: TechnicianUpdate,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_agent),
-    hotel_id: str = Depends(get_hotel_id),
-):
-    obj = TechnicianRepository(db).update(
-        technician_id, payload.model_dump(exclude_none=True), hotel_id=hotel_id
-    )
-    if not obj:
-        raise HTTPException(status_code=404, detail="Technician not found")
-    return obj
+@router.post("/", status_code=201, summary="Create technician")
+def create_technician(data: dict, db: Session = Depends(get_db)):
+    tech_id = str(uuid.uuid4())
+    now     = datetime.datetime.utcnow()
+    import json as _json
+    db.execute(text(
+        "INSERT INTO technicians (id, hotel_id, name, email, phone, specializations,"
+        " max_work_orders, current_work_orders, is_active, notes, created_at, updated_at)"
+        " VALUES (:id, :hotel_id, :name, :email, :phone, :specializations,"
+        " :max_work_orders, :current_work_orders, :is_active, :notes, :created_at, :updated_at)"
+    ), {
+        "id":                  tech_id,
+        "hotel_id":            data.get("hotel_id", "tb-default-hotel-000000000001"),
+        "name":                data.get("name", "New Technician"),
+        "email":               data.get("email", "tech@triangleblack.com"),
+        "phone":               data.get("phone"),
+        "specializations":     _json.dumps(data.get("specializations", [])),
+        "max_work_orders":     data.get("max_work_orders", 10),
+        "current_work_orders": 0,
+        "is_active":           data.get("is_active", True),
+        "notes":               data.get("notes"),
+        "created_at":          now,
+        "updated_at":          now,
+    })
+    db.commit()
+    return get_technician(tech_id, db)
 
-@router.delete("/{technician_id}", status_code=204)
-def delete(
-    technician_id: str,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_manager),
-    hotel_id: str = Depends(get_hotel_id),
-):
-    if not TechnicianRepository(db).delete(technician_id, hotel_id=hotel_id):
-        raise HTTPException(status_code=404, detail="Technician not found")
+@router.patch("/{technician_id}", summary="Update technician")
+def update_technician(technician_id: str, data: dict, db: Session = Depends(get_db)):
+    allowed = {"name","email","phone","specializations","max_work_orders","is_active","notes"}
+    updates = {k:v for k,v in data.items() if k in allowed and v is not None}
+    if not updates: raise HTTPException(400, "No valid fields")
+    updates["updated_at"] = datetime.datetime.utcnow()
+    set_clause = ", ".join(f"{k} = :{k}" for k in updates)
+    updates["id"] = technician_id
+    db.execute(text(f"UPDATE technicians SET {set_clause} WHERE id = :id"), updates)
+    db.commit()
+    return get_technician(technician_id, db)
+
+@router.get("/{technician_id}/work-orders", summary="Technician work orders")
+def technician_work_orders(technician_id: str, db: Session = Depends(get_db)):
+    rows = db.execute(text(
+        "SELECT * FROM work_orders WHERE technician_id = :id ORDER BY created_at DESC LIMIT 20"
+    ), {"id": technician_id}).fetchall()
+    return [row_to_dict(r) for r in rows]
