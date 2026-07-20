@@ -11,6 +11,7 @@ import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
 import { RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 const STATUS_TABS = [
   { value: "all", label: "All" },
@@ -25,7 +26,7 @@ export default function OperationsTechniciansPage() {
   const { data = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ["ops-technicians"],
     queryFn: async () => {
-      const r = await fetch("/api/v1/technicians/", { cache: "no-store" });
+      const r = await authFetch("/api/v1/technicians/");
       if (!r.ok) return [];
       const d = await r.json();
       return Array.isArray(d) ? d : d?.items || [];

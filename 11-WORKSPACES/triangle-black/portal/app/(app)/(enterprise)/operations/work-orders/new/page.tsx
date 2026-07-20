@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, Save, Wrench } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { tokenManager } from "@/lib/auth/token-manager";
 
 const WO_TYPES = [
@@ -44,7 +45,7 @@ export default function NewWorkOrderPage() {
     setError("");
     try {
       const token = tokenManager.getToken();
-      const res = await fetch("/api/v1/work-orders/", {
+      const res = await authFetch("/api/v1/work-orders/", {
         method:  "POST",
         headers: {
           "Content-Type": "application/json",

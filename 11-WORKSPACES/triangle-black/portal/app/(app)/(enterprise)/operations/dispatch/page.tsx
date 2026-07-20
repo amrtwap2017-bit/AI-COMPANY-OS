@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { tokenManager } from "@/lib/auth/token-manager";
 import { toast } from "@/lib/toast";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { RefreshCw, UserCheck, Wrench, MapPin, AlertTriangle } from "lucide-react";
 
 const PRIORITY_CLS: Record<string, string> = {
@@ -21,7 +22,7 @@ const PRIORITY_CLS: Record<string, string> = {
 
 async function assignWO(woId: string, techId: string) {
   const token = tokenManager.getToken();
-  const res = await fetch("/api/v1/actions/work-orders/" + woId + "/assign", {
+  const res = await authFetch("/api/v1/actions/work-orders/" + woId + "/assign", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +45,7 @@ export default function DispatchPage() {
   const { data: wos = [], isLoading: wLoading, refetch: refetchWOs } = useQuery({
     queryKey: ["dispatch-wos"],
     queryFn: async () => {
-      const r = await fetch("/api/v1/work-orders/?status=open&limit=50", { cache: "no-store" });
+      const r = await authFetch("/api/v1/work-orders/?status=open&limit=50");
       if (!r.ok) return [];
       const d = await r.json();
       return Array.isArray(d) ? d.filter((w: any) => !w.technician_id) : [];
@@ -55,7 +56,7 @@ export default function DispatchPage() {
   const { data: techs = [], isLoading: tLoading, refetch: refetchTechs } = useQuery({
     queryKey: ["dispatch-techs"],
     queryFn: async () => {
-      const r = await fetch("/api/v1/technicians/?is_active=true", { cache: "no-store" });
+      const r = await authFetch("/api/v1/technicians/?is_active=true");
       if (!r.ok) return [];
       const d = await r.json();
       return Array.isArray(d) ? d : d?.items || [];

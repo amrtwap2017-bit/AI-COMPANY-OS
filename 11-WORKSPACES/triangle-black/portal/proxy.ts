@@ -1,8 +1,6 @@
 // Triangle Black - Route Protection (proxy.ts)
-// Program A - Task A4
-// Next.js 16 uses proxy.ts instead of middleware.ts
-// DEV mode (AUTH_BYPASS=true): all routes pass through
-// PROD mode: unauthenticated requests redirect to /login
+// Fix: allow internal API proxy routes and health route
+// Fix: allow Authorization header as alternate auth proof
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -11,6 +9,8 @@ const PUBLIC_PATHS = [
   "/_next/",
   "/favicon.ico",
   "/api/auth/",
+  "/api/health",
+  "/api/v1/",
 ];
 
 export function proxy(req: NextRequest) {
@@ -20,14 +20,17 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // DEV bypass - allow all routes in development
+  // DEV bypass
   if (process.env.NEXT_PUBLIC_AUTH_BYPASS === "true") {
     return NextResponse.next();
   }
 
-  // Check for auth cookie (set by login flow)
-  const token = req.cookies.get("tb_access_token")?.value;
-  if (!token) {
+  // Accept either cookie OR Authorization header
+  const cookieToken = req.cookies.get("tb_access_token")?.value;
+  const authHeader  = req.headers.get("authorization");
+  const hasBearer   = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+
+  if (!cookieToken && !hasBearer) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("from", pathname);

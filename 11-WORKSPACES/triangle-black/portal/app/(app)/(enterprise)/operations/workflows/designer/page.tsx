@@ -1,16 +1,36 @@
+"use client";
 // @ts-nocheck
-export const dynamic = "force-dynamic";
-export default function WorkflowDesignerPage() {
+import { PageHeader, PageWrapper, SectionCard } from "@/components/ui";
+
+export default function Page() {
   return (
-    <div className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-          Workflow Designer
-        </h1>
-        <p className="mt-3 text-base text-slate-600">
-          Sprint 31 target page for workflow templates, states, transitions, and rule design.
-        </p>
+    <PageWrapper>
+      <PageHeader
+        title="Workflows"
+        subtitle="Enterprise workflow management"
+        badge="WF"
+      />
+      <SectionCard title="Quick Navigation">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a href="/approvals"
+          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
+          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Approvals</span>
+          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
+        </a>
+        <a href="/operations"
+          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
+          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Operations</span>
+          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
+        </a>
+        </div>
+      </SectionCard>
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+        <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <span className="text-2xl">🏗️</span>
+        </div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Workflows</h3>
+        <p className="text-sm text-slate-500 max-w-md mx-auto">Enterprise workflow management. This section is being built and will show live data soon.</p>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

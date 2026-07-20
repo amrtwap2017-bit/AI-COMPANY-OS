@@ -27,7 +27,7 @@ export function EnterpriseTopbar() {
     })
       .then(r => r.json())
       .then(d => {
-        const items = Array.isArray(d) ? d : d?.items ?? [];
+        const items = Array.isArray(d) ? d : (d?.notifications ?? d?.items ?? []);
         setRealNotifs(items.map((n: any) => ({
           id:      n.id,
           type:    n.type === "warning" ? "warning" : n.type === "error" ? "error" : n.type === "success" ? "success" : "info",

@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   },
 
   // Performance
+  trailingSlash: false,
   compress: true,
   poweredByHeader: false,
 

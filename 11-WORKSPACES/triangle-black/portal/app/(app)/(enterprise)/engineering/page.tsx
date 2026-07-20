@@ -1,45 +1,30 @@
 "use client";
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { PageHeader, PageWrapper, LoadingState } from "@/components/ui";
-import { maintenanceApi } from "@/lib/maintenance-api";
-import { Wrench, Zap, BarChart3, FileText, ArrowRight, RefreshCw } from "lucide-react";
-import { toast } from "@/lib/toast";
+import { PageHeader, PageWrapper, SectionCard } from "@/components/ui";
 
-const MODULES = [
-  { label: "AI Assistant",  href: "/engineering/ai",          icon: Zap,      desc: "Engineering AI workspace",     highlight: true },
-  { label: "Intelligence",  href: "/engineering/intelligence", icon: BarChart3,desc: "Cross-section intelligence" },
-  { label: "Actions",       href: "/engineering/actions",      icon: Wrench,   desc: "Site visit and inspection actions" },
-  { label: "Review",        href: "/engineering/review",       icon: FileText, desc: "Inspection and quality review" },
-];
-
-export default function EngineeringPage() {
+export default function Page() {
   return (
     <PageWrapper>
       <PageHeader
-        title="Engineering Center"
-        subtitle="Projects, documents, inspections, and site management"
-        badge="ENG" />
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {MODULES.map(mod => {
-          const Icon = mod.icon;
-          return (
-            <Link key={mod.href} href={mod.href}
-              className={
-                "group rounded-2xl border p-5 hover:shadow-sm transition-all " +
-                (mod.highlight ? "bg-amber-50 border-amber-200" : "bg-white border-slate-200 hover:border-amber-300")
-              }>
-              <div className={"w-10 h-10 rounded-xl flex items-center justify-center mb-3 " + (mod.highlight ? "bg-amber-200" : "bg-slate-100 group-hover:bg-amber-50")}>
-                <Icon className={"w-5 h-5 " + (mod.highlight ? "text-amber-700" : "text-slate-500 group-hover:text-amber-600")} />
-              </div>
-              <p className="font-semibold text-sm text-slate-900">{mod.label}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{mod.desc}</p>
-              <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 mt-3 transition-colors" />
-            </Link>
-          );
-        })}
+        title="Engineering"
+        subtitle="Engineering management"
+        badge="ENGI"
+      />
+      <SectionCard title="Quick Navigation">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a href="/workspace"
+          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
+          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Back</span>
+          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
+        </a>
+        </div>
+      </SectionCard>
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+        <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <span className="text-2xl">🏗️</span>
+        </div>
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Engineering</h3>
+        <p className="text-sm text-slate-500 max-w-md mx-auto">Engineering management. This section is being built and will show live data soon.</p>
       </div>
     </PageWrapper>
   );

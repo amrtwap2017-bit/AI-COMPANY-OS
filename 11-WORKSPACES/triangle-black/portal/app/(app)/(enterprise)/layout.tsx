@@ -1,13 +1,16 @@
 // @ts-nocheck
 // Triangle Black - Enterprise Layout
-// Program A - Task A3
+// FIXED: Does NOT wrap in EnterpriseShell
+// The parent (app)/layout.tsx already provides EnterpriseShell
+// for ALL pages under (app)/ including (enterprise)/ sub-group
+// Adding EnterpriseShell here caused double shell (two sidebars/topbars)
 export const dynamic = "force-dynamic";
-import { EnterpriseShell } from "@/components/workspace/EnterpriseShell";
 
 export default function EnterpriseLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <EnterpriseShell>{children}</EnterpriseShell>;
+  // Pass through - shell is already provided by parent (app)/layout.tsx
+  return <>{children}</>;
 }

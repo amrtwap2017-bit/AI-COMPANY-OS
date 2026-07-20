@@ -14,11 +14,12 @@ import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
 import { tokenManager } from "@/lib/auth/token-manager";
 import { toast } from "@/lib/toast";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { RefreshCw, Package, AlertTriangle, Plus, Minus } from "lucide-react";
 
 async function adjustStock(itemId: string, qty: number, reason: string) {
   const token = tokenManager.getToken();
-  const res = await fetch("/api/v1/actions/inventory/adjust", {
+  const res = await authFetch("/api/v1/actions/inventory/adjust", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +45,7 @@ export default function SCInventoryPage() {
   const { data: items = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["sc-inventory"],
     queryFn: async () => {
-      const r = await fetch("/api/v1/inventory/items/", { cache: "no-store" });
+      const r = await authFetch("/api/v1/inventory/items/");
       if (!r.ok) return [];
       const d = await r.json();
       return Array.isArray(d) ? d : d?.items || [];

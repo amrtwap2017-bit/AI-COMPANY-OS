@@ -30,7 +30,7 @@ export default function NotificationsPage() {
     queryKey: ["notifications-page"],
     queryFn: async () => {
       const r = await safeApi.notifications(50);
-      return Array.isArray(r.data) ? r.data : r.data?.items || [];
+      return Array.isArray(r.data) ? r.data : r.data?.notifications || r.data?.items || r.data?.data || [];
     },
     staleTime: 30_000,
   });

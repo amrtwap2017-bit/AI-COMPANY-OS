@@ -12,6 +12,7 @@ import { useSearch } from "@/lib/hooks/useSearch";
 import { fmtDate } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 const STATUS_TABS = [
   { value: "all",       label: "All" },
@@ -29,7 +30,7 @@ export default function ServiceRequestsPage() {
     queryKey: ["service-requests", statusFilter],
     queryFn: async () => {
       const q = statusFilter !== "all" ? "?status=" + statusFilter : "";
-      const r = await fetch("/api/v1/service-requests/" + q, { cache: "no-store" });
+      const r = await authFetch("/api/v1/service-requests/" + q);
       if (!r.ok) return [];
       const d = await r.json();
       return Array.isArray(d) ? d : d?.items || [];

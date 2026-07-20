@@ -11,12 +11,13 @@ import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
 import { RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 export default function InventoryPage() {
   const { data = [], isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["inventory"],
     queryFn: async () => {
-      const r = await fetch("/api/v1/inventory/items/", { cache: "no-store" });
+      const r = await authFetch("/api/v1/inventory/items/");
       if (!r.ok) return [];
       const d = await r.json();
       return Array.isArray(d) ? d : d?.items || d?.data || [];

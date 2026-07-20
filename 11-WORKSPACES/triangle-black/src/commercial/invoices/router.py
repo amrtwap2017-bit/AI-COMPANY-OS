@@ -9,7 +9,7 @@ from src.core.tenant import get_hotel_id
 from src.commercial.invoices.schemas import InvoiceCreate, InvoiceUpdate, InvoiceResponse
 from src.commercial.invoices.repository import InvoiceRepository
 
-router = APIRouter()
+router = APIRouter(prefix="/invoices", tags=["invoices"])
 
 @router.post("/", response_model=InvoiceResponse, status_code=201)
 def create_invoice(
