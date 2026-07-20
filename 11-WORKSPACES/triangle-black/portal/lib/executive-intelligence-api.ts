@@ -1,13 +1,10 @@
 // @ts-nocheck
-import { api } from "./api/client";
+import { safeFetch } from "./safe-api";
 
 export const executiveIntelligenceApi = {
-  ceoDashboard: () => api.get("/executive-intelligence/ceo/dashboard"),
-  cooDashboard: () => api.get("/executive-intelligence/coo/dashboard"),
-  renewalIntelligence: () => api.get("/executive-intelligence/renewals/intelligence"),
-  predictiveAlerts: () => api.get("/executive-intelligence/alerts/predictive"),
-  dailyBriefing: () => api.get("/executive-intelligence/ai/daily-briefing"),
-  portfolioOverview: () => api.get("/executive-intelligence/portfolio/overview"),
-  kpis: () => api.get("/executive-intelligence/kpis"),
-  watchlists: () => api.get("/executive-intelligence/watchlists"),
+  watchlists:  () => safeFetch("/api/v1/watchlists"),
+  kpis:        () => safeFetch("/api/v1/analytics"),
+  risks:       () => safeFetch("/api/v1/risks"),
+  portfolio:   () => safeFetch("/api/v1/projects"),
+  intelligence:() => safeFetch("/api/v1/analytics/intelligence"),
 };
