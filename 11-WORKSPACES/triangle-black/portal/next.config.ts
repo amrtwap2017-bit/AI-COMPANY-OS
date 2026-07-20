@@ -5,30 +5,32 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // Performance optimizations
+  // Performance
   compress: true,
   poweredByHeader: false,
+
+  // Remove console in production
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+  },
+
+  // Optimize specific heavy packages
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@tanstack/react-query",
+      "date-fns",
+    ],
+  },
 
   // Image optimization
   images: {
     formats: ["image/webp"],
     minimumCacheTTL: 60,
+    unoptimized: false,
   },
 
-  // Compiler optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
-  },
-
-  // Experimental: faster builds
-  experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "@tanstack/react-query",
-    ],
-  },
-
-  // API proxy rewrites
+  // API rewrites to TB Admin (real routes)
   async rewrites() {
     return [
       {
