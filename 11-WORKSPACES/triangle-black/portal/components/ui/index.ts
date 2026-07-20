@@ -1,31 +1,52 @@
-// Triangle Black - UI Component Library
-// Updated: UI-0 sprint additions
+// Triangle Black - UI Component Library v2
+// UI Sprint UI-1: Full enterprise component set
 
-export { StatusPill }    from "./StatusPill";
-export { PriorityPill }  from "./PriorityPill";
-export { StatusBadge }   from "./StatusBadge";
-export { PageHeader }    from "./PageHeader";
-export { PageWrapper }   from "./PageWrapper";
-export { MetricCard }    from "./MetricCard";
-export { MetricStrip }   from "./MetricStrip";
-export { DataTable }     from "./DataTable";
-export { SectionCard }   from "./SectionCard";
-export { EmptyState }    from "./EmptyState";
-export { LoadingState }  from "./LoadingState";
-export { Button }        from "./Button";
-export { Input }         from "./Input";
-export { Tabs }          from "./Tabs";
-export { Avatar }        from "./Avatar";
-export { SearchInput }   from "./SearchInput";
-export { FilterBar }     from "./FilterBar";
-export { AlertBanner }   from "./AlertBanner";
-export { EntityShell }   from "./EntityShell";
-export { Pagination }    from "./Pagination";
-export { Breadcrumb }    from "./Breadcrumb";
+// Core feedback
+export { AlertBanner }       from "./AlertBanner";
+export { LoadingState }      from "./LoadingState";
+export { EmptyState }        from "./EmptyState";
+export { Progress }          from "./Progress";
+
+// Layout
+export { PageHeader }        from "./PageHeader";
+export { PageWrapper }       from "./PageWrapper";
+export { SectionCard }       from "./SectionCard";
+export { EntityShell }       from "./EntityShell";
+
+// Navigation
+export { Breadcrumb }        from "./Breadcrumb";
+export { Tabs }              from "./Tabs";
+export { Pagination }        from "./Pagination";
+export { StatusFilterTabs }  from "./StatusFilterTabs";
+
+// Metrics
+export { MetricCard }        from "./MetricCard";
+export { MetricStrip }       from "./MetricStrip";
+
+// Data display
+export { DataTable }         from "./DataTable";
+export { StatusBadge }       from "./StatusBadge";
+export { StatusPill }        from "./StatusPill";
+export { PriorityPill }      from "./PriorityPill";
+
+// Inputs
+export { Button }            from "./Button";
+export { Input }             from "./Input";
+export { Textarea }          from "./Textarea";
+export { SearchInput }       from "./SearchInput";
+export { FilterBar }         from "./FilterBar";
+
+// Overlays
+export { Modal }             from "./Modal";
+export { Drawer }            from "./Drawer";
+export { Tooltip }           from "./Tooltip";
+
+// Identity
+export { Avatar }            from "./Avatar";
 
 // Client-only - import directly:
-// import { MobileNav }     from "@/components/ui/MobileNav"
-// import { ExportButton }  from "@/components/ui/ExportButton"
-// import { ActionBar }     from "@/components/ui/ActionBar"
-// import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
-// import { CommandBar }    from "@/components/ui/CommandBar"
+// import { MobileNav }       from "@/components/ui/MobileNav"
+// import { ExportButton }    from "@/components/ui/ExportButton"
+// import { ActionBar }       from "@/components/ui/ActionBar"
+// import { ConfirmDialog }   from "@/components/ui/ConfirmDialog"
+// import { CommandBar }      from "@/components/ui/CommandBar"
