@@ -18,3 +18,10 @@ reports/*.md
 
 *.bak
 *.bak.*
+
+*.bak2
+*.tsfix.bak
+*.ts-fix.bak
+reports/daily/
+tasks/logs/
+**/*.log
