@@ -15,3 +15,6 @@ __pycache__/
 .venv/
 node_modules/
 reports/*.md
+
+*.bak
+*.bak.*
