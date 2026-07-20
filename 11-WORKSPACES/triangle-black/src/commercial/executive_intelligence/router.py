@@ -1,4 +1,7 @@
 from __future__ import annotations
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
+from fastapi import Depends
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -17,7 +20,8 @@ def rows(result): return [row_to_dict(r) for r in result]
 router = APIRouter(prefix="/actions/executive", tags=["executive-intelligence"])
 
 @router.get("/dashboard", summary="Executive dashboard")
-def executive_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def executive_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     active_leads      = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id"), h).scalar() or 0
     won_leads         = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id AND status='won'"), h).scalar() or 0
@@ -44,7 +48,8 @@ def executive_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(ge
     }
 
 @router.get("/intelligence", summary="Executive intelligence summary")
-def executive_intelligence(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def executive_intelligence(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     hot_leads = rows(db.execute(text(
         "SELECT * FROM leads WHERE hotel_id=:hotel_id AND status='negotiation' ORDER BY updated_at DESC LIMIT 5"
@@ -67,7 +72,8 @@ def executive_intelligence(hotel_id: Optional[str] = None, db: Session = Depends
     }
 
 @router.get("/portfolio", summary="Portfolio overview")
-def executive_portfolio(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def executive_portfolio(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     contracts = rows(db.execute(text(
         "SELECT * FROM contracts WHERE hotel_id=:hotel_id ORDER BY created_at DESC LIMIT 20"
@@ -83,7 +89,8 @@ def executive_portfolio(hotel_id: Optional[str] = None, db: Session = Depends(ge
     }
 
 @router.get("/risks", summary="Enterprise risk signals")
-def executive_risks(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def executive_risks(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     risks = []
     overdue = db.execute(text("SELECT COUNT(*) FROM invoices WHERE hotel_id=:hotel_id AND due_date < NOW() AND status!='paid'"), h).scalar() or 0
@@ -93,7 +100,8 @@ def executive_risks(hotel_id: Optional[str] = None, db: Session = Depends(get_db
     return {"risks": risks, "total_risks": len(risks), "risk_score": len(risks) * 25}
 
 @router.get("/exceptions", summary="Exception items requiring leadership attention")
-def executive_exceptions(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def executive_exceptions(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     pending_quotes = db.execute(text("SELECT COUNT(*) FROM quotes WHERE hotel_id=:hotel_id AND status='review'"), h).scalar() or 0
     stale_leads    = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id AND status='new' AND updated_at < NOW() - INTERVAL '7 days'"), h).scalar() or 0
@@ -106,7 +114,8 @@ def executive_exceptions(hotel_id: Optional[str] = None, db: Session = Depends(g
     }
 
 @router.get("/daily-review", summary="Executive daily review")
-def executive_daily_review(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def executive_daily_review(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     today_wos = rows(db.execute(text(
         "SELECT * FROM work_orders WHERE hotel_id=:hotel_id AND DATE(created_at)=CURRENT_DATE"
@@ -125,7 +134,8 @@ def executive_daily_review(hotel_id: Optional[str] = None, db: Session = Depends
     }
 
 @router.get("/alerts/predictive", summary="Predictive alerts")
-def predictive_alerts(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def predictive_alerts(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     overdue_inv  = db.execute(text("SELECT COUNT(*) FROM invoices WHERE hotel_id=:hotel_id AND due_date < NOW()"), h).scalar() or 0
     low_stock    = db.execute(text("SELECT COUNT(*) FROM inventory_items WHERE hotel_id=:hotel_id AND min_stock > 0 AND reorder_qty > 0"), h).scalar() or 0

@@ -1,4 +1,7 @@
 from __future__ import annotations
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
+from fastapi import Depends
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -18,7 +21,8 @@ def rows(result): return [row_to_dict(r) for r in result]
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
 @router.get("/", summary="Unified approval queue")
-def approval_queue(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def approval_queue(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     queue = []
 
@@ -67,7 +71,8 @@ def approval_queue(hotel_id: Optional[str] = None, db: Session = Depends(get_db)
     }
 
 @router.get("/count", summary="Pending approval count")
-def approval_count(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def approval_count(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     quotes = db.execute(text(
         "SELECT COUNT(*) FROM quotes WHERE hotel_id=:hotel_id AND status IN ('review','sent')"
@@ -90,6 +95,7 @@ def approve_item(
     approval_id: str,
     approval_type: str,
     db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user),
 ):
     now = datetime.datetime.utcnow()
     table_map = {
@@ -114,6 +120,7 @@ def reject_item(
     approval_type: str,
     data: dict = None,
     db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user),
 ):
     now = datetime.datetime.utcnow()
     table_map = {

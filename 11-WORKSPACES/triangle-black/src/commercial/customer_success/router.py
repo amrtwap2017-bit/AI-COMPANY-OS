@@ -1,4 +1,7 @@
 from __future__ import annotations
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
+from fastapi import Depends
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -22,6 +25,7 @@ def list_customers(
     skip:     int = 0,
     limit:    int = Query(default=50, le=200),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001",
          "limit": limit, "skip": skip}
@@ -45,7 +49,8 @@ def list_customers(
     return {"customers": customer_rows, "total": len(customer_rows)}
 
 @router.get("/360", summary="Customer 360 view")
-def customer_360(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def customer_360(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     won_leads  = rows(db.execute(text(
         "SELECT * FROM leads WHERE hotel_id=:hotel_id AND status='won'"
@@ -78,7 +83,8 @@ def customer_360(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
     }
 
 @router.get("/review", summary="Customer review and renewal signals")
-def customer_review(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def customer_review(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     try:
         renewals = rows(db.execute(text(

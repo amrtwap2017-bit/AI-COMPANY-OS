@@ -1,4 +1,7 @@
 from __future__ import annotations
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
+from fastapi import Depends
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -18,7 +21,8 @@ router = APIRouter(prefix="/maintenance", tags=["maintenance"])
 
 # ── Dashboard ─────────────────────────────────────────────────
 @router.get("/dashboard", summary="Maintenance dashboard KPIs")
-def maintenance_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def maintenance_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     total_assets  = db.execute(text("SELECT COUNT(*) FROM assets WHERE hotel_id=:hotel_id"), h).scalar() or 0
     open_wos      = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='open'"), h).scalar() or 0
@@ -43,6 +47,7 @@ def list_pm_plans(
     skip:   int = 0,
     limit:  int = Query(default=50, le=200),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     q = "SELECT * FROM maintenance_plans WHERE 1=1"
     p: dict = {}
@@ -52,13 +57,15 @@ def list_pm_plans(
     return rows(db.execute(text(q), p).fetchall())
 
 @router.get("/pm-plans/{plan_id}", summary="Get PM plan")
-def get_pm_plan(plan_id: str, db: Session = Depends(get_db)):
+def get_pm_plan(plan_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     r = db.execute(text("SELECT * FROM maintenance_plans WHERE id=:id"), {"id": plan_id}).fetchone()
     if not r: raise HTTPException(404, "PM plan not found")
     return row_to_dict(r)
 
 @router.post("/pm-plans", status_code=201, summary="Create PM plan")
-def create_pm_plan(data: dict, db: Session = Depends(get_db)):
+def create_pm_plan(data: dict, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     pid = str(uuid.uuid4())
     now = datetime.datetime.utcnow()
     db.execute(text(
@@ -87,6 +94,7 @@ def list_work_items(
     skip:   int = 0,
     limit:  int = Query(default=50, le=200),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     q = "SELECT * FROM maintenance_work_items WHERE 1=1"
     p: dict = {}
@@ -97,7 +105,8 @@ def list_work_items(
 
 # ── Schedule ──────────────────────────────────────────────────
 @router.get("/schedule", summary="Maintenance schedule")
-def maintenance_schedule(db: Session = Depends(get_db)):
+def maintenance_schedule(db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     r = rows(db.execute(text(
         "SELECT * FROM maintenance_plans WHERE status='active' ORDER BY next_due_date ASC LIMIT 100"
     )).fetchall())
@@ -105,7 +114,8 @@ def maintenance_schedule(db: Session = Depends(get_db)):
 
 # ── Asset Tree ────────────────────────────────────────────────
 @router.get("/asset-tree", summary="Hierarchical asset tree")
-def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = hotel_id or "tb-default-hotel-000000000001"
     asset_rows = rows(db.execute(text(
         "SELECT * FROM assets WHERE hotel_id=:h ORDER BY category, name"
@@ -120,7 +130,8 @@ def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
 
 # ── Intelligence ──────────────────────────────────────────────
 @router.get("/intelligence", summary="Maintenance intelligence summary")
-def maintenance_intelligence(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def maintenance_intelligence(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     critical = rows(db.execute(text(
         "SELECT * FROM work_orders WHERE hotel_id=:hotel_id AND priority='critical' AND status!='completed' ORDER BY created_at DESC LIMIT 5"
@@ -139,7 +150,8 @@ def maintenance_intelligence(hotel_id: Optional[str] = None, db: Session = Depen
 
 # ── Actions ───────────────────────────────────────────────────
 @router.get("/actions", summary="Maintenance action items")
-def maintenance_actions(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def maintenance_actions(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     open_wos = rows(db.execute(text(
         "SELECT * FROM work_orders WHERE hotel_id=:hotel_id AND status IN ('open','in_progress') ORDER BY priority DESC, created_at DESC LIMIT 20"
@@ -148,7 +160,8 @@ def maintenance_actions(hotel_id: Optional[str] = None, db: Session = Depends(ge
 
 # ── Costs Review ──────────────────────────────────────────────
 @router.get("/costs", summary="Maintenance costs review")
-def maintenance_costs(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def maintenance_costs(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     cost_rows = rows(db.execute(text(
         "SELECT * FROM maintenance_cost_records ORDER BY created_at DESC LIMIT 50"
     )).fetchall())
@@ -157,7 +170,8 @@ def maintenance_costs(hotel_id: Optional[str] = None, db: Session = Depends(get_
 
 # ── Downtime ──────────────────────────────────────────────────
 @router.get("/downtime", summary="Asset downtime records")
-def maintenance_downtime(db: Session = Depends(get_db)):
+def maintenance_downtime(db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     r = rows(db.execute(text(
         "SELECT * FROM maintenance_downtime_records ORDER BY created_at DESC LIMIT 50"
     )).fetchall())

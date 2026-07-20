@@ -31,6 +31,37 @@ const nextConfig: NextConfig = {
   },
 
   // API rewrites to TB Admin (real routes)
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self' https://fonts.gstatic.com",
+              "connect-src 'self' http://localhost:8030 http://localhost:8001",
+              "frame-ancestors 'none'",
+            ].join('; '),
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       {

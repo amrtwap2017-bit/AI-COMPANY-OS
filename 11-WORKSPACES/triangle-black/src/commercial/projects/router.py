@@ -1,4 +1,7 @@
 from __future__ import annotations
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
+from fastapi import Depends
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -23,6 +26,7 @@ def list_projects(
     skip:     int = 0,
     limit:    int = Query(default=50, le=200),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     q = "SELECT * FROM projects WHERE 1=1"
     p: dict = {}
@@ -33,7 +37,8 @@ def list_projects(
     return rows(db.execute(text(q), p).fetchall())
 
 @router.get("/dashboard", summary="Projects dashboard")
-def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     total     = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id"), h).scalar() or 0
     active    = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id AND status='active'"), h).scalar() or 0
@@ -42,13 +47,15 @@ def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get
     return {"total": total, "active": active, "completed": completed, "at_risk_count": len(at_risk), "top_risks": at_risk}
 
 @router.get("/{project_id}", summary="Get project")
-def get_project(project_id: str, db: Session = Depends(get_db)):
+def get_project(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     r = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": project_id}).fetchone()
     if not r: raise HTTPException(404, "Project not found")
     return row_to_dict(r)
 
 @router.post("/", status_code=201, summary="Create project")
-def create_project(data: dict, db: Session = Depends(get_db)):
+def create_project(data: dict, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     pid = str(uuid.uuid4())
     now = datetime.datetime.utcnow()
     db.execute(text(
@@ -73,19 +80,23 @@ def create_project(data: dict, db: Session = Depends(get_db)):
     return get_project(pid, db)
 
 @router.get("/{project_id}/phases", summary="Project phases")
-def project_phases(project_id: str, db: Session = Depends(get_db)):
+def project_phases(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     return rows(db.execute(text("SELECT * FROM project_phases WHERE project_id=:id ORDER BY created_at"), {"id": project_id}).fetchall())
 
 @router.get("/{project_id}/risks", summary="Project risks")
-def project_risks(project_id: str, db: Session = Depends(get_db)):
+def project_risks(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     return rows(db.execute(text("SELECT * FROM project_risks WHERE project_id=:id ORDER BY created_at DESC"), {"id": project_id}).fetchall())
 
 @router.get("/{project_id}/milestones", summary="Project milestones")
-def project_milestones(project_id: str, db: Session = Depends(get_db)):
+def project_milestones(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     return rows(db.execute(text("SELECT * FROM project_milestones WHERE project_id=:id ORDER BY due_date"), {"id": project_id}).fetchall())
 
 @router.get("/intelligence/summary", summary="Projects intelligence")
-def projects_intelligence(db: Session = Depends(get_db)):
+def projects_intelligence(db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     at_risk  = rows(db.execute(text("SELECT * FROM project_risks WHERE status='open' ORDER BY created_at DESC LIMIT 10")).fetchall())
     overdue  = rows(db.execute(text("SELECT * FROM project_milestones WHERE due_date < NOW() AND status!='completed' ORDER BY due_date LIMIT 10")).fetchall())
     return {"open_risks": at_risk, "overdue_milestones": overdue, "signals": {"risks": len(at_risk), "overdue": len(overdue)}}
