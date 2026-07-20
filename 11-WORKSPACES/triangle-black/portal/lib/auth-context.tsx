@@ -52,9 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   };
 
-  const logout = () => {
+  const logout = async () => {
     tokenManager.clearAll();
+    try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
     setUser(process.env.NEXT_PUBLIC_AUTH_BYPASS === "true" ? DEV_USER : null);
+    if (typeof window !== "undefined" &&
+        process.env.NEXT_PUBLIC_AUTH_BYPASS !== "true") {
+      window.location.href = "/login";
+    }
   };
 
   return (

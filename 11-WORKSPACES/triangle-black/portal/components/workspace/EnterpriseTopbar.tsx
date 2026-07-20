@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Bell, ChevronDown, Zap, User, LogOut, Settings, Search } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { tokenManager } from "@/lib/auth/token-manager";
 import { enterpriseCenters } from "./nav";
 import { CommandBar } from "@/components/ui/CommandBar";
@@ -16,11 +17,12 @@ const MOCK_NOTIFICATIONS: any[] = [];
 export function EnterpriseTopbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [realNotifs, setRealNotifs] = useState<any[]>([]);
   useEffect(() => {
     const token = tokenManager.getToken() || "";
     if (!token) return;
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/notifications/?limit=20", {
+    fetch("/api/v1/notifications/?limit=20", {
       headers: { Authorization: "Bearer " + token }
     })
       .then(r => r.json())
@@ -146,7 +148,7 @@ export function EnterpriseTopbar() {
                 {[{ icon: User, label: "My Profile" }, { icon: Settings, label: "Settings" }].map(item => (
                   <button
                     key={item.label}
-                    onClick={() => setUserOpen(false)}
+                    onClick={() => { setUserOpen(false); router.push(item.label === "My Profile" ? "/profile" : "/settings"); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                   >
                     <item.icon className="w-4 h-4 text-slate-400" />
