@@ -99,14 +99,10 @@ done
 
 # ── Step 5b: Ensure builds exist ──
 echo "=== Checking builds ==="
-for dir_port in "$HUB_DIR:3000" "$PORTAL_DIR:3001"; do
-  dir=$(echo $dir_port | cut -d: -f1)
-  port=$(echo $dir_port | cut -d: -f2)
-  if [ ! -f "$dir/.next/BUILD_ID" ]; then
-    echo "  Building $dir..."
-    cd "$dir" && node node_modules/.bin/next build 2>&1 | tail -3
-  fi
-done
+HUB_BUILD="/home/amr/AI-COMPANY-OS/hub/dashboard/.next/BUILD_ID"
+PORTAL_BUILD="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/portal/.next/BUILD_ID"
+if [ -f "$HUB_BUILD" ]; then echo "  Hub: built OK"; else echo "  Hub: no build found"; fi
+if [ -f "$PORTAL_BUILD" ]; then echo "  Portal: built OK"; else echo "  Portal: no build found"; fi
 
 # ── Step 6: Hub Dashboard ───────────────────────────
 echo ""
