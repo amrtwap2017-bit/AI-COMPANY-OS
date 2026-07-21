@@ -54,7 +54,7 @@ export default function WorkOrdersPage() {
       w.due_date ? new Date(w.due_date).toLocaleDateString() : "",
       w.created_at ? new Date(w.created_at).toLocaleDateString() : "",
     ]);
-    const csv = [headers,...rowsCSV].map(r=>r.map(v=>"\""+String(v).replace(/\"/g,"\"\"")+"\"").join(",")).join("\n");
+    const csv = [headers,...rowsCSV].map(r=>r.map(v=>'"'+String(v).replace(/"/g,\'\'\'\'')+'"').join(",")).join("\n");
     const blob = new window.Blob([csv],{type:"text/csv"});
     const url  = window.URL.createObjectURL(blob);
     const a    = window.document.createElement("a");

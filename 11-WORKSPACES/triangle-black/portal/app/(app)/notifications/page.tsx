@@ -1,121 +1,119 @@
-"use client";
 // @ts-nocheck
-import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PageHeader, PageWrapper, LoadingState, EmptyState, StatusFilterTabs } from "@/components/ui";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { toast } from "@/lib/toast";
-import { Bell, CheckCircle2, AlertTriangle, Info, XCircle, RefreshCw, X } from "lucide-react";
-import { fmtDate } from "@/lib/design-tokens";
+"use client";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, LoadingState } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { tokenManager } from "@/lib/auth/token-manager";
+import { Bell, CheckCircle2, RefreshCw, X } from "lucide-react";
+import { toast } from "sonner";
 
-const TYPE_ICONS: any = { success: CheckCircle2, warning: AlertTriangle, info: Info, error: XCircle };
+const TYPE_ICONS: any = { info:"ℹ️", warning:"⚠️", success:"✅", error:"❌", system:"🔔" };
 const TYPE_COLORS: any = {
-  success: "text-emerald-600 bg-emerald-50 border-emerald-200",
-  warning: "text-amber-600 bg-amber-50 border-amber-200",
-  info:    "text-blue-600 bg-blue-50 border-blue-200",
-  error:   "text-red-600 bg-red-50 border-red-200",
+  info:    "border-l-blue-400 bg-blue-50",
+  warning: "border-l-amber-400 bg-amber-50",
+  success: "border-l-emerald-400 bg-emerald-50",
+  error:   "border-l-red-400 bg-red-50",
+  system:  "border-l-slate-300 bg-slate-50",
 };
 
-const FILTER_TABS = [
-  { value: "all",    label: "All" },
-  { value: "unread", label: "Unread" },
-  { value: "read",   label: "Read" },
-];
-
 export default function NotificationsPage() {
-  const [filter, setFilter] = useState("all");
   const qc = useQueryClient();
+  const [filter, setFilter] = useState<"all"|"unread">("all");
 
-  const { data: rawNotifs = [], isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["notifications-page"],
-    queryFn: async () => {
-      const res = await authFetch('/api/v1/notifications/?limit=50');
-      if (!res.ok) return [];
-      const d = await res.json();
-      return Array.isArray(d) ? d : d?.notifications || d?.items || [];
-    },
-    staleTime: 30_000,
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["notifications"],
+    queryFn:  () => authFetchJSON("/api/v1/notifications"),
+    staleTime: 15_000,
   });
 
-  const notifs = rawNotifs.filter((n:any) => {
-    if (filter === "unread") return !n.is_read;
-    if (filter === "read")   return  n.is_read;
-    return true;
-  });
+  const notifs = Array.isArray(data)
+    ? data
+    : data?.notifications || data?.items || data?.data || [];
 
-  const unreadCount = rawNotifs.filter((n:any) => !n.is_read).length;
+  const visible = filter === "unread" ? notifs.filter((n:any)=>!n.is_read&&!n.read) : notifs;
+  const unreadCount = notifs.filter((n:any)=>!n.is_read&&!n.read).length;
 
-  const tabs = FILTER_TABS.map(t => ({
-    ...t,
-    count: t.value === "all" ? rawNotifs.length :
-           t.value === "unread" ? unreadCount :
-           rawNotifs.length - unreadCount,
-  }));
+  async function markRead(id: string) {
+    try {
+      const token = tokenManager.getToken();
+      await fetch("/api/v1/notifications/"+id+"/read", {
+        method:"PATCH", headers:{"Authorization":"Bearer "+(token||"")}
+      });
+      qc.invalidateQueries({queryKey:["notifications"]});
+    } catch {}
+  }
 
   async function markAllRead() {
-    await safeApi.markAllRead();
-    qc.invalidateQueries({ queryKey: ["notifications-page"] });
-    toast.success("All notifications marked as read");
+    try {
+      const token = tokenManager.getToken();
+      await fetch("/api/v1/notifications/read-all", {
+        method:"POST", headers:{"Authorization":"Bearer "+(token||"")}
+      });
+      qc.invalidateQueries({queryKey:["notifications"]});
+      toast.success("All marked as read");
+    } catch {}
   }
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="Notifications"
-        subtitle={unreadCount + " unread"}
-        badge="NOTIF"
+      <Breadcrumb/>
+      <PageHeader title="Notifications" subtitle={`${unreadCount} unread`} badge="NOTIF"
         actions={
-          <div className="flex items-center gap-2">
-            {unreadCount > 0 && (
-              <button onClick={markAllRead}
-                className="text-xs text-amber-600 font-semibold hover:underline">
+          <div className="flex gap-2">
+            {unreadCount>0&&(
+              <button onClick={markAllRead} className="text-xs text-amber-600 hover:underline font-semibold px-3 py-2">
                 Mark all read
               </button>
             )}
-            <button onClick={() => { refetch(); toast.success("Refreshed"); }}
-              disabled={isFetching}
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
-              <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
+            <button onClick={()=>refetch()} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+              <RefreshCw className="h-4 w-4"/>
             </button>
           </div>
-        } />
+        }/>
 
-      <StatusFilterTabs tabs={tabs} active={filter} onChange={setFilter} />
+      <div className="flex gap-2">
+        {(["all","unread"] as const).map(f=>(
+          <button key={f} onClick={()=>setFilter(f)}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filter===f?"bg-amber-600 text-white":"text-slate-500 hover:bg-slate-100"}`}>
+            {f==="all"?"All ("+notifs.length+")":"Unread ("+unreadCount+")"}
+          </button>
+        ))}
+      </div>
 
-      {isLoading ? <LoadingState type="list" rows={5} /> :
-       notifs.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-          <Bell className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">No notifications</p>
-          <p className="text-xs text-slate-400 mt-1">You're all caught up</p>
-        </div>
+      {isLoading ? <LoadingState type="table" rows={6}/> :
+       visible.length===0 ? (
+         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+           <Bell className="w-16 h-16 text-slate-200 mx-auto mb-4"/>
+           <h3 className="text-lg font-semibold text-slate-700">
+             {filter==="unread"?"No unread notifications":"No notifications"}
+           </h3>
+         </div>
        ) : (
-        <div className="space-y-2">
-          {notifs.map((note:any) => {
-            const Icon = TYPE_ICONS[note.type] || Info;
-            const color = TYPE_COLORS[note.type] || TYPE_COLORS.info;
-            return (
-              <div key={note.id}
-                className={"bg-white rounded-2xl border p-4 flex items-start gap-4 transition-all " +
-                  (note.is_read ? "border-slate-100 opacity-70" : "border-slate-200 shadow-sm")}>
-                <div className={"w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border " + color}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className={"text-sm font-semibold " + (note.is_read ? "text-slate-500" : "text-slate-900")}>
-                      {note.title}
-                    </p>
-                    {!note.is_read && <span className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{note.message}</p>
-                  <p className="text-[10px] text-slate-400 mt-1">{fmtDate(note.created_at)}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+         <div className="space-y-2">
+           {visible.map((n:any)=>{
+             const isRead = n.is_read||n.read;
+             const type   = n.type||n.notification_type||"system";
+             return (
+               <div key={n.id}
+                 className={"border-l-4 rounded-2xl border border-slate-200 p-4 flex items-start gap-3 transition-all "+(TYPE_COLORS[type]||TYPE_COLORS.system)+(isRead?" opacity-60":"")}>
+                 <span className="text-lg flex-shrink-0">{TYPE_ICONS[type]||"🔔"}</span>
+                 <div className="flex-1 min-w-0">
+                   <p className={"text-sm font-semibold "+(isRead?"text-slate-600":"text-slate-900")}>{n.title||n.subject||"Notification"}</p>
+                   {n.body&&<p className="text-xs text-slate-500 mt-0.5">{n.body}</p>}
+                   <p className="text-[10px] text-slate-400 mt-1">{n.created_at?new Date(n.created_at).toLocaleString():"—"}</p>
+                 </div>
+                 {!isRead&&(
+                   <button onClick={()=>markRead(n.id)} className="text-slate-300 hover:text-amber-500 flex-shrink-0" title="Mark read">
+                     <CheckCircle2 className="w-4 h-4"/>
+                   </button>
+                 )}
+               </div>
+             );
+           })}
+         </div>
+       )}
     </PageWrapper>
   );
 }

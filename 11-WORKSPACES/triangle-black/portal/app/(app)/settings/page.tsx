@@ -1,143 +1,55 @@
-"use client";
 // @ts-nocheck
-import { useState } from "react";
-import { PageHeader, PageWrapper, SectionCard, AlertBanner } from "@/components/ui";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { Tabs } from "@/components/ui/Tabs";
-import { toast } from "@/lib/toast";
-import { Bell, Globe, Shield, Palette, Database, Save } from "lucide-react";
+"use client";
+import Link from "next/link";
+import { PageWrapper, PageHeader } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { User, Bell, Shield, Globe, Database, Cpu, Users, Building2, ArrowRight, Settings } from "lucide-react";
 
-const SETTING_TABS = [
-  { key: "general",       label: "General" },
-  { key: "notifications", label: "Notifications" },
-  { key: "security",      label: "Security" },
-  { key: "system",        label: "System" },
+const SECTIONS = [
+  { title:"Account",      items:[
+    { icon:User,     label:"My Profile",          desc:"Personal info, avatar, password",    href:"/profile" },
+    { icon:Bell,     label:"Notifications",        desc:"Alert preferences, email settings",  href:"/notifications" },
+    { icon:Shield,   label:"Security",             desc:"Password, 2FA, sessions",            href:"/profile" },
+  ]},
+  { title:"Organization", items:[
+    { icon:Building2,label:"Hotel Settings",       desc:"Hotel info, branding, contacts",     href:"/administration" },
+    { icon:Users,    label:"Team & Users",         desc:"Manage users, roles, permissions",   href:"/administration/users" },
+    { icon:Globe,    label:"Language & Region",    desc:"Egypt · Arabic/English · EGP",       href:"/profile" },
+  ]},
+  { title:"Platform",     items:[
+    { icon:Database, label:"Data & Backup",        desc:"Export data, backup settings",       href:"/reports" },
+    { icon:Cpu,      label:"AI & Integrations",    desc:"AI assistant, API keys, webhooks",   href:"/engineering/ai" },
+    { icon:Settings, label:"System Config",        desc:"Advanced platform configuration",    href:"/administration" },
+  ]},
 ];
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState("general");
-  const [appName, setAppName] = useState("Triangle Black");
-  const [timezone, setTimezone] = useState("Africa/Cairo");
-  const [currency, setCurrency] = useState("EGP");
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [smsNotifs, setSmsNotifs] = useState(false);
-
-  function handleSave() {
-    toast.success("Settings saved successfully");
-  }
-
   return (
     <PageWrapper>
-      <PageHeader
-        title="Settings"
-        subtitle="Platform configuration and preferences"
-        badge="SYS"
-        actions={
-          <Button variant="primary" icon={<Save className="w-4 h-4" />} onClick={handleSave}>
-            Save Changes
-          </Button>
-        } />
-
-      <Tabs tabs={SETTING_TABS} active={tab} onChange={setTab} />
-
-      {tab === "general" && (
-        <div className="max-w-2xl space-y-4">
-          <SectionCard title="Platform Identity">
-            <div className="space-y-4">
-              <Input label="Platform Name" value={appName}
-                onChange={e => setAppName(e.target.value)}
-                helper="Displayed in the browser tab and emails" />
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Default Timezone" value={timezone}
-                  onChange={e => setTimezone(e.target.value)} />
-                <Input label="Default Currency" value={currency}
-                  onChange={e => setCurrency(e.target.value)} />
-              </div>
-            </div>
-          </SectionCard>
-          <SectionCard title="Regional Settings">
-            <div className="grid grid-cols-2 gap-4">
-              <Input label="Date Format" value="DD/MM/YYYY" readOnly />
-              <Input label="Language" value="English (EN)" readOnly />
-            </div>
-          </SectionCard>
-        </div>
-      )}
-
-      {tab === "notifications" && (
-        <div className="max-w-2xl space-y-4">
-          <SectionCard title="Notification Channels"
-            subtitle="Configure how and where you receive alerts">
-            <div className="space-y-4">
-              {[
-                { label: "Email Notifications", desc: "Receive alerts via email", value: emailNotifs, set: setEmailNotifs },
-                { label: "SMS Notifications",   desc: "Receive urgent alerts via SMS", value: smsNotifs, set: setSmsNotifs },
-              ].map(item => (
-                <div key={item.label} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{item.label}</p>
+      <Breadcrumb/>
+      <PageHeader title="Settings" subtitle="Platform configuration and preferences" badge="CFG"/>
+      <div className="space-y-6 max-w-3xl">
+        {SECTIONS.map(section=>(
+          <div key={section.title}>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{section.title}</h2>
+            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
+              {section.items.map(item=>(
+                <Link key={item.href} href={item.href}
+                  className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors flex-shrink-0">
+                    <item.icon className="w-5 h-5 text-slate-500 group-hover:text-amber-600"/>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
                   </div>
-                  <button
-                    onClick={() => item.set(!item.value)}
-                    className={"relative w-11 h-6 rounded-full transition-colors " + (item.value ? "bg-amber-600" : "bg-slate-200")}
-                    role="switch" aria-checked={item.value}
-                  >
-                    <span className={"absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform " + (item.value ? "translate-x-5" : "")} />
-                  </button>
-                </div>
+                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors"/>
+                </Link>
               ))}
             </div>
-          </SectionCard>
-        </div>
-      )}
-
-      {tab === "security" && (
-        <div className="max-w-2xl space-y-4">
-          <AlertBanner type="info"
-            title="Security settings are managed by your administrator"
-            description="Contact support@triangleblack.com to change security policies" />
-          <SectionCard title="Session Policy">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">Session Timeout</p>
-                  <p className="text-xs text-slate-500">Auto-logout after inactivity</p>
-                </div>
-                <span className="text-sm font-semibold text-slate-700">8 hours</span>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">Two-Factor Authentication</p>
-                  <p className="text-xs text-slate-500">Additional login verification</p>
-                </div>
-                <span className="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-lg">Coming soon</span>
-              </div>
-            </div>
-          </SectionCard>
-        </div>
-      )}
-
-      {tab === "system" && (
-        <div className="max-w-2xl space-y-4">
-          <SectionCard title="System Information">
-            <div className="space-y-2">
-              {[
-                { label: "Version",     value: "v3.1.0" },
-                { label: "Environment", value: process.env.NODE_ENV || "development" },
-                { label: "Database",    value: "PostgreSQL (connected)" },
-                { label: "AI Engine",   value: "Ollama (local)" },
-              ].map(item => (
-                <div key={item.label} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                  <span className="text-sm text-slate-600">{item.label}</span>
-                  <span className="text-sm font-semibold text-slate-900">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </PageWrapper>
   );
 }
