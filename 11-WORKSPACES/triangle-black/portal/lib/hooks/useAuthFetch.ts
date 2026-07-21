@@ -23,3 +23,8 @@ export async function authFetchJSON<T = any>(path: string, options?: RequestInit
   const d = await res.json();
   return Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 }
+
+// Hook wrapper — makes { authFetch, authFetchJSON } available via useAuthFetch()
+export function useAuthFetch() {
+  return { authFetch, authFetchJSON };
+}
