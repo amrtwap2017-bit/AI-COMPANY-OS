@@ -1,0 +1,149 @@
+{
+  "timestamp": "2026-07-20 17:16:53.856582",
+  "score": 100,
+  "passed": 20,
+  "failed": 0,
+  "total": 20,
+  "results": [
+    {
+      "label": "Work Orders",
+      "endpoint": "/api/v1/work-orders",
+      "shape": "array",
+      "status": "PASS (50)",
+      "pass": true
+    },
+    {
+      "label": "Technicians",
+      "endpoint": "/api/v1/technicians",
+      "shape": "array",
+      "status": "PASS (25)",
+      "pass": true
+    },
+    {
+      "label": "Assets",
+      "endpoint": "/api/v1/assets",
+      "shape": "array",
+      "status": "PASS (46)",
+      "pass": true
+    },
+    {
+      "label": "Projects",
+      "endpoint": "/api/v1/projects",
+      "shape": "array",
+      "status": "PASS (12)",
+      "pass": true
+    },
+    {
+      "label": "Agents",
+      "endpoint": "/api/v1/agents",
+      "shape": "array",
+      "status": "PASS (12)",
+      "pass": true
+    },
+    {
+      "label": "Customers",
+      "endpoint": "/api/v1/customers",
+      "shape": "dict",
+      "status": "PASS (11)",
+      "pass": true
+    },
+    {
+      "label": "Inventory Items",
+      "endpoint": "/api/v1/inventory/items",
+      "shape": "array",
+      "status": "PASS (60)",
+      "pass": true
+    },
+    {
+      "label": "Warehouses",
+      "endpoint": "/api/v1/inventory/warehouses",
+      "shape": "array",
+      "status": "PASS (2)",
+      "pass": true
+    },
+    {
+      "label": "Notifications",
+      "endpoint": "/api/v1/notifications",
+      "shape": "dict",
+      "status": "PASS (50)",
+      "pass": true
+    },
+    {
+      "label": "Approvals Queue",
+      "endpoint": "/api/v1/approvals",
+      "shape": "dict",
+      "status": "PASS (12)",
+      "pass": true
+    },
+    {
+      "label": "Approvals Count",
+      "endpoint": "/api/v1/approvals/count",
+      "shape": "dict",
+      "status": "PASS (12)",
+      "pass": true
+    },
+    {
+      "label": "Maintenance Dashboard",
+      "endpoint": "/api/v1/maintenance/dashboard",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    },
+    {
+      "label": "PM Plans",
+      "endpoint": "/api/v1/maintenance/pm-plans",
+      "shape": "array",
+      "status": "PASS (30)",
+      "pass": true
+    },
+    {
+      "label": "Analytics KPIs",
+      "endpoint": "/api/v1/analytics/kpis",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    },
+    {
+      "label": "Analytics SLA",
+      "endpoint": "/api/v1/analytics/sla",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    },
+    {
+      "label": "Leads Search",
+      "endpoint": "/api/v1/actions/leads/search",
+      "shape": "dict",
+      "status": "PASS (50)",
+      "pass": true
+    },
+    {
+      "label": "Dashboard Stats",
+      "endpoint": "/api/v1/actions/dashboard/stats",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    },
+    {
+      "label": "Executive Dashboard",
+      "endpoint": "/api/v1/actions/executive/dashboard",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    },
+    {
+      "label": "Executive Risks",
+      "endpoint": "/api/v1/actions/executive/risks",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    },
+    {
+      "label": "Pipeline Summary",
+      "endpoint": "/api/v1/actions/pipeline/summary",
+      "shape": "dict",
+      "status": "PASS (0)",
+      "pass": true
+    }
+  ]
+}

@@ -4,30 +4,26 @@ on:
   push:
     branches: [main]
     paths:
-      - '11-WORKSPACES/triangle-black/portal/**'
+      - "11-WORKSPACES/triangle-black/portal/**"
+      - "11-WORKSPACES/triangle-black/src/**"
   pull_request:
     branches: [main]
-    paths:
-      - '11-WORKSPACES/triangle-black/portal/**'
 
 defaults:
   run:
     working-directory: 11-WORKSPACES/triangle-black/portal
 
 jobs:
-  build:
-    name: Build and Validate
+  portal-build:
+    name: Portal Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: 11-WORKSPACES/triangle-black/portal/package-lock.json
 
       - name: Install dependencies
@@ -39,30 +35,21 @@ jobs:
           NEXT_PUBLIC_API_URL: http://localhost:8030
           NEXT_PUBLIC_AI_ENGINE_URL: http://localhost:8001
           NEXT_PUBLIC_APP_ENV: production
-          NEXT_PUBLIC_AUTH_BYPASS: 'false'
+          NEXT_PUBLIC_AUTH_BYPASS: "false"
           NEXT_PUBLIC_APP_NAME: Triangle Black
           API_URL: http://localhost:8030
 
-      - name: Report bundle size
-        run: |
-          echo '=== Build output ==='
-          du -sh .next/ 2>/dev/null || echo 'Build output not found'
-
-  backend-check:
-    name: Backend Health Check
+  backend-syntax:
+    name: Backend Syntax Check
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Check Python syntax
         run: |
           cd 11-WORKSPACES/triangle-black
-          find src/ -name '*.py' -exec python3 -m py_compile {} \;
-          echo 'All Python files syntax OK'
+          find src/ -name "*.py" -exec python3 -m py_compile {} \;
