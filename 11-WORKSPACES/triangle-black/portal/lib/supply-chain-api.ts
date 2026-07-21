@@ -1,6 +1,7 @@
 // @ts-nocheck
 // Triangle Black — Supply Chain API Client
-import { safeApiJson } from "./enterprise-api";
+import { safeFetch } from "./safe-api";
+const safeApiJson = safeFetch;
 
 // Response shape normalizer
 // PR/PO/RFQ/GRN return {items:[], count:N}
