@@ -1,3 +1,7 @@
+// ARCHIVED: 2026-07-20
+// This file had zero page imports and has been archived.
+// Original content preserved below.
+
 // @ts-nocheck
 // Triangle Black Enterprise API
 // All routes go through Next.js proxy -> TB Admin

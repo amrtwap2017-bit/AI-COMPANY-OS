@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader, PageWrapper, LoadingState, EmptyState, StatusFilterTabs } from "@/components/ui";
-import { safeApi } from "@/lib/safe-api";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { toast } from "@/lib/toast";
 import { Bell, CheckCircle2, AlertTriangle, Info, XCircle, RefreshCw, X } from "lucide-react";
 import { fmtDate } from "@/lib/design-tokens";
@@ -29,8 +29,10 @@ export default function NotificationsPage() {
   const { data: rawNotifs = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ["notifications-page"],
     queryFn: async () => {
-      const r = await safeApi.notifications(50);
-      return Array.isArray(r.data) ? r.data : r.data?.notifications || r.data?.items || r.data?.data || [];
+      const res = await authFetch('/api/v1/notifications/?limit=50');
+      if (!res.ok) return [];
+      const d = await res.json();
+      return Array.isArray(d) ? d : d?.notifications || d?.items || [];
     },
     staleTime: 30_000,
   });

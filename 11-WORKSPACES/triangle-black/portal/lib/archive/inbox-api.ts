@@ -1,3 +1,7 @@
+// ARCHIVED: 2026-07-20
+// This file had zero page imports and has been archived.
+// Original content preserved below.
+
 // @ts-nocheck
 import { safeFetch } from "./safe-api";
 const apiJson = safeFetch;
