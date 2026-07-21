@@ -44,7 +44,7 @@ export default function LeadsPage() {
       l.phone||"",l.status||"",l.source||"",
       l.created_at ? new Date(l.created_at).toLocaleDateString() : "",
     ]);
-    const csv = [headers, ...rows_csv].map(r => r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+    const csv = [headers, ...rows_csv].map(r => r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join(String.fromCharCode(10));
     const blob = new window.Blob([csv], {type:"text/csv"});
     const url  = window.URL.createObjectURL(blob);
     const a    = window.document.createElement("a");

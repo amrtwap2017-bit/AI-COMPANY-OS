@@ -47,8 +47,7 @@ export default function InventoryPage() {
   function exportCSV() {
     const h = ["Name","Category","SKU","Quantity","Unit","Location","Status"];
     const r = filtered.map((i:any)=>[i.name||"",i.category||"",i.sku||"",i.quantity||0,i.unit||"",i.location||"",i.status||""]);
-    const csv = [h,...r].map(row=>row.map(v=>'"'+String(v)+'"').join(",")).join("
-");
+    const nl = String.fromCharCode(10); const csv = [h,...r].map(row=>row.map(v=>'"'+String(v)+'"').join(",")).join(nl);
     const blob = new window.Blob([csv],{type:"text/csv"});
     const url = window.URL.createObjectURL(blob);
     const a = window.document.createElement("a");

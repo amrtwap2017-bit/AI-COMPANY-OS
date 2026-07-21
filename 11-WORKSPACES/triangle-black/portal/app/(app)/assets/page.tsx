@@ -33,7 +33,7 @@ export default function AssetsPage() {
   function exportCSV() {
     const h=["Name","Type","Location","Serial","Status","Model","Manufacturer"];
     const r=filtered.map((a:any)=>[a.name||"",a.asset_type||"",a.location||"",a.serial_number||"",a.status||"",a.model||"",a.manufacturer||""]);
-    const csv=[h,...r].map(row=>row.map(v=>'"'+String(v)+'"').join(",")).join("\n");
+    const csv=[h,...r].map(row=>row.map(v=>'"'+String(v)+'"').join(",")).join(String.fromCharCode(10));
     const blob=new window.Blob([csv],{type:"text/csv"});
     const url=window.URL.createObjectURL(blob);
     const a=window.document.createElement("a");

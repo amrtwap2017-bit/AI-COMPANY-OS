@@ -44,7 +44,7 @@ export default function TechniciansPage() {
       t.is_active?"Yes":"No",
       t.current_work_orders||t.current_assignments||0,
     ]);
-    const csv=[headers,...csv_rows].map(r=>r.map(v=>'"'+String(v)+'"').join(",")).join("\n");
+    const csv=[headers,...csv_rows].map(r=>r.map(v=>'"'+String(v)+'"').join(",")).join(String.fromCharCode(10));
     const blob=new window.Blob([csv],{type:"text/csv"});
     const url=window.URL.createObjectURL(blob);
     const a=window.document.createElement("a");

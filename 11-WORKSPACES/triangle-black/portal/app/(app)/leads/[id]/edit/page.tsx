@@ -1,151 +1,105 @@
 // @ts-nocheck
 "use client";
-import { use, useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import {leadsApi, extendedLeadsApi} from "@/lib/api";
-import { Lead } from "@/lib/types";
-import { Card, CardHeader } from "@/components/Card";
-import { Input } from "@/components/Input";
-import { Select } from "@/components/Select";
-import { Button } from "@/components/Button";
-import { ArrowLeft } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { tokenManager } from "@/lib/auth/token-manager";
+import { Save, ArrowLeft, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
 
-export default function EditLeadPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const router = useRouter();
-  const qc = useQueryClient();
+export default function EditLeadPage() {
+  const { id } = useParams();
+  const router  = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error,   setError]   = useState("");
+  const [form, setForm] = useState<any>(null);
 
-  const { data: lead } = useQuery({
-    queryKey: ["lead", id],
-    queryFn: () => leadsApi.get(id).then((r) => r as Lead),
+  const { data: lead, isLoading } = useQuery({
+    queryKey: ["lead-edit", id],
+    queryFn:  () => authFetchJSON("/api/v1/actions/leads/" + id),
+    enabled:  !!id,
   });
 
-  const [form, setForm] = useState({
-    name: "", email: "", phone: "", company: "",
-    source: "web", priority: "medium", status: "new", notes: "",
-  });
-
-  useEffect(() => {
-    if (lead) {
-      setForm({
-        name: lead.name || "",
-        email: lead.email || "",
-        phone: lead.phone || "",
-        company: lead.company || "",
-        source: lead.source || "web",
-        priority: lead.priority || "medium",
-        status: lead.status || "new",
-        notes: lead.notes || "",
-      });
-    }
-  }, [lead]);
-
-  function set(field: string, val: string) {
-    setForm((f) => ({ ...f, [field]: val }));
-  }
+  useEffect(() => { if (lead) setForm(lead); }, [lead]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    if (!form) return;
+    setLoading(true); setError("");
     try {
-      await extendedLeadsApi.update(id, {
-        name: form.name, email: form.email,
-        phone: form.phone || undefined,
-        company: form.company || undefined,
-        source: form.source, priority: form.priority,
-        status: form.status,
-        notes: form.notes || undefined,
+      const token = tokenManager.getToken();
+      const res = await fetch("/api/v1/leads/" + id, {
+        method: "PUT",
+        headers: { "Content-Type":"application/json", "Authorization":"Bearer "+(token||"") },
+        body: JSON.stringify(form),
       });
-      qc.invalidateQueries({ queryKey: ["lead", id] });
-      qc.invalidateQueries({ queryKey: ["leads"] });
-      router.push(`/leads/${id}`);
-    } catch {
-      setError("Failed to update lead.");
-    } finally { setLoading(false); }
+      if (!res.ok) { const d=await res.json().catch(()=>({})); throw new Error(d.detail||"Failed"); }
+      toast.success("Lead updated");
+      router.push("/leads/"+id);
+    } catch(e:any) { setError(e.message||"Update failed"); }
+    finally { setLoading(false); }
   }
 
-  if (!lead) return (
-    <div className="flex items-center justify-center h-64" role="status">
-      <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
+  if (isLoading || !form) return <PageWrapper><LoadingState type="table" rows={5}/></PageWrapper>;
+
+  const field = (label: string, key: string, type="text") => (
+    <div>
+      <label className="text-xs font-medium text-slate-600 block mb-1.5">{label}</label>
+      <input type={type} value={form[key]||""} onChange={e=>setForm((f:any)=>({...f,[key]:e.target.value}))}
+        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
     </div>
   );
 
   return (
-    <div className="max-w-2xl">
-      <button onClick={() => router.back()}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back
-      </button>
-
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Lead</h1>
-
-      <Card>
-        <CardHeader title={lead.name} subtitle="Update lead information" />
-
-        {error && (
-          <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-            ⚠ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+    <PageWrapper>
+      <Breadcrumb/>
+      <PageHeader title={"Edit: "+(form.company_name||"Lead")} subtitle="Update lead information" badge="EDIT"
+        actions={<Link href={"/leads/"+id} className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
+      {error&&<AlertBanner type="error" title={error}/>}
+      <form onSubmit={handleSubmit} className="max-w-2xl">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Hotel / Client Name" required
-              value={form.name} onChange={(e) => set("name", e.target.value)} />
-            <Input label="Company / Group"
-              value={form.company} onChange={(e) => set("company", e.target.value)} />
+            {field("Company Name","company_name")}
+            {field("Contact Name","contact_name")}
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Email" type="email" required
-              value={form.email} onChange={(e) => set("email", e.target.value)} />
-            <Input label="Phone" type="tel"
-              value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+            {field("Email","email","email")}
+            {field("Phone","phone","tel")}
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <Select label="Source" value={form.source}
-              onChange={(e) => set("source", e.target.value)}
-              options={[
-                { value: "web", label: "Website" },
-                { value: "referral", label: "Referral" },
-                { value: "direct", label: "Direct" },
-              ]} />
-            <Select label="Priority" value={form.priority}
-              onChange={(e) => set("priority", e.target.value)}
-              options={[
-                { value: "high", label: "High" },
-                { value: "medium", label: "Medium" },
-                { value: "low", label: "Low" },
-              ]} />
-            <Select label="Status" value={form.status}
-              onChange={(e) => set("status", e.target.value)}
-              options={[
-                { value: "new", label: "New" },
-                { value: "qualified", label: "Qualified" },
-                { value: "assigned", label: "Assigned" },
-                { value: "converted", label: "Converted" },
-                { value: "lost", label: "Lost" },
-              ]} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-medium text-slate-600 block mb-1.5">Status</label>
+              <select value={form.status||"new"} onChange={e=>setForm((f:any)=>({...f,status:e.target.value}))}
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                {["new","qualified","negotiation","won","lost"].map(s=><option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-slate-600 block mb-1.5">Source</label>
+              <select value={form.source||"direct"} onChange={e=>setForm((f:any)=>({...f,source:e.target.value}))}
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                {["direct","referral","website","cold_call","exhibition"].map(s=><option key={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea id="notes" rows={4} value={form.notes}
-              onChange={(e) => set("notes", e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm
-                focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
-            />
+            <label className="text-xs font-medium text-slate-600 block mb-1.5">Notes</label>
+            <textarea rows={3} value={form.notes||""} onChange={e=>setForm((f:any)=>({...f,notes:e.target.value}))}
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none resize-none"/>
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="secondary" onClick={() => router.back()}>Cancel</Button>
-            <Button type="submit" loading={loading}>Save Changes</Button>
-          </div>
-        </form>
-      </Card>
-    </div>
+        </div>
+        <div className="flex gap-3 mt-4">
+          <button type="submit" disabled={loading}
+            className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl">
+            {loading?<><Loader2 className="w-4 h-4 animate-spin"/>Saving...</>:<><Save className="w-4 h-4"/>Save Changes</>}
+          </button>
+          <Link href={"/leads/"+id} className="px-5 py-2.5 border border-slate-200 text-slate-600 text-sm rounded-xl hover:bg-slate-50">Cancel</Link>
+        </div>
+      </form>
+    </PageWrapper>
   );
 }
