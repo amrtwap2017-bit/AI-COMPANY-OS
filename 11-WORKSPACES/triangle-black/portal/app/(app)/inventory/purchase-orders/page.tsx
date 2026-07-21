@@ -1,31 +1,41 @@
-"use client";
 // @ts-nocheck
-import { PageHeader, PageWrapper, SectionCard } from "@/components/ui";
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { useSearch } from "@/lib/hooks/useSearch";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { RefreshCw } from "lucide-react";
 
 export default function Page() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["(app)-inventory-purchase-orders"],
+    queryFn:  () => authFetchJSON("/api/v1/inventory/purchase-orders"),
+    staleTime: 30_000,
+  });
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||[];
+  const { query, setQuery, filtered } = useSearch(items, ["name","title","status"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+  const columns = [
+    { key:"po_number", label:"PO #", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["po_number"]??"—")}</span>) },
+    { key:"supplier", label:"Supplier", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["supplier"]??"—")}</span>) },
+    { key:"total_amount", label:"Amount", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["total_amount"]??"—")}</span>) },
+    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
+  ];
   return (
     <PageWrapper>
-      <PageHeader
-        title="Inventory Purchase Orders"
-        subtitle="Inventory Purchase Orders management"
-        badge="INVE"
-      />
-      <SectionCard title="Quick Navigation">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <a href="/workspace"
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
-          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Back</span>
-          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
-        </a>
-        </div>
-      </SectionCard>
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
-        <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🏗️</span>
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">Inventory Purchase Orders</h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">Inventory Purchase Orders management. This section is being built and will show live data soon.</p>
+      <Breadcrumb/>
+      <PageHeader title="Purchase Orders" subtitle={`${items.length} records`} badge="PO"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="📋" title="No data"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }

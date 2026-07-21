@@ -1,36 +1,41 @@
-"use client";
 // @ts-nocheck
-import { PageHeader, PageWrapper, SectionCard } from "@/components/ui";
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { useSearch } from "@/lib/hooks/useSearch";
+import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { RefreshCw } from "lucide-react";
 
 export default function Page() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["operations-workflows-instances"],
+    queryFn:  () => authFetchJSON("/api/v1/work-orders"),
+    staleTime: 30_000, retry: 2,
+  });
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
+  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+  const columns = [
+    { key:"title", label:"Instance", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
+    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
+    { key:"step", label:"Current Step", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["step"]??"—")}</span>) },
+    { key:"started", label:"Started", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["started"]??"—")}</span>) },
+  ];
   return (
     <PageWrapper>
-      <PageHeader
-        title="Workflows"
-        subtitle="Enterprise workflow management"
-        badge="WF"
-      />
-      <SectionCard title="Quick Navigation">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <a href="/approvals"
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
-          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Approvals</span>
-          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
-        </a>
-        <a href="/operations"
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
-          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Operations</span>
-          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
-        </a>
-        </div>
-      </SectionCard>
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
-        <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🏗️</span>
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">Workflows</h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">Enterprise workflow management. This section is being built and will show live data soon.</p>
+      <Breadcrumb/>
+      <PageHeader title="Workflow Instances" subtitle={`${items.length} records`} badge="WFI"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="▶️" title="No data" description="No records found"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }

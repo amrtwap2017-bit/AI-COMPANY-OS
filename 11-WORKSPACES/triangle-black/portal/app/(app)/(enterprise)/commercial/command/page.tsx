@@ -1,41 +1,41 @@
-"use client";
 // @ts-nocheck
-import { PageHeader, PageWrapper, SectionCard } from "@/components/ui";
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { useSearch } from "@/lib/hooks/useSearch";
+import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { RefreshCw } from "lucide-react";
 
 export default function Page() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["commercial-command"],
+    queryFn:  () => authFetchJSON("/api/v1/actions/pipeline/summary"),
+    staleTime: 30_000, retry: 2,
+  });
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
+  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+  const columns = [
+    { key:"stage", label:"Stage", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["stage"]??"—")}</span>) },
+    { key:"count", label:"Leads", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["count"]??"—")}</span>) },
+    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
+    { key:"conversion", label:"Conv %", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["conversion"]??"—")}</span>) },
+  ];
   return (
     <PageWrapper>
-      <PageHeader
-        title="Commercial Command"
-        subtitle="Sales command center"
-        badge="CMD"
-      />
-      <SectionCard title="Quick Navigation">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <a href="/commercial"
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
-          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Commercial</span>
-          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
-        </a>
-        <a href="/leads"
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
-          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Leads</span>
-          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
-        </a>
-        <a href="/commercial/pipeline"
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all group">
-          <span className="text-sm font-semibold text-slate-900 group-hover:text-amber-700">Pipeline</span>
-          <span className="text-slate-300 group-hover:text-amber-500 text-lg">›</span>
-        </a>
-        </div>
-      </SectionCard>
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
-        <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🏗️</span>
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">Commercial Command</h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">Sales command center. This section is being built and will show live data soon.</p>
+      <Breadcrumb/>
+      <PageHeader title="Commercial Command" subtitle={`${items.length} records`} badge="CMD"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="🎯" title="No data" description="No records found"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }

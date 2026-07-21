@@ -6,28 +6,24 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
-import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
+import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
 import { RefreshCw } from "lucide-react";
 
 export default function Page() {
-  const { authFetchJSON } = useAuthFetch();
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["supply-chain-stock-balances"],
     queryFn:  () => authFetchJSON("/api/v1/actions/inventory/stock-balances"),
     staleTime: 30_000, retry: 2,
   });
-
-  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
+  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
   const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-
   const columns = [
     { key:"item_name", label:"Item", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["item_name"]??"—")}</span>) },
     { key:"quantity", label:"Qty", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["quantity"]??"—")}</span>) },
     { key:"warehouse", label:"Warehouse", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["warehouse"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
+    { key:"unit", label:"Unit", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["unit"]??"—")}</span>) },
   ];
-
   return (
     <PageWrapper>
       <Breadcrumb/>
