@@ -219,3 +219,19 @@ for _mod_path, _name in _be_b:
         print(f"  OK: {_name}")
     except Exception as _e:
         print(f"  WARN: {_name}: {_e}")
+
+
+# ── Sprint 10: AI Core Intelligence Routers ─────────────────────────────
+print("Registering AI Intelligence routers...")
+_ai_routers = [
+    ("src.commercial.ai_assistant.router",          "ai-intake"),
+    ("src.commercial.ai_assistant.dispatch_router", "ai-dispatch"),
+    ("src.commercial.ai_assistant.signals_router",  "ai-signals"),
+]
+for _mod_path, _name in _ai_routers:
+    try:
+        _mod = __import__(_mod_path, fromlist=["router"])
+        app.include_router(_mod.router, prefix="/api/v1")
+        print(f"  OK: {_name}")
+    except Exception as _e:
+        print(f"  WARN: {_name}: {_e}")

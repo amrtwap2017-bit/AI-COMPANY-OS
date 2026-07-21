@@ -1,4 +1,3 @@
-"use client";
 // @ts-nocheck
 "use client";
 import { useState } from "react";
@@ -16,30 +15,26 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true); setError("");
     try {
-      const form = new URLSearchParams();
-      form.append("username", email);
-      form.append("password", password);
-      const res = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: form.toString(),
+      // Call our Next.js server route (handles cookie + proxy auth)
+      const res = await fetch("/api/auth/login", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email, password }),
       });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.detail || "Invalid credentials");
-      }
       const data = await res.json();
-      if (data.access_token) {
-        // Store in sessionStorage for API calls
-        sessionStorage.setItem("tb_access_token", data.access_token);
-        localStorage.setItem("tb_access_token", data.access_token);
-        // Also set cookie for proxy.ts auth check
-        document.cookie = "tb_access_token=" + data.access_token + "; path=/; max-age=28800; SameSite=Lax";
-        router.push("/dashboard");
-        router.refresh();
-      } else {
-        throw new Error("No token received");
-      }
+
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      const token = data.access_token || data.token;
+      if (!token) throw new Error("No token received");
+
+      // Store in all locations
+      sessionStorage.setItem("tb_access_token", token);
+      localStorage.setItem("tb_access_token", token);
+      // Cookie also set by server route
+
+      router.push("/dashboard");
+      router.refresh();
     } catch (e: any) {
       setError(e.message || "Login failed");
     } finally { setLoading(false); }
@@ -62,39 +57,34 @@ export default function LoginPage() {
             </div>
           )}
           <div>
-            <label htmlFor="email" className="text-xs font-medium text-slate-400 mb-1.5 block">Email</label>
+            <label htmlFor="email" className="text-xs font-medium text-slate-400 mb-1.5 block">
+              Email
+            </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"/>
               <input
-                id="email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                id="email" name="email" type="email"
+                value={email} onChange={e => setEmail(e.target.value)}
                 autoComplete="email"
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
-                placeholder="your@email.com"
-                required/>
+                placeholder="your@email.com" required/>
             </div>
           </div>
           <div>
-            <label htmlFor="password" className="text-xs font-medium text-slate-400 mb-1.5 block">Password</label>
+            <label htmlFor="password" className="text-xs font-medium text-slate-400 mb-1.5 block">
+              Password
+            </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"/>
               <input
-                id="password"
-                name="password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
+                id="password" name="password" type="password"
+                value={password} onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
                 placeholder="••••••••"/>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
+          <button type="submit" disabled={loading}
             className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
             {loading ? <><Loader2 className="w-4 h-4 animate-spin"/> Signing in...</> : "Sign In"}
           </button>
