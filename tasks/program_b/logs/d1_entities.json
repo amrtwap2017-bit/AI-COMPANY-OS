@@ -1,0 +1,616 @@
+{
+  "date": "2026-07-20 19:20:48.833260",
+  "tables": [
+    "activities",
+    "agents",
+    "alembic_version",
+    "assets",
+    "cache_configs",
+    "cacheconfigs",
+    "catalogs",
+    "client_announcements",
+    "client_audit_events",
+    "client_context",
+    "client_messages",
+    "client_preferences",
+    "client_support_tickets",
+    "contracts",
+    "customer_health_scores",
+    "customer_meetings",
+    "customer_renewals",
+    "customer_satisfaction_records",
+    "customer_tasks",
+    "documents",
+    "email_logs",
+    "email_notifications",
+    "engineering_boqs",
+    "engineering_documents",
+    "engineering_drawings",
+    "engineering_equipment",
+    "engineering_inspections",
+    "engineering_lessons_learned",
+    "engineering_library_items",
+    "engineering_method_statements",
+    "engineering_punch_list_items",
+    "engineering_quality_records",
+    "engineering_safety_records",
+    "engineering_site_visits",
+    "engineering_specifications",
+    "executive_dashboard",
+    "executive_snapshots",
+    "framework_agreements",
+    "goods_receipt_lines",
+    "goods_receipts",
+    "hotels",
+    "inventory_alerts",
+    "inventory_items",
+    "inventory_vendors",
+    "invoice_matches",
+    "invoices",
+    "kpi_snapshots",
+    "lead_searches",
+    "leads",
+    "maintenance_asset_nodes",
+    "maintenance_cost_records",
+    "maintenance_downtime_records",
+    "maintenance_history_records",
+    "maintenance_parts",
+    "maintenance_plans",
+    "maintenance_schedules",
+    "maintenance_warranties",
+    "maintenance_work_items",
+    "negotiation_logs",
+    "notifications",
+    "paginated_responses",
+    "payments",
+    "pipelines",
+    "price_benchmarks",
+    "price_list_lines",
+    "price_lists",
+    "procurement_events",
+    "project_budgets",
+    "project_documents",
+    "project_issues",
+    "project_milestones",
+    "project_phases",
+    "project_records",
+    "project_resources",
+    "project_risks",
+    "project_site_reports",
+    "project_tasks",
+    "project_variations",
+    "projects",
+    "purchase_order_lines",
+    "purchase_orders",
+    "purchase_request_lines",
+    "purchase_requests",
+    "quotation_comparisons",
+    "quotes",
+    "reports",
+    "rfq_lines",
+    "rfq_suppliers",
+    "rfq_vendor_quotes",
+    "rfqs",
+    "service_reports",
+    "service_requests",
+    "sites",
+    "spend_analytics",
+    "stock_balances",
+    "stock_movements",
+    "supplier_categories",
+    "supplier_contacts",
+    "supplier_documents",
+    "supplier_intelligence",
+    "supplier_invoices",
+    "supplier_quotation_lines",
+    "supplier_quotations",
+    "supplier_risk_snapshots",
+    "supplier_scorecards",
+    "suppliers",
+    "system_notifications",
+    "technicians",
+    "users",
+    "vendor_catalog_items",
+    "vendor_portal_notifications",
+    "vendor_purchase_orders",
+    "vendor_rfqs",
+    "vendor_scorecards",
+    "warehouses",
+    "webhookconfigs",
+    "work_orders",
+    "workflow_assignments",
+    "workflow_comments",
+    "workflow_escalations",
+    "workflow_events",
+    "workflow_instances",
+    "workflow_states",
+    "workflow_templates",
+    "workflow_timers",
+    "workflow_transitions"
+  ],
+  "api_modules": {
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/client_portal_api_complete": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/quotation_pdf_generator": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/client_portal_api_layer": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/sla_tracking": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/project_management_module": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/contract_lifecycle_management": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/orchestrator/reload_router.py": [
+      "post /tb/reload"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/orchestrator/maintenance_schedule_router.py": [
+      "post /maintenance_schedules/",
+      "get /maintenance_schedules/{schedule_id}",
+      "put /maintenance_schedules/{schedule_id}",
+      "delete /maintenance_schedules/{schedule_id}"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/vendor_portal_api": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/service_request_to_work_order_auto_routi": [
+      "get /health"
+    ],
+    "sites": [
+      "post /",
+      "get /",
+      "get /{site_id}",
+      "patch /{site_id}",
+      "delete /{site_id}"
+    ],
+    "webhook_notifications": [
+      "post /",
+      "get /",
+      "get /{webhookconfig_id}",
+      "patch /{webhookconfig_id}",
+      "delete /{webhookconfig_id}"
+    ],
+    "customer_success": [
+      "get /",
+      "get /360",
+      "get /review"
+    ],
+    "service_reports": [
+      "post /",
+      "get /",
+      "get /{report_id}",
+      "patch /{report_id}",
+      "delete /{report_id}"
+    ],
+    "hotels": [
+      "post /",
+      "get /",
+      "get /{hotel_id}",
+      "patch /{hotel_id}",
+      "delete /{hotel_id}"
+    ],
+    "pagination": [
+      "get /stats",
+      "get /logs"
+    ],
+    "inventory_items": [
+      "post /",
+      "get /",
+      "get /{item_id}",
+      "patch /{item_id}",
+      "delete /{item_id}"
+    ],
+    "purchase_orders": [
+      "post /",
+      "get /",
+      "get /{po_id}",
+      "patch /{po_id}",
+      "delete /{po_id}"
+    ],
+    "service_requests": [
+      "get /",
+      "get /{sr_id}",
+      "post /",
+      "post /{sr_id}/convert-to-wo"
+    ],
+    "invoices": [
+      "post /",
+      "get /{invoice_id}",
+      "put /{invoice_id}",
+      "delete /{invoice_id}"
+    ],
+    "documents": [
+      "post /documents/upload",
+      "get /documents",
+      "get /documents/{document_id}/download",
+      "delete /documents/{document_id}"
+    ],
+    "dashboard": [
+      "get /dashboard/executive"
+    ],
+    "analytics_platform": [
+      "get /kpis",
+      "get /scorecards",
+      "get /sla",
+      "get /trends"
+    ],
+    "technicians": [
+      "get /",
+      "get /{technician_id}",
+      "post /",
+      "patch /{technician_id}",
+      "get /{technician_id}/work-orders"
+    ],
+    "system_notifications": [
+      "post /notifications/",
+      "get /notifications/",
+      "patch /notifications/{id}/read",
+      "post /notifications/bulk-read"
+    ],
+    "executive_intelligence": [
+      "get /dashboard",
+      "get /intelligence",
+      "get /portfolio",
+      "get /risks",
+      "get /exceptions",
+      "get /daily-review",
+      "get /alerts/predictive"
+    ],
+    "agent_management": [
+      "post /",
+      "get /",
+      "get /{agent_id}",
+      "patch /{agent_id}",
+      "delete /{agent_id}"
+    ],
+    "goods_receipts": [
+      "post /",
+      "get /",
+      "get /{grn_id}",
+      "patch /{grn_id}",
+      "delete /{grn_id}"
+    ],
+    "stock_movements": [
+      "post /",
+      "get /",
+      "get /{movement_id}",
+      "delete /{movement_id}"
+    ],
+    "cache": [
+      "post /",
+      "get /",
+      "get /{cacheconfig_id}",
+      "patch /{cacheconfig_id}",
+      "delete /{cacheconfig_id}"
+    ],
+    "purchase_requests": [
+      "post /",
+      "get /",
+      "get /{pr_id}",
+      "patch /{pr_id}",
+      "delete /{pr_id}"
+    ],
+    "assets": [
+      "get /",
+      "get /tree",
+      "get /{asset_id}",
+      "post /",
+      "patch /{asset_id}",
+      "get /{asset_id}/work-orders"
+    ],
+    "work_orders": [
+      "get /",
+      "get /{work_order_id}",
+      "post /",
+      "patch /{work_order_id}",
+      "delete /{work_order_id}",
+      "get /{work_order_id}/history"
+    ],
+    "notifications": [
+      "get /",
+      "get /unread",
+      "patch /{notification_id}/read",
+      "post /read-all",
+      "delete /{notification_id}"
+    ],
+    "contracts": [
+      "post /",
+      "get /",
+      "get /{contract_id}",
+      "patch /{contract_id}",
+      "delete /{contract_id}",
+      "post /{contract_id}/activate",
+      "post /{contract_id}/renew"
+    ],
+    "email_notifications": [
+      "post /send",
+      "get /",
+      "get /{notification_id}",
+      "delete /{notification_id}"
+    ],
+    "inventory_vendors": [
+      "post /",
+      "get /",
+      "get /{vendor_id}",
+      "patch /{vendor_id}",
+      "delete /{vendor_id}"
+    ],
+    "lead_management": [
+      "post /",
+      "get /",
+      "put /{id}",
+      "delete /{id}"
+    ],
+    "vendor_portal": [
+      "get /rfqs",
+      "post /rfqs/{id}/quote",
+      "get /purchase-orders",
+      "patch /purchase-orders/{id}/deliver"
+    ],
+    "projects": [
+      "get /",
+      "get /dashboard",
+      "get /{project_id}",
+      "post /",
+      "get /{project_id}/phases",
+      "get /{project_id}/risks",
+      "get /{project_id}/milestones",
+      "get /intelligence/summary"
+    ],
+    "executive_dashboard": [
+      "get /executive"
+    ],
+    "pipeline_dashboard": [
+      "post /",
+      "get /",
+      "get /{pipeline_id}",
+      "patch /{pipeline_id}",
+      "delete /{pipeline_id}"
+    ],
+    "activity_tracking": [
+      "post /",
+      "get /",
+      "get /{activity_id}",
+      "patch /{activity_id}",
+      "delete /{activity_id}"
+    ],
+    "inventory_alerts": [
+      "post /alerts/",
+      "get /alerts/",
+      "post /alerts/{id}/acknowledge/"
+    ],
+    "quotation": [
+      "post /",
+      "get /",
+      "get /{quote_id}",
+      "patch /{quote_id}",
+      "delete /{quote_id}"
+    ],
+    "auth": [
+      "post /register",
+      "post /login",
+      "post /refresh",
+      "get /me",
+      "post /logout"
+    ],
+    "payment_tracking": [
+      "post /",
+      "get /{payment_id}",
+      "put /{payment_id}"
+    ],
+    "maintenance_enterprise": [
+      "get /dashboard",
+      "get /pm-plans",
+      "get /pm-plans/{plan_id}",
+      "post /pm-plans",
+      "get /work-items",
+      "get /schedule",
+      "get /asset-tree",
+      "get /intelligence",
+      "get /actions",
+      "get /costs",
+      "get /downtime"
+    ],
+    "warehouses": [
+      "post /",
+      "get /",
+      "get /{warehouse_id}",
+      "patch /{warehouse_id}",
+      "delete /{warehouse_id}"
+    ],
+    "email_service": [
+      "post /api/v1/email/send",
+      "get /api/v1/email/logs"
+    ],
+    "reporting": [
+      "post /",
+      "get /",
+      "get /{report_id}",
+      "patch /{report_id}",
+      "delete /{report_id}"
+    ],
+    "search_filters": [
+      "post /",
+      "get /",
+      "get /{leadsearch_id}",
+      "patch /{leadsearch_id}",
+      "delete /{leadsearch_id}"
+    ],
+    "approval_center": [
+      "get /",
+      "get /count",
+      "post /{approval_id}/approve",
+      "post /{approval_id}/reject"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/payment_tracking_module": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/mobile_api_for_field_technicians": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/analytics_api": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/maintenance_schedule_module": [
+      "get /health"
+    ],
+    "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src/admin_portal_foundation": [
+      "get /health"
+    ]
+  },
+  "portal_pages": [
+    "(app)/(enterprise)/actions/center",
+    "(app)/(enterprise)/admin/notification-rules",
+    "(app)/(enterprise)/administration",
+    "(app)/(enterprise)/administration/audit",
+    "(app)/(enterprise)/administration/users",
+    "(app)/(enterprise)/ai",
+    "(app)/(enterprise)/alerts",
+    "(app)/(enterprise)/analytics",
+    "(app)/(enterprise)/analytics/scorecards",
+    "(app)/(enterprise)/analytics/sla",
+    "(app)/(enterprise)/approvals",
+    "(app)/(enterprise)/commercial",
+    "(app)/(enterprise)/commercial/command",
+    "(app)/(enterprise)/commercial/contracts/renewal",
+    "(app)/(enterprise)/commercial/pipeline",
+    "(app)/(enterprise)/commercial/review",
+    "(app)/(enterprise)/commercial/review-intelligence",
+    "(app)/(enterprise)/commercial/workbench",
+    "(app)/(enterprise)/contracts/360",
+    "(app)/(enterprise)/customers",
+    "(app)/(enterprise)/customers/360",
+    "(app)/(enterprise)/customers/[id]",
+    "(app)/(enterprise)/customers/review",
+    "(app)/(enterprise)/engineering",
+    "(app)/(enterprise)/engineering/[section]",
+    "(app)/(enterprise)/engineering/actions",
+    "(app)/(enterprise)/engineering/ai",
+    "(app)/(enterprise)/engineering/intelligence",
+    "(app)/(enterprise)/engineering/review",
+    "(app)/(enterprise)/executive",
+    "(app)/(enterprise)/executive/command",
+    "(app)/(enterprise)/executive/daily-review",
+    "(app)/(enterprise)/executive/exceptions",
+    "(app)/(enterprise)/executive/intelligence",
+    "(app)/(enterprise)/executive/portfolio",
+    "(app)/(enterprise)/executive/reports",
+    "(app)/(enterprise)/executive/risks",
+    "(app)/(enterprise)/executive/workbench",
+    "(app)/(enterprise)/graph",
+    "(app)/(enterprise)/inbox",
+    "(app)/(enterprise)/inbox/presets",
+    "(app)/(enterprise)/integration/backend",
+    "(app)/(enterprise)/integration/entities",
+    "(app)/(enterprise)/maintenance",
+    "(app)/(enterprise)/maintenance/[section]",
+    "(app)/(enterprise)/maintenance/actions",
+    "(app)/(enterprise)/maintenance/asset-tree",
+    "(app)/(enterprise)/maintenance/assets",
+    "(app)/(enterprise)/maintenance/assets/360",
+    "(app)/(enterprise)/maintenance/costs/review",
+    "(app)/(enterprise)/maintenance/downtime/review",
+    "(app)/(enterprise)/maintenance/intelligence",
+    "(app)/(enterprise)/maintenance/pm-plans",
+    "(app)/(enterprise)/maintenance/pm-plans/360",
+    "(app)/(enterprise)/maintenance/review",
+    "(app)/(enterprise)/maintenance/review/schedules",
+    "(app)/(enterprise)/maintenance/schedule",
+    "(app)/(enterprise)/operations",
+    "(app)/(enterprise)/operations/calendar",
+    "(app)/(enterprise)/operations/command",
+    "(app)/(enterprise)/operations/dispatch",
+    "(app)/(enterprise)/operations/service-requests",
+    "(app)/(enterprise)/operations/sla-review",
+    "(app)/(enterprise)/operations/technicians",
+    "(app)/(enterprise)/operations/technicians/[id]",
+    "(app)/(enterprise)/operations/work-orders",
+    "(app)/(enterprise)/operations/work-orders/360",
+    "(app)/(enterprise)/operations/work-orders/[id]",
+    "(app)/(enterprise)/operations/work-orders/new",
+    "(app)/(enterprise)/operations/workbench",
+    "(app)/(enterprise)/operations/workflows",
+    "(app)/(enterprise)/operations/workflows/approvals",
+    "(app)/(enterprise)/operations/workflows/designer",
+    "(app)/(enterprise)/operations/workflows/instances",
+    "(app)/(enterprise)/projects-center",
+    "(app)/(enterprise)/projects-center/[id]",
+    "(app)/(enterprise)/projects-center/actions",
+    "(app)/(enterprise)/projects-center/intelligence",
+    "(app)/(enterprise)/projects-center/review",
+    "(app)/(enterprise)/projects-center/review/schedule",
+    "(app)/(enterprise)/projects-center/section/[section]",
+    "(app)/(enterprise)/recommendations",
+    "(app)/(enterprise)/supply-chain",
+    "(app)/(enterprise)/supply-chain/agreements",
+    "(app)/(enterprise)/supply-chain/command",
+    "(app)/(enterprise)/supply-chain/comparison",
+    "(app)/(enterprise)/supply-chain/goods-receipts",
+    "(app)/(enterprise)/supply-chain/intelligence",
+    "(app)/(enterprise)/supply-chain/inventory",
+    "(app)/(enterprise)/supply-chain/invoice-matching",
+    "(app)/(enterprise)/supply-chain/procurement",
+    "(app)/(enterprise)/supply-chain/purchase-orders",
+    "(app)/(enterprise)/supply-chain/purchase-requests",
+    "(app)/(enterprise)/supply-chain/queue",
+    "(app)/(enterprise)/supply-chain/quotations",
+    "(app)/(enterprise)/supply-chain/review",
+    "(app)/(enterprise)/supply-chain/rfqs",
+    "(app)/(enterprise)/supply-chain/rfqs/[id]",
+    "(app)/(enterprise)/supply-chain/risk",
+    "(app)/(enterprise)/supply-chain/spend",
+    "(app)/(enterprise)/supply-chain/stock-balances",
+    "(app)/(enterprise)/supply-chain/supplier-invoices",
+    "(app)/(enterprise)/supply-chain/suppliers",
+    "(app)/(enterprise)/supply-chain/suppliers/[id]",
+    "(app)/(enterprise)/supply-chain/transfers",
+    "(app)/(enterprise)/supply-chain/vendors",
+    "(app)/(enterprise)/supply-chain/vendors/360",
+    "(app)/(enterprise)/supply-chain/vendors/analytics",
+    "(app)/(enterprise)/supply-chain/workbench",
+    "(app)/(enterprise)/workflows/launcher",
+    "(app)/(enterprise)/workspace",
+    "(app)/(enterprise)/workspace/my-day",
+    "(app)/agents",
+    "(app)/assets",
+    "(app)/contracts",
+    "(app)/contracts/[id]",
+    "(app)/dashboard",
+    "(app)/inventory",
+    "(app)/inventory/items",
+    "(app)/inventory/purchase-orders",
+    "(app)/inventory/purchase-requests",
+    "(app)/inventory/vendors",
+    "(app)/inventory/warehouses",
+    "(app)/invoices",
+    "(app)/invoices/[id]",
+    "(app)/leads",
+    "(app)/leads/[id]",
+    "(app)/leads/[id]/edit",
+    "(app)/leads/new",
+    "(app)/notifications",
+    "(app)/profile",
+    "(app)/quotes",
+    "(app)/quotes/[id]",
+    "(app)/quotes/new",
+    "(app)/reports",
+    "(app)/settings",
+    "(app)/technicians",
+    "(app)/warehouses",
+    "(app)/work-orders",
+    "login",
+    "page.tsx"
+  ],
+  "ai_analysis": "Error: timed out",
+  "summary": {
+    "table_count": 126,
+    "module_count": 58,
+    "page_count": 141
+  }
+}

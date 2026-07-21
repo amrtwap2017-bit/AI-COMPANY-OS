@@ -1,76 +1,45 @@
-"use client";
 // @ts-nocheck
-import { useState } from "react";
+"use client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageHeader, PageWrapper, DataTable, LoadingState,
-  EmptyState, AlertBanner, StatusBadge, Pagination, StatusFilterTabs,
-} from "@/components/ui";
-import { ActionBar } from "@/components/ui/ActionBar";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
-import { fmtDate } from "@/lib/design-tokens";
+import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
 import { RefreshCw } from "lucide-react";
-import { toast } from "@/lib/toast";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-const STATUS_TABS = [
-  { value: "all",       label: "All" },
-  { value: "open",      label: "Open" },
-  { value: "in_progress",label: "In Progress" },
-  { value: "completed", label: "Completed" },
-  { value: "converted", label: "Converted" },
-];
-
-export default function ServiceRequestsPage() {
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [pageSize, setPageSize] = useState(20);
-
-  const { data = [], isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["service-requests", statusFilter],
-    queryFn: async () => {
-      const q = statusFilter !== "all" ? "?status=" + statusFilter : "";
-      const r = await authFetch("/api/v1/service-requests/" + q);
-      if (!r.ok) return [];
-      const d = await r.json();
-      return Array.isArray(d) ? d : d?.items || [];
-    },
-    staleTime: 30_000,
+export default function Page() {
+  const { authFetchJSON } = useAuthFetch();
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["operations-service-requests"],
+    queryFn:  () => authFetchJSON("/api/v1/service-requests"),
+    staleTime: 30_000, retry: 2,
   });
 
-  const { query, setQuery, filtered } = useSearch(data, ["title","description","priority"]);
-  const { page, totalPages, items, goToPage } = usePagination(filtered, pageSize);
-  const tabs = STATUS_TABS.map(t => ({ ...t, count: t.value === "all" ? data.length : data.filter((r:any) => r.status === t.value).length }));
+  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
+  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
 
   const columns = [
-    { key: "title", label: "Request", sortable: true,
-      render: (row:any) => (<div><p className="font-semibold text-sm text-slate-900">{row.title}</p><p className="text-xs text-slate-400">{row.description?.slice(0,60) || "—"}</p></div>) },
-    { key: "priority", label: "Priority",
-      render: (row:any) => <StatusBadge status={row.priority || "medium"} /> },
-    { key: "status", label: "Status",
-      render: (row:any) => <StatusBadge status={row.status || "open"} dot /> },
-    { key: "created_at", label: "Created", sortable: true,
-      render: (row:any) => <span className="text-xs text-slate-400">{fmtDate(row.created_at)}</span> },
+    { key:"title", label:"Title", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
+    { key:"priority", label:"Priority", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["priority"]??"—")}</span>) },
+    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
+    { key:"created_at", label:"Date", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["created_at"]??"—")}</span>) },
   ];
 
   return (
     <PageWrapper>
-      <PageHeader title="Service Requests" subtitle={data.length + " service requests"} badge="SR"
-        actions={<button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl"><RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} /></button>} />
-
-      {isError && <AlertBanner type="error" title={error instanceof Error ? error.message : "Failed"} />}
-
-      <StatusFilterTabs tabs={tabs} active={statusFilter} onChange={(v) => { setStatusFilter(v); goToPage(1); }} />
-
-      <ActionBar search={{ value: query, onChange: setQuery, placeholder: "Search service requests..." }} resultCount={filtered.length} totalCount={data.length} />
-
+      <Breadcrumb/>
+      <PageHeader title="Service Requests" subtitle={`${items.length} records`} badge="SR"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading ? <LoadingState type="table" rows={6} /> :
-         items.length === 0 ? <EmptyState icon="🔧" title="No service requests" description="No service requests found" /> :
-         <DataTable columns={columns} data={items} />}
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
-
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage} total={filtered.length} pageSize={pageSize} onPageSize={(s) => { setPageSize(s); goToPage(1); }} />
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }
