@@ -1,3 +1,4 @@
+"use client";
 // @ts-nocheck
 "use client";
 import { useParams, useRouter } from "next/navigation";
@@ -32,7 +33,7 @@ function formatValue(key: string, val: any): string {
     return String(val);
   }
   if (typeof val === "string") {
-    if (val.match(/^\d{4}-\d{2}-\d{2}/)) return fmtDate(val);
+    if (val.length > 7 && val[4] === "-") return fmtDate(val);
     return val;
   }
   if (Array.isArray(val)) return val.join(", ");
@@ -56,7 +57,7 @@ export default function DetailPage() {
   if (isError || !data) {
     return (
       <PageWrapper>
-        <AlertBanner type="error" title="Record not found (ID: " + {id} + ")"/>
+        <AlertBanner type="error" title={"Record not found"}/>
         <Link href="/invoices" className="flex items-center gap-2 text-sm text-amber-600 mt-4">
           <ArrowLeft className="w-4 h-4"/> Back to list
         </Link>
