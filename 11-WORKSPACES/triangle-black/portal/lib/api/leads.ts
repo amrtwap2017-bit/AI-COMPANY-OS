@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tbFetch, toList, toPagination } from "./tb-client";
 
 export interface Lead {

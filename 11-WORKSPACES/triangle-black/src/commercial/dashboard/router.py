@@ -8,7 +8,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.core.auth import require_manager
 from .schemas import ExecutiveDashboardResponse
-from .repository import get_dashboard_repo
+from .repository import DashboardRepository
 
 router = APIRouter()
 

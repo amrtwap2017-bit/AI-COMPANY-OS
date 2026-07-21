@@ -110,3 +110,25 @@ def me(current_user: User = Depends(get_current_user)):
 @router.post("/logout")
 def logout():
     return {"ok": True, "message": "Logged out. Discard your token."}
+
+# Simple in-memory rate limiter for login
+import time
+_login_attempts: dict = {}
+_MAX_ATTEMPTS = 5
+_LOCKOUT_SECONDS = 900  # 15 minutes
+
+def _check_rate_limit(identifier: str):
+    now = time.time()
+    if identifier in _login_attempts:
+        attempts, last_time = _login_attempts[identifier]
+        if attempts >= _MAX_ATTEMPTS and (now - last_time) < _LOCKOUT_SECONDS:
+            raise HTTPException(status_code=429, detail=f'Too many login attempts. Try again in {int(_LOCKOUT_SECONDS - (now-last_time)//60)} minutes.')
+        if (now - last_time) >= _LOCKOUT_SECONDS:
+            _login_attempts[identifier] = (0, now)
+
+def _record_attempt(identifier: str, success: bool):
+    if success:
+        _login_attempts.pop(identifier, None)
+    else:
+        attempts, last = _login_attempts.get(identifier, (0, time.time()))
+        _login_attempts[identifier] = (attempts + 1, time.time())

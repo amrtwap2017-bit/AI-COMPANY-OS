@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { api, buildParams } from './client'
 
 export interface SLAMetric {

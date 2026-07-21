@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tbFormPost, tbFetch } from "./tb-client";
 
 export const authApi = {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { api, buildParams } from './client'
 import type { ListParams, ListResponse } from './operations'
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tbFetch, toList } from "./tb-client";
 
 export const inventoryApi = {

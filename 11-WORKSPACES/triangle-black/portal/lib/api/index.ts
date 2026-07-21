@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Triangle Black API — Master Index
 // All real TB Admin endpoints, authenticated
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tbFetch } from "./tb-client";
 
 export const reportsApi = {

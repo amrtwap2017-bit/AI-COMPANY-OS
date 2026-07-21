@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Triangle Black API Client — Authenticated
 // All portal API calls go through this client
 
