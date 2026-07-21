@@ -1,47 +1,28 @@
-// Triangle Black - Route Protection (proxy.ts)
-// Fix: allow internal API proxy routes and health route
-// Fix: allow Authorization header as alternate auth proof
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = [
-  "/login",
-  "/_next/",
-  "/favicon.ico",
-  "/api/auth/",
-  "/api/health",
-  "/api/v1/",
-];
+const PUBLIC = ["/login", "/api/auth", "/api/health", "/api/v1", "/_next", "/favicon"];
 
-export function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+  // Allow public paths
+  if (PUBLIC.some(p => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // DEV bypass
+  // DEV BYPASS — always allow
   if (process.env.NEXT_PUBLIC_AUTH_BYPASS === "true") {
     return NextResponse.next();
   }
 
-  // Accept either cookie OR Authorization header
-  const cookieToken = req.cookies.get("tb_access_token")?.value;
-  const authHeader  = req.headers.get("authorization");
-  const hasBearer   = !!authHeader && authHeader.toLowerCase().startsWith("bearer ");
+  // Check httpOnly cookie
+  const token = request.cookies.get("tb_access_token")?.value;
+  if (token) return NextResponse.next();
 
-  if (!cookieToken && !hasBearer) {
-    const loginUrl = req.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  return NextResponse.next();
+  // Redirect to login
+  return NextResponse.redirect(new URL("/login", request.url));
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

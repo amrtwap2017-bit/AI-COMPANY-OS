@@ -161,7 +161,6 @@ safe_include("src.commercial.service_reports.router")
 # ── Dashboard & intelligence routers ─────────────────────────────────────────
 safe_include("src.commercial.dashboard.router")
 safe_include("src.commercial.executive_dashboard.router")
-safe_include("src.commercial.executive_intelligence.router")
 safe_include("src.commercial.pdf_service.router")
 safe_include("src.commercial.email_service.router")
 safe_include("src.commercial.system_notifications.router")

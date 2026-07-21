@@ -1,0 +1,16 @@
+{
+  "portal": {
+    "total_pages": 143,
+    "placeholder_pages": 1,
+    "real_pages": 142,
+    "ui_components": 37,
+    "hooks": 13
+  },
+  "backend": {
+    "api_routes": 168,
+    "tables": 126,
+    "modules": 35
+  },
+  "smoke_test": "100% 20/20",
+  "backend_tests": "19/19"
+}
