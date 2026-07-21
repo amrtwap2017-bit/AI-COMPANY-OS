@@ -1,3 +1,4 @@
+"use client";
 // @ts-nocheck
 "use client";
 import { useParams, useRouter } from "next/navigation";

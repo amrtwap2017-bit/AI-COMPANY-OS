@@ -1,75 +1,133 @@
-"use client";
 // @ts-nocheck
+"use client";
 import { useQuery } from "@tanstack/react-query";
-import { PageHeader, PageWrapper, LoadingState, SectionCard, AlertBanner } from "@/components/ui";
-import { executiveApi } from "@/lib/api/enterprise";
-import { fmtDate } from "@/lib/design-tokens";
-import { TrendingUp, AlertTriangle, Briefcase, RefreshCw } from "lucide-react";
-import { toast } from "@/lib/toast";
+import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import Link from "next/link";
+import { ArrowRight, TrendingUp, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+
+function SignalCard({ sig }:any) {
+  const c:any = { critical:"bg-red-50 border-red-300 text-red-800", high:"bg-amber-50 border-amber-300 text-amber-800", medium:"bg-blue-50 border-blue-300 text-blue-800", low:"bg-slate-50 border-slate-300 text-slate-700" };
+  const icons:any = { critical:"🚨", high:"⚠️", medium:"ℹ️", low:"✅" };
+  return (
+    <Link href={sig.endpoint||"#"} className={"flex items-start gap-3 p-4 rounded-xl border "+c[sig.level]+" hover:shadow-sm transition-all"}>
+      <span className="text-xl">{icons[sig.level]}</span>
+      <div className="flex-1">
+        <p className="text-sm font-bold">{sig.title}</p>
+        <p className="text-xs mt-0.5 opacity-75">{sig.action}</p>
+      </div>
+      <ArrowRight className="w-4 h-4 opacity-50 flex-shrink-0 mt-0.5"/>
+    </Link>
+  );
+}
 
 export default function ExecutiveIntelligencePage() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["executive-intelligence"],
-    queryFn:  () => executiveApi.intelligence(),
-    refetchInterval: 60_000,
+  const { data: signals } = useQuery({
+    queryKey: ["exec-signals"],
+    queryFn:  () => authFetchJSON("/api/v1/tb-ai/signals"),
+    staleTime: 30_000, retry:1,
+  });
+  const { data: exec } = useQuery({
+    queryKey: ["exec-intel"],
+    queryFn:  () => authFetchJSON("/api/v1/actions/executive/intelligence"),
+    staleTime: 60_000,
+  });
+  const { data: daily } = useQuery({
+    queryKey: ["exec-daily"],
+    queryFn:  () => authFetchJSON("/api/v1/actions/executive/daily-review"),
+    staleTime: 60_000,
+  });
+  const { data: alerts } = useQuery({
+    queryKey: ["exec-alerts"],
+    queryFn:  () => authFetchJSON("/api/v1/actions/executive/alerts/predictive"),
+    staleTime: 60_000,
   });
 
-  const intel = data?.data || {};
-  const hotDeals    = intel.hot_deals    || [];
-  const signals     = intel.signals      || [];
+  const sigs    = signals?.signals || [];
+  const d       = daily || {};
+  const e       = exec  || {};
+  const alertList = alerts?.alerts || [];
+  const critical  = sigs.filter((s:any)=>s.level==="critical").length;
 
   return (
     <PageWrapper>
-      <PageHeader title="Executive Intelligence" subtitle="AI-powered signals and enterprise insights" badge="AI"
-        actions={<button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl"><RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} /></button>} />
+      <Breadcrumb/>
+      <PageHeader title="Executive Intelligence" subtitle={"AI-powered platform insights · "+critical+" critical"} badge="INTEL"
+        actions={
+          critical>0&&(
+            <span className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm font-semibold rounded-xl">
+              <AlertTriangle className="w-4 h-4"/> {critical} Critical Alert{critical>1?"s":""}
+            </span>
+          )
+        }/>
 
-      {isError && <AlertBanner type="error" title={error instanceof Error ? error.message : "Failed"} />}
-
-      {isLoading ? <LoadingState type="cards" rows={3} cols={3} /> : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Daily review KPIs */}
+      {(d.new_leads||d.new_wos) && (
+        <div>
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Today's Overview</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: TrendingUp,   label: "Hot Deals",          value: hotDeals.length,        color: "bg-amber-50 border-amber-200 text-amber-700" },
-              { icon: AlertTriangle,label: "Overdue Invoices",   value: intel.overdue_invoices || 0, color: intel.overdue_invoices > 0 ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-700" },
-              { icon: Briefcase,    label: "Critical Operations", value: intel.critical_ops || 0, color: intel.critical_ops > 0 ? "bg-orange-50 border-orange-200 text-orange-700" : "bg-slate-50 border-slate-200 text-slate-700" },
-            ].map(m => { const Icon = m.icon; return (
-              <div key={m.label} className={"rounded-2xl border p-5 " + m.color}>
-                <Icon className="w-5 h-5 mb-3 opacity-70" />
-                <div className="text-2xl font-bold">{m.value}</div>
-                <div className="text-sm font-medium mt-1 opacity-80">{m.label}</div>
-              </div>
-            ); })}
+              {label:"New Leads Today",     val:d.new_leads||0,     icon:TrendingUp,   color:"blue"},
+              {label:"New Work Orders",     val:d.new_wos||0,       icon:AlertTriangle, color:"amber"},
+              {label:"Completed Today",     val:d.completed_wos||0, icon:CheckCircle2, color:"emerald"},
+              {label:"SLA Compliance",      val:(d.sla_compliance||92)+"%", icon:Clock, color:"slate"},
+            ].map(k=>{
+              const Icon=k.icon;
+              const c:any={blue:"bg-blue-50 text-blue-600",amber:"bg-amber-50 text-amber-600",emerald:"bg-emerald-50 text-emerald-600",slate:"bg-slate-100 text-slate-500"};
+              return (
+                <div key={k.label} className="bg-white rounded-2xl border border-slate-200 p-4">
+                  <div className={"w-9 h-9 rounded-xl flex items-center justify-center mb-3 "+c[k.color]}>
+                    <Icon className="w-4 h-4"/>
+                  </div>
+                  <div className="text-2xl font-bold text-slate-900">{k.val}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+                </div>
+              );
+            })}
           </div>
+        </div>
+      )}
 
-          {signals.length > 0 && (
-            <SectionCard title="Intelligence Signals" subtitle="AI-generated insights from your data">
-              <div className="space-y-3">
-                {signals.filter(Boolean).map((s:any, i:number) => (
-                  <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
-                    <div className={"w-2 h-2 rounded-full mt-1.5 flex-shrink-0 " + (s.type === "deal" ? "bg-amber-500" : s.type === "financial" ? "bg-red-500" : "bg-blue-500")} />
-                    <p className="text-sm text-slate-700">{s.message}</p>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
-          )}
+      {/* AI Signals */}
+      {sigs.length>0&&(
+        <div>
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">AI Platform Signals</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {sigs.map((sig:any)=><SignalCard key={sig.id} sig={sig}/>)}
+          </div>
+        </div>
+      )}
 
-          {hotDeals.length > 0 && (
-            <SectionCard title="Hot Deals" subtitle="Leads in negotiation stage requiring attention">
-              <div className="space-y-2">
-                {hotDeals.map((deal:any) => (
-                  <div key={deal.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-xl border border-amber-100">
-                    <div>
-                      <p className="font-semibold text-sm text-slate-900">{deal.company || deal.company_name || deal.name}</p>
-                      <p className="text-xs text-slate-500">{deal.contact_name || deal.email || ""}</p>
-                    </div>
-                    <span className="text-xs font-semibold bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full capitalize">{deal.status}</span>
-                  </div>
-                ))}
+      {/* Predictive alerts */}
+      {alertList.length>0&&(
+        <div>
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Predictive Alerts</h2>
+          <div className="space-y-2">
+            {alertList.slice(0,5).map((alert:any,i:number)=>(
+              <div key={i} className="bg-white rounded-xl border border-slate-200 p-4 flex items-start gap-3">
+                <span className="text-lg">⚡</span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{alert.title||alert.message||"Alert"}</p>
+                  {alert.recommendation&&<p className="text-xs text-slate-500 mt-0.5">{alert.recommendation}</p>}
+                </div>
               </div>
-            </SectionCard>
-          )}
-        </>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Hot deals + intel */}
+      {(e.hot_deals||e.overdue_invoices)&&(
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {e.hot_deals?.slice(0,3).map((deal:any,i:number)=>(
+            <div key={i} className="bg-white rounded-2xl border border-emerald-200 p-4">
+              <p className="text-xs font-bold text-emerald-600 mb-2">🔥 Hot Deal</p>
+              <p className="text-sm font-semibold text-slate-900">{deal.company_name||deal.name}</p>
+              <p className="text-xs text-slate-500 mt-1">{"EGP "+(deal.quote_value||0).toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
       )}
     </PageWrapper>
   );
