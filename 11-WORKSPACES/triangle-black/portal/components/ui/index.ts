@@ -50,3 +50,5 @@ export { Avatar }            from "./Avatar";
 // import { ActionBar }       from "@/components/ui/ActionBar"
 // import { ConfirmDialog }   from "@/components/ui/ConfirmDialog"
 // import { CommandBar }      from "@/components/ui/CommandBar"
+
+export { GlobalSearch } from './GlobalSearch';

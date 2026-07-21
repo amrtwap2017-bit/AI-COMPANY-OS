@@ -1,41 +1,62 @@
 // @ts-nocheck
 "use client";
+import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+import { EntityTabs } from "@/components/ui/EntityTabs";
+import { getStateColor } from "@/lib/hooks/useWorkflow";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { fmtDate } from "@/lib/design-tokens";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["customers-[id]"],
-    queryFn:  () => authFetchJSON("/api/v1/customers"),
-    staleTime: 30_000, retry: 2,
+export default function DetailPage() {
+  const { id } = useParams();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["-api-v1-customers", id],
+    queryFn:  () => authFetchJSON("/api/v1/customers" + (id ? "/" + id : "")),
+    enabled:  !!id, staleTime: 30_000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Name", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"email", label:"Email", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["email"]??"—")}</span>) },
-    { key:"hotel", label:"Hotel", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["hotel"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+  if (isLoading) return <PageWrapper><LoadingState type="table" rows={5}/></PageWrapper>;
+  if (isError || !data) return <PageWrapper><AlertBanner type="error" title="Record not found"/></PageWrapper>;
+  const d: any = Array.isArray(data) ? data[0] : data;
+  const overview = (
+    <div className="grid grid-cols-2 gap-3">
+      {([
+        ["Name", d?.name ?? "—"],
+        ["Email", d?.email ?? "—"],
+        ["Phone", d?.phone ?? "—"],
+        ["Hotel", d?.hotel_id ?? "—"],
+        ["Status", d?.status ?? "—"],
+        ["Health", d?.health_score ?? "—"],
+        ["Created", d?.created_at ?? "—"],
+        ["Updated", d?.updated_at ?? "—"],
+      ] as [string,any][]).map(([label, value]) => (
+        <div key={label} className="bg-slate-50 rounded-xl p-3">
+          <p className="text-xs text-slate-500 mb-1">{label}</p>
+          <div className="text-sm font-medium text-slate-900">
+            {typeof value === "string" && value.match(/^\d{4}/)
+              ? fmtDate(value)
+              : value ?? "—"}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  const name = d?.name || d?.title || d?.company_name || d?.invoice_number || id;
   return (
     <PageWrapper>
       <Breadcrumb/>
-      <PageHeader title="Customer Profile" subtitle={`${items.length} records`} badge="CX"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="👤" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title={String(name)} subtitle={"Customer Detail"} badge="CX"
+        actions={
+          <div className="flex gap-2">
+            <Link href="/customers" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
+              <ArrowLeft className="w-4 h-4"/> Back
+            </Link>
+          </div>
+        }/>
+      <EntityTabs tabs={[{ id:"overview", label:"Overview", icon:"📋", content: overview }]}/>
     </PageWrapper>
   );
 }

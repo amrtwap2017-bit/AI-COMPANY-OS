@@ -14,8 +14,8 @@ import { ArrowLeft } from "lucide-react";
 export default function DetailPage() {
   const { id } = useParams();
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["-api-v1-inventory-vendors", id],
-    queryFn:  () => authFetchJSON("/api/v1/inventory/vendors" + (id ? "/" + id : "")),
+    queryKey: ["-api-v1-assets", id],
+    queryFn:  () => authFetchJSON("/api/v1/assets" + (id ? "/" + id : "")),
     enabled:  !!id, staleTime: 30_000,
   });
   if (isLoading) return <PageWrapper><LoadingState type="table" rows={5}/></PageWrapper>;
@@ -25,13 +25,13 @@ export default function DetailPage() {
     <div className="grid grid-cols-2 gap-3">
       {([
         ["Name", d?.name ?? "—"],
-        ["Category", d?.category ?? "—"],
-        ["Email", d?.contact_email ?? "—"],
-        ["Phone", d?.contact_phone ?? "—"],
-        ["Address", d?.address ?? "—"],
-        ["Country", d?.country ?? "—"],
-        ["Rating", d?.rating ?? "—"],
-        ["Status", d?.is_active ?? "—"],
+        ["Type", d?.asset_type ?? "—"],
+        ["Location", d?.location ?? "—"],
+        ["Serial No", d?.serial_number ?? "—"],
+        ["Model", d?.model ?? "—"],
+        ["Manufacturer", d?.manufacturer ?? "—"],
+        ["Status", d?.status ?? "—"],
+        ["Hotel", d?.hotel_id ?? "—"],
       ] as [string,any][]).map(([label, value]) => (
         <div key={label} className="bg-slate-50 rounded-xl p-3">
           <p className="text-xs text-slate-500 mb-1">{label}</p>
@@ -48,10 +48,10 @@ export default function DetailPage() {
   return (
     <PageWrapper>
       <Breadcrumb/>
-      <PageHeader title={String(name)} subtitle={"Supplier Detail"} badge="VDR"
+      <PageHeader title={String(name)} subtitle={"Asset Detail"} badge="ASSET"
         actions={
           <div className="flex gap-2">
-            <Link href="/supply-chain/suppliers" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
+            <Link href="/assets" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
               <ArrowLeft className="w-4 h-4"/> Back
             </Link>
           </div>
