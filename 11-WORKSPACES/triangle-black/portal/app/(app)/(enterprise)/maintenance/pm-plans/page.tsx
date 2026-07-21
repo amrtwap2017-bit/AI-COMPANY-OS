@@ -1,90 +1,41 @@
-"use client";
 // @ts-nocheck
-import { useState } from "react";
+"use client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageHeader, PageWrapper, DataTable, LoadingState,
-  EmptyState, AlertBanner, StatusBadge, Pagination, StatusFilterTabs,
-} from "@/components/ui";
-import { ActionBar } from "@/components/ui/ActionBar";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
-import { maintenanceApi } from "@/lib/maintenance-api";
-import { fmtDate } from "@/lib/design-tokens";
-import { RefreshCw, Plus } from "lucide-react";
-import { toast } from "@/lib/toast";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { RefreshCw } from "lucide-react";
 
-const STATUS_TABS = [
-  { value: "all",      label: "All" },
-  { value: "active",   label: "Active" },
-  { value: "inactive", label: "Inactive" },
-  { value: "overdue",  label: "Overdue" },
-];
-
-export default function PMPlansPage() {
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [pageSize, setPageSize] = useState(20);
-
-  const { data = [], isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["pm-plans", statusFilter],
-    queryFn:  () => maintenanceApi.pmPlans(statusFilter !== "all" ? { status: statusFilter } : {})
-                     .then((r:any) => Array.isArray(r.data) ? r.data : r.data?.items || r.data || []),
-    staleTime: 30_000,
+export default function Page() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["-api-v1-maintenance-pm-plans"],
+    queryFn:  () => authFetchJSON("/api/v1/maintenance/pm-plans"),
+    staleTime: 30_000, retry: 1,
   });
-
-  const { query, setQuery, filtered } = useSearch(data, ["title","plan_type","owner","frequency"]);
-  const { page, totalPages, items, goToPage } = usePagination(filtered, pageSize);
-
-  const tabs = STATUS_TABS.map(t => ({
-    ...t,
-    count: t.value === "all" ? data.length : data.filter((p:any) => p.status === t.value).length,
-  }));
-
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
+  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
   const columns = [
-    { key: "title", label: "PM Plan", sortable: true,
-      render: (row:any) => (
-        <div>
-          <p className="font-semibold text-sm text-slate-900">{row.title}</p>
-          <p className="text-xs text-slate-400 capitalize">{row.plan_type || "preventive"}</p>
-        </div>
-      )},
-    { key: "frequency", label: "Frequency",
-      render: (row:any) => <span className="text-sm text-slate-600 capitalize">{row.frequency || "—"}</span> },
-    { key: "next_due_date", label: "Next Due", sortable: true,
-      render: (row:any) => (
-        <span className="text-xs text-slate-500">{row.next_due_date || "—"}</span>
-      )},
-    { key: "status", label: "Status",
-      render: (row:any) => <StatusBadge status={row.status || "active"} dot /> },
-    { key: "owner", label: "Owner",
-      render: (row:any) => <span className="text-xs text-slate-500">{row.owner || "—"}</span> },
+    { key:"title", label:"Plan", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
+    { key:"asset", label:"Asset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["asset"]??"—")}</span>) },
+    { key:"frequency", label:"Frequency", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["frequency"]??"—")}</span>) },
+    { key:"next_due", label:"Next Due", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["next_due"]??"—")}</span>) },
   ];
-
   return (
     <PageWrapper>
-      <PageHeader title="PM Plans" subtitle={data.length + " preventive maintenance plans"} badge="PM"
-        actions={
-          <button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
-            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
-          </button>
-        } />
-
-      {isError && <AlertBanner type="error" title={error instanceof Error ? error.message : "Failed"} />}
-
-      <StatusFilterTabs tabs={tabs} active={statusFilter} onChange={(v) => { setStatusFilter(v); goToPage(1); }} />
-
-      <ActionBar search={{ value: query, onChange: setQuery, placeholder: "Search PM plans..." }}
-        resultCount={filtered.length} totalCount={data.length} />
-
+      <Breadcrumb/>
+      <PageHeader title="PM Plans" subtitle={`${items.length} records`} badge="PM"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading ? <LoadingState type="table" rows={6} /> :
-         items.length === 0 ? <EmptyState icon="📅" title="No PM plans" description="Create preventive maintenance plans for your assets" /> :
-         <DataTable columns={columns} data={items} />}
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="📅" title="No data" description="No records available"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
-
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}
-        total={filtered.length} pageSize={pageSize} onPageSize={(s) => { setPageSize(s); goToPage(1); }} />
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }

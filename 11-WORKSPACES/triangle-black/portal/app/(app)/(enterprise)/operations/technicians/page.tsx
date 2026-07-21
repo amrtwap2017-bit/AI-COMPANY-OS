@@ -1,77 +1,41 @@
-"use client";
 // @ts-nocheck
-import { useState } from "react";
+"use client";
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageHeader, PageWrapper, DataTable, LoadingState,
-  EmptyState, StatusBadge, Avatar, Progress, Pagination, StatusFilterTabs,
-} from "@/components/ui";
-import { ActionBar } from "@/components/ui/ActionBar";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
 import { RefreshCw } from "lucide-react";
-import { toast } from "@/lib/toast";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-const STATUS_TABS = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-];
-
-export default function OperationsTechniciansPage() {
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [pageSize, setPageSize] = useState(20);
-
-  const { data = [], isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["ops-technicians"],
-    queryFn: async () => {
-      const r = await authFetch("/api/v1/technicians/");
-      if (!r.ok) return [];
-      const d = await r.json();
-      return Array.isArray(d) ? d : d?.items || [];
-    },
-    staleTime: 30_000,
+export default function Page() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["-api-v1-technicians"],
+    queryFn:  () => authFetchJSON("/api/v1/technicians"),
+    staleTime: 30_000, retry: 1,
   });
-
-  const preFiltered = statusFilter === "active" ? data.filter((t:any) => t.is_active) :
-                      statusFilter === "inactive" ? data.filter((t:any) => !t.is_active) : data;
-  const { query, setQuery, filtered } = useSearch(preFiltered, ["name","email","phone"]);
-  const { page, totalPages, items, goToPage } = usePagination(filtered, pageSize);
-  const active = data.filter((t:any) => t.is_active).length;
-  const tabs = STATUS_TABS.map(t => ({ ...t, count: t.value === "all" ? data.length : t.value === "active" ? active : data.length - active }));
-
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
+  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
   const columns = [
-    { key: "name", label: "Technician",
-      render: (row:any) => (<div className="flex items-center gap-3"><Avatar name={row.name} size="sm" online={row.is_active} /><div><p className="font-semibold text-sm text-slate-900">{row.name}</p><p className="text-xs text-slate-400">{row.email || "—"}</p></div></div>) },
-    { key: "specializations", label: "Specialization",
-      render: (row:any) => <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">{Array.isArray(row.specializations) ? row.specializations[0] : row.role || "Technician"}</span> },
-    { key: "phone", label: "Phone", render: (row:any) => <span className="text-sm text-slate-600">{row.phone || "—"}</span> },
-    { key: "is_active", label: "Status", render: (row:any) => <StatusBadge status={row.is_active ? "active" : "inactive"} dot /> },
-    { key: "capacity", label: "Capacity",
-      render: (row:any) => {
-        const used = row.current_work_orders || 0; const max = row.max_work_orders || 10;
-        const pct = Math.round((used / max) * 100);
-        return (<div className="w-24"><div className="flex justify-between text-xs mb-1"><span className="text-slate-500">{used}/{max}</span><span className={pct > 80 ? "text-red-600" : "text-slate-400"}>{pct}%</span></div><Progress value={used} max={max} size="sm" color={pct > 80 ? "red" : pct > 60 ? "amber" : "emerald"} /></div>);
-      }},
+    { key:"name", label:"Technician", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
+    { key:"specialization", label:"Skill", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["specialization"]??"—")}</span>) },
+    { key:"assignments", label:"Jobs", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["assignments"]??"—")}</span>) },
+    { key:"is_active", label:"Active", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["is_active"]??"—")}</span>) },
   ];
-
   return (
     <PageWrapper>
-      <PageHeader title="Technicians" subtitle={active + " active of " + data.length + " total"} badge="TECH"
-        actions={<button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl"><RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} /></button>} />
-
-      <StatusFilterTabs tabs={tabs} active={statusFilter} onChange={(v) => { setStatusFilter(v); goToPage(1); }} />
-
-      <ActionBar search={{ value: query, onChange: setQuery, placeholder: "Search technicians..." }} resultCount={filtered.length} totalCount={data.length} />
-
+      <Breadcrumb/>
+      <PageHeader title="Operations Technicians" subtitle={`${items.length} records`} badge="TECH"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading ? <LoadingState type="table" rows={8} /> :
-         items.length === 0 ? <EmptyState icon="👷" title="No technicians" description="No field team members found" /> :
-         <DataTable columns={columns} data={items} />}
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="👷" title="No data" description="No records available"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
-
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage} total={filtered.length} pageSize={pageSize} onPageSize={(s) => { setPageSize(s); goToPage(1); }} />
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }

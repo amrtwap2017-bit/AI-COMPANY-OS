@@ -1,112 +1,41 @@
-"use client";
 // @ts-nocheck
-import { useState, useEffect } from "react";
-import { PageHeader, PageWrapper, Avatar, SectionCard } from "@/components/ui";
-import { Modal } from "@/components/ui/Modal";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { tokenManager } from "@/lib/auth/token-manager";
-import { useAuth } from "@/lib/auth-context";
-import { toast } from "@/lib/toast";
-import { Mail, Shield, Clock, LogOut, Key } from "lucide-react";
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
+import { useSearch } from "@/lib/hooks/useSearch";
+import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
+import { RefreshCw } from "lucide-react";
 
-export default function ProfilePage() {
-  const { user, logout } = useAuth();
-  const [pwdOpen, setPwdOpen] = useState(false);
-  const [newPwd,  setNewPwd]  = useState("");
-  const [confirm, setConfirm] = useState("");
-
-  function handleChangePwd(e: React.FormEvent) {
-    e.preventDefault();
-    if (newPwd !== confirm) { toast.error("Passwords do not match"); return; }
-    if (newPwd.length < 8)  { toast.error("Password must be at least 8 characters"); return; }
-    toast.success("Password changed successfully");
-    setPwdOpen(false);
-    setNewPwd(""); setConfirm("");
-  }
-
+export default function Page() {
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["-api-v1-auth-me"],
+    queryFn:  () => authFetchJSON("/api/v1/auth/me"),
+    staleTime: 30_000, retry: 1,
+  });
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
+  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
+  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+  const columns = [
+    { key:"name", label:"Name", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
+    { key:"email", label:"Email", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["email"]??"—")}</span>) },
+    { key:"role", label:"Role", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["role"]??"—")}</span>) },
+    { key:"hotel", label:"Hotel", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["hotel"]??"—")}</span>) },
+  ];
   return (
     <PageWrapper>
-      <PageHeader title="Profile" subtitle="Your account and session" badge="ME" />
-
-      <div className="max-w-2xl space-y-4">
-        <SectionCard title="Account Information">
-          <div className="flex items-center gap-4 mb-5">
-            <Avatar name={user?.name} size="xl" />
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">{user?.name || "User"}</h2>
-              <p className="text-sm text-slate-500">{user?.email}</p>
-              <span className="inline-flex mt-1.5 px-2.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-semibold capitalize">
-                {user?.role || "admin"}
-              </span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {[
-              { icon: Mail,   label: "Email",   value: user?.email },
-              { icon: Shield, label: "Role",    value: user?.role },
-              { icon: Clock,  label: "Session", value: "Active" },
-            ].map(item => (
-              <div key={item.label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                <item.icon className="w-4 h-4 text-slate-400" />
-                <span className="text-sm text-slate-500 w-20">{item.label}</span>
-                <span className="text-sm font-medium text-slate-900 capitalize">{item.value || "—"}</span>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Actions">
-          <div className="space-y-2">
-            <Button
-              variant="secondary"
-              icon={<Key className="w-4 h-4" />}
-              onClick={() => setPwdOpen(true)}
-              className="w-full justify-start"
-            >
-              Change Password
-            </Button>
-            <Button
-              variant="danger"
-              icon={<LogOut className="w-4 h-4" />}
-              onClick={logout}
-              className="w-full justify-start"
-            >
-              Sign Out
-            </Button>
-          </div>
-        </SectionCard>
+      <Breadcrumb/>
+      <PageHeader title="My Profile" subtitle={`${items.length} records`} badge="ME"
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        {isLoading?<LoadingState type="table" rows={8}/>:
+         rows.length===0?<EmptyState icon="👤" title="No data" description="No records available"/>:
+         <DataTable columns={columns} data={rows}/>}
       </div>
-
-      <Modal
-        open={pwdOpen}
-        onClose={() => setPwdOpen(false)}
-        title="Change Password"
-        description="Enter a new password for your account"
-        footer={
-          <div className="flex items-center gap-2 justify-end">
-            <Button variant="ghost" onClick={() => setPwdOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={handleChangePwd}>Update Password</Button>
-          </div>
-        }
-      >
-        <div className="space-y-4">
-          <Input
-            type="password"
-            label="New Password"
-            placeholder="Minimum 8 characters"
-            value={newPwd}
-            onChange={e => setNewPwd(e.target.value)}
-          />
-          <Input
-            type="password"
-            label="Confirm Password"
-            placeholder="Re-enter new password"
-            value={confirm}
-            onChange={e => setConfirm(e.target.value)}
-          />
-        </div>
-      </Modal>
+      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }
