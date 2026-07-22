@@ -227,7 +227,8 @@ _ai_routers = [
     ("src.commercial.ai_assistant.router",          "ai-intake"),
     ("src.commercial.ai_assistant.dispatch_router", "ai-dispatch"),
     ("src.commercial.ai_assistant.signals_router",  "ai-signals"),
-]
+,
+    ("src.commercial.ai_assistant.supply_automation_router", "ai-supply")]
 for _mod_path, _name in _ai_routers:
     try:
         _mod = __import__(_mod_path, fromlist=["router"])

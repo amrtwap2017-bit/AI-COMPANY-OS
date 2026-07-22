@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchSLAData = async () => {
   try {
-    const response = await fetch("/api/v1/analytics/sla");
+    const response = await fetch("/api/v1/ai/analytics/sla");
     if (!response.ok) throw new Error("Failed to fetch SLA data");
     return response.json();
   } catch (error) {
