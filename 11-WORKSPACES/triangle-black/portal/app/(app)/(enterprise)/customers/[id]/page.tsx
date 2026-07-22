@@ -1,62 +1,83 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { EntityTabs } from "@/components/ui/EntityTabs";
-import { getStateColor } from "@/lib/hooks/useWorkflow";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { fmtDate } from "@/lib/design-tokens";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
-export default function DetailPage() {
-  const { id } = useParams();
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["-api-v1-customers", id],
-    queryFn:  () => authFetchJSON("/api/v1/customers" + (id ? "/" + id : "")),
-    enabled:  !!id, staleTime: 30_000,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useParams, useSearchParams } from "next/navigation";
+import Link from "next/link";
+
+const fetchContracts = async (name: string) => {
+  const response = await fetch(`/api/v1/contracts?client_name=${encodeURIComponent(name)}`, {
+    credentials: "include",
   });
-  if (isLoading) return <PageWrapper><LoadingState type="table" rows={5}/></PageWrapper>;
-  if (isError || !data) return <PageWrapper><AlertBanner type="error" title="Record not found"/></PageWrapper>;
-  const d: any = Array.isArray(data) ? data[0] : data;
-  const overview = (
-    <div className="grid grid-cols-2 gap-3">
-      {([
-        ["Name", d?.name ?? "—"],
-        ["Email", d?.email ?? "—"],
-        ["Phone", d?.phone ?? "—"],
-        ["Hotel", d?.hotel_id ?? "—"],
-        ["Status", d?.status ?? "—"],
-        ["Health", d?.health_score ?? "—"],
-        ["Created", d?.created_at ?? "—"],
-        ["Updated", d?.updated_at ?? "—"],
-      ] as [string,any][]).map(([label, value]) => (
-        <div key={label} className="bg-slate-50 rounded-xl p-3">
-          <p className="text-xs text-slate-500 mb-1">{label}</p>
-          <div className="text-sm font-medium text-slate-900">
-            {typeof value === "string" && value.match(/^\d{4}/)
-              ? fmtDate(value)
-              : value ?? "—"}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-  const name = d?.name || d?.title || d?.company_name || d?.invoice_number || id;
+  if (!response.ok) throw new Error("Failed to fetch contracts");
+  return response.json();
+};
+
+const fetchInvoices = async (contractId: string) => {
+  const response = await fetch(`/api/v1/invoices?contract_id=${encodeURIComponent(contractId)}`, {
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error("Failed to fetch invoices");
+  return response.json();
+};
+
+const fetchWorkOrders = async (contractId: string) => {
+  const response = await fetch(`/api/v1/work-orders?contract_id=${encodeURIComponent(contractId)}`, {
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error("Failed to fetch work orders");
+  return response.json();
+};
+
+const CustomerProfilePage = ({ params }: { params: { id: string } }) => {
+  const searchParams = useSearchParams();
+  const name = searchParams.get("name") || params?.id;
+
+  const { data: contracts, isLoading, isError } = useQuery(["contracts", name], () => fetchContracts(name), {
+    refetchInterval: 300000,
+  });
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load customer" description="Please try again later." />;
+
+  if (!contracts || contracts.length === 0)
+    return (
+      <EmptyState
+        title="Customer not found"
+        description="No contracts found for this customer."
+        action={<Link href="/customers">Back to customers</Link>}
+      />
+    );
+
+  const contractCount = contracts.length;
+  const activeContracts = contracts.filter(contract => contract.status === "active").length;
+  const totalValueEGP = contracts.reduce((acc, contract) => acc + contract.value, 0);
+  const workOrders = contracts.flatMap(contract => fetchWorkOrders(contract.id));
+  const invoices = contracts.flatMap(contract => fetchInvoices(contract.id));
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title={String(name)} subtitle={"Customer Detail"} badge="CX"
-        actions={
-          <div className="flex gap-2">
-            <Link href="/customers" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
-              <ArrowLeft className="w-4 h-4"/> Back
-            </Link>
-          </div>
-        }/>
-      <EntityTabs tabs={[{ id:"overview", label:"Overview", icon:"📋", content: overview }]}/>
+      <PageHeader title={name} description={`${contractCount} contracts`} />
+      <MetricStrip
+        metrics={[
+          { label: "Active Contracts", value: activeContracts, color: "green" },
+          { label: "Total Value EGP", value: totalValueEGP, color: "blue" },
+          { label: "Work Orders", value: workOrders.length, color: "orange" },
+          { label: "Invoices", value: invoices.length, color: "purple" },
+        ]}
+      />
+      <SectionCard title="Contracts">
+        <ul>
+          {contracts.map(contract => (
+            <li key={contract.id}>
+              {contract.name} - {StatusBadge(status: contract.status)}
+            </li>
+          ))}
+        </ul>
+      </SectionCard>
+      <Link href="/customers">Back to customers</Link>
     </PageWrapper>
   );
-}
+};
+
+export default CustomerProfilePage;
