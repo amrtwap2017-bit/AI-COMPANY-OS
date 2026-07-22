@@ -1,41 +1,73 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["engineering"],
-    queryFn:  () => authFetchJSON("/api/v1/projects"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Project", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"progress", label:"Progress", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["progress"]??"—")}</span>) },
-    { key:"hotel", label:"Hotel", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["hotel"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch assets");
+  return response.json();
+};
+
+const fetchMaintenanceSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch maintenance signals");
+  return response.json();
+};
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
+
+export default function EngineeringPage() {
+  const { data: assets, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, { refetchInterval: 120000 });
+  const { data: signals, isLoading: isSignalsLoading } = useQuery(["signals"], fetchMaintenanceSignals, { refetchInterval: 120000 });
+  const { data: kpis, isLoading: isKpisLoading } = useQuery(["kpis"], fetchKpis, { refetchInterval: 120000 });
+
+  if (isAssetsLoading || isSignalsLoading || isKpisLoading) return <LoadingState />;
+
+  const totalAssets = assets.length;
+  const inFault = assets.filter(asset => asset.status === "in-fault").length;
+  const engineeringWosOpen = kpis.engineeringWosOpen;
+  const maintenanceSignalsCount = signals.length;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Engineering Hub" subtitle={`${items.length} records`} badge="ENG"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="⚙️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Engineering Hub" />
+      <div className="grid grid-cols-3 gap-4">
+        <MetricStrip label="Total Assets" value={totalAssets} />
+        <MetricStrip label="In Fault" value={inFault} status={StatusBadge.Danger} />
+        <MetricStrip label="Engineering WOs Open" value={engineeringWosOpen} />
+        <MetricStrip label="Maintenance Signals" value={maintenanceSignalsCount} status={maintenanceSignalsCount > 0 ? StatusBadge.Warning : null} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      {maintenanceSignalsCount > 0 && (
+        <div className="bg-yellow-100 p-4 rounded-md">
+          <p className="text-yellow-700">There are {maintenanceSignalsCount} maintenance signals.</p>
+        </div>
+      )}
+      <div className="grid grid-cols-3 gap-4 mt-8">
+        <Link href="/engineering/intelligence" passHref>
+          <SectionCard title="Intelligence" />
+        </Link>
+        <Link href="/engineering/actions" passHref>
+          <SectionCard title="Actions" />
+        </Link>
+        <Link href="/engineering/review" passHref>
+          <SectionCard title="Review" />
+        </Link>
+        <Link href="/engineering/ai" passHref>
+          <SectionCard title="AI Assistant" />
+        </Link>
+        <Link href="/maintenance/intelligence" passHref>
+          <SectionCard title="Maintenance" />
+        </Link>
+        <Link href="/maintenance/assets" passHref>
+          <SectionCard title="Assets" />
+        </Link>
+      </div>
     </PageWrapper>
   );
 }

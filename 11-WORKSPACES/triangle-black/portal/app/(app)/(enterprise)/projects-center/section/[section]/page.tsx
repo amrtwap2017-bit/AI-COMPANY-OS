@@ -1,41 +1,76 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["projects-center-section-[section]"],
-    queryFn:  () => authFetchJSON("/api/v1/projects"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchProjects = async (section: string) => {
+  const response = await fetch(`/api/v1/projects?section=${section}`, {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Project", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"budget", label:"Budget", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["budget"]??"—")}</span>) },
-    { key:"spent", label:"Spent", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["spent"]??"—")}</span>) },
-  ];
+  if (!response.ok) throw new Error("Failed to fetch projects");
+  return response.json();
+};
+
+const ProjectsSectionPage = () => {
+  const { section } = useParams();
+  const router = useRouter();
+
+  const { data, isLoading, isError, error } = useQuery(
+    ["projects", section],
+    () => fetchProjects(section!),
+    {
+      refetchInterval: 300000,
+    }
+  );
+
+  if (isLoading) return <LoadingState />;
+  if (isError && error instanceof Error) return <EmptyState message={error.message} />;
+
+  const projects = data?.projects || [];
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Project Section" subtitle={`${items.length} records`} badge="PRJ"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📂" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Projects" breadcrumb={<Link href="/projects-center">Projects</Link>} />
+      {section === "reports" ? (
+        <div className="flex items-center justify-between">
+          <MetricStrip title="Project Count" value={projects.length} />
+          <Link href="/executive/reports" className="text-primary hover:underline">
+            View Reports
+          </Link>
+        </div>
+      ) : (
+        <>
+          {projects.length === 0 ? (
+            <EmptyState message="No projects found." />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project) => (
+                <SectionCard
+                  key={project.id}
+                  title={project.name}
+                  status={<StatusBadge status={project.status} />}
+                  endDate={project.end_date}
+                  WOCount={project.work_orders_count}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </PageWrapper>
   );
-}
+};
+
+export default ProjectsSectionPage;
