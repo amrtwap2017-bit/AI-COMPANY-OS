@@ -1,41 +1,112 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-stock-balances"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/inventory/stock-balances"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"item_name", label:"Item", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["item_name"]??"—")}</span>) },
-    { key:"quantity", label:"Qty", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["quantity"]??"—")}</span>) },
-    { key:"warehouse", label:"Warehouse", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["warehouse"]??"—")}</span>) },
-    { key:"unit", label:"Unit", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["unit"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchStockBalances = async () => {
+  const response = await fetch("/api/v1/supply-chain/stock-balances", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch stock balances");
+  return response.json();
+};
+
+const fetchItems = async () => {
+  const response = await fetch("/api/v1/inventory/items", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch items");
+  return response.json();
+};
+
+const fetchWarehouses = async () => {
+  const response = await fetch("/api/v1/supply-chain/warehouses", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch warehouses");
+  return response.json();
+};
+
+const StockBalancesPage = () => {
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(null);
+
+  const { data: stockBalances, isLoading: isStockLoading } = useQuery(["stock-balances"], fetchStockBalances, { refetchInterval: 120000 });
+  const { data: items, isLoading: isItemsLoading } = useQuery(["items"], fetchItems, { refetchInterval: 120000 });
+  const { data: warehouses, isLoading: isWarehousesLoading } = useQuery(["warehouses"], fetchWarehouses, { refetchInterval: 120000 });
+
+  if (isStockLoading || isItemsLoading || isWarehousesLoading) return <LoadingState />;
+
+  if (!stockBalances || !items || !warehouses) return <EmptyState />;
+
+  const filteredStockBalances = stockBalances.filter(sb => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
+
+  const totalItems = items.length;
+  const totalValueEGP = stockBalances.reduce((acc, sb) => acc + sb.total_value, 0);
+  const belowMinimum = stockBalances.filter(sb => sb.qty_on_hand < sb.min_stock).length;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Stock Balances" subtitle={`${items.length} records`} badge="STK"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Stock Balances" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Items", value: totalItems },
+            { label: "Total Value EGP", value: totalValueEGP.toFixed(2) },
+            { label: "Below Minimum", value: belowMinimum, color: "red" },
+            { label: "Warehouses Count", value: warehouses.length }
+          ]}
+        />
+      </SectionCard>
+      <div className="flex gap-4">
+        {warehouses.map(w => (
+          <button
+            key={w.id}
+            onClick={() => setSelectedWarehouse(w.id)}
+            className={`px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 ${
+              selectedWarehouse === w.id ? "bg-blue-500 text-white" : ""
+            }`}
+          >
+            {w.name}
+          </button>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <table className="w-full border-collapse">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Category</th>
+            <th>Qty On Hand</th>
+            <th>Qty Reserved</th>
+            <th>Qty Available</th>
+            <th>Avg Cost EGP</th>
+            <th>Total Value EGP</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredStockBalances.map(sb => {
+            const item = items.find(i => i.id === sb.item_id);
+            if (!item) return null;
+            return (
+              <tr key={sb.id}>
+                <td>{item.name}</td>
+                <td className="px-2 py-1 rounded bg-gray-200">{item.category}</td>
+                <td>{sb.qty_on_hand}</td>
+                <td>{sb.qty_reserved}</td>
+                <td>{sb.qty_available}</td>
+                <td>{sb.avg_cost.toFixed(2)}</td>
+                <td>{sb.total_value.toFixed(2)}</td>
+                <td>
+                  {sb.qty_on_hand === 0 ? (
+                    <StatusBadge status="out_of_stock" />
+                  ) : sb.qty_on_hand < item.min_stock ? (
+                    <StatusBadge status="low" />
+                  ) : (
+                    <StatusBadge status="ok" />
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </PageWrapper>
   );
-}
+};
+
+export default StockBalancesPage;

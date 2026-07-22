@@ -1,41 +1,95 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-work-orders"],
-    queryFn:  () => authFetchJSON("/api/v1/work-orders"),
-    staleTime: 30_000, retry: 1,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+import Link from "next/link";
+
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch work orders");
+  return response.json();
+};
+
+export default function WorkOrdersPage() {
+  const [statusFilter, setStatusFilter] = useState<"All" | "Open" | "In Progress" | "Completed" | "Cancelled">("All");
+  const [priorityFilter, setPriorityFilter] = useState<"All" | "Critical" | "High" | "Medium">("All");
+
+  const { data: workOrders, isLoading, isError } = useQuery({
+    queryKey: ["work-orders"],
+    queryFn: fetchWorkOrders,
+    refetchInterval: 60000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Work Order", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"priority", label:"Priority", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["priority"]??"—")}</span>) },
-    { key:"due_date", label:"Due", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["due_date"]??"—")}</span>) },
-  ];
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load work orders" />;
+
+  const filteredWorkOrders = workOrders.filter((wo: any) => {
+    const statusMatch = statusFilter === "All" || wo.status === statusFilter;
+    const priorityMatch = priorityFilter === "All" || wo.priority === priorityFilter;
+    return statusMatch && priorityMatch;
+  });
+
+  const metricData = {
+    Total: workOrders.length,
+    Open: workOrders.filter((wo: any) => wo.status === "Open").length,
+    "In Progress": workOrders.filter((wo: any) => wo.status === "In Progress").length,
+    "Critical Open": workOrders.filter((wo: any) => wo.status === "Open" && wo.priority === "Critical").length,
+    Completed: workOrders.filter((wo: any) => wo.status === "Completed").length,
+  };
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Operations Work Orders" subtitle={`${items.length} records`} badge="WO"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔧" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Work Orders" actions={<Link href="/operations/work-orders/new">New WO</Link>} />
+      <MetricStrip data={metricData} />
+      <div className="flex gap-4">
+        {["All", "Open", "In Progress", "Completed", "Cancelled"].map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`px-3 py-2 rounded-md ${
+              statusFilter === status ? "bg-blue-500 text-white" : "border border-gray-300 text-gray-700"
+            }`}
+          >
+            {status}
+          </button>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="flex gap-4">
+        {["All", "Critical", "High", "Medium"].map((priority) => (
+          <button
+            key={priority}
+            onClick={() => setPriorityFilter(priority)}
+            className={`px-3 py-2 rounded-md ${
+              priorityFilter === priority ? "bg-blue-500 text-white" : "border border-gray-300 text-gray-700"
+            }`}
+          >
+            {priority}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredWorkOrders.sort((a, b) => {
+          if (a.priority === "Critical" && b.priority !== "Critical") return -1;
+          if (b.priority === "Critical" && a.priority !== "Critical") return 1;
+          return new Date(b.created_at) - new Date(a.created_at);
+        }).map((wo: any) => (
+          <Link key={wo.id} href={`/operations/work-orders/${wo.id}`}>
+            <SectionCard>
+              <h3 className="font-bold">{wo.title}</h3>
+              <div className="flex gap-2">
+                <StatusBadge status={wo.status} />
+                <span>{wo.type}</span>
+                <span>{wo.priority}</span>
+              </div>
+              <p className={`text-red-500 ${new Date(wo.due_date) < new Date() && wo.status !== "Completed" ? "" : "opacity-50"}`}>
+                {wo.due_date}
+              </p>
+            </SectionCard>
+          </Link>
+        ))}
+      </div>
     </PageWrapper>
   );
 }

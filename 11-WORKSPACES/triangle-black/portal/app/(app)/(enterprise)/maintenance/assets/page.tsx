@@ -1,41 +1,110 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["maintenance-assets"],
-    queryFn:  () => authFetchJSON("/api/v1/assets"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Asset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"asset_type", label:"Type", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["asset_type"]??"—")}</span>) },
-    { key:"location", label:"Location", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["location"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+  if (!response.ok) {
+    throw new Error("Failed to fetch assets");
+  }
+  return response.json();
+};
+
+const AssetPage = () => {
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  const { data: assets, isLoading, isError } = useQuery({
+    queryKey: ["assets"],
+    queryFn: fetchAssets,
+    refetchInterval: 120000,
+  });
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState message="Failed to load assets" />;
+
+  const filteredAssets = assets.filter((asset: any) =>
+    categoryFilter ? asset.category.toLowerCase().includes(categoryFilter.toLowerCase()) : true
+  );
+
+  const totalAssets = filteredAssets.length;
+  const criticalAssets = filteredAssets.filter((asset: any) => asset.criticality === "critical").length;
+  const operationalAssets = filteredAssets.filter((asset: any) => asset.status === "operational").length;
+  const inFaultAssets = filteredAssets.filter(
+    (asset: any) => asset.status === "fault" || asset.status === "breakdown"
+  ).length;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Assets" subtitle={`${items.length} records`} badge="ASSET"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🏗️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Asset Registry">
+        <MetricStrip
+          metrics={[
+            { label: "Total Assets", value: totalAssets },
+            { label: "Critical", value: criticalAssets, color: "red" },
+            { label: "Operational", value: operationalAssets, color: "green" },
+            { label: "In Fault", value: inFaultAssets, color: "yellow" },
+          ]}
+        />
+      </PageHeader>
+      <div className="flex gap-4">
+        <button
+          onClick={() => setCategoryFilter(null)}
+          className={`px-3 py-2 rounded bg-gray-100 ${
+            categoryFilter === null ? "font-bold" : ""
+          }`}
+        >
+          All
+        </button>
+        {["HVAC", "Electrical", "Plumbing", "Mechanical", "Elevator"].map((category) => (
+          <button
+            key={category}
+            onClick={() => setCategoryFilter(category)}
+            className={`px-3 py-2 rounded bg-gray-100 ${
+              categoryFilter === category ? "font-bold" : ""
+            }`}
+          >
+            {category}
+          </button>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Assets">
+        {filteredAssets.length > 0 ? (
+          filteredAssets.map((asset: any) => (
+            <a
+              key={asset.id}
+              href={`/maintenance/assets/${asset.id}`}
+              className="block p-4 border-b last:border-b-0 hover:bg-gray-50"
+            >
+              <div className="flex items-center justify-between">
+                <strong>{asset.name}</strong>
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">{asset.category}</span>
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">{asset.criticality}</span>
+              </div>
+              <StatusBadge status={asset.status} />
+              {asset.manufacturer && asset.model ? (
+                <p>{`${asset.manufacturer} ${asset.model}`}</p>
+              ) : null}
+              <p className="truncate">{asset.location_description}</p>
+            </a>
+          ))
+        ) : (
+          <EmptyState message="No assets found" />
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default AssetPage;
