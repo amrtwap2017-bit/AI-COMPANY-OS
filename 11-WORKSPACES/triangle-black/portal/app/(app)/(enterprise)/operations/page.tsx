@@ -1,41 +1,64 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-maintenance-dashboard"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/dashboard"),
-    staleTime: 30_000, retry: 1,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"trend", label:"Trend", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["trend"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  return response.json();
+};
+
+const fetchSignalsSummary = async () => {
+  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  return response.json();
+};
+
+const OperationsPage = () => {
+  const { data: kpis, isLoading: isKpisLoading } = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
+  const { data: signalsSummary, isLoading: isSignalsLoading } = useQuery(["signalsSummary"], fetchSignalsSummary, { refetchInterval: 60000 });
+
+  if (isKpisLoading || isSignalsLoading) return <LoadingState />;
+
+  const openWOs = kpis?.work_orders.open || 41;
+  const criticalWOs = kpis?.work_orders.critical || 11;
+  const techniciansActive = signalsSummary?.technicians.active || 25;
+  const signalsTotal = signalsSummary?.signals.total || 0;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Operations Hub" subtitle={`${items.length} records`} badge="OPS"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="⚙️" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Operations Hub" />
+      <div className="grid grid-cols-3 gap-4">
+        <MetricStrip label="Open WOs" value={openWOs} />
+        <MetricStrip label="Critical" value={criticalWOs} />
+        <MetricStrip label="Technicians Active" value={techniciansActive} />
+        <MetricStrip label="Signals Total" value={signalsTotal} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      {criticalWOs > 0 && (
+        <StatusBadge className="mt-4 bg-red-500 text-white">X Critical Work Orders Require Attention</StatusBadge>
+      )}
+      <div className="grid grid-cols-3 gap-4 mt-8">
+        <Link href="/operations/workbench" passHref>
+          <SectionCard title="Workbench" icon="signal" />
+        </Link>
+        <Link href="/operations/work-orders" passHref>
+          <SectionCard title="Work Orders" icon="work-order" value={72} />
+        </Link>
+        <Link href="/operations/dispatch" passHref>
+          <SectionCard title="Dispatch" icon="dispatch" value={techniciansActive} />
+        </Link>
+        <Link href="/operations/calendar" passHref>
+          <SectionCard title="Calendar" icon="calendar" />
+        </Link>
+        <Link href="/operations/sla-review" passHref>
+          <SectionCard title="SLA Review" icon="sla" value={22.2} suffix="%" />
+        </Link>
+        <Link href="/operations/service-requests" passHref>
+          <SectionCard title="Service Requests" icon="service-request" />
+        </Link>
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default OperationsPage;

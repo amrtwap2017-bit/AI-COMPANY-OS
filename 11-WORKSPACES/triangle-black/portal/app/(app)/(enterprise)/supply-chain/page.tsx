@@ -1,41 +1,77 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-actions-inventory-dashboard"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/inventory/dashboard"),
-    staleTime: 30_000, retry: 1,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"module", label:"Module", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["module"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"count", label:"Count", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["count"]??"—")}</span>) },
-    { key:"alerts", label:"Alerts", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["alerts"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
+  return response.json();
+};
+
+const fetchPurchaseRequests = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-requests/", { credentials: "include" });
+  return response.json();
+};
+
+const fetchSignalsSummary = async () => {
+  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  return response.json();
+};
+
+export default function SupplyChainPage() {
+  const { data: purchaseOrders, isLoading: isPurchaseOrdersLoading } = useQuery(["purchase-orders"], fetchPurchaseOrders, { refetchInterval: 120000 });
+  const { data: purchaseRequests, isLoading: isPurchaseRequestsLoading } = useQuery(["purchase-requests"], fetchPurchaseRequests, { refetchInterval: 120000 });
+  const { data: signalsSummary, isLoading: isSignalsSummaryLoading } = useQuery(["signals-summary"], fetchSignalsSummary, { refetchInterval: 120000 });
+
+  if (isPurchaseOrdersLoading || isPurchaseRequestsLoading || isSignalsSummaryLoading) return <LoadingState />;
+
+  const activePOs = purchaseOrders.filter(po => po.status === "active").length;
+  const pendingPRs = purchaseRequests.filter(pr => pr.status === "pending").length;
+  const openRFQs = signalsSummary.open_rfq_count;
+  const inventoryAlerts = signalsSummary.inventory_alerts_count;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Supply Chain Hub" subtitle={`${items.length} records`} badge="SCM"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🏭" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Supply Chain Hub" />
+      <MetricStrip
+        metrics={[
+          { label: "Active POs", value: activePOs },
+          { label: "Pending PRs", value: pendingPRs },
+          { label: "Open RFQs", value: openRFQs },
+          { label: "Inventory Alerts", value: inventoryAlerts, status: inventoryAlerts > 0 ? <StatusBadge type="error" /> : null }
+        ]}
+      />
+      <div className="grid grid-cols-3 gap-4">
+        <Link href="/supply-chain/workbench" passHref>
+          <SectionCard title="Workbench" subtitle="Overview of all activities" count={activePOs + pendingPRs} />
+        </Link>
+        <Link href="/supply-chain/purchase-requests" passHref>
+          <SectionCard title="Purchase Requests" subtitle="Manage incoming requests" count={purchaseRequests.length} />
+        </Link>
+        <Link href="/supply-chain/purchase-orders" passHref>
+          <SectionCard title="Purchase Orders" subtitle="Track all orders" count={purchaseOrders.length} />
+        </Link>
+        <Link href="/supply-chain/inventory" passHref>
+          <SectionCard title="Inventory" subtitle="Manage stock levels" count={signalsSummary.total_inventory_count} />
+        </Link>
+        <Link href="/supply-chain/stock-balances" passHref>
+          <SectionCard title="Stock Balances" subtitle="Check current balances" count={signalsSummary.stock_balance_count} />
+        </Link>
+        <Link href="/supply-chain/vendors" passHref>
+          <SectionCard title="Vendors" subtitle="Manage vendor relationships" count={signalsSummary.vendor_count} />
+        </Link>
+        <Link href="/supply-chain/rfqs" passHref>
+          <SectionCard title="RFQs" subtitle="Request for Quotations" count={openRFQs} />
+        </Link>
+        <Link href="/supply-chain/intelligence" passHref>
+          <SectionCard title="Intelligence" subtitle="AI-driven insights" count={signalsSummary.ai_insight_count} />
+        </Link>
+        <Link href="/supply-chain/spend-analysis" passHref>
+          <SectionCard title="Spend Analysis" subtitle="Analyze spending trends" count={signalsSummary.spend_analysis_count} />
+        </Link>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
 }

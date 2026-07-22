@@ -1,41 +1,68 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-maintenance-dashboard"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/dashboard"),
-    staleTime: 30_000, retry: 1,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"action", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["action"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch assets");
+  return response.json();
+};
+
+const fetchPMPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  return response.json();
+};
+
+const fetchMaintenanceSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch maintenance signals");
+  return response.json();
+};
+
+const MaintenancePage = () => {
+  const { data: assets, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, { refetchInterval: 120000 });
+  const { data: pmPlans, isLoading: isPMPlansLoading } = useQuery(["pm-plans"], fetchPMPlans, { refetchInterval: 120000 });
+  const { data: signals, isLoading: isSignalsLoading } = useQuery(["signals"], fetchMaintenanceSignals, { refetchInterval: 120000 });
+
+  if (isAssetsLoading || isPMPlansLoading || isSignalsLoading) return <LoadingState />;
+
+  const totalAssets = assets.length;
+  const inFaultCount = assets.filter(asset => asset.status === "in-fault").length;
+  const activePMPlans = pmPlans.filter(plan => plan.status === "active").length;
+  const maintenanceSignals = signals.slice(0, 3);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Maintenance Hub" subtitle={`${items.length} records`} badge="MNT"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔧" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Maintenance Hub" />
+      <MetricStrip
+        metrics={[
+          { label: "Total Assets", value: totalAssets },
+          { label: "In Fault", value: inFaultCount, badge: <StatusBadge status="in-fault" /> },
+          { label: "Active PM Plans", value: activePMPlans },
+          { label: "Maintenance Signals", value: maintenanceSignals.length }
+        ]}
+      />
+      <div className="grid grid-cols-3 gap-4">
+        <SectionCard title="Assets" description="Manage all assets" count={totalAssets} href="/maintenance/assets" />
+        <SectionCard title="PM Plans" description="Review and manage PM plans" count={activePMPlans} href="/maintenance/pm-plans" />
+        <SectionCard title="Intelligence" description="Analyze maintenance signals" count={signals.length} href="/maintenance/intelligence" />
+        <SectionCard title="Schedule" description="View and edit schedules" count={0} href="/maintenance/review/schedules" />
+        <SectionCard title="Costs" description="Review maintenance costs" count={0} href="/maintenance/costs/review" />
+        <SectionCard title="Downtime" description="Manage downtime" count={0} href="/maintenance/downtime/review" />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="mt-4">
+        <h2 className="text-lg font-semibold">Current Alerts</h2>
+        <ul className="list-disc pl-4">
+          {maintenanceSignals.map((signal, index) => (
+            <li key={index}>{signal.description}</li>
+          ))}
+        </ul>
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default MaintenancePage;
