@@ -1,41 +1,88 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-spend"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/inventory/dashboard"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders", { credentials: "include" });
+  return response.json();
+};
+
+const fetchVendors = async () => {
+  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
+  return response.json();
+};
+
+const SpendPage = () => {
+  const [vendors, setVendors] = useState<{ id: number; name: string }[]>([]);
+  const purchaseOrdersQuery = useQuery(["purchase-orders"], fetchPurchaseOrders, {
+    refetchInterval: 300000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"category", label:"Category", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["category"]??"—")}</span>) },
-    { key:"amount", label:"Amount", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["amount"]??"—")}</span>) },
-    { key:"vendor", label:"Vendor", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["vendor"]??"—")}</span>) },
-    { key:"period", label:"Period", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["period"]??"—")}</span>) },
-  ];
+  const vendorsQuery = useQuery(["vendors"], fetchVendors, {
+    onSuccess: (data) => setVendors(data),
+  });
+
+  if (purchaseOrdersQuery.isLoading || vendorsQuery.isLoading) return <LoadingState />;
+  if (purchaseOrdersQuery.isError || vendorsQuery.isError) return <EmptyState />;
+
+  const purchaseOrders = purchaseOrdersQuery.data;
+  const totalPOs = purchaseOrders.length;
+  const totalSpend = purchaseOrders.reduce((acc, po) => acc + po.total_amount, 0);
+  const avgPOValue = totalPOs > 0 ? (totalSpend / totalPOs).toLocaleString() : "N/A";
+  const activeVendors = new Set(purchaseOrders.map(po => po.vendor_id)).size;
+
+  const statusCounts = purchaseOrders.reduce((acc, po) => {
+    acc[po.status] = (acc[po.status] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
+
+  const vendorSpend = purchaseOrders.reduce((acc, po) => {
+    const vendor = vendors.find(vendor => vendor.id === po.vendor_id);
+    if (vendor) {
+      acc[vendor.name] = (acc[vendor.name] || 0) + po.total_amount;
+    }
+    return acc;
+  }, {} as { [key: string]: number });
+
+  const topVendors = Object.entries(vendorSpend)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  const monthlyTrend = purchaseOrders.reduce((acc, po) => {
+    const month = new Date(po.created_at).toLocaleString("default", { month: "long" });
+    acc[month] = (acc[month] || { count: 0, totalAmount: 0 });
+    acc[month].count++;
+    acc[month].totalAmount += po.total_amount;
+    return acc;
+  }, {} as { [key: string]: { count: number; totalAmount: number } });
+
+  const maxSpend = Math.max(...Object.values(vendorSpend));
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Spend Analysis" subtitle={`${items.length} records`} badge="SPEND"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="💰" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Procurement Spend Analysis" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total POs", value: totalPOs.toLocaleString() },
+            { label: "Total Spend EGP", value: totalSpend.toLocaleString() },
+            { label: "Avg PO Value EGP", value: avgPOValue },
+            { label: "Active Vendors", value: activeVendors.toString() },
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Spend by Status">
+        {/* Render status bars */}
+      </SectionCard>
+      <SectionCard title="Top Vendors by Spend">
+        {/* Render top vendors table */}
+      </SectionCard>
+      <SectionCard title="Monthly Trend (Last 3 Months)">
+        {/* Render monthly trend table */}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default SpendPage;

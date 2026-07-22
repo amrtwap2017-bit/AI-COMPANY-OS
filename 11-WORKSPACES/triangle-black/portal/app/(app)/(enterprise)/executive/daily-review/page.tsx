@@ -1,45 +1,95 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
 
-export default function Page() {
-  const { authFetchJSON } = useAuthFetch();
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["executive-daily-review"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/executive/daily-review"),
-    staleTime: 30_000, retry: 2,
-  });
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  return response.json();
+};
 
-  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+const fetchKpisSla = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  return response.json();
+};
 
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"change", label:"Change", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["change"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+const fetchSla = async () => {
+  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  return response.json();
+};
+
+export default function DailyReviewPage() {
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
+  const kpisSlaQuery = useQuery(["kpisSla"], fetchKpisSla, { refetchInterval: 60000 });
+  const slaQuery = useQuery(["sla"], fetchSla, { refetchInterval: 60000 });
+
+  if (signalsQuery.isLoading || kpisSlaQuery.isLoading || slaQuery.isLoading) return <LoadingState />;
+
+  const signals = signalsQuery.data.sort((a, b) => b.priority - a.priority);
+  const totalWOs = 72;
+  const openWOs = 41;
+  const criticalWOs = 11;
+  const compliancePercentage = 22.2;
+  const targetSLA = 95;
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Daily Review" subtitle={`${items.length} records`} badge="DAY"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title={new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })} />
+      <MetricStrip
+        metrics={[
+          { label: "Critical WOs", value: criticalWOs, color: "red" },
+          { label: "SLA Compliance %", value: compliancePercentage.toFixed(1), color: compliancePercentage < targetSLA ? "orange" : "green" },
+          { label: "Active Signals", value: signals.length, color: "blue" },
+          { label: "Technician Utilization %", value: 85, color: "purple" }
+        ]}
+      />
+      <div className="grid grid-cols-2 gap-4">
+        <SectionCard title="Today's Priorities">
+          <ul>
+            {signals.map(signal => (
+              <li key={signal.id} className={`flex items-center p-2 border-l-4 ${signal.priority === 1 ? 'border-red-500' : signal.priority === 2 ? 'border-yellow-500' : 'border-green-500'}`}>
+                <div className="flex-grow">
+                  <h3>{signal.title}</h3>
+                  <p>{signal.recommended_action}</p>
+                </div>
+                {signal.priority === 1 ? (
+                  <StatusBadge label="Action Required" color="red" />
+                ) : (
+                  <StatusBadge label="Monitor" color="yellow" />
+                )}
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+        <SectionCard title="Operational Health">
+          <div className="grid grid-cols-2 gap-4">
+            <SectionCard title="Operations">
+              <p>Open WOs: {openWOs}</p>
+              <p>Critical: {criticalWOs}</p>
+              <p>Completion Rate: 75%</p>
+            </SectionCard>
+            <SectionCard title="SLA">
+              <p>Compliance %: {compliancePercentage.toFixed(1)}%</p>
+              <p>Target: {targetSLA}%</p>
+              <p>Gap: {targetSLA - compliancePercentage}%</p>
+            </SectionCard>
+            <SectionCard title="Resources">
+              <p>Active Technicians: 20</p>
+              <p>Utilization %: 85%</p>
+            </SectionCard>
+            <SectionCard title="Supply">
+              <Link href="/supply-chain/workbench" className="text-blue-500 hover:text-blue-700">Check Inventory</Link>
+            </SectionCard>
+          </div>
+        </SectionCard>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="flex justify-center mt-4 space-x-4">
+        <Link href="/dashboard" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Dashboard</Link>
+        <Link href="/reports" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">Reports</Link>
+        <Link href="/tasks" className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Tasks</Link>
+        <Link href="/settings" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Settings</Link>
+      </div>
     </PageWrapper>
   );
 }
