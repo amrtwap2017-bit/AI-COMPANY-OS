@@ -1,41 +1,119 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["projects-center-review"],
-    queryFn:  () => authFetchJSON("/api/v1/projects/dashboard"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchProjects = async () => {
+  const response = await fetch("/api/v1/projects", { credentials: "include" });
+  if (!response.ok) throw new Error("No projects");
+  return response.json();
+};
+
+const fetchWorkOrders = async (contract_id: string) => {
+  const response = await fetch(`/api/v1/work-orders?contract_id=${contract_id}`, { credentials: "include" });
+  return response.json();
+};
+
+const fetchSignals = async (project_id: string) => {
+  const response = await fetch(`/api/v1/ai/signals?project_id=${project_id}`, { credentials: "include" });
+  return response.json();
+};
+
+const ProjectReviewPage = () => {
+  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Completed" | "On Hold" | "Cancelled">("All");
+
+  const projectsQuery = useQuery({
+    queryKey: ["projects"],
+    queryFn: fetchProjects,
+    refetchInterval: 300000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"target", label:"Target", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["target"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+
+  if (projectsQuery.isError) return <EmptyState title="No projects" description="There are no projects available." />;
+  if (projectsQuery.isLoading || !projectsQuery.data) return <LoadingState />;
+
+  const projects = projectsQuery.data;
+  const totalProjects = projects.length;
+  const activeProjects = projects.filter(p => p.status === "Active").length;
+  const completedProjects = projects.filter(p => p.status === "Completed").length;
+  const atRiskProjects = projects.filter(p => p.status === "Active" && new Date(p.end_date) - new Date() <= 14 * 86400000).length;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Projects Review" subtitle={`${items.length} records`} badge="REV"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📋" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Project Review" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Projects", value: totalProjects },
+            { label: "Active", value: activeProjects, color: "green" },
+            { label: "Completed", value: completedProjects, color: "blue" },
+            { label: "At Risk", value: atRiskProjects, color: "red" },
+          ]}
+        />
+      </SectionCard>
+      <div className="flex gap-4">
+        <button
+          onClick={() => setStatusFilter("All")}
+          className={`px-3 py-2 rounded bg-white border ${
+            statusFilter === "All" ? "border-blue-500 text-blue-500" : "text-gray-600"
+          }`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setStatusFilter("Active")}
+          className={`px-3 py-2 rounded bg-white border ${
+            statusFilter === "Active" ? "border-green-500 text-green-500" : "text-gray-600"
+          }`}
+        >
+          Active
+        </button>
+        <button
+          onClick={() => setStatusFilter("Completed")}
+          className={`px-3 py-2 rounded bg-white border ${
+            statusFilter === "Completed" ? "border-blue-500 text-blue-500" : "text-gray-600"
+          }`}
+        >
+          Completed
+        </button>
+        <button
+          onClick={() => setStatusFilter("On Hold")}
+          className={`px-3 py-2 rounded bg-white border ${
+            statusFilter === "On Hold" ? "border-yellow-500 text-yellow-500" : "text-gray-600"
+          }`}
+        >
+          On Hold
+        </button>
+        <button
+          onClick={() => setStatusFilter("Cancelled")}
+          className={`px-3 py-2 rounded bg-white border ${
+            statusFilter === "Cancelled" ? "border-red-500 text-red-500" : "text-gray-600"
+          }`}
+        >
+          Cancelled
+        </button>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projects
+          .filter(p => statusFilter === "All" || p.status === statusFilter)
+          .map(project => (
+            <SectionCard key={project.id}>
+              <h3 className="font-bold">{project.name}</h3>
+              <StatusBadge status={project.status} />
+              <div className="flex items-center gap-2">
+                {new Date(project.start_date).toLocaleDateString()} → {new Date(project.end_date).toLocaleDateString()}
+              </div>
+              <div className="text-red-500" style={{ display: new Date() - new Date(project.end_date) <= 14 * 86400000 ? "block" : "none" }}>
+                AT RISK
+              </div>
+              <div>WO Count: {project.contract_id ? fetchWorkOrders(project.contract_id).then(data => data.length) : 0}</div>
+              {project.budget && <div>Budget: {new Intl.NumberFormat("en-US", { style: "currency", currency: "EGP" }).format(project.budget)}</div>}
+            </SectionCard>
+          ))}
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default ProjectReviewPage;

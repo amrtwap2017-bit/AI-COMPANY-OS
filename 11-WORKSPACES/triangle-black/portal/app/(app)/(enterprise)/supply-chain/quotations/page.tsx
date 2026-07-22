@@ -1,41 +1,113 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-quotations"],
-    queryFn:  () => authFetchJSON("/api/v1/quotes"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchQuotations = async () => {
+  try {
+    const response = await fetch("/api/v1/supply-chain/quotations", { credentials: "include" });
+    if (!response.ok) throw new Error("Not found");
+    return response.json();
+  } catch (error) {
+    if (error.message === "Not found") {
+      const fallbackResponse = await fetch("/api/v1/quotations", { credentials: "include" });
+      if (!fallbackResponse.ok) throw new Error("Failed to fetch quotations");
+      return fallbackResponse.json();
+    }
+    throw error;
+  }
+};
+
+const QuotationsPage = () => {
+  const [statusFilter, setStatusFilter] = useState<"all" | "received" | "accepted" | "rejected" | "expired">("all");
+
+  const { data: quotations, isLoading, isError } = useQuery(["quotations"], fetchQuotations, {
+    refetchInterval: 120000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"quote_number", label:"Quote #", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["quote_number"]??"—")}</span>) },
-    { key:"lead", label:"Lead", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["lead"]??"—")}</span>) },
-    { key:"total_value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["total_value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+
+  if (isLoading) return <LoadingState />;
+  if (isError || !quotations) return <EmptyState title="No quotations recorded" note="Create RFQs in Supply Chain Workbench" />;
+
+  const filteredQuotations = quotations.filter((q: any) => {
+    switch (statusFilter) {
+      case "received":
+        return q.status === "received" || q.status === "pending";
+      case "accepted":
+        return q.status === "accepted";
+      case "rejected":
+        return q.status === "rejected";
+      case "expired":
+        return q.status === "expired";
+      default:
+        return true;
+    }
+  });
+
+  const metrics = {
+    totalQuotes: quotations.length,
+    pendingReview: quotations.filter((q: any) => q.status === "received" || q.status === "pending").length,
+    accepted: quotations.filter((q: any) => q.status === "accepted").length,
+    expired: quotations.filter((q: any) => q.status === "expired").length,
+  };
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Vendor Quotations" subtitle={`${items.length} records`} badge="QUOT"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="💬" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Supplier Quotations" />
+      <SectionCard>
+        <MetricStrip metrics={metrics} />
+      </SectionCard>
+      <div className="flex gap-4">
+        <button
+          onClick={() => setStatusFilter("all")}
+          className={`px-3 py-2 rounded-md ${statusFilter === "all" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setStatusFilter("received")}
+          className={`px-3 py-2 rounded-md ${statusFilter === "received" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Received
+        </button>
+        <button
+          onClick={() => setStatusFilter("accepted")}
+          className={`px-3 py-2 rounded-md ${statusFilter === "accepted" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Accepted
+        </button>
+        <button
+          onClick={() => setStatusFilter("rejected")}
+          className={`px-3 py-2 rounded-md ${statusFilter === "rejected" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Rejected
+        </button>
+        <button
+          onClick={() => setStatusFilter("expired")}
+          className={`px-3 py-2 rounded-md ${statusFilter === "expired" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Expired
+        </button>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredQuotations.map((q: any) => (
+          <SectionCard key={q.id}>
+            <h3 className="font-bold">{q.quotation_number}</h3>
+            <StatusBadge status={q.status} />
+            <p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "EGP" }).format(q.total_amount)}</p>
+            <p className={q.valid_until < new Date().toISOString() ? "text-red-500" : ""}>
+              Valid Until: {new Date(q.valid_until).toLocaleDateString()}
+            </p>
+            {q.rfq_id && (
+              <a href={`/supply-chain/rfqs/${q.rfq_id}`} className="block mt-2 text-blue-500 hover:text-blue-700">
+                View RFQ
+              </a>
+            )}
+          </SectionCard>
+        ))}
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default QuotationsPage;
