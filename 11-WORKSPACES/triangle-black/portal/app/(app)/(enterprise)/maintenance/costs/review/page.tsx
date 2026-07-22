@@ -1,45 +1,144 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+import { useState, useEffect } from "react";
 
-export default function Page() {
-  const { authFetchJSON } = useAuthFetch();
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["maintenance-costs-review"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/costs"),
-    staleTime: 30_000, retry: 2,
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  return response.json();
+};
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  return response.json();
+};
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", {
+    credentials: "include",
   });
+  return response.json();
+};
 
-  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+export default function MaintenanceCostsReviewPage() {
+  const [workOrders, setWorkOrders] = useState([]);
+  const [assets, setAssets] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
 
-  const columns = [
-    { key:"description", label:"Description", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["description"]??"—")}</span>) },
-    { key:"amount", label:"Amount", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["amount"]??"—")}</span>) },
-    { key:"category", label:"Category", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["category"]??"—")}</span>) },
-    { key:"date", label:"Date", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["date"]??"—")}</span>) },
-  ];
+  useEffect(() => {
+    const fetchAllData = async () => {
+      const [woData, assetData, poData] = await Promise.all([
+        fetchWorkOrders(),
+        fetchAssets(),
+        fetchPurchaseOrders(),
+      ]);
+      setWorkOrders(woData);
+      setAssets(assetData);
+      setPurchaseOrders(poData);
+    };
+
+    fetchAllData();
+  }, []);
+
+  const completedWorkOrders = workOrders.filter(
+    (wo) => wo.status === "completed"
+  );
+
+  const totalWOsClosed = completedWorkOrders.length;
+  const avgResolutionTime =
+    completedWorkOrders.reduce((acc, wo) => {
+      if (wo.started_at && wo.completed_at) {
+        return acc + (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000;
+      }
+      return acc;
+    }, 0) / totalWOsClosed;
+
+  const poCount = purchaseOrders.length;
+  const poTotalValueEGP = purchaseOrders.reduce((acc, po) => acc + po.amount, 0);
+
+  const workOrderTypeCounts = completedWorkOrders.reduce((acc, wo) => {
+    if (!acc[wo.type]) {
+      acc[wo.type] = 1;
+    } else {
+      acc[wo.type]++;
+    }
+    return acc;
+  }, {});
+
+  const resolutionTimes = completedWorkOrders
+    .filter((wo) => wo.started_at && wo.completed_at)
+    .map((wo) => (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000);
+
+  const top5LongestWOs = completedWorkOrders
+    .filter((wo) => wo.started_at && wo.completed_at)
+    .sort((a, b) =>
+      (new Date(b.completed_at).getTime() - new Date(b.started_at).getTime()) -
+      (new Date(a.completed_at).getTime() - new Date(a.started_at).getTime())
+    )
+    .slice(0, 5);
+
+  const recentPOs = purchaseOrders.slice(-5);
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Maintenance Costs" subtitle={`${items.length} records`} badge="COST"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Maintenance Cost Analysis" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <MetricStrip
+          label="Total WOs Closed"
+          value={totalWOsClosed}
+          icon="check-circle"
+        />
+        <MetricStrip
+          label="Avg Resolution Time (hours)"
+          value={avgResolutionTime.toFixed(2)}
+          icon="clock"
+        />
+        <MetricStrip
+          label="PO Count"
+          value={poCount}
+          icon="shopping-cart"
+        />
+        <MetricStrip
+          label="PO Total Value EGP"
+          value={poTotalValueEGP.toFixed(2)}
+          icon="dollar-sign"
+        />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Cost by WO Type">
+        {/* Bar chart for work order type counts */}
+      </SectionCard>
+      <SectionCard title="Resolution Time Analysis">
+        <p>AVG: {avgResolutionTime.toFixed(2)} hours</p>
+        <p>MAX: {Math.max(...resolutionTimes).toFixed(2)} hours</p>
+        <p>MIN: {Math.min(...resolutionTimes).toFixed(2)} hours</p>
+        <ul>
+          {top5LongestWOs.map((wo) => (
+            <li key={wo.id}>
+              {wo.title} - {wo.type} - {wo.hours.toFixed(2)} hours
+            </li>
+          ))}
+        </ul>
+      </SectionCard>
+      <SectionCard title="Recent POs">
+        <ul>
+          {recentPOs.map((po) => (
+            <li key={po.id}>
+              {po.po_number} - {po.amount.toFixed(2)} EGP -{" "}
+              <StatusBadge status={po.status} />
+            </li>
+          ))}
+        </ul>
+      </SectionCard>
     </PageWrapper>
   );
 }

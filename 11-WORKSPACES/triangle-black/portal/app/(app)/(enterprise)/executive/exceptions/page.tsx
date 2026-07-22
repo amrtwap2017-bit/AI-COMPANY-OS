@@ -1,45 +1,111 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
 
-export default function Page() {
-  const { authFetchJSON } = useAuthFetch();
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["executive-exceptions"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/executive/exceptions"),
-    staleTime: 30_000, retry: 2,
-  });
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  return response.json();
+};
 
-  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  return response.json();
+};
 
-  const columns = [
-    { key:"title", label:"Exception", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"severity", label:"Severity", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["severity"]??"—")}</span>) },
-    { key:"module", label:"Module", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["module"]??"—")}</span>) },
-    { key:"created_at", label:"Date", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["created_at"]??"—")}</span>) },
-  ];
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  return response.json();
+};
+
+const ExecutiveExceptionsPage = () => {
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
+  const kpisQuery = useQuery(["kpis"], fetchKpis);
+  const workOrdersQuery = useQuery(["work-orders"], fetchWorkOrders);
+
+  if (signalsQuery.isLoading || kpisQuery.isLoading || workOrdersQuery.isLoading) {
+    return <LoadingState />;
+  }
+
+  if (signalsQuery.isError || kpisQuery.isError || workOrdersQuery.isError) {
+    return <EmptyState message="Failed to load data" />;
+  }
+
+  const signals = signalsQuery.data;
+  const kpis = kpisQuery.data;
+  const workOrders = workOrdersQuery.data;
+
+  const criticalSignals = signals.filter((signal: any) => signal.priority === "critical");
+  const highPrioritySignals = signals.filter((signal: any) => signal.priority === "high");
+
+  const exceptionsCount = criticalSignals.length + highPrioritySignals.length;
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Exceptions & Alerts" subtitle={`${items.length} records`} badge="EXC"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Executive Exceptions" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <MetricStrip
+          title="Critical Signals"
+          value={criticalSignals.length}
+          badge={<StatusBadge status="red" />}
+        />
+        <MetricStrip
+          title="Critical WOs Open"
+          value={workOrders.filter((wo: any) => wo.status === "open").length}
+          badge={<StatusBadge status="red" />}
+        />
+        <MetricStrip
+          title="SLA At Risk"
+          value={kpis.slaAtRisk ? "Yes" : "No"}
+          badge={<StatusBadge status={kpis.slaAtRisk ? "red" : "green"} />}
+        />
+        <MetricStrip
+          title="Exceptions Count"
+          value={exceptionsCount}
+          badge={<StatusBadge status={exceptionsCount > 0 ? "red" : "green"} />}
+        />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      {exceptionsCount > 0 && (
+        <SectionCard title="Requires Immediate Action">
+          {criticalSignals.map((signal: any) => (
+            <div key={signal.id} className="border-4 border-red-500 p-4 mb-2 rounded-lg">
+              <h3>{signal.title}</h3>
+              <p>{signal.message}</p>
+              <p>Recommended Action: {signal.recommended_action}</p>
+            </div>
+          ))}
+        </SectionCard>
+      )}
+      {highPrioritySignals.length > 0 && (
+        <SectionCard title="High Priority Items">
+          {highPrioritySignals.map((signal: any) => (
+            <div key={signal.id} className="border-2 border-yellow-500 p-4 mb-2 rounded-lg">
+              <h3>{signal.title}</h3>
+              <p>{signal.message}</p>
+            </div>
+          ))}
+        </SectionCard>
+      )}
+      {exceptionsCount === 0 && (
+        <SectionCard title="Status Summary">
+          <div className="bg-green-500 text-white p-4 rounded-lg">
+            All Systems Normal
+          </div>
+        </SectionCard>
+      )}
+      <div className="text-gray-500 text-sm mt-4">
+        Last Updated: {new Date().toLocaleString()}
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default ExecutiveExceptionsPage;
