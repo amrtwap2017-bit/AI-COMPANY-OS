@@ -1,41 +1,36 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["engineering-[section]"],
-    queryFn:  () => authFetchJSON("/api/v1/projects"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Project", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"phase", label:"Phase", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["phase"]??"—")}</span>) },
-    { key:"due_date", label:"Due", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["due_date"]??"—")}</span>) },
-  ];
-  return (
-    <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Engineering Section" subtitle={`${items.length} records`} badge="ENG"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔧" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </PageWrapper>
-  );
-}
+import { useParams, useRouter } from "next/navigation";
+import { PageWrapper, LoadingState } from "@/components/ui";
+import { useEffect } from "react";
+
+const EngineeringSectionPage = () => {
+  const params = useParams();
+  const section = params?.section;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (section) {
+      switch (section.toLowerCase()) {
+        case "intelligence":
+          router.replace("/engineering/intelligence");
+          break;
+        case "actions":
+          router.replace("/engineering/actions");
+          break;
+        case "review":
+          router.replace("/engineering/review");
+          break;
+        case "ai":
+          router.replace("/engineering/ai");
+          break;
+        default:
+          router.replace("/engineering");
+      }
+    }
+  }, [section, router]);
+
+  return <LoadingState />;
+};
+
+export default EngineeringSectionPage;
