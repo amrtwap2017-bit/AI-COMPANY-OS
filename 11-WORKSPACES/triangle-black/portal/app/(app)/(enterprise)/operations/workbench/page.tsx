@@ -1,6 +1,7 @@
 "use client"; // @ts-nocheck
 
-import { useAuthFetch, useQuery } from "@/lib/hooks";
+import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
+import { useQuery } from "@tanstack/react-query";
 import {
   PageWrapper,
   PageHeader,
