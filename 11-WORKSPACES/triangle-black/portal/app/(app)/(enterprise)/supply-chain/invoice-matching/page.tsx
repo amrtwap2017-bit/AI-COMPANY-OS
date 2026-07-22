@@ -1,41 +1,109 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-invoice-matching"],
-    queryFn:  () => authFetchJSON("/api/v1/inventory/purchase-orders"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"po_number", label:"PO #", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["po_number"]??"—")}</span>) },
-    { key:"supplier", label:"Supplier", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["supplier"]??"—")}</span>) },
-    { key:"amount", label:"Amount", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["amount"]??"—")}</span>) },
-    { key:"match_status", label:"Match Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["match_status"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch purchase orders");
+  return response.json();
+};
+
+const fetchSupplierInvoices = async () => {
+  try {
+    const response = await fetch("/api/v1/supply-chain/supplier-invoices", { credentials: "include" });
+    if (response.status === 404) throw new Error("Not Found");
+    if (!response.ok) throw new Error("Failed to fetch supplier invoices");
+    return response.json();
+  } catch {
+    const response = await fetch("/api/v1/supplier-invoices", { credentials: "include" });
+    if (!response.ok) throw new Error("Failed to fetch supplier invoices");
+    return response.json();
+  }
+};
+
+const InvoiceMatchingPage = () => {
+  const { data: purchaseOrders, isLoading, isError } = useQuery(["purchaseOrders"], fetchPurchaseOrders, { refetchInterval: 120000 });
+  const { data: supplierInvoices, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } = useQuery(
+    ["supplierInvoices"],
+    fetchSupplierInvoices,
+    { refetchInterval: 120000 }
+  );
+
+  if (isLoading || isFetching) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
+
+  const matchedInvoices = purchaseOrders.filter(po => supplierInvoices.some(inv => inv.po_id === po.id));
+  const unmatchedPOs = purchaseOrders.filter(po => !supplierInvoices.some(inv => inv.po_id === po.id));
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Invoice Matching" subtitle={`${items.length} records`} badge="INV"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔍" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Invoice Matching" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total POs", value: purchaseOrders.length },
+            { label: "Matched Invoices", value: matchedInvoices.length },
+            { label: "Unmatched POs", value: unmatchedPOs.length },
+            { label: "Total PO Value EGP", value: purchaseOrders.reduce((acc, po) => acc + po.total_amount, 0) }
+          ]}
+        />
+      </SectionCard>
+      <div className="grid grid-cols-2 gap-4">
+        <SectionCard title="Matching Table">
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th>PO Number</th>
+                <th>Vendor</th>
+                <th>Amount EGP</th>
+                <th>Status</th>
+                <th>Invoice</th>
+                <th>Match Indicator</th>
+              </tr>
+            </thead>
+            <tbody>
+              {purchaseOrders.map(po => (
+                <tr key={po.id}>
+                  <td>{po.po_number}</td>
+                  <td>{/* Fetch vendor name from API */}</td>
+                  <td>{po.total_amount}</td>
+                  <td><StatusBadge status={po.status} /></td>
+                  <td>
+                    {supplierInvoices.some(inv => inv.po_id === po.id) ? (
+                      <span className="text-green-500">Matched</span>
+                    ) : (
+                      <span className="text-red-500">No invoice</span>
+                    )}
+                  </td>
+                  <td>
+                    {supplierInvoices.some(inv => inv.po_id === po.id) ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green">
+                        <path d="M5 13l4 4 6-6" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">
+                        <path d="M18 6L6 18h12z" />
+                      </svg>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </SectionCard>
+        <SectionCard title="Unmatched POs">
+          <ul>
+            {unmatchedPOs.map(po => (
+              <li key={po.id}>
+                PO Number: {po.po_number}, Amount EGP: {po.total_amount}, Created At: {po.created_at}
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
-}
+};
+
+export default InvoiceMatchingPage;

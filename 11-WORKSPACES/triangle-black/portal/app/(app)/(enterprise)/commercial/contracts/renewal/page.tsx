@@ -1,41 +1,81 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["commercial-contracts-renewal"],
-    queryFn:  () => authFetchJSON("/api/v1/customers/review"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchContracts = async () => {
+  const response = await fetch("/api/v1/contracts", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"contract", label:"Contract", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["contract"]??"—")}</span>) },
-    { key:"client", label:"Client", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["client"]??"—")}</span>) },
-    { key:"expiry", label:"Expiry", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["expiry"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-  ];
+  if (!response.ok) {
+    throw new Error("Failed to fetch contracts");
+  }
+  return response.json();
+};
+
+const ContractRenewalPage = () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, isLoading, isError } = useQuery(["contracts"], fetchContracts, {
+    refetchInterval: 300000,
+  });
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load contracts" />;
+
+  const contracts = data.contracts;
+  const totalContracts = contracts.length;
+  const activeContracts = contracts.filter(c => c.status === "active").length;
+  const expiringSoon = contracts.filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90).length;
+  const expiringUrgently = contracts.filter(c => new Date(c.end_date) - new Date() <= 86400000 * 30).length;
+  const totalValueEGP = contracts.reduce((acc, c) => acc + c.contract_value, 0);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Contract Renewals" subtitle={`${items.length} records`} badge="REN"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔄" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Contract Renewal Pipeline" />
+      <MetricStrip
+        metrics={[
+          { label: "Total Contracts", value: totalContracts },
+          { label: "Active", value: activeContracts },
+          { label: "Expiring in 30 days", value: expiringUrgently, color: "red" },
+          { label: "Expiring in 90 days", value: expiringSoon - expiringUrgently, color: "amber" },
+          { label: "Total Value EGP", value: totalValueEGP.toLocaleString("en-GB") },
+        ]}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {contracts
+          .filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90)
+          .map((c, index) => (
+            <SectionCard key={index} className="bg-white shadow-md p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold">{c.client_name}</h3>
+                <StatusBadge status={c.status} />
+              </div>
+              <p className="text-gray-600">
+                {new Date(c.end_date).toLocaleDateString()}{" "}
+                {Math.ceil((new Date(c.end_date) - new Date()) / 86400000)} days left
+              </p>
+              <p className="font-bold">{c.contract_value.toLocaleString("en-GB")} EGP</p>
+              <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Initiate Renewal</button>
+            </SectionCard>
+          ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      {contracts
+        .filter(c => new Date(c.end_date) < new Date())
+        .map((c, index) => (
+          <SectionCard key={index} className="bg-white shadow-md p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-bold">{c.client_name}</h3>
+              <StatusBadge status={c.status} />
+            </div>
+            <p className="text-gray-600">
+              {new Date(c.end_date).toLocaleDateString()} Expired
+            </p>
+            <p className="font-bold">{c.contract_value.toLocaleString("en-GB")} EGP</p>
+          </SectionCard>
+        ))}
     </PageWrapper>
   );
-}
+};
+
+export default ContractRenewalPage;
