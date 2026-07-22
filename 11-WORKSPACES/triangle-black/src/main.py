@@ -256,3 +256,11 @@ try:
   print("  OK: supply_automation_router")
 except Exception as e:
   print(f"  WARN: supply_automation_router: {e}")
+
+# ── Sprint 16: Analytics + KPI Endpoints ──────────────────────
+try:
+    from src.commercial.ai_assistant.analytics_router import router as ai_analytics_router
+    app.include_router(ai_analytics_router, prefix="/api/v1")
+    print("  OK: analytics_router")
+except Exception as e:
+    print(f"  WARN: analytics_router: {e}")
