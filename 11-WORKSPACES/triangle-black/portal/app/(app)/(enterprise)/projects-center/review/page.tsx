@@ -1,119 +1,121 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
+import Link from "next/link";
 
 const fetchProjects = async () => {
   const response = await fetch("/api/v1/projects", { credentials: "include" });
-  if (!response.ok) throw new Error("No projects");
+  if (!response.ok) throw new Error("Failed to fetch projects");
   return response.json();
 };
 
 const fetchWorkOrders = async (contract_id: string) => {
   const response = await fetch(`/api/v1/work-orders?contract_id=${contract_id}`, { credentials: "include" });
-  return response.json();
-};
-
-const fetchSignals = async (project_id: string) => {
-  const response = await fetch(`/api/v1/ai/signals?project_id=${project_id}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch work orders");
   return response.json();
 };
 
 const ProjectReviewPage = () => {
-  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Completed" | "On Hold" | "Cancelled">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Active" | "Completed" | "On Hold">("All");
 
-  const projectsQuery = useQuery({
-    queryKey: ["projects"],
-    queryFn: fetchProjects,
+  const { data: projects, isLoading, isError } = useQuery(["projects"], fetchProjects, {
     refetchInterval: 300000,
   });
 
-  if (projectsQuery.isError) return <EmptyState title="No projects" description="There are no projects available." />;
-  if (projectsQuery.isLoading || !projectsQuery.data) return <LoadingState />;
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load projects" />;
 
-  const projects = projectsQuery.data;
+  const today = new Date().toISOString().slice(0, 10);
   const totalProjects = projects.length;
-  const activeProjects = projects.filter(p => p.status === "Active").length;
-  const completedProjects = projects.filter(p => p.status === "Completed").length;
-  const atRiskProjects = projects.filter(p => p.status === "Active" && new Date(p.end_date) - new Date() <= 14 * 86400000).length;
+  let activeCount = 0;
+  let atRiskCount = 0;
+  let completedCount = 0;
+
+  projects.forEach(project => {
+    if (project.status === "Active") activeCount++;
+    if (project.status === "Completed") completedCount++;
+    if (project.status === "On Hold") return;
+    const daysRemaining = Math.ceil((new Date(project.end_date) - new Date()) / 86400000);
+    if (daysRemaining <= 14) atRiskCount++;
+  });
+
+  const filteredProjects = projects.filter(project => {
+    if (statusFilter === "All") return true;
+    if (statusFilter === "Active" && project.status === "Active") return true;
+    if (statusFilter === "Completed" && project.status === "Completed") return true;
+    if (statusFilter === "On Hold" && project.status === "On Hold") return true;
+    return false;
+  });
+
+  const onTrackPercentage = ((totalProjects - atRiskCount) / totalProjects) * 100;
 
   return (
     <PageWrapper>
       <PageHeader title="Project Review" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Projects", value: totalProjects },
-            { label: "Active", value: activeProjects, color: "green" },
-            { label: "Completed", value: completedProjects, color: "blue" },
-            { label: "At Risk", value: atRiskProjects, color: "red" },
-          ]}
-        />
-      </SectionCard>
+      <div className="flex gap-4">
+        <MetricStrip label="Total Projects" value={totalProjects} />
+        <MetricStrip label="Active" value={activeCount} />
+        <MetricStrip label="At Risk" value={atRiskCount} color="red" />
+        <MetricStrip label="Completed" value={completedCount} />
+      </div>
       <div className="flex gap-4">
         <button
           onClick={() => setStatusFilter("All")}
-          className={`px-3 py-2 rounded bg-white border ${
-            statusFilter === "All" ? "border-blue-500 text-blue-500" : "text-gray-600"
-          }`}
+          className={`btn ${statusFilter === "All" ? "btn-active" : ""}`}
         >
           All
         </button>
         <button
           onClick={() => setStatusFilter("Active")}
-          className={`px-3 py-2 rounded bg-white border ${
-            statusFilter === "Active" ? "border-green-500 text-green-500" : "text-gray-600"
-          }`}
+          className={`btn ${statusFilter === "Active" ? "btn-active" : ""}`}
         >
           Active
         </button>
         <button
           onClick={() => setStatusFilter("Completed")}
-          className={`px-3 py-2 rounded bg-white border ${
-            statusFilter === "Completed" ? "border-blue-500 text-blue-500" : "text-gray-600"
-          }`}
+          className={`btn ${statusFilter === "Completed" ? "btn-active" : ""}`}
         >
           Completed
         </button>
         <button
           onClick={() => setStatusFilter("On Hold")}
-          className={`px-3 py-2 rounded bg-white border ${
-            statusFilter === "On Hold" ? "border-yellow-500 text-yellow-500" : "text-gray-600"
-          }`}
+          className={`btn ${statusFilter === "On Hold" ? "btn-active" : ""}`}
         >
           On Hold
         </button>
-        <button
-          onClick={() => setStatusFilter("Cancelled")}
-          className={`px-3 py-2 rounded bg-white border ${
-            statusFilter === "Cancelled" ? "border-red-500 text-red-500" : "text-gray-600"
-          }`}
-        >
-          Cancelled
-        </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {projects
-          .filter(p => statusFilter === "All" || p.status === statusFilter)
-          .map(project => (
-            <SectionCard key={project.id}>
-              <h3 className="font-bold">{project.name}</h3>
-              <StatusBadge status={project.status} />
-              <div className="flex items-center gap-2">
-                {new Date(project.start_date).toLocaleDateString()} → {new Date(project.end_date).toLocaleDateString()}
-              </div>
-              <div className="text-red-500" style={{ display: new Date() - new Date(project.end_date) <= 14 * 86400000 ? "block" : "none" }}>
-                AT RISK
-              </div>
-              <div>WO Count: {project.contract_id ? fetchWorkOrders(project.contract_id).then(data => data.length) : 0}</div>
-              {project.budget && <div>Budget: {new Intl.NumberFormat("en-US", { style: "currency", currency: "EGP" }).format(project.budget)}</div>}
-            </SectionCard>
-          ))}
-      </div>
-    </PageWrapper>
-  );
-};
-
-export default ProjectReviewPage;
+      {filteredProjects.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProjects.map(project => {
+            const daysRemaining = Math.ceil((new Date(project.end_date) - new Date()) / 86400000);
+            return (
+              <SectionCard key={project.id}>
+                <h3 className="font-bold">{project.name}</h3>
+                <StatusBadge status={project.status} />
+                <div className="flex items-center gap-2">
+                  {daysRemaining <= 14 && <span className="badge badge-error">AT RISK</span>}
+                  <span>{`${new Date(project.start_date).toLocaleDateString()} - ${new Date(project.end_date).toLocaleDateString()}`}</span>
+                  {daysRemaining > 0 && (
+                    <span className={`text-${daysRemaining <= 14 ? "error" : daysRemaining <= 30 ? "warning" : "success"}-600`}>
+                      {daysRemaining} days remaining
+                    </span>
+                  )}
+                </div>
+                <Link href={`/projects/${project.id}`}>
+                  View Work Orders ({fetchWorkOrders(project.contract_id).then(data => data.length)})
+                </Link>
+              </SectionCard>
+            );
+          })}
+        </div>
+      ) : (
+        <EmptyState title="No projects found" />
+      )}
+      <div className="mt-8">
+        <h4>Schedule Health Summary</h4>
+        <div className="flex items-center gap-2">
+          <span>{onTrackPercentage.toFixed(0)}% on track</span>
+          <progress value={onTrackPercentage} max="100" className="progress progress-info w-full"></progress>
+          <span>{atRiskCount / totalProjects * 100}% at risk</span
