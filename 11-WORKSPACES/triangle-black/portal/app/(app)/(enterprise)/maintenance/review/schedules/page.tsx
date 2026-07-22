@@ -1,41 +1,103 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["maintenance-review-schedules"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/schedule"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchPMPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  return response.json();
+};
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch assets");
+  return response.json();
+};
+
+const MaintenanceReviewPage = () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const weekEnds = Array.from({ length: 4 }, (_, i) => new Date(Date.now() + (i + 1) * 7 * 86400000).toISOString().slice(0, 10));
+
+  const { data: pmPlansData, isLoading: isPMPlansLoading, error: pmPlansError } = useQuery(["pm-plans"], fetchPMPlans, {
+    refetchInterval: 120000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Plan", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"asset", label:"Asset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["asset"]??"—")}</span>) },
-    { key:"next_due", label:"Next Due", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["next_due"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+
+  const { data: assetsData, isLoading: isAssetsLoading, error: assetsError } = useQuery(["assets"], fetchAssets, {
+    refetchInterval: 120000,
+  });
+
+  if (isPMPlansLoading || isAssetsLoading) return <LoadingState />;
+  if (pmPlansError || assetsError) return <EmptyState />;
+
+  const pmPlans = pmPlansData as { next_due_date: string; frequency: string; status: string; plan_type: string }[];
+  const assets = assetsData as { asset_node_id: string; name: string }[];
+
+  // Calculate metrics
+  const totalPlans = pmPlans.length;
+  const overdueCount = pmPlans.filter(p => p.next_due_date < today).length;
+  const dueThisWeekCount = pmPlans.filter(p => p.next_due_date >= today && p.next_due_date <= weekEnds[0]).length;
+  const dueThisMonthCount = pmPlans.filter(p => p.next_due_date >= today && p.next_due_date <= new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10)).length;
+
+  // Frequency distribution
+  const frequencyDistribution = pmPlans.reduce((acc, plan) => {
+    acc[plan.frequency] = (acc[plan.frequency] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Schedule Review" subtitle={`${items.length} records`} badge="SCH"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📅" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Maintenance Schedule Review" />
+      <div className="grid grid-cols-4 gap-4">
+        <MetricStrip label="Total Plans" value={totalPlans} />
+        <MetricStrip label="Overdue" value={overdueCount} status={StatusBadge.Danger} />
+        <MetricStrip label="Due This Week" value={dueThisWeekCount} status={StatusBadge.Warning} />
+        <MetricStrip label="Due This Month" value={dueThisMonthCount} status={StatusBadge.Success} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </PageWrapper>
-  );
-}
+      {/* Schedule view */}
+      {weekEnds.map((weekEnd, index) => (
+        <SectionCard key={index}>
+          <h3 className="text-lg font-semibold">Week {index + 1}</h3>
+          <ul>
+            {pmPlans
+              .filter(p => p.next_due_date >= today && p.next_due_date <= weekEnd)
+              .slice(0, 3)
+              .map((plan, i) => (
+                <li key={i}>{assets.find(a => a.asset_node_id === plan.plan_type)?.name}</li>
+              ))}
+          </ul>
+        </SectionCard>
+      ))}
+      {/* Full Schedule Table */}
+      <SectionCard>
+        <h3 className="text-lg font-semibold">Full Schedule</h3>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Frequency</th>
+              <th>Next Due Date</th>
+              <th>Days Until Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pmPlans
+              .sort((a, b) => {
+                if (a.next_due_date < b.next_due_date) return -1;
+                if (a.next_due_date > b.next_due_date) return 1;
+                return 0;
+              })
+              .map((plan, index) => (
+                <tr key={index}>
+                  <td>{assets.find(a => a.asset_node_id === plan.plan_type)?.name}</td>
+                  <td className="text-center">{plan.frequency}</td>
+                  <td>{plan.next_due_date}</td>
+                  <td className={`text-center ${new Date(plan.next_due_date).toISOString().slice(0, 10) < today ? "text-red-500" : new Date(plan.next_due_date).toISOString().slice(0, 10) - today <= 7 ? "text-yellow-500" : "text-green-500"}`}>
+                    {new Date(plan.next_due_date).toISOString().slice(0, 10) < today ? "Overdue" : new Date(plan.next_due_date).toISOString().slice(0, 10) - today}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </

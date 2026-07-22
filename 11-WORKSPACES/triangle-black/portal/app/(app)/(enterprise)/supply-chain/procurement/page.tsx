@@ -1,41 +1,68 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-procurement"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/procurement/dashboard"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"count", label:"Count", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["count"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchPurchaseRequests = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-requests/", { credentials: "include" });
+  return response.json();
+};
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
+  return response.json();
+};
+
+const ProcurementPage = () => {
+  const { data: purchaseRequests, isLoading: isPRLoading } = useQuery(["purchase-requests"], fetchPurchaseRequests, { refetchInterval: 120000 });
+  const { data: purchaseOrders, isLoading: isPOLoading } = useQuery(["purchase-orders"], fetchPurchaseOrders, { refetchInterval: 120000 });
+
+  if (isPRLoading || isPOLoading) return <LoadingState />;
+
+  const draftPRs = purchaseRequests.filter(pr => pr.status === "draft").length;
+  const approvedPRs = purchaseRequests.filter(pr => pr.status === "approved").length;
+  const activePOs = purchaseOrders.filter(po => po.status === "active").length;
+  const totalSpendEGP = (purchaseRequests.reduce((acc, pr) => acc + pr.amount, 0) + purchaseOrders.reduce((acc, po) => acc + po.amount, 0)).toFixed(2);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Procurement Dashboard" subtitle={`${items.length} records`} badge="PROC"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🛒" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Procurement Overview" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricStrip label="Draft PRs" value={draftPRs} />
+        <MetricStrip label="Approved PRs" value={approvedPRs} />
+        <MetricStrip label="Active POs" value={activePOs} />
+        <MetricStrip label="Total Spend EGP" value={totalSpendEGP} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Procurement Lifecycle Funnel">
+        <div className="flex items-center justify-between text-sm font-medium">
+          <span>Draft PRs</span>
+          <span>→</span>
+          <span>Approved PRs</span>
+          <span>→</span>
+          <span>POs Created</span>
+          <span>→</span>
+          <span>POs Received</span>
+        </div>
+      </SectionCard>
+      <SectionCard title="Recent Activity">
+        {purchaseRequests.slice(0, 5).concat(purchaseOrders.slice(0, 5)).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(item => (
+          <div key={item.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+            <span>{item.reference_number}</span>
+            <StatusBadge type={item.type} />
+            <StatusBadge status={item.status} />
+            <span>{item.amount.toFixed(2)} EGP</span>
+            <span>{new Date(item.created_at).toLocaleDateString()}</span>
+          </div>
+        ))}
+      </SectionCard>
+      <SectionCard title="Quick Actions">
+        <Link href="/supply-chain/purchase-requests" className="block py-2 px-4 text-center bg-blue-500 text-white rounded hover:bg-blue-600">New PR</Link>
+        <Link href="/supply-chain/queue" className="block py-2 px-4 text-center bg-green-500 text-white rounded hover:bg-green-600">View Queue</Link>
+        <Link href="/supply-chain/vendors/analytics" className="block py-2 px-4 text-center bg-purple-500 text-white rounded hover:bg-purple-600">Check Vendors</Link>
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default ProcurementPage;
