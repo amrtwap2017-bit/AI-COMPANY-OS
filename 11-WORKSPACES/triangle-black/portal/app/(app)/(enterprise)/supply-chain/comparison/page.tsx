@@ -1,116 +1,109 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-import { useState } from "react";
+import {
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState
+} from "@/components/ui";
 
-const fetchRfqs = async () => {
-  const response = await fetch("/api/v1/rfqs", { credentials: "include" });
-  if (!response.ok) throw new Error("RFQs not found");
-  return response.json();
-};
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
-const fetchVendors = async () => {
-  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
-  if (!response.ok) throw new Error("Vendors not found");
-  return response.json();
-};
+async function fetchVendors() {
+  const r = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+  if (!r.ok) {
+    const r2 = await fetch(`${BACK}/api/v1/supply-chain/vendors`, { credentials: "include" });
+    if (!r2.ok) return [];
+    const d = await r2.json();
+    return Array.isArray(d) ? d : [];
+  }
+  const d = await r.json();
+  return Array.isArray(d) ? d : [];
+}
 
-const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
-  if (!response.ok) throw new Error("Purchase orders not found");
-  return response.json();
-};
+async function fetchPOs() {
+  const r = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : [];
+}
 
-const ComparisonPage = () => {
-  const [rfqs, setRfqs] = useState<any[]>([]);
-  const [vendors, setVendors] = useState<any[]>([]);
-  const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
-
-  const { data: rfqData, isLoading: isRfqLoading, isError: isRfqError } = useQuery(["rfqs"], fetchRfqs, {
-    refetchInterval: 300000,
+export default function ComparisonPage() {
+  const { data: vendors = [], isLoading: v1 } = useQuery({
+    queryKey: ["comp-vendors"], queryFn: fetchVendors, refetchInterval: 300000,
+  });
+  const { data: pos = [], isLoading: p1 } = useQuery({
+    queryKey: ["comp-pos"], queryFn: fetchPOs, refetchInterval: 300000,
   });
 
-  const { data: vendorData, isLoading: isVendorLoading, isError: isVendorError } = useQuery(["vendors"], fetchVendors, {
-    refetchInterval: 300000,
-  });
+  const isLoading = v1 || p1;
 
-  const { data: purchaseOrderData, isLoading: isPurchaseOrderLoading, isError: isPurchaseOrderError } = useQuery(
-    ["purchaseOrders"],
-    fetchPurchaseOrders,
-    {
-      refetchInterval: 300000,
-    }
-  );
+  const vendorScores = vendors.slice(0, 5).map((v) => {
+    const poCount = pos.filter((p) => p.vendor_id === v.id).length;
+    const leadScore = v.lead_time_days ? Math.max(0, 40 - v.lead_time_days * 2) : 20;
+    const maxPO = Math.max(...vendors.map((x) => pos.filter((p) => p.vendor_id === x.id).length), 1);
+    const poScore = Math.round((poCount / maxPO) * 60);
+    return { ...v, poCount, score: leadScore + poScore };
+  }).sort((a, b) => b.score - a.score);
 
-  if (isRfqLoading || isVendorLoading || isPurchaseOrderLoading) return <LoadingState />;
-  if (isRfqError || isVendorError || isPurchaseOrderError) return <EmptyState />;
+  const best = vendorScores[0];
+  const fastestDelivery = vendors.length > 0
+    ? vendors.reduce((a, b) => (a.lead_time_days || 999) < (b.lead_time_days || 999) ? a : b)
+    : null;
 
-  setRfqs(rfqData);
-  setVendors(vendorData);
-  setPurchaseOrders(purchaseOrderData);
-
-  // Calculate metrics
-  const totalVendors = vendors.length;
-  const rfqsWithQuotes = rfqs.filter((rfq: any) => rfq.quotes.length > 0).length;
-
-  // Find best value and fastest delivery vendors
-  const bestValueVendor = vendors.sort((a, b) => a.quotes[0].price - b.quotes[0].price)[0];
-  const fastestDeliveryVendor = vendors.sort((a, b) => a.quotes[0].lead_time_days - b.quotes[0].lead_time_days)[0];
-
-  // Vendor comparison matrix
-  const vendorMatrix = vendors.slice(0, 5).map((vendor: any) => {
-    const poCount = purchaseOrders.filter((po: any) => po.vendor_id === vendor.id).length;
-    const maxPoCount = Math.max(...vendors.map((v: any) => purchaseOrders.filter((po: any) => po.vendor_id === v.id).length));
-    const score = ((1 / vendor.quotes[0].lead_time_days) * 40 + (poCount / maxPoCount) * 60);
-    return { ...vendor, score };
-  });
-
-  // Recommended vendor
-  const recommendedVendor = vendorMatrix.sort((a, b) => b.score - a.score)[0];
+  if (isLoading) return <LoadingState message="Loading vendor comparison..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Quote and Vendor Comparison" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <SectionCard title="Metrics">
-          <MetricStrip label="Total Vendors" value={totalVendors} />
-          <MetricStrip label="RFQs with Quotes" value={rfqsWithQuotes} />
-          <MetricStrip label="Best Value Vendor" value={bestValueVendor.name}>
-            <StatusBadge color="green">Lowest Price</StatusBadge>
-          </MetricStrip>
-          <MetricStrip label="Fastest Delivery Vendor" value={fastestDeliveryVendor.name}>
-            <StatusBadge color="blue">Lowest Lead Time</StatusBadge>
-          </MetricStrip>
-        </SectionCard>
-        <SectionCard title="Vendor Comparison Matrix">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>Vendor Name</th>
-                <th>Category</th>
-                <th>Lead Time</th>
-                <th>Payment Terms</th>
-                <th>PO Count</th>
-                <th>Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vendorMatrix.map((vendor: any) => (
-                <tr key={vendor.id} className={vendor.score === recommendedVendor.score ? "bg-green-100" : ""}>
-                  <td>{vendor.name}</td>
-                  <td>{vendor.category}</td>
-                  <td>{vendor.quotes[0].lead_time_days} days</td>
-                  <td>{vendor.payment_terms}</td>
-                  <td>{purchaseOrders.filter((po: any) => po.vendor_id === vendor.id).length}</td>
-                  <td>{vendor.score.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </SectionCard>
-      </div>
-      {rfqs.length > 0 ? (
-        <SectionCard title="RFQ Comparison">
-          {/* RFQ comparison logic here
+      <PageHeader
+        title="Vendor Comparison"
+        subtitle="Side-by-side vendor scoring and evaluation"
+        badge="AI Scored"
+      />
+
+      <MetricStrip metrics={[
+        { label: "Total Vendors",     value: vendors.length },
+        { label: "Recommended",       value: best?.name?.split(" ")[0] || "—" },
+        { label: "Fastest Delivery",  value: fastestDelivery ? `${fastestDelivery.lead_time_days}d` : "—" },
+        { label: "Active POs",        value: pos.filter((p) => p.status !== "cancelled").length },
+      ]} />
+
+      <SectionCard title="Vendor Scoring Matrix">
+        {vendorScores.length === 0 ? (
+          <EmptyState title="No vendors" description="No vendor data available" />
+        ) : (
+          <div className="space-y-3">
+            {vendorScores.map((v, i) => (
+              <div key={v.id} className={`flex items-center gap-4 px-4 py-3 rounded-lg border ${
+                i === 0 ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"
+              }`}>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-slate-800">{v.name}</p>
+                    {i === 0 && <StatusBadge status="recommended" label="Recommended" />}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {v.category} · Lead time: {v.lead_time_days || "?"}d · {v.poCount} POs
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-slate-700">{v.score}</p>
+                  <p className="text-xs text-slate-400">score</p>
+                </div>
+                <div className="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${v.score}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard title="RFQ Comparison">
+        <EmptyState
+          title="Submit RFQs to compare quotes"
+          description="Create RFQs from Supply Chain Workbench and send to multiple vendors to compare responses here."
+        />
+      </SectionCard>
+    </PageWrapper>
+  );
+}
