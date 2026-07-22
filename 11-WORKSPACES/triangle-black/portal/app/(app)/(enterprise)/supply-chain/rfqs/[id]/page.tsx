@@ -1,41 +1,104 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-actions-procurement-rfqs"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/procurement/rfqs"),
-    staleTime: 30_000, retry: 1,
+import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchRfqs = async () => {
+  const response = await fetch("/api/v1/rfqs", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch RFQs");
+  return response.json();
+};
+
+const fetchVendors = async () => {
+  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch vendors");
+  return response.json();
+};
+
+export default function RfqPage() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id;
+
+  const { data: rfqs, isLoading, isError } = useQuery(["rfqs"], fetchRfqs, {
+    refetchInterval: 120000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"rfq_number", label:"RFQ #", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["rfq_number"]??"—")}</span>) },
-    { key:"supplier", label:"Supplier", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["supplier"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"amount", label:"Amount", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["amount"]??"—")}</span>) },
-  ];
+
+  const { data: vendors, isVendorsLoading, isVendorsError } = useQuery(
+    ["vendors"],
+    fetchVendors,
+    {
+      refetchInterval: 120000,
+    }
+  );
+
+  if (isLoading || isVendorsLoading) return <LoadingState />;
+
+  if (isError || isVendorsError) return <EmptyState message="Failed to load data" />;
+
+  const rfq = rfqs.find((r) => r.id === id);
+
+  if (!rfq) {
+    return (
+      <PageWrapper>
+        <EmptyState
+          message="RFQ not found"
+          action={
+            <Link href="/supply-chain/rfqs">
+              <button className="btn btn-primary">Back to RFQs</button>
+            </Link>
+          }
+        />
+      </PageWrapper>
+    );
+  }
+
+  const vendorNames = rfq.vendor_ids
+    .map((vendorId) => vendors.find((v) => v.id === vendorId)?.name)
+    .filter(Boolean);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="RFQ Detail" subtitle={`${items.length} records`} badge="RFQ"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📝" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title={rfq.rfq_number}>
+        <StatusBadge status={rfq.status} />
+        <p className="text-sm text-gray-500">{new Date(rfq.created_at).toLocaleDateString()}</p>
+      </PageHeader>
+      <SectionCard title="Metrics">
+        <MetricStrip
+          metrics={[
+            { label: "Lines Count", value: rfq.lines_count },
+            { label: "Vendors Invited", value: rfq.vendor_ids.length },
+            { label: "Quotes Received", value: rfq.quotes_received },
+            { label: "Days Open", value: Math.floor((new Date() - new Date(rfq.created_at)) / (1000 * 60 * 60 * 24)) },
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Details">
+        <p>{rfq.description}</p>
+        <p>Deadline: {new Date(rfq.deadline).toLocaleDateString()}</p>
+        <p>Notes: {rfq.notes}</p>
+      </SectionCard>
+      <SectionCard title="Vendor Quotes">
+        <ul className="list-disc pl-4">
+          {vendorNames.map((name, index) => (
+            <li key={index}>{name}</li>
+          ))}
+        </ul>
+      </SectionCard>
+      <Link href="/supply-chain/rfqs">
+        <button className="btn btn-primary mt-4">Back to RFQs</button>
+      </Link>
     </PageWrapper>
   );
 }
