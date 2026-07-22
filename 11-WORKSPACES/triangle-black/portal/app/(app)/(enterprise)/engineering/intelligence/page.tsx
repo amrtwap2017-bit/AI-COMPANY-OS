@@ -1,41 +1,107 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["engineering-intelligence"],
-    queryFn:  () => authFetchJSON("/api/v1/projects/intelligence/summary"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"signal", label:"Signal", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["signal"]??"—")}</span>) },
-    { key:"project", label:"Project", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["project"]??"—")}</span>) },
-    { key:"risk", label:"Risk", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["risk"]??"—")}</span>) },
-    { key:"action", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["action"]??"—")}</span>) },
-  ];
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, Progress } from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch signals");
+  return response.json();
+};
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets?category=HVAC,Electrical,Mechanical,Elevator", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch assets");
+  return response.json();
+};
+
+const fetchPmPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  return response.json();
+};
+
+const EngineeringPage = () => {
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
+  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
+  const assetsQuery = useQuery(["assets"], fetchAssets, { refetchInterval: 60000 });
+  const pmPlansQuery = useQuery(["pm-plans"], fetchPmPlans, { refetchInterval: 60000 });
+
+  if (signalsQuery.isLoading || kpisQuery.isLoading || assetsQuery.isLoading || pmPlansQuery.isLoading) {
+    return <LoadingState />;
+  }
+
+  if (signalsQuery.isError || kpisQuery.isError || assetsQuery.isError || pmPlansQuery.isError) {
+    return <EmptyState message="Failed to load data" />;
+  }
+
+  const signals = signalsQuery.data.filter(signal => signal.category === "engineering");
+  const criticalSignals = signals.filter(signal => signal.priority === "critical");
+  const openWorkOrders = kpisQuery.data.open_work_orders.filter(wo => wo.status === "open");
+
+  const assets = assetsQuery.data;
+  const healthScores = assets.map(asset => {
+    let health = 100;
+    const correctiveWos = kpisQuery.data.work_orders.filter(wo => wo.asset_id === asset.id && wo.type === "corrective");
+    health -= correctiveWos.length * 20;
+    return { ...asset, health };
+  }).sort((a, b) => a.health - b.health);
+
+  const pmPlans = pmPlansQuery.data;
+  const overduePlans = pmPlans.filter(plan => new Date(plan.next_due_date) < new Date());
+  const dueSoonPlans = pmPlans.filter(plan => new Date(plan.next_due_date) >= new Date() && new Date(plan.next_due_date) <= new Date(new Date().setDate(new Date().getDate() + 14)));
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Engineering Intelligence" subtitle={`${items.length} records`} badge="INTEL"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🧠" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Engineering Dashboard" />
+      <SectionCard title="Engineering Metrics">
+        <MetricStrip
+          metrics={[
+            { label: "Total Engineering Assets", value: assets.length },
+            { label: "Critical Signals", value: criticalSignals.length, badgeColor: "red" },
+            { label: "Open Work Orders", value: openWorkOrders.length, badgeColor: "orange" },
+            { label: "PM Plans Due", value: overduePlans.length + dueSoonPlans.length }
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Live Engineering Signals">
+        <Progress
+          items={signals.map(signal => ({
+            priorityBorder: signal.priority === "critical" ? "red" : signal.priority === "high" ? "orange" : "blue",
+            title: signal.title,
+            message: signal.message,
+            action: signal.action
+          }))}
+          groupByPriority
+        />
+      </SectionCard>
+      <SectionCard title="Engineering Asset Health">
+        <Progress
+          items={healthScores.slice(0, 8).map(asset => ({
+            name: asset.name,
+            category: asset.category,
+            health: `${asset.health}%`,
+            badgeColor: asset.health < 50 ? "red" : asset.health < 75 ? "orange" : "green"
+          }))}
+        />
+      </SectionCard>
+      <SectionCard title="PM Schedule Summary">
+        <Progress
+          items={[
+            { label: "Overdue", value: overduePlans.length, badgeColor: "red" },
+            { label: "Due Soon", value: dueSoonPlans.length, badgeColor: "orange" },
+            { label: "Active", value: pmPlans.length - overduePlans.length - dueSoonPlans.length, badgeColor: "green" }
+          ]}
+        />
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default EngineeringPage;
