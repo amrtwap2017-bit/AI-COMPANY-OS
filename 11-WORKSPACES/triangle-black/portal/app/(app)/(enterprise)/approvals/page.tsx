@@ -1,178 +1,175 @@
 "use client"; // @ts-nocheck
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-  Button,
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState, Button
 } from "@/components/ui";
-import { fetchWithCredentials, toast } from "@/utils";
 
-const APPROVALS_URL = "/api/v1/inventory/purchase-requests";
-const APPROVE_URL = "/api/v1/actions/inventory/purchase-requests/";
-const ORDERS_URL = "/api/v1/inventory/purchase-orders";
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
-const getPendingPRs = async () => {
-  const response = await fetchWithCredentials(APPROVALS_URL, { method: "GET" });
-  return response.json();
-};
+async function fetchPRs() {
+  const r = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
+}
 
-const approvePR = async (prId: string) => {
-  const response = await fetchWithCredentials(
-    `${APPROVE_URL}${prId}/approve`,
-    { method: "POST" }
-  );
-  if (!response.ok) throw new Error("Failed to approve PR");
-  return response.json();
-};
-
-const getRecentlyApprovedPRs = async () => {
-  const response = await fetchWithCredentials(APPROVALS_URL, { method: "GET" });
-  const prs = await response.json();
-  return prs.filter((pr: any) => pr.status === "approved").slice(0, 5);
-};
-
-const getPurchaseOrders = async () => {
-  const response = await fetchWithCredentials(ORDERS_URL, { method: "GET" });
-  return response.json();
-};
+async function fetchPOs() {
+  const r = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
+}
 
 export default function ApprovalsPage() {
-  const { data: pendingPRs, isLoading: isPendingLoading } = useQuery(
-    ["pendingPRs"],
-    getPendingPRs
-  );
+  const [approving, setApproving] = useState({});
+  const [messages, setMessages] = useState({});
 
-  const { data: recentlyApprovedPRs, isLoading: isRecentlyApprovedLoading } =
-    useQuery(["recentlyApprovedPRs"], getRecentlyApprovedPRs);
-
-  const approveMutation = useMutation(approvePR, {
-    onSuccess: () => {
-      toast.success("Purchase Request approved successfully");
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
+  const { data: prs = [], isLoading: prsLoading, refetch } = useQuery({
+    queryKey: ["approvals-prs"],
+    queryFn: fetchPRs,
+    refetchInterval: 60000,
   });
+  const { data: pos = [], isLoading: posLoading } = useQuery({
+    queryKey: ["approvals-pos"],
+    queryFn: fetchPOs,
+    refetchInterval: 60000,
+  });
+
+  const isLoading = prsLoading || posLoading;
+
+  const pending  = prs.filter((p) => p.status === "draft" || p.status === "pending");
+  const urgent   = pending.filter((p) => p.urgency === "urgent");
+  const approved = prs.filter((p) => p.status === "approved").slice(0, 5);
+
+  const sorted = [...pending].sort((a, b) => {
+    if (a.urgency === "urgent" && b.urgency !== "urgent") return -1;
+    if (b.urgency === "urgent" && a.urgency !== "urgent") return 1;
+    if (a.priority === "high" && b.priority !== "high") return -1;
+    if (b.priority === "high" && a.priority !== "high") return 1;
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  });
+
+  async function handleApprove(prId) {
+    setApproving((prev) => ({ ...prev, [prId]: true }));
+    try {
+      const r = await fetch(
+        `${BACK}/api/v1/actions/inventory/purchase-requests/${prId}/approve`,
+        { method: "POST", credentials: "include" }
+      );
+      if (r.ok) {
+        setMessages((prev) => ({ ...prev, [prId]: "Approved" }));
+        refetch();
+      } else {
+        setMessages((prev) => ({ ...prev, [prId]: `Error ${r.status}` }));
+      }
+    } catch (e) {
+      setMessages((prev) => ({ ...prev, [prId]: "Network error" }));
+    } finally {
+      setApproving((prev) => ({ ...prev, [prId]: false }));
+    }
+  }
+
+  if (isLoading) return <LoadingState message="Loading approval queue..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Approvals" />
-      <SectionCard title="Metrics">
-        <MetricStrip
-          metrics={[
-            { label: "Pending PRs", value: pendingPRs?.length || 0, color: "blue" },
-            {
-              label: "Urgent",
-              value: pendingPRs?.filter((pr: any) => pr.urgency === "urgent").length || 0,
-              color: "red",
-            },
-            {
-              label: "High Priority",
-              value: pendingPRs?.filter((pr: any) => pr.priority === "high").length || 0,
-              color: "orange",
-            },
-            {
-              label: "Approved Today",
-              value: pendingPRs?.filter(
-                (pr: any) =>
-                  new Date(pr.approved_at).toDateString() === new Date().toDateString()
-              ).length || 0,
-              color: "green",
-            },
-          ]}
-        />
-      </SectionCard>
+      <PageHeader
+        title="Approvals Center"
+        subtitle="Purchase request approval queue"
+        badge={pending.length > 0 ? `${pending.length} Pending` : undefined}
+      />
+
+      <MetricStrip metrics={[
+        { label: "Pending Approval", value: pending.length, color: "amber" as const },
+        { label: "Urgent",           value: urgent.length,  color: urgent.length > 0 ? "red" as const : "slate" as const },
+        { label: "Approved Total",   value: prs.filter((p) => p.status === "approved").length, color: "green" as const },
+        { label: "Total PRs",        value: prs.length },
+      ]} />
+
       <SectionCard title="Pending Approval Queue">
-        {isPendingLoading ? (
-          <LoadingState />
-        ) : pendingPRs?.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {pendingPRs
-              .sort((a: any, b: any) => {
-                if (a.urgency !== b.urgency) return a.urgency === "urgent" ? -1 : 1;
-                if (a.priority !== b.priority) return a.priority === "high" ? -1 : 1;
-                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-              })
-              .map((pr: any) => (
-                <div key={pr.id} className="bg-white p-4 rounded shadow">
-                  <h3 className="font-bold">{pr.pr_number}</h3>
-                  <div className="flex items-center space-x-2">
-                    <StatusBadge status={pr.urgency} />
-                    <StatusBadge status={pr.priority} />
+        {sorted.length === 0 ? (
+          <EmptyState
+            title="Queue is clear"
+            description="No purchase requests waiting for approval"
+          />
+        ) : (
+          <div className="space-y-3">
+            {sorted.map((pr) => (
+              <div
+                key={pr.id}
+                className={`px-4 py-4 rounded-lg border ${
+                  pr.urgency === "urgent"
+                    ? "border-red-200 bg-red-50"
+                    : pr.priority === "high"
+                    ? "border-amber-200 bg-amber-50"
+                    : "border-slate-200 bg-slate-50"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-slate-800">
+                        {pr.pr_number || `PR-${pr.id?.slice(0, 8)}`}
+                      </span>
+                      <StatusBadge status={pr.urgency || "normal"} />
+                      <StatusBadge status={pr.priority || "medium"} />
+                    </div>
+                    <p className="text-xs text-slate-600">
+                      {pr.requester} · {pr.department || "Engineering"}
+                    </p>
+                    {pr.justification && (
+                      <p className="text-xs text-slate-500 mt-1 italic">
+                        {pr.justification.slice(0, 120)}
+                        {pr.justification.length > 120 ? "..." : ""}
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-400 mt-1">
+                      {Array.isArray(pr.lines) ? pr.lines.length : 0} line items ·
+                      Created {new Date(pr.created_at).toLocaleDateString()}
+                    </p>
+                    {messages[pr.id] && (
+                      <p className={`text-xs font-semibold mt-1 ${
+                        messages[pr.id] === "Approved" ? "text-green-600" : "text-red-600"
+                      }`}>
+                        {messages[pr.id]}
+                      </p>
+                    )}
                   </div>
-                  <p>{pr.requester}</p>
-                  <p>{pr.justification.slice(0, 100)}...</p>
-                  <p>Lines: {pr.lines.length}</p>
-                  <p>Created: {new Date(pr.created_at).toLocaleDateString()}</p>
-                  <div className="flex items-center space-x-2 mt-4">
-                    <Button
-                      onClick={() => approveMutation.mutate(pr.id)}
-                      disabled={approveMutation.isLoading}
-                    >
-                      Approve
-                    </Button>
-                    <a href={`/approvals/${pr.id}`}>View Details</a>
-                  </div>
+                  <Button
+                    onClick={() => handleApprove(pr.id)}
+                    disabled={!!approving[pr.id] || messages[pr.id] === "Approved"}
+                    variant="primary"
+                  >
+                    {approving[pr.id] ? "..." : messages[pr.id] === "Approved" ? "✓" : "Approve"}
+                  </Button>
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
-        ) : (
-          <EmptyState message="No pending purchase requests" />
         )}
       </SectionCard>
+
       <SectionCard title="Recently Approved">
-        {isRecentlyApprovedLoading ? (
-          <LoadingState />
-        ) : recentlyApprovedPRs?.length > 0 ? (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th>PR Number</th>
-                <th>Requester</th>
-                <th>Approved By</th>
-                <th>Approved Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentlyApprovedPRs.map((pr: any) => (
-                <tr key={pr.id}>
-                  <td>{pr.pr_number}</td>
-                  <td>{pr.requester}</td>
-                  <td>{pr.approved_by}</td>
-                  <td>{new Date(pr.approved_at).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {approved.length === 0 ? (
+          <EmptyState title="None yet" description="No approved requests this session" />
         ) : (
-          <EmptyState message="No recently approved purchase requests" />
+          <div className="space-y-2">
+            {approved.map((pr) => (
+              <div key={pr.id} className="flex items-center justify-between px-4 py-3 bg-green-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-slate-800">
+                    {pr.pr_number || `PR-${pr.id?.slice(0, 8)}`}
+                  </p>
+                  <p className="text-xs text-slate-500">{pr.requester} · {pr.approved_by || "System"}</p>
+                </div>
+                <StatusBadge status="approved" />
+              </div>
+            ))}
+          </div>
         )}
-      </SectionCard>
-      <SectionCard title="Quick Stats">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white p-4 rounded shadow">
-            <h3>Draft</h3>
-            <p>{pendingPRs?.filter((pr: any) => pr.status === "draft").length || 0}</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3>Pending</h3>
-            <p>{pendingPRs?.filter((pr: any) => pr.status === "pending").length || 0}</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3>Approved</h3>
-            <p>{pendingPRs?.filter((pr: any) => pr.status === "approved").length || 0}</p>
-          </div>
-          <div className="bg-white p-4 rounded shadow">
-            <h3>Rejected</h3>
-            <p>{pendingPRs?.filter((pr: any) => pr.status === "rejected").length || 0}</p>
-          </div>
-        </div>
       </SectionCard>
     </PageWrapper>
   );
