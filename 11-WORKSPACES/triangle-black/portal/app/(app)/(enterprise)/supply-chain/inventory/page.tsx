@@ -1,41 +1,134 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-actions-dashboard-stats"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/dashboard/stats"),
-    staleTime: 30_000, retry: 1,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"updated", label:"Updated", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["updated"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchItems = async () => {
+  const response = await fetch("/api/v1/inventory/items", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch items");
+  return response.json();
+};
+
+const fetchStockBalances = async () => {
+  try {
+    const response = await fetch("/api/v1/supply-chain/stock-balances", { credentials: "include" });
+    if (response.ok) return response.json();
+  } catch (error) {}
+  const response = await fetch("/api/v1/inventory/stock-balances", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch stock balances");
+  return response.json();
+};
+
+const InventoryPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const itemsQuery = useQuery(["items"], fetchItems, { refetchInterval: 120000 });
+  const stockBalancesQuery = useQuery(["stock-balances"], fetchStockBalances, { refetchInterval: 120000 });
+
+  if (itemsQuery.isLoading || stockBalancesQuery.isLoading) return <LoadingState />;
+
+  if (itemsQuery.isError || stockBalancesQuery.isError) return <EmptyState message="Failed to load data" />;
+
+  const items = itemsQuery.data;
+  const stockBalances = stockBalancesQuery.data;
+
+  const totalItems = items.length;
+  const lowStockCount = items.filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
+  const outOfStockCount = items.filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand === 0).length;
+  const categoriesCount = new Set(items.map(item => item.category)).size;
+
+  const filteredItems = selectedCategory ? items.filter(item => item.category === selectedCategory) : items;
+
+  const reorderAlerts = items
+    .filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.reorder_qty)
+    .map(item => ({
+      name: item.name,
+      currentQty: stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand || 0,
+      reorderQty: item.reorder_qty
+    }));
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Inventory" subtitle={`${items.length} records`} badge="PG"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📋" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Inventory Management" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Items", value: totalItems },
+            { label: "Low Stock", value: lowStockCount, color: "amber" },
+            { label: "Out of Stock", value: outOfStockCount, color: "red" },
+            { label: "Categories", value: categoriesCount }
+          ]}
+        />
+      </SectionCard>
+      <div className="flex gap-4">
+        {["All", "HVAC", "Electrical", "Plumbing", "Mechanical", "Chemicals"].map(category => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category === "All" ? null : category)}
+            className={`px-3 py-2 rounded-md ${
+              selectedCategory === category || (selectedCategory === null && category === "All")
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Inventory Table">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Qty on Hand</th>
+              <th>Min Stock</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredItems.map(item => {
+              const balance = stockBalances.find(balance => balance.item_id === item.id);
+              const status =
+                balance?.qty_on_hand === 0
+                  ? "out_of_stock"
+                  : balance?.qty_on_hand < item.min_stock
+                  ? "low_stock"
+                  : "ok";
+              return (
+                <tr key={item.id}>
+                  <td>{item.item_code}</td>
+                  <td><strong>{item.name}</strong></td>
+                  <td className="text-blue-500">{item.category}</td>
+                  <td>{balance?.qty_on_hand || 0}</td>
+                  <td>{item.min_stock}</td>
+                  <td>
+                    <StatusBadge status={status} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </SectionCard>
+      <SectionCard title="Reorder Alerts">
+        {reorderAlerts.length > 0 ? (
+          <ul>
+            {reorderAlerts.map(alert => (
+              <li key={alert.name}>
+                {alert.name} - Current Qty: {alert.currentQty}, Reorder Qty: {alert.reorderQty}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState message="No reorder alerts" />
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default InventoryPage;

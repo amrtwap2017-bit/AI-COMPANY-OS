@@ -1,41 +1,120 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-maintenance-pm-plans"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/pm-plans"),
-    staleTime: 30_000, retry: 1,
+import { useQuery } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Progress,
+} from "@/components/ui";
+import { useState } from "react";
+
+const fetchPmPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Plan", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"asset", label:"Asset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["asset"]??"—")}</span>) },
-    { key:"frequency", label:"Frequency", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["frequency"]??"—")}</span>) },
-    { key:"next_due", label:"Next Due", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["next_due"]??"—")}</span>) },
-  ];
+  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  return response.json();
+};
+
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", {
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error("Failed to fetch assets");
+  return response.json();
+};
+
+const PmPlansPage = () => {
+  const [planTypeFilter, setPlanTypeFilter] = useState<"all" | "preventive" | "inspection" | "corrective">("all");
+
+  const { data: pmPlansData, isLoading: isPmPlansLoading } = useQuery(["pm-plans"], fetchPmPlans, {
+    refetchInterval: 120000,
+  });
+
+  const { data: assetsData, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, {
+    refetchInterval: 120000,
+  });
+
+  if (isPmPlansLoading || isAssetsLoading) return <LoadingState />;
+
+  if (!pmPlansData || !assetsData) return <EmptyState />;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const totalPlans = pmPlansData.length;
+  const activePlans = pmPlansData.filter((plan) => plan.status === "active").length;
+  const overduePlans = pmPlansData.filter((plan) => plan.next_due_date < today).length;
+  const dueThisWeek = pmPlansData.filter((plan) => {
+    const nextDueDate = new Date(plan.next_due_date);
+    return nextDueDate >= new Date(today) && nextDueDate <= new Date(today + "T6:00:00Z");
+  }).length;
+
+  const preventiveCount = pmPlansData.filter((plan) => plan.plan_type === "preventive").length;
+  const inspectionCount = pmPlansData.filter((plan) => plan.plan_type === "inspection").length;
+  const correctiveCount = pmPlansData.filter((plan) => plan.plan_type === "corrective").length;
+
+  const filteredPmPlans = pmPlansData.filter((plan) => {
+    if (planTypeFilter === "all") return true;
+    if (planTypeFilter === "preventive" && plan.plan_type !== "preventive") return false;
+    if (planTypeFilter === "inspection" && plan.plan_type !== "inspection") return false;
+    if (planTypeFilter === "corrective" && plan.plan_type !== "corrective") return false;
+    return true;
+  });
+
+  const renderPmPlanCard = (plan: any) => {
+    const nextDueDate = new Date(plan.next_due_date);
+    const daysUntilDue = Math.ceil((nextDueDate - new Date()) / (1000 * 60 * 60 * 24));
+    const statusText = daysUntilDue > 0 ? `Due in ${daysUntilDue} days` : `${Math.abs(daysUntilDue)} days overdue`;
+    const statusColor = daysUntilDue > 0 ? "green" : "red";
+
+    return (
+      <SectionCard key={plan.id}>
+        <h3 className="font-bold">{plan.title}</h3>
+        <div className="flex items-center">
+          <span className="mr-2">{plan.plan_type}</span>
+          <StatusBadge status={plan.status} />
+        </div>
+        <p>{nextDueDate.toLocaleDateString()}</p>
+        <p>{statusText}</p>
+        <p>Owner: {plan.owner}</p>
+      </SectionCard>
+    );
+  };
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="PM Plans" subtitle={`${items.length} records`} badge="PM"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📅" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </PageWrapper>
-  );
-}
+      <PageHeader title="Preventive Maintenance Plans" />
+      <div className="flex justify-between mb-4">
+        <MetricStrip label="Total Plans" value={totalPlans} />
+        <MetricStrip label="Active" value={activePlans} />
+        <MetricStrip label="Overdue" value={overduePlans} color="red" />
+        <MetricStrip label="Due This Week" value={dueThisWeek} />
+        <div className="flex">
+          <button
+            onClick={() => setPlanTypeFilter("all")}
+            className={`px-2 py-1 mr-2 ${planTypeFilter === "all" ? "bg-blue-500 text-white" : ""}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setPlanTypeFilter("preventive")}
+            className={`px-2 py-1 mr-2 ${planTypeFilter === "preventive" ? "bg-blue-500 text-white" : ""}`}
+          >
+            Preventive
+          </button>
+          <button
+            onClick={() => setPlanTypeFilter("inspection")}
+            className={`px-2 py-1 mr-2 ${planTypeFilter === "inspection" ? "bg-blue-500 text-white" : ""}`}
+          >
+            Inspection
+          </button>
+          <button
+            onClick={() => setPlanTypeFilter("corrective")}
+            className={`px-2 py-1 ${planTypeFilter === "corrective" ? "bg-blue-500 text-white" : ""}`}
+          >
