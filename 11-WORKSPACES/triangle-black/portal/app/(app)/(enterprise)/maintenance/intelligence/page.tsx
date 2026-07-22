@@ -1,46 +1,176 @@
 "use client";
-// @ts-nocheck
-"use client";
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { authFetchJSON } = useAuthFetch();
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["maintenance-intelligence"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/intelligence"),
-    staleTime: 30_000, retry: 2,
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  MetricCard,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Button,
+  Progress
+} from "@/components/ui";
+
+const fetchMaintenanceSignals = async () => {
+  const response = await useAuthFetch("/api/v1/ai/signals?category=maintenance");
+  return response.json();
+};
+
+const fetchAssets = async () => {
+  const response = await useAuthFetch("/api/v1/assets");
+  return response.json();
+};
+
+const fetchPMPlans = async () => {
+  const response = await useAuthFetch("/api/v1/maintenance/pm-plans");
+  return response.json();
+};
+
+const MaintenanceIntelligencePage = () => {
+  const [assetsInFault, setAssetsInFault] = useState(0);
+  const [criticalAssetsCount, setCriticalAssetsCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const assetsResponse = await useAuthFetch("/api/v1/assets");
+        const assetsData = await assetsResponse.json();
+        const faultCount = assetsData.filter(asset => ["fault", "breakdown"].includes(asset.status)).length;
+        setAssetsInFault(faultCount);
+
+        const criticalCount = assetsData.filter(asset => asset.criticality === "critical").length;
+        setCriticalAssetsCount(criticalCount);
+      } catch (error) {
+        console.error("Error fetching counts:", error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const { data: signals, isLoading: signalsLoading, isError: signalsError } = useQuery({
+    queryKey: ["maintenance-signals"],
+    queryFn: fetchMaintenanceSignals,
+    refetchInterval: 60000
   });
 
-  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+  const { data: assets, isLoading: assetsLoading, isError: assetsError } = useQuery({
+    queryKey: ["assets"],
+    queryFn: fetchAssets
+  });
 
-  const columns = [
-    { key:"title", label:"Insight", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"severity", label:"Severity", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["severity"]??"—")}</span>) },
-    { key:"recommendation", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["recommendation"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+  const { data: pmPlans, isLoading: pmPlansLoading, isError: pmPlansError } = useQuery({
+    queryKey: ["pm-plans"],
+    queryFn: fetchPMPlans
+  });
+
+  if (signalsLoading || assetsLoading || pmPlansLoading) return <LoadingState />;
+
+  if (signalsError || assetsError || pmPlansError) return <EmptyState title="Failed to load data" description="Please try again later." />;
+
+  const filteredSignals = signals.filter(signal => signal.category === "maintenance");
+
+  const operationalAssets = assets.filter(asset => asset.status === "active");
+  const faultAssets = assets.filter(asset => ["fault", "breakdown"].includes(asset.status));
+  const underMaintenanceAssets = assets.filter(asset => asset.status === "under_maintenance");
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Maintenance Intelligence" subtitle={`${items.length} records`} badge="AI"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Maintenance Intelligence" />
+      <SectionCard title="Metrics">
+        <MetricStrip>
+          <MetricCard
+            title="Maintenance Signals"
+            value={filteredSignals.length}
+            icon="signal"
+            color="red"
+          />
+          <MetricCard
+            title="Assets in Fault"
+            value={assetsInFault}
+            icon="alert"
+            color="red"
+          />
+          <MetricCard
+            title="PM Plans Active"
+            value={pmPlans.filter(plan => plan.status === "active").length}
+            icon="calendar"
+            color="green"
+          />
+          <MetricCard
+            title="Critical Assets"
+            value={criticalAssetsCount}
+            icon="warning"
+            color="orange"
+          />
+        </MetricStrip>
+      </SectionCard>
+
+      <SectionCard title="Maintenance Signals">
+        {filteredSignals.length > 0 ? (
+          filteredSignals.map(signal => (
+            <div key={signal.signal_id} className="flex items-center space-x-4 p-2 border-b last:border-b-0">
+              <div className="w-3 h-3 bg-red-500 rounded-full" />
+              <div>
+                <h3 className="font-bold">{signal.title}</h3>
+                <p>{signal.message}</p>
+                <p className="italic">{signal.recommended_action}</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <EmptyState title="Maintenance systems nominal" description="No signals at the moment." />
+        )}
+      </SectionCard>
+
+      <SectionCard title="Asset Health Overview">
+        {assets.length > 0 ? (
+          assets
+            .sort((a, b) => {
+              if (a.status === "fault" && b.status !== "fault") return -1;
+              if (b.status === "fault" && a.status !== "fault") return 1;
+              if (a.criticality === "critical" && b.criticality !== "critical") return -1;
+              if (b.criticality === "critical" && a.criticality !== "critical") return 1;
+              return 0;
+            })
+            .map(asset => (
+              <div key={asset.id} className="flex items-center space-x-4 p-2 border-b last:border-b-0">
+                <span>{asset.name}</span>
+                <StatusBadge status={asset.status} />
+                <StatusBadge status={asset.criticality} />
+                <StatusBadge status={asset.status} />
+              </div>
+            ))
+        ) : (
+          <EmptyState title="No assets found" description="Please check your data source." />
+        )}
+      </SectionCard>
+
+      <SectionCard title="PM Plans Due Soon">
+        {pmPlans.length > 0 ? (
+          pmPlans
+            .filter(plan => plan.next_due_date <= new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) || plan.status === "overdue")
+            .sort((a, b) => a.next_due_date - b.next_due_date)
+            .map(plan => (
+              <div key={plan.title} className="flex items-center space-x-4 p-2 border-b last:border-b-0">
+                <span>{plan.title}</span>
+                <StatusBadge status={plan.status} />
+                <StatusBadge status={plan.plan_type} />
+                <span>{plan.frequency}</span>
+                <span>{plan.next_due_date.toLocaleDateString()}</span>
+              </div>
+            ))
+        ) : (
+          <EmptyState title="No PM plans due soon" description="All PM plans are up to date." />
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default MaintenanceIntelligencePage;

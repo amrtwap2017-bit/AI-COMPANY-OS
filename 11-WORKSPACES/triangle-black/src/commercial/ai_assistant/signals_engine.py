@@ -155,6 +155,36 @@ def generate_signals(db_url: str) -> list:
         except Exception:
             pass
 
+
+        try:
+            r = conn.execute(text(
+                "SELECT count(DISTINCT a.id) FROM assets a "
+                "WHERE (SELECT count(*) FROM work_orders wo "
+                "WHERE wo.asset_id = a.id "
+                "AND wo.type = 'corrective' "
+                "AND wo.created_at > NOW() - INTERVAL '30 days') > 2"
+            ))
+            count = r.scalar() or 0
+            if count > 0:
+                signals.append({
+                    "signal_id": "PREVENTIVE_PM_NEEDED",
+                    "title": f"{count} Assets Need Preventive Maintenance",
+                    "message": (
+                        f"{count} assets have had more than 2 corrective work orders "
+                        "in the last 30 days, indicating a need for preventive maintenance."
+                    ),
+                    "priority": "high",
+                    "category": "maintenance",
+                    "count": count,
+                    "recommended_action": (
+                        "Schedule preventive maintenance for all high-frequency "
+                        "corrective assets immediately."
+                    ),
+                    "data_source": "assets + work_orders"
+                })
+        except Exception:
+            pass
+
     priority_order = {"critical": 0, "high": 1, "medium": 2}
     return sorted(signals, key=lambda x: priority_order.get(x.get("priority", "medium"), 3))
 

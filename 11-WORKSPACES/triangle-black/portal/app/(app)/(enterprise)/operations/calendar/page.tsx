@@ -1,121 +1,172 @@
 "use client";
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState, StatusBadge } from "@/components/ui";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw, Calendar } from "lucide-react";
-import { toast } from "@/lib/toast";
-import { fmtDate } from "@/lib/design-tokens";
 
-export default function OperationsCalendarPage() {
-  const { data = [], isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["ops-calendar"],
-    queryFn: async () => {
-      const res = await authFetch("/api/v1/maintenance/pm-plans");
-      if (!res.ok) return [];
-      const d = await res.json();
-      return Array.isArray(d) ? d : d?.items || [];
-    },
-    staleTime: 30_000,
+import { useState } from "react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Button,
+} from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
+import fetch from "node-fetch";
+
+const getPMPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", {
+    method: "GET",
+    credentials: "include",
   });
+  return response.json();
+};
+
+const getWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders", {
+    method: "GET",
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const CalendarPage = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const { data: pmPlans, isLoading: isPMLoading, isError: isPMError } = useQuery(
+    ["pm-plans"],
+    getPMPlans
+  );
+
+  const { data: workOrders, isLoading: isWorkLoading, isError: isWorkError } =
+    useQuery(["work-orders"], getWorkOrders);
+
+  if (isPMLoading || isWorkLoading) return <LoadingState />;
+  if (isPMError || isWorkError) return <EmptyState />;
 
   const today = new Date();
-  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 13);
 
-  const dueSoon = data.filter((p) => {
-    if (!p.next_due_date) return false;
-    const due = new Date(p.next_due_date);
-    return due >= today && due <= nextWeek;
+  const pmPlansDueThisWeek = pmPlans.filter((plan: any) => {
+    const dueDate = new Date(plan.next_due_date);
+    return dueDate >= startOfWeek && dueDate <= endOfWeek;
   });
 
-  const overdue = data.filter((p) => {
-    if (!p.next_due_date) return false;
-    return new Date(p.next_due_date) < today && p.status === "active";
+  const workOrdersDueThisWeek = workOrders.filter((wo: any) => {
+    const dueDate = new Date(wo.due_date);
+    return dueDate >= startOfWeek && dueDate <= endOfWeek;
   });
 
-  const typeColor = (t) => {
-    if (t === "preventive") return "bg-blue-50 border-blue-200";
-    if (t === "inspection") return "bg-amber-50 border-amber-200";
-    return "bg-slate-50 border-slate-200";
+  const overdueItems = [...pmPlans, ...workOrders].filter((item: any) => {
+    const dueDate = item.type === "PM" ? new Date(item.next_due_date) : new Date(item.due_date);
+    return dueDate < today;
+  });
+
+  const next14DaysTotal = pmPlans.length + workOrders.length;
+
+  const renderDayPills = (date: Date) => {
+    const dayOfWeek = date.getDay();
+    const isToday = date.toDateString() === today.toDateString();
+    const isPast = date < today;
+
+    return (
+      <div
+        key={date.toISOString()}
+        className={`flex flex-col items-center justify-center ${
+          isToday ? "bg-gray-700" : isPast ? "text-gray-500" : ""
+        }`}
+      >
+        {dayOfWeek === 0 && <span>sun</span>}
+        {dayOfWeek === 1 && <span>mon</span>}
+        {dayOfWeek === 2 && <span>tue</span>}
+        {dayOfWeek === 3 && <span>wed</span>}
+        {dayOfWeek === 4 && <span>thu</span>}
+        {dayOfWeek === 5 && <span>fri</span>}
+        {dayOfWeek === 6 && <span>sat</span>}
+        <div className="mt-2">
+          {pmPlansDueThisWeek
+            .filter((plan: any) => {
+              const dueDate = new Date(plan.next_due_date);
+              return dueDate.toDateString() === date.toDateString();
+            })
+            .map((plan: any, index: number) => (
+              <div key={index} className="bg-blue-500 text-white px-2 py-1 rounded-full mb-1 truncate">
+                {plan.title.slice(0, 20)}
+              </div>
+            ))}
+          {workOrdersDueThisWeek
+            .filter((wo: any) => {
+              const dueDate = new Date(wo.due_date);
+              return dueDate.toDateString() === date.toDateString();
+            })
+            .map((wo: any, index: number) => (
+              <div key={index} className="bg-amber-500 text-white px-2 py-1 rounded-full mb-1 truncate">
+                {wo.title.slice(0, 20)}
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCalendarGrid = () => {
+    const days = [];
+    for (let i = 0; i < 21; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(date.getDate() + i);
+      days.push(renderDayPills(date));
+    }
+    return (
+      <div className="grid grid-cols-7 gap-4">
+        {days}
+      </div>
+    );
+  };
+
+  const renderSelectedDayDetail = () => {
+    const itemsDueOnDate = [...pmPlans, ...workOrders].filter((item: any) => {
+      const dueDate = item.type === "PM" ? new Date(item.next_due_date) : new Date(item.due_date);
+      return dueDate.toDateString() === selectedDate.toDateString();
+    });
+
+    if (itemsDueOnDate.length === 0) return <EmptyState />;
+
+    return (
+      <div>
+        {itemsDueOnDate.map((item: any, index: number) => (
+          <div key={index} className="flex items-center justify-between mb-2">
+            <span>{item.title}</span>
+            <StatusBadge status={item.status} />
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="Operations Calendar"
-        subtitle="Upcoming maintenance schedules and PM plans"
-        badge="CAL"
-        actions={
-          <button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
-            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
-          </button>
-        }
-      />
-
-      {isLoading ? <LoadingState type="list" rows={6} /> : (
-        <div className="space-y-5">
-          {overdue.length > 0 && (
-            <SectionCard title={"Overdue (" + overdue.length + ")"} subtitle="Past due date, requires immediate attention">
-              <div className="space-y-2">
-                {overdue.map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl">
-                    <Calendar className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-slate-900">{p.title}</p>
-                      <p className="text-xs text-slate-500 capitalize">{p.plan_type} · {p.frequency}</p>
-                    </div>
-                    <div className="text-xs text-red-600 font-semibold">{fmtDate(p.next_due_date)}</div>
-                  </div>
-                ))}
-              </div>
-            </SectionCard>
-          )}
-
-          <SectionCard title={"Due This Week (" + dueSoon.length + ")"} subtitle="Maintenance plans due in the next 7 days">
-            {dueSoon.length === 0 ? (
-              <EmptyState icon="✅" title="No plans due this week" description="All maintenance is on schedule" />
-            ) : (
-              <div className="space-y-2">
-                {dueSoon.map((p) => (
-                  <div key={p.id} className={"flex items-center gap-3 p-3 rounded-xl border " + typeColor(p.plan_type)}>
-                    <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-slate-900">{p.title}</p>
-                      <p className="text-xs text-slate-500 capitalize">{p.plan_type} · {p.frequency}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">{fmtDate(p.next_due_date)}</span>
-                      <StatusBadge status={p.status || "active"} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </SectionCard>
-
-          <SectionCard title={"All Plans (" + data.length + ")"} subtitle="Complete PM plan schedule">
-            {data.length === 0 ? (
-              <EmptyState icon="📅" title="No PM plans" description="Add preventive maintenance plans to see them here" />
-            ) : (
-              <div className="space-y-2">
-                {data.slice(0, 10).map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm text-slate-900">{p.title}</p>
-                      <p className="text-xs text-slate-400 capitalize">{p.plan_type} · {p.frequency}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">{fmtDate(p.next_due_date)}</span>
-                      <StatusBadge status={p.status || "active"} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </SectionCard>
+      <PageHeader title="Calendar" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "WOs Due This Week", value: workOrdersDueThisWeek.length },
+            { label: "PM Plans Due This Week", value: pmPlansDueThisWeek.length },
+            { label: "Overdue Items", value: overdueItems.length },
+            { label: "Next 14 Days Total", value: next14DaysTotal },
+          ]}
+        />
+      </SectionCard>
+      <div className="flex">
+        <div className="w-1/3">{renderCalendarGrid()}</div>
+        <div className="w-2/3 p-4">
+          {renderSelectedDayDetail()}
         </div>
-      )}
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default CalendarPage;
