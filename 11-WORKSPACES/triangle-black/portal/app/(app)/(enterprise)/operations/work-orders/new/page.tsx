@@ -1,6 +1,5 @@
 "use client";
 // @ts-nocheck
-"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageWrapper, PageHeader, AlertBanner } from "@/components/ui";
@@ -20,6 +19,9 @@ export default function NewWorkOrderPage() {
     due_date: "",
   });
 
+  const [dispatchRec, setDispatchRec] = useState(null);
+  const [dispatchLoading, setDispatchLoading] = useState(false);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title) { setError("Title is required"); return; }
@@ -31,6 +33,26 @@ export default function NewWorkOrderPage() {
         body: JSON.stringify(form),
       } as any);
       toast.success("Work order created");
+      
+        // Sprint 18: Auto-dispatch recommendation
+        setDispatchLoading(true);
+        try {
+          const dispRes = await fetch("/api/v1/ai/dispatch/recommend", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              work_order_type: form.type || "general",
+              priority: form.priority || "medium",
+              hotel_id: "tb-default-hotel-000000000001"
+            })
+          });
+          if (dispRes.ok) {
+            const dispData = await dispRes.json();
+            setDispatchRec(dispData);
+          }
+        } catch {}
+        setDispatchLoading(false);
       router.push("/work-orders");
     } catch (e: any) { setError(e.message || "Failed"); }
     finally { setLoading(false); }
@@ -84,6 +106,28 @@ export default function NewWorkOrderPage() {
           <Link href="/work-orders" className="px-5 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50">Cancel</Link>
         </div>
       </form>
-    </PageWrapper>
+    
+      {/* Sprint 18: Dispatch Recommendation */}
+      {dispatchLoading && (
+        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-sm text-blue-700 animate-pulse">Finding best technician...</p>
+        </div>
+      )}
+      {dispatchRec && dispatchRec.recommended && (
+        <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+          <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
+            Recommended Technician
+          </p>
+          <p className="text-sm font-bold text-slate-800">
+            {dispatchRec.recommended.name}
+          </p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Match score: {Math.round((dispatchRec.recommended.score || 0) * 100)}%
+            {dispatchRec.warning === "all_full" && " · All technicians at capacity"}
+            {dispatchRec.warning === "no_specialist" && " · No specialist available"}
+          </p>
+        </div>
+      )}
+</PageWrapper>
   );
 }
