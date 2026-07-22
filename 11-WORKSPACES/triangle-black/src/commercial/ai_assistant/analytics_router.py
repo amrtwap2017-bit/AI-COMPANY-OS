@@ -189,3 +189,33 @@ def get_analytics_trends(db: Session = Depends(get_db)):
         }
     except Exception as e:
         return {"months": [], "summary": {}, "error": str(e)}
+
+@router.get("/health", summary="AI layer health check")
+def ai_health_check(db: Session = Depends(get_db)):
+    """Health check for the AI operations layer."""
+    checks = {}
+
+    try:
+        count = db.execute(text("SELECT count(*) FROM work_orders")).scalar()
+        checks["database"] = {"status": "ok", "work_orders": count}
+    except Exception as e:
+        checks["database"] = {"status": "error", "error": str(e)}
+
+    # Check signals engine
+    try:
+        from src.commercial.ai_assistant.signals_engine import generate_signals
+        DB_URL = "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"
+        signals = generate_signals(DB_URL)
+        checks["signals_engine"] = {"status": "ok", "signal_count": len(signals)}
+    except Exception as e:
+        checks["signals_engine"] = {"status": "error", "error": str(e)}
+
+    all_ok = all(v.get("status") == "ok" for v in checks.values())
+
+    return {
+        "status": "ok" if all_ok else "degraded",
+        "service": "triangle-black-ai-layer",
+        "version": "1.0.0",
+        "checks": checks,
+        "generated_at": datetime.utcnow().isoformat()
+    }

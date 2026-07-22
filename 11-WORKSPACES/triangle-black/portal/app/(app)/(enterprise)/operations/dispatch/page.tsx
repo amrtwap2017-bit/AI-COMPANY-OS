@@ -1,205 +1,196 @@
-"use client";
-// @ts-nocheck
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  PageHeader, PageWrapper, LoadingState, AlertBanner,
-  StatusBadge, Avatar, Progress, SectionCard, EmptyState,
-} from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import { tokenManager } from "@/lib/auth/token-manager";
-import { toast } from "@/lib/toast";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw, UserCheck, Wrench, MapPin, AlertTriangle } from "lucide-react";
+"use client"; // @ts-nocheck
 
-const PRIORITY_CLS: Record<string, string> = {
-  critical:  "border-red-300 bg-red-50",
-  emergency: "border-red-400 bg-red-100",
-  high:      "border-orange-300 bg-orange-50",
-  medium:    "border-blue-200 bg-blue-50",
-  low:       "border-slate-200 bg-white",
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Progress,
+  Button,
+} from "@/components/ui";
+
+const fetchTechnicians = async () => {
+  const response = await fetch("/api/v1/technicians", { credentials: "include" });
+  return response.json();
 };
 
-async function assignWO(woId: string, techId: string) {
-  const token = tokenManager.getToken();
-  const res = await authFetch("/api/v1/actions/work-orders/" + woId + "/assign", {
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  return response.json();
+};
+
+const dispatchTechnician = async (values) => {
+  const response = await fetch("/api/v1/ai/dispatch/recommend", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: "Bearer " + token } : {}),
     },
-    body: JSON.stringify({ technician_id: techId }),
+    body: JSON.stringify(values),
+    credentials: "include",
   });
-  if (!res.ok) {
-    const d = await res.json().catch(() => ({}));
-    throw new Error(d.detail || "Assignment failed");
-  }
-  return res.json();
-}
+  return response.json();
+};
 
-export default function DispatchPage() {
-  const qc = useQueryClient();
-  const [selectedWO,   setSelectedWO]   = useState<string | null>(null);
-  const [assigning,    setAssigning]    = useState(false);
+const DispatchPage = () => {
+  const { data: technicians, isLoading: techniciansLoading } = useQuery(
+    ["technicians"],
+    fetchTechnicians,
+    { refetchInterval: 30000 }
+  );
 
-  const { data: wos = [], isLoading: wLoading, refetch: refetchWOs } = useQuery({
-    queryKey: ["dispatch-wos"],
-    queryFn: async () => {
-      const r = await authFetch("/api/v1/work-orders/?status=open&limit=50");
-      if (!r.ok) return [];
-      const d = await r.json();
-      return Array.isArray(d) ? d.filter((w: any) => !w.technician_id) : [];
+  const { data: workOrders, isLoading: workOrdersLoading } = useQuery(
+    ["work-orders"],
+    fetchWorkOrders,
+    { refetchInterval: 30000 }
+  );
+
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedPriority, setSelectedPriority] = useState("");
+
+  const dispatchMutation = useMutation(dispatchTechnician, {
+    onSuccess: () => {
+      // Refetch data after successful dispatch
+      techniciansRefetch();
+      workOrdersRefetch();
     },
-    staleTime: 30_000,
-  });
-
-  const { data: techs = [], isLoading: tLoading, refetch: refetchTechs } = useQuery({
-    queryKey: ["dispatch-techs"],
-    queryFn: async () => {
-      const r = await authFetch("/api/v1/technicians/?is_active=true");
-      if (!r.ok) return [];
-      const d = await r.json();
-      return Array.isArray(d) ? d : d?.items || [];
-    },
-    staleTime: 30_000,
   });
 
-  async function handleAssign(techId: string) {
-    if (!selectedWO) { toast.error("Select a work order first"); return; }
-    setAssigning(true);
-    try {
-      await assignWO(selectedWO, techId);
-      qc.invalidateQueries({ queryKey: ["dispatch-wos"] });
-      qc.invalidateQueries({ queryKey: ["dispatch-techs"] });
-      qc.invalidateQueries({ queryKey: ["ops-work-orders"] });
-      toast.success("Work order assigned successfully");
-      setSelectedWO(null);
-    } catch (e: any) {
-      toast.error(e.message || "Assignment failed");
-    } finally {
-      setAssigning(false);
-    }
-  }
+  if (techniciansLoading || workOrdersLoading) return <LoadingState />;
 
-  function refresh() {
-    refetchWOs(); refetchTechs();
-    toast.success("Refreshed");
-  }
-
-  const isLoading = wLoading || tLoading;
-  const selectedWOData = wos.find((w: any) => w.id === selectedWO);
+  const totalTechnicians = technicians.length;
+  const availableTechnicians = technicians.filter(
+    (t) => t.current_work_orders < t.max_work_orders
+  ).length;
+  const atCapacityTechnicians = technicians.filter(
+    (t) => t.current_work_orders >= t.max_work_orders
+  ).length;
+  const openWOsUnassigned = workOrders.filter(
+    (wo) => wo.status === "open" && (!wo.technician_id || wo.technician_id === "")
+  ).length;
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="Dispatch Board"
-        subtitle={wos.length + " unassigned · " + techs.length + " available"}
-        badge="DISPATCH"
-        actions={
-          <button onClick={refresh} className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        }
-      />
-
-      {selectedWO && selectedWOData && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-900">Selected: {selectedWOData.title}</p>
-            <p className="text-xs text-amber-700">Click a technician below to assign this work order</p>
-          </div>
-          <button onClick={() => setSelectedWO(null)}
-            className="text-xs text-amber-600 hover:text-amber-800 font-semibold">Cancel</button>
-        </div>
-      )}
-
-      {isLoading ? <LoadingState type="cards" rows={4} cols={2} /> : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-          <SectionCard
-            title="Unassigned Work Orders"
-            subtitle={wos.length + " need assignment"}
-          >
-            {wos.length === 0 ? (
-              <EmptyState
-                icon="✅"
-                title="All work orders assigned"
-                description="No unassigned work orders"
+      <PageHeader title="Dispatch Operations" />
+      <SectionCard title="Metrics">
+        <MetricStrip
+          label="Total Technicians"
+          value={totalTechnicians}
+          status={
+            totalTechnicians > 0 ? StatusBadge.SUCCESS : StatusBadge.WARNING
+          }
+        />
+        <MetricStrip
+          label="Available Technicians"
+          value={availableTechnicians}
+          status={
+            availableTechnicians > 0 ? StatusBadge.SUCCESS : StatusBadge.WARNING
+          }
+        />
+        <MetricStrip
+          label="At Capacity Technicians"
+          value={atCapacityTechnicians}
+          status={
+            atCapacityTechnicians > 0 ? StatusBadge.ERROR : StatusBadge.SUCCESS
+          }
+        />
+        <MetricStrip
+          label="Open WOs Unassigned"
+          value={openWOsUnassigned}
+          status={
+            openWOsUnassigned > 0 ? StatusBadge.WARNING : StatusBadge.SUCCESS
+          }
+        />
+      </SectionCard>
+      <SectionCard title="Technician Capacity Grid">
+        <div className="grid grid-cols-3 gap-4">
+          {technicians.map((t) => (
+            <div key={t.id} className="bg-white p-4 rounded-lg shadow-md">
+              <h2 className="font-bold">{t.name}</h2>
+              <Progress
+                value={t.current_work_orders}
+                max={t.max_work_orders}
+                color={
+                  t.current_work_orders / t.max_work_orders < 0.5
+                    ? "green"
+                    : t.current_work_orders / t.max_work_orders < 0.85
+                    ? "amber"
+                    : "red"
+                }
               />
-            ) : (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                {wos.map((wo: any) => (
-                  <button
-                    key={wo.id}
-                    onClick={() => setSelectedWO(selectedWO === wo.id ? null : wo.id)}
-                    className={"w-full text-left p-3 rounded-xl border transition-all " +
-                      (selectedWO === wo.id
-                        ? "border-amber-400 bg-amber-50 shadow-sm"
-                        : (PRIORITY_CLS[wo.priority] || PRIORITY_CLS.medium) + " hover:border-amber-300")}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-slate-900 truncate">{wo.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <MapPin className="w-3 h-3 text-slate-400" />
-                          <span className="text-xs text-slate-500">{wo.location || wo.type || "—"}</span>
-                        </div>
-                      </div>
-                      <StatusBadge status={wo.priority || "medium"} />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </SectionCard>
-
-          <SectionCard
-            title="Available Technicians"
-            subtitle={techs.length + " active"}
-          >
-            {techs.length === 0 ? (
-              <EmptyState icon="👷" title="No active technicians" description="Add technicians to dispatch" />
-            ) : (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                {techs.map((tech: any) => {
-                  const used = tech.current_work_orders || 0;
-                  const max  = tech.max_work_orders    || 10;
-                  const pct  = Math.round((used / max) * 100);
-                  const busy = pct >= 100;
-                  return (
-                    <div key={tech.id}
-                      className={"rounded-xl border p-3 " + (busy ? "bg-slate-50 border-slate-200 opacity-60" : "bg-white border-slate-200")}>
-                      <div className="flex items-center gap-3">
-                        <Avatar name={tech.name} size="sm" online={!busy} />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-slate-900">{tech.name}</p>
-                          <div className="mt-1">
-                            <Progress value={used} max={max} size="sm"
-                              color={pct > 80 ? "red" : pct > 60 ? "amber" : "emerald"} />
-                            <p className="text-[10px] text-slate-400 mt-0.5">{used}/{max} jobs · {pct}%</p>
-                          </div>
-                        </div>
-                        <Button
-                          size="xs"
-                          variant={selectedWO && !busy ? "primary" : "ghost"}
-                          disabled={!selectedWO || busy || assigning}
-                          loading={assigning && selectedWO !== null}
-                          onClick={() => handleAssign(tech.id)}
-                          icon={<UserCheck className="w-3 h-3" />}
-                        >
-                          {busy ? "Full" : "Assign"}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </SectionCard>
-
+              {t.specializations.slice(0, 2).map((spec) => (
+                <StatusBadge key={spec} label={spec} />
+              ))}
+              <p>{t.current_work_orders}/{t.max_work_orders}</p>
+            </div>
+          ))}
         </div>
-      )}
+      </SectionCard>
+      <SectionCard title="Quick Dispatch Panel">
+        <select
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+          className="w-full p-2 border rounded-md mb-4"
+        >
+          <option value="">Select Type</option>
+          <option value="hvac">HVAC</option>
+          <option value="electrical">Electrical</option>
+          <option value="plumbing">Plumbing</option>
+          <option value="mechanical">Mechanical</option>
+          <option value="civil">Civil</option>
+        </select>
+        <select
+          value={selectedPriority}
+          onChange={(e) => setSelectedPriority(e.target.value)}
+          className="w-full p-2 border rounded-md mb-4"
+        >
+          <option value="">Select Priority</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+        </select>
+        <Button
+          onClick={() =>
+            dispatchMutation.mutate({ work_order_type: selectedType, priority: selectedPriority, hotel_id: 1 })
+          }
+          disabled={!selectedType || !selectedPriority}
+        >
+          Find Best Technician
+        </Button>
+        {dispatchMutation.isSuccess && (
+          <div className="mt-4 bg-white p-4 rounded-lg shadow-md">
+            <h3>{dispatchMutation.data.recommended.name}</h3>
+            <p>Score: {dispatchMutation.data.recommended.score}%</p>
+            <p>Reason: {dispatchMutation.data.recommended.reason}</p>
+            {dispatchMutation.data.warning && (
+              <StatusBadge label="Warning" status={StatusBadge.WARNING} />
+            )}
+          </div>
+        )}
+      </SectionCard>
+      <SectionCard title="Open Unassigned Work Orders">
+        <ul className="divide-y divide-gray-200">
+          {openWOsUnassigned.length > 0 ? (
+            openWOsUnassigned.map((wo) => (
+              <li key={wo.id} className="p-4 flex items-center justify-between">
+                <div>
+                  <h3>{wo.title}</h3>
+                  <StatusBadge label={wo.priority} />
+                  <StatusBadge label={wo.type} />
+                </div>
+                <span>{wo.due_date}</span>
+              </li>
+            ))
+          ) : (
+            <EmptyState message="No unassigned work orders" />
+          )}
+        </ul>
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default DispatchPage;
