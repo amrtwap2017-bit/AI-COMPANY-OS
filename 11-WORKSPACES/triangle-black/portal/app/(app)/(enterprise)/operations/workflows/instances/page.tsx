@@ -1,41 +1,94 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["operations-workflows-instances"],
-    queryFn:  () => authFetchJSON("/api/v1/work-orders"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Instance", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"step", label:"Current Step", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["step"]??"—")}</span>) },
-    { key:"started", label:"Started", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["started"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchWorkflows = async () => {
+  try {
+    const response = await fetch("/api/v1/workflows/instances", { credentials: "include" });
+    if (response.ok) return response.json();
+    throw new Error("Failed to fetch workflows");
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const fetchWorkOrders = async () => {
+  try {
+    const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+    if (response.ok) return response.json();
+    throw new Error("Failed to fetch work orders");
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const WorkflowInstancesPage = () => {
+  const [workflows, setWorkflows] = useState<any[]>([]);
+  const [workOrders, setWorkOrders] = useState<any[]>([]);
+
+  const { data: workflowData, isLoading: isWorkflowLoading, isError: isWorkflowError } = useQuery(
+    "workflows",
+    fetchWorkflows,
+    {
+      refetchInterval: 60000,
+      onSuccess: (data) => setWorkflows(data),
+    }
+  );
+
+  const { data: workOrdersData, isLoading: isWorkOrdersLoading, isError: isWorkOrdersError } = useQuery(
+    "workOrders",
+    fetchWorkOrders,
+    {
+      refetchInterval: 60000,
+      onSuccess: (data) => setWorkOrders(data),
+    }
+  );
+
+  if (isWorkflowLoading || isWorkOrdersLoading) return <LoadingState />;
+  if (isWorkflowError && isWorkOrdersError) return <EmptyState title="No workflow history" />;
+
+  const totalInstances = workflows.length + workOrders.length;
+  const runningInstances = workOrders.filter((wo) => wo.status === "in_progress").length;
+  const completedInstances = workflows.length - runningInstances;
+  const failedInstances = 0; // No failure tracking
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Workflow Instances" subtitle={`${items.length} records`} badge="WFI"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="▶️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Workflow Execution History" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Instances", value: totalInstances },
+            { label: "Running", value: runningInstances, badgeColor: "bg-green-500" },
+            { label: "Completed", value: completedInstances, badgeColor: "bg-blue-500" },
+            { label: "Failed", value: failedInstances, badgeColor: "bg-red-500" },
+          ]}
+        />
+      </SectionCard>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {workflows.map((wf) => (
+          <SectionCard key={wf.id}>
+            <h3>{wf.name}</h3>
+            <StatusBadge status={wf.status} />
+            <p>Started: {new Date(wf.created_at).toLocaleString()}</p>
+            {wf.completed_at && <p>Duration: {new Date(wf.completed_at - wf.created_at).toISOString().slice(14, 19)}</p>}
+          </SectionCard>
+        ))}
+        {workOrders.map((wo) => (
+          <SectionCard key={wo.id}>
+            <h3>{wo.title}</h3>
+            <StatusBadge status={wo.status} />
+            <p>Started: {new Date(wo.created_at).toLocaleString()}</p>
+          </SectionCard>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
-}
+};
+
+export default WorkflowInstancesPage;

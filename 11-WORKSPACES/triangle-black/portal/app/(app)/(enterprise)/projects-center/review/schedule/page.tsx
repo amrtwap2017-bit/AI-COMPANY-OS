@@ -1,41 +1,76 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["projects-center-review-schedule"],
-    queryFn:  () => authFetchJSON("/api/v1/projects"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+
+const fetchProjects = async () => {
+  const response = await fetch("/api/v1/projects", { credentials: "include" });
+  if (!response.ok) throw new Error("Not found");
+  return response.json();
+};
+
+const SchedulePage = () => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["projects"],
+    queryFn: fetchProjects,
+    refetchInterval: 300000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Project", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"phase", label:"Phase", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["phase"]??"—")}</span>) },
-    { key:"start_date", label:"Start", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["start_date"]??"—")}</span>) },
-    { key:"end_date", label:"End", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["end_date"]??"—")}</span>) },
-  ];
+
+  if (isLoading) return <LoadingState />;
+  if (isError || !data) return <EmptyState />;
+
+  const today = new Date();
+  const totalDays = data.length;
+  const onScheduleCount = data.filter(p => new Date(p.end_date) > new Date(today.setDate(today.getDate() + 14))).length;
+  const atRiskCount = data.filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(p.end_date) > today).length;
+  const overdueCount = data.filter(p => new Date(p.end_date) < today).length;
+
+  const scheduleHealth = (onScheduleCount / totalDays) * 100;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Project Schedule" subtitle={`${items.length} records`} badge="SCH"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📅" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Project Schedule Review" />
+      <div className="grid grid-cols-3 gap-4">
+        <SectionCard title="Metrics">
+          <MetricStrip label="Total Projects" value={totalDays} />
+          <MetricStrip label="On Schedule" value={onScheduleCount} color="green" />
+          <MetricStrip label="At Risk" value={atRiskCount} color="amber" />
+          <MetricStrip label="Overdue" value={overdueCount} color="red" />
+        </SectionCard>
+        <SectionCard title="Schedule Timeline">
+          {data.map(project => (
+            <div key={project.id} className="flex items-center justify-between border-b py-2 last:border-b-0">
+              <span>{project.name}</span>
+              <div className="relative w-full">
+                <div
+                  className={`absolute left-0 top-0 h-4 bg-gray-300 rounded`}
+                  style={{ width: `${Math.min(1, (new Date(project.end_date) - today) / (new Date(project.end_date) - new Date(project.start_date))) * 100}%` }}
+                />
+                <div
+                  className={`absolute left-0 top-0 h-4 rounded bg-${
+                    new Date(project.end_date) > new Date(today.setDate(today.getDate() + 14)) ? "green" :
+                    new Date(project.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(project.end_date) > today ? "amber" : "red"
+                  }`}
+                />
+              </div>
+              <span>{project.start_date} - {project.end_date}</span>
+            </div>
+          ))}
+        </SectionCard>
+        <SectionCard title="Upcoming Milestones">
+          {data
+            .filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 30)) && new Date(p.end_date) > today)
+            .sort((a, b) => new Date(a.end_date) - new Date(b.end_date))
+            .map(project => (
+              <div key={project.id} className="flex items-center justify-between py-2">
+                <span>{project.name}</span>
+                <StatusBadge status={new Date(project.end_date) > today ? "on-track" : "at-risk"} />
+              </div>
+            ))}
+        </SectionCard>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
-}
+};
+
+export default SchedulePage;

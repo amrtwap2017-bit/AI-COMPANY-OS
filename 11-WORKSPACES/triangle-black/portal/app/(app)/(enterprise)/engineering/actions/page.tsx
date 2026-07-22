@@ -1,41 +1,85 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["engineering-actions"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/actions"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"type", label:"Type", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["type"]??"—")}</span>) },
-    { key:"priority", label:"Priority", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["priority"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch work orders");
+  return response.json();
+};
+
+const fetchMaintenanceSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch maintenance signals");
+  return response.json();
+};
+
+const fetchPmPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  return response.json();
+};
+
+const EngineeringActionsPage = () => {
+  const woQuery = useQuery(["work-orders"], fetchWorkOrders, { refetchInterval: 60000 });
+  const signalsQuery = useQuery(["maintenance-signals"], fetchMaintenanceSignals, { refetchInterval: 60000 });
+  const pmPlansQuery = useQuery(["pm-plans"], fetchPmPlans, { refetchInterval: 60000 });
+
+  if (woQuery.isLoading || signalsQuery.isLoading || pmPlansQuery.isLoading) return <LoadingState />;
+
+  if (woQuery.isError || signalsQuery.isError || pmPlansQuery.isError) return <EmptyState />;
+
+  const criticalWos = woQuery.data.filter((wo: any) => wo.priority === "critical" && ["hvac", "electrical", "mechanical"].includes(wo.type));
+  const overduePmPlans = pmPlansQuery.data.filter((plan: any) => new Date(plan.next_due_date) < new Date());
+  const maintenanceSignals = signalsQuery.data;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Engineering Actions" subtitle={`${items.length} records`} badge="ACT"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="⚡" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Engineering Team Actions" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricStrip label="Engineering WOs Open" value={woQuery.data.length} />
+        <MetricStrip label="Critical WOs" value={criticalWos.length} />
+        <MetricStrip label="PM Plans Overdue" value={overduePmPlans.length} />
+        <MetricStrip label="Maintenance Signals" value={maintenanceSignals.length} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Today's Engineering Actions">
+        {criticalWos.map((wo: any) => (
+          <Link key={wo.id} href={`/engineering/work-orders/${wo.id}`}>
+            <div className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{wo.title}</span>
+              <StatusBadge type={wo.type} priority={wo.priority} />
+            </div>
+          </Link>
+        ))}
+        {overduePmPlans.map((plan: any) => (
+          <Link key={plan.id} href={`/engineering/pm-plans/${plan.id}`}>
+            <div className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{plan.title}</span>
+              <StatusBadge type="pm" priority="overdue" />
+            </div>
+          </Link>
+        ))}
+        {maintenanceSignals.map((signal: any) => (
+          <Link key={signal.id} href={`/engineering/maintenance-signals/${signal.id}`}>
+            <div className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{signal.title}</span>
+              <StatusBadge type="maintenance" priority="signal" />
+            </div>
+          </Link>
+        ))}
+      </SectionCard>
+      <SectionCard title="Quick Links">
+        <ul className="flex flex-col gap-2">
+          <li><Link href="/engineering/new-work-order">New WO</Link></li>
+          <li><Link href="/engineering/pm-plans">PM Plans</Link></li>
+          <li><Link href="/engineering/maintenance-intelligence">Maintenance Intelligence</Link></li>
+        </ul>
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default EngineeringActionsPage;
