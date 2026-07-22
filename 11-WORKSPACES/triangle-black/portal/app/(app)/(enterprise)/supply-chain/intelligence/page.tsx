@@ -1,41 +1,93 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch signals");
+  return response.json();
+};
+
+const fetchInventoryCheck = async (category: string) => {
+  const response = await fetch(`/api/v1/ai/supply/inventory-check?work_order_type=${category}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch inventory check");
+  return response.json();
+};
+
+const fetchKPIs = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
 
 export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-intelligence"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/procurement/dashboard"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"trend", label:"Trend", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["trend"]??"—")}</span>) },
-    { key:"risk", label:"Risk", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["risk"]??"—")}</span>) },
-  ];
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 60000 });
+  const inventoryCheckQuery = useQuery(["inventory-check", "hvac"], () => fetchInventoryCheck("hvac"), { refetchInterval: 120000 });
+  const kpisQuery = useQuery(["kpis"], fetchKPIs, { refetchInterval: 60000 });
+
+  if (signalsQuery.isLoading || inventoryCheckQuery.isLoading || kpisQuery.isLoading) return <LoadingState />;
+  if (signalsQuery.isError || inventoryCheckQuery.isError || kpisQuery.isError) return <EmptyState />;
+
+  const signals = signalsQuery.data;
+  const inventoryCheck = inventoryCheckQuery.data;
+  const kpis = kpisQuery.data;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Supply Intelligence" subtitle={`${items.length} records`} badge="AI"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🧠" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="AI-Powered Supply Chain Intelligence" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricStrip title="AI Signals Total" value={signals.total} />
+        <MetricStrip title="Inventory Alerts" value={inventoryCheck.out_of_stock_count} badgeColor="red" />
+        <MetricStrip title="Out of Stock" value={inventoryCheck.out_of_stock_count} badgeColor="red" />
+        <MetricStrip title="Procurement Actions Needed" value={kpis.procurement_actions_needed} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="AI Recommendations">
+        {signals.signals.map(signal => (
+          <div key={signal.id} className="p-4 border rounded-md mb-2">
+            <h3>{signal.title}</h3>
+            <p>{signal.recommended_action}</p>
+            {signal.type === "inventory" && (
+              <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Auto-PR Available</button>
+            )}
+          </div>
+        ))}
+      </SectionCard>
+      <SectionCard title="Live Inventory Intelligence">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {["hvac", "electrical", "plumbing"].map(category => (
+            <div key={category} className="p-4 border rounded-md">
+              <h3>{category}</h3>
+              <p>Available Count: {inventoryCheck[`${category}_available_count`]}</p>
+              <p>Out of Stock: {inventoryCheck[`${category}_out_of_stock_count`]}</p>
+              <p>Below Min: {inventoryCheck[`${category}_below_min_count`]}</p>
+              <StatusBadge
+                value={inventoryCheck[`${category}_out_of_stock_count`]}
+                color="red"
+                label="Out of Stock"
+              />
+              <StatusBadge
+                value={inventoryCheck[`${category}_below_min_count`]}
+                color="amber"
+                label="Below Min"
+              />
+              <StatusBadge
+                value={inventoryCheck[`${category}_available_count`]}
+                color="green"
+                label="OK"
+              />
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+      <SectionCard title="Smart Actions">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <a href="/supply-chain/workbench" className="p-4 border rounded-md bg-blue-500 text-white">Create Purchase Request</a>
+          <a href="/supply-chain/vendors/analytics" className="p-4 border rounded-md bg-green-500 text-white">Review Vendors</a>
+          <a href="/supply-chain/rfqs" className="p-4 border rounded-md bg-yellow-500 text-white">Check RFQs</a>
+        </div>
+      </SectionCard>
     </PageWrapper>
   );
 }

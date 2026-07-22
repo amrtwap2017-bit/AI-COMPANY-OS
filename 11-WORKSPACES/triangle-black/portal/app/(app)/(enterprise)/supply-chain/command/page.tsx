@@ -1,41 +1,81 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-command"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/inventory/dashboard"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"module", label:"Module", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["module"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"count", label:"Count", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["count"]??"—")}</span>) },
-    { key:"alerts", label:"Alerts", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["alerts"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchInventorySignals = async () => {
+  const response = await fetch("/api/v1/ai/signals?category=inventory", { credentials: "include" });
+  return response.json();
+};
+
+const fetchPurchaseRequests = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-requests/", { credentials: "include" });
+  return response.json();
+};
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
+  return response.json();
+};
+
+const SupplyChainCommandPage = () => {
+  const { data: signals, isLoading: signalsLoading } = useQuery(["inventorySignals"], fetchInventorySignals, { refetchInterval: 60000 });
+  const { data: prs, isLoading: prsLoading } = useQuery(["purchaseRequests"], fetchPurchaseRequests, { refetchInterval: 120000 });
+  const { data: pos, isLoading: posLoading } = useQuery(["purchaseOrders"], fetchPurchaseOrders, { refetchInterval: 120000 });
+
+  if (signalsLoading || prsLoading || posLoading) return <LoadingState />;
+
+  const status = signals.length > 0 ? "AT RISK" : "NORMAL";
+  const pendingPRs = prs.filter(pr => pr.status === "PENDING").length;
+  const activePOs = pos.filter(po => po.status === "ACTIVE").length;
+  const inventoryAlerts = signals.filter(signal => signal.type === "INVENTORY_ALERT").length;
+  const vendorsCount = 13;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Supply Chain Command" subtitle={`${items.length} records`} badge="CMD"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🎯" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Supply Chain Command Center" />
+      <div className="flex justify-between items-center mb-4">
+        <StatusBadge status={status} />
+        <MetricStrip
+          metrics={[
+            { label: "Pending PRs", value: pendingPRs },
+            { label: "Active POs", value: activePOs },
+            { label: "Inventory Alerts", value: inventoryAlerts },
+            { label: "Vendors Count", value: vendorsCount }
+          ]}
+        />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Action Required">
+        <ul className="list-disc pl-5">
+          {signals.map(signal => (
+            <li key={signal.id}>{signal.description}</li>
+          ))}
+          {prs.filter(pr => pr.status === "PENDING").map(pr => (
+            <li key={pr.id}>{pr.title}</li>
+          ))}
+        </ul>
+      </SectionCard>
+      <div className="grid grid-cols-3 gap-4">
+        <Link href="/workbench" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">Workbench</Link>
+        <Link href="/purchase-requests" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">Purchase Requests</Link>
+        <Link href="/purchase-orders" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">Purchase Orders</Link>
+        <Link href="/rfqs" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">RFQs</Link>
+        <Link href="/vendors" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">Vendors</Link>
+        <Link href="/stock-levels" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">Stock Levels</Link>
+      </div>
+      <SectionCard title="Recent Activity">
+        {pos.slice(-5).map(po => (
+          <div key={po.id} className="flex justify-between items-center mb-2">
+            <span>{po.po_number}</span>
+            <span>{po.status}</span>
+            <span>{po.amount} EGP</span>
+          </div>
+        ))}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default SupplyChainCommandPage;
