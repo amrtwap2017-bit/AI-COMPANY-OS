@@ -1,41 +1,91 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-actions-pipeline-summary"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/pipeline/summary"),
-    staleTime: 30_000, retry: 1,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"stage", label:"Stage", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["stage"]??"—")}</span>) },
-    { key:"count", label:"Leads", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["count"]??"—")}</span>) },
-    { key:"value", label:"Value EGP", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"conversion", label:"Conv %", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["conversion"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchLeads = async () => {
+  const response = await fetch("/api/v1/leads", { credentials: "include" });
+  return response.json();
+};
+
+const fetchContracts = async () => {
+  const response = await fetch("/api/v1/contracts", { credentials: "include" });
+  return response.json();
+};
+
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals?category=commercial", { credentials: "include" });
+  return response.json();
+};
+
+const CommercialPage = () => {
+  const leadsQuery = useQuery(["leads"], fetchLeads, { refetchInterval: 300000 });
+  const contractsQuery = useQuery(["contracts"], fetchContracts, { refetchInterval: 300000 });
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 300000 });
+
+  if (leadsQuery.isLoading || contractsQuery.isLoading || signalsQuery.isLoading) return <LoadingState />;
+
+  const leadsData = leadsQuery.data;
+  const contractsData = contractsQuery.data;
+  const signalsData = signalsQuery.data;
+
+  const totalLeads = leadsData.total;
+  const wonLeads = leadsData.won;
+  const activeContracts = contractsData.active;
+  const commercialSignals = signalsData.length;
+
+  const winRate = (wonLeads / totalLeads) * 100 || 0;
+  const targetWinRate = 30;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Commercial Hub" subtitle={`${items.length} records`} badge="CRM"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="💼" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Commercial Hub" />
+      <div className="grid grid-cols-2 gap-4">
+        <MetricStrip label="Total Leads" value={totalLeads} />
+        <MetricStrip label="Won" value={wonLeads} />
+        <MetricStrip label="Active Contracts" value={activeContracts} />
+        <MetricStrip label="Commercial Signals" value={commercialSignals} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="grid grid-cols-3 gap-4 mt-8">
+        <Link href="/commercial/pipeline" passHref>
+          <SectionCard title="Pipeline" icon="pipeline" />
+        </Link>
+        <Link href="/commercial/workbench" passHref>
+          <SectionCard title="Workbench" icon="workbench" />
+        </Link>
+        <Link href="/commercial/command" passHref>
+          <SectionCard title="Command" icon="command" />
+        </Link>
+        <Link href="/commercial/contracts/renewal" passHref>
+          <SectionCard title="Contracts Renewal" icon="renewal" />
+        </Link>
+        <Link href="/commercial/review" passHref>
+          <SectionCard title="Review" icon="review" />
+        </Link>
+        <Link href="/commercial/review-intelligence" passHref>
+          <SectionCard title="Review Intelligence" icon="intelligence" />
+        </Link>
+      </div>
+      <div className="mt-8">
+        <StatusBadge
+          label="Win Rate"
+          value={`${winRate.toFixed(2)}%`}
+          targetValue={`${targetWinRate}%`}
+          isTargetMet={winRate >= targetWinRate}
+        />
+      </div>
+      <div className="mt-8">
+        <h3>Recent Activity</h3>
+        <ul>
+          {leadsData.wonLeads.slice(-3).map((lead) => (
+            <li key={lead.id}>{lead.name}</li>
+          ))}
+        </ul>
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default CommercialPage;

@@ -1,41 +1,78 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["recommendations"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/executive/intelligence"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch signals");
+  return response.json();
+};
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
+
+const RecommendationsPage = () => {
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 60000 });
+  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
+
+  if (signalsQuery.isLoading || kpisQuery.isLoading) return <LoadingState />;
+
+  if (signalsQuery.isError || kpisQuery.isError) return <p>Error fetching data</p>;
+
+  const signals = signalsQuery.data.filter(signal => signal.recommended_action);
+  const totalRecommendations = signals.length;
+  const criticalActions = signals.filter(signal => signal.priority === "critical").length;
+  const highPriority = signals.filter(signal => signal.priority === "high").length;
+
+  if (totalRecommendations === 0) {
+    return (
+      <PageWrapper>
+        <EmptyState title="All systems optimal — no recommendations at this time" />
+      </PageWrapper>
+    );
+  }
+
+  const sortedSignals = [...signals].sort((a, b) => {
+    if (a.priority !== b.priority) return a.priority === "critical" ? -1 : 1;
+    return 0;
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"recommendation", label:"Recommendation", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["recommendation"]??"—")}</span>) },
-    { key:"module", label:"Module", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["module"]??"—")}</span>) },
-    { key:"impact", label:"Impact", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["impact"]??"—")}</span>) },
-    { key:"priority", label:"Priority", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["priority"]??"—")}</span>) },
-  ];
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="AI Recommendations" subtitle={`${items.length} records`} badge="AI"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="💡" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="AI Recommendations" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Recommendations", value: totalRecommendations },
+            { label: "Critical Actions", value: criticalActions, color: "red" },
+            { label: "High Priority", value: highPriority, color: "amber" },
+            { label: "Completed", value: 0 }
+          ]}
+        />
+      </SectionCard>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sortedSignals.map(signal => (
+          <SectionCard key={signal.id}>
+            <StatusBadge label={signal.priority} color={signal.priority === "critical" ? "red" : signal.priority === "high" ? "amber" : "blue"} />
+            <h2 className="font-bold">{signal.title}</h2>
+            <p>{signal.recommended_action}</p>
+            <StatusBadge label={signal.category} />
+            <Link href={`/operations/workbench`} passHref legacyBehavior>
+              <a className="mt-4 block text-blue-500 hover:underline">Take Action</a>
+            </Link>
+          </SectionCard>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <footer className="text-center mt-8">
+        Recommendations generated by Triangle Black AI Engine — refreshed every 60s
+      </footer>
     </PageWrapper>
   );
-}
+};
+
+export default RecommendationsPage;

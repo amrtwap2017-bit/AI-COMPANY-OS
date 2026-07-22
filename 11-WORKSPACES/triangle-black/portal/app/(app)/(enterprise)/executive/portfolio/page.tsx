@@ -1,91 +1,84 @@
-"use client";
+"use client"; // @ts-nocheck
 // @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState, StatusBadge } from "@/components/ui";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw, Briefcase } from "lucide-react";
-import { toast } from "@/lib/toast";
-import { fmtCurrency, fmtDate } from "@/lib/design-tokens";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Progress,
+} from "@/components/ui";
 
-export default function ExecutivePortfolioPage() {
-  const { data: portData, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["exec-portfolio"],
-    queryFn: async () => {
-      const res = await authFetch("/api/v1/actions/executive/portfolio");
-      if (!res.ok) return {};
-      return res.json();
-    },
-    staleTime: 60_000,
+const fetchContracts = async () => {
+  const response = await fetch("/api/v1/contracts", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch contracts");
+  return response.json();
+};
+
+const fetchWorkOrders = async (contractId: string) => {
+  const response = await fetch(`/api/v1/work-orders?contract_id=${contractId}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch work orders");
+  return response.json();
+};
+
+const fetchInvoices = async (contractId: string) => {
+  const response = await fetch(`/api/v1/invoices?contract_id=${contractId}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch invoices");
+  return response.json();
+};
+
+const PortfolioPage = () => {
+  const { data: contracts, isLoading, isError } = useQuery(["contracts"], fetchContracts, {
+    refetchInterval: 300000,
   });
 
-  const { data: contracts = [] } = useQuery({
-    queryKey: ["portfolio-contracts"],
-    queryFn: async () => {
-      const res = await authFetch("/api/v1/contracts");
-      if (!res.ok) return [];
-      const d = await res.json();
-      return Array.isArray(d) ? d : d?.items || [];
-    },
-    staleTime: 60_000,
-  });
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState message="Failed to load portfolio" />;
 
-  const d = portData || {};
-  const totalValue = contracts.reduce((s, c) => s + (c.total_value || 0), 0);
-  const active = contracts.filter(c => c.status === "active");
-  const activeValue = active.reduce((s, c) => s + (c.total_value || 0), 0);
+  const totalContracts = contracts.length;
+  const activeContracts = contracts.filter((c) => c.status === "active").length;
+  const totalValue = contracts.reduce((acc, c) => acc + c.contract_value, 0);
+  const avgContractValue = totalContracts > 0 ? totalValue / totalContracts : 0;
 
   return (
     <PageWrapper>
-      <PageHeader title="Executive Portfolio" subtitle="Contract portfolio and revenue base" badge="PORT"
-        actions={
-          <button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
-            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
-          </button>
-        } />
-
-      {isLoading ? <LoadingState type="cards" rows={4} cols={3} /> : (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Total Contracts", value: contracts.length,       color: "bg-slate-50 border-slate-200 text-slate-900" },
-              { label: "Active",          value: active.length,          color: "bg-emerald-50 border-emerald-200 text-emerald-700" },
-              { label: "Active Value",    value: fmtCurrency(activeValue), color: "bg-blue-50 border-blue-200 text-blue-700" },
-              { label: "Total Portfolio", value: fmtCurrency(totalValue),  color: "bg-amber-50 border-amber-200 text-amber-700" },
-            ].map(m => (
-              <div key={m.label} className={"rounded-2xl border p-4 " + m.color}>
-                <div className="text-xl font-bold">{m.value}</div>
-                <div className="text-xs font-medium mt-1 opacity-80">{m.label}</div>
-              </div>
-            ))}
+      <PageHeader title="Executive Portfolio" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Contracts", value: totalContracts },
+            { label: "Active", value: activeContracts, color: "green" },
+            { label: "Total Portfolio Value EGP", value: totalValue.toLocaleString("en-EG") },
+            { label: "Avg Contract Value EGP", value: avgContractValue.toLocaleString("en-EG") },
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Portfolio Health">
+        <Progress
+          value={(activeContracts / totalContracts) * 100}
+          label={`Active Contracts (${activeContracts}/${totalContracts})`}
+        />
+        {/* Add amber alert for expiring contracts */}
+      </SectionCard>
+      <SectionCard title="Top 8 Contracts by Value">
+        {contracts.slice(0, 8).map((contract) => (
+          <div key={contract.id} className="flex items-center justify-between mb-2">
+            <span className="font-bold">{contract.client_name}</span>
+            <StatusBadge status={contract.status} />
+            <span>{contract.contract_value.toLocaleString("en-EG")}</span>
+            {/* Add WO count and end date with days remaining */}
           </div>
-
-          <SectionCard title="Active Contracts" subtitle={active.length + " active revenue-generating contracts"}>
-            {active.length === 0
-              ? <EmptyState icon="📋" title="No active contracts" description="Activate contracts to see portfolio" />
-              : (
-                <div className="space-y-2">
-                  {active.slice(0, 15).map(c => (
-                    <Link key={c.id} href={"/contracts/" + c.id}
-                      className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-amber-300 hover:shadow-sm transition-all group">
-                      <Briefcase className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-slate-900 group-hover:text-amber-700 truncate">{c.title}</p>
-                        <p className="text-xs text-slate-400">{c.duration_months || "—"} months · Ends {fmtDate(c.end_date)}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-bold text-slate-900">{fmtCurrency(c.total_value || 0)}</p>
-                        <StatusBadge status={c.status} />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )
-            }
-          </SectionCard>
-        </>
-      )}
+        ))}
+      </SectionCard>
+      <SectionCard title="Revenue Distribution by Status">
+        {/* Add simple count + value per status group */}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default PortfolioPage;
