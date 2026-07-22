@@ -1,41 +1,127 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["customers-360"],
-    queryFn:  () => authFetchJSON("/api/v1/customers/360"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+const fetchContracts = async (customer_id: string) => {
+  const response = await fetch(`/api/v1/contracts?client_name=${customer_id}`, {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"customer", label:"Customer", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["customer"]??"—")}</span>) },
-    { key:"contracts", label:"Contracts", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["contracts"]??"—")}</span>) },
-    { key:"invoices", label:"Invoices", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["invoices"]??"—")}</span>) },
-    { key:"health", label:"Health", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["health"]??"—")}</span>) },
-  ];
+  return response.json();
+};
+
+const fetchWorkOrders = async (contract_ids: string[]) => {
+  const response = await fetch(`/api/v1/work-orders?contract_id=${contract_ids.join(",")}`, {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const fetchInvoices = async (contract_ids: string[]) => {
+  const response = await fetch(`/api/v1/invoices?contract_id=${contract_ids.join(",")}`, {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const Customer360Page = () => {
+  const searchParams = useSearchParams();
+  const [searchText, setSearchText] = useState(searchParams.get("q") || "");
+
+  const { data: contractsData, isLoading: contractsLoading } = useQuery(["contracts", searchText], () => fetchContracts(searchText), {
+    refetchInterval: 300000,
+  });
+
+  const contractIds = contractsData?.map((contract: any) => contract.contract_id) || [];
+
+  const { data: workOrdersData, isLoading: workOrdersLoading } = useQuery(["work-orders", contractIds], () => fetchWorkOrders(contractIds), {
+    refetchInterval: 300000,
+  });
+
+  const { data: invoicesData, isLoading: invoicesLoading } = useQuery(["invoices", contractIds], () => fetchInvoices(contractIds), {
+    refetchInterval: 300000,
+  });
+
+  if (contractsLoading || workOrdersLoading || invoicesLoading) return <LoadingState />;
+
+  if (!searchText && !contractIds.length) return <EmptyState message="Search for a customer above" />;
+
+  const totalContracts = contractsData?.length || 0;
+  const activeContracts = contractsData?.filter((contract: any) => contract.status === "active").length || 0;
+  const totalWorkOrders = workOrdersData?.length || 0;
+  const totalInvoices = invoicesData?.length || 0;
+  const revenueEGP = invoicesData?.reduce((acc, invoice: any) => acc + invoice.total_amount, 0) || 0;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Customer 360°" subtitle={`${items.length} records`} badge="360"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔍" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Customer 360" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Contracts", value: totalContracts },
+            { label: "Active", value: activeContracts, badge: StatusBadge({ status: "active" }) },
+            { label: "Total WOs", value: totalWorkOrders },
+            { label: "Total Invoices", value: totalInvoices },
+            { label: "Revenue EGP", value: revenueEGP.toFixed(2) },
+          ]}
+        />
+      </SectionCard>
+      <div className="flex flex-col gap-4">
+        <input
+          type="text"
+          placeholder="Search customer name..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="border p-2 rounded-md"
+        />
+        {contractsData && contractsData.length > 0 ? (
+          <div>
+            <h3>Contracts</h3>
+            <ul>
+              {contractsData.map((contract: any) => (
+                <li key={contract.contract_id} className="flex justify-between items-center">
+                  <span>{contract.client_name}</span>
+                  <StatusBadge status={contract.status} />
+                  <span>{contract.start_date} - {contract.end_date}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {workOrdersData && workOrdersData.length > 0 ? (
+          <div>
+            <h3>Work Orders</h3>
+            <ul>
+              {workOrdersData.map((wo: any) => (
+                <li key={wo.work_order_id} className="flex justify-between items-center">
+                  <span>{wo.title}</span>
+                  <StatusBadge status={wo.status} />
+                  <StatusBadge status={wo.priority} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {invoicesData && invoicesData.length > 0 ? (
+          <div>
+            <h3>Invoices</h3>
+            <ul>
+              {invoicesData.map((invoice: any) => (
+                <li key={invoice.invoice_number} className="flex justify-between items-center">
+                  <span>{invoice.invoice_number}</span>
+                  <span>{invoice.total_amount.toFixed(2)}</span>
+                  <StatusBadge status={invoice.status} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
-}
+};
+
+export default Customer360Page;
