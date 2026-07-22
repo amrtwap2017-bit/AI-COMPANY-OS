@@ -1,120 +1,143 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-  Progress,
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState
 } from "@/components/ui";
-import { useState } from "react";
 
-const fetchPmPlans = async () => {
-  const response = await fetch("/api/v1/maintenance/pm-plans", {
-    credentials: "include",
-  });
-  if (!response.ok) throw new Error("Failed to fetch PM plans");
-  return response.json();
-};
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
-const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", {
-    credentials: "include",
-  });
-  if (!response.ok) throw new Error("Failed to fetch assets");
-  return response.json();
-};
+async function fetchPlans() {
+  const r = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
+}
 
-const PmPlansPage = () => {
-  const [planTypeFilter, setPlanTypeFilter] = useState<"all" | "preventive" | "inspection" | "corrective">("all");
+function daysDiff(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  const diff = Math.ceil((new Date(dateStr) - new Date(today)) / 86400000);
+  return diff;
+}
 
-  const { data: pmPlansData, isLoading: isPmPlansLoading } = useQuery(["pm-plans"], fetchPmPlans, {
+export default function PMPlansPage() {
+  const [filter, setFilter] = useState("all");
+
+  const { data: plans = [], isLoading } = useQuery({
+    queryKey: ["pm-plans"],
+    queryFn: fetchPlans,
     refetchInterval: 120000,
   });
-
-  const { data: assetsData, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, {
-    refetchInterval: 120000,
-  });
-
-  if (isPmPlansLoading || isAssetsLoading) return <LoadingState />;
-
-  if (!pmPlansData || !assetsData) return <EmptyState />;
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const totalPlans = pmPlansData.length;
-  const activePlans = pmPlansData.filter((plan) => plan.status === "active").length;
-  const overduePlans = pmPlansData.filter((plan) => plan.next_due_date < today).length;
-  const dueThisWeek = pmPlansData.filter((plan) => {
-    const nextDueDate = new Date(plan.next_due_date);
-    return nextDueDate >= new Date(today) && nextDueDate <= new Date(today + "T6:00:00Z");
-  }).length;
-
-  const preventiveCount = pmPlansData.filter((plan) => plan.plan_type === "preventive").length;
-  const inspectionCount = pmPlansData.filter((plan) => plan.plan_type === "inspection").length;
-  const correctiveCount = pmPlansData.filter((plan) => plan.plan_type === "corrective").length;
-
-  const filteredPmPlans = pmPlansData.filter((plan) => {
-    if (planTypeFilter === "all") return true;
-    if (planTypeFilter === "preventive" && plan.plan_type !== "preventive") return false;
-    if (planTypeFilter === "inspection" && plan.plan_type !== "inspection") return false;
-    if (planTypeFilter === "corrective" && plan.plan_type !== "corrective") return false;
-    return true;
+  const overdue   = plans.filter((p) => p.next_due_date && p.next_due_date < today);
+  const dueSoon   = plans.filter((p) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+  const active    = plans.filter((p) => p.status === "active");
+  const byType    = filter === "all" ? plans : plans.filter((p) => p.plan_type === filter);
+  const sorted    = [...byType].sort((a, b) => {
+    const aOver = a.next_due_date && a.next_due_date < today;
+    const bOver = b.next_due_date && b.next_due_date < today;
+    if (aOver && !bOver) return -1;
+    if (!aOver && bOver) return 1;
+    return (a.next_due_date || "").localeCompare(b.next_due_date || "");
   });
 
-  const renderPmPlanCard = (plan: any) => {
-    const nextDueDate = new Date(plan.next_due_date);
-    const daysUntilDue = Math.ceil((nextDueDate - new Date()) / (1000 * 60 * 60 * 24));
-    const statusText = daysUntilDue > 0 ? `Due in ${daysUntilDue} days` : `${Math.abs(daysUntilDue)} days overdue`;
-    const statusColor = daysUntilDue > 0 ? "green" : "red";
+  const TYPES = ["all", "preventive", "inspection", "corrective"];
 
-    return (
-      <SectionCard key={plan.id}>
-        <h3 className="font-bold">{plan.title}</h3>
-        <div className="flex items-center">
-          <span className="mr-2">{plan.plan_type}</span>
-          <StatusBadge status={plan.status} />
-        </div>
-        <p>{nextDueDate.toLocaleDateString()}</p>
-        <p>{statusText}</p>
-        <p>Owner: {plan.owner}</p>
-      </SectionCard>
-    );
-  };
+  if (isLoading) return <LoadingState message="Loading PM plans..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Preventive Maintenance Plans" />
-      <div className="flex justify-between mb-4">
-        <MetricStrip label="Total Plans" value={totalPlans} />
-        <MetricStrip label="Active" value={activePlans} />
-        <MetricStrip label="Overdue" value={overduePlans} color="red" />
-        <MetricStrip label="Due This Week" value={dueThisWeek} />
-        <div className="flex">
-          <button
-            onClick={() => setPlanTypeFilter("all")}
-            className={`px-2 py-1 mr-2 ${planTypeFilter === "all" ? "bg-blue-500 text-white" : ""}`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setPlanTypeFilter("preventive")}
-            className={`px-2 py-1 mr-2 ${planTypeFilter === "preventive" ? "bg-blue-500 text-white" : ""}`}
-          >
-            Preventive
-          </button>
-          <button
-            onClick={() => setPlanTypeFilter("inspection")}
-            className={`px-2 py-1 mr-2 ${planTypeFilter === "inspection" ? "bg-blue-500 text-white" : ""}`}
-          >
-            Inspection
-          </button>
-          <button
-            onClick={() => setPlanTypeFilter("corrective")}
-            className={`px-2 py-1 ${planTypeFilter === "corrective" ? "bg-blue-500 text-white" : ""}`}
-          >
+      <PageHeader
+        title="PM Plans"
+        subtitle="Preventive maintenance schedule — 30 active plans"
+        badge={overdue.length > 0 ? `${overdue.length} Overdue` : undefined}
+      />
+
+      <MetricStrip metrics={[
+        { label: "Total Plans",  value: plans.length },
+        { label: "Active",       value: active.length,   color: "green" as const },
+        { label: "Overdue",      value: overdue.length,  color: overdue.length > 0 ? "red" as const : "slate" as const },
+        { label: "Due This Week",value: dueSoon.length,  color: "amber" as const },
+      ]} />
+
+      {overdue.length > 0 && (
+        <SectionCard title="Overdue Plans">
+          <div className="space-y-2">
+            {overdue.slice(0, 5).map((p) => (
+              <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-red-50 rounded-lg border border-red-200">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{p.title}</p>
+                  <p className="text-xs text-slate-500">{p.frequency} · {p.owner || "Unassigned"}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-red-600">
+                    {Math.abs(daysDiff(p.next_due_date) || 0)}d overdue
+                  </span>
+                  <StatusBadge status={p.plan_type || "preventive"} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      <SectionCard title="All Plans">
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {TYPES.map((t) => (
+            <button
+              key={t}
+              onClick={() => setFilter(t)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
+                filter === t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {t === "all" ? `All (${plans.length})` : `${t} (${plans.filter((p) => p.plan_type === t).length})`}
+            </button>
+          ))}
+        </div>
+
+        {sorted.length === 0 ? (
+          <EmptyState title="No plans" description="No PM plans match this filter" />
+        ) : (
+          <div className="space-y-2">
+            {sorted.map((p) => {
+              const diff = daysDiff(p.next_due_date);
+              const isOver = diff !== null && diff < 0;
+              const isSoon = diff !== null && diff >= 0 && diff <= 7;
+              return (
+                <div key={p.id} className={`flex items-center justify-between px-4 py-3 rounded-lg ${
+                  isOver ? "bg-red-50 border border-red-100" :
+                  isSoon ? "bg-amber-50 border border-amber-100" :
+                  "bg-slate-50"
+                }`}>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{p.title}</p>
+                    <p className="text-xs text-slate-500">{p.frequency} · {p.owner || "Unassigned"}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-right">
+                    <div>
+                      <p className={`text-xs font-medium ${isOver ? "text-red-600" : isSoon ? "text-amber-600" : "text-slate-500"}`}>
+                        {p.next_due_date || "No date"}
+                      </p>
+                      {diff !== null && (
+                        <p className="text-xs text-slate-400">
+                          {isOver ? `${Math.abs(diff)}d overdue` : `in ${diff}d`}
+                        </p>
+                      )}
+                    </div>
+                    <StatusBadge status={p.status || "active"} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </SectionCard>
+    </PageWrapper>
+  );
+}
