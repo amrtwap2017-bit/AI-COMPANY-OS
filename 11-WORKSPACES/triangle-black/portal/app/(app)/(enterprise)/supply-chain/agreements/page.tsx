@@ -1,41 +1,116 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-agreements"],
-    queryFn:  () => authFetchJSON("/api/v1/contracts"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchAgreements = async () => {
+  try {
+    const response = await fetch("/api/v1/supply-chain/agreements", { credentials: "include" });
+    if (response.ok) return response.json();
+    throw new Error("Failed to fetch agreements");
+  } catch (_) {
+    return fetch("/api/v1/contracts", { credentials: "include" }).then((res) => res.json());
+  }
+};
+
+const AgreementCard = ({ id, client_name, status, start_date, end_date, contract_value }: any) => (
+  <SectionCard key={id}>
+    <h3 className="font-bold">{client_name}</h3>
+    <StatusBadge status={status} />
+    <p>{contract_value.toLocaleString("en-EG", { style: "currency", currency: "EGP" })}</p>
+    <p>{`${start_date} - ${end_date}`}</p>
+    <div className="text-right">
+      {(() => {
+        const daysUntilExpiry = Math.ceil((new Date(end_date) - new Date()) / (1000 * 60 * 60 * 24));
+        if (daysUntilExpiry <= 30) return <span className="text-red-500">{daysUntilExpiry} days</span>;
+        if (daysUntilExpiry <= 60) return <span className="text-yellow-500">{daysUntilExpiry} days</span>;
+        return <span>{daysUntilExpiry} days</span>;
+      })()}
+    </div>
+  </SectionCard>
+);
+
+const AgreementsPage = () => {
+  const [statusFilter, setStatusFilter] = useState("All");
+  const { data: agreements, isLoading, isError } = useQuery(["agreements"], fetchAgreements, {
+    refetchInterval: 300000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"contract_number", label:"Agreement #", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["contract_number"]??"—")}</span>) },
-    { key:"vendor", label:"Vendor", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["vendor"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState message="Failed to load agreements" />;
+
+  const filteredAgreements = agreements.filter((a: any) => {
+    if (statusFilter === "Active") return a.status === "Active";
+    if (statusFilter === "Expiring") return new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000;
+    if (statusFilter === "Expired") return new Date(a.end_date) < new Date();
+    return true;
+  });
+
+  const totalValue = agreements.reduce((acc: number, a: any) => acc + a.contract_value, 0);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Framework Agreements" subtitle={`${items.length} records`} badge="AGR"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📋" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Supplier Agreements and Contracts" />
+      <div className="flex justify-between mb-4">
+        <MetricStrip
+          title="Total Agreements"
+          value={agreements.length}
+          icon="document"
+        />
+        <MetricStrip
+          title="Active"
+          value={agreements.filter((a: any) => a.status === "Active").length}
+          icon="check-circle"
+        />
+        <MetricStrip
+          title="Expiring Soon"
+          value={agreements.filter((a: any) => new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000).length}
+          icon="clock"
+        />
+        <MetricStrip
+          title="Total Value EGP"
+          value={totalValue.toLocaleString("en-EG", { style: "currency", currency: "EGP" })}
+          icon="dollar-sign"
+        />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="flex justify-between mb-4">
+        <button
+          onClick={() => setStatusFilter("All")}
+          className={`px-2 py-1 rounded ${statusFilter === "All" ? "bg-blue-500 text-white" : ""}`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setStatusFilter("Active")}
+          className={`px-2 py-1 rounded ${statusFilter === "Active" ? "bg-green-500 text-white" : ""}`}
+        >
+          Active
+        </button>
+        <button
+          onClick={() => setStatusFilter("Expiring")}
+          className={`px-2 py-1 rounded ${statusFilter === "Expiring" ? "bg-yellow-500 text-white" : ""}`}
+        >
+          Expiring
+        </button>
+        <button
+          onClick={() => setStatusFilter("Expired")}
+          className={`px-2 py-1 rounded ${statusFilter === "Expired" ? "bg-red-500 text-white" : ""}`}
+        >
+          Expired
+        </button>
+      </div>
+      {filteredAgreements.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredAgreements.map((a: any) => (
+            <AgreementCard key={a.id} {...a} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState message="No agreements found" />
+      )}
     </PageWrapper>
   );
-}
+};
+
+export default AgreementsPage;
