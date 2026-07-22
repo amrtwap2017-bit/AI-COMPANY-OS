@@ -1,41 +1,90 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["operations-command"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/dashboard"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"metric", label:"Metric", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["metric"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"action", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["action"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch signals");
+  return response.json();
+};
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
+
+const fetchTechnicians = async () => {
+  const response = await fetch("/api/v1/technicians", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch technicians");
+  return response.json();
+};
+
+export default function CommandPage() {
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
+  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
+  const techniciansQuery = useQuery(["technicians"], fetchTechnicians, { refetchInterval: 120000 });
+
+  if (signalsQuery.isLoading || kpisQuery.isLoading || techniciansQuery.isLoading) return <LoadingState />;
+
+  const signals = signalsQuery.data;
+  const kpis = kpisQuery.data;
+  const technicians = techniciansQuery.data;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Operations Command" subtitle={`${items.length} records`} badge="CMD"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🎯" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Operations Command Center" />
+      <div className="flex justify-between items-center mb-4">
+        <StatusBadge status={kpis.system_status} />
+        <p>Last Refresh: {new Date().toLocaleTimeString()}</p>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <MetricStrip
+        metrics={[
+          { label: "Open WOs", value: kpis.open_wo_count },
+          { label: "Critical WOs", value: kpis.critical_wo_count },
+          { label: "Available Technicians", value: technicians.available_technician_count },
+          { label: "Active Signals", value: signals.length },
+        ]}
+      />
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <Link href="/operations/work-orders/new" passHref>
+          <button className="bg-blue-500 text-white p-4 rounded-lg hover:bg-blue-600">New Work Order</button>
+        </Link>
+        <Link href="/operations/dispatch" passHref>
+          <button className="bg-green-500 text-white p-4 rounded-lg hover:bg-green-600">Dispatch Technician</button>
+        </Link>
+        <Link href="/operations/calendar" passHref>
+          <button className="bg-purple-500 text-white p-4 rounded-lg hover:bg-purple-600">View Calendar</button>
+        </Link>
+        <Link href="/operations/sla-review" passHref>
+          <button className="bg-red-500 text-white p-4 rounded-lg hover:bg-red-600">SLA Review</button>
+        </Link>
+      </div>
+      <SectionCard title="Live Signal Feed">
+        <ul className="list-disc pl-4">
+          {signals.slice(0, 5).map((signal) => (
+            <li key={signal.id}>{signal.description}</li>
+          ))}
+        </ul>
+      </SectionCard>
+      <SectionCard title="Technician Status">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {technicians.slice(0, 5).map((tech) => (
+            <div key={tech.id} className="bg-gray-100 p-4 rounded-lg flex items-center justify-between">
+              <p>{tech.name}</p>
+              <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                <div
+                  style={{ width: `${(tech.current_work_orders / tech.max_work_orders) * 100}%` }}
+                  className="bg-blue-500 h-full"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
     </PageWrapper>
   );
 }

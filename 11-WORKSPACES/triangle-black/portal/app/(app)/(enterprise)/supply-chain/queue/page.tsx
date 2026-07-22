@@ -1,41 +1,102 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-queue"],
-    queryFn:  () => authFetchJSON("/api/v1/approvals"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { useState } from "react";
+
+const fetchPurchaseRequests = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-requests/", { credentials: "include" });
+  return response.json();
+};
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
+  return response.json();
+};
+
+const fetchRFQs = async () => {
+  const response = await fetch("/api/v1/rfqs", { credentials: "include" });
+  return response.json();
+};
+
+const QueuePage = () => {
+  const [totalQueueItems, setTotalQueueItems] = useState(0);
+
+  const { data: purchaseRequests, isLoading: prLoading } = useQuery(["purchase-requests"], fetchPurchaseRequests, {
+    refetchInterval: 60000,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"type", label:"Type", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["type"]??"—")}</span>) },
-    { key:"reference", label:"Reference", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["reference"]??"—")}</span>) },
-    { key:"requestor", label:"Requestor", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["requestor"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+
+  const { data: purchaseOrders, isLoading: poLoading } = useQuery(["purchase-orders"], fetchPurchaseOrders, {
+    refetchInterval: 60000,
+  });
+
+  const { data: rfqs, isLoading: rfqLoading } = useQuery(["rfqs"], fetchRFQs, {
+    refetchInterval: 60000,
+  });
+
+  if (prLoading || poLoading || rfqLoading) return <LoadingState />;
+
+  const urgentPRs = purchaseRequests.filter((pr: any) => pr.urgency === "urgent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
+  const pendingPOs = purchaseOrders.filter((po: any) => ["pending", "approved"].includes(po.status)).sort((a: any, b: any) => new Date(b.expected_delivery) - new Date(a.expected_delivery));
+  const awaitingQuotes = rfqs.filter((rfq: any) => rfq.status === "sent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
+
+  setTotalQueueItems(urgentPRs.length + pendingPOs.length + awaitingQuotes.length);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Procurement Queue" subtitle={`${items.length} records`} badge="QUE"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="⏳" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Procurement Queue" badge={<StatusBadge type="info">{totalQueueItems}</StatusBadge>} />
+      <MetricStrip
+        items={[
+          { label: "PRs Pending", value: purchaseRequests.filter((pr: any) => ["draft", "pending"].includes(pr.status)).length, color: "primary" },
+          { label: "POs Active", value: purchaseOrders.filter((po: any) => !["received", "cancelled"].includes(po.status)).length, color: "success" },
+          { label: "Open RFQs", value: rfqs.filter((rfq: any) => rfq.status === "sent").length, color: "warning" },
+          { label: "Total Queue Items", value: totalQueueItems, color: "info" },
+        ]}
+      />
+      <SectionCard title="Urgent PRs">
+        {urgentPRs.length > 0 ? (
+          urgentPRs.map((pr: any) => (
+            <div key={pr.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{pr.reference_number}</span>
+              <StatusBadge type="primary">{pr.type}</StatusBadge>
+              <StatusBadge type={pr.status === "pending" ? "warning" : pr.status === "draft" ? "info" : "success"}>{pr.status}</StatusBadge>
+              <span>{new Date(pr.created_at).toLocaleString()}</span>
+            </div>
+          ))
+        ) : (
+          <EmptyState title="No Urgent PRs" />
+        )}
+      </SectionCard>
+      <SectionCard title="Pending POs">
+        {pendingPOs.length > 0 ? (
+          pendingPOs.map((po: any) => (
+            <div key={po.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{po.reference_number}</span>
+              <StatusBadge type="primary">{po.type}</StatusBadge>
+              <StatusBadge type={po.status === "pending" ? "warning" : "success"}>{po.status}</StatusBadge>
+              <span>{new Date(po.expected_delivery).toLocaleString()}</span>
+            </div>
+          ))
+        ) : (
+          <EmptyState title="No Pending POs" />
+        )}
+      </SectionCard>
+      <SectionCard title="Awaiting Quotes">
+        {awaitingQuotes.length > 0 ? (
+          awaitingQuotes.map((rfq: any) => (
+            <div key={rfq.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{rfq.reference_number}</span>
+              <StatusBadge type="primary">{rfq.type}</StatusBadge>
+              <StatusBadge type="warning">{rfq.status}</StatusBadge>
+              <span>{new Date(rfq.created_at).toLocaleString()}</span>
+            </div>
+          ))
+        ) : (
+          <EmptyState title="No Awaiting Quotes" />
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default QueuePage;
