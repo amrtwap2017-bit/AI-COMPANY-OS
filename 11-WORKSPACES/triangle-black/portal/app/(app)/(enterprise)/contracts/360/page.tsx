@@ -1,41 +1,112 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["contracts-360"],
-    queryFn:  () => authFetchJSON("/api/v1/contracts"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchContracts = async () => {
+  const response = await fetch("/api/v1/contracts", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"contract_number", label:"Contract", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["contract_number"]??"—")}</span>) },
-    { key:"client", label:"Client", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["client"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+  return response.json();
+};
+
+const fetchWorkOrdersByContractId = async (contract_id: string) => {
+  const response = await fetch(`/api/v1/work-orders?contract_id=${contract_id}`, {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const fetchInvoicesByContractId = async (contract_id: string) => {
+  const response = await fetch(`/api/v1/invoices?contract_id=${contract_id}`, {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const Contract360Page = () => {
+  const [searchText, setSearchText] = useState("");
+  const [selectedContract, setSelectedContract] = useState(null);
+
+  const { data: contracts, isLoading, isError } = useQuery(
+    ["contracts"],
+    fetchContracts,
+    {
+      refetchInterval: 300000,
+    }
+  );
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState message="Failed to load contracts" />;
+
+  const filteredContracts = contracts.filter((contract) =>
+    contract.client_name.toLowerCase().includes(searchText.toLowerCase())
+  ).sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
+
+  const handleContractClick = (contract) => {
+    setSelectedContract(contract);
+  };
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Contract 360°" subtitle={`${items.length} records`} badge="360"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📜" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Contract 360" />
+      <input
+        type="text"
+        placeholder="Search by client name..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="w-full p-2 border rounded mb-4"
+      />
+      {filteredContracts.length === 0 ? (
+        <EmptyState message="No contracts found" />
+      ) : (
+        filteredContracts.map((contract) => (
+          <SectionCard key={contract.id} onClick={() => handleContractClick(contract)}>
+            <h3 className="font-bold">{contract.client_name}</h3>
+            <StatusBadge status={contract.status} />
+            <p>Value: {contract.contract_value} EGP</p>
+            <p>Dates: {contract.start_date} - {contract.end_date}</p>
+          </SectionCard>
+        ))
+      )}
+      {selectedContract && (
+        <div className="mt-8">
+          <h2 className="font-bold">Selected Contract Details</h2>
+          <p>Client: {selectedContract.client_name}</p>
+          <p>Value: {selectedContract.contract_value} EGP</p>
+          <p>Dates: {selectedContract.start_date} - {selectedContract.end_date}</p>
+          <p>Status: {selectedContract.status}</p>
+          <h3>Linked WOs</h3>
+          <SectionCard>
+            <MetricStrip
+              title="WO Count"
+              value={fetchWorkOrdersByContractId(selectedContract.id).length}
+            />
+          </SectionCard>
+          <h3>Linked Invoices</h3>
+          <SectionCard>
+            <MetricStrip
+              title="Invoice Total"
+              value={fetchInvoicesByContractId(selectedContract.id).reduce(
+                (total, invoice) => total + invoice.amount,
+                0
+              )}
+            />
+          </SectionCard>
+        </div>
+      )}
     </PageWrapper>
   );
-}
+};
+
+export default Contract360Page;

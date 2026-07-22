@@ -1,41 +1,67 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["engineering-ai"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/intelligence"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"insight", label:"Insight", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["insight"]??"—")}</span>) },
-    { key:"asset", label:"Asset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["asset"]??"—")}</span>) },
-    { key:"severity", label:"Severity", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["severity"]??"—")}</span>) },
-    { key:"recommendation", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["recommendation"]??"—")}</span>) },
-  ];
+import { useState } from "react";
+import { PageWrapper, PageHeader, SectionCard, EmptyState } from "@/components/ui";
+
+const EngineeringAIPage = () => {
+  const [question, setQuestion] = useState("");
+  const [selectedExample, setSelectedExample] = useState<string | null>(null);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Engineering AI Assistant" subtitle={`${items.length} records`} badge="AI"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🤖" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Engineering AI Assistant" description="Ask questions about your engineering operations." />
+      <div className="flex flex-col gap-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <textarea
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Ask about your engineering operations..."
+            rows={4}
+            className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none"
+          />
+          <button onClick={() => setSelectedExample(question)} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            Ask
+          </button>
+        </div>
+        <SectionCard title="Example Questions">
+          <ul className="space-y-4">
+            {[
+              "Which assets have the most corrective work orders?",
+              "What is the current HVAC maintenance status?",
+              "Show me technicians with capacity available",
+              "Which PM plans are overdue?",
+            ].map((example, index) => (
+              <li
+                key={index}
+                onClick={() => {
+                  setQuestion(example);
+                  setSelectedExample(example);
+                }}
+                className={`cursor-pointer px-4 py-2 rounded-md hover:bg-gray-100 ${
+                  selectedExample === example ? "bg-blue-500 text-white" : ""
+                }`}
+              >
+                {example}
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+        <SectionCard title="Example Responses">
+          <EmptyState
+            icon="/path/to/icon.svg"
+            title="Connect AI Engine to enable real-time responses"
+            description="Powered by Triangle Black AI Engine — /api/v1/ai/signals"
+          />
+        </SectionCard>
+        <div className="grid grid-cols-3 gap-4">
+          <SectionCard title="Asset Health" href="/maintenance/assets/360" />
+          <SectionCard title="PM Schedule" href="/maintenance/pm-plans" />
+          <SectionCard title="Engineering Actions" href="/engineering/actions" />
+        </div>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
     </PageWrapper>
   );
-}
+};
+
+export default EngineeringAIPage;

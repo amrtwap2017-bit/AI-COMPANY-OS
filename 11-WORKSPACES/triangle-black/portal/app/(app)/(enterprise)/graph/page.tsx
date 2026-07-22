@@ -1,41 +1,95 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["graph"],
-    queryFn:  () => authFetchJSON("/api/v1/projects"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"entity", label:"Entity", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["entity"]??"—")}</span>) },
-    { key:"type", label:"Type", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["type"]??"—")}</span>) },
-    { key:"connections", label:"Links", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["connections"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
+
+const fetchSignalsSummary = async () => {
+  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch Signals Summary");
+  return response.json();
+};
+
+const GraphPage = () => {
+  const { data: kpis, isLoading } = useQuery(["kpis"], fetchKpis, { refetchInterval: 300000 });
+  const { data: signalsSummary, isLoading: signalsLoading } = useQuery(["signalsSummary"], fetchSignalsSummary, { refetchInterval: 300000 });
+
+  if (isLoading || signalsLoading) return <LoadingState />;
+
+  const totalEntities = kpis.WOs + kpis.technicians + kpis.assets + kpis.contracts;
+  const connections = kpis.WOs * kpis.technicians; // Simplified for example
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Knowledge Graph" subtitle={`${items.length} records`} badge="GRAPH"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🕸️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Operations Knowledge Graph" note="Entity relationships in Triangle Black" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Entities", value: totalEntities },
+            { label: "Connections", value: connections },
+            { label: "Signals", value: signalsSummary.totalSignals },
+            { label: "Data Points", value: signalsSummary.dataPoints }
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Entity Relationship Summary">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th>Entity</th>
+              <th>Related Entity</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Work Orders</td>
+              <td>Technicians</td>
+              <td>{kpis.WOs * kpis.technicians}</td>
+            </tr>
+            <tr>
+              <td>Work Orders</td>
+              <td>Assets</td>
+              <td>{kpis.WOsWithAssetId}</td>
+            </tr>
+            <tr>
+              <td>Contracts</td>
+              <td>Work Orders</td>
+              <td>{kpis.WOsWithContractId}</td>
+            </tr>
+            <tr>
+              <td>Assets</td>
+              <td>PM Plans</td>
+              <td>{signalsSummary.plansWithAssetNodeId}</td>
+            </tr>
+          </tbody>
+        </table>
+      </SectionCard>
+      <SectionCard title="Quick Navigation">
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/operations/work-orders" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">
+            Work Orders
+          </Link>
+          <Link href="/operations/technicians" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">
+            Technicians
+          </Link>
+          <Link href="/maintenance/assets" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">
+            Assets
+          </Link>
+          <Link href="/contracts/360" className="bg-white p-4 rounded-lg shadow hover:bg-gray-100">
+            Contracts 360
+          </Link>
+        </div>
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default GraphPage;
