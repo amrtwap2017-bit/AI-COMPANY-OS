@@ -234,3 +234,25 @@ try:
     app.include_router(webhook_notifications_router, prefix="/api/v1")
 except Exception as e:
     print(f"[WARN] webhook_notifications: {e}")
+
+# ── Sprint 11: AI Operations Routers ──────────────────────────
+try:
+  from src.commercial.ai_assistant.signals_router import router as ai_signals_router
+  app.include_router(ai_signals_router, prefix="/api/v1")
+  print("  OK: signals_router")
+except Exception as e:
+  print(f"  WARN: signals_router: {e}")
+
+try:
+  from src.commercial.ai_assistant.dispatch_router import router as ai_dispatch_router
+  app.include_router(ai_dispatch_router, prefix="/api/v1")
+  print("  OK: dispatch_router")
+except Exception as e:
+  print(f"  WARN: dispatch_router: {e}")
+
+try:
+  from src.commercial.ai_assistant.supply_automation_router import router as ai_supply_router
+  app.include_router(ai_supply_router, prefix="/api/v1")
+  print("  OK: supply_automation_router")
+except Exception as e:
+  print(f"  WARN: supply_automation_router: {e}")
