@@ -1,76 +1,96 @@
-"use client";
-// @ts-nocheck
+"use client"; // @ts-nocheck
+
+use client"; // @ts-nocheck
+
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, Progress } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, Progress } from "@/components/ui";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
-import { toast } from "@/lib/toast";
 
-export default function SLAReviewPage() {
-  const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["sla-review"],
-    queryFn: async () => {
-      const res = await authFetch("/api/v1/analytics/sla");
-      if (!res.ok) return {};
-      return res.json();
-    },
-    refetchInterval: 60_000,
-  });
+const fetchSLAData = async () => {
+  try {
+    const response = await fetch("/api/v1/analytics/sla");
+    if (!response.ok) throw new Error("Failed to fetch SLA data");
+    return response.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
 
-  const sla = data || {};
-  const compliance = Number(sla.compliance_rate || 0);
-  const target = Number(sla.sla_target || 95);
-  const isCompliant = compliance >= target;
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders");
+  return response.json();
+};
+
+const SLAReviewPage = () => {
+  const { data: slaData, isLoading: isSLALoading, isError: isSLError } = useQuery(["sla"], fetchSLAData);
+  const { data: workOrders, isLoading: isWorkOrdersLoading, isError: isWorkOrdersError } = useQuery(["work-orders"], fetchWorkOrders);
+
+  if (isSLALoading || isWorkOrdersLoading) return <LoadingState />;
+  if (isSLError || isWorkOrdersError) return <EmptyState title="Failed to load data" description="Please try again later." />;
+
+  const complianceRate = slaData ? Math.round((slaData.completed / slaData.total) * 100) : null;
+  const completedWOs = slaData ? slaData.completed : workOrders.filter(order => order.status === "completed").length;
+  const openWOs = slaData ? slaData.open : workOrders.filter(order => order.status !== "completed").length;
+  const overdueWOs = workOrders.filter(order => new Date(order.due_date) < new Date() && order.status !== "completed").length;
+
+  const compliance = (completedWOs / (completedWOs + openWOs)) * 100;
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="SLA Review"
-        subtitle="Service level agreement compliance monitoring"
-        badge="SLA"
-        actions={
-          <button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
-            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
-          </button>
-        }
-      />
-
-      {isLoading ? <LoadingState type="cards" rows={4} cols={2} /> : (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Compliance Rate", value: compliance + "%", color: isCompliant ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-red-50 border-red-200 text-red-700" },
-              { label: "SLA Target",      value: target + "%",     color: "bg-slate-50 border-slate-200 text-slate-700" },
-              { label: "Total WOs",       value: sla.total_work_orders || 0, color: "bg-blue-50 border-blue-200 text-blue-700" },
-              { label: "Critical Open",   value: sla.critical_open || 0, color: (sla.critical_open || 0) > 0 ? "bg-red-50 border-red-200 text-red-700" : "bg-emerald-50 border-emerald-200 text-emerald-700" },
-            ].map(m => (
-              <div key={m.label} className={"rounded-2xl border p-4 " + m.color}>
-                <div className="text-2xl font-bold">{m.value}</div>
-                <div className="text-xs font-medium mt-1 opacity-80">{m.label}</div>
+      <PageHeader title="SLA Review" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Compliance Rate", value: complianceRate, unit: "%" },
+            { label: "Completed WOs", value: completedWOs },
+            { label: "Open WOs", value: openWOs },
+            { label: "Overdue WOs", value: overdueWOs }
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="SLA Gauge">
+        <Progress value={complianceRate} max={100} color={compliance >= 95 ? "green" : compliance >= 80 ? "amber" : "red"} />
+        <div className="flex justify-between items-center mt-2">
+          <span>SLA Target: 95%</span>
+          <span>{completedWOs} of {completedWOs + openWOs} work orders completed on time</span>
+        </div>
+      </SectionCard>
+      <SectionCard title="Work Orders Past Due">
+        {overdueWOs > 0 ? (
+          <ul>
+            {workOrders
+              .filter(order => new Date(order.due_date) < new Date() && order.status !== "completed")
+              .sort((a, b) => new Date(b.due_date) - new Date(a.due_date))
+              .map(order => (
+                <li key={order.id} className="flex items-center justify-between mb-2">
+                  <div>
+                    {order.title}
+                    <StatusBadge status={order.status} />
+                  </div>
+                  <span>{Math.floor((new Date() - new Date(order.due_date)) / (1000 * 60 * 60 * 24))} days overdue</span>
+                </li>
+              ))}
+          </ul>
+        ) : (
+          <EmptyState title="All work orders within SLA" description="No work orders are past due." />
+        )}
+      </SectionCard>
+      <SectionCard title="SLA by Work Order Type">
+        {slaData ? (
+          <div className="flex flex-wrap gap-4">
+            {["hvac", "electrical", "plumbing", "mechanical"].map(type => (
+              <div key={type} className="bg-white p-4 rounded-lg shadow-md w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
+                <h3>{type}</h3>
+                <StatusBadge status="completed" count={slaData[type]} />
               </div>
             ))}
           </div>
-
-          <SectionCard title="Compliance Overview">
-            <div className="space-y-4">
-              <div className={isCompliant ? "flex items-center gap-3 p-4 rounded-xl bg-emerald-50" : "flex items-center gap-3 p-4 rounded-xl bg-red-50"}>
-                {isCompliant ? <CheckCircle2 className="w-6 h-6 text-emerald-600" /> : <XCircle className="w-6 h-6 text-red-600" />}
-                <div>
-                  <p className={isCompliant ? "font-semibold text-emerald-800" : "font-semibold text-red-800"}>
-                    Status: {sla.sla_status === "compliant" ? "Compliant" : "At Risk"}
-                  </p>
-                  <p className={isCompliant ? "text-sm text-emerald-600" : "text-sm text-red-600"}>
-                    {compliance}% vs {target}% target
-                  </p>
-                </div>
-              </div>
-              <Progress value={compliance} max={100} size="lg" label="Overall Compliance" showValue
-                color={isCompliant ? "emerald" : "red"} />
-            </div>
-          </SectionCard>
-        </>
-      )}
+        ) : (
+          <EmptyState title="No data available" description="Please try again later." />
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default SLAReviewPage;
