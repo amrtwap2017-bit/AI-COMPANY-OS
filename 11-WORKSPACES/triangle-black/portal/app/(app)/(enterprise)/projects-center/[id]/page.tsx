@@ -1,90 +1,84 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useParams } from "next/navigation";
+
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, LoadingState, AlertBanner, DataTable } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { EntityTabs } from "@/components/ui/EntityTabs";
-import { getStateColor } from "@/lib/hooks/useWorkflow";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { fmtDate } from "@/lib/design-tokens";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useParams, Link } from "next/navigation";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchProjects = async () => {
+  const response = await fetch("/api/v1/projects", { credentials: "include" });
+  return response.json();
+};
+
+const fetchWorkOrders = async (contractId: string) => {
+  const response = await fetch(`/api/v1/work-orders?contract_id=${contractId}`, { credentials: "include" });
+  return response.json();
+};
+
+const fetchSignals = async (projectId: string) => {
+  const response = await fetch(`/api/v1/ai/signals?project_id=${projectId}`, { credentials: "include" });
+  return response.json();
+};
 
 export default function ProjectDetailPage() {
-  const { id } = useParams();
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["project", id],
-    queryFn:  () => authFetchJSON("/api/v1/projects/" + id),
-    enabled:  !!id,
+  const params = useParams();
+  const id = params?.id;
+
+  const { data: projects, isLoading, isError } = useQuery(["projects"], fetchProjects, {
+    refetchInterval: 120000,
   });
-  const { data: phases  = [] } = useQuery({ queryKey:["project-phases",id],  queryFn:()=>authFetchJSON("/api/v1/projects/"+id+"/phases"),     enabled:!!id });
-  const { data: risks   = [] } = useQuery({ queryKey:["project-risks",id],   queryFn:()=>authFetchJSON("/api/v1/projects/"+id+"/risks"),      enabled:!!id });
-  const { data: milestones=[] } = useQuery({ queryKey:["project-miles",id],  queryFn:()=>authFetchJSON("/api/v1/projects/"+id+"/milestones"),  enabled:!!id });
 
-  if (isLoading) return <PageWrapper><LoadingState type="table" rows={6}/></PageWrapper>;
-  if (isError || !data) return <PageWrapper><AlertBanner type="error" title="Project not found"/></PageWrapper>;
-  const p: any  = Array.isArray(data) ? data[0] : data;
-  const pList   = Array.isArray(phases)     ? phases     : phases?.phases     || [];
-  const rList   = Array.isArray(risks)      ? risks      : risks?.risks       || [];
-  const mList   = Array.isArray(milestones) ? milestones : milestones?.milestones || [];
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load project" />;
 
-  const progress = Number(p?.progress || p?.completion_percentage || 0);
+  const project = projects.find(p => p.id === id);
 
-  const overview = (
-    <div className="space-y-4">
-      <div className="bg-slate-50 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-slate-700">Progress</span>
-          <span className="text-sm font-bold text-amber-600">{progress}%</span>
-        </div>
-        <div className="h-2 bg-slate-200 rounded-full">
-          <div className="h-2 bg-amber-500 rounded-full transition-all" style={{width: progress+"%"}}/>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        {[
-          ["Status",     <span className={"text-xs font-bold px-2 py-0.5 rounded-full "+getStateColor(p?.status||"active")}>{p?.status}</span>],
-          ["Client",     p?.client || p?.hotel_id || "—"],
-          ["Start Date", p?.start_date ? fmtDate(p.start_date) : "—"],
-          ["End Date",   p?.end_date   ? fmtDate(p.end_date)   : "—"],
-          ["Budget",     p?.budget_total ? "EGP "+Number(p.budget_total).toLocaleString() : "—"],
-          ["Spent",      p?.budget_spent ? "EGP "+Number(p.budget_spent).toLocaleString() : "—"],
-        ].map(([label, value]: any) => (
-          <div key={label} className="bg-slate-50 rounded-xl p-3">
-            <p className="text-xs text-slate-500 mb-1">{label}</p>
-            <div className="text-sm font-medium text-slate-900">{value}</div>
-          </div>
-        ))}
-      </div>
-      {p?.description && <div className="bg-slate-50 rounded-xl p-4"><p className="text-xs text-slate-500 mb-1">Description</p><p className="text-sm text-slate-700">{p.description}</p></div>}
-    </div>
-  );
+  if (!project) return <EmptyState title="Project not found" action={<Link href="/projects-center">Back to Projects</Link>} />;
 
-  const phaseCols = [
-    { key:"name",       label:"Phase",    render:(r:any)=><span className="text-sm font-semibold">{r.name}</span> },
-    { key:"status",     label:"Status",   render:(r:any)=><span className={"text-xs font-bold px-2 py-0.5 rounded-full "+getStateColor(r.status)}>{r.status}</span> },
-    { key:"start_date", label:"Start",    render:(r:any)=><span className="text-xs text-slate-500">{r.start_date?fmtDate(r.start_date):"—"}</span> },
-    { key:"end_date",   label:"End",      render:(r:any)=><span className="text-xs text-slate-500">{r.end_date?fmtDate(r.end_date):"—"}</span> },
-  ];
-  const riskCols = [
-    { key:"title",      label:"Risk",     render:(r:any)=><span className="text-sm font-semibold">{r.title||r.description}</span> },
-    { key:"severity",   label:"Severity", render:(r:any)=><span className={"text-xs font-bold px-2 py-0.5 rounded-full "+getStateColor(r.severity||"medium")}>{r.severity}</span> },
-    { key:"mitigation", label:"Mitigation",render:(r:any)=><span className="text-xs text-slate-500">{r.mitigation||"—"}</span> },
-  ];
+  const { name, status, start_date, end_date, contract_id } = project;
+  const workOrdersQuery = useQuery(["work-orders", contract_id], () => fetchWorkOrders(contract_id), {
+    refetchInterval: 120000,
+  });
+  const signalsQuery = useQuery(["signals", id], () => fetchSignals(id), { refetchInterval: 120000 });
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title={p?.name||"Project"} subtitle={"Progress: "+progress+"%"} badge="PRJ"
-        actions={<Link href="/projects-center" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
-      <EntityTabs tabs={[
-        { id:"overview",   label:"Overview",   icon:"📋", content: overview },
-        { id:"phases",     label:"Phases",     icon:"🔄", badge: pList.length,
-          content: pList.length===0?<p className="text-sm text-slate-400 text-center py-8">No phases</p>:<DataTable columns={phaseCols} data={pList}/> },
-        { id:"risks",      label:"Risks",      icon:"⚠️",  badge: rList.length,
-          content: rList.length===0?<p className="text-sm text-slate-400 text-center py-8">No risks</p>:<DataTable columns={riskCols} data={rList}/> },
-      ]}/>
+      <PageHeader title={name} action={<StatusBadge status={status} />}>
+        {start_date} → {end_date}
+      </PageHeader>
+      <SectionCard title="Metrics">
+        <MetricStrip
+          title="Work Orders"
+          value={workOrdersQuery.data?.length || 0}
+          subValue={workOrdersQuery.data?.filter(w => w.status !== "completed").length || 0}
+          extraInfo={`Days Remaining: ${Math.ceil((new Date(end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}`}
+        />
+      </SectionCard>
+      <SectionCard title="Work Orders">
+        {workOrdersQuery.isLoading ? (
+          <LoadingState />
+        ) : workOrdersQuery.isError ? (
+          <EmptyState title="Failed to load work orders" />
+        ) : (
+          workOrdersQuery.data?.map(w => (
+            <div key={w.id} className="flex items-center justify-between p-2 border-b">
+              {w.title}
+              <StatusBadge status={w.status} />
+            </div>
+          ))
+        )}
+      </SectionCard>
+      <SectionCard title="Quick Links">
+        <Link href="/projects-center/review" className="block px-4 py-2 text-blue-500 hover:text-blue-700">Review</Link>
+        <Link href="/projects-center/actions" className="block px-4 py-2 text-blue-500 hover:text-blue-700">Actions</Link>
+      </SectionCard>
     </PageWrapper>
   );
 }

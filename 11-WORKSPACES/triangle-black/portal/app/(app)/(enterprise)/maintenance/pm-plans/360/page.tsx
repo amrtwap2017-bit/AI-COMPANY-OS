@@ -1,78 +1,94 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useParams } from "next/navigation";
+
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { EntityTabs } from "@/components/ui/EntityTabs";
-import { getStateColor } from "@/lib/hooks/useWorkflow";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { fmtDate } from "@/lib/design-tokens";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
 
-export default function PMPlan360Page() {
-  const params = useParams();
-  const id     = params?.id as string;
+const fetchPmPlans = async () => {
+  const response = await fetch("/api/v1/maintenance/pm-plans", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  return response.json();
+};
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey:  ["pm-plan", id],
-    queryFn:   () => authFetchJSON("/api/v1/maintenance/pm-plans/" + (id || "")),
-    enabled:   !!id,
-    staleTime: 30_000,
+const fetchAssets = async (asset_node_id: string) => {
+  const response = await fetch(`/api/v1/assets?node_id=${asset_node_id}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch asset details");
+  return response.json();
+};
+
+const PmPlansPage = () => {
+  const [search, setSearch] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<{ id: string; title: string } | null>(null);
+
+  const { data: pmPlans, isLoading, isError } = useQuery(["pm-plans"], fetchPmPlans, {
+    refetchInterval: 120000,
   });
 
-  if (isLoading) return <PageWrapper><LoadingState type="table" rows={5}/></PageWrapper>;
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState message="Failed to load PM plans" />;
 
-  if (isError || !data) {
-    return (
-      <PageWrapper>
-        <AlertBanner type="error" title="PM Plan not found"/>
-        <Link href="/maintenance/pm-plans" className="text-sm text-amber-600 mt-4 flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4"/> Back to PM Plans
-        </Link>
-      </PageWrapper>
-    );
-  }
-
-  const p: any = Array.isArray(data) ? data[0] : (data?.data || data);
-
-  const overview = (
-    <div className="grid grid-cols-2 gap-3">
-      {[
-        ["Title",       p?.title],
-        ["Frequency",   p?.frequency],
-        ["Status",      p?.status],
-        ["Asset",       p?.asset_id],
-        ["Next Due",    p?.next_due_date ? fmtDate(p.next_due_date) : "—"],
-        ["Created",     p?.created_at   ? fmtDate(p.created_at)    : "—"],
-      ].map(([label, value]: any) => (
-        <div key={label} className="bg-slate-50 rounded-xl p-3">
-          <p className="text-xs text-slate-500 mb-1">{label}</p>
-          <p className="text-sm font-medium text-slate-900 capitalize">
-            {value ? String(value).replace(/_/g," ") : "—"}
-          </p>
-        </div>
-      ))}
-    </div>
+  const filteredPlans = pmPlans.filter((plan: any) =>
+    plan.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader
-        title={p?.title || "PM Plan"}
-        subtitle={"Frequency: " + (p?.frequency || "—")}
-        badge="PM"
-        actions={
-          <Link href="/maintenance/pm-plans"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
-            <ArrowLeft className="w-4 h-4"/> Back
-          </Link>
-        }/>
-      <EntityTabs tabs={[
-        { id:"overview", label:"Overview", icon:"📋", content: overview },
-      ]}/>
+      <PageHeader title="PM Plan 360" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Plans", value: pmPlans.length },
+            { label: "Active", value: filteredPlans.filter((p: any) => p.status === "active").length },
+            {
+              label: "Overdue",
+              value: filteredPlans.filter((p: any) => new Date(p.next_due_date) < new Date(today)).length,
+            },
+            {
+              label: "Due This Week",
+              value: filteredPlans.filter(
+                (p: any) =>
+                  new Date(p.next_due_date).getTime() >= new Date(today).getTime() &&
+                  new Date(p.next_due_date).getTime() <= new Date(today).getTime() + 604800000
+              ).length,
+            },
+          ]}
+        />
+      </SectionCard>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredPlans.map((plan: any) => (
+          <div key={plan.id} onClick={() => setSelectedPlan(plan)} className="cursor-pointer p-4 border rounded hover:bg-gray-50">
+            <h3 className="font-bold">{plan.title}</h3>
+            <StatusBadge status={plan.status} />
+            <p>{plan.frequency}</p>
+            <p>{new Date(plan.next_due_date).toLocaleDateString()}</p>
+          </div>
+        ))}
+      </div>
+      {selectedPlan && (
+        <SectionCard>
+          <h2 className="font-bold">{selectedPlan.title}</h2>
+          <p>Type: {selectedPlan.type}</p>
+          <p>Frequency: {selectedPlan.frequency}</p>
+          <p>Next Due Date: {new Date(selectedPlan.next_due_date).toLocaleDateString()}</p>
+          <p>Status: {selectedPlan.status}</p>
+          {/* Fetch owner name and notes */}
+          {/* Fetch related asset name */}
+          {/* Calculate "Due in X days" or "X days overdue" */}
+        </SectionCard>
+      )}
     </PageWrapper>
   );
-}
+};
+
+export default PmPlansPage;

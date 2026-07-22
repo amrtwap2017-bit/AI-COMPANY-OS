@@ -1,41 +1,100 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["operations-technicians-[id]"],
-    queryFn:  () => authFetchJSON("/api/v1/technicians"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Progress
+} from "@/components/ui";
+
+const fetchTechnician = async (id: string) => {
+  const response = await fetch(`/api/v1/technicians?id=${id}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Technician not found");
+  return response.json();
+};
+
+const fetchWorkOrders = async (id: string) => {
+  const response = await fetch(`/api/v1/work-orders?technician_id=${id}`, { credentials: "include" });
+  return response.json();
+};
+
+export default function TechnicianProfilePage() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id;
+
+  const { data: technician, isLoading, isError } = useQuery(["technician", id], () => fetchTechnician(id), {
+    refetchInterval: 60000
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Name", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"specialization", label:"Skill", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["specialization"]??"—")}</span>) },
-    { key:"current_assignments", label:"Jobs", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["current_assignments"]??"—")}</span>) },
-    { key:"is_active", label:"Active", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["is_active"]??"—")}</span>) },
-  ];
+
+  const { data: workOrders = [] } = useQuery(["workOrders", id], () => fetchWorkOrders(id));
+
+  if (isLoading) return <LoadingState />;
+  if (isError || !technician) return <EmptyState title="Technician not found" backLink="/operations/technicians" />;
+
+  const specializations = JSON.parse(technician.specializations || "[]");
+  const currentWOs = workOrders.filter(w => w.status !== "completed").length;
+  const maxCapacity = technician.capacity;
+  const utilizationPercentage = ((currentWOs / maxCapacity) * 100).toFixed(2);
+  const completedWOs = workOrders.filter(w => w.status === "completed").length;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Technician Profile" subtitle={`${items.length} records`} badge="TECH"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="👷" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Technician Profile" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Current WOs", value: currentWOs },
+            { label: "Max Capacity", value: maxCapacity },
+            { label: "Utilization %", value: utilizationPercentage, suffix: "%" },
+            { label: "Completed WOs", value: completedWOs }
+          ]}
+        />
+      </SectionCard>
+      <div className="flex flex-col gap-4">
+        <h2 className="text-xl font-bold">{technician.name}</h2>
+        <p>{technician.email}</p>
+        <p>{technician.phone}</p>
+        <div className="flex gap-2">
+          {specializations.map((spec: string, index: number) => (
+            <StatusBadge key={index} label={spec} />
+          ))}
+        </div>
+        <Progress value={(currentWOs / maxCapacity) * 100} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Assigned Work Orders">
+        {workOrders.length === 0 ? (
+          <EmptyState title="No work orders assigned" />
+        ) : (
+          <ul className="space-y-2">
+            {workOrders
+              .sort((a, b) => {
+                if (a.status === "in_progress" && b.status !== "in_progress") return -1;
+                if (b.status === "in_progress" && a.status !== "in_progress") return 1;
+                return 0;
+              })
+              .map((wo: any) => (
+                <li key={wo.id} className="flex items-center gap-2">
+                  <span>{wo.title}</span>
+                  <StatusBadge label={wo.type} />
+                  <StatusBadge label={wo.priority} />
+                  <StatusBadge label={wo.status} />
+                </li>
+              ))}
+          </ul>
+        )}
+      </SectionCard>
+      <Link href="/operations/technicians" className="text-sm text-gray-500">
+        Back to Technicians
+      </Link>
     </PageWrapper>
   );
 }
