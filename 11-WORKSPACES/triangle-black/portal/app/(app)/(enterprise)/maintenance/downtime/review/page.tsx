@@ -1,104 +1,146 @@
 "use client"; // @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import {
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState
+} from "@/components/ui";
 
-const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders?type=corrective&status=completed&started_at[not_null]=true&completed_at[not_null]=true", { credentials: "include" });
-  return response.json();
-};
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
-const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", { credentials: "include" });
-  return response.json();
-};
+async function fetchWOs() {
+  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
+}
 
-const MaintenanceDowntimeReviewPage = () => {
-  const workOrdersQuery = useQuery(["work-orders"], fetchWorkOrders, { refetchInterval: 300000 });
-  const assetsQuery = useQuery(["assets"], fetchAssets, { refetchInterval: 300000 });
+async function fetchAssets() {
+  const r = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
+}
 
-  if (workOrdersQuery.isLoading || assetsQuery.isLoading) return <LoadingState />;
-  if (workOrdersQuery.isError || assetsQuery.isError) return <EmptyState />;
+export default function DowntimeReviewPage() {
+  const { data: wos = [], isLoading: woLoading } = useQuery({
+    queryKey: ["downtime-wos"],
+    queryFn: fetchWOs,
+    refetchInterval: 300000,
+  });
+  const { data: assets = [], isLoading: assetLoading } = useQuery({
+    queryKey: ["downtime-assets"],
+    queryFn: fetchAssets,
+    refetchInterval: 300000,
+  });
 
-  const workOrders = workOrdersQuery.data;
-  const assets = assetsQuery.data;
+  const isLoading = woLoading || assetLoading;
 
-  // Compute downtime and MTTR
-  const completedWorkOrders = workOrders.filter((wo: any) => wo.type === "corrective" && wo.status === "completed");
-  const downtimeHours = completedWorkOrders.map((wo: any) => (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000);
-  const avgMTTR = downtimeHours.length > 0 ? downtimeHours.reduce((a, b) => a + b, 0) / downtimeHours.length : 0;
-  const longestRepair = Math.max(...downtimeHours);
-  const assetsAffected = new Set(completedWorkOrders.map((wo: any) => wo.asset_id));
+  const corrective = wos.filter(
+    (w) => w.type === "corrective" &&
+           w.status === "completed" &&
+           w.started_at &&
+           w.completed_at
+  );
 
-  // Group by asset category
-  const mttrByAssetType = completedWorkOrders.reduce((acc, wo) => {
-    const asset = assets.find((a: any) => a.id === wo.asset_id);
-    if (asset) {
-      const category = asset.category;
-      acc[category] = acc[category] || { count: 0, totalHours: 0, maxHours: 0 };
-      acc[category].count++;
-      acc[category].totalHours += downtimeHours.find((dh, index) => dh === (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000);
-      acc[category].maxHours = Math.max(acc[category].maxHours, downtimeHours[index]);
-    }
+  const withHours = corrective.map((w) => {
+    const hours = (new Date(w.completed_at) - new Date(w.started_at)) / 3600000;
+    const asset = assets.find((a) => a.id === w.asset_id);
+    return { ...w, hours, assetName: asset?.name || "Unknown", category: asset?.category || "General" };
+  }).filter((w) => w.hours > 0);
+
+  const avgMTTR = withHours.length > 0
+    ? (withHours.reduce((s, w) => s + w.hours, 0) / withHours.length).toFixed(1)
+    : 0;
+
+  const maxRepair = withHours.length > 0
+    ? Math.max(...withHours.map((w) => w.hours)).toFixed(1)
+    : 0;
+
+  const uniqueAssets = new Set(withHours.map((w) => w.asset_id)).size;
+  const mttrOk = Number(avgMTTR) < 8;
+
+  const byCategory = withHours.reduce((acc, w) => {
+    if (!acc[w.category]) acc[w.category] = { count: 0, totalHours: 0 };
+    acc[w.category].count += 1;
+    acc[w.category].totalHours += w.hours;
     return acc;
-  }, {} as { [key: string]: { count: number; totalHours: number; maxHours: number } });
+  }, {});
 
-  // Top 5 longest repairs
-  const topLongestRepairs = completedWorkOrders.sort((a, b) => (new Date(b.completed_at).getTime() - new Date(b.started_at).getTime()) / 3600000 - (new Date(a.completed_at).getTime() - new Date(a.started_at).getTime()) / 3600000).slice(0, 5);
+  const top5 = [...withHours].sort((a, b) => b.hours - a.hours).slice(0, 5);
+
+  if (isLoading) return <LoadingState message="Loading downtime data..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Asset Downtime Analysis" />
-      <SectionCard>
-        <MetricStrip
-          title="Corrective WOs Completed"
-          value={completedWorkOrders.length}
-        />
-        <MetricStrip
-          title="Avg MTTR (hours)"
-          value={avgMTTR.toFixed(2)}
-        />
-        <MetricStrip
-          title="Longest Repair (hours)"
-          value={longestRepair.toFixed(2)}
-        />
-        <MetricStrip
-          title="Assets Affected"
-          value={assetsAffected.size}
-        />
+      <PageHeader
+        title="Downtime Review"
+        subtitle="Asset downtime and mean time to repair analysis"
+        badge={mttrOk ? "On Target" : "Exceeds Target"}
+      />
+
+      <MetricStrip metrics={[
+        { label: "Corrective WOs",  value: corrective.length },
+        { label: "Avg MTTR (hrs)",  value: avgMTTR, color: mttrOk ? "green" as const : "red" as const },
+        { label: "Longest Repair",  value: `${maxRepair}h` },
+        { label: "Assets Affected", value: uniqueAssets },
+      ]} />
+
+      <SectionCard title={`MTTR Status — Target: under 8 hours`}>
+        <div className={`px-4 py-3 rounded-lg border ${
+          mttrOk ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+        }`}>
+          <p className={`text-sm font-bold ${mttrOk ? "text-green-700" : "text-red-700"}`}>
+            {mttrOk
+              ? `MTTR within target — avg ${avgMTTR}h (target < 8h)`
+              : `MTTR exceeds target — avg ${avgMTTR}h (target < 8h)`}
+          </p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Based on {corrective.length} completed corrective work orders
+          </p>
+        </div>
       </SectionCard>
-      <StatusBadge status={avgMTTR < 8 ? "within target" : "exceeds target"} />
-      <h3 className="mt-4 text-lg font-medium">MTTR by Asset Type</h3>
-      <table className="w-full border-collapse">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Count</th>
-            <th>Avg Hours</th>
-            <th>Max Hours</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(mttrByAssetType).map(([category, data]) => (
-            <tr key={category}>
-              <td>{category}</td>
-              <td>{data.count}</td>
-              <td>{(data.totalHours / data.count).toFixed(2)}</td>
-              <td>{data.maxHours.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <h3 className="mt-4 text-lg font-medium">Top 5 Longest Repairs</h3>
-      <ul>
-        {topLongestRepairs.map((wo: any) => (
-          <li key={wo.id}>
-            <strong>{wo.title}</strong> - {assets.find((a: any) => a.id === wo.asset_id).name}, {downtimeHours.find((dh, index) => dh === (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000)).toFixed(2)} hours, {new Date(wo.completed_at).toLocaleString()}
-          </li>
-        ))}
-      </ul>
+
+      <SectionCard title="MTTR by Asset Category">
+        {Object.keys(byCategory).length === 0 ? (
+          <EmptyState title="No data" description="No completed corrective work orders with timing data" />
+        ) : (
+          <div className="space-y-2">
+            {Object.entries(byCategory).map(([cat, data]) => (
+              <div key={cat} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-slate-800">{cat}</p>
+                  <p className="text-xs text-slate-500">{data.count} repairs</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-slate-700">
+                    {(data.totalHours / data.count).toFixed(1)}h avg
+                  </p>
+                  <p className="text-xs text-slate-400">max: {Math.max(...withHours.filter(w => w.category === cat).map(w => w.hours)).toFixed(1)}h</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard title="Top 5 Longest Repairs">
+        {top5.length === 0 ? (
+          <EmptyState title="No repairs recorded" description="No completed corrective WOs with timing found" />
+        ) : (
+          <div className="space-y-2">
+            {top5.map((w) => (
+              <div key={w.id} className="flex items-center justify-between px-4 py-3 bg-amber-50 rounded-lg border border-amber-100">
+                <div>
+                  <p className="text-sm font-medium text-slate-800">{w.title}</p>
+                  <p className="text-xs text-slate-500">{w.assetName} · {w.completed_at?.slice(0, 10)}</p>
+                </div>
+                <span className="text-sm font-bold text-amber-700">{w.hours.toFixed(1)}h</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-};
-
-export default MaintenanceDowntimeReviewPage;
+}
