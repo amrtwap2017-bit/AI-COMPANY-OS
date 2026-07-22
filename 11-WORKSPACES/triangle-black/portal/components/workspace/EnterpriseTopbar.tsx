@@ -15,6 +15,26 @@ import { NotificationDrawer } from "@/components/ui/NotificationDrawer";
 const MOCK_NOTIFICATIONS: any[] = [];
 
 export function EnterpriseTopbar() {
+  // Sprint 13: Live signal badge
+  const [signalSummary, setSignalSummary] = useState({ critical: 0, high: 0, total: 0 });
+
+  const fetchSignals = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setSignalSummary(data);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    fetchSignals();
+    const interval = setInterval(fetchSignals, 120000);
+    return () => clearInterval(interval);
+  }, [fetchSignals]);
+
+
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -108,6 +128,11 @@ export function EnterpriseTopbar() {
             aria-label="Notifications"
           >
             <Bell className="w-4 h-4 text-slate-500" />
+            {signalSummary.critical > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                {signalSummary.critical > 9 ? "9+" : signalSummary.critical}
+              </span>
+            )}
             {unreadCount > 0 && (
               <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full border-2 border-white" />
             )}
