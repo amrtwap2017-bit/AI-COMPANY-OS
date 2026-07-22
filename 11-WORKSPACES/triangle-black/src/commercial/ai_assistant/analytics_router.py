@@ -144,3 +144,48 @@ def get_live_kpis(db: Session = Depends(get_db)):
         }
     except Exception as e:
         return {"error": str(e)}
+
+@router.get("/analytics/trends", summary="Monthly WO completion trend for last 6 months")
+def get_analytics_trends(db: Session = Depends(get_db)):
+    try:
+        rows = db.execute(text("""
+            SELECT
+                to_char(date_trunc('month', created_at), 'Mon YYYY') as month_label,
+                count(*) as total,
+                count(*) FILTER (WHERE status = 'completed') as completed,
+                count(*) FILTER (WHERE status = 'open') as open_count,
+                count(*) FILTER (WHERE priority = 'critical') as critical_count
+            FROM work_orders
+            WHERE created_at > NOW() - INTERVAL '6 months'
+            GROUP BY date_trunc('month', created_at)
+            ORDER BY date_trunc('month', created_at)
+        """)).fetchall()
+
+        months = []
+        for row in rows:
+            total = row.total or 1
+            rate = round((row.completed or 0) / total * 100, 1)
+            months.append({
+                "month": row.month_label,
+                "total": row.total or 0,
+                "completed": row.completed or 0,
+                "open": row.open_count or 0,
+                "critical": row.critical_count or 0,
+                "completion_rate": rate,
+            })
+
+        overall_total = sum(m["total"] for m in months) or 1
+        overall_completed = sum(m["completed"] for m in months)
+
+        return {
+            "months": months,
+            "summary": {
+                "total_6_months": overall_total,
+                "completed_6_months": overall_completed,
+                "avg_completion_rate": round(overall_completed / overall_total * 100, 1),
+                "trend": "improving" if len(months) >= 2 and months[-1]["completion_rate"] > months[0]["completion_rate"] else "stable"
+            },
+            "generated_at": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {"months": [], "summary": {}, "error": str(e)}

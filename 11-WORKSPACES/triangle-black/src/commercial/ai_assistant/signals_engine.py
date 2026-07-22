@@ -185,6 +185,32 @@ def generate_signals(db_url: str) -> list:
         except Exception:
             pass
 
+
+        try:
+            r = conn.execute(text(
+                "SELECT count(*) FROM contracts "
+                "WHERE end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'"
+            ))
+            count = r.scalar() or 0
+            if count > 0:
+                signals.append({
+                    "signal_id": "CONTRACTS_EXPIRING",
+                    "title": f"{count} Contracts Expiring in 30 Days",
+                    "message": (
+                        f"{count} contracts are expiring within the next 30 days "
+                        "and require renewal action."
+                    ),
+                    "priority": "high",
+                    "category": "commercial",
+                    "count": count,
+                    "recommended_action": (
+                        "Review expiring contracts and initiate renewal pipeline immediately."
+                    ),
+                    "data_source": "contracts"
+                })
+        except Exception:
+            pass
+
     priority_order = {"critical": 0, "high": 1, "medium": 2}
     return sorted(signals, key=lambda x: priority_order.get(x.get("priority", "medium"), 3))
 
