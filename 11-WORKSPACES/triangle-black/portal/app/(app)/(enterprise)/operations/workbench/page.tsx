@@ -10,7 +10,6 @@ import {
   StatusBadge,
   LoadingState,
   EmptyState,
-  ActionBar,
   Button,
 } from "@/components/ui";
 
@@ -72,11 +71,7 @@ const WorkbenchPage = () => {
         )}
       </SectionCard>
       <SectionCard title="Quick Actions">
-        <ActionBar>
-          <Button href="/operations/work-orders/new">New Work Order</Button>
-          <Button href="/operations/dispatch">Dispatch Technician</Button>
-          <Button href="/supply-chain/workbench">Check Inventory</Button>
-        </ActionBar>
+        
       </SectionCard>
       <SectionCard title="Recent Work Orders">
         {workOrdersData.work_orders.slice(0, 5).map((order) => (
