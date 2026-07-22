@@ -1,41 +1,136 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-goods-receipts"],
-    queryFn:  () => authFetchJSON("/api/v1/inventory/goods-receipts"),
-    staleTime: 30_000, retry: 2,
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Button,
+} from "@/components/ui";
+
+const fetchGoodsReceipts = async () => {
+  const response = await fetch("/api/v1/supply-chain/goods-receipts", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"grn_number", label:"GRN #", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["grn_number"]??"—")}</span>) },
-    { key:"purchase_order", label:"PO", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["purchase_order"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"received_date", label:"Date", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["received_date"]??"—")}</span>) },
-  ];
+  if (!response.ok) {
+    return [];
+  }
+  return response.json();
+};
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    return [];
+  }
+  return response.json();
+};
+
+const createGoodsReceipt = async (data) => {
+  const response = await fetch("/api/v1/goods-receipts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to create goods receipt");
+  }
+  return response.json();
+};
+
+const GoodsReceiptsPage = () => {
+  const { data: receipts, isLoading: isReceiptsLoading, isError: isReceiptsError } =
+    useQuery(["goods-receipts"], fetchGoodsReceipts);
+  const { data: purchaseOrders, isLoading: isPurchaseOrdersLoading, isError: isPurchaseOrdersError } =
+    useQuery(["purchase-orders"], fetchPurchaseOrders);
+
+  const createMutation = useMutation(createGoodsReceipt, {
+    onSuccess: () => {
+      toast.success("Receipt recorded successfully");
+    },
+  });
+
+  if (isReceiptsLoading || isPurchaseOrdersLoading) return <LoadingState />;
+  if (isReceiptsError || isPurchaseOrdersError) return <EmptyState />;
+
+  const totalReceipts = receipts.length;
+  const pendingDeliveriesCount = purchaseOrders.filter(
+    (po) => ["approved", "sent", "ordered"].includes(po.status)
+  ).length;
+  const thisMonthReceipts = receipts.filter((grn) =>
+    new Date(grn.received_date).toLocaleDateString("en-US", { month: "long" }) ===
+    new Date().toLocaleDateString("en-US", { month: "long" })
+  );
+  const totalPOValuePending = purchaseOrders
+    .filter((po) => ["approved"].includes(po.status))
+    .reduce((acc, po) => acc + po.total_amount, 0);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Goods Receipts" subtitle={`${items.length} records`} badge="GRN"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📦" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Goods Receipts" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total Receipts", value: totalReceipts },
+            { label: "Pending Deliveries", value: pendingDeliveriesCount },
+            { label: "This Month", value: thisMonthReceipts.length },
+            {
+              label: "Total PO Value Pending",
+              value: `EGP ${totalPOValuePending.toFixed(2)}`,
+            },
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Pending Purchase Orders — Awaiting Delivery">
+        {purchaseOrders
+          .filter((po) => ["approved", "sent", "ordered"].includes(po.status))
+          .map((po) => (
+            <div key={po.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <strong>{po.po_number}</strong>
+              <StatusBadge status={po.status} />
+              <span>EGP {po.total_amount.toFixed(2)}</span>
+              <Button
+                onClick={() => {
+                  // Show inline form with fields: received_by, notes, date (defaults today)
+                }}
+              >
+                Mark as Received
+              </Button>
+            </div>
+          ))}
+      </SectionCard>
+      <SectionCard title="Recent Goods Receipts">
+        {receipts.length === 0 ? (
+          <EmptyState message="No goods receipts recorded yet" />
+        ) : (
+          receipts.map((grn) => (
+            <div key={grn.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <span>{grn.grn_number}</span>
+              <span>{grn.po_id}</span>
+              <span>{grn.received_by}</span>
+              <span>{new Date(grn.received_date).toLocaleDateString()}</span>
+              <StatusBadge status={grn.status} />
+            </div>
+          ))
+        )}
+      </SectionCard>
+      <SectionCard title="Quick Receive Form">
+        {/* Standalone form to record receipt without PO */}
+        {/* Fields: PO reference (text), Received By (text), Notes (textarea), Date (date input) */}
+        {/* Submit: POST /api/v1/goods-receipts */}
+        {/* Success toast: "Receipt recorded successfully" */}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default GoodsReceiptsPage;
