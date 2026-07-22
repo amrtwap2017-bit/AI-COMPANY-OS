@@ -1,109 +1,149 @@
 "use client"; // @ts-nocheck
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import {
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState
+} from "@/components/ui";
 import Link from "next/link";
 
-const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
-  return response.json();
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+async function fetchSignals() {
+  const r = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  if (!r.ok) return { signals: [] };
+  return r.json();
+}
+async function fetchPRs() {
+  const r = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
+async function fetchWOs() {
+  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
+
+const CATEGORY_LINKS = {
+  operations: "/operations/workbench",
+  maintenance: "/maintenance/intelligence",
+  inventory: "/supply-chain/workbench",
+  commercial: "/commercial/pipeline",
+  resources: "/operations/dispatch",
 };
 
-const fetchPRs = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-requests/", { credentials: "include" });
-  return response.json();
-};
+export default function ActionsCenterPage() {
+  const [tab, setTab] = useState("all");
 
-const fetchWOs = async () => {
-  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
-  return response.json();
-};
-
-const CenterPage = () => {
-  const [tab, setTab] = useState("All");
-
-  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
-  const prsQuery = useQuery(["prs"], fetchPRs, { refetchInterval: 30000 });
-  const wosQuery = useQuery(["wos"], fetchWOs, { refetchInterval: 30000 });
-
-  if (signalsQuery.isLoading || prsQuery.isLoading || wosQuery.isLoading) return <LoadingState />;
-
-  if (signalsQuery.isError || prsQuery.isError || wosQuery.isError) return <EmptyState title="Failed to load actions" description="Please try again later." />;
-
-  const signals = signalsQuery.data;
-  const prs = prsQuery.data;
-  const wos = wosQuery.data;
-
-  const allActions = [
-    ...signals.filter(signal => signal.status !== "completed"),
-    ...prs.filter(pr => pr.status === "pending"),
-    ...wos.filter(wo => wo.status === "critical")
-  ].sort((a, b) => {
-    if (a.priority > b.priority) return -1;
-    if (a.priority < b.priority) return 1;
-    return 0;
+  const { data: sigsData = { signals: [] }, isLoading: s1 } = useQuery({
+    queryKey: ["actions-signals"], queryFn: fetchSignals, refetchInterval: 30000,
+  });
+  const { data: prs = [], isLoading: s2 } = useQuery({
+    queryKey: ["actions-prs"], queryFn: fetchPRs, refetchInterval: 60000,
+  });
+  const { data: wos = [], isLoading: s3 } = useQuery({
+    queryKey: ["actions-wos"], queryFn: fetchWOs, refetchInterval: 60000,
   });
 
-  const totalActions = allActions.length;
-  const criticalActions = signals.filter(signal => signal.status !== "completed").length + wos.filter(wo => wo.status === "critical").length;
-  const approvalsPending = prs.filter(pr => pr.status === "pending").length;
+  const signals = sigsData.signals || [];
+  const pendingPRs = prs.filter((p) => p.status === "draft" || p.status === "pending");
+  const criticalWOs = wos.filter((w) => w.priority === "critical" && w.status === "open");
+
+  const totalActions = signals.length + pendingPRs.length + criticalWOs.length;
+  const criticalCount = signals.filter((s) => s.priority === "critical").length + criticalWOs.length;
+
+  const isLoading = s1 || s2 || s3;
+  if (isLoading) return <LoadingState message="Loading action center..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Unified Action Center" />
-      <MetricStrip
-        metrics={[
-          { label: "Total Actions", value: totalActions },
-          { label: "Critical Actions", value: criticalActions, color: "red" },
-          { label: "Approvals Pending", value: approvalsPending, color: "amber" },
-          { label: "Completed Today", value: 0 }
-        ]}
+      <PageHeader
+        title="Actions Center"
+        subtitle="All pending actions across the platform"
+        badge={totalActions > 0 ? `${totalActions} Actions` : undefined}
       />
-      <div className="flex gap-4">
-        <button
-          onClick={() => setTab("All")}
-          className={`px-4 py-2 rounded bg-white border ${tab === "All" ? "border-blue-500 text-blue-500" : "text-gray-600"}`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setTab("Signals")}
-          className={`px-4 py-2 rounded bg-white border ${tab === "Signals" ? "border-red-500 text-red-500" : "text-gray-600"}`}
-        >
-          Signals
-        </button>
-        <button
-          onClick={() => setTab("Approvals")}
-          className={`px-4 py-2 rounded bg-white border ${tab === "Approvals" ? "border-amber-500 text-amber-500" : "text-gray-600"}`}
-        >
-          Approvals
-        </button>
-        <button
-          onClick={() => setTab("Work Orders")}
-          className={`px-4 py-2 rounded bg-white border ${tab === "Work Orders" ? "border-red-500 text-red-500" : "text-gray-600"}`}
-        >
-          Work Orders
-        </button>
+
+      <MetricStrip metrics={[
+        { label: "Total Actions", value: totalActions },
+        { label: "Critical",      value: criticalCount, color: criticalCount > 0 ? "red" as const : "slate" as const },
+        { label: "Approvals",     value: pendingPRs.length, color: "amber" as const },
+        { label: "Completed",     value: 0 },
+      ]} />
+
+      <div className="flex gap-2 px-1 mb-2">
+        {["all", "signals", "approvals", "work-orders"].map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
+              tab === t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {t.replace("-", " ")}
+          </button>
+        ))}
       </div>
-      {allActions.length === 0 && <EmptyState title="All Clear" description="No actions pending." />}
-      <ul className="mt-4">
-        {allActions.map(action => (
-          <li key={action.id} className={`border p-4 rounded mb-2 ${action.type === "signal" ? (action.status !== "completed" ? "border-red-500" : "border-blue-500") : action.type === "pr" ? "border-amber-500" : "border-red-500"}`}>
-            {action.type === "signal" && (
-              <>
-                <h3 className="text-lg font-bold">{action.title}</h3>
-                <p>{action.recommended_action}</p>
-                <Link href={`/signals/${action.id}`} className="mt-2 text-blue-500 hover:underline">View Signal</Link>
-              </>
-            )}
-            {action.type === "pr" && (
-              <>
-                <h3 className="text-lg font-bold">{action.pr_number}</h3>
-                <p>Requested by {action.requester}</p>
-                <Link href={`/approvals/${action.id}`} className="mt-2 text-blue-500 hover:underline">Approve PR</Link>
-              </>
-            )}
-            {action.type === "wo" && (
-              <>
-                <h3 className="text-lg font-bold">{action.title}</h3>
-                <Link href={`/operations/work-orders/${action.id}`}
+
+      {totalActions === 0 ? (
+        <SectionCard title="Actions">
+          <EmptyState title="All clear" description="No pending actions at this time" />
+        </SectionCard>
+      ) : (
+        <SectionCard title="Pending Actions">
+          <div className="space-y-2">
+            {(tab === "all" || tab === "signals") && signals.map((s) => (
+              <div key={s.signal_id} className={`px-4 py-3 rounded-lg border-l-4 ${
+                s.priority === "critical" ? "border-red-500 bg-red-50" :
+                s.priority === "high" ? "border-amber-400 bg-amber-50" : "border-blue-400 bg-blue-50"
+              }`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{s.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5 italic">{s.recommended_action}</p>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <StatusBadge status={s.priority} />
+                    <Link href={CATEGORY_LINKS[s.category] || "/operations/workbench"}
+                      className="text-xs font-medium text-blue-600 underline whitespace-nowrap">
+                      Go
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(tab === "all" || tab === "approvals") && pendingPRs.map((pr) => (
+              <div key={pr.id} className="px-4 py-3 rounded-lg border-l-4 border-amber-400 bg-amber-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{pr.pr_number || "PR"}</p>
+                    <p className="text-xs text-slate-500">{pr.requester} — approval needed</p>
+                  </div>
+                  <Link href="/approvals" className="text-xs font-medium text-amber-700 underline">
+                    Approve
+                  </Link>
+                </div>
+              </div>
+            ))}
+            {(tab === "all" || tab === "work-orders") && criticalWOs.map((w) => (
+              <div key={w.id} className="px-4 py-3 rounded-lg border-l-4 border-red-500 bg-red-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{w.title}</p>
+                    <p className="text-xs text-slate-500">{w.type} — critical and open</p>
+                  </div>
+                  <Link href="/operations/work-orders" className="text-xs font-medium text-red-700 underline">
+                    View
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </PageWrapper>
+  );
+}

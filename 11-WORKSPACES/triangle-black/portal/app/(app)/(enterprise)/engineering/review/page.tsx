@@ -1,93 +1,114 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import {
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState
+} from "@/components/ui";
 
-const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch work orders");
-  return response.json();
-};
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const ENG_TYPES = ["hvac", "electrical", "mechanical", "corrective", "plumbing"];
 
-const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch assets");
-  return response.json();
-};
+async function fetchWOs() {
+  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
+async function fetchAssets() {
+  const r = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
 
-const fetchSLA = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch SLA data");
-  return response.json();
-};
+export default function EngineeringReviewPage() {
+  const { data: wos = [], isLoading: w1 } = useQuery({
+    queryKey: ["eng-wos"], queryFn: fetchWOs, refetchInterval: 300000,
+  });
+  const { data: assets = [], isLoading: a1 } = useQuery({
+    queryKey: ["eng-assets"], queryFn: fetchAssets, refetchInterval: 300000,
+  });
 
-const EngineeringReviewPage = () => {
-  const workOrdersQuery = useQuery(["work-orders"], fetchWorkOrders, { refetchInterval: 300000 });
-  const assetsQuery = useQuery(["assets"], fetchAssets, { refetchInterval: 300000 });
-  const slaQuery = useQuery(["sla"], fetchSLA, { refetchInterval: 300000 });
+  const isLoading = w1 || a1;
 
-  if (workOrdersQuery.isLoading || assetsQuery.isLoading || slaQuery.isLoading) return <LoadingState />;
-  if (workOrdersQuery.isError || assetsQuery.isError || slaQuery.isError) return <EmptyState />;
+  const engWOs = wos.filter((w) => ENG_TYPES.includes(w.type));
+  const completed = engWOs.filter((w) => w.status === "completed");
+  const criticalOpen = engWOs.filter((w) => w.priority === "critical" && w.status === "open");
+  const faultAssets = assets.filter((a) => a.status === "fault" || a.status === "breakdown");
+  const overallRate = engWOs.length > 0 ? Math.round((completed.length / engWOs.length) * 100) : 0;
 
-  const workOrders = workOrdersQuery.data.filter((wo: any) => ["hvac", "electrical", "mechanical", "corrective", "plumbing"].includes(wo.type));
-  const assetCriticalityCounts = assetsQuery.data.reduce((acc, asset: any) => {
-    acc[asset.criticality] = (acc[asset.criticality] || 0) + 1;
+  const byType = ENG_TYPES.reduce((acc, t) => {
+    const total = engWOs.filter((w) => w.type === t).length;
+    const done  = engWOs.filter((w) => w.type === t && w.status === "completed").length;
+    if (total > 0) acc[t] = { total, done, rate: Math.round(done / total * 100) };
     return acc;
-  }, {} as { [key: string]: number });
+  }, {});
 
-  // Calculate metrics
-  const totalWOs = workOrders.length;
-  const completedWOs = workOrders.filter((wo: any) => wo.status === "completed").length;
-  const completionRate = (completedWOs / totalWOs) * 100;
-  const criticalOpenWOs = workOrders.filter((wo: any) => wo.status === "open" && wo.priority === "critical").length;
-  const assetsInFault = assetsQuery.data.filter((asset: any) => asset.status === "faulty").length;
-
-  // Group WO types by completion rate
-  const typeBreakdown = workOrders.reduce((acc, wo: any) => {
-    acc[wo.type] = (acc[wo.type] || { total: 0, completed: 0 });
-    acc[wo.type].total++;
-    if (wo.status === "completed") acc[wo.type].completed++;
+  const byCriticality = ["critical", "high", "medium"].reduce((acc, c) => {
+    acc[c] = {
+      total: assets.filter((a) => a.criticality === c).length,
+      fault: assets.filter((a) => a.criticality === c && (a.status === "fault" || a.status === "breakdown")).length,
+    };
     return acc;
-  }, {} as { [key: string]: { total: number; completed: number } });
+  }, {});
 
-  // Calculate performance summary
-  const bestType = Object.entries(typeBreakdown).reduce((acc, [type, data]) => {
-    if (!acc || (data.completed / data.total) > (acc.data.completed / acc.data.total)) return { type, data };
-    return acc;
-  }, { type: "", data: { total: 0, completed: 0 } });
-
-  const worstType = Object.entries(typeBreakdown).reduce((acc, [type, data]) => {
-    if (!acc || (data.completed / data.total) < (acc.data.completed / acc.data.total)) return { type, data };
-    return acc;
-  }, { type: "", data: { total: 0, completed: 0 } });
-
-  const overallHealthScore = completionRate;
+  if (isLoading) return <LoadingState message="Loading engineering review..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Engineering Performance Review" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SectionCard title="Metrics">
-          <MetricStrip label="Engineering WOs" value={totalWOs} type="hvac/electrical/mechanical count" />
-          <MetricStrip label="Completion Rate" value={`${completionRate.toFixed(2)}%`} type="percentage" />
-          <MetricStrip label="Critical Open WOs" value={criticalOpenWOs} type="count" />
-          <MetricStrip label="Assets in Fault" value={assetsInFault} type="count" />
-        </SectionCard>
-        <SectionCard title="WO Type Breakdown">
-          {Object.entries(typeBreakdown).map(([type, data]) => (
-            <div key={type} className="flex items-center justify-between border-b-2 py-2 last:border-b-0">
-              <span>{type}</span>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  style={{ width: `${(data.completed / data.total) * 100}%`, backgroundColor: "green" }}
-                  className="h-3 rounded-full"
-                />
+      <PageHeader
+        title="Engineering Review"
+        subtitle="Engineering performance metrics and asset health"
+        badge={`${overallRate}% Completion`}
+      />
+
+      <MetricStrip metrics={[
+        { label: "Engineering WOs",  value: engWOs.length },
+        { label: "Completion Rate",  value: `${overallRate}%`, color: overallRate >= 80 ? "green" as const : overallRate >= 50 ? "amber" as const : "red" as const },
+        { label: "Critical Open",    value: criticalOpen.length, color: criticalOpen.length > 0 ? "red" as const : "slate" as const },
+        { label: "Assets in Fault",  value: faultAssets.length, color: faultAssets.length > 0 ? "red" as const : "slate" as const },
+      ]} />
+
+      <SectionCard title="WO Completion by Type">
+        {Object.keys(byType).length === 0 ? (
+          <EmptyState title="No data" description="No engineering work orders found" />
+        ) : (
+          <div className="space-y-3">
+            {Object.entries(byType).map(([type, data]) => (
+              <div key={type} className="flex items-center gap-3">
+                <div className="w-24 text-sm font-medium text-slate-700 capitalize">{type}</div>
+                <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div
+                    className={`h-3 rounded-full ${data.rate >= 80 ? "bg-green-500" : data.rate >= 50 ? "bg-amber-400" : "bg-red-400"}`}
+                    style={{ width: `${data.rate}%` }}
+                  />
+                </div>
+                <div className="w-28 text-xs text-slate-500 text-right">
+                  {data.done}/{data.total} ({data.rate}%)
+                </div>
               </div>
-              <span>{`${((data.completed / data.total) * 100).toFixed(2)}%`}</span>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard title="Asset Criticality Health">
+        <div className="grid grid-cols-3 gap-3">
+          {Object.entries(byCriticality).map(([crit, data]) => (
+            <div key={crit} className={`px-4 py-3 rounded-lg border ${
+              crit === "critical" ? "border-red-200 bg-red-50" :
+              crit === "high" ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-slate-50"
+            }`}>
+              <p className="text-xs font-semibold text-slate-600 uppercase">{crit}</p>
+              <p className="text-2xl font-bold text-slate-800 mt-1">{data.total}</p>
+              {data.fault > 0 && (
+                <p className="text-xs text-red-600 mt-0.5">{data.fault} in fault</p>
+              )}
             </div>
           ))}
-        </SectionCard>
-        <SectionCard title="Asset Criticality Review">
-          {Object.entries(assetCriticalityCounts).map(([criticality, count]) => (
-            <div key={criticality} className="flex items-center justify-between border-b-2 py-2 last:border-b-0">
+        </div>
+      </SectionCard>
+    </PageWrapper>
+  );
+}
