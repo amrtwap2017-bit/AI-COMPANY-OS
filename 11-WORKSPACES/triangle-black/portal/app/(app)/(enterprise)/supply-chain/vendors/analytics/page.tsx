@@ -1,6 +1,5 @@
 "use client"; // @ts-nocheck
 
-use client"; // @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
 import {
