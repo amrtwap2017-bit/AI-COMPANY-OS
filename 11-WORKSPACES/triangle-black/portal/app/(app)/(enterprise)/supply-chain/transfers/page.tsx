@@ -1,41 +1,88 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-transfers"],
-    queryFn:  () => authFetchJSON("/api/v1/inventory/movements"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"item_name", label:"Item", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["item_name"]??"—")}</span>) },
-    { key:"from_warehouse", label:"From", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["from_warehouse"]??"—")}</span>) },
-    { key:"to_warehouse", label:"To", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["to_warehouse"]??"—")}</span>) },
-    { key:"quantity", label:"Qty", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["quantity"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+
+const fetchTransfers = async () => {
+  try {
+    const response = await fetch("/api/v1/supply-chain/transfers", { credentials: "include" });
+    if (!response.ok) throw new Error("Failed to fetch transfers");
+    return response.json();
+  } catch (error) {
+    return fetch("/api/v1/inventory/transfers", { credentials: "include" }).then(response => response.json());
+  }
+};
+
+const fetchWarehouses = async () => {
+  const response = await fetch("/api/v1/supply-chain/warehouses", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch warehouses");
+  return response.json();
+};
+
+const TransferPage = () => {
+  const transfersQuery = useQuery(["transfers"], fetchTransfers, { refetchInterval: 120000 });
+  const warehousesQuery = useQuery(["warehouses"], fetchWarehouses, { refetchInterval: 120000 });
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Stock Transfers" subtitle={`${items.length} records`} badge="TRF"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔄" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Inventory Transfers" />
+      <div className="grid grid-cols-3 gap-4">
+        <MetricStrip
+          title="Total Transfers"
+          value={transfersQuery.data ? transfersQuery.data.length : 0}
+        />
+        <MetricStrip
+          title="Pending"
+          value={transfersQuery.data ? transfersQuery.data.filter(t => t.status === "pending").length : 0}
+        />
+        <MetricStrip
+          title="Completed"
+          value={transfersQuery.data ? transfersQuery.data.filter(t => t.status === "completed").length : 0}
+        />
+        <MetricStrip
+          title="Warehouses Count"
+          value={warehousesQuery.data ? warehousesQuery.data.length : 0}
+        />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Warehouses">
+        {warehousesQuery.isLoading && <LoadingState />}
+        {warehousesQuery.isError && <EmptyState message="Failed to fetch warehouses" />}
+        {warehousesQuery.isSuccess && (
+          <ul className="grid grid-cols-1 gap-4">
+            {warehousesQuery.data.map(warehouse => (
+              <li key={warehouse.id} className="bg-white p-4 rounded-lg shadow-md">
+                <strong>{warehouse.name}</strong> - {warehouse.location}
+              </li>
+            ))}
+          </ul>
+        )}
+      </SectionCard>
+      <SectionCard title="Transfer History">
+        {transfersQuery.isLoading && <LoadingState />}
+        {transfersQuery.isError && (
+          <EmptyState message="Failed to fetch transfers" note="Transfers are recorded when items move between warehouses" />
+        )}
+        {transfersQuery.isSuccess && transfersQuery.data.length === 0 && (
+          <EmptyState message="No transfer records" note="Transfers are recorded when items move between warehouses" />
+        )}
+        {transfersQuery.isSuccess && transfersQuery.data.length > 0 && (
+          <ul className="grid grid-cols-1 gap-4">
+            {transfersQuery.data.map(transfer => (
+              <li key={transfer.id} className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                <div>
+                  From: {transfer.from_warehouse.name}, To: {transfer.to_warehouse.name}
+                  <br />
+                  Item: {transfer.item}, Quantity: {transfer.quantity}
+                </div>
+                <StatusBadge status={transfer.status} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default TransferPage;
