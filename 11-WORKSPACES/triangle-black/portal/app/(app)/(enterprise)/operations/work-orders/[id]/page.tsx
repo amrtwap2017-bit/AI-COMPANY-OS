@@ -1,115 +1,197 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { EntityTabs } from "@/components/ui/EntityTabs";
-import { WorkflowBar } from "@/components/ui/WorkflowBar";
-import { getStateColor, useWorkflow } from "@/lib/hooks/useWorkflow";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { fmtDate } from "@/lib/design-tokens";
-import Link from "next/link";
-import { ArrowLeft, Wrench, Calendar, User, MapPin, Clock } from "lucide-react";
 
-const WO_TRANSITIONS = [
-  { from:"draft",         to:"submitted",    label:"Submit" },
-  { from:"submitted",     to:"approved",     label:"Approve" },
-  { from:"submitted",     to:"rejected",     label:"Reject" },
-  { from:"approved",      to:"assigned",     label:"Assign" },
-  { from:"assigned",      to:"in_progress",  label:"Start Work" },
-  { from:"in_progress",   to:"inspection",   label:"Send for Inspection" },
-  { from:"in_progress",   to:"waiting_parts",label:"Waiting Parts" },
-  { from:"waiting_parts", to:"in_progress",  label:"Parts Arrived" },
-  { from:"inspection",    to:"completed",    label:"Complete" },
-  { from:"completed",     to:"closed",       label:"Close" },
-];
+import { useParams } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Button,
+  Progress,
+  Textarea,
+  Input,
+} from "@/components/ui";
 
-export default function WorkOrderDetailPage() {
-  const { id } = useParams();
+const fetchWorkOrder = async (id: string) => {
+  const response = await fetch(`/api/v1/work-orders/${id}`, { credentials: "include" });
+  if (!response.ok) throw new Error("Not found");
+  return response.json();
+};
 
-  const { data: wo, isLoading, isError, error, refetch } = useQuery({
-    queryKey:  ["work-order", id],
-    queryFn:   () => authFetchJSON("/api/v1/work-orders/" + id),
-    staleTime: 30_000, enabled: !!id,
+const fetchAssets = async () => {
+  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  return response.json();
+};
+
+const updateWorkOrder = async (id: string, data: any) => {
+  const response = await fetch(`/api/v1/work-orders/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const WorkOrderPage = () => {
+  const params = useParams();
+  const id = params?.id as string;
+
+  const { data: workOrder, isLoading, isError } = useQuery(["workOrder", id], () => fetchWorkOrder(id));
+  const { data: assets } = useQuery("assets", fetchAssets);
+
+  const [notes, setNotes] = useState("");
+  const [parts, setParts] = useState<{ name: string; quantity: number }[]>([]);
+
+  const updateMutation = useMutation((data: any) => updateWorkOrder(id, data), {
+    onSuccess: () => {
+      alert("Progress saved!");
+    },
   });
 
-  const { data: history = [] } = useQuery({
-    queryKey: ["wo-history", id],
-    queryFn:  () => authFetchJSON("/api/v1/work-orders/" + id + "/history"),
-    enabled:  !!id,
-  });
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Work Order Not Found" description="The work order you are looking for does not exist." />;
 
-  const { state, available, doTransition, loading: wfLoading } = useWorkflow(
-    "work-orders", String(id), wo?.status || "draft", WO_TRANSITIONS,
-    () => refetch()
-  );
+  const checklistItems = {
+    hvac: [
+      "Check refrigerant levels",
+      "Inspect filters",
+      "Test temperature output",
+      "Check electrical connections",
+      "Verify thermostat operation",
+    ],
+    electrical: [
+      "Check circuit breakers",
+      "Test voltage levels",
+      "Inspect wiring",
+      "Test emergency systems",
+    ],
+    plumbing: [
+      "Check water pressure",
+      "Inspect pipes for leaks",
+      "Test fixtures",
+      "Check valves",
+    ],
+    general: ["Inspect equipment", "Document findings", "Test operation", "Clean work area"],
+  };
 
-  if (isLoading) return <PageWrapper><LoadingState type="table" rows={6}/></PageWrapper>;
-  if (isError || !wo) return <PageWrapper><AlertBanner type="error" title={error instanceof Error?error.message:"Work order not found"}/></PageWrapper>;
-
-  const historyItems = Array.isArray(history) ? history : history?.history || [];
-
-  const overview = (
-    <div className="space-y-4">
-      <WorkflowBar state={state} available={available} onTransition={doTransition} loading={wfLoading}/>
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        {[
-          ["Priority",    <span className={"text-xs font-bold px-2.5 py-1 rounded-full "+getStateColor(wo.priority||"medium")}>{wo.priority}</span>],
-          ["Type",        wo.type || "—"],
-          ["Technician",  wo.technician_id || "Unassigned"],
-          ["Asset",       wo.asset_id || "—"],
-          ["Due Date",    wo.due_date ? fmtDate(wo.due_date) : "—"],
-          ["Created",     fmtDate(wo.created_at)],
-        ].map(([label, value]: any) => (
-          <div key={String(label)} className="bg-slate-50 rounded-xl p-3">
-            <p className="text-xs text-slate-500 mb-1">{label}</p>
-            <div className="text-sm font-medium text-slate-900">{value}</div>
-          </div>
-        ))}
-      </div>
-      {wo.description && (
-        <div className="bg-slate-50 rounded-xl p-4">
-          <p className="text-xs text-slate-500 mb-2">Description</p>
-          <p className="text-sm text-slate-700 leading-relaxed">{wo.description}</p>
-        </div>
-      )}
-    </div>
-  );
-
-  const timeline = (
-    <div className="space-y-3">
-      {historyItems.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-8">No history yet</p>
-      ) : historyItems.map((h: any, i: number) => (
-        <div key={i} className="flex gap-3 p-3 bg-slate-50 rounded-xl">
-          <div className="w-2 h-2 rounded-full bg-amber-500 mt-2 flex-shrink-0"/>
-          <div>
-            <p className="text-xs font-semibold text-slate-800">{h.action||h.title||"Update"}</p>
-            <p className="text-xs text-slate-500">{h.user||h.actor||""} · {fmtDate(h.created_at||h.timestamp)}</p>
-            {h.notes && <p className="text-xs text-slate-600 mt-1">{h.notes}</p>}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  const completedItems = checklistItems[workOrder.type].filter((item) => parts.some((part) => part.name === item));
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader
-        title={wo.title || "Work Order"}
-        subtitle={"Type: " + (wo.type||"—") + " · Priority: " + (wo.priority||"—")}
-        badge="WO"
-        actions={
-          <Link href="/work-orders" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
-            <ArrowLeft className="w-4 h-4"/> Back
-          </Link>
-        }/>
-      <EntityTabs tabs={[
-        { id:"overview",  label:"Overview",  icon:"📋", content: overview  },
-        { id:"timeline",  label:"History",   icon:"🕐", content: timeline  },
-      ]}/>
+      <PageHeader title={workOrder.title} />
+      <SectionCard>
+        <div className="flex items-center space-x-4">
+          <StatusBadge status={workOrder.status} />
+          <MetricStrip label="Priority" value={workOrder.priority} />
+          <MetricStrip label="Type" value={workOrder.type} />
+        </div>
+        {new Date(workOrder.due_date) < new Date() && (
+          <p className="text-red-500">Overdue</p>
+        )}
+        {workOrder.asset_id && (
+          <div className="mt-4">
+            <h3>Asset:</h3>
+            <p>{assets.find((asset: any) => asset.id === workOrder.asset_id)?.name}</p>
+            <p>{assets.find((asset: any) => asset.id === workOrder.asset_id)?.location_description}</p>
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard title="Execution Checklist">
+        <Progress value={(completedItems.length / checklistItems[workOrder.type].length) * 100} />
+        <ul className="mt-4 space-y-2">
+          {checklistItems[workOrder.type].map((item, index) => (
+            <li key={index} className={`flex items-center justify-between ${parts.some((part) => part.name === item) ? "line-through" : ""}`}>
+              <input
+                type="checkbox"
+                checked={parts.some((part) => part.name === item)}
+                onChange={() =>
+                  setParts(
+                    parts.map((part) =>
+                      part.name === item ? { ...part, quantity: part.quantity + 1 } : part
+                    )
+                  )
+                }
+              />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-sm">{`${completedItems.length} of ${checklistItems[workOrder.type].length} steps completed`}</p>
+      </SectionCard>
+
+      <SectionCard title="Field Notes">
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <div className="mt-2 text-sm">{`${notes.length}/500 characters`}</div>
+      </SectionCard>
+
+      <SectionCard title="Parts Used">
+        <Input
+          type="text"
+          placeholder="Search part name"
+          onChange={(e) => {
+            const query = e.target.value.toLowerCase();
+            const suggestions = assets.filter((asset: any) =>
+              asset.name.toLowerCase().includes(query)
+            );
+            console.log(suggestions);
+          }}
+        />
+        <ul className="mt-4 space-y-2">
+          {parts.map((part, index) => (
+            <li key={index} className="flex items-center justify-between">
+              <span>{part.name}</span>
+              <Input
+                type="number"
+                value={part.quantity}
+                onChange={(e) =>
+                  setParts(
+                    parts.map((p, i) =>
+                      i === index ? { ...p, quantity: parseInt(e.target.value) } : p
+                    )
+                  )
+                }
+              />
+              <Button onClick={() => setParts(parts.filter((_, i) => i !== index))}>Remove</Button>
+            </li>
+          ))}
+        </ul>
+      </SectionCard>
+
+      <SectionCard title="Action Buttons">
+        <div className="flex space-x-4">
+          <Button
+            variant="primary"
+            onClick={() =>
+              updateMutation.mutate({
+                notes,
+                status: workOrder.status,
+              })
+            }
+          >
+            Save Progress
+          </Button>
+          <Button
+            variant="success"
+            onClick={() =>
+              updateMutation.mutate({
+                notes,
+                status: "completed",
+                completed_at: new Date().toISOString(),
+              })
+            }
+          >
+            Mark Complete
+          </Button>
+        </div>
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default WorkOrderPage;

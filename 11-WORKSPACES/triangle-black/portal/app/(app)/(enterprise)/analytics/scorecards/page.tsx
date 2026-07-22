@@ -1,53 +1,152 @@
-"use client";
-// @ts-nocheck
+"use client"; // @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
-import { PageHeader, PageWrapper, LoadingState, Progress, SectionCard } from "@/components/ui";
-import { analyticsApi } from "@/lib/api/enterprise";
-import { RefreshCw, Target } from "lucide-react";
-import { toast } from "@/lib/toast";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  Progress,
+} from "@/components/ui";
 
-export default function ScorecardsPage() {
-  const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["analytics-scorecards"],
-    queryFn:  () => analyticsApi.scorecards(),
-    refetchInterval: 60_000,
-  });
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  return response.json();
+};
 
-  const scorecards = data?.data?.scorecards || [];
+const fetchSla = async () => {
+  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  return response.json();
+};
+
+const fetchTrends = async () => {
+  const response = await fetch("/api/v1/ai/analytics/trends", { credentials: "include" });
+  return response.json();
+};
+
+const calculateGrade = (score: number) => {
+  if (score >= 90) return "A";
+  if (score >= 75) return "B";
+  if (score >= 60) return "C";
+  return "D";
+};
+
+const OperationsProgramScorecard = ({ kpis }) => {
+  const completedWOs = kpis.total - kpis.open;
+  const score = ((completedWOs / kpis.total) * 100).toFixed(2);
+  const grade = calculateGrade(score);
+
+  return (
+    <SectionCard title="Operations Performance" grade={grade}>
+      <MetricStrip label="Total WOs" value={kpis.total} />
+      <MetricStrip label="Open WOs" value={kpis.open} />
+      <MetricStrip label="Critical Open" value={kpis.critical} />
+      <MetricStrip label="Completion Rate %" value={`${score}%`} />
+    </SectionCard>
+  );
+};
+
+const SLAQualityScorecard = ({ sla }) => {
+  const score = sla.compliance_rate;
+  const grade = calculateGrade(score);
+  const gap = (sla.target - sla.compliance_rate).toFixed(2);
+
+  return (
+    <SectionCard title="SLA & Quality" grade={grade}>
+      <MetricStrip label="SLA Compliance %" value={`${score}%`} />
+      <MetricStrip label="Target 95%" value={`${sla.target}%`} />
+      <MetricStrip label="Gap (target - current)" value={`${gap}%`} />
+      <Progress value={score} max={100} />
+    </SectionCard>
+  );
+};
+
+const ResourceUtilizationScorecard = ({ kpis }) => {
+  const score = (100 - kpis.utilization).toFixed(2);
+  const grade = calculateGrade(score);
+
+  return (
+    <SectionCard title="Resource Management" grade={grade}>
+      <MetricStrip label="Active Technicians" value={kpis.active} />
+      <MetricStrip label="Utilization %" value={`${kpis.utilization}%`} />
+      <MetricStrip label="Items Below Min Stock" value={kpis.below_min} />
+    </SectionCard>
+  );
+};
+
+const ProcurementScorecard = ({ kpis }) => {
+  const score = (100 - (kpis.below_minimum / kpis.total) * 100).toFixed(2);
+  const grade = calculateGrade(score);
+
+  return (
+    <SectionCard title="Supply Chain" grade={grade}>
+      <MetricStrip label="Total POs" value={kpis.total} />
+      <MetricStrip label="Items Out of Stock" value={kpis.below_minimum} />
+      <MetricStrip label="PO Value EGP" value={kpis.value_egp} />
+    </SectionCard>
+  );
+};
+
+const AnalyticsPage = () => {
+  const { data: kpis, isLoading: isKpisLoading } = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
+  const { data: sla, isLoading: isSlaLoading } = useQuery(["sla"], fetchSla, { refetchInterval: 60000 });
+  const { data: trends, isLoading: isTrendsLoading } = useQuery(["trends"], fetchTrends, { refetchInterval: 60000 });
+
+  if (isKpisLoading || isSlaLoading || isTrendsLoading) return <LoadingState />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Enterprise Scorecards" subtitle="Cross-center health and performance metrics" badge="KPI"
-        actions={<button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl"><RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} /></button>} />
-
-      {isLoading ? <LoadingState type="cards" rows={4} cols={2} /> : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {scorecards.length === 0 ? (
-            <div className="col-span-2 bg-white rounded-2xl border border-slate-200 p-12 text-center">
-              <Target className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-              <p className="text-slate-500">No scorecard data yet</p>
-              <p className="text-xs text-slate-400 mt-1">Scorecards are generated from live operational data</p>
-            </div>
-          ) : scorecards.map((sc:any) => {
-            const isGood = sc.score >= sc.target;
-            return (
-              <div key={sc.domain} className={"bg-white rounded-2xl border p-5 " + (isGood ? "border-emerald-200" : "border-amber-200")}>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="font-semibold text-slate-900">{sc.domain}</p>
-                  <span className={"text-lg font-bold " + (isGood ? "text-emerald-600" : "text-amber-600")}>{sc.score}%</span>
-                </div>
-                <Progress value={sc.score} max={100} size="md"
-                  color={isGood ? "emerald" : "amber"}
-                  showValue={false} />
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs text-slate-400">{sc.label}</p>
-                  <p className="text-xs text-slate-400">Target: {sc.target}%</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <PageHeader title="Program Scorecards" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <OperationsProgramScorecard kpis={kpis} />
+        <SLAQualityScorecard sla={sla} />
+        <ResourceUtilizationScorecard kpis={kpis} />
+        <ProcurementScorecard kpis={kpis} />
+      </div>
+      <table className="w-full mt-8">
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>Score</th>
+            <th>Grade</th>
+            <th>Status</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Operations Performance</td>
+            <td>{((kpis.total - kpis.open) / kpis.total) * 100}</td>
+            <td>{calculateGrade(((kpis.total - kpis.open) / kpis.total) * 100)}</td>
+            <td>On Track</td>
+            <td>Stable</td>
+          </tr>
+          <tr>
+            <td>SLA & Quality</td>
+            <td>{sla.compliance_rate}</td>
+            <td>{calculateGrade(sla.compliance_rate)}</td>
+            <td>Needs Attention</td>
+            <td>Stable</td>
+          </tr>
+          <tr>
+            <td>Resource Management</td>
+            <td>{100 - kpis.utilization}</td>
+            <td>{calculateGrade(100 - kpis.utilization)}</td>
+            <td>On Track</td>
+            <td>Stable</td>
+          </tr>
+          <tr>
+            <td>Supply Chain</td>
+            <td>{100 - (kpis.below_minimum / kpis.total) * 100}</td>
+            <td>{calculateGrade(100 - (kpis.below_minimum / kpis.total) * 100)}</td>
+            <td>On Track</td>
+            <td>Stable</td>
+          </tr>
+        </tbody>
+      </table>
     </PageWrapper>
   );
-}
+};
+
+export default AnalyticsPage;
