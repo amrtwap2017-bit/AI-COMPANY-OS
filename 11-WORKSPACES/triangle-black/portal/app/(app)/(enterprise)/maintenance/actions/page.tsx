@@ -1,41 +1,101 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["maintenance-actions"],
-    queryFn:  () => authFetchJSON("/api/v1/maintenance/actions"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import Link from "next/link";
+
+const fetchMaintenanceData = async () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const [signalsResponse, pmPlansResponse, wosResponse, assetsResponse] = await Promise.all([
+    fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" }),
+    fetch("/api/v1/maintenance/pm-plans", { credentials: "include" }),
+    fetch("/api/v1/work-orders", { credentials: "include" }),
+    fetch("/api/v1/assets", { credentials: "include" })
+  ]);
+
+  const [signals, pmPlans, wos, assets] = await Promise.all([
+    signalsResponse.json(),
+    pmPlansResponse.json(),
+    wosResponse.json(),
+    assetsResponse.json()
+  ]);
+
+  return {
+    totalActions: signals.length + pmPlans.length + wos.length + assets.length,
+    criticalActions: [
+      ...signals.filter(signal => signal.urgency === "critical"),
+      ...assets.filter(asset => asset.status === "faulted")
+    ],
+    overduePMs: pmPlans.filter(plan => plan.next_due_date < today),
+    openWOs: wos.filter(wo => wo.status === "open")
+  };
+};
+
+const MaintenanceActionsPage = () => {
+  const { data, isLoading, isError } = useQuery(["maintenanceData"], fetchMaintenanceData, {
+    refetchInterval: 60000
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"asset", label:"Asset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["asset"]??"—")}</span>) },
-    { key:"priority", label:"Priority", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["priority"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+
+  if (isLoading) return <LoadingState />;
+  if (isError) return <EmptyState title="Failed to load maintenance actions" />;
+
+  const today = new Date().toISOString().slice(0, 10);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Maintenance Actions" subtitle={`${items.length} records`} badge="ACT"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="⚡" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Maintenance Actions" />
+      <div className="grid grid-cols-3 gap-4">
+        <MetricStrip label="Total Actions" value={data.totalActions} />
+        <MetricStrip label="Critical Actions" value={data.criticalActions.length} />
+        <MetricStrip label="PM Overdue" value={data.overduePMs.length} />
+        <MetricStrip label="WOs Open" value={data.openWOs.length} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Critical Actions">
+        {data.criticalActions.map(action => (
+          <Link href={`/maintenance/actions/${action.id}`} key={action.id}>
+            <div className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <div>
+                <p>{action.description}</p>
+                <p className="text-sm text-gray-500">{action.name}</p>
+              </div>
+              <StatusBadge status={action.urgency} />
+            </div>
+          </Link>
+        ))}
+      </SectionCard>
+      <SectionCard title="Overdue PM Plans">
+        {data.overduePMs.map(plan => (
+          <Link href={`/maintenance/pm-plans/${plan.id}`} key={plan.id}>
+            <div className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <div>
+                <p>{plan.description}</p>
+                <p className="text-sm text-gray-500">{plan.name}</p>
+              </div>
+              <StatusBadge status="overdue" />
+            </div>
+          </Link>
+        ))}
+      </SectionCard>
+      <SectionCard title="Open Work Orders">
+        {data.openWOs.map(wo => (
+          <Link href={`/maintenance/work-orders/${wo.id}`} key={wo.id}>
+            <div className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <div>
+                <p>{wo.description}</p>
+                <p className="text-sm text-gray-500">{wo.name}</p>
+              </div>
+              <StatusBadge status={wo.status} />
+            </div>
+          </Link>
+        ))}
+      </SectionCard>
+      <div className="flex justify-between mt-4">
+        <Link href="/operations/dispatch" className="btn btn-primary">Dispatch</Link>
+        <Link href="/maintenance/pm-plans" className="btn btn-secondary">PM Plans</Link>
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default MaintenanceActionsPage;
