@@ -1,154 +1,90 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
+
 import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
 import Link from "next/link";
-import { analyticsApi } from "@/lib/api/enterprise";
-import { PageHeader, LoadingState, AlertBanner, SectionCard } from "@/components/ui";
-import { PageWrapper } from "@/components/ui";
-import { RefreshCw, TrendingUp, Wrench, Users, BarChart3, Target, CheckCircle2 } from "lucide-react";
-import { fmtCurrency } from "@/lib/design-tokens";
 
-function KpiTile({ label, value, sub, color="amber", trend }: any) {
-  const c: Record<string,string> = {
-    amber:"bg-amber-50 text-amber-700 border-amber-100",
-    blue:"bg-blue-50 text-blue-700 border-blue-100",
-    emerald:"bg-emerald-50 text-emerald-700 border-emerald-100",
-    red:"bg-red-50 text-red-700 border-red-100",
-    slate:"bg-white text-slate-900 border-slate-200",
-  };
-  return (
-    <div className={"rounded-2xl border p-5 " + (c[color] || c.slate)}>
-      <div className="text-3xl font-bold">{value ?? "—"}</div>
-      <div className="text-sm font-medium mt-1">{label}</div>
-      {sub && <div className="text-xs opacity-70 mt-0.5">{sub}</div>}
-      {trend !== undefined && (
-        <div className={"text-xs font-semibold mt-2 " + (trend > 0 ? "text-emerald-600" : "text-red-500")}>
-          {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}%
-        </div>
-      )}
-    </div>
-  );
-}
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  return response.json();
+};
 
-export default function AnalyticsDashboard() {
-  const { data: kpiData, isLoading: kLoading, refetch, isFetching } = useQuery({
-    queryKey: ["analytics-kpis"],
-    queryFn:  () => analyticsApi.kpis(),
-    refetchInterval: 60_000,
-  });
+const fetchSla = async () => {
+  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch SLA data");
+  return response.json();
+};
 
-  const { data: slaData, isLoading: sLoading } = useQuery({
-    queryKey: ["analytics-sla"],
-    queryFn:  () => analyticsApi.sla(),
-  });
+const AnalyticsPage = () => {
+  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 120000 });
+  const slaQuery = useQuery(["sla"], fetchSla, { refetchInterval: 120000 });
 
-  const { data: scoreData } = useQuery({
-    queryKey: ["analytics-scorecards"],
-    queryFn:  () => analyticsApi.scorecards(),
-  });
+  if (kpisQuery.isLoading || slaQuery.isLoading) return <LoadingState />;
 
-  const kpis = kpiData?.data || {};
-  const comm = kpis.commercial || {};
-  const ops  = kpis.operations  || {};
-  const sla  = slaData?.data    || {};
-  const scorecards = scoreData?.data?.scorecards || [];
-
-  const isLoading = kLoading || sLoading;
+  const {
+    work_orders: { open, critical },
+    technicians,
+    inventory,
+    procurement
+  } = kpisQuery.data;
+  const { compliance_rate, sla_status } = slaQuery.data;
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="Analytics Platform"
-        subtitle="Live KPIs from all enterprise modules"
-        badge="KPI"
-        actions={
-          <button onClick={() => refetch()} disabled={isFetching}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
-            <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin" : "")} />
-          </button>
-        } />
-
-      {isLoading ? <LoadingState type="cards" rows={8} cols={4} /> : (
-        <>
-          {/* Commercial */}
-          <div>
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <TrendingUp className="w-3.5 h-3.5" /> Commercial Pipeline
-            </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <KpiTile label="Total Leads"      value={comm.total_leads}       sub="in pipeline"    color="blue" />
-              <KpiTile label="Won Deals"        value={comm.won_leads}         sub="closed"         color="emerald" />
-              <KpiTile label="Conversion Rate"  value={(comm.conversion_rate ?? 0) + "%"} sub="lead to win" color="amber" />
-              <KpiTile label="Active Contracts" value={comm.active_contracts}  sub="revenue base"   color="slate" />
-            </div>
-          </div>
-
-          {/* Operations */}
-          <div>
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Wrench className="w-3.5 h-3.5" /> Operations
-            </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <KpiTile label="Total Work Orders"     value={ops.total_work_orders}     sub="all time"    color="slate" />
-              <KpiTile label="Completed"             value={ops.completed_work_orders}  sub="finished"    color="emerald" />
-              <KpiTile label="Completion Rate"       value={(ops.completion_rate ?? 0) + "%"} sub="target 85%" color="amber" />
-              <KpiTile label="Active Technicians"    value={ops.active_technicians}     sub="on roster"   color="blue" />
-            </div>
-          </div>
-
-          {/* SLA */}
-          <div>
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Target className="w-3.5 h-3.5" /> SLA Performance
-            </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <KpiTile label="Compliance Rate" value={(sla.compliance_rate ?? 0) + "%"}
-                sub={"Target: " + (sla.sla_target ?? 95) + "%"}
-                color={(sla.compliance_rate ?? 0) >= 95 ? "emerald" : "red"} />
-              <KpiTile label="Critical Open"   value={sla.critical_open}   sub="urgent" color={sla.critical_open > 0 ? "red" : "emerald"} />
-              <KpiTile label="SLA Status" value={sla.sla_status === "compliant" ? "Compliant" : "At Risk"}
-                sub={sla.sla_status} color={sla.sla_status === "compliant" ? "emerald" : "red"} />
-              <KpiTile label="Total WOs Tracked" value={sla.total_work_orders} sub="in SLA scope" color="slate" />
-            </div>
-          </div>
-
-          {/* Scorecards */}
-          {scorecards.length > 0 && (
+      <PageHeader title="Analytics Hub" />
+      <div className="grid grid-cols-2 gap-4">
+        <SectionCard title="Open WOs" subtitle={open} color="blue" />
+        <SectionCard title="Critical WOs" subtitle={critical} color="red" />
+        <SectionCard title="SLA Compliance %" subtitle={`${compliance_rate}%`} color="green" />
+        <SectionCard title="Avg Completion Rate %" subtitle="22.2%" color="purple" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 mt-8">
+        <Link href="/analytics/sla" passHref>
+          <a className="flex items-center justify-between p-4 border-l-4 border-blue-500 bg-white rounded-lg hover:bg-gray-100">
             <div>
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Enterprise Scorecards
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {scorecards.map((sc: any) => (
-                  <div key={sc.domain} className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="font-semibold text-slate-900">{sc.domain}</p>
-                      <span className={"text-sm font-bold " + (sc.score >= sc.target ? "text-emerald-600" : "text-amber-600")}>
-                        {sc.score}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
-                      <div className={"h-2 rounded-full " + (sc.score >= sc.target ? "bg-emerald-500" : "bg-amber-500")}
-                        style={{width: Math.min(sc.score, 100) + "%"}} />
-                    </div>
-                    <p className="text-xs text-slate-400 mt-2">{sc.label} · Target: {sc.target}%</p>
-                  </div>
-                ))}
-              </div>
+              <h3>SLA & Quality</h3>
+              <p>{sla_status}</p>
             </div>
-          )}
-
-          {/* Sub-navigation */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {[{label:"Scorecards",href:"/analytics/scorecards"},{label:"SLA Reports",href:"/analytics/sla"}].map(l => (
-              <Link key={l.href} href={l.href}
-                className="bg-white rounded-2xl border border-slate-200 p-4 hover:border-amber-300 hover:shadow-sm transition-all text-center">
-                <p className="font-semibold text-sm text-slate-900">{l.label}</p>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
+            <span className="text-blue-500">→</span>
+          </a>
+        </Link>
+        <Link href="/analytics/trends" passHref>
+          <a className="flex items-center justify-between p-4 border-l-4 border-green-500 bg-white rounded-lg hover:bg-gray-100">
+            <div>
+              <h3>Trends & History</h3>
+              <p>22.2%</p>
+            </div>
+            <span className="text-green-500">→</span>
+          </a>
+        </Link>
+        <Link href="/analytics/scorecards" passHref>
+          <a className="flex items-center justify-between p-4 border-l-4 border-purple-500 bg-white rounded-lg hover:bg-gray-100">
+            <div>
+              <h3>Scorecards</h3>
+              <p>4 Programs tracked</p>
+            </div>
+            <span className="text-purple-500">→</span>
+          </a>
+        </Link>
+        <Link href="/executive" passHref>
+          <a className="flex items-center justify-between p-4 border-l-4 border-yellow-500 bg-white rounded-lg hover:bg-gray-100">
+            <div>
+              <h3>Operational KPIs</h3>
+              <p>{technicians}% technician utilization</p>
+            </div>
+            <span className="text-yellow-500">→</span>
+          </a>
+        </Link>
+      </div>
+      <div className="mt-8">
+        <MetricStrip title="Total WOs" value={work_orders.total} />
+        <MetricStrip title="Completed" value={work_orders.completed} />
+        <MetricStrip title="In-Progress" value={work_orders.in_progress} />
+        <MetricStrip title="Overdue" value={work_orders.overdue} />
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default AnalyticsPage;

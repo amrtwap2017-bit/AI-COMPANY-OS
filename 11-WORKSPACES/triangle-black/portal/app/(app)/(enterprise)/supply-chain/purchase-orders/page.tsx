@@ -1,45 +1,125 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { useAuthFetch } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { authFetchJSON } = useAuthFetch();
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-purchase-orders"],
-    queryFn:  () => authFetchJSON("/api/v1/inventory/purchase-orders"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchPurchaseOrders = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-orders/", {
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error("Failed to fetch purchase orders");
+  return response.json();
+};
+
+const PurchaseOrdersPage = () => {
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "pending" | "approved" | "received" | "cancelled">("all");
+
+  const { data: purchaseOrders, isLoading, isError } = useQuery({
+    queryKey: ["purchase-orders"],
+    queryFn: fetchPurchaseOrders,
+    refetchInterval: 120000,
   });
 
-  const items = Array.isArray(data) ? data : data?.items || data?.data || data?.results || data?.queue || [];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
+  if (isLoading) return <LoadingState />;
+  if (isError || !purchaseOrders) return <EmptyState />;
 
-  const columns = [
-    { key:"po_number", label:"PO Number", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["po_number"]??"—")}</span>) },
-    { key:"supplier", label:"Supplier", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["supplier"]??"—")}</span>) },
-    { key:"total_amount", label:"Amount", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["total_amount"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+  const totalPOs = purchaseOrders.length;
+  const pendingPOs = purchaseOrders.filter(po => po.status === "pending" || po.status === "draft").length;
+  const approvedPOs = purchaseOrders.filter(po => po.status === "approved").length;
+  const receivedPOs = purchaseOrders.filter(po => po.status === "received").length;
+  const cancelledPOs = purchaseOrders.filter(po => po.status === "cancelled").length;
+
+  const totalValueEGP = purchaseOrders.reduce((acc, po) => acc + po.total_amount, 0).toLocaleString() + " EGP";
+
+  const filteredPOs = statusFilter === "all"
+    ? purchaseOrders
+    : purchaseOrders.filter(po => po.status === statusFilter);
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Purchase Orders" subtitle={`${items.length} records`} badge="PO"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Purchase Orders" />
+      <SectionCard>
+        <MetricStrip
+          metrics={[
+            { label: "Total POs", value: totalPOs },
+            { label: "Pending", value: pendingPOs, color: "bg-yellow-200" },
+            { label: "Approved", value: approvedPOs, color: "bg-green-200" },
+            { label: "Received", value: receivedPOs, color: "bg-blue-200" },
+            { label: "Cancelled", value: cancelledPOs, color: "bg-red-200" },
+          ]}
+        />
+      </SectionCard>
+      <div className="flex justify-center">
+        <button
+          onClick={() => setStatusFilter("all")}
+          className={`px-4 py-2 mr-2 ${statusFilter === "all" ? "bg-blue-500 text-white" : "bg-gray-300"} rounded`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setStatusFilter("draft")}
+          className={`px-4 py-2 mr-2 ${statusFilter === "draft" ? "bg-blue-500 text-white" : "bg-gray-300"} rounded`}
+        >
+          Draft
+        </button>
+        <button
+          onClick={() => setStatusFilter("pending")}
+          className={`px-4 py-2 mr-2 ${statusFilter === "pending" ? "bg-blue-500 text-white" : "bg-gray-300"} rounded`}
+        >
+          Pending
+        </button>
+        <button
+          onClick={() => setStatusFilter("approved")}
+          className={`px-4 py-2 mr-2 ${statusFilter === "approved" ? "bg-blue-500 text-white" : "bg-gray-300"} rounded`}
+        >
+          Approved
+        </button>
+        <button
+          onClick={() => setStatusFilter("received")}
+          className={`px-4 py-2 mr-2 ${statusFilter === "received" ? "bg-blue-500 text-white" : "bg-gray-300"} rounded`}
+        >
+          Received
+        </button>
+        <button
+          onClick={() => setStatusFilter("cancelled")}
+          className={`px-4 py-2 ${statusFilter === "cancelled" ? "bg-blue-500 text-white" : "bg-gray-300"} rounded`}
+        >
+          Cancelled
+        </button>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard>
+        {filteredPOs.length > 0 ? (
+          <ul className="divide-y divide-gray-200">
+            {filteredPOs.map(po => (
+              <li key={po.id} className="py-4">
+                <div className="flex justify-between items-center">
+                  <strong>{po.po_number}</strong>
+                  <StatusBadge status={po.status} />
+                </div>
+                <div className="text-gray-500 text-sm">
+                  {new Date(po.expected_delivery).toLocaleDateString()}{" "}
+                  {new Date(po.expected_delivery) < new Date() && <span className="text-red-500">Past Due</span>}
+                </div>
+                <div className="text-gray-500 text-sm">{po.created_at.toLocaleDateString()}</div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState />
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default PurchaseOrdersPage;
