@@ -1,6 +1,5 @@
-"use client";
+"use client"; // @ts-nocheck
 // @ts-nocheck
-"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageWrapper, PageHeader, AlertBanner } from "@/components/ui";

@@ -1,42 +1,129 @@
-"use client";
-// @ts-nocheck
-"use client";
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+"use client"; // @ts-nocheck
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["projects-center-intelligence"],
-    queryFn:  () => authFetchJSON("/api/v1/projects/intelligence/summary"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+} from "@/components/ui";
+
+const fetchProjects = async () => {
+  const response = await fetch("/api/v1/projects", { credentials: "include" });
+  if (!response.ok) throw new Error("No projects configured");
+  return response.json();
+};
+
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals?category=operations", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"signal", label:"Signal", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["signal"]??"—")}</span>) },
-    { key:"project", label:"Project", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["project"]??"—")}</span>) },
-    { key:"risk", label:"Risk", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["risk"]??"—")}</span>) },
-    { key:"action", label:"Action", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["action"]??"—")}</span>) },
-  ];
+  return response.json();
+};
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export default function IntelligencePage() {
+  const { data: projects, isLoading, isError } = useQuery(
+    ["projects"],
+    fetchProjects,
+    {
+      refetchInterval: 120000,
+    }
+  );
+
+  const { data: signals, isSignalsLoading, isSignalsError } = useQuery(
+    ["signals"],
+    fetchSignals,
+    {
+      refetchInterval: 120000,
+    }
+  );
+
+  const { data: kpis, isKpisLoading, isKpisError } = useQuery(
+    ["kpis"],
+    fetchKpis,
+    {
+      refetchInterval: 120000,
+    }
+  );
+
+  if (isLoading || isSignalsLoading || isKpisLoading) return <LoadingState />;
+
+  if (isError || isSignalsError || isKpisError) return <EmptyState message="An error occurred" />;
+
+  const totalProjects = projects.length;
+  const activeProjects = projects.filter((p) => p.status === "active" || p.status === "in_progress").length;
+  const onTrackProjects = projects.filter(
+    (p) => new Date(p.end_date) > new Date() && p.status === "active"
+  ).length;
+  const atRiskProjects = projects.filter(
+    (p) =>
+      new Date(p.end_date) < new Date(new Date().setDate(new Date().getDate() + 7)) &&
+      p.status === "active"
+  ).length;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Project Intelligence" subtitle={`${items.length} records`} badge="AI"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🧠" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Intelligence Center" />
+      <MetricStrip
+        metrics={[
+          { label: "Total Projects", value: totalProjects },
+          { label: "Active Projects", value: activeProjects, color: "green" },
+          { label: "On Track Projects", value: onTrackProjects, color: "green" },
+          { label: "At Risk Projects", value: atRiskProjects, color: "red" },
+        ]}
+      />
+      <SectionCard title="Project Status Grid">
+        {projects
+          .sort((a, b) => {
+            if (a.status === b.status) return new Date(a.end_date) - new Date(b.end_date);
+            if (a.status === "active") return -1;
+            if (b.status === "active") return 1;
+            return 0;
+          })
+          .map((project) => (
+            <div
+              key={project.id}
+              className={`p-4 border rounded-lg mb-2 ${
+                project.status === "active"
+                  ? "bg-green-50 text-green-800"
+                  : project.status === "on_hold"
+                  ? "bg-yellow-50 text-yellow-800"
+                  : project.status === "completed"
+                  ? "bg-blue-50 text-blue-800"
+                  : "bg-red-50 text-red-800"
+              }`}
+            >
+              <h3>{project.name}</h3>
+              <div className="flex justify-between">
+                <StatusBadge status={project.status} />
+                {project.budget && <span>Budget: ${project.budget}</span>}
+              </div>
+              <p>Start Date: {new Date(project.start_date).toLocaleDateString()}</p>
+              <p>End Date: {new Date(project.end_date).toLocaleDateString()}</p>
+            </div>
+          ))}
+      </SectionCard>
+      <SectionCard title="AI Intelligence Panel">
+        <h4>{signals.length} active signals require attention</h4>
+        <a href="/operations/workbench" className="text-blue-500 underline">Go to Operations Workbench</a>
+      </SectionCard>
+      <SectionCard title="Quick Links">
+        <ul>
+          <li><a href="/projects-center" className="text-blue-500 underline">All Projects</a></li>
+          <li><a href="/operations/workbench" className="text-blue-500 underline">Operations Center</a></li>
+          <li><a href="/executive" className="text-blue-500 underline">Executive Dashboard</a></li>
+        </ul>
+      </SectionCard>
     </PageWrapper>
   );
 }
