@@ -1,42 +1,140 @@
-"use client";
-// @ts-nocheck
-"use client";
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+"use client"; // @ts-nocheck
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["-api-v1-actions-executive-dashboard"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/executive/dashboard"),
-    staleTime: 30_000, retry: 1,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.schedule||data?.actions||data?.agents||data?.technicians||data?.rfqs||[];
-  const { filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"kpi", label:"KPI", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["kpi"]??"—")}</span>) },
-    { key:"value", label:"Value", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["value"]??"—")}</span>) },
-    { key:"target", label:"Target", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["target"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  MetricCard,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Progress,
+} from "@/components/ui";
+
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  return response.json();
+};
+
+const fetchSla = async () => {
+  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  return response.json();
+};
+
+const fetchSignalsSummary = async () => {
+  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  return response.json();
+};
+
+export default function ExecutivePage() {
+  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
+  const slaQuery = useQuery(["sla"], fetchSla, { refetchInterval: 60000 });
+  const signalsSummaryQuery = useQuery(
+    ["signalsSummary"],
+    fetchSignalsSummary,
+    { refetchInterval: 30000 }
+  );
+
+  if (kpisQuery.isLoading || slaQuery.isLoading || signalsSummaryQuery.isLoading) {
+    return <LoadingState />;
+  }
+
+  if (kpisQuery.isError || slaQuery.isError || signalsSummaryQuery.isError) {
+    return <EmptyState />;
+  }
+
+  const { work_orders, technicians, inventory, procurement } = kpisQuery.data;
+  const { compliance_rate, sla_target, sla_status, total_work_orders, completed, overdue } = slaQuery.data;
+  const { critical, high, total } = signalsSummaryQuery.data;
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Executive Hub" subtitle={`${items.length} records`} badge="EXEC"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="📊" title="No data" description="No records available"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Executive Dashboard" />
+      <SectionCard title="Metrics">
+        <MetricStrip>
+          <MetricCard label="Total Work Orders" value={work_orders.total.toLocaleString()} />
+          <MetricCard
+            label="Critical Open"
+            value={work_orders.critical_open}
+            color={work_orders.critical_open > 0 ? "red" : undefined}
+          />
+          <MetricCard
+            label="SLA Compliance %"
+            value={`${compliance_rate.toFixed(2)}%`}
+            color={compliance_rate < 95 ? "red" : undefined}
+          />
+          <MetricCard label="Active Technicians" value={technicians.active} />
+          <MetricCard
+            label="Technician Utilization %"
+            value={`${technicians.utilization_pct.toFixed(2)}%`}
+          />
+          <MetricCard
+            label="Total PO Value EGP"
+            value={procurement.total_value_egp.toLocaleString("en-US", { style: "currency", currency: "EGP" })}
+          />
+        </MetricStrip>
+      </SectionCard>
+
+      <div className="grid grid-cols-2 gap-4">
+        <SectionCard title="Work Order Status">
+          <Progress value={Math.round((completed / total_work_orders) * 100)} label="22% completion rate" />
+          <div>Open: {work_orders.open}</div>
+          <div>In Progress: {work_orders.active}</div>
+          <div>Critical: {work_orders.critical_open}</div>
+        </SectionCard>
+
+        <SectionCard title="SLA Performance">
+          <Progress
+            value={compliance_rate}
+            showPercentage
+            color={
+              compliance_rate < 80 ? "red" : compliance_rate >= 95 ? "green" : "amber"
+            }
+          />
+          <div>Target: {sla_target}% | Current: {compliance_rate.toFixed(2)}%</div>
+          <StatusBadge status={sla_status} />
+        </SectionCard>
+
+        <SectionCard title="Technician Capacity">
+          <Progress value={technicians.utilization_pct} />
+          <div>Active: {technicians.active} of {technicians.total}</div>
+        </SectionCard>
+
+        <SectionCard title="Inventory Alert">
+          <StatusBadge
+            status={inventory.below_minimum > 0 ? "red" : undefined}
+            label={`${inventory.below_minimum} items below minimum stock`}
+          />
+          <a href="/supply-chain/workbench">View Supply Chain →</a>
+        </SectionCard>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+
+      <SectionCard title="Active Operational Signals">
+        {critical > 0 && (
+          <StatusBadge status="red" pulsing label={`${critical} critical signals`} />
+        )}
+        {high > 0 && (
+          <StatusBadge status="amber" pulsing label={`${high} high signals`} />
+        )}
+        <a href="/operations/workbench">View all signals →</a>
+      </SectionCard>
+
+      <div className="grid grid-cols-2 gap-4">
+        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Operations Center
+        </button>
+        <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+          Supply Chain
+        </button>
+        <button className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+          Maintenance
+        </button>
+        <button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+          SLA Review
+        </button>
+      </div>
     </PageWrapper>
   );
 }
