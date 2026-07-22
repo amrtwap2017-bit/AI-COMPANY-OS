@@ -1,111 +1,179 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { tokenManager } from "@/lib/auth/token-manager";
-import { CheckCircle2, XCircle, Clock, FileText, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
 
-const TYPE_COLORS: any = {
-  quote:"bg-blue-100 text-blue-700",
-  purchase_request:"bg-purple-100 text-purple-700",
-  purchase_order:"bg-amber-100 text-amber-700",
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Button,
+} from "@/components/ui";
+import { fetchWithCredentials, toast } from "@/utils";
+
+const APPROVALS_URL = "/api/v1/inventory/purchase-requests";
+const APPROVE_URL = "/api/v1/actions/inventory/purchase-requests/";
+const ORDERS_URL = "/api/v1/inventory/purchase-orders";
+
+const getPendingPRs = async () => {
+  const response = await fetchWithCredentials(APPROVALS_URL, { method: "GET" });
+  return response.json();
+};
+
+const approvePR = async (prId: string) => {
+  const response = await fetchWithCredentials(
+    `${APPROVE_URL}${prId}/approve`,
+    { method: "POST" }
+  );
+  if (!response.ok) throw new Error("Failed to approve PR");
+  return response.json();
+};
+
+const getRecentlyApprovedPRs = async () => {
+  const response = await fetchWithCredentials(APPROVALS_URL, { method: "GET" });
+  const prs = await response.json();
+  return prs.filter((pr: any) => pr.status === "approved").slice(0, 5);
+};
+
+const getPurchaseOrders = async () => {
+  const response = await fetchWithCredentials(ORDERS_URL, { method: "GET" });
+  return response.json();
 };
 
 export default function ApprovalsPage() {
-  const qc = useQueryClient();
-  const [processing, setProcessing] = useState<string|null>(null);
+  const { data: pendingPRs, isLoading: isPendingLoading } = useQuery(
+    ["pendingPRs"],
+    getPendingPRs
+  );
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["approvals"],
-    queryFn:  () => authFetchJSON("/api/v1/approvals"),
-    staleTime: 15_000,
+  const { data: recentlyApprovedPRs, isLoading: isRecentlyApprovedLoading } =
+    useQuery(["recentlyApprovedPRs"], getRecentlyApprovedPRs);
+
+  const approveMutation = useMutation(approvePR, {
+    onSuccess: () => {
+      toast.success("Purchase Request approved successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
-
-  const items = Array.isArray(data) ? data : data?.queue || data?.items || [];
-
-  async function doAction(id: string, type: string, action: "approve"|"reject") {
-    setProcessing(id+action);
-    try {
-      const token = tokenManager.getToken();
-      const res = await fetch(
-        "/api/v1/approvals/"+id+"/"+action+"?approval_type="+type,
-        { method:"POST", headers:{ "Authorization":"Bearer "+(token||""), "Content-Type":"application/json" } }
-      );
-      if (!res.ok) { const d=await res.json().catch(()=>({})); throw new Error(d.detail||"Failed"); }
-      toast.success(action==="approve"?"Approved ✅":"Rejected ❌");
-      qc.invalidateQueries({queryKey:["approvals"]});
-    } catch(e:any) { toast.error(e.message||"Action failed"); }
-    finally { setProcessing(null); }
-  }
-
-  const counts = { total:items.length, quotes:items.filter((i:any)=>i.type==="quote").length, prs:items.filter((i:any)=>i.type==="purchase_request").length, pos:items.filter((i:any)=>i.type==="purchase_order").length };
 
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Approvals Center" subtitle={`${counts.total} pending`} badge="APV"
-        actions={<button onClick={()=>refetch()} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className="h-4 w-4"/></button>}/>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          {label:"Total Pending",  val:counts.total,  color:"text-slate-900"},
-          {label:"Quotes",         val:counts.quotes, color:"text-blue-700"},
-          {label:"Purchase Req",   val:counts.prs,    color:"text-purple-700"},
-          {label:"Purchase Orders",val:counts.pos,    color:"text-amber-700"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-2xl border border-slate-200 p-4">
-            <div className={`text-2xl font-bold ${k.color}`}>{k.val}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+      <PageHeader title="Approvals" />
+      <SectionCard title="Metrics">
+        <MetricStrip
+          metrics={[
+            { label: "Pending PRs", value: pendingPRs?.length || 0, color: "blue" },
+            {
+              label: "Urgent",
+              value: pendingPRs?.filter((pr: any) => pr.urgency === "urgent").length || 0,
+              color: "red",
+            },
+            {
+              label: "High Priority",
+              value: pendingPRs?.filter((pr: any) => pr.priority === "high").length || 0,
+              color: "orange",
+            },
+            {
+              label: "Approved Today",
+              value: pendingPRs?.filter(
+                (pr: any) =>
+                  new Date(pr.approved_at).toDateString() === new Date().toDateString()
+              ).length || 0,
+              color: "green",
+            },
+          ]}
+        />
+      </SectionCard>
+      <SectionCard title="Pending Approval Queue">
+        {isPendingLoading ? (
+          <LoadingState />
+        ) : pendingPRs?.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {pendingPRs
+              .sort((a: any, b: any) => {
+                if (a.urgency !== b.urgency) return a.urgency === "urgent" ? -1 : 1;
+                if (a.priority !== b.priority) return a.priority === "high" ? -1 : 1;
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+              })
+              .map((pr: any) => (
+                <div key={pr.id} className="bg-white p-4 rounded shadow">
+                  <h3 className="font-bold">{pr.pr_number}</h3>
+                  <div className="flex items-center space-x-2">
+                    <StatusBadge status={pr.urgency} />
+                    <StatusBadge status={pr.priority} />
+                  </div>
+                  <p>{pr.requester}</p>
+                  <p>{pr.justification.slice(0, 100)}...</p>
+                  <p>Lines: {pr.lines.length}</p>
+                  <p>Created: {new Date(pr.created_at).toLocaleDateString()}</p>
+                  <div className="flex items-center space-x-2 mt-4">
+                    <Button
+                      onClick={() => approveMutation.mutate(pr.id)}
+                      disabled={approveMutation.isLoading}
+                    >
+                      Approve
+                    </Button>
+                    <a href={`/approvals/${pr.id}`}>View Details</a>
+                  </div>
+                </div>
+              ))}
           </div>
-        ))}
-      </div>
-
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
-
-      {isLoading ? <LoadingState type="cards" rows={3} cols={1}/> :
-       items.length===0 ? (
-         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-           <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4"/>
-           <h3 className="text-xl font-bold text-slate-900">All caught up!</h3>
-           <p className="text-slate-500 mt-2">No pending approvals.</p>
-         </div>
-       ) : (
-         <div className="space-y-3">
-           {items.map((item:any)=>(
-             <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex items-start gap-4">
-               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-                 <FileText className="w-5 h-5 text-amber-600"/>
-               </div>
-               <div className="flex-1 min-w-0">
-                 <div className="flex items-center gap-2 mb-1">
-                   <span className={"text-[10px] font-bold px-2 py-0.5 rounded-full capitalize "+(TYPE_COLORS[item.type]||"bg-slate-100 text-slate-600")}>{(item.type||"").replace(/_/g," ")}</span>
-                   <span className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3"/>{item.created_at?new Date(item.created_at).toLocaleDateString():"—"}</span>
-                 </div>
-                 <h4 className="font-semibold text-slate-900">{item.reference||item.title||item.id}</h4>
-                 <p className="text-xs text-slate-500 mt-0.5">{item.description||item.notes||"Pending approval"}</p>
-               </div>
-               <div className="flex items-center gap-2 flex-shrink-0">
-                 <button onClick={()=>doAction(item.id,item.type||"quote","reject")}
-                   disabled={processing!==null}
-                   className="flex items-center gap-1.5 px-3 py-2 text-sm border border-red-200 text-red-600 rounded-xl hover:bg-red-50 disabled:opacity-50 transition-colors">
-                   <XCircle className="w-4 h-4"/>
-                   {processing===item.id+"reject"?"...":"Reject"}
-                 </button>
-                 <button onClick={()=>doAction(item.id,item.type||"quote","approve")}
-                   disabled={processing!==null}
-                   className="flex items-center gap-1.5 px-3 py-2 text-sm bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-colors">
-                   <CheckCircle2 className="w-4 h-4"/>
-                   {processing===item.id+"approve"?"...":"Approve"}
-                 </button>
-               </div>
-             </div>
-           ))}
-         </div>
-       )}
+        ) : (
+          <EmptyState message="No pending purchase requests" />
+        )}
+      </SectionCard>
+      <SectionCard title="Recently Approved">
+        {isRecentlyApprovedLoading ? (
+          <LoadingState />
+        ) : recentlyApprovedPRs?.length > 0 ? (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th>PR Number</th>
+                <th>Requester</th>
+                <th>Approved By</th>
+                <th>Approved Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentlyApprovedPRs.map((pr: any) => (
+                <tr key={pr.id}>
+                  <td>{pr.pr_number}</td>
+                  <td>{pr.requester}</td>
+                  <td>{pr.approved_by}</td>
+                  <td>{new Date(pr.approved_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <EmptyState message="No recently approved purchase requests" />
+        )}
+      </SectionCard>
+      <SectionCard title="Quick Stats">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded shadow">
+            <h3>Draft</h3>
+            <p>{pendingPRs?.filter((pr: any) => pr.status === "draft").length || 0}</p>
+          </div>
+          <div className="bg-white p-4 rounded shadow">
+            <h3>Pending</h3>
+            <p>{pendingPRs?.filter((pr: any) => pr.status === "pending").length || 0}</p>
+          </div>
+          <div className="bg-white p-4 rounded shadow">
+            <h3>Approved</h3>
+            <p>{pendingPRs?.filter((pr: any) => pr.status === "approved").length || 0}</p>
+          </div>
+          <div className="bg-white p-4 rounded shadow">
+            <h3>Rejected</h3>
+            <p>{pendingPRs?.filter((pr: any) => pr.status === "rejected").length || 0}</p>
+          </div>
+        </div>
+      </SectionCard>
     </PageWrapper>
   );
 }
