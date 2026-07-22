@@ -1,41 +1,121 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["operations-workflows-approvals"],
-    queryFn:  () => authFetchJSON("/api/v1/approvals"),
-    staleTime: 30_000, retry: 2,
+import { useQuery } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  EmptyState,
+  Button,
+} from "@/components/ui";
+import { useState } from "react";
+
+const fetchPurchaseRequests = async () => {
+  const response = await fetch("/api/v1/inventory/purchase-requests/", {
+    credentials: "include",
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"type", label:"Type", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["type"]??"—")}</span>) },
-    { key:"reference", label:"Reference", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["reference"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"created_at", label:"Date", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["created_at"]??"—")}</span>) },
-  ];
+  return response.json();
+};
+
+const fetchWorkOrders = async () => {
+  const response = await fetch("/api/v1/work-orders?status=completed", {
+    credentials: "include",
+  });
+  return response.json();
+};
+
+const ApprovalsPage = () => {
+  const [loading, setLoading] = useState(false);
+
+  const { data: prsData, isLoading: prsLoading } = useQuery(
+    ["purchase-requests"],
+    fetchPurchaseRequests,
+    {
+      refetchInterval: 60000,
+    }
+  );
+
+  const { data: wosData, isLoading: wosLoading } = useQuery(
+    ["work-orders"],
+    fetchWorkOrders,
+    {
+      refetchInterval: 60000,
+    }
+  );
+
+  if (prsLoading || wosLoading) return <LoadingState />;
+
+  if (!prsData.length && !wosData.length) return <EmptyState message="Approval queue is clear" />;
+
+  const pendingApprovals = prsData.filter(pr => pr.status === "draft" || pr.status === "pending");
+  const completedWOs = wosData.filter(wo => wo.status === "completed");
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Workflow Approvals" subtitle={`${items.length} records`} badge="APV"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="✅" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Workflow Approval Queue" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SectionCard title="Metric Strip">
+          <MetricStrip
+            label="Pending Approvals"
+            value={pendingApprovals.length}
+            badge={<StatusBadge status="pending" />}
+          />
+          <MetricStrip
+            label="Completed WOs"
+            value={completedWOs.length}
+            badge={<StatusBadge status="completed" />}
+          />
+          <MetricStrip
+            label="Total Queue"
+            value={prsData.length + wosData.length}
+          />
+        </SectionCard>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SectionCard title="Purchase Requests">
+          {pendingApprovals.map(pr => (
+            <div key={pr.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <div>
+                <p>{pr.pr_number}</p>
+                <p>{pr.requester}</p>
+                <StatusBadge status={pr.status} />
+              </div>
+              <Button
+                onClick={() => {
+                  setLoading(true);
+                  fetch(`/api/v1/actions/inventory/purchase-requests/${pr.id}/approve`, {
+                    method: "POST",
+                    credentials: "include",
+                  }).then(() => {
+                    setLoading(false);
+                  });
+                }}
+                disabled={loading}
+              >
+                Approve
+              </Button>
+            </div>
+          ))}
+        </SectionCard>
+        <SectionCard title="Completed Work Orders">
+          {completedWOs.map(wo => (
+            <div key={wo.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
+              <div>
+                <p>{wo.title}</p>
+                <p>{wo.technician}</p>
+                <p>{new Date(wo.completed_at).toLocaleString()}</p>
+              </div>
+              <Button disabled>Sign Off</Button>
+            </div>
+          ))}
+        </SectionCard>
+      </div>
     </PageWrapper>
   );
-}
+};
+
+export default ApprovalsPage;

@@ -1,41 +1,72 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["operations-workflows-designer"],
-    queryFn:  () => authFetchJSON("/api/v1/work-orders"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Template", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"steps", label:"Steps", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["steps"]??"—")}</span>) },
-    { key:"active", label:"Active", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["active"]??"—")}</span>) },
-    { key:"last_updated", label:"Updated", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["last_updated"]??"—")}</span>) },
-  ];
+import { useState } from "react";
+import Link from "next/link";
+
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  EmptyState,
+  Button,
+} from "@/components/ui";
+
+const WorkflowTemplates = [
+  {
+    name: "New Work Order → Auto Dispatch",
+    trigger: "WO created",
+    action: "dispatch recommendation",
+    status: "Active",
+  },
+  {
+    name: "Low Stock → Auto PR",
+    trigger: "stock below min",
+    action: "create purchase request",
+    status: "Configure",
+  },
+  {
+    name: "Critical Signal → Alert Manager",
+    trigger: "critical signal",
+    action: "notify operations",
+    status: "Active",
+  },
+  {
+    name: "Contract Expiring → Renewal Pipeline",
+    trigger: "30 days before end",
+    action: "flag for renewal",
+    status: "Configure",
+  },
+];
+
+const WorkflowDesignerPage = () => {
+  const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Workflow Designer" subtitle={`${items.length} records`} badge="WFD"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="✏️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Workflow Designer (Beta)" />
+      <div className="mt-4">
+        {WorkflowTemplates.map((template) => (
+          <SectionCard key={template.name} className="mb-4">
+            <h3>{template.name}</h3>
+            <p>Trigger: {template.trigger}</p>
+            <p>Action: {template.action}</p>
+            <Button
+              onClick={() => setActiveTemplate(template.status === "Active" ? null : template.name)}
+              variant={activeTemplate === template.name ? "primary" : "secondary"}
+            >
+              {template.status === "Active" ? "Deactivate" : "Configure"}
+            </Button>
+          </SectionCard>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <p className="mt-8 text-center">
+        Workflows are automatically executed by the Triangle Black AI Engine
+      </p>
+      <Link href="/operations/workflows" passHref>
+        <Button variant="outline">Back to List View</Button>
+      </Link>
     </PageWrapper>
   );
-}
+};
+
+export default WorkflowDesignerPage;
