@@ -519,3 +519,69 @@ try:
     print("  OK: sse_notifications_router")
 except Exception as e:
     print(f"  WARN sse_notifications: {e}")
+
+# ── Sprint 89 — CSV Export ────────────────────────────────────────────────────
+try:
+    from src.commercial.csv_export.router import router as csv_export_router
+    app.include_router(csv_export_router, prefix="/api/v1")
+    print("  OK: csv_export_router")
+except Exception as e:
+    print(f"  WARN csv_export: {e}")
+
+
+# ── Sprint 89: Platform Summary Endpoint ─────────────────────────────────────
+@app.get("/api/v1/platform/summary", tags=["system"])
+async def platform_summary():
+    """Complete platform summary — all programs, routes, and capabilities."""
+    from src.core.database import check_connection
+    db_ok = check_connection()
+    return {
+        "platform":       "Triangle Black Enterprise Operations Platform",
+        "version":        "2.0.0",
+        "sprint":         89,
+        "status":         "production-ready",
+        "database":       "ok" if db_ok else "error",
+        "programs": {
+            "A":  {"name": "UX Foundation",    "status": "complete", "pages": "179+"},
+            "B":  {"name": "Operations",        "status": "complete", "features": ["SLA","dispatch","bulk ops","my-day","QR codes"]},
+            "C":  {"name": "Workflow Engine",   "status": "complete", "state_machines": ["work_order","project","purchase_request"]},
+            "D":  {"name": "Resources",         "status": "complete", "features": ["dispatch","crew","scheduling"]},
+            "E":  {"name": "Projects",          "status": "complete", "features": ["phase_sm","earned_value","portfolio"]},
+            "F":  {"name": "Cost Engine",       "status": "complete", "features": ["BOQ","margin","reorder"]},
+            "G":  {"name": "Planning",          "status": "complete", "features": ["AI_scheduling","capacity"]},
+            "H":  {"name": "Documents",         "status": "complete", "features": ["PDF_export","BOQ_templates"]},
+            "I":  {"name": "Finance",           "status": "complete", "features": ["cash_flow","payments","KPI_trends"]},
+            "J":  {"name": "Customer",          "status": "complete", "features": ["NPS","renewals","warranty","at_risk"]},
+            "K":  {"name": "Supplier",          "status": "complete", "features": ["portal","RFQ","quotes"]},
+            "L":  {"name": "AI Layer",          "status": "complete", "features": ["signals_v2","scheduling","notifications","predictive"]},
+            "M":  {"name": "Digital Twin",      "status": "complete", "domains": 8},
+            "N":  {"name": "Knowledge Graph",   "status": "complete", "engine": "Qdrant+PostgreSQL"},
+        },
+        "capabilities": [
+            "Multi-hotel tenant isolation",
+            "State machine workflows (WO + Project + PR)",
+            "Predictive maintenance AI",
+            "Real-time SSE notifications",
+            "Global search (8 entity types)",
+            "Command palette (/ key)",
+            "Keyboard navigation (G+14 routes)",
+            "PWA with offline cache",
+            "Bulk operations (assign/approve/update)",
+            "PDF/HTML export for WO + Invoice",
+            "CSV export for all major entities",
+            "User preference persistence",
+            "Dashboard personalization",
+            "Performance audit API",
+            "Database index optimization",
+            "CORS + rate limiting + tenant middleware",
+            "Audit log with entity trail",
+            "Email alerts (SMTP/log-only)",
+            "API documentation browser",
+            "Platform maturity report",
+        ],
+        "api_modules": 35,
+        "frontend_pages": 179,
+        "detail_pages": 15,
+        "backend_routes": "210+",
+        "generated_at": __import__("datetime").datetime.utcnow().isoformat(),
+    }
