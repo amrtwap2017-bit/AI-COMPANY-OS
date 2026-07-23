@@ -488,3 +488,11 @@ try:
     print("  OK: email_alert_router")
 except Exception as e:
     print(f"  WARN email_alert: {e}")
+
+# ── Sprint 84 — User Preferences ─────────────────────────────────────────────
+try:
+    from src.commercial.user_preferences.router import router as user_prefs_router
+    app.include_router(user_prefs_router, prefix="/api/v1")
+    print("  OK: user_preferences_router")
+except Exception as e:
+    print(f"  WARN user_preferences: {e}")

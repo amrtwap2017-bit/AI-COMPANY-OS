@@ -1,176 +1,205 @@
 "use client"; // @ts-nocheck
-
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";;
-import {
-  PageWrapper, PageHeader, SectionCard,
-  MetricStrip, StatusBadge, LoadingState, EmptyState, Button
-} from "@/components/ui";
+import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { CheckCircle, XCircle, Clock, ShoppingCart, Wrench, FolderOpen } from "lucide-react";
+import { ApprovalModal } from "@/components/ui/ApprovalModal";
 
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const TYPE_ICONS: Record<string, any> = {
+  purchase_request: ShoppingCart,
+  work_order:       Wrench,
+  project:          FolderOpen,
+};
 
-async function fetchPRs() {
-  const r = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
-}
-
-async function fetchPOs() {
-  const r = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
-}
+const STATUS_COLORS: Record<string, string> = {
+  submitted: "bg-blue-100 text-blue-700",
+  pending:   "bg-amber-100 text-amber-700",
+  draft:     "bg-slate-100 text-slate-600",
+  planning:  "bg-indigo-100 text-indigo-700",
+  open:      "bg-slate-100 text-slate-600",
+};
 
 export default function ApprovalsPage() {
-  const [approving, setApproving] = useState({});
-  const [messages, setMessages] = useState({});
+  const qc = useQueryClient();
+  const [modal, setModal] = useState<any>(null);
 
-  const { data: prs = [], isLoading: prsLoading, refetch } = useQuery({
+  // Purchase Requests pending approval
+  const { data: prsData = {}, isLoading: pl } = useQuery({
     queryKey: ["approvals-prs"],
-    queryFn: fetchPRs,
-    refetchInterval: 60000,
-  });
-  const { data: pos = [], isLoading: posLoading } = useQuery({
-    queryKey: ["approvals-pos"],
-    queryFn: fetchPOs,
+    queryFn: () => authFetch("/api/v1/purchase-requests/?status=submitted&limit=30").then(r => r.json()),
     refetchInterval: 60000,
   });
 
-  const isLoading = prsLoading || posLoading;
-
-  const pending  = prs.filter((p) => p.status === "draft" || p.status === "pending");
-  const urgent   = pending.filter((p) => p.urgency === "urgent");
-  const approved = prs.filter((p) => p.status === "approved").slice(0, 5);
-
-  const sorted = [...pending].sort((a, b) => {
-    if (a.urgency === "urgent" && b.urgency !== "urgent") return -1;
-    if (b.urgency === "urgent" && a.urgency !== "urgent") return 1;
-    if (a.priority === "high" && b.priority !== "high") return -1;
-    if (b.priority === "high" && a.priority !== "high") return 1;
-    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  // Projects in planning (need activation)
+  const { data: projData = {}, isLoading: prjl } = useQuery({
+    queryKey: ["approvals-projects"],
+    queryFn: () => authFetch("/api/v1/projects/?status=planning&limit=20").then(r => r.json()),
+    refetchInterval: 60000,
   });
 
-  async function handleApprove(prId) {
-    setApproving((prev) => ({ ...prev, [prId]: true }));
-    try {
-      const r = await fetch(
-        `${BACK}/api/v1/actions/inventory/purchase-requests/${prId}/approve`,
-        { method: "POST", credentials: "include" }
-      );
-      if (r.ok) {
-        setMessages((prev) => ({ ...prev, [prId]: "Approved" }));
-        refetch();
-      } else {
-        setMessages((prev) => ({ ...prev, [prId]: `Error ${r.status}` }));
-      }
-    } catch (e) {
-      setMessages((prev) => ({ ...prev, [prId]: "Network error" }));
-    } finally {
-      setApproving((prev) => ({ ...prev, [prId]: false }));
-    }
-  }
+  // Critical open WOs (need assignment approval)
+  const { data: woData = {}, isLoading: wl } = useQuery({
+    queryKey: ["approvals-wos"],
+    queryFn: () => authFetch("/api/v1/work-orders/?priority=critical&status=open&limit=10").then(r => r.json()),
+    refetchInterval: 30000,
+  });
 
-  if (isLoading) return <LoadingState message="Loading approval queue..." />;
+  if (pl || prjl || wl) return <PageWrapper><LoadingState title="Loading approvals..." /></PageWrapper>;
+
+  const prs   = Array.isArray(prsData)  ? prsData  : prsData?.data  ?? prsData?.items  ?? [];
+  const projs = Array.isArray(projData) ? projData : projData?.data ?? projData?.items ?? [];
+  const wos   = Array.isArray(woData)   ? woData   : woData?.data   ?? woData?.items   ?? [];
+
+  const totalPending = prs.length + projs.length + wos.length;
+
+  const openModal = (entityType: string, entity: any, invalidateKey: string[]) => {
+    setModal({ entityType, entity, invalidateKey });
+  };
+
+  const closeModal = () => {
+    setModal(null);
+    qc.invalidateQueries({ queryKey: ["approvals-prs"] });
+    qc.invalidateQueries({ queryKey: ["approvals-projects"] });
+    qc.invalidateQueries({ queryKey: ["approvals-wos"] });
+  };
 
   return (
     <PageWrapper>
       <PageHeader
-        title="Approvals Center"
-        subtitle="Purchase request approval queue"
-        badge={pending.length > 0 ? `${pending.length} Pending` : undefined}
+        title="Approval Center"
+        subtitle={`${totalPending} items waiting for approval`}
+        badge={totalPending > 0 ? `${totalPending} pending` : "All clear"}
       />
 
-      <MetricStrip metrics={[
-        { label: "Pending Approval", value: pending.length, color: "amber" as const },
-        { label: "Urgent",           value: urgent.length,  color: urgent.length > 0 ? "red" as const : "slate" as const },
-        { label: "Approved Total",   value: prs.filter((p) => p.status === "approved").length, color: "green" as const },
-        { label: "Total PRs",        value: prs.length },
-      ]} />
-
-      <SectionCard title="Pending Approval Queue">
-        {sorted.length === 0 ? (
-          <EmptyState
-            title="Queue is clear"
-            description="No purchase requests waiting for approval"
-          />
-        ) : (
-          <div className="space-y-3">
-            {sorted.map((pr) => (
-              <div
-                key={pr.id}
-                className={`px-4 py-4 rounded-lg border ${
-                  pr.urgency === "urgent"
-                    ? "border-red-200 bg-red-50"
-                    : pr.priority === "high"
-                    ? "border-amber-200 bg-amber-50"
-                    : "border-slate-200 bg-slate-50"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-bold text-slate-800">
-                        {pr.pr_number || `PR-${pr.id?.slice(0, 8)}`}
-                      </span>
-                      <StatusBadge status={pr.urgency || "normal"} />
-                      <StatusBadge status={pr.priority || "medium"} />
-                    </div>
-                    <p className="text-xs text-slate-600">
-                      {pr.requester} · {pr.department || "Engineering"}
-                    </p>
-                    {pr.justification && (
-                      <p className="text-xs text-slate-500 mt-1 italic">
-                        {pr.justification.slice(0, 120)}
-                        {pr.justification.length > 120 ? "..." : ""}
-                      </p>
-                    )}
-                    <p className="text-xs text-slate-400 mt-1">
-                      {Array.isArray(pr.lines) ? pr.lines.length : 0} line items ·
-                      Created {new Date(pr.created_at).toLocaleDateString()}
-                    </p>
-                    {messages[pr.id] && (
-                      <p className={`text-xs font-semibold mt-1 ${
-                        messages[pr.id] === "Approved" ? "text-green-600" : "text-red-600"
-                      }`}>
-                        {messages[pr.id]}
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    onClick={() => handleApprove(pr.id)}
-                    disabled={!!approving[pr.id] || messages[pr.id] === "Approved"}
-                    variant="primary"
-                  >
-                    {approving[pr.id] ? "..." : messages[pr.id] === "Approved" ? "✓" : "Approve"}
-                  </Button>
-                </div>
-              </div>
-            ))}
+      {/* Summary strip */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {[
+          { label: "Purchase Requests", value: prs.length,   icon: ShoppingCart, color: "text-amber-600" },
+          { label: "Projects",          value: projs.length, icon: FolderOpen,   color: "text-blue-600" },
+          { label: "Critical WOs",      value: wos.length,   icon: Wrench,       color: "text-red-600" },
+        ].map(s => (
+          <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
+            <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
+            <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
           </div>
-        )}
-      </SectionCard>
+        ))}
+      </div>
 
-      <SectionCard title="Recently Approved">
-        {approved.length === 0 ? (
-          <EmptyState title="None yet" description="No approved requests this session" />
-        ) : (
+      {/* Purchase Requests */}
+      {prs.length > 0 && (
+        <SectionCard title={`Purchase Requests (${prs.length})`} className="mb-6">
           <div className="space-y-2">
-            {approved.map((pr) => (
-              <div key={pr.id} className="flex items-center justify-between px-4 py-3 bg-green-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-slate-800">
-                    {pr.pr_number || `PR-${pr.id?.slice(0, 8)}`}
-                  </p>
-                  <p className="text-xs text-slate-500">{pr.requester} · {pr.approved_by || "System"}</p>
+            {prs.map((pr: any) => (
+              <div key={pr.id}
+                   className="flex items-center justify-between p-4
+                              bg-white border border-slate-200 rounded-xl hover:border-amber-300">
+                <div className="flex items-center gap-3">
+                  <ShoppingCart className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800">{pr.title}</div>
+                    <div className="text-xs text-slate-400">
+                      {Number(pr.total_amount || 0).toLocaleString()} EGP
+                      {pr.requested_by ? ` · by ${pr.requested_by}` : ""}
+                    </div>
+                  </div>
                 </div>
-                <StatusBadge status="approved" />
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[pr.status] ?? STATUS_COLORS.pending}`}>
+                    {pr.status}
+                  </span>
+                  <button
+                    onClick={() => openModal("purchase_request", pr, ["approvals-prs"])}
+                    className="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                  >
+                    Review
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-        )}
-      </SectionCard>
+        </SectionCard>
+      )}
+
+      {/* Projects to activate */}
+      {projs.length > 0 && (
+        <SectionCard title={`Projects for Activation (${projs.length})`} className="mb-6">
+          <div className="space-y-2">
+            {projs.map((proj: any) => (
+              <div key={proj.id}
+                   className="flex items-center justify-between p-4
+                              bg-white border border-slate-200 rounded-xl hover:border-blue-300">
+                <div className="flex items-center gap-3">
+                  <FolderOpen className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800">
+                      {proj.name ?? proj.title}
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      {proj.status} · {String(proj.created_at ?? "").slice(0,10)}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => openModal("project", proj, ["approvals-projects"])}
+                  className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Activate
+                </button>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Critical WOs */}
+      {wos.length > 0 && (
+        <SectionCard title={`Critical WOs — Unassigned (${wos.length})`} className="mb-6">
+          <div className="space-y-2">
+            {wos.map((wo: any) => (
+              <div key={wo.id}
+                   className="flex items-center justify-between p-4
+                              bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Wrench className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-semibold text-slate-800">{wo.title}</div>
+                    <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => openModal("work_order", wo, ["approvals-wos"])}
+                  className="px-3 py-1.5 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Dispatch
+                </button>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {totalPending === 0 && (
+        <div className="text-center py-16">
+          <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-slate-700">All Clear</h3>
+          <p className="text-sm text-slate-400 mt-2">No items pending approval</p>
+        </div>
+      )}
+
+      {/* Approval Modal */}
+      {modal && (
+        <ApprovalModal
+          isOpen={true}
+          onClose={closeModal}
+          entityType={modal.entityType}
+          entityId={modal.entity.id}
+          entityTitle={modal.entity.title ?? modal.entity.name ?? modal.entity.id?.slice(0,8)}
+          currentStatus={modal.entity.status}
+          invalidateKey={modal.invalidateKey}
+        />
+      )}
     </PageWrapper>
   );
 }
