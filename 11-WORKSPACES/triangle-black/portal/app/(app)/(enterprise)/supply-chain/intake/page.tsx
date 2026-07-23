@@ -276,7 +276,8 @@ export default function ProcurementIntakePage() {
             )}
           </div>
         </div>
-     }
+     )}
+
 
       {/* Step 3: PR Created */}
       {prCreated && (

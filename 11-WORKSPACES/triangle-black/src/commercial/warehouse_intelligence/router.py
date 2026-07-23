@@ -1,10 +1,4 @@
 from __future__ import annotations
-"""
-Warehouse Intelligence Engine - Sprint 90
-Manages min/max stock levels, auto-reorder triggers,
-brand recommendations, and sourcing guidance.
-Acts as AI mentor for warehouse team.
-"""
 import datetime
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -22,247 +16,66 @@ def _safe_int(v):
     try: return int(v or 0)
     except: return 0
 
-def _safe_float(v):
-    try: return float(v or 0)
-    except: return 0.0
-
-# Recommended brands per category (Egypt market knowledge)
-BRAND_RECOMMENDATIONS = {
+BRAND_GUIDE = {
     "hvac": {
         "brands": ["Carrier Egypt","Daikin","Midea","LG","Samsung Climate"],
-        "notes": "Carrier Egypt has widest service network. Daikin for commercial grade. Midea for cost efficiency.",
-        "certifications": ["ISO 9001","AHRI","CE"],
-        "avg_lead_time_days": 5,
-        "sourcing_tip": "Order filters quarterly in bulk - 20% cost saving vs ad-hoc",
+        "notes":  "Carrier Egypt has widest service network. Daikin for commercial grade.",
+        "certs":  ["ISO 9001","AHRI","CE"],
+        "lead":   5,
+        "tip":    "Order filters quarterly in bulk - 20% cost saving vs ad-hoc ordering.",
     },
     "electrical": {
         "brands": ["ABB Egypt","Schneider Electric","Siemens","Legrand","Hager"],
-        "notes": "ABB and Schneider have local warehouses. Siemens for industrial grade. Legrand for residential.",
-        "certifications": ["IEC","CE","SASO"],
-        "avg_lead_time_days": 3,
-        "sourcing_tip": "Keep 30-day safety stock for breakers - critical items with high failure rate",
+        "notes":  "ABB and Schneider have local warehouses. Siemens for industrial grade.",
+        "certs":  ["IEC","CE","SASO"],
+        "lead":   3,
+        "tip":    "Keep 30-day safety stock for breakers - critical items with high failure rate.",
     },
     "plumbing": {
         "brands": ["Grundfos Egypt","Wilo","DAB Pumps","Giacomini","Oventrop"],
-        "notes": "Grundfos for pumps - widest local support. Giacomini for valves - Italian quality.",
-        "certifications": ["WRAS","ISO 9001"],
-        "avg_lead_time_days": 7,
-        "sourcing_tip": "Pumps should have 1 spare unit on-site for critical installations",
+        "notes":  "Grundfos for pumps - widest local support. Giacomini for valves.",
+        "certs":  ["WRAS","ISO 9001"],
+        "lead":   7,
+        "tip":    "Pumps should have 1 spare unit on-site for critical installations.",
     },
     "safety": {
         "brands": ["3M Egypt","Honeywell Safety","MSA Safety","Drager"],
-        "notes": "3M for PPE - widest availability. MSA for confined space equipment.",
-        "certifications": ["CE","ANSI","EN"],
-        "avg_lead_time_days": 2,
-        "sourcing_tip": "PPE has expiry dates - order 3-month supply maximum. Monthly inspection required.",
+        "notes":  "3M for PPE - widest availability. MSA for confined space equipment.",
+        "certs":  ["CE","ANSI","EN"],
+        "lead":   2,
+        "tip":    "PPE has expiry dates - order max 3-month supply. Monthly inspection required.",
     },
     "pool": {
         "brands": ["Hayward","Pentair","Fluidra","Bayrol"],
-        "notes": "Bayrol chemicals have local distributor. Hayward for pumps and filtration.",
-        "certifications": ["NSF","DIN"],
-        "avg_lead_time_days": 3,
-        "sourcing_tip": "Test water chemistry daily. Keep 2-week chemical stock minimum.",
+        "notes":  "Bayrol chemicals have local distributor. Hayward for pumps and filtration.",
+        "certs":  ["NSF","DIN"],
+        "lead":   3,
+        "tip":    "Test water chemistry daily. Keep 2-week chemical stock minimum.",
     },
     "generator": {
         "brands": ["Cummins Egypt","Perkins","Kohler","Caterpillar"],
-        "notes": "Cummins has strongest Egypt service network. Perkins cost-effective for smaller units.",
-        "certifications": ["ISO 8528","CE"],
-        "avg_lead_time_days": 14,
-        "sourcing_tip": "Critical item - always maintain 7-day fuel reserve and quarterly service contract.",
+        "notes":  "Cummins has strongest Egypt service network. Perkins cost-effective.",
+        "certs":  ["ISO 8528","CE"],
+        "lead":   14,
+        "tip":    "Critical item - always maintain 7-day fuel reserve and quarterly service contract.",
     },
     "general": {
         "brands": ["Local market","Multiple vendors"],
-        "notes": "Compare at least 3 quotes for general items.",
-        "certifications": [],
-        "avg_lead_time_days": 5,
-        "sourcing_tip": "Use preferred vendor list - do not source from unknown vendors without approval.",
+        "notes":  "Compare at least 3 quotes for general items.",
+        "certs":  [],
+        "lead":   5,
+        "tip":    "Use preferred vendor list - do not source from unknown vendors without approval.",
     },
 }
 
 @router.get("/stock-health", summary="Complete stock health dashboard")
 def stock_health(
     hotel_id:  str = Query(default=None),
-    warehouse: str = Query(default=None),
     db: Session = Depends(get_db)
 ):
-    """
-    Complete warehouse stock health overview.
-    Shows: critical, low, healthy, overstocked items.
-    Provides sourcing guidance per category.
-    """
+    """Complete warehouse stock health with sourcing guidance per category."""
     now = datetime.datetime.utcnow()
-
-    where = "WHERE 1=1"
-    params = {}
-    if hotel_id:  where += " AND ii.hotel_id = :hotel_id";  params["hotel_id"] = hotel_id
-    if warehouse: where += " AND sb.warehouse_id = :wh";     params["wh"] = warehouse
-
-    try:
-        rows = db.execute(text(f"""
-            SELECT ii.id, ii.name, ii.category, ii.item_code,
-                   ii.unit_of_measure, ii.min_stock, ii.max_stock,
-                   ii.reorder_qty, ii.hotel_id,
-                   COALESCE(sb.quantity, 0) as current_stock,
-                   w.name as warehouse_name,
-                   sb.warehouse_id
-            FROM inventory_items ii
-            LEFT JOIN stock_balances sb ON sb.item_id = ii.id
-            LEFT JOIN warehouses w ON w.id = sb.warehouse_id
-            {where}
-            ORDER BY
-                CASE
-                    WHEN COALESCE(sb.quantity, 0) = 0 THEN 0
-                    WHEN COALESCE(sb.quantity, 0) <= ii.min_stock THEN 1
-                    ELSE 2
-                END,
-                ii.category
-            LIMIT 200
-        """), params).fetchall()
-    except Exception as e:
-        return {"items": [], "error": str(e)}
-
-    critical   = []
-    low        = []
-    healthy    = []
-    overstocked = []
-
-    for row in rows:
-        item     = row_to_dict(row)
-        current  = _safe_int(item.get("current_stock"))
-        min_stock = _safe_int(item.get("min_stock"))
-        max_stock = _safe_int(item.get("max_stock")) or min_stock * 3
-        reorder  = _safe_int(item.get("reorder_qty")) or min_stock
-
-        # Calculate stock health score
-        if current == 0:
-            status = "critical"
-            health_score = 0
-            action = f"ORDER IMMEDIATELY: {reorder} units needed"
-        elif current <= min_stock:
-            status = "low"
-            health_score = round(current / min_stock * 50, 0)
-            shortage = min_stock - current
-            action = f"REORDER: Need {shortage} more units to reach minimum"
-        elif current >= max_stock * 0.9:
-            status = "overstocked"
-            health_score = 100
-            excess = current - max_stock
-            action = f"REVIEW: {excess} units over maximum - pause ordering"
-        else:
-            status = "healthy"
-            health_score = round(50 + (current - min_stock) / (max_stock - min_stock) * 50, 0)
-            action = "Stock level OK"
-
-        # Get brand recommendation for category
-        cat      = item.get("category","").lower()
-        brand_cat = next((k for k in BRAND_RECOMMENDATIONS if k in cat), "general")
-        brand_rec = BRAND_RECOMMENDATIONS[brand_cat]
-
-        enriched = {
-            **item,
-            "status":          status,
-            "health_score":    health_score,
-            "action":          action,
-            "shortage":        max(0, min_stock - current),
-            "brand_recommendation": brand_rec["brands"][:2],
-            "sourcing_tip":    brand_rec["sourcing_tip"],
-            "avg_lead_time":   brand_rec["avg_lead_time_days"],
-        }
-
-        if status == "critical":        critical.append(enriched)
-        elif status == "low":           low.append(enriched)
-        elif status == "overstocked":   overstocked.append(enriched)
-        else:                           healthy.append(enriched)
-
-    # Generate warehouse mentor guidance
-    guidance = []
-    if critical:
-        guidance.append({
-            "priority": "CRITICAL",
-            "message":  f"{len(critical)} items are completely out of stock.",
-            "action":   "Create emergency purchase requests NOW. Contact vendors directly.",
-            "items":    [i["name"] for i in critical[:5]],
-        })
-    if low:
-        guidance.append({
-            "priority": "HIGH",
-            "message":  f"{len(low)} items are below minimum stock level.",
-            "action":   "Create purchase requests today. Allow lead time in ordering.",
-            "items":    [i["name"] for i in low[:5]],
-        })
-    if overstocked:
-        guidance.append({
-            "priority": "LOW",
-            "message":  f"{len(overstocked)} items are overstocked.",
-            "action":   "Pause ordering these items until stock reduces to healthy level.",
-            "items":    [i["name"] for i in overstocked[:3]],
-        })
-    if not critical and not low:
-        guidance.append({
-            "priority": "INFO",
-            "message":  "All tracked items are within healthy stock levels.",
-            "action":   "Continue regular monitoring and scheduled reorder cycles.",
-        })
-
-    return {
-        "summary": {
-            "critical":    len(critical),
-            "low":         len(low),
-            "healthy":     len(healthy),
-            "overstocked": len(overstocked),
-            "total":       len(rows),
-        },
-        "critical_items":   critical[:10],
-        "low_stock_items":  low[:10],
-        "overstocked":      overstocked[:5],
-        "healthy_sample":   healthy[:5],
-        "mentor_guidance":  guidance,
-        "generated_at":     now.isoformat(),
-    }
-
-@router.get("/brand-guide/{category}", summary="Brand and sourcing guide for category")
-def brand_guide(category: str):
-    """
-    AI-powered brand recommendation and sourcing guide.
-    Returns: recommended brands, certifications, lead times, best practices.
-    """
-    cat_lower = category.lower()
-    matched = next((k for k in BRAND_RECOMMENDATIONS if k in cat_lower), "general")
-    rec = BRAND_RECOMMENDATIONS[matched]
-
-    return {
-        "category":        category,
-        "matched_guide":   matched,
-        "recommended_brands": rec["brands"],
-        "required_certifications": rec["certifications"],
-        "avg_lead_time_days": rec["avg_lead_time_days"],
-        "sourcing_notes":  rec["notes"],
-        "best_practice":   rec["sourcing_tip"],
-        "mentor_tip": (
-            f"For {category}: Always request at least 3 quotes. "
-            f"Verify certifications ({', '.join(rec['certifications']) or 'check locally'}). "
-            f"Plan for {rec['avg_lead_time_days']} day lead time."
-        ),
-        "reorder_strategy": {
-            "safety_stock_days": rec["avg_lead_time_days"] * 2,
-            "order_frequency":   "monthly" if rec["avg_lead_time_days"] <= 7 else "bi-monthly",
-            "preferred_vendors": rec["brands"][:3],
-        },
-    }
-
-@router.get("/auto-reorder-plan", summary="Auto-generate reorder plan")
-def auto_reorder_plan(
-    hotel_id: str = Query(default=None),
-    db: Session = Depends(get_db)
-):
-    """
-    Generate a complete reorder plan for all items below minimum.
-    Groups by vendor category for efficient ordering.
-    Provides total budget estimate.
-    """
-    now = datetime.datetime.utcnow()
-
-    where = "WHERE COALESCE(sb.quantity, 0) <= ii.min_stock"
+    where  = "WHERE 1=1"
     params = {}
     if hotel_id:
         where += " AND ii.hotel_id = :hotel_id"
@@ -271,8 +84,142 @@ def auto_reorder_plan(
     try:
         rows = db.execute(text(f"""
             SELECT ii.id, ii.name, ii.category, ii.item_code,
+                   ii.unit_of_measure, ii.min_stock, ii.max_stock, ii.reorder_qty,
+                   COALESCE(sb.quantity, 0) as current_stock
+            FROM inventory_items ii
+            LEFT JOIN stock_balances sb ON sb.item_id = ii.id
+            {where}
+            ORDER BY COALESCE(sb.quantity, 0) ASC
+            LIMIT 200
+        """), params).fetchall()
+    except Exception as e:
+        return {"summary": {"critical":0,"low":0,"healthy":0,"overstocked":0,"total":0},
+                "critical_items":[],"low_stock_items":[],"overstocked":[],
+                "mentor_guidance":[{"priority":"INFO","message":"Stock data loading","action":"Retry in a moment"}],
+                "generated_at": datetime.datetime.utcnow().isoformat()}
+
+    critical = []
+    low      = []
+    healthy  = []
+    over     = []
+
+    for row in rows:
+        item      = row_to_dict(row)
+        current   = _safe_int(item.get("current_stock"))
+        min_stock = _safe_int(item.get("min_stock"))
+        max_stock = _safe_int(item.get("max_stock")) or min_stock * 3
+        reorder   = _safe_int(item.get("reorder_qty")) or min_stock
+
+        if current == 0:
+            status = "critical"
+            action = f"ORDER IMMEDIATELY: {reorder} units needed"
+        elif current <= min_stock:
+            status = "low"
+            action = f"REORDER: Need {min_stock - current} more to reach minimum"
+        elif current >= max_stock * 0.9:
+            status = "overstocked"
+            action = f"PAUSE ordering - {current - max_stock} units over maximum"
+        else:
+            status = "healthy"
+            action = "Stock level OK"
+
+        cat_key = next((k for k in BRAND_GUIDE if k in item.get("category","").lower()), "general")
+        bg      = BRAND_GUIDE[cat_key]
+
+        enriched = {
+            **item,
+            "status":        status,
+            "action":        action,
+            "shortage":      max(0, min_stock - current),
+            "brands":        bg["brands"][:2],
+            "sourcing_tip":  bg["tip"],
+            "lead_time_days": bg["lead"],
+        }
+
+        if status == "critical":      critical.append(enriched)
+        elif status == "low":         low.append(enriched)
+        elif status == "overstocked": over.append(enriched)
+        else:                         healthy.append(enriched)
+
+    guidance = []
+    if critical:
+        guidance.append({
+            "priority": "CRITICAL",
+            "message":  f"{len(critical)} items completely out of stock.",
+            "action":   "Create emergency purchase requests NOW. Contact vendors directly.",
+            "items":    [i["name"] for i in critical[:5]],
+        })
+    if low:
+        guidance.append({
+            "priority": "HIGH",
+            "message":  f"{len(low)} items below minimum stock level.",
+            "action":   "Create purchase requests today. Allow for lead time.",
+            "items":    [i["name"] for i in low[:5]],
+        })
+    if not critical and not low:
+        guidance.append({
+            "priority": "INFO",
+            "message":  "All tracked items within healthy stock levels.",
+            "action":   "Continue regular monitoring and scheduled reorder cycles.",
+        })
+
+    return {
+        "summary": {
+            "critical": len(critical), "low": len(low),
+            "healthy": len(healthy), "overstocked": len(over),
+            "total": len(rows),
+        },
+        "critical_items":  critical[:10],
+        "low_stock_items": low[:10],
+        "overstocked":     over[:5],
+        "mentor_guidance": guidance,
+        "generated_at":    now.isoformat(),
+    }
+
+@router.get("/brand-guide/{category}", summary="Brand and sourcing guide")
+def brand_guide(category: str):
+    """AI-powered brand recommendation and sourcing guide for Egypt market."""
+    cat_lower = category.lower()
+    matched   = next((k for k in BRAND_GUIDE if k in cat_lower), "general")
+    rec       = BRAND_GUIDE[matched]
+
+    return {
+        "category":               category,
+        "matched_guide":          matched,
+        "recommended_brands":     rec["brands"],
+        "required_certifications": rec["certs"],
+        "avg_lead_time_days":     rec["lead"],
+        "sourcing_notes":         rec["notes"],
+        "best_practice":          rec["tip"],
+        "mentor_tip": (
+            f"For {category}: Always request at least 3 quotes. "
+            f"Verify certifications. "
+            f"Plan for {rec['lead']} day lead time."
+        ),
+        "reorder_strategy": {
+            "safety_stock_days": rec["lead"] * 2,
+            "order_frequency":   "monthly" if rec["lead"] <= 7 else "bi-monthly",
+        },
+    }
+
+@router.get("/auto-reorder-plan", summary="Auto-generate reorder plan")
+def auto_reorder_plan(
+    hotel_id: str = Query(default=None),
+    db: Session = Depends(get_db)
+):
+    """Generate complete reorder plan grouped by vendor category."""
+    now    = datetime.datetime.utcnow()
+    where  = "WHERE COALESCE(sb.quantity, 0) <= ii.min_stock"
+    params = {}
+    if hotel_id:
+        where  += " AND ii.hotel_id = :hotel_id"
+        params["hotel_id"] = hotel_id
+
+    try:
+        rows = db.execute(text(f"""
+            SELECT ii.id, ii.name, ii.category, ii.item_code,
                    ii.unit_of_measure, ii.min_stock, ii.reorder_qty,
-                   ii.hotel_id, COALESCE(sb.quantity, 0) as current_stock
+                   COALESCE(sb.quantity, 0) as current_stock
             FROM inventory_items ii
             LEFT JOIN stock_balances sb ON sb.item_id = ii.id
             {where}
@@ -282,56 +229,49 @@ def auto_reorder_plan(
     except Exception:
         rows = []
 
-    # Group by category
-    plan_by_category = {}
+    plan = {}
     for row in rows:
         item = row_to_dict(row)
         cat  = item.get("category", "General")
-        if cat not in plan_by_category:
-            cat_lower = cat.lower()
-            matched   = next((k for k in BRAND_RECOMMENDATIONS if k in cat_lower), "general")
-            plan_by_category[cat] = {
-                "category":      cat,
-                "items":         [],
-                "brand_guide":   BRAND_RECOMMENDATIONS[matched]["brands"][:2],
-                "lead_time_days": BRAND_RECOMMENDATIONS[matched]["avg_lead_time_days"],
-                "total_items":   0,
+        if cat not in plan:
+            cat_key = next((k for k in BRAND_GUIDE if k in cat.lower()), "general")
+            plan[cat] = {
+                "category":   cat,
+                "items":      [],
+                "brands":     BRAND_GUIDE[cat_key]["brands"][:2],
+                "lead_days":  BRAND_GUIDE[cat_key]["lead"],
+                "total":      0,
             }
-
         needed = max(
             _safe_int(item.get("reorder_qty")),
             _safe_int(item.get("min_stock")) - _safe_int(item.get("current_stock"))
         )
-        plan_by_category[cat]["items"].append({
-            "item_id":     item.get("id"),
-            "name":        item.get("name"),
-            "item_code":   item.get("item_code"),
-            "current":     _safe_int(item.get("current_stock")),
-            "minimum":     _safe_int(item.get("min_stock")),
-            "order_qty":   needed,
-            "unit":        item.get("unit_of_measure"),
-            "urgency":     "CRITICAL" if _safe_int(item.get("current_stock")) == 0 else "LOW",
+        plan[cat]["items"].append({
+            "name":      item.get("name"),
+            "item_code": item.get("item_code"),
+            "current":   _safe_int(item.get("current_stock")),
+            "minimum":   _safe_int(item.get("min_stock")),
+            "order_qty": needed,
+            "unit":      item.get("unit_of_measure"),
+            "urgency":   "CRITICAL" if _safe_int(item.get("current_stock")) == 0 else "LOW",
         })
-        plan_by_category[cat]["total_items"] += 1
+        plan[cat]["total"] += 1
 
-    total_lines = sum(len(v["items"]) for v in plan_by_category.values())
-    categories_count = len(plan_by_category)
+    total_lines = sum(v["total"] for v in plan.values())
 
     return {
-        "reorder_plan":     list(plan_by_category.values()),
+        "reorder_plan":     list(plan.values()),
         "total_line_items": total_lines,
-        "categories":       categories_count,
+        "categories":       len(plan),
         "mentor_guidance": (
-            f"Create {categories_count} purchase requests (one per vendor category). "
+            f"Create {len(plan)} purchase requests (one per vendor category). "
             f"Total {total_lines} line items need reordering. "
             f"Start with CRITICAL items (zero stock) first."
         ),
         "recommended_order": (
-            "1. Critical (zero stock) → emergency PR today
-"
-            "2. Low stock → standard PR this week
-"
-            "3. Group by vendor category → fewer POs = better pricing"
+            "1. Critical (zero stock) - emergency PR today. "
+            "2. Low stock - standard PR this week. "
+            "3. Group by vendor category - fewer POs means better pricing."
         ),
         "generated_at": now.isoformat(),
     }
