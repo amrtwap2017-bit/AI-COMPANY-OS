@@ -7,13 +7,14 @@
 // Legacy routes are preserved. Only the shell is unified.
 // Users see one consistent navigation on every page.
 //
-export const dynamic = "force-dynamic";
 import { useKeyboardShortcuts } from "@/lib/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsModal } from "@/components/ui/KeyboardShortcutsModal";
 import { useState } from "react";
 import { EnterpriseShell } from "@/components/workspace/EnterpriseShell";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import { NotificationBell } from "@/components/ui/NotificationBell";
+
+export const dynamic = "force-dynamic";
 
 export default function AppLayout({
   children,
