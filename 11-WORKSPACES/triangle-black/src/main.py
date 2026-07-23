@@ -320,3 +320,18 @@ try:
     print("  OK: ai_scheduling_router")
 except Exception as e:
     print(f"  WARN ai_scheduling: {e}")
+
+# ── Sprint 71 — Knowledge Graph + Payment Tracking + Warranty ─────────────────
+try:
+    from src.commercial.knowledge_graph.router import router as knowledge_graph_router
+    app.include_router(knowledge_graph_router, prefix="/api/v1")
+    print("  OK: knowledge_graph_router")
+except Exception as e:
+    print(f"  WARN knowledge_graph: {e}")
+
+try:
+    from src.commercial.warranty.router import router as warranty_router
+    app.include_router(warranty_router, prefix="/api/v1")
+    print("  OK: warranty_router")
+except Exception as e:
+    print(f"  WARN warranty: {e}")

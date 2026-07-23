@@ -1,13 +1,16 @@
 {
-  "name": "Triangle Black Enterprise",
+  "name": "Triangle Black \u2014 Enterprise Operations",
   "short_name": "Triangle Black",
-  "description": "Hotel Engineering Operations Platform",
-  "start_url": "/workspace",
+  "description": "Enterprise Operations Platform for Engineering Companies",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#b45309",
+  "theme_color": "#0f172a",
   "orientation": "portrait-primary",
-  "categories": ["business", "productivity"],
+  "categories": [
+    "business",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -24,22 +27,21 @@
   ],
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Home",
-      "description": "Go to enterprise dashboard",
-      "url": "/workspace"
-    },
-    {
       "name": "Work Orders",
-      "short_name": "Work Orders",
-      "description": "View open work orders",
-      "url": "/operations/work-orders"
+      "url": "/operations/work-orders",
+      "description": "View work orders"
     },
     {
-      "name": "Leads",
-      "short_name": "Leads",
-      "description": "View leads pipeline",
-      "url": "/leads"
+      "name": "Dashboard",
+      "url": "/executive",
+      "description": "Executive dashboard"
+    },
+    {
+      "name": "Technicians",
+      "url": "/operations/technicians",
+      "description": "Manage technicians"
     }
-  ]
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }
