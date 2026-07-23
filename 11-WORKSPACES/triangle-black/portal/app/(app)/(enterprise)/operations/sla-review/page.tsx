@@ -1,93 +1,86 @@
 "use client"; // @ts-nocheck
+// @ts-nocheck
 
-
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, Progress } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  LoadingState,
+  Progress,
+} from "@/components/ui";
 
 const fetchSLAData = async () => {
-  try {
-    const response = await fetch("/api/v1/ai/analytics/sla");
-    if (!response.ok) throw new Error("Failed to fetch SLA data");
-    return response.json();
-  } catch (error) {
-    console.error(error);
-    return null;
+  const response = await fetch("/api/v1/ai/analytics/sla", {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch SLA data");
   }
-};
-
-const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders");
   return response.json();
 };
 
 const SLAReviewPage = () => {
-  const { data: slaData, isLoading: isSLALoading, isError: isSLError } = useQuery(["sla"], fetchSLAData);
-  const { data: workOrders, isLoading: isWorkOrdersLoading, isError: isWorkOrdersError } = useQuery(["work-orders"], fetchWorkOrders);
+  const { isLoading, isError, data } = useQuery({
+    queryKey: ["slaData"],
+    queryFn: fetchSLAData,
+    refetchInterval: 60000,
+  });
 
-  if (isSLALoading || isWorkOrdersLoading) return <LoadingState />;
-  if (isSLError || isWorkOrdersError) return <EmptyState title="Failed to load data" description="Please try again later." />;
+  if (isLoading) return <LoadingState />;
+  if (isError) return <div>Error fetching SLA data</div>;
 
-  const complianceRate = slaData ? Math.round((slaData.completed / slaData.total) * 100) : null;
-  const completedWOs = slaData ? slaData.completed : workOrders.filter(order => order.status === "completed").length;
-  const openWOs = slaData ? slaData.open : workOrders.filter(order => order.status !== "completed").length;
-  const overdueWOs = workOrders.filter(order => new Date(order.due_date) < new Date() && order.status !== "completed").length;
+  const { compliance_rate, sla_target, sla_status, total, completed, overdue, by_type } = data;
 
-  const compliance = (completedWOs / (completedWOs + openWOs)) * 100;
+  const statusBadgeColor = sla_status === "at_risk" ? "red" : "green";
+  const gapPercentage = (sla_target - compliance_rate).toFixed(2);
+  const actionItems = compliance_rate < 95 && [
+    { title: "Improve Compliance", description: "Review and optimize work orders." },
+    { title: "Increase Resources", description: "Assign more personnel to critical tasks." },
+    { title: "Enhance Training", description: "Provide additional training for staff." },
+  ];
 
   return (
     <PageWrapper>
       <PageHeader title="SLA Review" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Compliance Rate", value: complianceRate, unit: "%" },
-            { label: "Completed WOs", value: completedWOs },
-            { label: "Open WOs", value: openWOs },
-            { label: "Overdue WOs", value: overdueWOs }
-          ]}
-        />
-      </SectionCard>
-      <SectionCard title="SLA Gauge">
-        <Progress value={complianceRate} max={100} color={compliance >= 95 ? "green" : compliance >= 80 ? "amber" : "red"} />
-        <div className="flex justify-between items-center mt-2">
-          <span>SLA Target: 95%</span>
-          <span>{completedWOs} of {completedWOs + openWOs} work orders completed on time</span>
-        </div>
-      </SectionCard>
-      <SectionCard title="Work Orders Past Due">
-        {overdueWOs > 0 ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SectionCard>
+          <StatusBadge status={sla_status} color={statusBadgeColor} />
+        </SectionCard>
+        <SectionCard>
+          <MetricStrip
+            title="Compliance Rate"
+            value={`${compliance_rate.toFixed(2)}%`}
+            target={`${sla_target}%`}
+            gap={`${gapPercentage}%`}
+            icon="chart-bar"
+          />
+        </SectionCard>
+      </div>
+      <Progress value={compliance_rate} max={sla_target} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {by_type.map((type) => (
+          <SectionCard key={type.type}>
+            <h3>{type.type}</h3>
+            <p>Total: {type.total}</p>
+            <p>Completed: {type.completed}</p>
+            <p>Rate: {type.rate.toFixed(2)}%</p>
+          </SectionCard>
+        ))}
+      </div>
+      {actionItems.length > 0 && (
+        <SectionCard title="Action Items">
           <ul>
-            {workOrders
-              .filter(order => new Date(order.due_date) < new Date() && order.status !== "completed")
-              .sort((a, b) => new Date(b.due_date) - new Date(a.due_date))
-              .map(order => (
-                <li key={order.id} className="flex items-center justify-between mb-2">
-                  <div>
-                    {order.title}
-                    <StatusBadge status={order.status} />
-                  </div>
-                  <span>{Math.floor((new Date() - new Date(order.due_date)) / (1000 * 60 * 60 * 24))} days overdue</span>
-                </li>
-              ))}
-          </ul>
-        ) : (
-          <EmptyState title="All work orders within SLA" description="No work orders are past due." />
-        )}
-      </SectionCard>
-      <SectionCard title="SLA by Work Order Type">
-        {slaData ? (
-          <div className="flex flex-wrap gap-4">
-            {["hvac", "electrical", "plumbing", "mechanical"].map(type => (
-              <div key={type} className="bg-white p-4 rounded-lg shadow-md w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
-                <h3>{type}</h3>
-                <StatusBadge status="completed" count={slaData[type]} />
-              </div>
+            {actionItems.map((item, index) => (
+              <li key={index}>
+                <strong>{item.title}</strong>: {item.description}
+              </li>
             ))}
-          </div>
-        ) : (
-          <EmptyState title="No data available" description="Please try again later." />
-        )}
-      </SectionCard>
+          </ul>
+        </SectionCard>
+      )}
     </PageWrapper>
   );
 };

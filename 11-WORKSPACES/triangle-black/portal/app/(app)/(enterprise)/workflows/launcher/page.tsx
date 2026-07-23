@@ -1,41 +1,71 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["workflows-launcher"],
-    queryFn:  () => authFetchJSON("/api/v1/work-orders"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"template", label:"Template", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["template"]??"—")}</span>) },
-    { key:"category", label:"Category", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["category"]??"—")}</span>) },
-    { key:"last_run", label:"Last Run", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["last_run"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
+import { PageWrapper, PageHeader, SectionCard, EmptyState, Button } from "@/components/ui";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const WorkflowLauncherPage = () => {
+  const router = useRouter();
+  const [hoveredWorkflow, setHoveredWorkflow] = useState<string | null>(null);
+
+  const workflows = [
+    {
+      category: "OPERATIONS WORKFLOWS",
+      items: [
+        { name: "New Work Order", description: "Create a new work order.", path: "/operations/work-orders/new" },
+        { name: "Dispatch Technician", description: "Dispatch a technician to the site.", path: "/operations/dispatch" },
+        { name: "Create Service Request", description: "Report an asset fault.", path: "/operations/service-requests" }
+      ]
+    },
+    {
+      category: "PROCUREMENT WORKFLOWS",
+      items: [
+        { name: "Create Purchase Request", description: "Request materials for procurement.", path: "/supply-chain/purchase-requests" },
+        { name: "Send RFQ", description: "Send a request for quotation.", path: "/supply-chain/rfqs" },
+        { name: "Receive Goods", description: "Record the receipt of goods.", path: "/supply-chain/goods-receipts" }
+      ]
+    },
+    {
+      category: "MAINTENANCE WORKFLOWS",
+      items: [
+        { name: "Schedule PM", description: "Plan preventive maintenance tasks.", path: "/maintenance/pm-plans" },
+        { name: "Report Asset Fault", description: "Report an asset fault.", path: "/operations/work-orders/new" },
+        { name: "View Schedule", description: "View the maintenance schedule.", path: "/maintenance/schedule" }
+      ]
+    }
   ];
+
+  const handleLaunch = (path: string) => {
+    router.push(path);
+  };
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Workflow Launcher" subtitle={`${items.length} records`} badge="WF"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🚀" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Workflow Launcher" description="Start a workflow from anywhere in the platform" />
+      {workflows.map((category, index) => (
+        <SectionCard key={index} title={category.category}>
+          {category.items.map((item, i) => (
+            <div
+              key={i}
+              className={`flex items-center justify-between p-4 hover:bg-gray-100 rounded-md ${
+                hoveredWorkflow === item.name ? "bg-gray-200" : ""
+              }`}
+              onMouseEnter={() => setHoveredWorkflow(item.name)}
+              onMouseLeave={() => setHoveredWorkflow(null)}
+            >
+              <div>
+                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <p className="text-sm text-gray-500">{item.description}</p>
+              </div>
+              <Button onClick={() => handleLaunch(item.path)}>Launch</Button>
+            </div>
+          ))}
+        </SectionCard>
+      ))}
     </PageWrapper>
   );
-}
+};
+
+export default WorkflowLauncherPage;
