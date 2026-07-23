@@ -480,3 +480,11 @@ try:
             pass
 except Exception as _e:
     print(f"  WARN scheduler import: {_e}")
+
+# ── Sprint 83 — Email Alerts ──────────────────────────────────────────────────
+try:
+    from src.commercial.email_alert.router import router as email_alert_router
+    app.include_router(email_alert_router, prefix="/api/v1")
+    print("  OK: email_alert_router")
+except Exception as e:
+    print(f"  WARN email_alert: {e}")
