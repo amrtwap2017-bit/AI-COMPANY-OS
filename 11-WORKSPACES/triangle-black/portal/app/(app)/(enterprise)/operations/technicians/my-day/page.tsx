@@ -1,9 +1,8 @@
-"use client";
-jsx
+"use client"; // @ts-nocheck
 "use client"; // @ts-nocheck
 
 import { PageWrapper, PageHeader, SectionCard, StatusBadge, LoadingState } from "@/components/ui";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";;
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 const fetchWorkOrders = async () => {

@@ -1,9 +1,8 @@
-"use client";
-typescript
+"use client"; // @ts-nocheck
 "use client"; // @ts-nocheck
 
 import { PageWrapper, PageHeader, SectionCard, StatusBadge, LoadingState } from "@/components/ui";
-import { useQuery } from "@tanstack/react-query";;
+import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 const fetchCustomerSuccessOverview = async () => {
