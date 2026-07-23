@@ -1,5 +1,5 @@
 "use client"; // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";;
 import { useParams } from "next/navigation";
 import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";

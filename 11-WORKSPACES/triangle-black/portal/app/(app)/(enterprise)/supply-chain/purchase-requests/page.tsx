@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";;
 import Link from "next/link";
 import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner, StatusBadge, Pagination, StatusFilterTabs } from "@/components/ui";
 import { ActionBar } from "@/components/ui/ActionBar";

@@ -1,7 +1,7 @@
 "use client"; // @ts-nocheck
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, DataTable, Button } from "@/components/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";;
 
 const fetchVendors = async () => {
   try {

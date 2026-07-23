@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";;
 import { PageWrapper, PageHeader, SectionCard, AlertBanner } from "@/components/ui";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";

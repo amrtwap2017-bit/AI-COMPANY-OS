@@ -1,6 +1,6 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";;
 import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Pagination } from "@/components/ui/Pagination";

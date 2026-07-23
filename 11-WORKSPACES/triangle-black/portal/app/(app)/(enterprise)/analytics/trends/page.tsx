@@ -1,7 +1,7 @@
 "use client"; // @ts-nocheck
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";;
 
 const fetchTrends = async () => {
   const response = await fetch("/api/v1/ai/analytics/trends", {

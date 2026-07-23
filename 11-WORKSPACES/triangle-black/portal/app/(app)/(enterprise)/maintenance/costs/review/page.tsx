@@ -1,7 +1,7 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";;
 import {
   PageWrapper,
   PageHeader,
