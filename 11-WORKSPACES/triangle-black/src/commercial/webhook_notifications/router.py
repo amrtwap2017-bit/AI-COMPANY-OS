@@ -18,7 +18,7 @@ from .repository import WebhookConfigRepository
 router = APIRouter(prefix="/webhookconfigs", tags=["webhookconfigs"])
 
 @router.post("/", response_model=WebhookConfigResponse, status_code=201)
-def create(
+def webhook_create(
     payload: WebhookConfigCreate,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
@@ -29,7 +29,7 @@ def create(
     return WebhookConfigRepository(db).create(data)
 
 @router.get("/", response_model=List[WebhookConfigResponse])
-def list_all(
+def webhook_list_all(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -39,7 +39,7 @@ def list_all(
     return WebhookConfigRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
 @router.get("/{webhookconfig_id}", response_model=WebhookConfigResponse)
-def get(
+def webhook_get(
     webhookconfig_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
@@ -51,7 +51,7 @@ def get(
     return obj
 
 @router.patch("/{webhookconfig_id}", response_model=WebhookConfigResponse)
-def update(
+def webhook_update(
     webhookconfig_id: str,
     payload: WebhookConfigUpdate,
     db: Session = Depends(get_db),
@@ -66,7 +66,7 @@ def update(
     return obj
 
 @router.delete("/{webhookconfig_id}", status_code=204)
-def delete(
+def webhook_delete(
     webhookconfig_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_manager),

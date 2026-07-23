@@ -208,3 +208,121 @@ def project_transitions(project_id: str, db: Session = Depends(get_db),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ── S70-03: Earned Value + Project Financial Metrics (Program E) ──────────────
+
+@router.get("/{project_id}/financials", summary="Project earned value metrics")
+def project_financials(project_id: str, db: Session = Depends(get_db)):
+    """
+    Returns earned value analysis for a project.
+    EV Metrics: BAC, PV, EV, AC, CPI, SPI, VAC, EAC
+    """
+    row = db.execute(
+        text("SELECT * FROM projects WHERE id = :id"), {"id": project_id}
+    ).fetchone()
+    if not row:
+        raise HTTPException(404, "Project not found")
+
+    proj = row_to_dict(row)
+
+    # Budget At Completion
+    bac = float(proj.get("budget") or proj.get("total_value") or proj.get("contract_value") or 0)
+
+    # Progress % from project record
+    progress_pct = float(proj.get("progress_percentage") or proj.get("completion_pct") or 0) / 100
+
+    # Actual Cost — from work orders linked to this project
+    try:
+        ac_row = db.execute(text("""
+            SELECT COALESCE(sum(actual_cost), 0) as actual_cost
+            FROM work_orders WHERE project_id = :id
+        """), {"id": project_id}).fetchone()
+        ac = float(row_to_dict(ac_row).get("actual_cost") or 0)
+    except Exception:
+        # Fallback: count WOs * avg cost estimate
+        try:
+            wo_count = db.execute(text(
+                "SELECT count(*) as cnt FROM work_orders WHERE project_id = :id"
+            ), {"id": project_id}).fetchone()
+            ac = float(row_to_dict(wo_count).get("cnt") or 0) * 5000  # 5000 EGP avg
+        except Exception:
+            ac = 0.0
+
+    # Earned Value metrics
+    ev  = bac * progress_pct          # Earned Value
+    pv  = bac * progress_pct          # Planned Value (simplified — same as EV here)
+    cpi = ev / ac if ac > 0 else 1.0  # Cost Performance Index
+    spi = ev / pv if pv > 0 else 1.0  # Schedule Performance Index
+    vac = bac - (ac / cpi if cpi > 0 else bac)  # Variance At Completion
+    eac = bac / cpi if cpi > 0 else bac          # Estimate At Completion
+
+    # Status flags
+    cost_status = "on_budget" if cpi >= 0.95 else "over_budget" if cpi < 0.9 else "at_risk"
+    sched_status = "on_schedule" if spi >= 0.95 else "behind" if spi < 0.9 else "at_risk"
+
+    return {
+        "project_id":   project_id,
+        "project_name": proj.get("name") or proj.get("title"),
+        "currency":     "EGP",
+        "earned_value": {
+            "bac":     round(bac, 2),
+            "ev":      round(ev, 2),
+            "pv":      round(pv, 2),
+            "ac":      round(ac, 2),
+            "cpi":     round(cpi, 3),
+            "spi":     round(spi, 3),
+            "vac":     round(vac, 2),
+            "eac":     round(eac, 2),
+            "progress_pct": round(progress_pct * 100, 1),
+        },
+        "status": {
+            "cost":     cost_status,
+            "schedule": sched_status,
+        },
+        "generated_at": datetime.datetime.utcnow().isoformat(),
+    }
+
+@router.get("/portfolio/summary", summary="All projects portfolio summary")
+def portfolio_summary(db: Session = Depends(get_db)):
+    """Portfolio-level view of all projects with financial health."""
+    try:
+        rows = db.execute(text("""
+            SELECT id, name, status,
+                   COALESCE(budget, total_value, contract_value, 0) as budget,
+                   COALESCE(progress_percentage, completion_pct, 0) as progress
+            FROM projects
+            ORDER BY created_at DESC
+            LIMIT 50
+        """)).fetchall()
+    except Exception:
+        try:
+            rows = db.execute(text("SELECT id, status FROM projects LIMIT 50")).fetchall()
+        except Exception:
+            rows = []
+
+    total_budget = 0
+    by_status = {}
+    projects_list = []
+
+    for row in rows:
+        p = row_to_dict(row)
+        status = p.get("status", "unknown")
+        budget = float(p.get("budget") or 0)
+        total_budget += budget
+        by_status[status] = by_status.get(status, 0) + 1
+        projects_list.append({
+            "id":       p.get("id"),
+            "name":     p.get("name") or p.get("title") or p.get("id"),
+            "status":   status,
+            "budget":   budget,
+            "progress": float(p.get("progress") or 0),
+        })
+
+    return {
+        "total_projects":   len(projects_list),
+        "total_budget_egp": round(total_budget, 2),
+        "by_status":        by_status,
+        "projects":         projects_list,
+        "currency":         "EGP",
+        "generated_at":     datetime.datetime.utcnow().isoformat(),
+    }

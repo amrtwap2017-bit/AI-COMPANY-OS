@@ -18,7 +18,7 @@ from .repository import PipelineRepository
 router = APIRouter(prefix="/pipelines", tags=["pipelines"])
 
 @router.post("/", response_model=PipelineResponse, status_code=201)
-def create(
+def pipeline_create(
     payload: PipelineCreate,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
@@ -29,7 +29,7 @@ def create(
     return PipelineRepository(db).create(data)
 
 @router.get("/", response_model=List[PipelineResponse])
-def list_all(
+def pipeline_list_all(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
@@ -39,7 +39,7 @@ def list_all(
     return PipelineRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
 
 @router.get("/{pipeline_id}", response_model=PipelineResponse)
-def get(
+def pipeline_get(
     pipeline_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
@@ -51,7 +51,7 @@ def get(
     return obj
 
 @router.patch("/{pipeline_id}", response_model=PipelineResponse)
-def update(
+def pipeline_update(
     pipeline_id: str,
     payload: PipelineUpdate,
     db: Session = Depends(get_db),
@@ -66,7 +66,7 @@ def update(
     return obj
 
 @router.delete("/{pipeline_id}", status_code=204)
-def delete(
+def pipeline_delete(
     pipeline_id: str,
     db: Session = Depends(get_db),
     _: User = Depends(require_manager),

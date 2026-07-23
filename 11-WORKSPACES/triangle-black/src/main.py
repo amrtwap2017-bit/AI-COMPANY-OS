@@ -305,3 +305,18 @@ try:
     print("  OK: supplier_portal_router")
 except Exception as e:
     print(f"  WARN supplier_portal: {e}")
+
+# ── Sprint 70 — Customer Success + AI Scheduling + Earned Value ───────────────
+try:
+    from src.commercial.customer_success.router import router as customer_success_router
+    app.include_router(customer_success_router, prefix="/api/v1")
+    print("  OK: customer_success_router")
+except Exception as e:
+    print(f"  WARN customer_success: {e}")
+
+try:
+    from src.commercial.ai_scheduling.router import router as ai_scheduling_router
+    app.include_router(ai_scheduling_router, prefix="/api/v1")
+    print("  OK: ai_scheduling_router")
+except Exception as e:
+    print(f"  WARN ai_scheduling: {e}")

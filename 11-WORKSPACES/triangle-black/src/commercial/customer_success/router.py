@@ -1,171 +1,195 @@
 from __future__ import annotations
-from src.core.auth import get_current_user
-from src.commercial.auth.models import User
-from fastapi import Depends
-from fastapi import APIRouter, Depends, Query
+import uuid, datetime
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
-from typing import Optional
+
+router = APIRouter(prefix="/customer-success", tags=["customer-success"])
 
 def row_to_dict(row):
-    if row is None: return None
-    if hasattr(row, "_mapping"): d = dict(row._mapping)
-    elif hasattr(row, "__dict__"): d = {k:v for k,v in row.__dict__.items() if not k.startswith("_")}
-    else: return {}
-    return {k: (v.isoformat() if hasattr(v,"isoformat") else v) for k,v in d.items()}
+    if row is None: return {}
+    if hasattr(row, "_mapping"): return dict(row._mapping)
+    return {}
 
-def rows(result): return [row_to_dict(r) for r in result]
+def _ensure_nps_table(db):
+    db.execute(text("""
+        CREATE TABLE IF NOT EXISTS customer_nps (
+            id          VARCHAR(36) PRIMARY KEY,
+            hotel_id    VARCHAR(36) NOT NULL,
+            score       INTEGER NOT NULL CHECK (score BETWEEN 0 AND 10),
+            comment     TEXT,
+            category    VARCHAR(20),
+            surveyed_by VARCHAR(36),
+            created_at  TIMESTAMP NOT NULL
+        )
+    """))
+    db.commit()
 
-router = APIRouter(prefix="/customers", tags=["customer-success"])
-
-@router.get("/", summary="Customer list derived from won leads")
-def list_customers(
-    hotel_id: Optional[str] = None,
-    skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001",
-         "limit": limit, "skip": skip}
-    # leads columns: id, name, email, phone, company, status, created_at, updated_at
-    # Use GROUP BY to avoid DISTINCT ON / window function conflict
-    customer_rows = rows(db.execute(text(
-        "SELECT company AS company_name,"
-        " MAX(email) AS email,"
-        " MAX(phone) AS phone,"
-        " COUNT(*) AS lead_count,"
-        " MAX(status) AS status,"
-        " MAX(updated_at) AS last_activity"
-        " FROM leads"
-        " WHERE hotel_id=:hotel_id"
-        " AND status IN ('won','negotiation','qualified')"
-        " AND company IS NOT NULL AND company != ''"
-        " GROUP BY company"
-        " ORDER BY MAX(updated_at) DESC"
-        " LIMIT :limit OFFSET :skip"
-    ), h).fetchall())
-    return {"customers": customer_rows, "total": len(customer_rows)}
-
-
-@router.get("", summary="Customer list derived from won leads")
-def list_customers_root(
-    hotel_id: Optional[str] = None,
-    skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001",
-         "limit": limit, "skip": skip}
-    # leads columns: id, name, email, phone, company, status, created_at, updated_at
-    # Use GROUP BY to avoid DISTINCT ON / window function conflict
-    customer_rows = rows(db.execute(text(
-        "SELECT company AS company_name,"
-        " MAX(email) AS email,"
-        " MAX(phone) AS phone,"
-        " COUNT(*) AS lead_count,"
-        " MAX(status) AS status,"
-        " MAX(updated_at) AS last_activity"
-        " FROM leads"
-        " WHERE hotel_id=:hotel_id"
-        " AND status IN ('won','negotiation','qualified')"
-        " AND company IS NOT NULL AND company != ''"
-        " GROUP BY company"
-        " ORDER BY MAX(updated_at) DESC"
-        " LIMIT :limit OFFSET :skip"
-    ), h).fetchall())
-    return {"customers": customer_rows, "total": len(customer_rows)}
-
-@router.get("", summary="Customer list derived from won leads")
-def list_noslash_customers(
-    hotel_id: Optional[str] = None,
-    skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001",
-         "limit": limit, "skip": skip}
-    # leads columns: id, name, email, phone, company, status, created_at, updated_at
-    # Use GROUP BY to avoid DISTINCT ON / window function conflict
-    customer_rows = rows(db.execute(text(
-        "SELECT company AS company_name,"
-        " MAX(email) AS email,"
-        " MAX(phone) AS phone,"
-        " COUNT(*) AS lead_count,"
-        " MAX(status) AS status,"
-        " MAX(updated_at) AS last_activity"
-        " FROM leads"
-        " WHERE hotel_id=:hotel_id"
-        " AND status IN ('won','negotiation','qualified')"
-        " AND company IS NOT NULL AND company != ''"
-        " GROUP BY company"
-        " ORDER BY MAX(updated_at) DESC"
-        " LIMIT :limit OFFSET :skip"
-    ), h).fetchall())
-    return {"customers": customer_rows, "total": len(customer_rows)}
-
-
-@router.get("/360", summary="Customer 360 view")
-def customer_360(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-    h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
-    won_leads  = rows(db.execute(text(
-        "SELECT * FROM leads WHERE hotel_id=:hotel_id AND status='won'"
-        " ORDER BY updated_at DESC LIMIT 10"
-    ), h).fetchall())
-    contracts  = rows(db.execute(text(
-        "SELECT * FROM contracts WHERE hotel_id=:hotel_id AND status='active'"
-        " ORDER BY created_at DESC LIMIT 10"
-    ), h).fetchall())
-    invoices   = rows(db.execute(text(
-        "SELECT * FROM invoices WHERE hotel_id=:hotel_id"
-        " ORDER BY created_at DESC LIMIT 10"
-    ), h).fetchall())
+@router.get("/overview", summary="Customer success overview")
+def customer_success_overview(db: Session = Depends(get_db)):
     try:
-        health = rows(db.execute(text(
-            "SELECT * FROM customer_health_scores ORDER BY created_at DESC LIMIT 10"
-        )).fetchall())
+        contracts = db.execute(text("""
+            SELECT
+                count(*) as total,
+                sum(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+                sum(CASE WHEN end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'
+                         AND status = 'active' THEN 1 ELSE 0 END) as expiring_30,
+                COALESCE(sum(CASE WHEN end_date BETWEEN NOW() AND NOW() + INTERVAL '90 days'
+                         AND status = 'active' THEN total_value ELSE 0 END), 0) as renewal_pipeline
+            FROM contracts
+        """)).fetchone()
+        c = row_to_dict(contracts)
     except Exception:
-        health = []
+        c = {"total": 0, "active": 0, "expiring_30": 0, "renewal_pipeline": 0}
+
+    try:
+        at_risk = db.execute(text("""
+            SELECT count(DISTINCT hotel_id) as count FROM work_orders
+            WHERE priority = 'critical'
+              AND status NOT IN ('completed','closed','cancelled')
+              AND created_at >= NOW() - INTERVAL '30 days'
+            GROUP BY hotel_id
+            HAVING count(*) >= 3
+        """)).fetchall()
+        at_risk_count = len(at_risk)
+    except Exception:
+        at_risk_count = 0
+
+    try:
+        nps_row = db.execute(text(
+            "SELECT COALESCE(avg(score),0) as avg_score FROM customer_nps"
+        )).fetchone()
+        avg_nps = round(float(row_to_dict(nps_row).get("avg_score", 0)), 1)
+    except Exception:
+        avg_nps = 0.0
+
     return {
-        "won_customers":    won_leads,
-        "active_contracts": contracts,
-        "recent_invoices":  invoices,
-        "health_scores":    health,
-        "summary": {
-            "won_count":      len(won_leads),
-            "contracts":      len(contracts),
-            "invoices":       len(invoices),
-        },
+        "total_clients":             int(c.get("total") or 0),
+        "active_contracts":          int(c.get("active") or 0),
+        "contracts_expiring_30_days": int(c.get("expiring_30") or 0),
+        "avg_satisfaction_score":    avg_nps,
+        "renewal_pipeline_value_egp": float(c.get("renewal_pipeline") or 0),
+        "at_risk_count":             at_risk_count,
+        "currency":                  "EGP",
+        "generated_at":              datetime.datetime.utcnow().isoformat(),
     }
 
-@router.get("/review", summary="Customer review and renewal signals")
-def customer_review(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-    h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
+@router.get("/renewals", summary="Contracts expiring in 90 days")
+def get_renewals(db: Session = Depends(get_db)):
     try:
-        renewals = rows(db.execute(text(
-            "SELECT * FROM customer_renewals ORDER BY created_at DESC LIMIT 10"
-        )).fetchall())
+        rows = db.execute(text("""
+            SELECT c.id, c.title, c.end_date, c.total_value, c.status,
+                   h.name as hotel_name,
+                   DATE_PART('day', c.end_date - NOW()) as days_remaining
+            FROM contracts c
+            LEFT JOIN hotels h ON h.id = c.hotel_id
+            WHERE c.end_date BETWEEN NOW() AND NOW() + INTERVAL '90 days'
+              AND c.status = 'active'
+            ORDER BY c.end_date ASC
+            LIMIT 50
+        """)).fetchall()
     except Exception:
-        renewals = []
-    try:
-        meetings = rows(db.execute(text(
-            "SELECT * FROM customer_meetings ORDER BY scheduled_at DESC LIMIT 10"
-        )).fetchall())
-    except Exception:
-        meetings = []
-    expiring = rows(db.execute(text(
-        "SELECT * FROM contracts WHERE hotel_id=:hotel_id"
-        " AND end_date IS NOT NULL AND end_date < NOW() + INTERVAL '30 days'"
-        " AND status='active' ORDER BY end_date ASC LIMIT 10"
-    ), h).fetchall())
+        rows = []
+
+    renewals = []
+    for row in rows:
+        r = row_to_dict(row)
+        days = int(r.get("days_remaining") or 90)
+        risk = "high" if days < 30 else "medium" if days < 60 else "low"
+        r["risk_level"] = risk
+        r["days_remaining"] = days
+        renewals.append(r)
+
+    return {"renewals": renewals, "total": len(renewals)}
+
+@router.post("/nps", summary="Submit NPS survey response")
+def submit_nps(data: dict, db: Session = Depends(get_db)):
+    hotel_id    = data.get("hotel_id")
+    score       = data.get("score")
+    comment     = data.get("comment", "")
+    surveyed_by = data.get("surveyed_by", "")
+
+    if score is None or not (0 <= int(score) <= 10):
+        raise HTTPException(400, "score must be 0-10")
+
+    score = int(score)
+    category = "promoter" if score >= 9 else "passive" if score >= 7 else "detractor"
+
+    _ensure_nps_table(db)
+    nps_id = str(uuid.uuid4())
+    now = datetime.datetime.utcnow()
+
+    db.execute(text("""
+        INSERT INTO customer_nps (id, hotel_id, score, comment, category, surveyed_by, created_at)
+        VALUES (:id, :hotel_id, :score, :comment, :category, :surveyed_by, :now)
+    """), {
+        "id": nps_id, "hotel_id": hotel_id, "score": score,
+        "comment": comment, "category": category,
+        "surveyed_by": surveyed_by, "now": now,
+    })
+    db.commit()
+
     return {
-        "renewals":           renewals,
-        "meetings":           meetings,
-        "expiring_contracts": expiring,
-        "total_renewals":     len(renewals),
+        "success":  True,
+        "nps_id":   nps_id,
+        "score":    score,
+        "category": category,
+        "message":  f"NPS submitted — {category}",
     }
+
+@router.get("/nps/summary", summary="NPS score summary")
+def nps_summary(db: Session = Depends(get_db)):
+    try:
+        _ensure_nps_table(db)
+        row = db.execute(text("""
+            SELECT
+                count(*) as total,
+                sum(CASE WHEN category = 'promoter'  THEN 1 ELSE 0 END) as promoters,
+                sum(CASE WHEN category = 'passive'   THEN 1 ELSE 0 END) as passives,
+                sum(CASE WHEN category = 'detractor' THEN 1 ELSE 0 END) as detractors
+            FROM customer_nps
+        """)).fetchone()
+        d = row_to_dict(row)
+        total      = int(d.get("total") or 0)
+        promoters  = int(d.get("promoters") or 0)
+        passives   = int(d.get("passives") or 0)
+        detractors = int(d.get("detractors") or 0)
+        nps_score  = round((promoters - detractors) / total * 100, 1) if total > 0 else 0.0
+    except Exception:
+        total = promoters = passives = detractors = 0
+        nps_score = 0.0
+
+    return {
+        "total_responses": total,
+        "promoters":       promoters,
+        "passives":        passives,
+        "detractors":      detractors,
+        "nps_score":       nps_score,
+        "scale":           "(-100 to +100)",
+        "generated_at":    datetime.datetime.utcnow().isoformat(),
+    }
+
+@router.get("/at-risk", summary="At-risk clients by critical WO count")
+def get_at_risk_clients(db: Session = Depends(get_db)):
+    try:
+        rows = db.execute(text("""
+            SELECT wo.hotel_id,
+                   h.name as hotel_name,
+                   count(*) as critical_wo_count,
+                   max(wo.created_at) as last_critical_date,
+                   COALESCE(c.total_value, 0) as contract_value
+            FROM work_orders wo
+            LEFT JOIN hotels h ON h.id = wo.hotel_id
+            LEFT JOIN contracts c ON c.hotel_id = wo.hotel_id AND c.status = 'active'
+            WHERE wo.priority = 'critical'
+              AND wo.status NOT IN ('completed','closed','cancelled')
+              AND wo.created_at >= NOW() - INTERVAL '30 days'
+            GROUP BY wo.hotel_id, h.name, c.total_value
+            HAVING count(*) >= 3
+            ORDER BY count(*) DESC
+            LIMIT 20
+        """)).fetchall()
+        return {"at_risk": [row_to_dict(r) for r in rows], "total": len(rows)}
+    except Exception as e:
+        return {"at_risk": [], "total": 0, "note": str(e)}
