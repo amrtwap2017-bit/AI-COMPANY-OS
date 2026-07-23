@@ -219,3 +219,26 @@ def ai_health_check(db: Session = Depends(get_db)):
         "checks": checks,
         "generated_at": datetime.utcnow().isoformat()
     }
+
+@router.get("/analytics/costs", summary="WO cost analysis and contract profitability")
+def get_cost_analytics(db: Session = Depends(get_db)):
+    """Full cost engine report — labor costs, overhead, contract margins."""
+    try:
+        from src.commercial.ai_assistant.cost_engine import generate_cost_report
+        DB_URL = "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"
+        report = generate_cost_report(DB_URL)
+        return report
+    except Exception as e:
+        return {"error": str(e), "work_orders": [], "contracts": [], "summary": {}}
+
+
+@router.get("/analytics/costs/summary", summary="Cost summary for dashboard")
+def get_cost_summary(db: Session = Depends(get_db)):
+    """Quick cost summary — totals only."""
+    try:
+        from src.commercial.ai_assistant.cost_engine import generate_cost_report
+        DB_URL = "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"
+        report = generate_cost_report(DB_URL)
+        return report.get("summary", {})
+    except Exception as e:
+        return {"error": str(e)}
