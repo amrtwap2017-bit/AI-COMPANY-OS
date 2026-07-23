@@ -3,7 +3,7 @@ typescript
 "use client"; // @ts-nocheck
 
 import { PageWrapper, PageHeader, SectionCard, StatusBadge, LoadingState } from "@/components/ui";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";;
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { toast } from "react-toastify";
 

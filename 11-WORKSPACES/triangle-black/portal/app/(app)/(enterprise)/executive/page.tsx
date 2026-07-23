@@ -1,6 +1,7 @@
 "use client"; // @ts-nocheck
 
-import { AlertTriangle, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";;
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, Progress } from "@/components/ui";
 import Link from "next/link";
 
