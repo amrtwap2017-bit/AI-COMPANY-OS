@@ -445,3 +445,18 @@ async def get_version():
         "programs": 14,
         "build":   "production-ready",
     }
+
+# ── Sprint 77 — Bulk Operations + Predictive Maintenance ─────────────────────
+try:
+    from src.commercial.bulk_operations.router import router as bulk_ops_router
+    app.include_router(bulk_ops_router, prefix="/api/v1")
+    print("  OK: bulk_operations_router")
+except Exception as e:
+    print(f"  WARN bulk_operations: {e}")
+
+try:
+    from src.commercial.predictive_maintenance.router import router as pred_maint_router
+    app.include_router(pred_maint_router, prefix="/api/v1")
+    print("  OK: predictive_maintenance_router")
+except Exception as e:
+    print(f"  WARN predictive_maintenance: {e}")
