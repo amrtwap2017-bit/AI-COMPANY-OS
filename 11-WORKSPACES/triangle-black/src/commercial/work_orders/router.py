@@ -116,3 +116,162 @@ def work_order_history(work_order_id: str, db: Session = Depends(get_db)):
         "SELECT * FROM activities WHERE entity_id = :id ORDER BY created_at DESC LIMIT 50"
     ), {"id": work_order_id}).fetchall()
     return [row_to_dict(r) for r in rows]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# S68-01: Work Order Transition Engine (Program C)
+# Called by useWorkflow hook: POST /api/v1/work-orders/{id}/transition
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Valid state machine for work orders
+WO_TRANSITIONS = {
+    "open":          ["assigned", "cancelled"],
+    "assigned":      ["in_progress", "open", "cancelled"],
+    "in_progress":   ["waiting_parts", "completed", "cancelled"],
+    "waiting_parts": ["in_progress", "cancelled"],
+    "completed":     ["closed", "in_progress"],
+    "closed":        [],
+    "cancelled":     [],
+    # Legacy states in DB
+    "pending":       ["assigned", "cancelled"],
+    "new":           ["open", "cancelled"],
+    "draft":         ["open", "cancelled"],
+}
+
+def _ensure_transition_log_table(db: Session):
+    """Create transition_logs table if it does not exist."""
+    db.execute(text("""
+        CREATE TABLE IF NOT EXISTS wo_transition_logs (
+            id          VARCHAR(36) PRIMARY KEY,
+            wo_id       VARCHAR(36) NOT NULL,
+            from_state  VARCHAR(50) NOT NULL,
+            to_state    VARCHAR(50) NOT NULL,
+            triggered_by VARCHAR(36),
+            comment     TEXT,
+            created_at  TIMESTAMP NOT NULL
+        )
+    """))
+    db.commit()
+
+@router.post("/{work_order_id}/transition", summary="Transition work order state")
+def transition_work_order(
+    work_order_id: str,
+    data: dict,
+    db: Session = Depends(get_db),
+):
+    """
+    Transition a work order to a new state.
+    Body: { "to": "in_progress", "comment": "...", "technician_id": "..." }
+    Uses WO_TRANSITIONS state machine to validate the move.
+    """
+    to_state = data.get("to", "").strip()
+    if not to_state:
+        raise HTTPException(400, "Field 'to' is required")
+
+    # Load current work order
+    row = db.execute(
+        text("SELECT * FROM work_orders WHERE id = :id"),
+        {"id": work_order_id}
+    ).fetchone()
+    if not row:
+        raise HTTPException(404, "Work order not found")
+
+    wo = row_to_dict(row)
+    from_state = wo.get("status", "open")
+
+    # Validate transition
+    allowed = WO_TRANSITIONS.get(from_state, [])
+    if to_state not in allowed:
+        raise HTTPException(400, {
+            "error":   "Invalid transition",
+            "from":    from_state,
+            "to":      to_state,
+            "allowed": allowed,
+        })
+
+    # Build update payload
+    now     = datetime.datetime.utcnow()
+    updates = {
+        "status":     to_state,
+        "updated_at": now,
+    }
+
+    # Automatic field updates based on transition
+    if to_state == "in_progress" and not wo.get("started_at"):
+        updates["started_at"] = now
+    if to_state in ("completed", "closed"):
+        updates["completed_at"] = now
+    if data.get("technician_id") and to_state == "assigned":
+        updates["technician_id"] = data["technician_id"]
+
+    # Apply update
+    set_clause = ", ".join(f"{k} = :{k}" for k in updates)
+    updates["id"] = work_order_id
+    db.execute(text(f"UPDATE work_orders SET {set_clause} WHERE id = :id"), updates)
+
+    # Write transition log
+    try:
+        _ensure_transition_log_table(db)
+        db.execute(text("""
+            INSERT INTO wo_transition_logs
+                (id, wo_id, from_state, to_state, triggered_by, comment, created_at)
+            VALUES
+                (:id, :wo_id, :from_state, :to_state, :triggered_by, :comment, :created_at)
+        """), {
+            "id":           str(uuid.uuid4()),
+            "wo_id":        work_order_id,
+            "from_state":   from_state,
+            "to_state":     to_state,
+            "triggered_by": data.get("triggered_by"),
+            "comment":      data.get("comment"),
+            "created_at":   now,
+        })
+    except Exception:
+        pass  # Log failure is non-blocking
+
+    db.commit()
+
+    updated = row_to_dict(
+        db.execute(text("SELECT * FROM work_orders WHERE id = :id"),
+                   {"id": work_order_id}).fetchone()
+    )
+    return {
+        "success":    True,
+        "work_order": updated,
+        "transition": {"from": from_state, "to": to_state},
+        "message":    f"Work order moved from {from_state} to {to_state}",
+    }
+
+
+@router.get("/{work_order_id}/transitions", summary="Available transitions for work order")
+def get_available_transitions(work_order_id: str, db: Session = Depends(get_db)):
+    """Return which states this work order can move to from its current state."""
+    row = db.execute(
+        text("SELECT id, status, title FROM work_orders WHERE id = :id"),
+        {"id": work_order_id}
+    ).fetchone()
+    if not row:
+        raise HTTPException(404, "Work order not found")
+    wo = row_to_dict(row)
+    current = wo.get("status", "open")
+    allowed = WO_TRANSITIONS.get(current, [])
+    return {
+        "work_order_id": work_order_id,
+        "current_state": current,
+        "allowed":       allowed,
+        "state_machine": WO_TRANSITIONS,
+    }
+
+
+@router.get("/{work_order_id}/transition-log", summary="Transition history for work order")
+def get_transition_log(work_order_id: str, db: Session = Depends(get_db)):
+    """Return full audit trail of state changes for a work order."""
+    try:
+        rows = db.execute(text("""
+            SELECT * FROM wo_transition_logs
+            WHERE wo_id = :id
+            ORDER BY created_at DESC
+            LIMIT 100
+        """), {"id": work_order_id}).fetchall()
+        return [row_to_dict(r) for r in rows]
+    except Exception:
+        return []

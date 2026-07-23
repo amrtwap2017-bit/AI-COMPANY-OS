@@ -83,6 +83,8 @@ from src.commercial.cache.router import router as cache_router
 from src.commercial.pagination.router import router as pagination_router
 from src.commercial.email_notifications.router import router as email_notification_router
 
+
+
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform — Multi-Hotel",
@@ -269,6 +271,29 @@ except Exception as e:
 try:
     from src.commercial.ai_assistant.document_router import router as ai_doc_router
     app.include_router(ai_doc_router, prefix="/api/v1")
+
     print("  OK: document_router")
 except Exception as e:
     print(f"  WARN: document_router: {e}")
+
+# ── Sprint 68 — Workflow + Finance + AI + Digital Twin ─────────────────────
+try:
+    from src.commercial.analytics_kpi.router import router as analytics_kpi_router
+    app.include_router(analytics_kpi_router, prefix="/api/v1")
+    print("  OK: analytics_kpi_router")
+except Exception as e:
+    print(f"  WARN analytics_kpi: {e}")
+
+try:
+    from src.commercial.ai_signals.router import router as ai_signals_v2_router
+    app.include_router(ai_signals_v2_router, prefix="/api/v1")
+    print("  OK: ai_signals_v2_router")
+except Exception as e:
+    print(f"  WARN ai_signals: {e}")
+
+try:
+    from src.commercial.digital_twin.router import router as digital_twin_router
+    app.include_router(digital_twin_router, prefix="/api/v1")
+    print("  OK: digital_twin_router")
+except Exception as e:
+    print(f"  WARN digital_twin: {e}")
