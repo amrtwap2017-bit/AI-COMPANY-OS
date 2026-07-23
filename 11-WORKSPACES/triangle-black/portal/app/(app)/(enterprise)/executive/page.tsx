@@ -1,134 +1,144 @@
 "use client"; // @ts-nocheck
-
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";;
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, Progress } from "@/components/ui";
-import Link from "next/link";
+import { useState } from "react";
+import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { AlertTriangle } from "lucide-react";
+import { useUserPreferences } from "@/lib/hooks/useUserPreferences";
 
-const fetchKpis = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
-  return response.json();
-};
+const WIDGETS = [
+  { key: "digital_twin",  label: "Digital Twin",    endpoint: "/api/v1/twin/state" },
+  { key: "ai_signals",    label: "AI Signals",      endpoint: "/api/v1/ai/signals/v2" },
+  { key: "cash_flow",     label: "Cash Flow",       endpoint: "/api/v1/analytics/cashflow" },
+  { key: "sla",           label: "SLA Overview",    endpoint: "/api/v1/sla/overview" },
+  { key: "pred_maint",    label: "Asset Health",    endpoint: "/api/v1/predictive-maintenance/health-scores?max_score=40" },
+  { key: "kpi",           label: "KPI Summary",     endpoint: "/api/v1/executive-kpi/summary" },
+  { key: "notifications", label: "Notifications",   endpoint: "/api/v1/notifications/live/count" },
+  { key: "customer",      label: "Customer Success", endpoint: "/api/v1/customer-success/overview" },
+];
 
-const fetchSLA = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
-  return response.json();
-};
+function WidgetData({ endpoint }: { endpoint: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["exec-widget", endpoint],
+    queryFn: () => authFetch(endpoint).then(r => r.json()),
+    refetchInterval: 60000,
+  });
+  if (isLoading) return <p className="text-xs text-slate-400">Loading...</p>;
+  if (!data) return <p className="text-xs text-slate-400">No data</p>;
+  const keys = Object.keys(data).slice(0, 4);
+  return (
+    <div className="space-y-1">
+      {keys.map(k => {
+        const v = data[k];
+        const display = typeof v === "object" ? JSON.stringify(v).slice(0,40) : String(v ?? "—");
+        return (
+          <div key={k} className="flex justify-between text-xs">
+            <span className="text-slate-500 capitalize">{k.replace(/_/g," ")}</span>
+            <span className="font-medium text-slate-800 text-right max-w-32 truncate">{display}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
-const fetchCosts = async () => {
-  const response = await fetch("/api/v1/ai/analytics/costs/summary", { credentials: "include" });
-  return response.json();
-};
+export default function ExecutiveDashboardPage() {
+  const { widgetVisible, toggleWidget, isSaving } = useUserPreferences("portal_user");
+  const [showConfig, setShowConfig] = useState(false);
 
-const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
-  return response.json();
-};
+  const { data: kpis = {} } = useQuery({
+    queryKey: ["exec-kpis-main"],
+    queryFn: () => authFetch("/api/v1/executive-kpi/summary").then(r => r.json()),
+    refetchInterval: 300000,
+  });
 
-const ExecutivePage = () => {
-  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 60000 });
-  const slaQuery = useQuery(["sla"], fetchSLA, { refetchInterval: 30000 });
-  const costsQuery = useQuery(["costs"], fetchCosts, { refetchInterval: 300000 });
-  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
+  const { data: twin = {} } = useQuery({
+    queryKey: ["exec-twin-main"],
+    queryFn: () => authFetch("/api/v1/twin/state").then(r => r.json()),
+    refetchInterval: 60000,
+  });
 
-  if (kpisQuery.isLoading || slaQuery.isLoading || costsQuery.isLoading || signalsQuery.isLoading) {
-    return <LoadingState />;
-  }
+  const { data: notifs = {} } = useQuery({
+    queryKey: ["exec-notifs-main"],
+    queryFn: () => authFetch("/api/v1/notifications/live/count").then(r => r.json()),
+    refetchInterval: 30000,
+  });
 
-  if (kpisQuery.isError || slaQuery.isError || costsQuery.isError || signalsQuery.isError) {
-    return <div>Error fetching data</div>;
-  }
+  const twinHealth  = twin?.health_score ?? 0;
+  const twinLabel   = twin?.health_label ?? "Unknown";
+  const criticalBadge = notifs?.critical ?? 0;
 
-  const { totalWOs, criticalWOs } = kpisQuery.data;
-  const { compliancePercentage, status } = slaQuery.data;
-  const { totalCost, marginPercentage } = costsQuery.data;
-  const { criticalSignals, highSignals } = signalsQuery.data;
+  const visibleWidgets = WIDGETS.filter(w => widgetVisible(w.key));
 
   return (
     <PageWrapper>
-      <PageHeader title="Executive Dashboard" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricStrip label="Critical WOs" value={criticalWOs} />
-        <MetricStrip label="SLA %" value={compliancePercentage.toFixed(2)} />
-        <MetricStrip label="Portfolio Revenue EGP" value={totalCost} />
-        <MetricStrip label="Gross Margin %" value={marginPercentage.toFixed(2)} />
-        <MetricStrip label="Active Signals" value={criticalSignals + highSignals} />
-        <MetricStrip label="Tech Utilization %" value="75%" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <SectionCard title="Operational Health">
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between">
-              <span>WOs</span>
-              <Progress value={75} />
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              <span>SLA Compliance</span>
-              {status === "AT RISK" ? (
-                <StatusBadge status="at-risk" label={`${compliancePercentage.toFixed(2)}%`} />
-              ) : (
-                <StatusBadge status="good" label={`${compliancePercentage.toFixed(2)}%`} />
-              )}
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              <span>Cost</span>
-              <Progress value={95} />
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              <span>Resources</span>
-              <Progress value={80} />
-            </div>
+      <PageHeader
+        title="Executive Dashboard"
+        subtitle={`${twinLabel} · Platform Health ${twinHealth}/100 · ${notifs?.total ?? 0} alerts`}
+        badge={criticalBadge > 0 ? `${criticalBadge} critical` : "Operational"}
+      />
+
+      {/* Top KPI strip */}
+      <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
+        {[
+          { label: "Revenue (EGP)",    value: Number(kpis.revenue_egp||0).toLocaleString(),  color: "text-emerald-600" },
+          { label: "WO Completion",    value: `${kpis.wo_completion_pct ?? 0}%`,             color: kpis.wo_completion_pct >= 90 ? "text-emerald-600" : "text-amber-600" },
+          { label: "Platform Health",  value: `${twinHealth}/100`,                           color: twinHealth >= 70 ? "text-emerald-600" : twinHealth >= 50 ? "text-amber-600" : "text-red-600" },
+          { label: "Active Alerts",    value: notifs?.badge ?? 0,                            color: (notifs?.badge ?? 0) > 0 ? "text-red-600" : "text-emerald-600" },
+        ].map(s => (
+          <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+            <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
           </div>
-        </SectionCard>
-      </div>
-      {criticalSignals > 0 && (
-        <StatusBadge status="alert" label="Critical Signals" className="mt-4" />
-      )}
-      <div className="flex justify-between mt-4">
-        <Link href="/operations">Operations</Link>
-        <Link href="/supply">Supply</Link>
-        <Link href="/maintenance">Maintenance</Link>
-        <Link href="/analytics-costs">Analytics/Costs</Link>
-        <Link href="/reports">Reports</Link>
-      </div>
-      <div className="mt-4 text-sm">
-        Last refresh: {new Date().toLocaleString()}
+        ))}
       </div>
 
-      {/* Predictive Maintenance Alerts */}
-      {atRiskAssets.length > 0 && (
-        <SectionCard title={`⚠️ ${atRiskAssets.length} Assets At Risk (Health < 40)`}>
-          <div className="space-y-2">
-            {atRiskAssets.slice(0, 5).map((asset: any) => (
-              <div key={asset.asset_id}
-                   className="flex items-center justify-between p-3 bg-amber-50
-                              border border-amber-200 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  <div>
-                    <div className="text-sm font-medium text-slate-800">{asset.asset_name}</div>
-                    <div className="text-xs text-slate-500">{asset.category} · {asset.criticality}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className={`text-sm font-bold ${asset.health_score < 20 ? "text-red-600" : "text-amber-600"}`}>
-                    {asset.health_score}/100
-                  </div>
-                  <div className="text-xs text-slate-400">{asset.predicted_failure_date}</div>
-                </div>
-              </div>
+      {/* Widget configuration toggle */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setShowConfig(!showConfig)}
+          className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600"
+        >
+          {showConfig ? "Done" : "⚙️ Customize Widgets"}
+        </button>
+      </div>
+
+      {/* Widget configuration panel */}
+      {showConfig && (
+        <SectionCard title="Dashboard Widgets" className="mb-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {WIDGETS.map(w => (
+              <label key={w.key} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={widgetVisible(w.key)}
+                  onChange={() => toggleWidget(w.key)}
+                  disabled={isSaving}
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600"
+                />
+                <span className="text-sm text-slate-700">{w.label}</span>
+              </label>
             ))}
-            {atRiskAssets.length > 5 && (
-              <p className="text-xs text-slate-400 text-center">
-                +{atRiskAssets.length - 5} more at-risk assets
-              </p>
-            )}
           </div>
+          <p className="text-xs text-slate-400 mt-3">
+            Changes are saved automatically to your user preferences.
+          </p>
         </SectionCard>
       )}
 
+      {/* Dynamic widget grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        {visibleWidgets.map(widget => (
+          <SectionCard key={widget.key} title={widget.label}>
+            <WidgetData endpoint={widget.endpoint} />
+          </SectionCard>
+        ))}
+        {visibleWidgets.length === 0 && (
+          <div className="lg:col-span-3 text-center py-12 text-slate-400">
+            <p className="text-sm">All widgets hidden. Click "Customize Widgets" to show them.</p>
+          </div>
+        )}
+      </div>
     </PageWrapper>
   );
-};
-
-export default ExecutivePage;
+}
