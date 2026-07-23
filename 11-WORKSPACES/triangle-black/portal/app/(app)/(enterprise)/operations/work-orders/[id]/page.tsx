@@ -1,176 +1,190 @@
 "use client"; // @ts-nocheck
-
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import {
-  PageWrapper, PageHeader, SectionCard,
-  MetricStrip, StatusBadge, LoadingState, EmptyState, Button, Textarea
-} from "@/components/ui";
-import Link from "next/link";
+import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useState } from "react";
+import { ChevronRight, Loader2, Clock, User, Wrench, FileText } from "lucide-react";
 
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const PRIORITY_COLORS: Record<string, string> = {
+  critical: "bg-red-100 text-red-700",
+  high:     "bg-orange-100 text-orange-700",
+  medium:   "bg-blue-100 text-blue-700",
+  low:      "bg-slate-100 text-slate-600",
+};
 
-async function fetchWOs() {
-  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? d.work_orders ?? [];
-}
-async function fetchTechs() {
-  const r = await fetch(`${BACK}/api/v1/technicians`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? [];
-}
-async function fetchAssets() {
-  const r = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? [];
-}
+const STATUS_COLORS: Record<string, string> = {
+  open:          "bg-slate-100 text-slate-600",
+  assigned:      "bg-blue-100 text-blue-700",
+  in_progress:   "bg-amber-100 text-amber-700",
+  waiting_parts: "bg-orange-100 text-orange-700",
+  completed:     "bg-emerald-100 text-emerald-700",
+  closed:        "bg-slate-200 text-slate-600",
+  cancelled:     "bg-red-100 text-red-700",
+};
 
-export default function WODetailPage() {
-  const params  = useParams();
-  const id      = String(params?.id || "");
-  const [notes, setNotes]   = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saved,  setSaved]  = useState(false);
+export default function WorkOrderDetailPage() {
+  const { id } = useParams();
+  const qc = useQueryClient();
+  const [transitionResult, setTransitionResult] = useState<any>(null);
 
-  const { data: wos    = [], isLoading: l1 } = useQuery({ queryKey: ["wo-detail-wos"],    queryFn: fetchWOs,    refetchInterval: 60000 });
-  const { data: techs  = [], isLoading: l2 } = useQuery({ queryKey: ["wo-detail-techs"],  queryFn: fetchTechs,  refetchInterval: 300000 });
-  const { data: assets = [], isLoading: l3 } = useQuery({ queryKey: ["wo-detail-assets"], queryFn: fetchAssets, refetchInterval: 300000 });
+  const { data: wo, isLoading } = useQuery({
+    queryKey: ["wo-detail", id],
+    queryFn: () => authFetch(`/api/v1/work-orders/${id}`).then(r => r.json()),
+    enabled: !!id,
+  });
 
-  const isLoading = l1 || l2 || l3;
-  const wo        = wos.find((w) => w.id === id);
-  const tech      = techs.find((t) => t.id === wo?.technician_id);
-  const asset     = assets.find((a) => a.id === wo?.asset_id);
+  const { data: transData = {} } = useQuery({
+    queryKey: ["wo-transitions", id],
+    queryFn: () => authFetch(`/api/v1/work-orders/${id}/transitions`).then(r => r.json()),
+    enabled: !!id,
+  });
 
-  if (isLoading) return <LoadingState message="Loading work order..." />;
+  const { data: history = {} } = useQuery({
+    queryKey: ["wo-history", id],
+    queryFn: () => authFetch(`/api/v1/work-orders/${id}/history`).then(r => r.json()),
+    enabled: !!id,
+  });
 
-  if (!wo) {
-    return (
-      <PageWrapper>
-        <PageHeader title="Work Order Not Found" />
-        <EmptyState title="Work order not found" description={`No WO found with id: ${id}`} />
-        <div className="px-6 mt-4">
-          <Link href="/operations/work-orders" className="text-sm text-blue-600 underline">
-            Back to Work Orders
-          </Link>
-        </div>
-      </PageWrapper>
-    );
-  }
+  const { data: pdfUrl } = useQuery({
+    queryKey: ["wo-pdf", id],
+    queryFn: () => Promise.resolve(`/api/v1/pdf-export/work-order/${id}`),
+    enabled: !!id,
+  });
 
-  async function handleSave() {
-    setSaving(true);
-    try {
-      await fetch(`${BACK}/api/v1/work-orders/${id}`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notes }),
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch {}
-    setSaving(false);
-  }
-
-  async function updateStatus(status) {
-    await fetch(`${BACK}/api/v1/work-orders/${id}`, {
-      method: "PATCH",
-      credentials: "include",
+  const transition = useMutation({
+    mutationFn: (toState: string) => authFetch(`/api/v1/work-orders/${id}/transition`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-  }
+      body: JSON.stringify({ to: toState, comment: "Portal transition" }),
+    }).then(r => r.json()),
+    onSuccess: (data) => {
+      setTransitionResult(data);
+      qc.invalidateQueries({ queryKey: ["wo-detail", id] });
+      qc.invalidateQueries({ queryKey: ["wo-transitions", id] });
+    },
+  });
 
-  const today = new Date().toISOString().slice(0, 10);
-  const isOverdue = wo.due_date && wo.due_date.slice(0, 10) < today && wo.status !== "completed";
+  if (isLoading) return <PageWrapper><LoadingState title="Loading work order..." /></PageWrapper>;
+  if (!wo || wo.detail) return <PageWrapper><p className="p-8 text-slate-400">Work order not found</p></PageWrapper>;
+
+  const allowed: string[] = transData?.allowed_transitions ?? [];
+  const historyItems = Array.isArray(history) ? history : history?.data ?? [];
 
   return (
     <PageWrapper>
       <PageHeader
-        title={wo.title}
-        subtitle={`${wo.type} · ${wo.status}`}
-        badge={wo.priority}
+        title={wo.title || "Work Order"}
+        subtitle={`${wo.type} · ${wo.hotel_id ?? ""}`}
+        badge={
+          <span className={`px-2 py-0.5 rounded text-xs font-medium ${PRIORITY_COLORS[wo.priority] ?? ""}`}>
+            {wo.priority}
+          </span>
+        }
       />
 
-      <MetricStrip metrics={[
-        { label: "Priority",  value: wo.priority || "medium" },
-        { label: "Status",    value: wo.status   || "open" },
-        { label: "Type",      value: wo.type     || "corrective" },
-        { label: "Due Date",  value: wo.due_date ? wo.due_date.slice(0, 10) : "No date",
-          color: isOverdue ? "red" as const : "slate" as const },
-      ]} />
+      {transitionResult && (
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+          ✅ {transitionResult.message}
+        </div>
+      )}
 
-      <SectionCard title="Work Order Details">
-        <div className="space-y-3">
-          {wo.description && (
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Description</p>
-              <p className="text-sm text-slate-700">{wo.description}</p>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Left: Details + Actions */}
+        <div className="space-y-6">
+          <SectionCard title="Details">
+            <div className="space-y-2 text-sm">
+              {[
+                ["Status",     <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[wo.status] ?? ""}`}>{wo.status}</span>],
+                ["Priority",   <span className={`px-2 py-0.5 rounded text-xs font-medium ${PRIORITY_COLORS[wo.priority] ?? ""}`}>{wo.priority}</span>],
+                ["Type",       wo.type],
+                ["Due Date",   String(wo.due_date ?? "").slice(0,10)],
+                ["Started",    String(wo.started_at ?? "—").slice(0,10)],
+                ["Completed",  String(wo.completed_at ?? "—").slice(0,10)],
+              ].map(([k, v]) => (
+                <div key={k as string} className="flex justify-between py-1 border-b border-slate-50 items-center">
+                  <span className="text-slate-500">{k}</span>
+                  <span className="font-medium text-slate-800">{v}</span>
+                </div>
+              ))}
             </div>
+            {wo.description && (
+              <div className="mt-3 p-3 bg-slate-50 rounded-lg">
+                <div className="text-xs text-slate-500 uppercase font-semibold mb-1">Description</div>
+                <div className="text-sm text-slate-700 whitespace-pre-wrap">{wo.description}</div>
+              </div>
+            )}
+          </SectionCard>
+
+          {/* State machine transitions */}
+          {allowed.length > 0 && (
+            <SectionCard title="Transition State">
+              <p className="text-xs text-slate-500 mb-3">
+                Current: <strong>{wo.status}</strong>
+              </p>
+              <div className="space-y-2">
+                {allowed.map((next: string) => (
+                  <button
+                    key={next}
+                    onClick={() => transition.mutate(next)}
+                    disabled={transition.isPending}
+                    className="w-full h-9 flex items-center justify-between px-3
+                               border border-slate-200 rounded-lg text-sm
+                               hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                      {next.replace(/_/g, " ")}
+                    </span>
+                    {transition.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
+                  </button>
+                ))}
+              </div>
+            </SectionCard>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Technician</p>
-              <p className="text-sm text-slate-700">{tech?.name || "Unassigned"}</p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Asset</p>
-              <p className="text-sm text-slate-700">{asset?.name || "No asset linked"}</p>
-            </div>
-            {wo.started_at && (
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Started</p>
-                <p className="text-sm text-slate-700">{wo.started_at.slice(0, 10)}</p>
-              </div>
-            )}
-            {wo.completed_at && (
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Completed</p>
-                <p className="text-sm text-slate-700">{wo.completed_at.slice(0, 10)}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </SectionCard>
 
-      <SectionCard title="Status Update">
-        <div className="flex gap-2 flex-wrap">
-          {["open", "in_progress", "completed"].map((s) => (
-            <Button
-              key={s}
-              onClick={() => updateStatus(s)}
-              variant={wo.status === s ? "primary" : undefined}
+          {/* Export */}
+          <SectionCard title="Export">
+            <a
+              href={`http://localhost:8030/api/v1/pdf-export/work-order/${id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 border border-slate-200
+                         rounded-lg text-sm hover:bg-slate-50 text-slate-700"
             >
-              {s.replace("_", " ")}
-            </Button>
-          ))}
+              <FileText className="w-4 h-4" /> Download Work Order (HTML)
+            </a>
+          </SectionCard>
         </div>
-      </SectionCard>
 
-      <SectionCard title="Notes">
-        <Textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes or observations..."
-          rows={4}
-        />
-        <div className="mt-3 flex items-center gap-3">
-          <Button onClick={handleSave} disabled={saving} variant="primary">
-            {saving ? "Saving..." : "Save Notes"}
-          </Button>
-          {saved && <span className="text-sm text-green-600 font-medium">Saved</span>}
+        {/* Right: Activity history */}
+        <div className="lg:col-span-2">
+          <SectionCard title={`Activity History (${historyItems.length})`}>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {historyItems.map((item: any, idx: number) => (
+                <div key={item.id ?? idx}
+                     className="flex gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <Clock className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium text-slate-800">
+                      {item.action ?? item.type ?? item.title ?? "Activity"}
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {String(item.created_at ?? "").slice(0,16)}
+                      {item.user && ` · ${item.user}`}
+                    </div>
+                    {item.description && (
+                      <div className="text-xs text-slate-500 mt-1">{item.description}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {historyItems.length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-8">No activity history</p>
+              )}
+            </div>
+          </SectionCard>
         </div>
-      </SectionCard>
-
-      <div className="px-1">
-        <Link href="/operations/work-orders" className="text-sm text-blue-600 underline">
-          Back to Work Orders
-        </Link>
       </div>
     </PageWrapper>
   );
