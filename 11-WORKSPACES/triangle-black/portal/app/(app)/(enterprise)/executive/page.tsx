@@ -1,6 +1,6 @@
 "use client"; // @ts-nocheck
 
-import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle, useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, Progress } from "@/components/ui";
 import Link from "next/link";
 
@@ -93,6 +93,39 @@ const ExecutivePage = () => {
       <div className="mt-4 text-sm">
         Last refresh: {new Date().toLocaleString()}
       </div>
+
+      {/* Predictive Maintenance Alerts */}
+      {atRiskAssets.length > 0 && (
+        <SectionCard title={`⚠️ ${atRiskAssets.length} Assets At Risk (Health < 40)`}>
+          <div className="space-y-2">
+            {atRiskAssets.slice(0, 5).map((asset: any) => (
+              <div key={asset.asset_id}
+                   className="flex items-center justify-between p-3 bg-amber-50
+                              border border-amber-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium text-slate-800">{asset.asset_name}</div>
+                    <div className="text-xs text-slate-500">{asset.category} · {asset.criticality}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`text-sm font-bold ${asset.health_score < 20 ? "text-red-600" : "text-amber-600"}`}>
+                    {asset.health_score}/100
+                  </div>
+                  <div className="text-xs text-slate-400">{asset.predicted_failure_date}</div>
+                </div>
+              </div>
+            ))}
+            {atRiskAssets.length > 5 && (
+              <p className="text-xs text-slate-400 text-center">
+                +{atRiskAssets.length - 5} more at-risk assets
+              </p>
+            )}
+          </div>
+        </SectionCard>
+      )}
+
     </PageWrapper>
   );
 };

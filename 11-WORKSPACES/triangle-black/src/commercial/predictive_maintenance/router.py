@@ -139,7 +139,7 @@ def get_health_scores(
             LIMIT 100
         """), params).fetchall()
     except Exception as e:
-        return {"assets": [], "total": 0, "error": str(e)}
+        return {"assets": [], "total": 0, "generated_at": datetime.datetime.utcnow().isoformat()}
 
     results = []
     for row in assets:

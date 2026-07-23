@@ -460,3 +460,15 @@ try:
     print("  OK: predictive_maintenance_router")
 except Exception as e:
     print(f"  WARN predictive_maintenance: {e}")
+
+
+# ── Sprint 78: Background Scheduler ──────────────────────────────────────────
+from src.commercial.scheduler.jobs import start_scheduler, stop_scheduler
+
+@app.on_event("startup")
+async def startup_event():
+    start_scheduler()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    stop_scheduler()
