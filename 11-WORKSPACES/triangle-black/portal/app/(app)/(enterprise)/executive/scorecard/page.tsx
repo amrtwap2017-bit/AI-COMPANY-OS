@@ -1,3 +1,4 @@
+"use client";
 jsx
 "use client"; // @ts-nocheck
 
