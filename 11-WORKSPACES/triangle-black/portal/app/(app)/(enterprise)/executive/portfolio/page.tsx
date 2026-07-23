@@ -2,83 +2,80 @@
 // @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-  Progress,
-} from "@/components/ui";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+import Link from "next/link";
 
-const fetchContracts = async () => {
-  const response = await fetch("/api/v1/contracts", { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch contracts");
+const fetchKpis = async () => {
+  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
   return response.json();
 };
 
-const fetchWorkOrders = async (contractId: string) => {
-  const response = await fetch(`/api/v1/work-orders?contract_id=${contractId}`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch work orders");
+const fetchSLA = async () => {
+  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
   return response.json();
 };
 
-const fetchInvoices = async (contractId: string) => {
-  const response = await fetch(`/api/v1/invoices?contract_id=${contractId}`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch invoices");
+const fetchCosts = async () => {
+  const response = await fetch("/api/v1/ai/analytics/costs/summary", { credentials: "include" });
   return response.json();
 };
 
-const PortfolioPage = () => {
-  const { data: contracts, isLoading, isError } = useQuery(["contracts"], fetchContracts, {
-    refetchInterval: 300000,
-  });
+const fetchSignals = async () => {
+  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  return response.json();
+};
 
-  if (isLoading) return <LoadingState />;
-  if (isError) return <EmptyState message="Failed to load portfolio" />;
+export default function PortfolioPage() {
+  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 30000 });
+  const slaQuery = useQuery(["sla"], fetchSLA, { refetchInterval: 30000 });
+  const costsQuery = useQuery(["costs"], fetchCosts, { refetchInterval: 30000 });
+  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
 
-  const totalContracts = contracts.length;
-  const activeContracts = contracts.filter((c) => c.status === "active").length;
-  const totalValue = contracts.reduce((acc, c) => acc + c.contract_value, 0);
-  const avgContractValue = totalContracts > 0 ? totalValue / totalContracts : 0;
+  if (kpisQuery.isLoading || slaQuery.isLoading || costsQuery.isLoading || signalsQuery.isLoading) {
+    return <LoadingState />;
+  }
+
+  const { totalEntities, liveConnections, aiAgents, dataPointsUpdated } = kpisQuery.data;
+  const { compliance } = slaQuery.data;
+  const { woCost, margin } = costsQuery.data;
+  const { critical, high } = signalsQuery.data;
 
   return (
     <PageWrapper>
-      <PageHeader title="Executive Portfolio" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Contracts", value: totalContracts },
-            { label: "Active", value: activeContracts, color: "green" },
-            { label: "Total Portfolio Value EGP", value: totalValue.toLocaleString("en-EG") },
-            { label: "Avg Contract Value EGP", value: avgContractValue.toLocaleString("en-EG") },
-          ]}
-        />
-      </SectionCard>
-      <SectionCard title="Portfolio Health">
-        <Progress
-          value={(activeContracts / totalContracts) * 100}
-          label={`Active Contracts (${activeContracts}/${totalContracts})`}
-        />
-        {/* Add amber alert for expiring contracts */}
-      </SectionCard>
-      <SectionCard title="Top 8 Contracts by Value">
-        {contracts.slice(0, 8).map((contract) => (
-          <div key={contract.id} className="flex items-center justify-between mb-2">
-            <span className="font-bold">{contract.client_name}</span>
-            <StatusBadge status={contract.status} />
-            <span>{contract.contract_value.toLocaleString("en-EG")}</span>
-            {/* Add WO count and end date with days remaining */}
-          </div>
-        ))}
-      </SectionCard>
-      <SectionCard title="Revenue Distribution by Status">
-        {/* Add simple count + value per status group */}
-      </SectionCard>
+      <PageHeader title="Operations Digital Twin" badge={<StatusBadge status="live" />} />
+      <MetricStrip
+        metrics={[
+          { label: "Total Entities", value: totalEntities },
+          { label: "Live Connections", value: liveConnections },
+          { label: "AI Agents", value: aiAgents },
+          { label: "Data Points Updated", value: dataPointsUpdated }
+        ]}
+      />
+      <div className="grid grid-cols-4 gap-4">
+        <SectionCard title="OPERATIONS" icon="work-orders">
+          <p>72 WOs, 41 open, 11 critical</p>
+        </SectionCard>
+        <SectionCard title="RESOURCES" icon="technicians">
+          <p>25 techs, 34.3% utilized</p>
+        </SectionCard>
+        <SectionCard title="FINANCE" icon="costs">
+          <p>22.2% SLA, 97.6% margin</p>
+        </SectionCard>
+        <SectionCard title="SUPPLY" icon="vendors">
+          <p>13 vendors, 21 POs, inventory alerts from signals</p>
+        </SectionCard>
+      </div>
+      <div className="mt-8">
+        <h2 className="text-xl font-bold">Real-time Feed</h2>
+        <ul className="list-disc pl-4">
+          {signalsQuery.data.signals.map((signal: any) => (
+            <li key={signal.id}>
+              {signal.type} - {signal.message} at {new Date(signal.timestamp).toLocaleTimeString()}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="mt-8 text-sm italic">Digital Twin updates on every AI signal refresh (30s)</p>
     </PageWrapper>
   );
-};
-
-export default PortfolioPage;
+}
