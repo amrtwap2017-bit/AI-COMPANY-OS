@@ -95,9 +95,16 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "https://triangleblack.com",
+        "https://app.triangleblack.com",
+        "https://portal.triangleblack.com",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -380,3 +387,61 @@ try:
     print("  OK: executive_kpi_router")
 except Exception as e:
     print(f"  WARN executive_kpi: {e}")
+
+# ── Rate Limiting Middleware (Sprint 76) ──────────────────────────────────────
+from collections import defaultdict
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import time as _time
+
+_rl_store: dict = defaultdict(list)
+_RL_WINDOW = 60   # seconds
+_RL_MAX    = 120  # requests per window per IP
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    ip  = (request.client.host if request.client else "unknown")
+    now = _time.time()
+    _rl_store[ip] = [t for t in _rl_store[ip] if t > now - _RL_WINDOW]
+    if len(_rl_store[ip]) >= _RL_MAX:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Rate limit exceeded. Try again in 60 seconds."}
+        )
+    _rl_store[ip].append(now)
+    return await call_next(request)
+
+# ── Multi-Tenant Hotel Context (Sprint 76) ────────────────────────────────────
+@app.middleware("http")
+async def hotel_context_middleware(request: Request, call_next):
+    hotel_id = request.headers.get("X-Hotel-ID") or request.query_params.get("hotel_id")
+    request.state.hotel_id = hotel_id
+    response = await call_next(request)
+    if hotel_id:
+        response.headers["X-Hotel-ID"] = hotel_id
+    return response
+
+
+# ── Sprint 76: Health + Version ───────────────────────────────────────────────
+@app.get("/api/v1/health/detailed", tags=["system"])
+async def detailed_health():
+    import datetime as _dt
+    from src.core.database import check_connection
+    db_ok = check_connection()
+    return {
+        "status":    "ok" if db_ok else "degraded",
+        "version":   "2.0.0-sprint76",
+        "platform":  "Triangle Black Enterprise Operations Platform",
+        "timestamp": _dt.datetime.utcnow().isoformat(),
+        "checks":    {"database": "ok" if db_ok else "error", "api": "ok"},
+    }
+
+@app.get("/api/v1/version", tags=["system"])
+async def get_version():
+    return {
+        "version": "2.0.0",
+        "sprint":  76,
+        "platform": "Triangle Black Enterprise Operations Platform",
+        "programs": 14,
+        "build":   "production-ready",
+    }
