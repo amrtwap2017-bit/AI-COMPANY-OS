@@ -504,3 +504,18 @@ try:
     print("  OK: performance_audit_router")
 except Exception as e:
     print(f"  WARN performance_audit: {e}")
+
+# ── Sprint 87 — Audit Log + SSE Notifications ─────────────────────────────────
+try:
+    from src.commercial.audit_log.router import router as audit_log_router
+    app.include_router(audit_log_router, prefix="/api/v1")
+    print("  OK: audit_log_router")
+except Exception as e:
+    print(f"  WARN audit_log: {e}")
+
+try:
+    from src.commercial.sse_notifications.router import router as sse_router
+    app.include_router(sse_router, prefix="/api/v1")
+    print("  OK: sse_notifications_router")
+except Exception as e:
+    print(f"  WARN sse_notifications: {e}")
