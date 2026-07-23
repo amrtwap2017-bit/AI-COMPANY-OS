@@ -614,3 +614,11 @@ try:
     print("  OK: ai_mentor_router")
 except Exception as e:
     print(f"  WARN ai_mentor: {e}")
+
+# Sprint 91 - Goods Receipt Workflow
+try:
+    from src.commercial.goods_receipt_workflow.router import router as gr_workflow_router
+    app.include_router(gr_workflow_router, prefix="/api/v1")
+    print("  OK: goods_receipt_workflow_router")
+except Exception as e:
+    print(f"  WARN goods_receipt_workflow: {e}")
