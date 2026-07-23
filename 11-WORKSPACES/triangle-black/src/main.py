@@ -365,3 +365,18 @@ try:
     print("  OK: pdf_export_router")
 except Exception as e:
     print(f"  WARN pdf_export: {e}")
+
+# ── Sprint 74 — SLA Dashboard + Executive KPI + Reorder Automation ───────────
+try:
+    from src.commercial.sla_dashboard.router import router as sla_dashboard_router
+    app.include_router(sla_dashboard_router, prefix="/api/v1")
+    print("  OK: sla_dashboard_router")
+except Exception as e:
+    print(f"  WARN sla_dashboard: {e}")
+
+try:
+    from src.commercial.executive_kpi.router import router as executive_kpi_router
+    app.include_router(executive_kpi_router, prefix="/api/v1")
+    print("  OK: executive_kpi_router")
+except Exception as e:
+    print(f"  WARN executive_kpi: {e}")

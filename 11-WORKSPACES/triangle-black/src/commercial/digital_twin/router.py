@@ -1,83 +1,157 @@
 from __future__ import annotations
+import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
-import datetime
 
 router = APIRouter(prefix="/twin", tags=["digital-twin"])
 
-def safe_int(v, d=0):
-    try: return int(v) if v is not None else d
-    except: return d
+def _safe_int(val):
+    try:
+        return int(val or 0)
+    except Exception:
+        return 0
 
-def safe_float(v, d=0.0):
-    try: return float(v) if v is not None else d
-    except: return d
+def _safe_float(val):
+    try:
+        return float(val or 0)
+    except Exception:
+        return 0.0
 
-# ─────────────────────────────────────────────────────────────────────────────
-# S68-05: Digital Twin — Live Operational State Snapshot
-# Reads current state from all operational tables
-# ─────────────────────────────────────────────────────────────────────────────
+def _query(db, sql, params=None):
+    try:
+        row = db.execute(text(sql), params or {}).fetchone()
+        if row is None:
+            return {}
+        if hasattr(row, "_mapping"):
+            return dict(row._mapping)
+        return {}
+    except Exception:
+        return {}
 
-@router.get("/state", summary="Current operational state of the entire company")
+@router.get("/state", summary="Digital Twin operational state")
 def get_twin_state(db: Session = Depends(get_db)):
     """
-    The Digital Twin state endpoint.
-    Returns a live snapshot of every operational domain.
-    This is the single source of truth for the platform state.
+    Program M — Digital Twin.
+    Returns live operational snapshot. Always returns valid JSON.
+    Health score: 100 minus deductions for operational issues.
     """
-    now = datetime.datetime.utcnow()
+    health = 100
+    now    = datetime.datetime.utcnow()
 
-    # Initialize default values
-    wo = {
-        "total": 0,
-        "open": 0,
-        "in_progress": 0,
-        "waiting_parts": 0,
-        "completed": 0,
-        "critical_open": 0,
-        "overdue": 0
-    }
-    assets = {"t": 0}
+    # Work Orders
+    wo = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN status IN ('open','assigned','in_progress') THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN priority='critical' AND status NOT IN ('completed','closed','cancelled') THEN 1 ELSE 0 END) as critical_open,
+               sum(CASE WHEN due_date < NOW() AND status NOT IN ('completed','closed','cancelled') THEN 1 ELSE 0 END) as overdue
+        FROM work_orders
+    """)
+    critical_open = _safe_int(wo.get("critical_open"))
+    overdue_wo    = _safe_int(wo.get("overdue"))
+    health -= min(25, critical_open * 3)
+    health -= min(10, overdue_wo * 2)
 
-    try:
-        # Work Orders Domain
-        wo_query = db.execute(text("""
-            SELECT
-                COUNT(*)                                                  AS total,
-                COUNT(*) FILTER (WHERE status = 'open')                   AS open,
-                COUNT(*) FILTER (WHERE status = 'in_progress')            AS in_progress,
-                COUNT(*) FILTER (WHERE status = 'waiting_parts')          AS waiting_parts,
-                COUNT(*) FILTER (WHERE status = 'completed')              AS completed,
-                COUNT(*) FILTER (WHERE priority = 'critical'
-                    AND status NOT IN ('completed','closed','cancelled'))  AS critical_open,
-                COUNT(*) FILTER (WHERE due_date < NOW()
-                    AND status NOT IN ('completed','closed','cancelled'))  AS overdue
-            FROM work_orders
-        """))
-        wo = wo_query.fetchone() or wo
+    # Technicians
+    tech = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN is_active THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN current_work_orders >= max_work_orders THEN 1 ELSE 0 END) as at_capacity
+        FROM technicians
+    """)
+    health -= min(10, _safe_int(tech.get("at_capacity")) * 2)
 
-        # Asset Domain
-        assets_query = db.execute(text("""
-            SELECT
-                COUNT(*)                                               AS t
-            FROM assets
-        """))
-        assets = assets_query.fetchone() or assets
+    # Assets
+    ast = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN criticality='critical' THEN 1 ELSE 0 END) as critical_count
+        FROM assets
+    """)
 
-    except Exception as e:
-        print(f"Database error: {e}")
-        pass  # Handle the exception gracefully, returning default values
+    # Inventory
+    inv = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN sb.quantity <= ii.min_stock THEN 1 ELSE 0 END) as below_min
+        FROM inventory_items ii
+        LEFT JOIN stock_balances sb ON sb.item_id = ii.id
+    """)
+    health -= min(10, _safe_int(inv.get("below_min")) * 2)
 
-    health_score = safe_int(wo["total"] > 0) * 100  # Simple health score calculation
-    operational_domains = [
-        {"name": "Work Orders", "data": wo},
-        {"name": "Assets", "data": assets}
-    ]
+    # Finance
+    fin = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN status='unpaid' THEN 1 ELSE 0 END) as unpaid,
+               sum(CASE WHEN status='overdue' THEN 1 ELSE 0 END) as overdue_inv,
+               COALESCE(sum(total_amount), 0) as total_value
+        FROM invoices
+    """)
+    health -= min(10, _safe_int(fin.get("overdue_inv")) * 3)
+
+    # Maintenance
+    maint = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN next_due_date < NOW() AND status='active' THEN 1 ELSE 0 END) as overdue
+        FROM maintenance_plans
+    """)
+    health -= min(10, _safe_int(maint.get("overdue")) * 2)
+
+    # Projects
+    proj = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN status='active' THEN 1 ELSE 0 END) as active
+        FROM projects
+    """)
+
+    # Contracts
+    contracts = _query(db, """
+        SELECT count(*) as total,
+               sum(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'
+                        AND status='active' THEN 1 ELSE 0 END) as expiring_30
+        FROM contracts
+    """)
+
+    health = max(0, min(100, health))
+
+    if health >= 80:
+        label = "Healthy"
+    elif health >= 60:
+        label = "Warning"
+    elif health >= 40:
+        label = "Degraded"
+    else:
+        label = "Critical"
 
     return {
-        "health_score": health_score,
-        "operational_domains": operational_domains,
-        "generated_at": now.isoformat()
+        "health_score":  health,
+        "health_label":  label,
+        "generated_at":  now.isoformat(),
+        "platform":      "Triangle Black Enterprise Operations Platform",
+        "version":       "2.0-sprint74",
+        "operational_domains": [
+            {"domain": "Work Orders",  "total": _safe_int(wo.get("total")),
+             "active": _safe_int(wo.get("active")),
+             "critical_open": critical_open, "overdue": overdue_wo},
+            {"domain": "Technicians",  "total": _safe_int(tech.get("total")),
+             "active": _safe_int(tech.get("active")),
+             "at_capacity": _safe_int(tech.get("at_capacity"))},
+            {"domain": "Assets",       "total": _safe_int(ast.get("total")),
+             "active": _safe_int(ast.get("active")),
+             "critical": _safe_int(ast.get("critical_count"))},
+            {"domain": "Inventory",    "total": _safe_int(inv.get("total")),
+             "below_min": _safe_int(inv.get("below_min"))},
+            {"domain": "Finance",      "total": _safe_int(fin.get("total")),
+             "unpaid": _safe_int(fin.get("unpaid")),
+             "overdue": _safe_int(fin.get("overdue_inv")),
+             "total_value_egp": _safe_float(fin.get("total_value"))},
+            {"domain": "Maintenance",  "total": _safe_int(maint.get("total")),
+             "overdue": _safe_int(maint.get("overdue"))},
+            {"domain": "Projects",     "total": _safe_int(proj.get("total")),
+             "active": _safe_int(proj.get("active"))},
+            {"domain": "Contracts",    "total": _safe_int(contracts.get("total")),
+             "active": _safe_int(contracts.get("active")),
+             "expiring_30": _safe_int(contracts.get("expiring_30"))},
+        ],
     }
