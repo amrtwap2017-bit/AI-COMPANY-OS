@@ -462,13 +462,21 @@ except Exception as e:
     print(f"  WARN predictive_maintenance: {e}")
 
 
-# ── Sprint 78: Background Scheduler ──────────────────────────────────────────
-from src.commercial.scheduler.jobs import start_scheduler, stop_scheduler
+# ── Sprint 78: Background Scheduler (safe startup) ───────────────────────────
+try:
+    from src.commercial.scheduler.jobs import start_scheduler, stop_scheduler
+    @app.on_event("startup")
+    async def tb_scheduler_startup():
+        try:
+            start_scheduler()
+        except Exception as _e:
+            print(f"  WARN scheduler startup: {_e}")
 
-@app.on_event("startup")
-async def startup_event():
-    start_scheduler()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    stop_scheduler()
+    @app.on_event("shutdown")
+    async def tb_scheduler_shutdown():
+        try:
+            stop_scheduler()
+        except Exception:
+            pass
+except Exception as _e:
+    print(f"  WARN scheduler import: {_e}")
