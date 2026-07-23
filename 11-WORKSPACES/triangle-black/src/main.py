@@ -357,3 +357,11 @@ try:
     print("  OK: tenant_audit_router")
 except Exception as e:
     print(f"  WARN tenant_audit: {e}")
+
+# ── Sprint 73 — PDF Export + QR Codes ────────────────────────────────────────
+try:
+    from src.commercial.pdf_export.router import router as pdf_export_router
+    app.include_router(pdf_export_router, prefix="/api/v1")
+    print("  OK: pdf_export_router")
+except Exception as e:
+    print(f"  WARN pdf_export: {e}")

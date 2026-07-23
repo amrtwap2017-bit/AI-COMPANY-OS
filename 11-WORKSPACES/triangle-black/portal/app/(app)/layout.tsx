@@ -9,6 +9,8 @@
 //
 export const dynamic = "force-dynamic";
 import { EnterpriseShell } from "@/components/workspace/EnterpriseShell";
+import { CommandPalette } from "@/components/ui/CommandPalette";
+import { NotificationBell } from "@/components/ui/NotificationBell";
 
 export default function AppLayout({
   children,
