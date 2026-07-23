@@ -496,3 +496,11 @@ try:
     print("  OK: user_preferences_router")
 except Exception as e:
     print(f"  WARN user_preferences: {e}")
+
+# ── Sprint 85 — Performance Audit ────────────────────────────────────────────
+try:
+    from src.commercial.performance_audit.router import router as perf_audit_router
+    app.include_router(perf_audit_router, prefix="/api/v1")
+    print("  OK: performance_audit_router")
+except Exception as e:
+    print(f"  WARN performance_audit: {e}")
