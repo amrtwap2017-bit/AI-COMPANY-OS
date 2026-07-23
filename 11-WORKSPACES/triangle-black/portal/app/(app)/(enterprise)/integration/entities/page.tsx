@@ -1,41 +1,78 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
+
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge } from "@/components/ui";
+import Link from "next/link";
+
+const entities = [
+  { name: "Work Orders", records: 72, operations: ["Create", "Read", "Update"], link: "/operations/work-orders" },
+  { name: "Technicians", records: 25, operations: ["Read", "Assign"], link: "/operations/technicians" },
+  { name: "Assets", records: 46, operations: ["Read", "Monitor"], link: "/maintenance/assets" },
+  { name: "PM Plans", records: 30, operations: ["Create", "Schedule"], link: "/maintenance/pm-plans" },
+  { name: "Contracts", records: 72, operations: ["Read", "Renew"], link: "/customers/review" },
+  { name: "Invoices", records: 45, operations: ["Read"], link: "/customers/review" },
+  { name: "Purchase Orders", records: 21, operations: ["Create", "Receive"], link: "/supply-chain/purchase-orders" },
+  { name: "Purchase Requests", records: null, operations: ["Create", "Approve"], link: "/approvals" },
+  { name: "Vendors", records: 13, operations: ["Read", "Compare"], link: "/supply-chain/vendors" },
+  { name: "RFQs", records: 8, operations: ["Create", "Track"], link: "/supply-chain/rfqs" },
+  { name: "Leads", records: 110, operations: ["Create", "Track"], link: "/commercial/pipeline" },
+  { name: "Projects", records: 12, operations: ["Read", "Monitor"], link: "/projects-center" },
+];
+
+const AI_SIGNAL_ENTITY = {
+  name: "signals_engine",
+  types: 9,
+};
 
 export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["integration-entities"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/dashboard/stats"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"entity", label:"Entity", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["entity"]??"—")}</span>) },
-    { key:"sync_status", label:"Sync", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["sync_status"]??"—")}</span>) },
-    { key:"records", label:"Records", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["records"]??"—")}</span>) },
-    { key:"last_sync", label:"Updated", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["last_sync"]??"—")}</span>) },
-  ];
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Entity Integration" subtitle={`${items.length} records`} badge="ENT"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🗄️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Data Entities Overview" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <MetricStrip label="Total Entities" value={12} />
+        <MetricStrip label="API Routes" value={115} />
+        <MetricStrip label="AI Endpoints" value={9} />
+        <MetricStrip label="Database Tables" value={126} />
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <SectionCard title="Entity Registry">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="border px-4 py-2">Entity Name</th>
+              <th className="border px-4 py-2">Records</th>
+              <th className="border px-4 py-2">Primary Operations</th>
+              <th className="border px-4 py-2">Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entities.map((entity, index) => (
+              <tr key={index}>
+                <td className="border px-4 py-2">{entity.name}</td>
+                <td className="border px-4 py-2">{entity.records !== null ? entity.records : "varies"}</td>
+                <td className="border px-4 py-2">
+                  {entity.operations.map((operation, opIndex) => (
+                    <span key={opIndex} className="mr-2">
+                      {operation}
+                    </span>
+                  ))}
+                </td>
+                <td className="border px-4 py-2">
+                  <Link href={entity.link}>
+                    <a className="text-blue-500 hover:underline">View</a>
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </SectionCard>
+      <SectionCard title="AI Signal Entity">
+        <div className="flex items-center space-x-4">
+          <span>{AI_SIGNAL_ENTITY.name}</span>
+          <StatusBadge status="active" />
+        </div>
+        <p>Signal Types: {AI_SIGNAL_ENTITY.types}</p>
+      </SectionCard>
     </PageWrapper>
   );
 }

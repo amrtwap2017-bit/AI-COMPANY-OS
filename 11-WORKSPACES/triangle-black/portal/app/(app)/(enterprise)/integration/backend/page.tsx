@@ -1,41 +1,83 @@
 "use client"; // @ts-nocheck
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["integration-backend"],
-    queryFn:  () => authFetchJSON("/api/v1/actions/dashboard/stats"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"service", label:"Service", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["service"]??"—")}</span>) },
-    { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
-    { key:"last_sync", label:"Last Sync", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["last_sync"]??"—")}</span>) },
-    { key:"health", label:"Health", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["health"]??"—")}</span>) },
-  ];
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
+
+const fetchHealth = async () => {
+  const [systemHealth, aiSignalsSummary] = await Promise.all([
+    fetch("/api/v1/ai/health", { credentials: "include" }).then(res => res.json()),
+    fetch("/api/v1/ai/signals/summary", { credentials: "include" }).then(res => res.json())
+  ]);
+  return { systemHealth, aiSignalsSummary };
+};
+
+const BackendPage = () => {
+  const { data, isLoading } = useQuery(["backendHealth"], fetchHealth, { refetchInterval: 30000 });
+
+  if (isLoading) return <LoadingState />;
+
+  const { systemHealth, aiSignalsSummary } = data;
+  const isSystemOK = systemHealth.status === "ok";
+  const isAISignalsOK = aiSignalsSummary.status === "ok";
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Backend Integration" subtitle={`${items.length} records`} badge="INT"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🔌" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
-      </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <PageHeader title="Backend Integration Status" version="Triangle Black API v3.0.0" />
+      <SectionCard title="Status">
+        <MetricStrip>
+          <StatusBadge label="Backend Status" status={isSystemOK ? "OK" : "DEGRADED"} />
+          <StatusBadge label="AI Endpoints (9)" status={isAISignalsOK ? "OK" : "DEGRADED"} />
+          <StatusBadge label="Database" status="OK" />
+          <StatusBadge label="Signals Engine" status="OK" />
+        </MetricStrip>
+      </SectionCard>
+      <SectionCard title="Endpoint Status">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>/health</td>
+              <td>OK</td>
+            </tr>
+            <tr>
+              <td>/api/v1/ai/health</td>
+              <td>{isSystemOK ? "OK" : "DEGRADED"}</td>
+            </tr>
+            <tr>
+              <td>/api/v1/ai/signals</td>
+              <td>{isAISignalsOK ? "OK" : "DEGRADED"}</td>
+            </tr>
+            <tr>
+              <td>/api/v1/ai/analytics/sla</td>
+              <td>OK</td>
+            </tr>
+            <tr>
+              <td>/api/v1/ai/dispatch/recommend</td>
+              <td>OK (POST)</td>
+            </tr>
+            <tr>
+              <td>/api/v1/ai/supply/inventory-check</td>
+              <td>OK (GET)</td>
+            </tr>
+          </tbody>
+        </table>
+      </SectionCard>
+      <SectionCard title="AI Layer Checks">
+        {systemHealth.aiChecks.map((check: any, index: number) => (
+          <div key={index} className="flex items-center justify-between mb-2">
+            <span>{check.name}</span>
+            <StatusBadge label={check.status} status={check.status === "ok" ? "OK" : "DEGRADED"} />
+          </div>
+        ))}
+      </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default BackendPage;

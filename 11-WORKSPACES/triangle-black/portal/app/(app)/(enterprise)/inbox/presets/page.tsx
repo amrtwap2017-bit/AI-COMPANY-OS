@@ -1,41 +1,49 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, DataTable, LoadingState, EmptyState, AlertBanner } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
 
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["inbox-presets"],
-    queryFn:  () => authFetchJSON("/api/v1/notifications"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"title", label:"Preset", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["title"]??"—")}</span>) },
-    { key:"type", label:"Type", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["type"]??"—")}</span>) },
-    { key:"active", label:"Active", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["active"]??"—")}</span>) },
-    { key:"last_used", label:"Last Used", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["last_used"]??"—")}</span>) },
-  ];
+import { useState } from "react";
+import Link from "next/link";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  EmptyState,
+  Button,
+} from "@/components/ui";
+
+const presets = [
+  { name: "Critical Alerts", filter: "priority=critical&channel=Signal" },
+  { name: "Maintenance Signals", filter: "category=maintenance" },
+  { name: "Supply Chain Alerts", filter: "category=inventory" },
+  { name: "Commercial Updates", filter: "category=commercial" },
+  { name: "All Signals", filter: "" },
+];
+
+const InboxPresetsPage = () => {
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+
   return (
     <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Inbox Presets" subtitle={`${items.length} records`} badge="PSET"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="⚙️" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+      <PageHeader title="Inbox Presets" description="Saved filters and views for inbox" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {presets.map((preset) => (
+          <SectionCard
+            key={preset.name}
+            title={preset.name}
+            selected={selectedPreset === preset.name}
+            onClick={() => setSelectedPreset(preset.name)}
+          >
+            <p className="text-sm text-gray-500">Filter: {preset.filter}</p>
+            <Link href={`/alerts?filter=${preset.filter}`}>
+              <Button size="sm" variant="outline">
+                View
+              </Button>
+            </Link>
+          </SectionCard>
+        ))}
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
+      <EmptyState title="Custom presets coming soon" />
     </PageWrapper>
   );
-}
+};
+
+export default InboxPresetsPage;
