@@ -1,18 +1,8 @@
 // @ts-nocheck
-// Triangle Black - App Layout (Legacy Route Group)
-// Program A Task A3 / Program C Step 5
-//
-// KEY MOVE: All legacy (app)/ pages now use EnterpriseShell.
-// Dual-shell problem permanently eliminated.
-// Legacy routes are preserved. Only the shell is unified.
-// Users see one consistent navigation on every page.
-//
-import { useKeyboardShortcuts } from "@/lib/hooks/useKeyboardShortcuts";
-import { KeyboardShortcutsModal } from "@/components/ui/KeyboardShortcutsModal";
-import { useState } from "react";
+// Triangle Black — App Layout (Server Component)
+// Hooks and client state live in EnterpriseShell — not here.
+// This file must remain a Server Component (no "use client").
 import { EnterpriseShell } from "@/components/workspace/EnterpriseShell";
-import { CommandPalette } from "@/components/ui/CommandPalette";
-import { NotificationBell } from "@/components/ui/NotificationBell";
 
 export const dynamic = "force-dynamic";
 
