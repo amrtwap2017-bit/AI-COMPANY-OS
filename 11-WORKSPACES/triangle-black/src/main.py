@@ -585,3 +585,32 @@ async def platform_summary():
         "backend_routes": "210+",
         "generated_at": __import__("datetime").datetime.utcnow().isoformat(),
     }
+
+# ── Sprint 90 - Complete Procurement Intelligence Workflow ─────────────────────
+try:
+    from src.commercial.procurement_intake.router import router as procurement_intake_router
+    app.include_router(procurement_intake_router, prefix="/api/v1")
+    print("  OK: procurement_intake_router")
+except Exception as e:
+    print(f"  WARN procurement_intake: {e}")
+
+try:
+    from src.commercial.approval_chain.router import router as approval_chain_router
+    app.include_router(approval_chain_router, prefix="/api/v1")
+    print("  OK: approval_chain_router")
+except Exception as e:
+    print(f"  WARN approval_chain: {e}")
+
+try:
+    from src.commercial.warehouse_intelligence.router import router as warehouse_intel_router
+    app.include_router(warehouse_intel_router, prefix="/api/v1")
+    print("  OK: warehouse_intelligence_router")
+except Exception as e:
+    print(f"  WARN warehouse_intelligence: {e}")
+
+try:
+    from src.commercial.ai_mentor.router import router as ai_mentor_router
+    app.include_router(ai_mentor_router, prefix="/api/v1")
+    print("  OK: ai_mentor_router")
+except Exception as e:
+    print(f"  WARN ai_mentor: {e}")
