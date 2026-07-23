@@ -1,124 +1,96 @@
 "use client"; // @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper, PageHeader, SectionCard,
-  MetricStrip, StatusBadge, LoadingState, EmptyState
-} from "@/components/ui";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import Link from "next/link";
 
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const fetchLeads = async () => {
+  const response = await fetch("/api/v1/leads", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch leads");
+  return response.json();
+};
 
-async function fetchLeads() {
-  const r = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
-}
+const fetchContracts = async () => {
+  const response = await fetch("/api/v1/contracts", { credentials: "include" });
+  if (!response.ok) throw new Error("Failed to fetch contracts");
+  return response.json();
+};
 
-async function fetchContracts() {
-  const r = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
-  if (!r.ok) return [];
-  const d = await r.json();
-  return Array.isArray(d) ? d : d.items ?? d.data ?? [];
-}
+const CommercialReviewPage = () => {
+  const leadsQuery = useQuery(["leads"], fetchLeads, { refetchInterval: 300000 });
+  const contractsQuery = useQuery(["contracts"], fetchContracts, { refetchInterval: 300000 });
 
-export default function CommercialReviewPage() {
-  const { data: leads = [], isLoading: leadsLoading } = useQuery({
-    queryKey: ["leads-review"],
-    queryFn: fetchLeads,
-    refetchInterval: 300000,
-  });
-  const { data: contracts = [], isLoading: contractsLoading } = useQuery({
-    queryKey: ["contracts-review"],
-    queryFn: fetchContracts,
-    refetchInterval: 300000,
-  });
+  if (leadsQuery.isLoading || contractsQuery.isLoading) return <LoadingState />;
+  if (leadsQuery.isError || contractsQuery.isError) return <EmptyState />;
 
-  const isLoading = leadsLoading || contractsLoading;
+  const leads = leadsQuery.data;
+  const contracts = contractsQuery.data;
 
-  const won    = leads.filter((l) => l.status === "won").length;
-  const lost   = leads.filter((l) => l.status === "lost").length;
-  const active = leads.filter((l) => !["won","lost","converted"].includes(l.status)).length;
-  const convRate = leads.length > 0 ? Math.round((won / leads.length) * 100) : 0;
+  // Calculate metrics
+  const totalLeads = leads.length;
+  const wonLeads = leads.filter(lead => lead.status === "won").length;
+  const conversionRate = (wonLeads / totalLeads * 100).toFixed(2);
+  const activeContracts = contracts.filter(contract => contract.status === "active").length;
 
-  const activeContracts = contracts.filter((c) => c.status === "active").length;
-  const totalValue = contracts.reduce((sum, c) => sum + (Number(c.contract_value) || 0), 0);
+  // Lead status summary
+  const statusSummary = leads.reduce((acc, lead) => {
+    acc[lead.status] = (acc[lead.status] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
 
-  if (isLoading) return <LoadingState message="Loading commercial data..." />;
+  // Top 5 leads by value
+  const topLeads = leads.sort((a, b) => b.value - a.value).slice(0, 5);
+
+  // Contract health
+  const expiringContracts = contracts.filter(contract => {
+    const today = new Date();
+    const expirationDate = new Date(contract.expiration_date);
+    return expirationDate <= new Date(today.setMonth(today.getMonth() + 1));
+  }).length;
 
   return (
     <PageWrapper>
-      <PageHeader
-        title="Commercial Review"
-        subtitle="Pipeline health and contract performance"
-        badge="Live"
-      />
-      <MetricStrip metrics={[
-        { label: "Total Leads",       value: leads.length },
-        { label: "Active Pipeline",   value: active,        color: "blue"  as const },
-        { label: "Won",               value: won,           color: "green" as const },
-        { label: "Conversion Rate",   value: `${convRate}%` },
-        { label: "Active Contracts",  value: activeContracts },
-        { label: "Total Value EGP",   value: totalValue.toLocaleString() },
-      ]} />
-
-      <SectionCard title="Lead Status Breakdown">
-        {leads.length === 0 ? (
-          <EmptyState title="No leads" description="No leads in the system yet" />
-        ) : (
-          <div className="space-y-2">
-            {["new","qualified","negotiation","won","lost","converted","assigned"].map((status) => {
-              const count = leads.filter((l) => l.status === status).length;
-              if (count === 0) return null;
-              const pct = Math.round((count / leads.length) * 100);
-              return (
-                <div key={status} className="flex items-center gap-3">
-                  <div className="w-28 text-sm text-slate-600 capitalize">{status}</div>
-                  <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                    <div
-                      className={`h-3 rounded-full ${
-                        status === "won" ? "bg-green-500" :
-                        status === "lost" ? "bg-red-400" :
-                        status === "negotiation" ? "bg-amber-400" :
-                        "bg-blue-400"
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <div className="w-16 text-sm font-medium text-slate-700 text-right">
-                    {count} ({pct}%)
-                  </div>
-                </div>
-              );
-            })}
+      <PageHeader title="Commercial Review" />
+      <div className="grid grid-cols-3 gap-4">
+        <MetricStrip label="Total Leads" value={totalLeads} />
+        <MetricStrip label="Won" value={wonLeads} />
+        <MetricStrip label="Conversion Rate" value={`${conversionRate}%`} />
+        <MetricStrip label="Active Contracts" value={activeContracts} />
+      </div>
+      <SectionCard title="Lead Status Summary">
+        {Object.keys(statusSummary).map(status => (
+          <div key={status} className="flex items-center justify-between mb-2">
+            <StatusBadge status={status} />
+            <span>{`${statusSummary[status]} (${((statusSummary[status] / totalLeads) * 100).toFixed(2)}%)`}</span>
           </div>
-        )}
+        ))}
       </SectionCard>
-
-      <SectionCard title="Active Contracts">
-        {contracts.length === 0 ? (
-          <EmptyState title="No contracts" description="No contracts found" />
-        ) : (
-          <div className="space-y-2">
-            {contracts.filter((c) => c.status === "active").slice(0, 8).map((c) => (
-              <div key={c.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-slate-800">{c.client_name || c.name || "Contract"}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {c.start_date?.slice(0, 10)} → {c.end_date?.slice(0, 10)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-700">
-                    {Number(c.contract_value || 0).toLocaleString()} EGP
-                  </span>
-                  <StatusBadge status={c.status || "active"} />
-                </div>
-              </div>
-            ))}
+      <SectionCard title="Top 5 Leads by Value">
+        {topLeads.map(lead => (
+          <div key={lead.id} className="flex items-center justify-between mb-2">
+            <Link href={`/leads/${lead.id}`} className="text-blue-500 hover:underline">{lead.company_name}</Link>
+            <StatusBadge status={lead.status} />
+            <span>{`${lead.value} EGP`}</span>
           </div>
-        )}
+        ))}
+      </SectionCard>
+      <SectionCard title="Contract Health">
+        <div className="flex items-center justify-between mb-2">
+          <span>Active Contracts</span>
+          <span>{activeContracts}</span>
+        </div>
+        <div className="flex items-center justify-between mb-2">
+          <span>Expiring Contracts (within 60 days)</span>
+          <span>{expiringContracts}</span>
+        </div>
+      </SectionCard>
+      <SectionCard title="Quick Links">
+        <Link href="/pipeline" className="block p-2 bg-blue-500 text-white rounded mb-2">Pipeline</Link>
+        <Link href="/renewal" className="block p-2 bg-blue-500 text-white rounded mb-2">Renewal</Link>
+        <Link href="/customers" className="block p-2 bg-blue-500 text-white rounded">Customers</Link>
       </SectionCard>
     </PageWrapper>
   );
-}
+};
+
+export default CommercialReviewPage;
