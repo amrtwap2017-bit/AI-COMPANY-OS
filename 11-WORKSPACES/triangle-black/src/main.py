@@ -264,3 +264,11 @@ try:
     print("  OK: analytics_router")
 except Exception as e:
     print(f"  WARN: analytics_router: {e}")
+
+# ── Sprint 62: Document Control ──────────────────────────────
+try:
+    from src.commercial.ai_assistant.document_router import router as ai_doc_router
+    app.include_router(ai_doc_router, prefix="/api/v1")
+    print("  OK: document_router")
+except Exception as e:
+    print(f"  WARN: document_router: {e}")

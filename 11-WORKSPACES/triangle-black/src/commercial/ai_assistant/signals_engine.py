@@ -211,6 +211,32 @@ def generate_signals(db_url: str) -> list:
         except Exception:
             pass
 
+
+        try:
+            from src.commercial.ai_assistant.cost_engine import generate_cost_report
+            DB_URL = "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"
+            cost_report = generate_cost_report(DB_URL)
+            at_risk_contracts = cost_report.get("summary", {}).get("at_risk_contracts", 0)
+            if at_risk_contracts > 0:
+                signals.append({
+                    "signal_id": "COST_OVERRUN",
+                    "title": f"{at_risk_contracts} Contracts With Cost Overrun",
+                    "message": (
+                        f"{at_risk_contracts} contracts have allocated costs "
+                        "exceeding their contract value."
+                    ),
+                    "priority": "high",
+                    "category": "commercial",
+                    "count": at_risk_contracts,
+                    "recommended_action": (
+                        "Review contract profitability at /analytics/costs "
+                        "and adjust resource allocation."
+                    ),
+                    "data_source": "cost_engine + contracts"
+                })
+        except Exception:
+            pass
+
     priority_order = {"critical": 0, "high": 1, "medium": 2}
     return sorted(signals, key=lambda x: priority_order.get(x.get("priority", "medium"), 3))
 
