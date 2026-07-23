@@ -1,116 +1,148 @@
 "use client"; // @ts-nocheck
-// @ts-nocheck
 
 import { useQuery } from "@tanstack/react-query";
 import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
+  PageWrapper, PageHeader, SectionCard,
+  MetricStrip, StatusBadge, LoadingState, EmptyState
 } from "@/components/ui";
 
-const fetchVendors = async () => {
-  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
-  return response.json();
-};
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
-const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
-  return response.json();
-};
+async function fetchVendors() {
+  const r = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
+async function fetchPOs() {
+  const r = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
+async function fetchRFQs() {
+  const r = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
+  if (!r.ok) return [];
+  const d = await r.json();
+  return Array.isArray(d) ? d : d.items ?? [];
+}
 
-const fetchRFQs = async () => {
-  const response = await fetch("/api/v1/rfqs", { credentials: "include" });
-  return response.json();
-};
-
-const VendorScorecardPage = () => {
-  const vendorsQuery = useQuery(["vendors"], fetchVendors, { refetchInterval: 300000 });
-  const purchaseOrdersQuery = useQuery(["purchase-orders"], fetchPurchaseOrders, { refetchInterval: 300000 });
-  const rfqsQuery = useQuery(["rfqs"], fetchRFQs, { refetchInterval: 300000 });
-
-  if (vendorsQuery.isLoading || purchaseOrdersQuery.isLoading || rfqsQuery.isLoading) {
-    return <LoadingState />;
-  }
-
-  if (vendorsQuery.isError || purchaseOrdersQuery.isError || rfqsQuery.isError) {
-    return <EmptyState message="Failed to load data" />;
-  }
-
-  const vendors = vendorsQuery.data;
-  const purchaseOrders = purchaseOrdersQuery.data;
-  const rfqs = rfqsQuery.data;
-
-  // Calculate vendor scores
-  const vendorScores = vendors.map((vendor) => {
-    const poCount = purchaseOrders.filter((po) => po.vendor_id === vendor.id).length;
-    const totalSpend = purchaseOrders
-      .filter((po) => po.vendor_id === vendor.id)
-      .reduce((acc, po) => acc + po.total_amount, 0);
-    const leadTime = vendor.lead_time_days || 1; // Avoid division by zero
-    let performanceScore = poCount * 10 + (1 / leadTime) * 40 + 50;
-    performanceScore = Math.min(Math.max(performanceScore, 0), 100);
-    return { ...vendor, po_count: poCount, total_spend, performance_score: performanceScore };
+export default function VendorAnalyticsPage() {
+  const { data: vendors = [], isLoading: v1 } = useQuery({
+    queryKey: ["va-vendors"], queryFn: fetchVendors, refetchInterval: 300000,
+  });
+  const { data: pos = [], isLoading: v2 } = useQuery({
+    queryKey: ["va-pos"], queryFn: fetchPOs, refetchInterval: 300000,
+  });
+  const { data: rfqs = [], isLoading: v3 } = useQuery({
+    queryKey: ["va-rfqs"], queryFn: fetchRFQs, refetchInterval: 300000,
   });
 
-  // Sort vendors by score
-  vendorScores.sort((a, b) => b.performance_score - a.performance_score);
+  const isLoading = v1 || v2 || v3;
 
-  // Calculate spend distribution
-  const totalSpend = vendorScores.reduce((acc, vendor) => acc + vendor.total_spend, 0);
-  const spendDistribution = vendorScores.slice(0, 5).map((vendor) => ({
-    name: vendor.name,
-    value: (vendor.total_spend / totalSpend) * 100,
-  }));
+  const vendorScores = vendors.map((v) => {
+    const vendorPOs   = pos.filter((p) => p.vendor_id === v.id);
+    const poCount     = vendorPOs.length;
+    const totalSpend  = vendorPOs.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
+    const leadScore   = v.lead_time_days ? Math.max(0, 40 - v.lead_time_days * 2) : 20;
+    const maxPOs      = Math.max(...vendors.map((x) => pos.filter((p) => p.vendor_id === x.id).length), 1);
+    const poScore     = Math.round((poCount / maxPOs) * 50);
+    const score       = Math.min(100, 10 + leadScore + poScore);
+    return { ...v, poCount, totalSpend, score };
+  }).sort((a, b) => b.score - a.score);
 
-  // Calculate RFQ response rate
-  const respondedRFQs = rfqs.filter((rfq) => rfq.status === "received").length;
-  const responseRate = ((respondedRFQs / rfqs.length) * 100).toFixed(2);
+  const totalSpend      = pos.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
+  const activeVendors   = vendorScores.filter((v) => v.poCount > 0).length;
+  const avgLead         = vendors.length > 0
+    ? Math.round(vendors.reduce((s, v) => s + (v.lead_time_days || 0), 0) / vendors.length)
+    : 0;
+  const rfqResponded    = rfqs.filter((r) => r.status === "received").length;
+  const responseRate    = rfqs.length > 0 ? Math.round((rfqResponded / rfqs.length) * 100) : 0;
+  const maxSpend        = Math.max(...vendorScores.map((v) => v.totalSpend), 1);
+
+  if (isLoading) return <LoadingState message="Loading vendor analytics..." />;
 
   return (
     <PageWrapper>
-      <PageHeader title="Supplier Performance Scorecard" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Vendors", value: vendors.length },
-            { label: "Active (with POs)", value: vendorScores.filter((v) => v.po_count > 0).length },
-            { label: "Total Spend EGP", value: totalSpend.toFixed(2) },
-            { label: "Avg Lead Time days", value: vendorScores.reduce((acc, v) => acc + v.lead_time_days, 0) / vendors.length },
-          ]}
-        />
+      <PageHeader
+        title="Vendor Analytics"
+        subtitle="Supplier performance scorecard and spend analysis"
+        badge="AI Scored"
+      />
+
+      <MetricStrip metrics={[
+        { label: "Total Vendors",  value: vendors.length },
+        { label: "Active",         value: activeVendors,               color: "green" as const },
+        { label: "Total Spend",    value: `${totalSpend.toLocaleString()} EGP` },
+        { label: "Avg Lead Time",  value: `${avgLead}d` },
+      ]} />
+
+      <SectionCard title="Vendor Performance Scorecard">
+        {vendorScores.length === 0 ? (
+          <EmptyState title="No vendors" description="No vendor data available" />
+        ) : (
+          <div className="space-y-3">
+            {vendorScores.map((v, i) => (
+              <div key={v.id} className={`flex items-center gap-4 px-4 py-3 rounded-lg border ${
+                i === 0 ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"
+              }`}>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-slate-800">{v.name}</p>
+                    {i === 0 && <StatusBadge status="recommended" label="Top Vendor" />}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {v.category} · Lead: {v.lead_time_days || "?"}d · {v.poCount} POs · {v.payment_terms || "N/A"}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-slate-700">{v.score}/100</p>
+                  <p className="text-xs text-slate-400">{v.totalSpend.toLocaleString()} EGP</p>
+                </div>
+                <div className="w-20 bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${v.score}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </SectionCard>
-      <SectionCard title="Vendor Scorecard">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {vendorScores.map((vendor) => (
-            <div key={vendor.id} className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold">{vendor.name}</h3>
-              <StatusBadge status={vendor.performance_score > 70 ? "success" : vendor.performance_score > 50 ? "warning" : "error"} />
-              <p>Category: {vendor.category}</p>
-              <p>POs: {vendor.po_count}</p>
-              <p>Total Spend EGP: {vendor.total_spend.toFixed(2)}</p>
-              <p>Score: {vendor.performance_score.toFixed(0)}</p>
-              <p>Lead Time: {vendor.lead_time_days} days</p>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-      <SectionCard title="Spend Distribution">
-        <div className="flex flex-col items-center space-y-4">
-          {spendDistribution.map((item) => (
-            <div key={item.name} className="bg-white p-4 rounded-lg shadow-md w-full max-w-sm">
-              <h3 className="text-xl font-bold">{item.name}</h3>
-              <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+
+      <SectionCard title="Spend Distribution (Top 5)">
+        <div className="space-y-3">
+          {vendorScores.slice(0, 5).map((v) => (
+            <div key={v.id} className="flex items-center gap-3">
+              <div className="w-32 text-xs font-medium text-slate-700 truncate">{v.name}</div>
+              <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
                 <div
-                  style={{ width: `${item.value}%`, backgroundColor: "blue" }}
-                  className="h-full"
+                  className="h-3 bg-blue-500 rounded-full"
+                  style={{ width: `${(v.totalSpend / maxSpend) * 100}%` }}
                 />
               </div>
-              <p>{item.value.toFixed(0)}%</p>
+              <div className="w-36 text-xs text-slate-500 text-right">
+                {v.totalSpend.toLocaleString()} EGP
+              </div>
             </div>
           ))}
         </div>
       </SectionCard>
+
+      <SectionCard title="RFQ Response Analysis">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center px-4 py-3 bg-slate-50 rounded-lg">
+            <p className="text-2xl font-bold text-slate-800">{rfqs.length}</p>
+            <p className="text-xs text-slate-500">Total RFQs</p>
+          </div>
+          <div className="text-center px-4 py-3 bg-green-50 rounded-lg">
+            <p className="text-2xl font-bold text-green-700">{rfqResponded}</p>
+            <p className="text-xs text-slate-500">Responded</p>
+          </div>
+          <div className="text-center px-4 py-3 bg-blue-50 rounded-lg">
+            <p className="text-2xl font-bold text-blue-700">{responseRate}%</p>
+            <p className="text-xs text-slate-500">Response Rate</p>
+          </div>
+        </div>
+      </SectionCard>
+    </PageWrapper>
+  );
+}
