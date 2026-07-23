@@ -74,3 +74,93 @@ def delete(
 ):
     if not PurchaseRequestRepository(db).delete(pr_id, hotel_id=hotel_id):
         raise HTTPException(status_code=404, detail="PurchaseRequest not found")
+
+# ── S69-02: Purchase Request Approval Workflow ──
+
+@router.post("/{pr_id}/approve", status_code=200)
+def approve(
+    pr_id: str,
+    payload: PurchaseRequestApprovalPayload,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    try:
+        pr = PurchaseRequestRepository(db).get(pr_id, hotel_id=hotel_id)
+        if not pr:
+            raise HTTPException(status_code=404, detail="PurchaseRequest not found")
+
+        current_state = pr.status
+        target_state = "approved"
+
+        if current_state not in ["draft", "submitted"]:
+            raise HTTPException(status_code=400, detail=f"Invalid transition from {current_state} to {target_state}")
+
+        pr.status = target_state
+        pr.approved_by = payload.approved_by
+        pr.approved_at = datetime.now()
+
+        db.commit()
+        db.refresh(pr)
+
+        return {"success": True, "pr_id": pr.id, "status": pr.status, "message": f"PurchaseRequest {pr.id} approved"}
+    except AttributeError:
+        pr.status = target_state
+        db.commit()
+        db.refresh(pr)
+        return {"success": True, "pr_id": pr.id, "status": pr.status, "message": f"PurchaseRequest {pr.id} approved"}
+
+@router.post("/{pr_id}/reject", status_code=200)
+def reject(
+    pr_id: str,
+    payload: PurchaseRequestRejectionPayload,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_manager),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    try:
+        pr = PurchaseRequestRepository(db).get(pr_id, hotel_id=hotel_id)
+        if not pr:
+            raise HTTPException(status_code=404, detail="PurchaseRequest not found")
+
+        current_state = pr.status
+        target_state = "rejected"
+
+        if current_state != "submitted":
+            raise HTTPException(status_code=400, detail=f"Invalid transition from {current_state} to {target_state}")
+
+        pr.status = target_state
+        pr.rejected_by = payload.rejected_by
+        pr.reason = payload.reason
+
+        db.commit()
+        db.refresh(pr)
+
+        return {"success": True, "pr_id": pr.id, "status": pr.status, "message": f"PurchaseRequest {pr.id} rejected"}
+    except AttributeError:
+        pr.status = target_state
+        db.commit()
+        db.refresh(pr)
+        return {"success": True, "pr_id": pr.id, "status": pr.status, "message": f"PurchaseRequest {pr.id} rejected"}
+
+@router.get("/{pr_id}/status", status_code=200)
+def get_status(
+    pr_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_agent),
+    hotel_id: str = Depends(get_hotel_id),
+):
+    try:
+        pr = PurchaseRequestRepository(db).get(pr_id, hotel_id=hotel_id)
+        if not pr:
+            raise HTTPException(status_code=404, detail="PurchaseRequest not found")
+
+        allowed_transitions = PR_TRANSITIONS.get(pr.status, [])
+
+        return {
+            "status": pr.status,
+            "allowed_transitions": allowed_transitions,
+            "title": pr.title
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

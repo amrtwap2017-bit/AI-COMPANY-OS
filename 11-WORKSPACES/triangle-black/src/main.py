@@ -297,3 +297,11 @@ try:
     print("  OK: digital_twin_router")
 except Exception as e:
     print(f"  WARN digital_twin: {e}")
+
+# ── Sprint 69 — Project Workflow + Supplier Portal + Digital Twin Fix ─────────
+try:
+    from src.commercial.supplier_portal.router import router as supplier_portal_router
+    app.include_router(supplier_portal_router, prefix="/api/v1")
+    print("  OK: supplier_portal_router")
+except Exception as e:
+    print(f"  WARN supplier_portal: {e}")

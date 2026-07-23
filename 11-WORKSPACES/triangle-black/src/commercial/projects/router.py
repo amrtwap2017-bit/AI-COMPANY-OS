@@ -136,3 +136,75 @@ def projects_intelligence(db: Session = Depends(get_db),
     at_risk  = rows(db.execute(text("SELECT * FROM project_risks WHERE status='open' ORDER BY created_at DESC LIMIT 10")).fetchall())
     overdue  = rows(db.execute(text("SELECT * FROM project_milestones WHERE due_date < NOW() AND status!='completed' ORDER BY due_date LIMIT 10")).fetchall())
     return {"open_risks": at_risk, "overdue_milestones": overdue, "signals": {"risks": len(at_risk), "overdue": len(overdue)}}
+
+# ── S69-01: Project Phase State Machine ──
+
+from uuid import uuid4
+from datetime import datetime
+from fastapi import HTTPException, Depends
+from sqlalchemy import text
+
+PROJECT_TRANSITIONS = {
+    "planning": ["active", "cancelled"],
+    "active": ["on_hold", "completed", "cancelled"],
+    "on_hold": ["active", "cancelled"],
+    "completed": ["closed"],
+    "closed": [],
+    "cancelled": []
+}
+
+@router.post("/{project_id}/transition")
+def project_transition(project_id: str, data: dict, db: Session = Depends(get_db),
+                      current_user: User = Depends(get_current_user)):
+    try:
+        pid = uuid.UUID(project_id)
+        project = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": pid}).fetchone()
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        current_status = project.status
+        to_status = data.get("to")
+        comment = data.get("comment", "")
+        changed_by = data.get("changed_by", "")
+
+        if to_status not in PROJECT_TRANSITIONS[current_status]:
+            raise HTTPException(status_code=400, detail="Invalid transition")
+
+        db.execute(text("UPDATE projects SET status=:status, updated_at=:updated_at WHERE id=:id"),
+                   {"status": to_status, "updated_at": datetime.now(), "id": pid})
+
+        log_id = uuid4()
+        db.execute(text("INSERT INTO project_transition_logs (id, project_id, from_status, to_status, comment, changed_by, created_at) "
+                       "VALUES (:id, :project_id, :from_status, :to_status, :comment, :changed_by, :created_at)"),
+                   {"id": log_id, "project_id": pid, "from_status": current_status, "to_status": to_status,
+                    "comment": comment, "changed_by": changed_by, "created_at": datetime.now()})
+
+        db.commit()
+        return {
+            "success": True,
+            "project": get_project(pid, db),
+            "transition": {"from": current_status, "to": to_status},
+            "message": f"Project {pid} transitioned from {current_status} to {to_status}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{project_id}/transitions")
+def project_transitions(project_id: str, db: Session = Depends(get_db),
+                        current_user: User = Depends(get_current_user)):
+    try:
+        pid = uuid.UUID(project_id)
+        project = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": pid}).fetchone()
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        current_status = project.status
+        allowed_transitions = PROJECT_TRANSITIONS[current_status]
+
+        return {
+            "current_status": current_status,
+            "allowed_transitions": allowed_transitions,
+            "project_id": pid
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
