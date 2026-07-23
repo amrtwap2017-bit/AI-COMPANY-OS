@@ -1,6 +1,6 @@
 "use client"; // @ts-nocheck
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   PageWrapper,
   PageHeader,
@@ -12,11 +12,11 @@ import {
   Progress,
 } from "@/components/ui";
 
-const fetchCostsSummary = async () => {
+const fetchCostSummary = async () => {
   const response = await fetch("/api/v1/ai/analytics/costs/summary", {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch costs summary");
+  if (!response.ok) throw new Error("Failed to fetch cost summary");
   return response.json();
 };
 
@@ -28,106 +28,109 @@ const fetchFullReport = async () => {
   return response.json();
 };
 
-const CostsPage = () => {
-  const { data: summary, isLoading: isSummaryLoading } = useQuery(
-    ["costs-summary"],
-    fetchCostsSummary,
-    { refetchInterval: 300000 }
-  );
+const fetchBOQTemplate = async (wo_type: string) => {
+  const response = await fetch(`/api/v1/ai/documents/boq/template?wo_type=${wo_type}`, {
+    credentials: "include",
+  });
+  if (!response.ok) throw new Error("Failed to fetch BOQ template");
+  return response.json();
+};
 
-  const { data: report, isLoading: isReportLoading } = useQuery(
-    ["full-report"],
-    fetchFullReport,
-    { refetchInterval: 300000 }
-  );
+const AnalyticsCostsPage = () => {
+  const { data: costSummary, isLoading: isSummaryLoading } = useQuery(["costSummary"], fetchCostSummary, {
+    refetchInterval: 300000,
+  });
 
-  if (isSummaryLoading || isReportLoading) return <LoadingState />;
+  const { data: fullReport, isLoading: isFullReportLoading } = useQuery(["fullReport"], fetchFullReport, {
+    refetchInterval: 300000,
+  });
 
-  if (!summary || !report) return <EmptyState message="No data available" />;
+  const [selectedBOQTemplate, setSelectedBOQTemplate] = useState<string | null>(null);
 
-  const { total_wo_cost_egp, avg_wo_cost_egp, total_contract_value, overall_margin_pct } = summary;
-  const { work_orders, contracts } = report;
+  const handleBOQTemplateClick = async (wo_type: string) => {
+    try {
+      const templateData = await fetchBOQTemplate(wo_type);
+      setSelectedBOQTemplate(JSON.stringify(templateData));
+    } catch (error) {
+      console.error("Error fetching BOQ template:", error);
+    }
+  };
 
-  const woCostByType = work_orders.reduce((acc, curr) => {
-    acc[curr.wo_type] = (acc[curr.wo_type] || 0) + curr.total_cost_egp;
+  if (isSummaryLoading || isFullReportLoading) return <LoadingState />;
+
+  if (!costSummary || !fullReport) return <EmptyState />;
+
+  const { total_wo_cost_egp, avg_wo_cost_egp, portfolio_revenue_egp, margin_pct } = costSummary;
+  const { work_orders, contracts } = fullReport;
+
+  const woCostByType = work_orders.reduce((acc, wo) => {
+    if (!acc[wo.wo_type]) acc[wo.wo_type] = { total_cost_egp: 0, count: 0 };
+    acc[wo.wo_type].total_cost_egp += wo.total_cost_egp;
+    acc[wo.wo_type].count++;
     return acc;
-  }, {} as Record<string, number>);
+  }, {} as Record<string, { total_cost_egp: number; count: number }>);
 
-  const top5Contracts = contracts
-    .sort((a, b) => b.total_cost_egp - a.total_cost_egp)
+  const top5ContractsByMargin = contracts
+    .sort((a, b) => a.margin_pct - b.margin_pct)
     .slice(0, 5);
+
+  const boqTemplateData = selectedBOQTemplate ? JSON.parse(selectedBOQTemplate) : null;
 
   return (
     <PageWrapper>
-      <PageHeader title="Operational Cost and Profitability Analytics" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            {
-              label: "Total WO Cost EGP",
-              value: total_wo_cost_egp.toLocaleString(),
-            },
-            {
-              label: "Avg WO Cost EGP",
-              value: avg_wo_cost_egp.toLocaleString(),
-            },
-            {
-              label: "Contract Revenue EGP",
-              value: total_contract_value.toLocaleString(),
-            },
-            {
-              label: "Gross Margin %",
-              value: overall_margin_pct.toFixed(2) + "%",
-            },
-          ]}
-        />
-      </SectionCard>
-      <SectionCard title="Profitability">
-        <Progress
-          value={overall_margin_pct}
-          max={100}
-          target={30}
-          label={`Gross Margin ${overall_margin_pct.toFixed(2)}%`}
-        />
-      </SectionCard>
-      <SectionCard title="WO Cost by Type">
-        <div className="flex flex-wrap gap-4">
-          {Object.entries(woCostByType).map(([type, cost]) => (
-            <div
-              key={type}
-              className={`bg-gray-200 p-3 rounded-lg w-full sm:w-1/2 md:w-1/3 lg:w-1/4`}
-            >
-              <h3 className="text-sm font-medium">{type}</h3>
-              <p className="text-base font-bold">{cost.toLocaleString()}</p>
+      <PageHeader title="Operational Cost and Profitability — Program F" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <SectionCard title="Metrics">
+          <MetricStrip
+            label="Total WO Cost EGP"
+            value={total_wo_cost_egp.toLocaleString()}
+            unit="EGP"
+          />
+          <MetricStrip
+            label="Avg WO Cost EGP"
+            value={avg_wo_cost_egp.toLocaleString()}
+            unit="EGP"
+          />
+          <MetricStrip
+            label="Portfolio Revenue EGP"
+            value={portfolio_revenue_egp.toLocaleString()}
+            unit="EGP"
+          />
+          <MetricStrip
+            label="Margin %"
+            value={`${margin_pct}%`}
+            status={
+              margin_pct < 20 ? "red" : margin_pct >= 30 ? "green" : "amber"
+            }
+          />
+        </SectionCard>
+        <SectionCard title="Margin Gauge">
+          <Progress
+            value={margin_pct}
+            target={30}
+            label={`Current: ${margin_pct}% | Target: 30%`}
+            status={
+              margin_pct < 20 ? "red" : margin_pct >= 30 ? "green" : "amber"
+            }
+          />
+        </SectionCard>
+        <SectionCard title="WO Cost by Type">
+          {Object.entries(woCostByType).map(([type, data], index) => (
+            <div key={index} className="flex items-center justify-between p-2 border-b last:border-b-0">
+              <span>{type}</span>
+              <span>{data.total_cost_egp.toLocaleString()} EGP</span>
+              <span>{data.count} WO</span>
             </div>
           ))}
-        </div>
-      </SectionCard>
-      <SectionCard title="Top 5 Contracts by Total Cost">
-        {top5Contracts.length > 0 ? (
-          <ul>
-            {top5Contracts.map((contract) => (
-              <li key={contract.contract_id} className="flex items-center justify-between p-2 border-b last:border-b-0">
-                <div>
-                  <p>{contract.client_name}</p>
-                  <p className="text-sm text-gray-500">{contract.contract_value.toLocaleString()} EGP</p>
-                </div>
-                <div>
-                  <p className="text-base font-bold">{contract.total_cost_egp.toLocaleString()} EGP</p>
-                  <StatusBadge status={contract.margin_pct >= 30 ? "success" : "warning"} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyState message="No contracts available" />
-        )}
-      </SectionCard>
-      <div className="text-center text-sm mt-4">
-        <p>Costs are estimated from work order type, priority, and duration. Add time-tracking for precision.</p>
+        </SectionCard>
       </div>
-    </PageWrapper>
-  );
-};
-
-export default CostsPage;
+      <SectionCard title="Top 5 Contracts by Margin">
+        {top5ContractsByMargin.map((contract, index) => (
+          <div key={index} className="flex items-center justify-between p-2 border-b last:border-b-0">
+            <span>{contract.client_name}</span>
+            <span>{contract.contract_value_egp.toLocaleString()} EGP</span>
+            <span>{contract.allocated_cost_egp.toLocaleString()} EGP</span>
+            <span>{contract.margin_pct}%</span>
+            <StatusBadge
+              status={
+                contract.margin_pct < 20 ? "red
