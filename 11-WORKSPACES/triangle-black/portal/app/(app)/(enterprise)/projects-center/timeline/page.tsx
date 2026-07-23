@@ -1,3 +1,4 @@
+"use client";
 typescript
 "use client"; // @ts-nocheck
 
