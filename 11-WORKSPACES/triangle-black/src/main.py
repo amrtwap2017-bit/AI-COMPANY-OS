@@ -335,3 +335,25 @@ try:
     print("  OK: warranty_router")
 except Exception as e:
     print(f"  WARN warranty: {e}")
+
+# ── Sprint 72 — Global Search + Notifications + Tenant Audit ─────────────────
+try:
+    from src.commercial.global_search.router import router as global_search_router
+    app.include_router(global_search_router, prefix="/api/v1")
+    print("  OK: global_search_router")
+except Exception as e:
+    print(f"  WARN global_search: {e}")
+
+try:
+    from src.commercial.notification_engine.router import router as notif_engine_router
+    app.include_router(notif_engine_router, prefix="/api/v1")
+    print("  OK: notification_engine_router")
+except Exception as e:
+    print(f"  WARN notification_engine: {e}")
+
+try:
+    from src.commercial.tenant_audit.router import router as tenant_audit_router
+    app.include_router(tenant_audit_router, prefix="/api/v1")
+    print("  OK: tenant_audit_router")
+except Exception as e:
+    print(f"  WARN tenant_audit: {e}")
