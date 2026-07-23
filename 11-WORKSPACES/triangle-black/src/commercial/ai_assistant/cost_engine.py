@@ -122,9 +122,9 @@ def generate_cost_report(db_url: str) -> dict:
         # Fetch contracts
         try:
             contract_rows = conn.execute(text(
-                "SELECT id, client_name, status, "
+                "SELECT id, title as client_name, status, "
                 "total_value as contract_value, start_date, end_date "
-                "FROM contracts WHERE status = 'active'"
+                "FROM contracts WHERE status NOT IN ('cancelled', 'rejected')"
             )).fetchall()
             contracts = [dict(r._mapping) for r in contract_rows]
         except Exception:
