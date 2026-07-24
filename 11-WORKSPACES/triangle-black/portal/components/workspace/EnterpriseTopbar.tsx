@@ -1,6 +1,6 @@
 // @ts-nocheck
 "use client";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";;
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Bell, ChevronDown, Zap, User, LogOut, Settings, Search } from "lucide-react";
