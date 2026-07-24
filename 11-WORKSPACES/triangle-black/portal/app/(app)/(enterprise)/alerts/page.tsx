@@ -5,15 +5,18 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };
 
 const fetchNotifications = async () => {
   try {
-    const response = await fetch("/api/v1/notifications", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/notifications`, { credentials: "include" });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error("Failed to fetch notifications");
     return response.json();

@@ -4,13 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchAgreements = async () => {
   try {
-    const response = await fetch("/api/v1/supply-chain/agreements", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/supply-chain/agreements`, { credentials: "include" });
     if (response.ok) return response.json();
     throw new Error("Failed to fetch agreements");
   } catch (_) {
-    return fetch("/api/v1/contracts", { credentials: "include" }).then((res) => res.json());
+    return fetch(`${BACK}/api/v1/contracts`, { credentials: "include" }).then((res) => res.json());
   }
 };
 

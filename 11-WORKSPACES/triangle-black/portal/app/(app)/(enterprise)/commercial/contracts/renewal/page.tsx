@@ -4,8 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchContracts = async () => {
-  const response = await fetch("/api/v1/contracts", {
+  const response = await fetch(`${BACK}/api/v1/contracts`, {
     credentials: "include",
   });
   if (!response.ok) {

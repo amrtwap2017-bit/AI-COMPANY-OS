@@ -10,8 +10,11 @@ import {
   Progress,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchSLAData = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", {
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, {
     credentials: "include",
   });
   if (!response.ok) {

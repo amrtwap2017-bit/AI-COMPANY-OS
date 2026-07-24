@@ -11,18 +11,21 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
   return response.json();
 };
 

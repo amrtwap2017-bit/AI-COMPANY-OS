@@ -13,22 +13,25 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchContracts = async () => {
-  const response = await fetch("/api/v1/contracts", {
+  const response = await fetch(`${BACK}/api/v1/contracts`, {
     credentials: "include",
   });
   return response.json();
 };
 
 const fetchWorkOrdersByContractId = async (contract_id: string) => {
-  const response = await fetch(`/api/v1/work-orders?contract_id=${contract_id}`, {
+  const response = await fetch(`${BACK}/api/v1/work-orders?contract_id=${contract_id}`, {
     credentials: "include",
   });
   return response.json();
 };
 
 const fetchInvoicesByContractId = async (contract_id: string) => {
-  const response = await fetch(`/api/v1/invoices?contract_id=${contract_id}`, {
+  const response = await fetch(`${BACK}/api/v1/invoices?contract_id=${contract_id}`, {
     credentials: "include",
   });
   return response.json();

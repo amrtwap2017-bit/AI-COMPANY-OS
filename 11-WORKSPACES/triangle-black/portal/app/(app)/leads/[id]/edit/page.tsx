@@ -11,6 +11,9 @@ import { Save, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 export default function EditLeadPage() {
   const { id } = useParams();
   const router  = useRouter();
@@ -32,7 +35,7 @@ export default function EditLeadPage() {
     setLoading(true); setError("");
     try {
       const token = tokenManager.getToken();
-      const res = await fetch("/api/v1/leads/" + id, {
+      const res = await fetch(`${BACK}/api/v1/leads/` + id, {
         method: "PUT",
         headers: { "Content-Type":"application/json", "Authorization":"Bearer "+(token||"") },
         body: JSON.stringify(form),

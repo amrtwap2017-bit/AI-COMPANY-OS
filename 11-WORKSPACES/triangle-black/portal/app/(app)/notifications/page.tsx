@@ -9,6 +9,9 @@ import { tokenManager } from "@/lib/auth/token-manager";
 import { Bell, CheckCircle2, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const TYPE_ICONS: any = { info:"ℹ️", warning:"⚠️", success:"✅", error:"❌", system:"🔔" };
 const TYPE_COLORS: any = {
   info:    "border-l-blue-400 bg-blue-50",
@@ -38,7 +41,7 @@ export default function NotificationsPage() {
   async function markRead(id: string) {
     try {
       const token = tokenManager.getToken();
-      await fetch("/api/v1/notifications/"+id+"/read", {
+      await fetch(`${BACK}/api/v1/notifications/`+id+"/read", {
         method:"PATCH", headers:{"Authorization":"Bearer "+(token||"")}
       });
       qc.invalidateQueries({queryKey:["notifications"]});
@@ -48,7 +51,7 @@ export default function NotificationsPage() {
   async function markAllRead() {
     try {
       const token = tokenManager.getToken();
-      await fetch("/api/v1/notifications/read-all", {
+      await fetch(`${BACK}/api/v1/notifications/read-all`, {
         method:"POST", headers:{"Authorization":"Bearer "+(token||"")}
       });
       qc.invalidateQueries({queryKey:["notifications"]});

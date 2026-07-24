@@ -4,22 +4,25 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const getToday = () => new Date().toISOString().split('T')[0];
 
 const fetchLeads = async () => {
-  const response = await fetch(`/api/v1/leads?created_at=${getToday()}`, { credentials: 'include' });
+  const response = await fetch(`${BACK}/api/v1/leads?created_at=${getToday()}`, { credentials: 'include' });
   if (!response.ok) throw new Error("Failed to fetch leads");
   return response.json();
 };
 
 const fetchContracts = async () => {
-  const response = await fetch("/api/v1/contracts", { credentials: 'include' });
+  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: 'include' });
   if (!response.ok) throw new Error("Failed to fetch contracts");
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=commercial", { credentials: 'include' });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: 'include' });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };

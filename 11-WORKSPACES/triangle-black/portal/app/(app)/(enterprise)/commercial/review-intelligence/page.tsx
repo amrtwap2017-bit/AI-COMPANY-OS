@@ -12,14 +12,17 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchLeads = async () => {
-  const response = await fetch("/api/v1/leads", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch leads");
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=commercial", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };

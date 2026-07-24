@@ -12,8 +12,11 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchBoqTemplate = async (wo_type: string) => {
-  const response = await fetch(`/api/v1/ai/documents/boq/template?wo_type=${wo_type}`, {
+  const response = await fetch(`${BACK}/api/v1/ai/documents/boq/template?wo_type=${wo_type}`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch BOQ template");
@@ -21,7 +24,7 @@ const fetchBoqTemplate = async (wo_type: string) => {
 };
 
 const saveBoq = async (title: string, lines: any[]) => {
-  const response = await fetch("/api/v1/ai/documents/boq", {
+  const response = await fetch(`${BACK}/api/v1/ai/documents/boq`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title, lines }),

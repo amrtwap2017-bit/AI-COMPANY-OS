@@ -14,15 +14,18 @@ import {
 } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchPurchaseRequests = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-requests/", {
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, {
     credentials: "include",
   });
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders?status=completed", {
+  const response = await fetch(`${BACK}/api/v1/work-orders?status=completed`, {
     credentials: "include",
   });
   return response.json();
@@ -87,7 +90,7 @@ const ApprovalsPage = () => {
               <Button
                 onClick={() => {
                   setLoading(true);
-                  fetch(`/api/v1/actions/inventory/purchase-requests/${pr.id}/approve`, {
+                  fetch(`${BACK}/api/v1/actions/inventory/purchase-requests/${pr.id}/approve`, {
                     method: "POST",
                     credentials: "include",
                   }).then(() => {

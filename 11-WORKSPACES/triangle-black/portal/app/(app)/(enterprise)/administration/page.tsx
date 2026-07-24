@@ -4,14 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, LoadingState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchUsers = async () => {
-  const response = await fetch("/api/v1/auth/users", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/auth/users`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch users");
   return response.json();
 };
 
 const fetchHealth = async () => {
-  const response = await fetch("/api/v1/ai/health", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/health`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch health");
   return response.json();
 };

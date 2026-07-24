@@ -5,20 +5,23 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch work orders");
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch maintenance signals");
   return response.json();
 };
 
 const fetchPmPlans = async () => {
-  const response = await fetch("/api/v1/maintenance/pm-plans", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch PM plans");
   return response.json();
 };

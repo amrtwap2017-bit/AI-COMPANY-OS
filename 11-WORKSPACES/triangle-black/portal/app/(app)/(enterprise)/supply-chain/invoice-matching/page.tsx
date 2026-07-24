@@ -3,20 +3,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch purchase orders");
   return response.json();
 };
 
 const fetchSupplierInvoices = async () => {
   try {
-    const response = await fetch("/api/v1/supply-chain/supplier-invoices", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/supply-chain/supplier-invoices`, { credentials: "include" });
     if (response.status === 404) throw new Error("Not Found");
     if (!response.ok) throw new Error("Failed to fetch supplier invoices");
     return response.json();
   } catch {
-    const response = await fetch("/api/v1/supplier-invoices", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/supplier-invoices`, { credentials: "include" });
     if (!response.ok) throw new Error("Failed to fetch supplier invoices");
     return response.json();
   }

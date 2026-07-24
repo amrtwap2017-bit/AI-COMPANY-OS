@@ -14,22 +14,25 @@ import {
 } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchTechnicians = async () => {
-  const response = await fetch("/api/v1/technicians", {
+  const response = await fetch(`${BACK}/api/v1/technicians`, {
     credentials: "include",
   });
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders", {
+  const response = await fetch(`${BACK}/api/v1/work-orders`, {
     credentials: "include",
   });
   return response.json();
 };
 
 const dispatchRecommendation = async (work_order_id: string) => {
-  const response = await fetch("/api/v1/ai/dispatch/recommend", {
+  const response = await fetch(`${BACK}/api/v1/ai/dispatch/recommend`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ work_order_type: "exampleType", priority: 1, hotel_id: "exampleHotelId" }),

@@ -13,8 +13,11 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchVendors = async () => {
-  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch vendors");
   return response.json();
 };
@@ -56,7 +59,7 @@ const Vendor360Page = () => {
     if (!selectedVendor) return null;
 
     const fetchPOs = async (vendorId) => {
-      const response = await fetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendorId}`, { credentials: "include" });
+      const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders?vendor_id=${vendorId}`, { credentials: "include" });
       if (!response.ok) throw new Error("Failed to fetch POs");
       return response.json();
     };

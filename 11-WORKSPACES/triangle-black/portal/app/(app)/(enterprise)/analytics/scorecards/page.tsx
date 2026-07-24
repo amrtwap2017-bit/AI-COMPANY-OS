@@ -10,18 +10,21 @@ import {
   Progress,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchKpis = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
   return response.json();
 };
 
 const fetchSla = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
   return response.json();
 };
 
 const fetchTrends = async () => {
-  const response = await fetch("/api/v1/ai/analytics/trends", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/trends`, { credentials: "include" });
   return response.json();
 };
 

@@ -13,18 +13,21 @@ import {
 } from "@/components/ui";
 import { useState, useEffect } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
   return response.json();
 };
 
 const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
   return response.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders/", {
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, {
     credentials: "include",
   });
   return response.json();

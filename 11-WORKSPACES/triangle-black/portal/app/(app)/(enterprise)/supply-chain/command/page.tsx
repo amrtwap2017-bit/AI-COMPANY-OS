@@ -5,18 +5,21 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchInventorySignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=inventory", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=inventory`, { credentials: "include" });
   return response.json();
 };
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-requests/", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
   return response.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders/", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
   return response.json();
 };
 

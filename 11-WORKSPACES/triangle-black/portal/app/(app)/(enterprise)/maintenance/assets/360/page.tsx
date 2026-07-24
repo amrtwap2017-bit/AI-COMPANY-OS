@@ -13,20 +13,23 @@ import {
   Progress,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch assets");
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch work orders");
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };

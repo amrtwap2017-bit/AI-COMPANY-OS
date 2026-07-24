@@ -5,13 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchMaintenanceData = async () => {
   const today = new Date().toISOString().slice(0, 10);
   const [signalsResponse, pmPlansResponse, wosResponse, assetsResponse] = await Promise.all([
-    fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" }),
-    fetch("/api/v1/maintenance/pm-plans", { credentials: "include" }),
-    fetch("/api/v1/work-orders", { credentials: "include" }),
-    fetch("/api/v1/assets", { credentials: "include" })
+    fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" }),
+    fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" }),
+    fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" }),
+    fetch(`${BACK}/api/v1/assets`, { credentials: "include" })
   ]);
 
   const [signals, pmPlans, wos, assets] = await Promise.all([

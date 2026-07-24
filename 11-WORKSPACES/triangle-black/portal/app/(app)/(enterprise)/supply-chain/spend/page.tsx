@@ -4,13 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders`, { credentials: "include" });
   return response.json();
 };
 
 const fetchVendors = async () => {
-  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
   return response.json();
 };
 

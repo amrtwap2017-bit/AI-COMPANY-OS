@@ -4,20 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };
 
 const fetchKpisSla = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch KPIs and SLA");
   return response.json();
 };
 
 const fetchSlas = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch SLAs");
   return response.json();
 };

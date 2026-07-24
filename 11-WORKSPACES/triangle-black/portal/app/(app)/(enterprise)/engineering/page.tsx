@@ -4,20 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch assets");
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=maintenance", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch maintenance signals");
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch KPIs");
   return response.json();
 };

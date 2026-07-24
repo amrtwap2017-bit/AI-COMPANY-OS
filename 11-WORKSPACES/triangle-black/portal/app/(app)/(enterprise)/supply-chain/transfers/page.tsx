@@ -4,18 +4,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchTransfers = async () => {
   try {
-    const response = await fetch("/api/v1/supply-chain/transfers", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/supply-chain/transfers`, { credentials: "include" });
     if (!response.ok) throw new Error("Failed to fetch transfers");
     return response.json();
   } catch (error) {
-    return fetch("/api/v1/inventory/transfers", { credentials: "include" }).then(response => response.json());
+    return fetch(`${BACK}/api/v1/inventory/transfers`, { credentials: "include" }).then(response => response.json());
   }
 };
 
 const fetchWarehouses = async () => {
-  const response = await fetch("/api/v1/supply-chain/warehouses", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/supply-chain/warehouses`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch warehouses");
   return response.json();
 };

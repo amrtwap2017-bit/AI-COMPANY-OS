@@ -4,23 +4,26 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchKpis = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
   return response.json();
 };
 
 const fetchSLA = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
   return response.json();
 };
 
 const fetchCosts = async () => {
-  const response = await fetch("/api/v1/ai/analytics/costs/summary", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/costs/summary`, { credentials: "include" });
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
   return response.json();
 };
 

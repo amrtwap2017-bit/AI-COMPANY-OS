@@ -12,15 +12,18 @@ import {
 } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchServiceRequests = async () => {
   try {
-    const response = await fetch("/api/v1/service-requests", {
+    const response = await fetch(`${BACK}/api/v1/service-requests`, {
       credentials: "include",
     });
     if (!response.ok) throw new Error("No service requests found");
     return response.json();
   } catch (error) {
-    return fetch("/api/v1/operations/service-requests", {
+    return fetch(`${BACK}/api/v1/operations/service-requests`, {
       credentials: "include",
     }).then((response) => response.json());
   }
@@ -56,7 +59,7 @@ const ServiceRequestsPage = () => {
     });
 
   const convertToWO = async (srId: string) => {
-    await fetch(`/api/v1/work-orders`, {
+    await fetch(`${BACK}/api/v1/work-orders`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ service_request_id: srId }),

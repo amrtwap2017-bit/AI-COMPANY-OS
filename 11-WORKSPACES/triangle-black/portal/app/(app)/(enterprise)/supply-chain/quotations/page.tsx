@@ -4,14 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchQuotations = async () => {
   try {
-    const response = await fetch("/api/v1/supply-chain/quotations", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/supply-chain/quotations`, { credentials: "include" });
     if (!response.ok) throw new Error("Not found");
     return response.json();
   } catch (error) {
     if (error.message === "Not found") {
-      const fallbackResponse = await fetch("/api/v1/quotations", { credentials: "include" });
+      const fallbackResponse = await fetch(`${BACK}/api/v1/quotations`, { credentials: "include" });
       if (!fallbackResponse.ok) throw new Error("Failed to fetch quotations");
       return fallbackResponse.json();
     }

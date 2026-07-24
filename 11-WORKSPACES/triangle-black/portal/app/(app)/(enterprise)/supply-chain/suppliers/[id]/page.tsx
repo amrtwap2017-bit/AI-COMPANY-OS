@@ -14,8 +14,11 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchVendor = async (id: string) => {
-  const response = await fetch(`/api/v1/inventory/vendors?id=${id}`, {
+  const response = await fetch(`${BACK}/api/v1/inventory/vendors?id=${id}`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch vendor");
@@ -23,7 +26,7 @@ const fetchVendor = async (id: string) => {
 };
 
 const fetchPurchaseOrders = async (vendor_id: string) => {
-  const response = await fetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`, {
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch purchase orders");
@@ -31,7 +34,7 @@ const fetchPurchaseOrders = async (vendor_id: string) => {
 };
 
 const fetchRFQs = async (vendor_reference: string) => {
-  const response = await fetch(`/api/v1/rfqs?vendor_reference=${vendor_reference}`, {
+  const response = await fetch(`${BACK}/api/v1/rfqs?vendor_reference=${vendor_reference}`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch RFQs");

@@ -14,14 +14,17 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchRfqs = async () => {
-  const response = await fetch("/api/v1/rfqs", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch RFQs");
   return response.json();
 };
 
 const fetchVendors = async () => {
-  const response = await fetch("/api/v1/inventory/vendors", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch vendors");
   return response.json();
 };

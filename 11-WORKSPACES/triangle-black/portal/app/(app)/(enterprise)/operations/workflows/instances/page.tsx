@@ -5,9 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchWorkflows = async () => {
   try {
-    const response = await fetch("/api/v1/workflows/instances", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/workflows/instances`, { credentials: "include" });
     if (response.ok) return response.json();
     throw new Error("Failed to fetch workflows");
   } catch (error) {
@@ -18,7 +21,7 @@ const fetchWorkflows = async () => {
 
 const fetchWorkOrders = async () => {
   try {
-    const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
     if (response.ok) return response.json();
     throw new Error("Failed to fetch work orders");
   } catch (error) {

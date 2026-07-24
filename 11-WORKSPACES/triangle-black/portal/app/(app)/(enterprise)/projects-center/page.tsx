@@ -12,21 +12,24 @@ import {
   Button,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchProjects = async () => {
-  const response = await fetch("/api/v1/projects", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
   if (!response.ok) throw new Error("No projects configured yet");
   return response.json();
 };
 
 const fetchWorkOrders = async (contractId: string) => {
-  const response = await fetch(`/api/v1/work-orders?contract_id=${contractId}`, {
+  const response = await fetch(`${BACK}/api/v1/work-orders?contract_id=${contractId}`, {
     credentials: "include",
   });
   return response.json();
 };
 
 const fetchAISignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
   return response.json();
 };
 

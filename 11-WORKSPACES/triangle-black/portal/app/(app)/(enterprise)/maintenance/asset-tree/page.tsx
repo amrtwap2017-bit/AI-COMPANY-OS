@@ -12,8 +12,11 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchAssets = async () => {
-  const response = await fetch("/api/v1/assets", {
+  const response = await fetch(`${BACK}/api/v1/assets`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch assets");
@@ -21,7 +24,7 @@ const fetchAssets = async () => {
 };
 
 const fetchPMPlans = async (assetId: number) => {
-  const response = await fetch(`/api/v1/maintenance/pm-plans/${assetId}`, {
+  const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans/${assetId}`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch PM plans");

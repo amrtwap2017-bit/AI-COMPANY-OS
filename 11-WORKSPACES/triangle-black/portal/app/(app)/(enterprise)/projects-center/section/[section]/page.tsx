@@ -14,8 +14,11 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchProjects = async (section: string) => {
-  const response = await fetch(`/api/v1/projects?section=${section}`, {
+  const response = await fetch(`${BACK}/api/v1/projects?section=${section}`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch projects");

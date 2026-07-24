@@ -3,8 +3,11 @@
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchTrends = async () => {
-  const response = await fetch("/api/v1/ai/analytics/trends", {
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/trends`, {
     credentials: "include",
   });
   if (!response.ok) {

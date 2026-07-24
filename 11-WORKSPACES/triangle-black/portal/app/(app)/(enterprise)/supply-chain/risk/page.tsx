@@ -11,26 +11,29 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch purchase orders");
   return response.json();
 };
 
 const fetchItems = async () => {
-  const response = await fetch("/api/v1/inventory/items", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/inventory/items`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch items");
   return response.json();
 };
 
 const fetchStockBalances = async () => {
-  const response = await fetch("/api/v1/supply-chain/stock-balances", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/supply-chain/stock-balances`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch stock balances");
   return response.json();
 };
 
 const fetchInventorySignals = async () => {
-  const response = await fetch("/api/v1/ai/signals?category=inventory", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals?category=inventory`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch inventory signals");
   return response.json();
 };

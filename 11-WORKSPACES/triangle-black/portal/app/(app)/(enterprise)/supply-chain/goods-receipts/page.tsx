@@ -12,8 +12,11 @@ import {
   Button,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchGoodsReceipts = async () => {
-  const response = await fetch("/api/v1/supply-chain/goods-receipts", {
+  const response = await fetch(`${BACK}/api/v1/supply-chain/goods-receipts`, {
     credentials: "include",
   });
   if (!response.ok) {
@@ -23,7 +26,7 @@ const fetchGoodsReceipts = async () => {
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch("/api/v1/inventory/purchase-orders/", {
+  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, {
     credentials: "include",
   });
   if (!response.ok) {
@@ -33,7 +36,7 @@ const fetchPurchaseOrders = async () => {
 };
 
 const createGoodsReceipt = async (data) => {
-  const response = await fetch("/api/v1/goods-receipts", {
+  const response = await fetch(`${BACK}/api/v1/goods-receipts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

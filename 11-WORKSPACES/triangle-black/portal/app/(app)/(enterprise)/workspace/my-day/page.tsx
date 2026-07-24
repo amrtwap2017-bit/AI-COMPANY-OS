@@ -15,20 +15,23 @@ import {
   Button
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchWorkOrders = async () => {
-  const response = await fetch("/api/v1/work-orders", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch work orders");
   return response.json();
 };
 
 const fetchTechnicians = async () => {
-  const response = await fetch("/api/v1/technicians", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/technicians`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch technicians");
   return response.json();
 };
 
 const fetchAISignalsSummary = async () => {
-  const response = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch AI signals summary");
   return response.json();
 };
@@ -134,7 +137,7 @@ const MyDayPage = () => {
                   {w.status === "open" && (
                     <Button
                       onClick={() => {
-                        fetch(`/api/v1/work-orders/${w.id}/status-update`, {
+                        fetch(`${BACK}/api/v1/work-orders/${w.id}/status-update`, {
                           method: "POST",
                           headers: { "Content-Type": "application/json", credentials: "include" },
                           body: JSON.stringify({ status: "in_progress" })

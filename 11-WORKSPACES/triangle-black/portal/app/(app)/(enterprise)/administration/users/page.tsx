@@ -12,8 +12,11 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchUsers = async () => {
-  const response = await fetch("/api/v1/auth/users", {
+  const response = await fetch(`${BACK}/api/v1/auth/users`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch users");
@@ -21,7 +24,7 @@ const fetchUsers = async () => {
 };
 
 const fetchTechnicians = async () => {
-  const response = await fetch("/api/v1/technicians", {
+  const response = await fetch(`${BACK}/api/v1/technicians`, {
     credentials: "include",
   });
   if (!response.ok) throw new Error("Failed to fetch technicians");

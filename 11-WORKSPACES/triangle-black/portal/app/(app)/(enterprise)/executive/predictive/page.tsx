@@ -4,26 +4,29 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };
 
 const fetchCostsSummary = async () => {
-  const response = await fetch("/api/v1/ai/analytics/costs/summary", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/costs/summary`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch costs summary");
   return response.json();
 };
 
 const fetchSLA = async () => {
-  const response = await fetch("/api/v1/ai/analytics/sla", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch SLA");
   return response.json();
 };
 
 const fetchKPIsLive = async () => {
-  const response = await fetch("/api/v1/ai/analytics/kpis/live", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch KPIs live");
   return response.json();
 };

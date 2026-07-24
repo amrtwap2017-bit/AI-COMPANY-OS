@@ -4,20 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import Link from "next/link";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchProjects = async () => {
-  const response = await fetch("/api/v1/projects", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch projects");
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch("/api/v1/ai/signals", { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch signals");
   return response.json();
 };
 
 const fetchWorkOrders = async (projectId: string) => {
-  const response = await fetch(`/api/v1/work-orders?project_id=${projectId}`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/work-orders?project_id=${projectId}`, { credentials: "include" });
   if (!response.ok) throw new Error("Failed to fetch work orders");
   return response.json();
 };

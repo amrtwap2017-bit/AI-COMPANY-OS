@@ -4,25 +4,28 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+
+
 const fetchRfqs = async () => {
   try {
-    const response = await fetch("/api/v1/rfqs", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
     if (!response.ok) throw new Error("Failed to fetch RFQs");
     return response.json();
   } catch (error) {
     console.error(error);
-    return fetch("/api/v1/supply-chain/rfqs", { credentials: "include" }).then(response => response.json());
+    return fetch(`${BACK}/api/v1/supply-chain/rfqs`, { credentials: "include" }).then(response => response.json());
   }
 };
 
 const fetchVendors = async () => {
   try {
-    const response = await fetch("/api/v1/supply-chain/vendors", { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/supply-chain/vendors`, { credentials: "include" });
     if (!response.ok) throw new Error("Failed to fetch vendors");
     return response.json();
   } catch (error) {
     console.error(error);
-    return fetch("/api/v1/inventory/vendors", { credentials: "include" }).then(response => response.json());
+    return fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" }).then(response => response.json());
   }
 };
 
