@@ -128,7 +128,7 @@ export default function SupplyChainWorkbenchPage() {
         badge="AI"
       />
 
-      <MetricStrip metrics={metrics} />
+      <MetricStrip metrics={Array.isArray(metrics) ? metrics : []} />
 
       {/* Category Tabs */}
       <SectionCard title="Inventory by Category">

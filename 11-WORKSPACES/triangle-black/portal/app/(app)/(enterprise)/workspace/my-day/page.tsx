@@ -101,9 +101,9 @@ const MyDayPage = () => {
       ) : (
         <>
           <SectionCard title="Today's Snapshot">
-            <MetricStrip
-              metrics={[
-                { label: "My Open WOs", value: openWOsCount, color: "bg-green-500" },
+            <MetricStrip metrics={Array.isArray([
+                { label: "My Open WOs", value: openWOsCount, color: "bg-green-500" ) ? [
+                { label: "My Open WOs", value: openWOsCount, color: "bg-green-500"  : []},
                 { label: "In Progress", value: inProgressCount, color: "bg-yellow-500" },
                 { label: "Completed Today", value: completedTodayCount, color: "bg-blue-500" },
                 { label: "Due Today", value: dueTodayCount, color: "bg-red-500" }

@@ -33,9 +33,9 @@ export default function TrendsPage() {
     <PageWrapper>
       <PageHeader title="Trends" />
       <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "6-Month Total WOs", value: summary.total_6_months },
+        <MetricStrip metrics={Array.isArray([
+            { label: "6-Month Total WOs", value: summary.total_6_months ) ? [
+            { label: "6-Month Total WOs", value: summary.total_6_months  : []},
             { label: "6-Month Completed", value: summary.completed_6_months },
             { label: "Avg Completion Rate %", value: (Number(summary.avg_completion_rate) || 0).toFixed(1) },
             { label: "Trend", value: summary.trend, badgeColor: trendBadgeColor },

@@ -81,9 +81,9 @@ const GoodsReceiptsPage = () => {
     <PageWrapper>
       <PageHeader title="Goods Receipts" />
       <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Receipts", value: totalReceipts },
+        <MetricStrip metrics={Array.isArray([
+            { label: "Total Receipts", value: totalReceipts ) ? [
+            { label: "Total Receipts", value: totalReceipts  : []},
             { label: "Pending Deliveries", value: pendingDeliveriesCount },
             { label: "This Month", value: thisMonthReceipts.length },
             {

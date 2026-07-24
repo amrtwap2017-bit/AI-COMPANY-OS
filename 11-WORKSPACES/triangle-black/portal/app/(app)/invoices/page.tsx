@@ -41,9 +41,9 @@ const InvoicesPage = () => {
     <PageWrapper>
       <PageHeader title="Invoice Management" />
       <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Invoices", value: totalInvoices },
+        <MetricStrip metrics={Array.isArray([
+            { label: "Total Invoices", value: totalInvoices ) ? [
+            { label: "Total Invoices", value: totalInvoices  : []},
             { label: "Total Value EGP", value: (Number(totalValueEGP) || 0).toFixed(2) + " EGP" },
             { label: "Pending", value: pendingCount, color: "bg-yellow-500" },
             { label: "Overdue", value: overdueCount, color: "bg-red-500" },

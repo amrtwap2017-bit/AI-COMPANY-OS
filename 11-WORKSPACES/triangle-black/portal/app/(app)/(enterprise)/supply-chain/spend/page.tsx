@@ -66,9 +66,9 @@ const SpendPage = () => {
     <PageWrapper>
       <PageHeader title="Procurement Spend Analysis" />
       <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total POs", value: totalPOs.toLocaleString() },
+        <MetricStrip metrics={Array.isArray([
+            { label: "Total POs", value: totalPOs.toLocaleString() ) ? [
+            { label: "Total POs", value: totalPOs.toLocaleString()  : []},
             { label: "Total Spend EGP", value: totalSpend.toLocaleString() },
             { label: "Avg PO Value EGP", value: avgPOValue },
             { label: "Active Vendors", value: activeVendors.toString() },

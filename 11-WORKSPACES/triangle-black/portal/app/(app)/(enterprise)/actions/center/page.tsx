@@ -76,8 +76,9 @@ export default function ActionsCenterPage() {
         badge={totalActions > 0 ? `${totalActions} Actions` : undefined}
       />
 
-      <MetricStrip metrics={[
-        { label: "Total Actions", value: totalActions },
+      <MetricStrip metrics={Array.isArray([
+        { label: "Total Actions", value: totalActions ) ? [
+        { label: "Total Actions", value: totalActions  : []},
         { label: "Critical",      value: criticalCount, color: criticalCount > 0 ? "red" as const : "slate" as const },
         { label: "Approvals",     value: pendingPRs.length, color: "amber" as const },
         { label: "Completed",     value: 0 },

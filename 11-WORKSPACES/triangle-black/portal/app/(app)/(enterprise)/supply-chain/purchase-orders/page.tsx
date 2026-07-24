@@ -52,9 +52,9 @@ const PurchaseOrdersPage = () => {
     <PageWrapper>
       <PageHeader title="Purchase Orders" />
       <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total POs", value: totalPOs },
+        <MetricStrip metrics={Array.isArray([
+            { label: "Total POs", value: totalPOs ) ? [
+            { label: "Total POs", value: totalPOs  : []},
             { label: "Pending", value: pendingPOs, color: "bg-yellow-200" },
             { label: "Approved", value: approvedPOs, color: "bg-green-200" },
             { label: "Received", value: receivedPOs, color: "bg-blue-200" },

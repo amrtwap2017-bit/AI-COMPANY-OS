@@ -52,14 +52,19 @@ export default function SLAPage() {
       <PageHeader title="SLA Analytics" />
       <div className="grid grid-cols-1 gap-4">
         <SectionCard title="Metrics">
-          <MetricStrip
-            metrics={[
+          <MetricStrip metrics={Array.isArray([
               {
                 label: "Overall Compliance %",
                 value: compliance_rate,
                 color:
                   compliance_rate >= 95 ? "green" : compliance_rate < 80 ? "red" : "amber",
-              },
+              ) ? [
+              {
+                label: "Overall Compliance %",
+                value: compliance_rate,
+                color:
+                  compliance_rate >= 95 ? "green" : compliance_rate < 80 ? "red" : "amber",
+               : []},
               { label: "SLA Target", value: sla_target, color: "gray" },
               { label: "Total WOs", value: total_work_orders, color: "gray" },
               { label: "Completed", value: completed, color: "green" },

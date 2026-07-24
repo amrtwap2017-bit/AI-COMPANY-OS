@@ -29,7 +29,7 @@ export default function DailyReviewPage() {
 
   if (signalsQuery.isLoading || kpisSlaQuery.isLoading || slaQuery.isLoading) return <LoadingState />;
 
-  const signals = (signalsQuery.data || []).sort((a: any, b: any) => (b.priority||0) - (a.priority||0));
+  const signals = (Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || [])).sort((a: any, b: any) => (b.priority||0) - (a.priority||0));
   const totalWOs = 72;
   const openWOs = 41;
   const criticalWOs = 11;
@@ -39,9 +39,9 @@ export default function DailyReviewPage() {
   return (
     <PageWrapper>
       <PageHeader title={new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })} />
-      <MetricStrip
-        metrics={[
-          { label: "Critical WOs", value: criticalWOs, color: "red" },
+      <MetricStrip metrics={Array.isArray([
+          { label: "Critical WOs", value: criticalWOs, color: "red" ) ? [
+          { label: "Critical WOs", value: criticalWOs, color: "red"  : []},
           { label: "SLA Compliance %", value: (Number(compliancePercentage) || 0).toFixed(1), color: compliancePercentage < targetSLA ? "orange" : "green" },
           { label: "Active Signals", value: (signals || []).length, color: "blue" },
           { label: "Technician Utilization %", value: 85, color: "purple" }

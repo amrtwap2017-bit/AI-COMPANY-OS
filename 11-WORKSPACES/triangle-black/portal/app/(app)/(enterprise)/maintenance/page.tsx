@@ -40,9 +40,9 @@ const MaintenancePage = () => {
   return (
     <PageWrapper>
       <PageHeader title="Maintenance Hub" />
-      <MetricStrip
-        metrics={[
-          { label: "Total Assets", value: totalAssets },
+      <MetricStrip metrics={Array.isArray([
+          { label: "Total Assets", value: totalAssets ) ? [
+          { label: "Total Assets", value: totalAssets  : []},
           { label: "In Fault", value: inFaultCount, badge: <StatusBadge status="in-fault" /> },
           { label: "Active PM Plans", value: activePMPlans },
           { label: "Maintenance Signals", value: maintenanceSignals.length }

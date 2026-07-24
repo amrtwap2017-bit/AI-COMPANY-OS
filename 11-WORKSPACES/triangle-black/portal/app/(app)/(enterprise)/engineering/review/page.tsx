@@ -69,8 +69,9 @@ export default function EngineeringReviewPage() {
         badge={`${overallRate}% Completion`}
       />
 
-      <MetricStrip metrics={[
-        { label: "Engineering WOs",  value: engWOs.length },
+      <MetricStrip metrics={Array.isArray([
+        { label: "Engineering WOs",  value: engWOs.length ) ? [
+        { label: "Engineering WOs",  value: engWOs.length  : []},
         { label: "Completion Rate",  value: `${overallRate}%`, color: overallRate >= 80 ? "green" as const : overallRate >= 50 ? "amber" as const : "red" as const },
         { label: "Critical Open",    value: criticalOpen.length, color: criticalOpen.length > 0 ? "red" as const : "slate" as const },
         { label: "Assets in Fault",  value: faultAssets.length, color: faultAssets.length > 0 ? "red" as const : "slate" as const },

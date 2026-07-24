@@ -41,9 +41,9 @@ const SupplyChainCommandPage = () => {
       <PageHeader title="Supply Chain Command Center" />
       <div className="flex justify-between items-center mb-4">
         <StatusBadge status={status} />
-        <MetricStrip
-          metrics={[
-            { label: "Pending PRs", value: pendingPRs },
+        <MetricStrip metrics={Array.isArray([
+            { label: "Pending PRs", value: pendingPRs ) ? [
+            { label: "Pending PRs", value: pendingPRs  : []},
             { label: "Active POs", value: activePOs },
             { label: "Inventory Alerts", value: inventoryAlerts },
             { label: "Vendors Count", value: vendorsCount }
