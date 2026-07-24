@@ -50,7 +50,7 @@ export default function ActionsCenterPage() {
   });
 
   const signals = sigsData.signals || [];
-  const pendingPRs = prs.filter((p) => p.status === "draft" || p.status === "pending");
+  const pendingPRs = (Array.isArray(prs) ? prs : []).filter((p) => p.status === "draft" || p.status === "pending");
   const criticalWOs = (wos || []).filter((w) => w.priority === "critical" && w.status === "open");
 
   const totalActions = (signals || []).length + pendingPRs.length + criticalWOs.length;

@@ -96,7 +96,7 @@ export default function WorkflowDesignerPage() {
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   const [hoveredState,   setHoveredState]   = useState<string | null>(null);
 
-  const { data: signals } = useQuery({
+  const { data: signals = [] } = useQuery({
     queryKey: ["signals-v2"],
     queryFn: () => authFetchJSON("/api/v1/ai/signals/v2"),
     staleTime: 60_000,

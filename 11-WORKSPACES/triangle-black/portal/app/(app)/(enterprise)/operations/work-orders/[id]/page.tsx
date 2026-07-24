@@ -46,7 +46,7 @@ export default function WorkOrderDetailPage() {
     enabled: !!id,
   });
 
-  const { data: pdfUrl } = useQuery({
+  const { data: pdfUrl = [] } = useQuery({
     queryKey: ["wo-pdf", id],
     queryFn: () => Promise.resolve(`/api/v1/pdf-export/work-order/${id}`),
     enabled: !!id,

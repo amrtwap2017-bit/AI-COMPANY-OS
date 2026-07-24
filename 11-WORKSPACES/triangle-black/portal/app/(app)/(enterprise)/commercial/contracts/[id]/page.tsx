@@ -18,7 +18,7 @@ export default function ContractDetailPage() {
     enabled: !!id,
   });
 
-  const { data: graph } = useQuery({
+  const { data: graph = [] } = useQuery({
     queryKey: ["contract-graph", id],
     queryFn: () => authFetch(`/api/v1/knowledge-graph/entity/contract/${id}`).then(r => r.json()),
     enabled: !!id,

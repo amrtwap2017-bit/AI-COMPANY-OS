@@ -32,13 +32,13 @@ export default function AssetDetailPage() {
     enabled: !!id,
   });
 
-  const { data: relationships } = useQuery({
+  const { data: relationships = [] } = useQuery({
     queryKey: ["asset-graph", id],
     queryFn: () => authFetch(`/api/v1/knowledge-graph/entity/asset/${id}`).then(r => r.json()),
     enabled: !!id,
   });
 
-  const { data: healthData } = useQuery({
+  const { data: healthData = [] } = useQuery({
     queryKey: ["asset-health", id],
     queryFn: () => authFetch(`/api/v1/predictive-maintenance/health-scores`)
       .then(r => r.json())
@@ -46,7 +46,7 @@ export default function AssetDetailPage() {
     enabled: !!id,
   });
 
-  const { data: warranties } = useQuery({
+  const { data: warranties = [] } = useQuery({
     queryKey: ["asset-warranty", id],
     queryFn: () => authFetch(`/api/v1/warranty/asset/${id}`).then(r => r.json()),
     enabled: !!id,
