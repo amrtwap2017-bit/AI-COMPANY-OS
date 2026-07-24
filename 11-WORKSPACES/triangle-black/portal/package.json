@@ -46,5 +46,12 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.4.11",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@tanstack/react-query": "5.101.2",
+    "@tanstack/query-core": "5.101.2"
+  },
+  "resolutions": {
+    "@tanstack/react-query": "5.101.2"
   }
 }
