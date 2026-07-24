@@ -1,6 +1,6 @@
 "use client"; // @ts-nocheck
 
-import { useQuery } from "@tanstack/react-query";;
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 

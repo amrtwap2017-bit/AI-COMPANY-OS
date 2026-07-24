@@ -1,6 +1,6 @@
 "use client"; // @ts-nocheck
 
-import { useQuery, useMutation } from "@tanstack/react-query";;
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   PageWrapper,
   PageHeader,

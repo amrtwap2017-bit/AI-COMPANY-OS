@@ -1,9 +1,8 @@
 // @ts-nocheck
 // Triangle Black - Enterprise Breadcrumb
-// Fix: Added "use client" directive (uses usePathname hook)
+"use client"; // @ts-nocheck
 // Fix: Home links to /workspace not /dashboard
 // Fix: Extended label map for all enterprise routes
-"use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";

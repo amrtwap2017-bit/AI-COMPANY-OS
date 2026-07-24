@@ -1,6 +1,6 @@
 "use client"; // @ts-nocheck
 
-import { useQuery } from "@tanstack/react-query";;
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import {
   PageWrapper, PageHeader, SectionCard,

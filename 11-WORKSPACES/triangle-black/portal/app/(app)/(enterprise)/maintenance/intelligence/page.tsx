@@ -1,5 +1,5 @@
 "use client"; // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";;
+import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { AlertTriangle, Activity, TrendingDown, CheckCircle } from "lucide-react";

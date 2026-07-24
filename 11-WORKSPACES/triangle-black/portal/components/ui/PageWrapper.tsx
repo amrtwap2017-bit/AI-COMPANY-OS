@@ -1,7 +1,6 @@
 // @ts-nocheck
 // Triangle Black - Page Wrapper
-// TB-001: Added "use client" - required because Breadcrumb uses usePathname
-"use client";
+"use client"; // @ts-nocheck
 import { Breadcrumb } from "./Breadcrumb";
 
 interface PageWrapperProps {
