@@ -80,7 +80,7 @@ def delete(
 @router.post("/{pr_id}/approve", status_code=200)
 def approve(
     pr_id: str,
-    payload: PurchaseRequestApprovalPayload,
+    payload: dict,
     db: Session = Depends(get_db),
     _: User = Depends(require_manager),
     hotel_id: str = Depends(get_hotel_id),
