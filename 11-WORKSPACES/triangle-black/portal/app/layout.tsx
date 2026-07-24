@@ -1,7 +1,9 @@
-// Root layout — Server Component
-// QueryClientProvider lives in Providers (client component)
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 import { Providers } from "./providers";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Triangle Black",
@@ -15,11 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body>
-        <Providers>{children}</Providers>
+      <body className={inter.className}>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
