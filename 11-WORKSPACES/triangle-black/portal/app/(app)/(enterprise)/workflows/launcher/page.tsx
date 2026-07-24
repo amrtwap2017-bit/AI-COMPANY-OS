@@ -46,7 +46,7 @@ const WorkflowLauncherPage = () => {
       <PageHeader title="Workflow Launcher" description="Start a workflow from anywhere in the platform" />
       {(workflows || []).map((category, index) => (
         <SectionCard key={index} title={category.category}>
-          {(category.items || []).map((item, i) => (
+          {(Array.isArray(category.items) ? category.items : []).map((item, i) => (
             <div
               key={i}
               className={`flex items-center justify-between p-4 hover:bg-gray-100 rounded-md ${

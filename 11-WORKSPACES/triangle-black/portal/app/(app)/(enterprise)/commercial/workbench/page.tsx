@@ -36,12 +36,12 @@ const CommercialWorkbenchPage = () => {
 
   if (leadsQuery.isError || contractsQuery.isError || signalsQuery.isError) return <EmptyState />;
 
-  const todayLeads = (leadsQuery.data || []).filter(lead => lead.created_at.startsWith(getToday()));
+  const todayLeads = (Array.isArray(leadsQuery.data) ? leadsQuery.data : []).filter(lead => lead.created_at.startsWith(getToday()));
   const hotLeads = leadsQuery.data
     .filter(lead => ["negotiation", "qualified"].includes(lead.status))
     .sort((a: any, b: any) => b.value - a.value)
     .slice(0, 5);
-  const contractRenewals = (contractsQuery.data || []).filter(contract => {
+  const contractRenewals = (Array.isArray(contractsQuery.data) ? contractsQuery.data : []).filter(contract => {
     const endDate = new Date(contract.end_date);
     return endDate >= new Date() && endDate <= new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
   });
@@ -57,12 +57,12 @@ const CommercialWorkbenchPage = () => {
         />
         <MetricStrip
           title="Won This Week"
-          value={(contractsQuery.data || []).filter(contract => contract.status === "won").length}
+          value={(Array.isArray(contractsQuery.data) ? contractsQuery.data : []).filter(contract => contract.status === "won").length}
           icon="/icons/won.svg"
         />
         <MetricStrip
           title="Active Contracts"
-          value={(contractsQuery.data || []).filter(contract => contract.status !== "won").length}
+          value={(Array.isArray(contractsQuery.data) ? contractsQuery.data : []).filter(contract => contract.status !== "won").length}
           icon="/icons/active-contracts.svg"
         />
         <MetricStrip

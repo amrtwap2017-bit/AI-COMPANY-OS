@@ -35,8 +35,8 @@ const EngineeringActionsPage = () => {
 
   if (woQuery.isError || signalsQuery.isError || pmPlansQuery.isError) return <EmptyState />;
 
-  const criticalWos = (woQuery.data || []).filter((wo: any) => wo.priority === "critical" && ["hvac", "electrical", "mechanical"].includes(wo.type));
-  const overduePmPlans = (pmPlansQuery.data || []).filter((plan: any) => new Date(plan.next_due_date) < new Date());
+  const criticalWos = (Array.isArray(woQuery.data) ? woQuery.data : []).filter((wo: any) => wo.priority === "critical" && ["hvac", "electrical", "mechanical"].includes(wo.type));
+  const overduePmPlans = (Array.isArray(pmPlansQuery.data) ? pmPlansQuery.data : []).filter((plan: any) => new Date(plan.next_due_date) < new Date());
   const maintenanceSignals = signalsQuery.data;
 
   return (

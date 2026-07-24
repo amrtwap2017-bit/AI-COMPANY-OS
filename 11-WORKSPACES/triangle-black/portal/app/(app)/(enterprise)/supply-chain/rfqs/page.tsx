@@ -14,13 +14,13 @@ const fetchRfqs = async () => {
     return response.json();
   } catch (error) {
     console.error(error);
-    return fetch(`${BACK}/api/v1/supply-chain/rfqs`, { credentials: "include" }).then(response => response.json());
+    return fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" }).then(response => response.json());
   }
 };
 
 const fetchVendors = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/supply-chain/vendors`, { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/inventory-vendors`, { credentials: "include" });
     if (!response.ok) return [];
     return response.json();
   } catch (error) {

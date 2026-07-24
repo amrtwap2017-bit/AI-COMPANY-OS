@@ -33,7 +33,7 @@ export default function SettingsPage() {
           <div key={section.title}>
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{section.title}</h2>
             <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
-              {(section.items || []).map(item=>(
+              {(Array.isArray(section.items) ? section.items : []).map(item=>(
                 <Link key={item.href} href={item.href}
                   className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors flex-shrink-0">

@@ -18,7 +18,7 @@ async function fetchVendors() {
 }
 async function fetchPOs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);

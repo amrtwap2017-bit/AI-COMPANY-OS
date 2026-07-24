@@ -20,7 +20,7 @@ async function fetchInventory(category) {
 }
 async function fetchPRs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);

@@ -18,7 +18,7 @@ const fetchTransfers = async () => {
 };
 
 const fetchWarehouses = async () => {
-  const response = await fetch(`${BACK}/api/v1/supply-chain/warehouses`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/warehouses`, { credentials: "include" });
   if (!response.ok) return [];
   return response.json();
 };
@@ -37,11 +37,11 @@ const TransferPage = () => {
         />
         <MetricStrip
           title="Pending"
-          value={transfersQuery.data ? (transfersQuery.data || []).filter(t => t.status === "pending").length : 0}
+          value={transfersQuery.data ? (Array.isArray(transfersQuery.data) ? transfersQuery.data : []).filter(t => t.status === "pending").length : 0}
         />
         <MetricStrip
           title="Completed"
-          value={transfersQuery.data ? (transfersQuery.data || []).filter(t => t.status === "completed").length : 0}
+          value={transfersQuery.data ? (Array.isArray(transfersQuery.data) ? transfersQuery.data : []).filter(t => t.status === "completed").length : 0}
         />
         <MetricStrip
           title="Warehouses Count"
@@ -53,7 +53,7 @@ const TransferPage = () => {
         {warehousesQuery.isError && <EmptyState message="Failed to fetch warehouses" />}
         {warehousesQuery.isSuccess && (
           <ul className="grid grid-cols-1 gap-4">
-            {(warehousesQuery.data || []).map(warehouse => (
+            {(Array.isArray(warehousesQuery.data) ? warehousesQuery.data : []).map(warehouse => (
               <li key={warehouse.id} className="bg-white p-4 rounded-lg shadow-md">
                 <strong>{warehouse.name}</strong> - {warehouse.location}
               </li>
@@ -71,7 +71,7 @@ const TransferPage = () => {
         )}
         {transfersQuery.isSuccess && (transfersQuery.data || []).length > 0 && (
           <ul className="grid grid-cols-1 gap-4">
-            {(transfersQuery.data || []).map(transfer => (
+            {(Array.isArray(transfersQuery.data) ? transfersQuery.data : []).map(transfer => (
               <li key={transfer.id} className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
                 <div>
                   From: {transfer.from_warehouse.name}, To: {transfer.to_warehouse.name}

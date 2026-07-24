@@ -8,7 +8,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchVendors = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/supply-chain/vendors`, { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/inventory-vendors`, { credentials: "include" });
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -18,7 +18,7 @@ const fetchVendors = async () => {
 
 const fetchRFQs = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/supply-chain/rfqs`, { credentials: "include" });
+    const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -27,7 +27,7 @@ const fetchRFQs = async () => {
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
   if (!response.ok) return [];
   return await response.json();
 };

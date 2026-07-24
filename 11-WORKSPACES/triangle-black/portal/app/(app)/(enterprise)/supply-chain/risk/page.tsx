@@ -27,7 +27,7 @@ const fetchItems = async () => {
 };
 
 const fetchStockBalances = async () => {
-  const response = await fetch(`${BACK}/api/v1/supply-chain/stock-balances`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/stock-balances`, { credentials: "include" });
   if (!response.ok) return [];
   return response.json();
 };

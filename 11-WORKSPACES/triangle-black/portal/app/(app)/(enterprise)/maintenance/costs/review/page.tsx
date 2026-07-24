@@ -27,7 +27,7 @@ const fetchAssets = async () => {
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, {
+  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, {
     credentials: "include",
   });
   return response.json();

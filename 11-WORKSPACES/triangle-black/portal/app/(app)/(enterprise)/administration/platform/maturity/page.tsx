@@ -175,7 +175,7 @@ export default function PlatformMaturityPage() {
       {/* Category breakdown */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {MATURITY_BENCHMARKS.map(cat => {
-          const catScore = (cat.items || []).reduce((s: any, i: any) => s + i.score, 0);
+          const catScore = (Array.isArray(cat.items) ? cat.items : []).reduce((s: any, i: any) => s + i.score, 0);
           const catMax   = (cat.items || []).length * 10;
           const catPct   = Math.round(catScore / catMax * 100);
           return (
@@ -187,7 +187,7 @@ export default function PlatformMaturityPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                {(cat.items || []).map(item => (
+                {(Array.isArray(cat.items) ? cat.items : []).map(item => (
                   <div key={item.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {item.status === "complete"

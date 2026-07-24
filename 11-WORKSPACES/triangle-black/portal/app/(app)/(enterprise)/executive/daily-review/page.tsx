@@ -29,7 +29,7 @@ export default function DailyReviewPage() {
 
   if (signalsQuery.isLoading || kpisSlaQuery.isLoading || slaQuery.isLoading) return <LoadingState />;
 
-  const signals = (signalsQuery.data || []).sort((a: any, b: any) => (b.priority||0) - (a.priority||0));
+  const signals = (Array.isArray(signalsQuery.data) ? signalsQuery.data : []).sort((a: any, b: any) => (b.priority||0) - (a.priority||0));
   const totalWOs = 72;
   const openWOs = 41;
   const criticalWOs = 11;

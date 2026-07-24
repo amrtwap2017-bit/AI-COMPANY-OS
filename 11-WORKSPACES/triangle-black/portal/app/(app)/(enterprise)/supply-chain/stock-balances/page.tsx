@@ -8,7 +8,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchStockBalances = async () => {
-  const response = await fetch(`${BACK}/api/v1/supply-chain/stock-balances`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/stock-balances`, { credentials: "include" });
   if (!response.ok) return [];
   return response.json();
 };
@@ -20,7 +20,7 @@ const fetchItems = async () => {
 };
 
 const fetchWarehouses = async () => {
-  const response = await fetch(`${BACK}/api/v1/supply-chain/warehouses`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/warehouses`, { credentials: "include" });
   if (!response.ok) return [];
   return response.json();
 };

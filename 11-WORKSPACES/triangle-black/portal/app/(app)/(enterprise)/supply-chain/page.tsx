@@ -9,12 +9,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
   return response.json();
 };
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
+  const response = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
   return response.json();
 };
 
