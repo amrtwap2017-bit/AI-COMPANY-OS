@@ -31,7 +31,7 @@ const CustomerHubPage = () => {
   const invoices = invoicesQuery.data;
 
   const uniqueClients = Array.from(new Set((contracts || []).map(contract => contract.client_name)));
-  const totalRevenue = invoices.reduce((acc: any, invoice: any) => acc + invoice.revenue, 0);
+  const totalRevenue = (invoices || []).reduce((acc: any, invoice: any) => acc + invoice.revenue, 0);
   const expiringSoon = (contracts || []).filter(contract => Date.now() - new Date(contract.end_date).getTime() < 60 * 24 * 60 * 1000);
 
   const topClientsByValue = uniqueClients

@@ -24,11 +24,11 @@ const SupplierInvoicesPage = () => {
   if (isError || !invoices) return <EmptyState title="No supplier invoices recorded" description="Please create an invoice via the PO workflow." />;
 
   const totalInvoices = invoices.length;
-  const pendingPayment = invoices.filter(i => i.status === "Pending").length;
-  const overdue = invoices.filter(i => new Date(i.due_date) < new Date() && i.status !== "Paid").length;
-  const totalAmount = invoices.reduce((acc: any, curr: any) => acc + curr.amount, 0);
+  const pendingPayment = (invoices || []).filter(i => i.status === "Pending").length;
+  const overdue = (invoices || []).filter(i => new Date(i.due_date) < new Date() && i.status !== "Paid").length;
+  const totalAmount = (invoices || []).reduce((acc: any, curr: any) => acc + curr.amount, 0);
 
-  const filteredInvoices = invoices.filter(invoice => {
+  const filteredInvoices = (invoices || []).filter(invoice => {
     if (statusFilter === "All") return true;
     if (statusFilter === "Pending" && invoice.status === "Pending") return true;
     if (statusFilter === "Paid" && invoice.status === "Paid") return true;

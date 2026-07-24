@@ -147,7 +147,7 @@ export default function ContractDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((inv: any) => (
+                    {(invoices || []).map((inv: any) => (
                       <tr key={inv.id} className="border-b border-slate-50 hover:bg-slate-50">
                         <td className="py-2 font-mono text-xs text-slate-500">{inv.id?.slice(0,8)}</td>
                         <td className="py-2">

@@ -34,7 +34,7 @@ const MyComponent = () => {
   }
 
   const signals = (signalsQuery.data?.signals || signalsQuery.data || []).filter(signal => signal.category === "engineering");
-  const criticalSignals = signals.filter(signal => signal.priority === "critical");
+  const criticalSignals = (signals || []).filter(signal => signal.priority === "critical");
   const openWorkOrders = kpisQuery.data?.(open_work_orders || []).filter(wo => wo.status === "open");
 
   const assets = assetsQuery.data;

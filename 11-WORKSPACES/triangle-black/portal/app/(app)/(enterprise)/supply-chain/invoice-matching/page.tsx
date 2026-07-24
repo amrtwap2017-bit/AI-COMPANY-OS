@@ -36,8 +36,8 @@ const InvoiceMatchingPage = () => {
   if (isLoading || isFetching) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
 
-  const matchedInvoices = purchaseOrders.filter(po => supplierInvoices.some(inv => inv.po_id === po.id));
-  const unmatchedPOs = purchaseOrders.filter(po => !supplierInvoices.some(inv => inv.po_id === po.id));
+  const matchedInvoices = (purchaseOrders || []).filter(po => supplierInvoices.some(inv => inv.po_id === po.id));
+  const unmatchedPOs = (purchaseOrders || []).filter(po => !supplierInvoices.some(inv => inv.po_id === po.id));
 
   return (
     <PageWrapper>
@@ -48,7 +48,7 @@ const InvoiceMatchingPage = () => {
             { label: "Total POs", value: purchaseOrders.length },
             { label: "Matched Invoices", value: matchedInvoices.length },
             { label: "Unmatched POs", value: unmatchedPOs.length },
-            { label: "Total PO Value EGP", value: purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0) }
+            { label: "Total PO Value EGP", value: (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0) }
           ]}
         />
       </SectionCard>
@@ -66,7 +66,7 @@ const InvoiceMatchingPage = () => {
               </tr>
             </thead>
             <tbody>
-              {purchaseOrders.map(po => (
+              {(purchaseOrders || []).map(po => (
                 <tr key={po.id}>
                   <td>{po.po_number}</td>
                   <td>{/* Fetch vendor name from API */}</td>

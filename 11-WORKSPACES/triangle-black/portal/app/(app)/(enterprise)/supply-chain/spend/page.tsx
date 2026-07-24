@@ -31,16 +31,16 @@ const SpendPage = () => {
 
   const purchaseOrders = purchaseOrdersQuery.data;
   const totalPOs = purchaseOrders.length;
-  const totalSpend = purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0);
+  const totalSpend = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0);
   const avgPOValue = totalPOs > 0 ? (totalSpend / totalPOs).toLocaleString() : "N/A";
-  const activeVendors = new Set(purchaseOrders.map(po => po.vendor_id)).size;
+  const activeVendors = new Set((purchaseOrders || []).map(po => po.vendor_id)).size;
 
-  const statusCounts = purchaseOrders.reduce((acc: any, po: any) => {
+  const statusCounts = (purchaseOrders || []).reduce((acc: any, po: any) => {
     acc[po.status] = (acc[po.status] || 0) + 1;
     return acc;
   }, {} as { [key: string]: number });
 
-  const vendorSpend = purchaseOrders.reduce((acc: any, po: any) => {
+  const vendorSpend = (purchaseOrders || []).reduce((acc: any, po: any) => {
     const vendor = (vendors || []).find(vendor => vendor.id === po.vendor_id);
     if (vendor) {
       acc[vendor.name] = (acc[vendor.name] || 0) + po.total_amount;
@@ -52,7 +52,7 @@ const SpendPage = () => {
     .sort((a: any, b: any) => b[1] - a[1])
     .slice(0, 5);
 
-  const monthlyTrend = purchaseOrders.reduce((acc: any, po: any) => {
+  const monthlyTrend = (purchaseOrders || []).reduce((acc: any, po: any) => {
     const month = new Date(po.created_at).toLocaleString("default", { month: "long" });
     acc[month] = (acc[month] || { count: 0, totalAmount: 0 });
     acc[month].count++;

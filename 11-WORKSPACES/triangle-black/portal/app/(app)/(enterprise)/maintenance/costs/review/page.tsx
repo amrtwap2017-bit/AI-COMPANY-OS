@@ -67,7 +67,7 @@ export default function MaintenanceCostsReviewPage() {
     }, 0) / totalWOsClosed;
 
   const poCount = purchaseOrders.length;
-  const poTotalValueEGP = purchaseOrders.reduce((acc: any, po: any) => acc + po.amount, 0);
+  const poTotalValueEGP = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.amount, 0);
 
   const workOrderTypeCounts = completedWorkOrders.reduce((acc: any, wo: any) => {
     if (!acc[wo.type]) {
@@ -90,7 +90,7 @@ export default function MaintenanceCostsReviewPage() {
     )
     .slice(0, 5);
 
-  const recentPOs = purchaseOrders.slice(-5);
+  const recentPOs = (purchaseOrders || []).slice(-5);
 
   return (
     <PageWrapper>

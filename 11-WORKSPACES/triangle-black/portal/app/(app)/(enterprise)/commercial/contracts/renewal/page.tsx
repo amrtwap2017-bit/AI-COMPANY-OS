@@ -31,7 +31,7 @@ const ContractRenewalPage = () => {
   const activeContracts = (contracts || []).filter(c => c.status === "active").length;
   const expiringSoon = (contracts || []).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90).length;
   const expiringUrgently = (contracts || []).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 30).length;
-  const totalValueEGP = contracts.reduce((acc: any, c: any) => acc + c.contract_value, 0);
+  const totalValueEGP = (contracts || []).reduce((acc: any, c: any) => acc + c.contract_value, 0);
 
   return (
     <PageWrapper>

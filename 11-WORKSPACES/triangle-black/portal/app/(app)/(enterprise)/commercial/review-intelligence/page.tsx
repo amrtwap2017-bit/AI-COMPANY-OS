@@ -58,7 +58,7 @@ const CommercialReviewIntelligencePage = () => {
   }).reverse();
 
   // Best performing stage
-  const bestStage = leads.reduce((acc: any, lead: any) => {
+  const bestStage = (leads || []).reduce((acc: any, lead: any) => {
     if (!acc[lead.status]) acc[lead.status] = 0;
     acc[lead.status]++;
     return acc;

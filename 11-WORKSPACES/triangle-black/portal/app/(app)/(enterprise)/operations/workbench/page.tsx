@@ -40,7 +40,7 @@ const DashboardPage = () => {
     <PageWrapper>
       <PageHeader title="Dashboard" />
       <SectionCard title="Signals">
-        {signals.map((signal: any) => (
+        {(signals || []).map((signal: any) => (
           <div key={signal.id} className="flex items-center mt-1">
             <StatusBadge category={signal.category} />
             <StatusBadge priority={signal.priority} />

@@ -59,12 +59,12 @@ const ReviewPage = () => {
   }
 
   const totalPOs = purchaseOrders.length;
-  const totalSpendEGP = purchaseOrders.reduce(
+  const totalSpendEGP = (purchaseOrders || []).reduce(
     (acc, po) => acc + po.total_spend_egp,
     0
   );
-  const activeVendors = new Set(purchaseOrders.map(po => po.vendor_id)).size;
-  const avgLeadTime = purchaseOrders.reduce(
+  const activeVendors = new Set((purchaseOrders || []).map(po => po.vendor_id)).size;
+  const avgLeadTime = (purchaseOrders || []).reduce(
     (acc, po) => acc + po.lead_time_days,
     0
   ) / totalPOs;
@@ -73,7 +73,7 @@ const ReviewPage = () => {
   if (purchaseOrders.some(po => new Date(po.created_at) < new Date() - 30 * 24 * 60 * 60 * 1000)) {
     procurementHealthScore -= 10;
   }
-  purchaseOrders.forEach(po => {
+  (purchaseOrders || []).forEach(po => {
     if (po.out_of_stock_signal) {
       procurementHealthScore -= 5;
     }
@@ -81,7 +81,7 @@ const ReviewPage = () => {
 
   const vendorPerformance = (vendors || []).map(vendor => ({
     ...vendor,
-    poCount: purchaseOrders.filter(po => po.vendor_id === vendor.id).length,
+    poCount: (purchaseOrders || []).filter(po => po.vendor_id === vendor.id).length,
   })).sort((a: any, b: any) => b.poCount - a.poCount).slice(0, 5);
 
   return (

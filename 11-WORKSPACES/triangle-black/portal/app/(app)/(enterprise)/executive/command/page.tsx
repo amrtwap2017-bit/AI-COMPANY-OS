@@ -37,7 +37,7 @@ const ExecutiveCommandPage = () => {
   const criticalSignalsCount = signals?.critical || 0;
   const status = criticalSignalsCount > 0 ? "CRITICAL ALERT" : "NOMINAL";
 
-  const topSignals = signals?.top_signals.slice(0, 3);
+  const topSignals = signals?.top_(signals || []).slice(0, 3);
 
   return (
     <PageWrapper>

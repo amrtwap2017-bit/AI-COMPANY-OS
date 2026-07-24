@@ -39,9 +39,9 @@ const QueuePage = () => {
 
   if (prLoading || poLoading || rfqLoading) return <LoadingState />;
 
-  const urgentPRs = purchaseRequests.filter((pr: any) => pr.urgency === "urgent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
-  const pendingPOs = purchaseOrders.filter((po: any) => ["pending", "approved"].includes(po.status)).sort((a: any, b: any) => new Date(b.expected_delivery) - new Date(a.expected_delivery));
-  const awaitingQuotes = rfqs.filter((rfq: any) => rfq.status === "sent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
+  const urgentPRs = (purchaseRequests || []).filter((pr: any) => pr.urgency === "urgent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
+  const pendingPOs = (purchaseOrders || []).filter((po: any) => ["pending", "approved"].includes(po.status)).sort((a: any, b: any) => new Date(b.expected_delivery) - new Date(a.expected_delivery));
+  const awaitingQuotes = (rfqs || []).filter((rfq: any) => rfq.status === "sent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
 
   setTotalQueueItems(urgentPRs.length + pendingPOs.length + awaitingQuotes.length);
 
@@ -50,9 +50,9 @@ const QueuePage = () => {
       <PageHeader title="Procurement Queue" badge={<StatusBadge type="info">{totalQueueItems}</StatusBadge>} />
       <MetricStrip
         items={[
-          { label: "PRs Pending", value: purchaseRequests.filter((pr: any) => ["draft", "pending"].includes(pr.status)).length, color: "primary" },
-          { label: "POs Active", value: purchaseOrders.filter((po: any) => !["received", "cancelled"].includes(po.status)).length, color: "success" },
-          { label: "Open RFQs", value: rfqs.filter((rfq: any) => rfq.status === "sent").length, color: "warning" },
+          { label: "PRs Pending", value: (purchaseRequests || []).filter((pr: any) => ["draft", "pending"].includes(pr.status)).length, color: "primary" },
+          { label: "POs Active", value: (purchaseOrders || []).filter((po: any) => !["received", "cancelled"].includes(po.status)).length, color: "success" },
+          { label: "Open RFQs", value: (rfqs || []).filter((rfq: any) => rfq.status === "sent").length, color: "warning" },
           { label: "Total Queue Items", value: totalQueueItems, color: "info" },
         ]}
       />

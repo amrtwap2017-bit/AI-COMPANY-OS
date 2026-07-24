@@ -37,16 +37,16 @@ const PurchaseOrdersPage = () => {
   if (isError || !purchaseOrders) return <EmptyState />;
 
   const totalPOs = purchaseOrders.length;
-  const pendingPOs = purchaseOrders.filter(po => po.status === "pending" || po.status === "draft").length;
-  const approvedPOs = purchaseOrders.filter(po => po.status === "approved").length;
-  const receivedPOs = purchaseOrders.filter(po => po.status === "received").length;
-  const cancelledPOs = purchaseOrders.filter(po => po.status === "cancelled").length;
+  const pendingPOs = (purchaseOrders || []).filter(po => po.status === "pending" || po.status === "draft").length;
+  const approvedPOs = (purchaseOrders || []).filter(po => po.status === "approved").length;
+  const receivedPOs = (purchaseOrders || []).filter(po => po.status === "received").length;
+  const cancelledPOs = (purchaseOrders || []).filter(po => po.status === "cancelled").length;
 
-  const totalValueEGP = purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0).toLocaleString() + " EGP";
+  const totalValueEGP = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0).toLocaleString() + " EGP";
 
   const filteredPOs = statusFilter === "all"
     ? purchaseOrders
-    : purchaseOrders.filter(po => po.status === statusFilter);
+    : (purchaseOrders || []).filter(po => po.status === statusFilter);
 
   return (
     <PageWrapper>

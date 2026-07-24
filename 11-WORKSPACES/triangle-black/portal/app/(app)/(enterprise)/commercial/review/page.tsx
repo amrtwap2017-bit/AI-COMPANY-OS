@@ -36,7 +36,7 @@ const CommercialReviewPage = () => {
   const activeContracts = (contracts || []).filter(contract => contract.status === "active").length;
 
   // Lead status summary
-  const statusSummary = leads.reduce((acc: any, lead: any) => {
+  const statusSummary = (leads || []).reduce((acc: any, lead: any) => {
     acc[lead.status] = (acc[lead.status] || 0) + 1;
     return acc;
   }, {} as { [key: string]: number });

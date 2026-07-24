@@ -54,7 +54,7 @@ const RiskPage = () => {
   // Filter and group data for MetricStrip
   const highRiskItems = stockBalancesWithItems.filter((b: any) => b.qty_on_hand === 0);
   const mediumRiskItems = stockBalancesWithItems.filter((b: any) => b.qty_on_hand < b.min_stock);
-  const overduePOs = purchaseOrders.filter((po: any) => new Date(po.expected_delivery) < new Date());
+  const overduePOs = (purchaseOrders || []).filter((po: any) => new Date(po.expected_delivery) < new Date());
   const activeSignals = inventorySignals.filter((signal: any) => signal.status === "active");
 
   // Filter and group data for Risk Matrix

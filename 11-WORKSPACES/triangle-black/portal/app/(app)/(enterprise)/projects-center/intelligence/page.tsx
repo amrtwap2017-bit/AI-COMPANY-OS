@@ -35,7 +35,7 @@ const ProjectIntelligencePage = () => {
   const totalProjects = (projects || []).length;
   const atRiskCount = (projects || []).filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000).length;
   const activeSignalsCount = (signals || []).filter(s => s.category === "operations" || s.category === "commercial").length;
-  const openWosCount = projects.reduce((acc: any, p: any) => acc + fetchWorkOrders(p.id).then(wos => (wos || []).length), 0);
+  const openWosCount = (projects || []).reduce((acc: any, p: any) => acc + fetchWorkOrders(p.id).then(wos => (wos || []).length), 0);
 
   return (
     <PageWrapper>

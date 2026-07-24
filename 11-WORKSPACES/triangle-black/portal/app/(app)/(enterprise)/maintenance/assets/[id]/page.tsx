@@ -169,7 +169,7 @@ export default function AssetDetailPage() {
           <SectionCard title={`Maintenance Plans (${pms.length})`}>
             {pms.length > 0 ? (
               <div className="space-y-2">
-                {pms.map((pm: any) => (
+                {(pms || []).map((pm: any) => (
                   <div key={pm.id} className="flex items-center justify-between p-3
                                                bg-slate-50 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-3">

@@ -50,7 +50,7 @@ export default function RfqPage() {
 
   if (isError || isVendorsError) return <EmptyState message="Failed to load data" />;
 
-  const rfq = rfqs.find((r: any) => r.id === id);
+  const rfq = (rfqs || []).find((r: any) => r.id === id);
 
   if (!rfq) {
     return (

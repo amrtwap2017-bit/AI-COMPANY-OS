@@ -39,9 +39,9 @@ const RFQsPage = () => {
   if (rfqQuery.isLoading || vendorQuery.isLoading) return <LoadingState />;
   if (rfqQuery.isError || vendorQuery.isError) return <EmptyState />;
 
-  const openRfqs = rfqs.filter(rfq => rfq.status === "sent" || rfq.status === "open");
-  const receivedQuotes = rfqs.filter(rfq => rfq.status === "received");
-  const expiredRfqs = rfqs.filter(rfq => rfq.status === "expired");
+  const openRfqs = (rfqs || []).filter(rfq => rfq.status === "sent" || rfq.status === "open");
+  const receivedQuotes = (rfqs || []).filter(rfq => rfq.status === "received");
+  const expiredRfqs = (rfqs || []).filter(rfq => rfq.status === "expired");
 
   return (
     <PageWrapper>
@@ -61,7 +61,7 @@ const RFQsPage = () => {
           <ul className="space-y-4">
             {openRfqs
               .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-              .concat(rfqs.filter(rfq => rfq.status !== "sent" && rfq.status !== "open"))
+              .concat((rfqs || []).filter(rfq => rfq.status !== "sent" && rfq.status !== "open"))
               .map(rfq => (
                 <li key={rfq.id} className="flex items-center space-x-4">
                   <a href={`/supply-chain/rfqs/${rfq.id}`} className="font-bold">{rfq.rfq_number}</a>

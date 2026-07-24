@@ -74,7 +74,7 @@ const Vendor360Page = () => {
     if (isPOError) return <EmptyState title="Failed to load POs" />;
 
     const poCount = purchaseOrders.length;
-    const totalSpend = purchaseOrders.reduce((acc: any, po: any) => acc + po.total_spend_egp, 0);
+    const totalSpend = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_spend_egp, 0);
     const lastPODate = purchaseOrders.length > 0 ? new Date(purchaseOrders[0].created_at).toLocaleDateString() : null;
 
     let performanceBadge = "No History";
@@ -92,7 +92,7 @@ const Vendor360Page = () => {
 
         <h3>PO History</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {purchaseOrders.map((po: any) => (
+          {(purchaseOrders || []).map((po: any) => (
             <SectionCard key={po.id}>
               <h4>{po.order_number}</h4>
               <MetricStrip label="Total Spend" value={`${po.total_spend_egp} EGP`} />

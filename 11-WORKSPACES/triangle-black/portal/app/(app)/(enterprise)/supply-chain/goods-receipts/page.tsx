@@ -66,7 +66,7 @@ const GoodsReceiptsPage = () => {
   if (isReceiptsError || isPurchaseOrdersError) return <EmptyState />;
 
   const totalReceipts = receipts.length;
-  const pendingDeliveriesCount = purchaseOrders.filter(
+  const pendingDeliveriesCount = (purchaseOrders || []).filter(
     (po) => ["approved", "sent", "ordered"].includes(po.status)
   ).length;
   const thisMonthReceipts = receipts.filter((grn: any) =>

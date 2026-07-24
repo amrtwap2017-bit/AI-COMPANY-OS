@@ -46,21 +46,21 @@ const SupplierPage = () => {
   const purchaseOrders = purchaseOrdersQuery.data;
 
   const totalSuppliers = (vendors || []).length;
-  const activeRFQs = rfqs.filter(rfq => rfq.status === "sent").length;
-  const totalSpend = purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0);
-  const avgLeadTime = vendors.reduce((acc: any, vendor: any) => acc + (vendor.lead_time_days || 0), 0) / (vendors || []).length;
+  const activeRFQs = (rfqs || []).filter(rfq => rfq.status === "sent").length;
+  const totalSpend = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0);
+  const avgLeadTime = (vendors || []).reduce((acc: any, vendor: any) => acc + (vendor.lead_time_days || 0), 0) / (vendors || []).length;
 
   const vendorScores = (vendors || []).map(vendor => {
-    const poCount = purchaseOrders.filter(po => po.vendor_id === vendor.id).length;
-    const totalSpend = purchaseOrders.filter(po => po.vendor_id === vendor.id).reduce((acc: any, po: any) => acc + po.total_amount, 0);
+    const poCount = (purchaseOrders || []).filter(po => po.vendor_id === vendor.id).length;
+    const totalSpend = (purchaseOrders || []).filter(po => po.vendor_id === vendor.id).reduce((acc: any, po: any) => acc + po.total_amount, 0);
     const responseRate = rfqs.some(rfq => rfq.vendor_id === vendor.id) ? Math.floor(Math.random() * (100 - 85) + 85) : null;
     return { ...vendor, po_count: poCount, total_spend, response_rate };
   }).sort((a: any, b: any) => b.total_spend - a.total_spend);
 
   const rfqStatusCounts = {
-    sent: rfqs.filter(rfq => rfq.status === "sent").length,
-    received: rfqs.filter(rfq => rfq.status === "received").length,
-    expired: rfqs.filter(rfq => rfq.status === "expired").length,
+    sent: (rfqs || []).filter(rfq => rfq.status === "sent").length,
+    received: (rfqs || []).filter(rfq => rfq.status === "received").length,
+    expired: (rfqs || []).filter(rfq => rfq.status === "expired").length,
   };
 
   return (

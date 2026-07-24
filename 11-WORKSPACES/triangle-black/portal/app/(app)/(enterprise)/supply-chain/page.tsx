@@ -30,8 +30,8 @@ export default function SupplyChainPage() {
 
   if (isPurchaseOrdersLoading || isPurchaseRequestsLoading || isSignalsSummaryLoading) return <LoadingState />;
 
-  const activePOs = purchaseOrders.filter(po => po.status === "active").length;
-  const pendingPRs = purchaseRequests.filter(pr => pr.status === "pending").length;
+  const activePOs = (purchaseOrders || []).filter(po => po.status === "active").length;
+  const pendingPRs = (purchaseRequests || []).filter(pr => pr.status === "pending").length;
   const openRFQs = signalsSummary.open_rfq_count;
   const inventoryAlerts = signalsSummary.inventory_alerts_count;
 
