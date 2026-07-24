@@ -678,3 +678,11 @@ try:
     print("  OK: invoices_router_commercial")
 except Exception as e:
     print(f"  WARN: invoices_router_commercial: {e}")
+
+# ── Sprint 68: Force-register commercial projects router LAST ──
+try:
+    from src.commercial.projects.router import router as _fresh_projects_router
+    app.include_router(_fresh_projects_router, prefix="/api/v1")
+    print("  OK: fresh_projects_router (override)")
+except Exception as e:
+    print(f"  WARN: fresh_projects_router: {e}")
