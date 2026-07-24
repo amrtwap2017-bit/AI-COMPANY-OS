@@ -37,14 +37,6 @@ def list_projects(
     return rows(db.execute(text(q), p).fetchall())
 
 
-@router.get("", summary="List projects")
-def list_projects_root(
-    hotel_id: Optional[str] = None,
-    status:   Optional[str] = None,
-    skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     q = "SELECT * FROM projects WHERE 1=1"
     p: dict = {}
@@ -54,14 +46,6 @@ def list_projects_root(
     p["limit"] = limit; p["skip"] = skip
     return rows(db.execute(text(q), p).fetchall())
 
-@router.get("", summary="List projects")
-def list_noslash_projects(
-    hotel_id: Optional[str] = None,
-    status:   Optional[str] = None,
-    skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     q = "SELECT * FROM projects WHERE 1=1"
     p: dict = {}
