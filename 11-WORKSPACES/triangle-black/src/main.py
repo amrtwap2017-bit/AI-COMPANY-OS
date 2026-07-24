@@ -163,7 +163,6 @@ try:
     app.include_router(payment_tracking_router, prefix="/api/v1")
     app.include_router(projects_router,          prefix="/api/v1")
     app.include_router(dashboard_router,         prefix="/api/v1")
-    app.include_router(notifications_router,     prefix="/api/v1")
 except ImportError as e:
     print(f"[WARN] Sprint 20 module import failed: {e}")
 

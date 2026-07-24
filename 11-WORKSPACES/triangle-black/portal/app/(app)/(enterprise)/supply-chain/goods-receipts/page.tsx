@@ -49,9 +49,9 @@ const createGoodsReceipt = async (data) => {
 
 const GoodsReceiptsPage = () => {
   const { data: receipts, isLoading: isReceiptsLoading, isError: isReceiptsError } =
-    useQuery(["goods-receipts"], fetchGoodsReceipts);
+    useQuery({ queryKey: ["goods-receipts"], queryFn: fetchGoodsReceipts });
   const { data: purchaseOrders, isLoading: isPurchaseOrdersLoading, isError: isPurchaseOrdersError } =
-    useQuery(["purchase-orders"], fetchPurchaseOrders);
+    useQuery({ queryKey: ["purchase-orders"], queryFn: fetchPurchaseOrders });
 
   const createMutation = useMutation(createGoodsReceipt, {
     onSuccess: () => {

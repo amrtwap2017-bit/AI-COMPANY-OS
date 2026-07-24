@@ -15,8 +15,8 @@ const fetchStats = async () => {
 };
 
 const GraphPage = () => {
-  const { data: overview, isLoading: isOverviewLoading } = useQuery(["knowledgeGraphOverview"], fetchOverview);
-  const { data: stats, isLoading: isStatsLoading } = useQuery(["knowledgeGraphStats"], fetchStats);
+  const { data: overview, isLoading: isOverviewLoading } = useQuery({ queryKey: ["knowledgeGraphOverview"], queryFn: fetchOverview });
+  const { data: stats, isLoading: isStatsLoading } = useQuery({ queryKey: ["knowledgeGraphStats"], queryFn: fetchStats });
 
   if (isOverviewLoading || isStatsLoading) return <LoadingState />;
 

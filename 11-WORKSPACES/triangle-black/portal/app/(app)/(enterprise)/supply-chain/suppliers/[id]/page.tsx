@@ -38,73 +38,45 @@ const fetchRFQs = async (vendor_reference: string) => {
   return response.json();
 };
 
-const SupplierDetailPage = () => {
+const VendorPage = () => {
+  const { id } = useParams();
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id;
 
-  const { data: vendor, isLoading, isError } = useQuery(["vendor", id], () => fetchVendor(id), {
-    refetchInterval: 300000,
+  const vendorQuery = useQuery({
+    queryKey: ["vendor", id],
+    queryFn: () => fetchVendor(id),
+    enabled: !!id, // Ensure the query is only enabled if an ID is provided
   });
 
-  if (isLoading) return <LoadingState />;
-  if (isError || !vendor) return (
-    <EmptyState>
-      <Link href="/supply-chain/suppliers">Back to Suppliers</Link>
-    </EmptyState>
-  );
+  const purchaseOrdersQuery = useQuery({
+    queryKey: ["purchase-orders", id],
+    queryFn: () => fetchPurchaseOrders(id),
+    enabled: vendorQuery.isSuccess && !!id,
+  });
 
-  const { name, category, phone, email, payment_terms } = vendor;
-  const { total_POs, total_spend_EGP, lead_time_days } = vendor.metrics || {};
-  const purchaseOrders = useQuery(["purchaseOrders", id], () => fetchPurchaseOrders(id), {
-    refetchInterval: 300000,
-  }).data || [];
-  const rfqs = useQuery(["rfqs", vendor.vendor_reference], () => fetchRFQs(vendor.vendor_reference), {
-    refetchInterval: 300000,
-  }).data || [];
+  const rfqsQuery = useQuery({
+    queryKey: ["rfqs", id],
+    queryFn: () => fetchRFQs(vendorQuery.data?.reference || ""),
+    enabled: purchaseOrdersQuery.isSuccess && !!id,
+  });
 
-  const performanceBadge = purchaseOrders.length >= 3 ? "Good" : purchaseOrders.length > 0 ? "Developing" : "New";
+  if (vendorQuery.isLoading) return <LoadingState />;
+  if (vendorQuery.isError) return <EmptyState />;
 
   return (
     <PageWrapper>
-      <PageHeader title={name} category={category}>
-        <StatusBadge status={performanceBadge} />
-      </PageHeader>
-      <SectionCard title="Metrics">
-        <MetricStrip
-          metrics={[
-            { label: "Total POs", value: total_POs },
-            { label: "Total Spend EGP", value: total_spend_EGP },
-            { label: "Lead Time (days)", value: lead_time_days },
-            { label: "Payment Terms", value: payment_terms },
-          ]}
-        />
+      <PageHeader title="Vendor Details" />
+      <SectionCard title="Vendor Information">
+        {/* Render vendor details */}
       </SectionCard>
-      <SectionCard title="Contact Info">
-        <div className="flex flex-col gap-2">
-          <span>{phone}</span>
-          <span>{email}</span>
-          <span>{payment_terms}</span>
-        </div>
+      <SectionCard title="Purchase Orders">
+        {/* Render purchase orders */}
       </SectionCard>
-      <SectionCard title="Purchase Order History">
-        {purchaseOrders.length === 0 ? (
-          <EmptyState>No purchase orders found.</EmptyState>
-        ) : (
-          <ul className="list-disc pl-4">
-            {purchaseOrders.map((po) => (
-              <li key={po.po_number}>
-                {po.po_number} - <StatusBadge status={po.status} /> - {po.total_amount_EGP} EGP - {po.created_at}
-              </li>
-            ))}
-          </ul>
-        )}
+      <SectionCard title="RFQs">
+        {/* Render RFQs */}
       </SectionCard>
-      <Link href="/supply-chain/suppliers" className="mt-4 block text-center">
-        Back to Suppliers
-      </Link>
     </PageWrapper>
   );
 };
 
-export default SupplierDetailPage;
+export default VendorPage;

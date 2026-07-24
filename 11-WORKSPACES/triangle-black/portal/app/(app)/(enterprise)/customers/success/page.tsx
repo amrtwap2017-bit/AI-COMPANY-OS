@@ -20,9 +20,9 @@ const fetchNPSData = async () => {
 };
 
 const CustomerSuccessPage = () => {
-  const { data: overview, isLoading: isOverviewLoading } = useQuery(["customer-success-overview"], fetchCustomerSuccessOverview);
-  const { data: renewals, isLoading: isRenewalsLoading } = useQuery(["customer-success-renewals"], fetchRenewals);
-  const { data: npsData, isLoading: isNPSLoading } = useQuery(["customer-success-nps"], fetchNPSData);
+  const { data: overview, isLoading: isOverviewLoading } = useQuery({ queryKey: ["customer-success-overview"], queryFn: fetchCustomerSuccessOverview });
+  const { data: renewals, isLoading: isRenewalsLoading } = useQuery({ queryKey: ["customer-success-renewals"], queryFn: fetchRenewals });
+  const { data: npsData, isLoading: isNPSLoading } = useQuery({ queryKey: ["customer-success-nps"], queryFn: fetchNPSData });
 
   if (isOverviewLoading || isRenewalsLoading || isNPSLoading) return <LoadingState />;
 

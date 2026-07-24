@@ -28,8 +28,8 @@ const fetchWorkOrders = async () => {
 
 const ExecutiveExceptionsPage = () => {
   const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
-  const kpisQuery = useQuery(["kpis"], fetchKpis);
-  const workOrdersQuery = useQuery(["work-orders"], fetchWorkOrders);
+  const kpisQuery = useQuery({ queryKey: ["kpis"], queryFn: fetchKpis });
+  const workOrdersQuery = useQuery({ queryKey: ["work-orders"], queryFn: fetchWorkOrders });
 
   if (signalsQuery.isLoading || kpisQuery.isLoading || workOrdersQuery.isLoading) {
     return <LoadingState />;

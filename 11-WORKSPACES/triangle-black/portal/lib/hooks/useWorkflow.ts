@@ -1,5 +1,4 @@
-// @ts-nocheck
-"use client";
+"use client"; // @ts-nocheck
 import { useState, useCallback } from "react";
 import { useAuthFetch } from "./useAuthFetch";
 import { toast } from "sonner";

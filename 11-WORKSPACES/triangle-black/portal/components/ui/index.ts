@@ -52,3 +52,14 @@ export { Avatar }            from "./Avatar";
 // import { CommandBar }      from "@/components/ui/CommandBar"
 
 // GlobalSearch is client-only — import directly when needed
+
+export { CommandPalette } from "./CommandPalette";
+export { EntityTabs } from "./EntityTabs";
+export { NotificationDrawer } from "./NotificationDrawer";
+export { ContextRail } from "./ContextRail";
+export { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
+export { ClientKeyboardHandler } from "./ClientKeyboardHandler";
+export { useConfirm } from "./ConfirmDialog";
+export { ApprovalModal } from "./ApprovalModal";
+export { NotificationBell } from "./NotificationBell";
+export { WorkflowBar } from "./WorkflowBar";
