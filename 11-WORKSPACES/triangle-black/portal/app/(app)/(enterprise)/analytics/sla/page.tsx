@@ -72,7 +72,7 @@ export default function SLAPage() {
           <Progress
             value={compliance_rate}
             max={100}
-            label={`Current: ${compliance_rate.toFixed(2)}% | Target: 95%`}
+            label={`Current: ${(Number(compliance_rate) || 0).toFixed(2)}% | Target: 95%`}
             status={complianceStatus}
           />
         </SectionCard>
@@ -83,14 +83,14 @@ export default function SLAPage() {
                 <Progress
                   value={stats.rate}
                   max={100}
-                  label={`${stats.completed} of ${stats.total} completed (${stats.rate.toFixed(2)}%)`}
+                  label={`${stats.completed} of ${stats.total} completed (${(Number(stats.rate) || 0).toFixed(2)}%)`}
                 />
                 <StatusBadge
                   status={
                     stats.rate >= 80 ? "compliant" : stats.rate >= 50 ? "warning" : "at_risk"
                   }
                 >
-                  {stats.rate.toFixed(2)}%
+                  {(Number(stats.rate) || 0).toFixed(2)}%
                 </StatusBadge>
               </SectionCard>
             ))}

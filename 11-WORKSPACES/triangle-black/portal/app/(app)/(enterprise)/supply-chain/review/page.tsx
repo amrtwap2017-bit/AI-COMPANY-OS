@@ -89,7 +89,7 @@ const ReviewPage = () => {
           <MetricStrip label="Total POs" value={totalPOs} />
           <MetricStrip label="Total Spend EGP" value={totalSpendEGP} />
           <MetricStrip label="Active Vendors" value={activeVendors} />
-          <MetricStrip label="Avg Lead Time" value={avgLeadTime.toFixed(2)} unit="days" />
+          <MetricStrip label="Avg Lead Time" value={(Number(avgLeadTime) || 0).toFixed(2)} unit="days" />
         </SectionCard>
         <SectionCard title="Procurement Health Score">
           <div className="flex items-center justify-between">

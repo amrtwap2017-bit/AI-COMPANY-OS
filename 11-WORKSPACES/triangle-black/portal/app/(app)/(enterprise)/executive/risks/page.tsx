@@ -92,7 +92,7 @@ const RiskRegisterPage = () => {
       </SectionCard>
       {financialRisk > 0 && (
         <SectionCard title="Financial Risk">
-          Contracts expiring in 30 days: ${financialRisk.toFixed(2)}
+          Contracts expiring in 30 days: ${(Number(financialRisk) || 0).toFixed(2)}
         </SectionCard>
       )}
     </PageWrapper>

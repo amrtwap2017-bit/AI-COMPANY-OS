@@ -85,7 +85,7 @@ const GoodsReceiptsPage = () => {
             { label: "This Month", value: thisMonthReceipts.length },
             {
               label: "Total PO Value Pending",
-              value: `EGP ${totalPOValuePending.toFixed(2)}`,
+              value: `EGP ${(Number(totalPOValuePending) || 0).toFixed(2)}`,
             },
           ]}
         />
@@ -97,7 +97,7 @@ const GoodsReceiptsPage = () => {
             <div key={po.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <strong>{po.po_number}</strong>
               <StatusBadge status={po.status} />
-              <span>EGP {po.total_amount.toFixed(2)}</span>
+              <span>EGP {(Number(po.total_amount) || 0).toFixed(2)}</span>
               <Button
                 onClick={() => {
                   // Show inline form with fields: received_by, notes, date (defaults today)

@@ -51,7 +51,7 @@ const ProcurementPage = () => {
             <span>{item.reference_number}</span>
             <StatusBadge type={item.type} />
             <StatusBadge status={item.status} />
-            <span>{item.amount.toFixed(2)} EGP</span>
+            <span>{(Number(item.amount) || 0).toFixed(2)} EGP</span>
             <span>{new Date(item.created_at).toLocaleDateString()}</span>
           </div>
         ))}

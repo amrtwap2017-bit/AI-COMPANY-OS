@@ -71,7 +71,7 @@ const CommercialPage = () => {
       <div className="mt-8">
         <StatusBadge
           label="Win Rate"
-          value={`${winRate.toFixed(2)}%`}
+          value={`${(Number(winRate) || 0).toFixed(2)}%`}
           targetValue={`${targetWinRate}%`}
           isTargetMet={winRate >= targetWinRate}
         />

@@ -69,7 +69,7 @@ const CustomerSuccessPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatusBadge label="Renewal Risk" value={renewalRisk} />
           <StatusBadge label="Active Revenue" value={activeRevenue} />
-          <StatusBadge label="Portfolio Health" value={`${portfolioHealth.toFixed(2)}%`} />
+          <StatusBadge label="Portfolio Health" value={`${(Number(portfolioHealth) || 0).toFixed(2)}%`} />
         </div>
       </SectionCard>
       <SectionCard title="Contract List with Renewal Status">

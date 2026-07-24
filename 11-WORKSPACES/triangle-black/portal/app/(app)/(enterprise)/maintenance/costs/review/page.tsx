@@ -100,7 +100,7 @@ export default function MaintenanceCostsReviewPage() {
         />
         <MetricStrip
           label="Avg Resolution Time (hours)"
-          value={avgResolutionTime.toFixed(2)}
+          value={(Number(avgResolutionTime) || 0).toFixed(2)}
           icon="clock"
         />
         <MetricStrip
@@ -110,7 +110,7 @@ export default function MaintenanceCostsReviewPage() {
         />
         <MetricStrip
           label="PO Total Value EGP"
-          value={poTotalValueEGP.toFixed(2)}
+          value={(Number(poTotalValueEGP) || 0).toFixed(2)}
           icon="dollar-sign"
         />
       </div>
@@ -118,13 +118,13 @@ export default function MaintenanceCostsReviewPage() {
         {/* Bar chart for work order type counts */}
       </SectionCard>
       <SectionCard title="Resolution Time Analysis">
-        <p>AVG: {avgResolutionTime.toFixed(2)} hours</p>
+        <p>AVG: {(Number(avgResolutionTime) || 0).toFixed(2)} hours</p>
         <p>MAX: {Math.max(...resolutionTimes).toFixed(2)} hours</p>
         <p>MIN: {Math.min(...resolutionTimes).toFixed(2)} hours</p>
         <ul>
           {top5LongestWOs.map((wo) => (
             <li key={wo.id}>
-              {wo.title} - {wo.type} - {wo.hours.toFixed(2)} hours
+              {wo.title} - {wo.type} - {(Number(wo.hours) || 0).toFixed(2)} hours
             </li>
           ))}
         </ul>
@@ -133,7 +133,7 @@ export default function MaintenanceCostsReviewPage() {
         <ul>
           {recentPOs.map((po) => (
             <li key={po.id}>
-              {po.po_number} - {po.amount.toFixed(2)} EGP -{" "}
+              {po.po_number} - {(Number(po.amount) || 0).toFixed(2)} EGP -{" "}
               <StatusBadge status={po.status} />
             </li>
           ))}

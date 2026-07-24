@@ -39,7 +39,7 @@ export default function DailyReviewPage() {
       <MetricStrip
         metrics={[
           { label: "Critical WOs", value: criticalWOs, color: "red" },
-          { label: "SLA Compliance %", value: compliancePercentage.toFixed(1), color: compliancePercentage < targetSLA ? "orange" : "green" },
+          { label: "SLA Compliance %", value: (Number(compliancePercentage) || 0).toFixed(1), color: compliancePercentage < targetSLA ? "orange" : "green" },
           { label: "Active Signals", value: (signals || []).length, color: "blue" },
           { label: "Technician Utilization %", value: 85, color: "purple" }
         ]}
@@ -70,7 +70,7 @@ export default function DailyReviewPage() {
               <p>Completion Rate: 75%</p>
             </SectionCard>
             <SectionCard title="SLA">
-              <p>Compliance %: {compliancePercentage.toFixed(1)}%</p>
+              <p>Compliance %: {(Number(compliancePercentage) || 0).toFixed(1)}%</p>
               <p>Target: {targetSLA}%</p>
               <p>Gap: {targetSLA - compliancePercentage}%</p>
             </SectionCard>

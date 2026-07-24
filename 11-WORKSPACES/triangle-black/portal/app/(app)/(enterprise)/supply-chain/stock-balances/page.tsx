@@ -46,7 +46,7 @@ const StockBalancesPage = () => {
         <MetricStrip
           metrics={[
             { label: "Total Items", value: totalItems },
-            { label: "Total Value EGP", value: totalValueEGP.toFixed(2) },
+            { label: "Total Value EGP", value: (Number(totalValueEGP) || 0).toFixed(2) },
             { label: "Below Minimum", value: belowMinimum, color: "red" },
             { label: "Warehouses Count", value: warehouses.length }
           ]}
@@ -89,8 +89,8 @@ const StockBalancesPage = () => {
                 <td>{sb.qty_on_hand}</td>
                 <td>{sb.qty_reserved}</td>
                 <td>{sb.qty_available}</td>
-                <td>{sb.avg_cost.toFixed(2)}</td>
-                <td>{sb.total_value.toFixed(2)}</td>
+                <td>{(Number(sb.avg_cost) || 0).toFixed(2)}</td>
+                <td>{(Number(sb.total_value) || 0).toFixed(2)}</td>
                 <td>
                   {sb.qty_on_hand === 0 ? (
                     <StatusBadge status="out_of_stock" />

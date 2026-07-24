@@ -34,7 +34,7 @@ export default function TrendsPage() {
           metrics={[
             { label: "6-Month Total WOs", value: summary.total_6_months },
             { label: "6-Month Completed", value: summary.completed_6_months },
-            { label: "Avg Completion Rate %", value: summary.avg_completion_rate.toFixed(1) },
+            { label: "Avg Completion Rate %", value: (Number(summary.avg_completion_rate) || 0).toFixed(1) },
             { label: "Trend", value: summary.trend, badgeColor: trendBadgeColor },
           ]}
         />
@@ -51,7 +51,7 @@ export default function TrendsPage() {
                   backgroundColor: month.completion_rate >= 80 ? "green" : month.completion_rate >= 40 ? "amber" : "red",
                 }}
               >
-                <span className="absolute bottom-[-30px] text-white">{`${month.completed} of ${month.total} completed (${month.completion_rate.toFixed(1)}%)`}</span>
+                <span className="absolute bottom-[-30px] text-white">{`${month.completed} of ${month.total} completed (${(Number(month.completion_rate) || 0).toFixed(1)}%)`}</span>
               </div>
             </div>
           ))}

@@ -45,7 +45,7 @@ const SupplierInvoicesPage = () => {
             { label: "Total Invoices", value: totalInvoices },
             { label: "Pending Payment", value: pendingPayment, color: "text-yellow-500" },
             { label: "Overdue", value: overdue, color: "text-red-500" },
-            { label: "Total Amount EGP", value: totalAmount.toFixed(2), currency: true },
+            { label: "Total Amount EGP", value: (Number(totalAmount) || 0).toFixed(2), currency: true },
           ]}
         />
       </SectionCard>

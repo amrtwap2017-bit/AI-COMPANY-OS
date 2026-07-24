@@ -135,7 +135,7 @@ export default function DowntimeReviewPage() {
                   <p className="text-sm font-medium text-slate-800">{w.title}</p>
                   <p className="text-xs text-slate-500">{w.assetName} · {w.completed_at?.slice(0, 10)}</p>
                 </div>
-                <span className="text-sm font-bold text-amber-700">{w.hours.toFixed(1)}h</span>
+                <span className="text-sm font-bold text-amber-700">{(Number(w.hours) || 0).toFixed(1)}h</span>
               </div>
             ))}
           </div>

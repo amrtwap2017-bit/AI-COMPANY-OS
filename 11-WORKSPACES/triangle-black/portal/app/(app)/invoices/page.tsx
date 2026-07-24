@@ -41,7 +41,7 @@ const InvoicesPage = () => {
         <MetricStrip
           metrics={[
             { label: "Total Invoices", value: totalInvoices },
-            { label: "Total Value EGP", value: totalValueEGP.toFixed(2) + " EGP" },
+            { label: "Total Value EGP", value: (Number(totalValueEGP) || 0).toFixed(2) + " EGP" },
             { label: "Pending", value: pendingCount, color: "bg-yellow-500" },
             { label: "Overdue", value: overdueCount, color: "bg-red-500" },
           ]}
@@ -85,7 +85,7 @@ const InvoicesPage = () => {
             <li key={invoice.id} className="flex items-center justify-between mb-2">
               <span className="font-bold">{invoice.invoice_number}</span>
               <StatusBadge status={invoice.status} />
-              <span>{invoice.total_amount.toFixed(2)} EGP</span>
+              <span>{(Number(invoice.total_amount) || 0).toFixed(2)} EGP</span>
               <span
                 className={`text-red-500 ${new Date(invoice.due_date) < new Date(today) && invoice.status !== "paid" ? "" : "hidden"}`}
               >

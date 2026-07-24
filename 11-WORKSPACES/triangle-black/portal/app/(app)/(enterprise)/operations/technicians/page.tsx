@@ -58,7 +58,7 @@ const TechniciansPage = () => {
             { label: "Total Technicians", value: totalTechnicians },
             { label: "Active", value: activeTechnicians, color: "green" },
             { label: "At Capacity", value: atCapacityTechnicians, color: "red" },
-            { label: "Avg Utilization %", value: avgUtilization.toFixed(2) },
+            { label: "Avg Utilization %", value: (Number(avgUtilization) || 0).toFixed(2) },
           ]}
         />
       </SectionCard>

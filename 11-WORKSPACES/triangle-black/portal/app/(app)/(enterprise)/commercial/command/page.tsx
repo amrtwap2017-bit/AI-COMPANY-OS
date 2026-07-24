@@ -77,7 +77,7 @@ const CommercialCommandPage = () => {
         </SectionCard>
         <SectionCard title="Pipeline Health">
           <div className="flex items-center justify-between">
-            <span>Win Rate: {winRate.toFixed(2)}%</span>
+            <span>Win Rate: {(Number(winRate) || 0).toFixed(2)}%</span>
             <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
               <div
                 style={{ width: `${Math.min(winRate, 30)}%`, backgroundColor: winRate >= 30 ? "green" : "red" }}
