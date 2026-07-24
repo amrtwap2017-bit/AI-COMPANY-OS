@@ -4,54 +4,48 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   PageWrapper, PageHeader, SectionCard,
-  MetricStrip, StatusBadge, LoadingState
+  MetricStrip, LoadingState
 } from "@/components/ui";
 
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchKPIs() {
   try {
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!r.ok) return {};
-  return r.json();
+    const r = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+    if (!r.ok) return {};
+    return r.json();
+  } catch { return {}; }
 }
 
 async function fetchSignals() {
   try {
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/ai/signals/summary`, { credentials: "include" });
-  if (!r.ok) return { critical: 0, high: 0, total: 0 };
-  return r.json();
+    const r = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
+    if (!r.ok) return { critical: 0, high: 0, total: 0 };
+    return r.json();
+  } catch { return { critical: 0, high: 0, total: 0 }; }
 }
 
 const QUICK_LINKS = [
-  { label: "My Day",            href: "/workspace/my-day",           color: "bg-blue-600"   },
-  { label: "Operations",        href: "/operations/workbench",        color: "bg-slate-700"  },
-  { label: "Dispatch",          href: "/operations/dispatch",         color: "bg-indigo-600" },
-  { label: "Calendar",          href: "/operations/calendar",         color: "bg-teal-600"   },
-  { label: "Supply Chain",      href: "/supply-chain/workbench",      color: "bg-orange-600" },
-  { label: "Maintenance",       href: "/maintenance/intelligence",    color: "bg-red-600"    },
-  { label: "Executive",         href: "/executive",                   color: "bg-purple-600" },
-  { label: "SLA Review",        href: "/operations/sla-review",       color: "bg-amber-600"  },
+  { label: "My Day",       href: "/workspace/my-day",        color: "bg-blue-600"   },
+  { label: "Operations",   href: "/operations/workbench",    color: "bg-slate-700"  },
+  { label: "Dispatch",     href: "/operations/dispatch",     color: "bg-indigo-600" },
+  { label: "Calendar",     href: "/operations/calendar",     color: "bg-teal-600"   },
+  { label: "Supply Chain", href: "/supply-chain/workbench",  color: "bg-orange-600" },
+  { label: "Maintenance",  href: "/maintenance/intelligence", color: "bg-red-600"    },
+  { label: "Executive",    href: "/executive",               color: "bg-purple-600" },
+  { label: "SLA Review",   href: "/operations/sla-review",  color: "bg-amber-600"  },
 ];
 
 export default function WorkspacePage() {
-  const { data: kpis = {}, isLoading: kpisLoading } = useQuery({
-    queryKey: ["workspace-kpis"],
-    queryFn: fetchKPIs,
-    refetchInterval: 120000,
+  const { data: kpis = {}, isLoading: k1 } = useQuery({
+    queryKey: ["workspace-kpis"], queryFn: fetchKPIs, refetchInterval: 120000,
   });
-  const { data: signals = { critical: 0, high: 0, total: 0 }, isLoading: sigLoading } = useQuery({
-    queryKey: ["workspace-signals"],
-    queryFn: fetchSignals,
-    refetchInterval: 120000,
+  const { data: signals = { critical: 0, high: 0, total: 0 }, isLoading: k2 } = useQuery({
+    queryKey: ["workspace-signals"], queryFn: fetchSignals, refetchInterval: 120000,
   });
 
-  const wo  = kpis.work_orders   || {};
-  const tec = kpis.technicians   || {};
+  const wo  = kpis.work_orders  || {};
+  const tec = kpis.technicians  || {};
 
   return (
     <PageWrapper>
@@ -61,20 +55,18 @@ export default function WorkspacePage() {
         badge={signals.critical > 0 ? `${signals.critical} Critical` : undefined}
       />
 
-      {kpisLoading || sigLoading ? (
-        <div className="h-16" />
-      ) : (
+      {!k1 && !k2 && (
         <MetricStrip metrics={[
-          { label: "Open WOs",        value: wo.open           ?? 0 },
-          { label: "Critical",        value: wo.critical_open  ?? 0, color: "red"   as const },
-          { label: "Technicians",     value: tec.active        ?? 0, color: "blue"  as const },
-          { label: "AI Signals",      value: signals.total     ?? 0, color: "amber" as const },
+          { label: "Open WOs",    value: wo.open          ?? 0 },
+          { label: "Critical",    value: wo.critical_open ?? 0, color: "red"   as const },
+          { label: "Technicians", value: tec.active       ?? 0, color: "blue"  as const },
+          { label: "AI Signals",  value: signals.total    ?? 0, color: "amber" as const },
         ]} />
       )}
 
       <SectionCard title="Quick Navigation">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {QUICK_LINKS.map((link: any) => (
+          {QUICK_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -97,10 +89,7 @@ export default function WorkspacePage() {
                 {signals.high} high priority · {signals.total} total
               </p>
             </div>
-            <Link
-              href="/operations/workbench"
-              className="text-xs font-semibold text-red-700 underline"
-            >
+            <Link href="/operations/workbench" className="text-xs font-semibold text-red-700 underline">
               View all →
             </Link>
           </div>
