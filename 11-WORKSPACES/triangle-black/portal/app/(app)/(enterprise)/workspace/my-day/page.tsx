@@ -51,7 +51,7 @@ const MyDayPage = () => {
     "technicians",
     fetchTechnicians,
     {
-      onSuccess: (data) => setTechnicians(data.filter(t => t.is_active)),
+      onSuccess: (data) => setTechnicians((data || []).filter(t => t.is_active)),
       refetchInterval: 30000
     }
   );
@@ -67,10 +67,10 @@ const MyDayPage = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const openWOsCount = workOrders.filter(w => w.status === "open").length;
-  const inProgressCount = workOrders.filter(w => w.status === "in_progress").length;
-  const completedTodayCount = workOrders.filter(w => w.status === "completed" && new Date(w.completed_at).toDateString() === today).length;
-  const dueTodayCount = workOrders.filter(w => w.due_date === today).length;
+  const openWOsCount = (workOrders || []).filter(w => w.status === "open").length;
+  const inProgressCount = (workOrders || []).filter(w => w.status === "in_progress").length;
+  const completedTodayCount = (workOrders || []).filter(w => w.status === "completed" && new Date(w.completed_at).toDateString() === today).length;
+  const dueTodayCount = (workOrders || []).filter(w => w.due_date === today).length;
 
   const priorityWorkOrders = workOrders
     .filter(w => w.status !== "completed" && (w.priority === "critical" || w.priority === "high" || w.due_date === today))
@@ -82,7 +82,7 @@ const MyDayPage = () => {
       return new Date(a.due_date) - new Date(b.due_date);
     });
 
-  const technicianCapacity = technicians.map(t => ({
+  const technicianCapacity = (technicians || []).map(t => ({
     ...t,
     capacity: t.current_work_orders / t.max_work_orders * 100
   })).sort((a, b) => b.capacity - a.capacity);

@@ -35,8 +35,8 @@ export default function InboxPage() {
 
   const isLoading = notifLoading || sigLoading;
   const signals = signalsData.signals || [];
-  const unread = notifications.filter((n) => !n.read_at && !n.is_read).length;
-  const critical = signals.filter((s) => s.priority === "critical").length;
+  const unread = (notifications || []).filter((n) => !n.read_at && !n.is_read).length;
+  const critical = (signals || []).filter((s) => s.priority === "critical").length;
 
   if (isLoading) return <LoadingState message="Loading inbox..." />;
 
@@ -48,18 +48,18 @@ export default function InboxPage() {
         badge={unread + critical > 0 ? `${unread + critical} Unread` : undefined}
       />
       <MetricStrip metrics={[
-        { label: "Notifications", value: notifications.length },
+        { label: "Notifications", value: (notifications || []).length },
         { label: "Unread",        value: unread,   color: "amber" as const },
-        { label: "AI Signals",    value: signals.length },
+        { label: "AI Signals",    value: (signals || []).length },
         { label: "Critical",      value: critical, color: critical > 0 ? "red" as const : "slate" as const },
       ]} />
 
       <SectionCard title="AI Operational Signals">
-        {signals.length === 0 ? (
+        {(signals || []).length === 0 ? (
           <EmptyState title="All clear" description="No active signals at this time" />
         ) : (
           <div className="space-y-2">
-            {signals.map((sig) => (
+            {(signals || []).map((sig) => (
               <div
                 key={sig.signal_id}
                 className={`px-4 py-3 rounded-lg border-l-4 ${
@@ -83,11 +83,11 @@ export default function InboxPage() {
       </SectionCard>
 
       <SectionCard title="System Notifications">
-        {notifications.length === 0 ? (
+        {(notifications || []).length === 0 ? (
           <EmptyState title="No notifications" description="Your inbox is empty" />
         ) : (
           <div className="space-y-2">
-            {notifications.slice(0, 10).map((n, i) => (
+            {(notifications || []).slice(0, 10).map((n, i) => (
               <div key={n.id || i} className="flex items-start gap-3 px-4 py-3 bg-slate-50 rounded-lg">
                 <div className={`mt-1.5 h-2 w-2 rounded-full flex-shrink-0 ${
                   n.read_at || n.is_read ? "bg-slate-300" : "bg-blue-500"

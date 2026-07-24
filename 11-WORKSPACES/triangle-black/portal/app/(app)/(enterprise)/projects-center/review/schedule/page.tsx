@@ -20,10 +20,10 @@ const SchedulePage = () => {
   if (isError || !data) return <EmptyState />;
 
   const today = new Date();
-  const totalDays = data.length;
-  const onScheduleCount = data.filter(p => new Date(p.end_date) > new Date(today.setDate(today.getDate() + 14))).length;
-  const atRiskCount = data.filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(p.end_date) > today).length;
-  const overdueCount = data.filter(p => new Date(p.end_date) < today).length;
+  const totalDays = (data || []).length;
+  const onScheduleCount = (data || []).filter(p => new Date(p.end_date) > new Date(today.setDate(today.getDate() + 14))).length;
+  const atRiskCount = (data || []).filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(p.end_date) > today).length;
+  const overdueCount = (data || []).filter(p => new Date(p.end_date) < today).length;
 
   const scheduleHealth = (onScheduleCount / totalDays) * 100;
 
@@ -38,7 +38,7 @@ const SchedulePage = () => {
           <MetricStrip label="Overdue" value={overdueCount} color="red" />
         </SectionCard>
         <SectionCard title="Schedule Timeline">
-          {data.map(project => (
+          {(data || []).map(project => (
             <div key={project.id} className="flex items-center justify-between border-b py-2 last:border-b-0">
               <span>{project.name}</span>
               <div className="relative w-full">

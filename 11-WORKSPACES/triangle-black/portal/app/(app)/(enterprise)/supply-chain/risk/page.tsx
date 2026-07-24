@@ -45,7 +45,7 @@ const RiskPage = () => {
 
   const stockBalancesWithItems = stockBalances.map((balance) => ({
     ...balance,
-    item: items.find((item) => item.item_id === balance.item_id),
+    item: (items || []).find((item) => item.item_id === balance.item_id),
   }));
 
   // Filter and group data for MetricStrip

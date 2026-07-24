@@ -106,7 +106,7 @@ export default function WorkflowDesignerPage() {
     { label: "Active Workflows",    value: WORKFLOW_TEMPLATES.filter(w => w.status === "active").length,      suffix: "" },
     { label: "Total Executions",    value: WORKFLOW_TEMPLATES.reduce((a, w) => a + w.runs, 0),                suffix: "" },
     { label: "State Transitions",   value: WO_STATE_MACHINE.length,                                           suffix: "" },
-    { label: "AI Signals Active",   value: Array.isArray(signals) ? signals.length : 0,                       suffix: "" },
+    { label: "AI Signals Active",   value: Array.isArray(signals) ? (signals || []).length : 0,                       suffix: "" },
   ];
 
   return (

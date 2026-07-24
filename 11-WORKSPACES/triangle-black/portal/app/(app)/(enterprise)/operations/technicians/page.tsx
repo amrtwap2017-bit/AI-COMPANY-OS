@@ -35,9 +35,9 @@ const TechniciansPage = () => {
   if (isError || !data) return <EmptyState />;
 
   const technicians = data.technicians;
-  const totalTechnicians = technicians.length;
-  const activeTechnicians = technicians.filter(t => t.is_active).length;
-  const atCapacityTechnicians = technicians.filter(t => t.current_work_orders >= t.max_work_orders).length;
+  const totalTechnicians = (technicians || []).length;
+  const activeTechnicians = (technicians || []).filter(t => t.is_active).length;
+  const atCapacityTechnicians = (technicians || []).filter(t => t.current_work_orders >= t.max_work_orders).length;
   const avgUtilization = (technicians.reduce((acc, t) => acc + t.current_work_orders / t.max_work_orders, 0) / totalTechnicians) * 100;
 
   const filteredTechnicians = technicians

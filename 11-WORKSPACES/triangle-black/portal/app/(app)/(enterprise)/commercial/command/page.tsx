@@ -34,8 +34,8 @@ const CommercialCommandPage = () => {
   const contracts = contractsQuery.data;
   const signals = signalsQuery.data;
 
-  const wonLeads = leads.filter(lead => lead.status === "won").length;
-  const totalLeads = leads.length;
+  const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
+  const totalLeads = (leads || []).length;
   const winRate = (wonLeads / totalLeads) * 100 || 0;
 
   const topActiveLeads = leads
@@ -66,8 +66,8 @@ const CommercialCommandPage = () => {
           />
           <MetricStrip
             label="Active Contracts"
-            value={contracts.length}
-            status={<StatusBadge type="warning">{contracts.length}</StatusBadge>}
+            value={(contracts || []).length}
+            status={<StatusBadge type="warning">{(contracts || []).length}</StatusBadge>}
           />
           <MetricStrip
             label="Monthly Revenue Estimate"
@@ -106,7 +106,7 @@ const CommercialCommandPage = () => {
         </SectionCard>
       </div>
       <SectionCard title="Commercial Signals">
-        {signals.map((signal, index) => (
+        {(signals || []).map((signal, index) => (
           <div key={index} className="p-4 border-b last:border-b-0">{signal.message}</div>
         ))}
       </SectionCard>

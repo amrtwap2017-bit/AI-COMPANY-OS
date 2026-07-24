@@ -29,10 +29,10 @@ export default function EngineeringPage() {
 
   if (isAssetsLoading || isSignalsLoading || isKpisLoading) return <LoadingState />;
 
-  const totalAssets = assets.length;
-  const inFault = assets.filter(asset => asset.status === "in-fault").length;
+  const totalAssets = (assets || []).length;
+  const inFault = (assets || []).filter(asset => asset.status === "in-fault").length;
   const engineeringWosOpen = kpis.engineeringWosOpen;
-  const maintenanceSignalsCount = signals.length;
+  const maintenanceSignalsCount = (signals || []).length;
 
   return (
     <PageWrapper>

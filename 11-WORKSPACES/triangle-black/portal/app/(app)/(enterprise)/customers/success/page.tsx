@@ -49,7 +49,7 @@ const CustomerSuccessPage = () => {
           </tr>
         </thead>
         <tbody>
-          {renewals.renewals.map((renewal) => (
+          {(renewals.renewals || []).map((renewal) => (
             <tr key={renewal.contract_id}>
               <td>{renewal.hotel_name}</td>
               <td>{new Date(renewal.end_date).toLocaleDateString()}</td>

@@ -45,12 +45,12 @@ export default function WO360Page() {
     .filter((w) => !search || w.title?.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  const open    = wos.filter((w) => w.status === "open").length;
-  const inProg  = wos.filter((w) => w.status === "in_progress").length;
-  const done    = wos.filter((w) => w.status === "completed").length;
+  const open    = (wos || []).filter((w) => w.status === "open").length;
+  const inProg  = (wos || []).filter((w) => w.status === "in_progress").length;
+  const done    = (wos || []).filter((w) => w.status === "completed").length;
 
   const techName  = (id) => techs.find((t) => t.id === id)?.name || null;
-  const assetName = (id) => assets.find((a) => a.id === id)?.name || null;
+  const assetName = (id) => (assets || []).find((a) => a.id === id)?.name || null;
 
   const STATUS_TABS = ["all", "open", "in_progress", "completed", "cancelled"];
 
@@ -58,10 +58,10 @@ export default function WO360Page() {
 
   return (
     <PageWrapper>
-      <PageHeader title="Work Orders 360" subtitle="Search and filter all work orders" badge={`${wos.length} Total`} />
+      <PageHeader title="Work Orders 360" subtitle="Search and filter all work orders" badge={`${(wos || []).length} Total`} />
 
       <MetricStrip metrics={[
-        { label: "Total",       value: wos.length },
+        { label: "Total",       value: (wos || []).length },
         { label: "Open",        value: open,   color: open > 0 ? "amber" as const : "slate" as const },
         { label: "In Progress", value: inProg, color: "blue" as const },
         { label: "Completed",   value: done,   color: "green" as const },

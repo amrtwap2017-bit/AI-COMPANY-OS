@@ -22,13 +22,13 @@ const fetchMaintenanceData = async () => {
   ]);
 
   return {
-    totalActions: signals.length + pmPlans.length + wos.length + assets.length,
+    totalActions: (signals || []).length + pmPlans.length + (wos || []).length + (assets || []).length,
     criticalActions: [
-      ...signals.filter(signal => signal.urgency === "critical"),
-      ...assets.filter(asset => asset.status === "faulted")
+      ...(signals || []).filter(signal => signal.urgency === "critical"),
+      ...(assets || []).filter(asset => asset.status === "faulted")
     ],
     overduePMs: pmPlans.filter(plan => plan.next_due_date < today),
-    openWOs: wos.filter(wo => wo.status === "open")
+    openWOs: (wos || []).filter(wo => wo.status === "open")
   };
 };
 

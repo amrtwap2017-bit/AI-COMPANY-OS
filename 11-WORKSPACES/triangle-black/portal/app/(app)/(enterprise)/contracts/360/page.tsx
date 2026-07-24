@@ -49,7 +49,7 @@ const Contract360Page = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load contracts" />;
 
-  const filteredContracts = contracts.filter((contract) =>
+  const filteredContracts = (contracts || []).filter((contract) =>
     contract.client_name.toLowerCase().includes(searchText.toLowerCase())
   ).sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
 

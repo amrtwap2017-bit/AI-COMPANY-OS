@@ -65,7 +65,7 @@ export default function RfqPage() {
   }
 
   const vendorNames = rfq.vendor_ids
-    .map((vendorId) => vendors.find((v) => v.id === vendorId)?.name)
+    .map((vendorId) => (vendors || []).find((v) => v.id === vendorId)?.name)
     .filter(Boolean);
 
   return (

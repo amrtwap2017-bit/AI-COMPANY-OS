@@ -26,7 +26,7 @@ export default function DailyReviewPage() {
 
   if (signalsQuery.isLoading || kpisSlaQuery.isLoading || slaQuery.isLoading) return <LoadingState />;
 
-  const signals = signalsQuery.data.sort((a, b) => b.priority - a.priority);
+  const signals = (signalsQuery.data || []).sort((a: any, b: any) => (b.priority||0) - (a.priority||0));
   const totalWOs = 72;
   const openWOs = 41;
   const criticalWOs = 11;
@@ -40,14 +40,14 @@ export default function DailyReviewPage() {
         metrics={[
           { label: "Critical WOs", value: criticalWOs, color: "red" },
           { label: "SLA Compliance %", value: compliancePercentage.toFixed(1), color: compliancePercentage < targetSLA ? "orange" : "green" },
-          { label: "Active Signals", value: signals.length, color: "blue" },
+          { label: "Active Signals", value: (signals || []).length, color: "blue" },
           { label: "Technician Utilization %", value: 85, color: "purple" }
         ]}
       />
       <div className="grid grid-cols-2 gap-4">
         <SectionCard title="Today's Priorities">
           <ul>
-            {signals.map(signal => (
+            {(signals || []).map(signal => (
               <li key={signal.id} className={`flex items-center p-2 border-l-4 ${signal.priority === 1 ? 'border-red-500' : signal.priority === 2 ? 'border-yellow-500' : 'border-green-500'}`}>
                 <div className="flex-grow">
                   <h3>{signal.title}</h3>

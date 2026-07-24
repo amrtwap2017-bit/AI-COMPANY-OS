@@ -39,10 +39,10 @@ const ServiceRequestsPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError || !data) return <EmptyState message="No service requests found" />;
 
-  const totalRequests = data.length;
-  const openRequests = data.filter((sr) => sr.status === "open").length;
-  const inProgressRequests = data.filter((sr) => sr.status === "in_progress").length;
-  const convertedToWO = data.filter((sr) => sr.status === "converted").length;
+  const totalRequests = (data || []).length;
+  const openRequests = (data || []).filter((sr) => sr.status === "open").length;
+  const inProgressRequests = (data || []).filter((sr) => sr.status === "in_progress").length;
+  const convertedToWO = (data || []).filter((sr) => sr.status === "converted").length;
 
   const filteredRequests = data
     .filter((sr) =>

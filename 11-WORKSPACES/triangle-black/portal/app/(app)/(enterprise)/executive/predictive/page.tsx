@@ -69,7 +69,7 @@ const PredictivePage = () => {
         />
       </div>
       <SectionCard title="Predictive Risk Cards">
-        {signals.sort((a, b) => (b.priority > a.priority ? -1 : 1)).map(signal => (
+        {(signals || []).sort((a, b) => (b.priority > a.priority ? -1 : 1)).map(signal => (
           <div key={signal.id} className="p-4 border-b last:border-b-0">
             <StatusBadge status={signal.priority} />
             <h3>{signal.title}</h3>

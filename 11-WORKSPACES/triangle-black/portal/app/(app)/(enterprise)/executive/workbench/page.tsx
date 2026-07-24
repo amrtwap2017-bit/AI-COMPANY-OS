@@ -33,7 +33,7 @@ export default function ExecutiveWorkbench() {
   const kpisSla = kpisSlaQuery.data;
   const slas = slasQuery.data;
 
-  const actionItems = signals.slice(0, 5).map(signal => ({
+  const actionItems = (signals || []).slice(0, 5).map(signal => ({
     priority: signal.priority,
     title: signal.title,
     actionLabel: "Take Action",
@@ -48,8 +48,8 @@ export default function ExecutiveWorkbench() {
       <PageHeader title="Good morning, CEO/COO! Current Time: {new Date().toLocaleTimeString()}" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SectionCard title="Metrics">
-          <MetricStrip label="Critical Signals" value={signals.filter(signal => signal.priority === "critical").length} />
-          <MetricStrip label="Open WOs" value={signals.length} />
+          <MetricStrip label="Critical Signals" value={(signals || []).filter(signal => signal.priority === "critical").length} />
+          <MetricStrip label="Open WOs" value={(signals || []).length} />
           <MetricStrip label="SLA %" value={kpisSla.slaCompliancePercentage} />
           <MetricStrip label="Technician Utilization %" value={kpisSla.technicianUtilizationPercentage} />
         </SectionCard>
@@ -66,9 +66,9 @@ export default function ExecutiveWorkbench() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SectionCard title="Key Metrics - Operations">
-          <MetricStrip label="Open WOs" value={signals.length} />
-          <MetricStrip label="Critical WOs" value={signals.filter(signal => signal.priority === "critical").length} />
-          <MetricStrip label="Completed WOs" value={signals.filter(signal => signal.status === "completed").length} />
+          <MetricStrip label="Open WOs" value={(signals || []).length} />
+          <MetricStrip label="Critical WOs" value={(signals || []).filter(signal => signal.priority === "critical").length} />
+          <MetricStrip label="Completed WOs" value={(signals || []).filter(signal => signal.status === "completed").length} />
         </SectionCard>
         <SectionCard title="Key Metrics - SLA">
           <MetricStrip label="Compliance %" value={kpisSla.slaCompliancePercentage} />

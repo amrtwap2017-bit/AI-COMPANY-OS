@@ -48,9 +48,9 @@ export default function HotelDetailPage() {
   const wos       = Array.isArray(wosData)       ? wosData       : wosData?.data       ?? wosData?.items       ?? [];
   const techs     = Array.isArray(techsData)     ? techsData     : techsData?.data     ?? techsData?.items     ?? [];
 
-  const activeContracts = contracts.filter((c: any) => c.status === "active");
+  const activeContracts = (contracts || []).filter((c: any) => c.status === "active");
   const totalContractValue = activeContracts.reduce((s: number, c: any) => s + Number(c.total_value || 0), 0);
-  const criticalAssets = assets.filter((a: any) => a.criticality === "critical").length;
+  const criticalAssets = (assets || []).filter((a: any) => a.criticality === "critical").length;
 
   return (
     <PageWrapper>
@@ -63,10 +63,10 @@ export default function HotelDetailPage() {
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
         {[
-          { label: "Total Assets",     value: assets.length,         icon: Wrench,    color: "text-blue-600" },
+          { label: "Total Assets",     value: (assets || []).length,         icon: Wrench,    color: "text-blue-600" },
           { label: "Critical Assets",  value: criticalAssets,        icon: Activity,  color: "text-red-600" },
           { label: "Active Contracts", value: activeContracts.length, icon: FileText,  color: "text-emerald-600" },
-          { label: "Open WOs",         value: wos.length,            icon: Building,  color: "text-amber-600" },
+          { label: "Open WOs",         value: (wos || []).length,            icon: Building,  color: "text-amber-600" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
@@ -157,10 +157,10 @@ export default function HotelDetailPage() {
 
         {/* Assets + Open WOs */}
         <div className="lg:col-span-2 space-y-6">
-          <SectionCard title={`Assets (${assets.length})`}>
-            {assets.length > 0 ? (
+          <SectionCard title={`Assets (${(assets || []).length})`}>
+            {(assets || []).length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {assets.map((asset: any) => (
+                {(assets || []).map((asset: any) => (
                   <div key={asset.id}
                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -182,10 +182,10 @@ export default function HotelDetailPage() {
             )}
           </SectionCard>
 
-          {wos.length > 0 && (
-            <SectionCard title={`Open Work Orders (${wos.length})`}>
+          {(wos || []).length > 0 && (
+            <SectionCard title={`Open Work Orders (${(wos || []).length})`}>
               <div className="space-y-2">
-                {wos.map((wo: any) => (
+                {(wos || []).map((wo: any) => (
                   <div key={wo.id}
                        className={`flex items-center justify-between p-3 rounded-lg border
                          ${wo.priority === "critical" ? "bg-red-50 border-red-200" : "bg-slate-50 border-slate-100"}`}>

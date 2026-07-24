@@ -34,12 +34,12 @@ const InventoryPage = () => {
   const items = itemsQuery.data;
   const stockBalances = stockBalancesQuery.data;
 
-  const totalItems = items.length;
-  const lowStockCount = items.filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
-  const outOfStockCount = items.filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand === 0).length;
-  const categoriesCount = new Set(items.map(item => item.category)).size;
+  const totalItems = (items || []).length;
+  const lowStockCount = (items || []).filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
+  const outOfStockCount = (items || []).filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand === 0).length;
+  const categoriesCount = new Set((items || []).map(item => item.category)).size;
 
-  const filteredItems = selectedCategory ? items.filter(item => item.category === selectedCategory) : items;
+  const filteredItems = selectedCategory ? (items || []).filter(item => item.category === selectedCategory) : items;
 
   const reorderAlerts = items
     .filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.reorder_qty)

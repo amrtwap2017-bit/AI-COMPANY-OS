@@ -27,13 +27,13 @@ const CustomerHubPage = () => {
   const contracts = contractsQuery.data;
   const invoices = invoicesQuery.data;
 
-  const uniqueClients = Array.from(new Set(contracts.map(contract => contract.client_name)));
+  const uniqueClients = Array.from(new Set((contracts || []).map(contract => contract.client_name)));
   const totalRevenue = invoices.reduce((acc, invoice) => acc + invoice.revenue, 0);
-  const expiringSoon = contracts.filter(contract => Date.now() - new Date(contract.end_date).getTime() < 60 * 24 * 60 * 1000);
+  const expiringSoon = (contracts || []).filter(contract => Date.now() - new Date(contract.end_date).getTime() < 60 * 24 * 60 * 1000);
 
   const topClientsByValue = uniqueClients
     .map(clientName => {
-      const clientContracts = contracts.filter(contract => contract.client_name === clientName);
+      const clientContracts = (contracts || []).filter(contract => contract.client_name === clientName);
       return {
         clientName,
         contractCount: clientContracts.length,
@@ -48,13 +48,13 @@ const CustomerHubPage = () => {
       <PageHeader title="Customer Hub" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricStrip label="Total Clients" value={uniqueClients.length} />
-        <MetricStrip label="Active Contracts" value={contracts.length} />
+        <MetricStrip label="Active Contracts" value={(contracts || []).length} />
         <MetricStrip label="Total Revenue EGP" value={totalRevenue} />
         <MetricStrip label="Expiring Soon" value={expiringSoon.length} />
       </div>
       <SectionCard title="Customer List">
         {uniqueClients.map(clientName => {
-          const clientContracts = contracts.filter(contract => contract.client_name === clientName);
+          const clientContracts = (contracts || []).filter(contract => contract.client_name === clientName);
           const mostRecentContract = clientContracts.sort((a, b) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime())[0];
           return (
             <div key={clientName} className="flex items-center justify-between p-4 border-b last:border-b-0">

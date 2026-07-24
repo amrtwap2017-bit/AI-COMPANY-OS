@@ -25,18 +25,18 @@ export default function WorkOrdersPage() {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load work orders" />;
 
-  const filteredWorkOrders = workOrders.filter((wo: any) => {
+  const filteredWorkOrders = (workOrders || []).filter((wo: any) => {
     const statusMatch = statusFilter === "All" || wo.status === statusFilter;
     const priorityMatch = priorityFilter === "All" || wo.priority === priorityFilter;
     return statusMatch && priorityMatch;
   });
 
   const metricData = {
-    Total: workOrders.length,
-    Open: workOrders.filter((wo: any) => wo.status === "Open").length,
-    "In Progress": workOrders.filter((wo: any) => wo.status === "In Progress").length,
-    "Critical Open": workOrders.filter((wo: any) => wo.status === "Open" && wo.priority === "Critical").length,
-    Completed: workOrders.filter((wo: any) => wo.status === "Completed").length,
+    Total: (workOrders || []).length,
+    Open: (workOrders || []).filter((wo: any) => wo.status === "Open").length,
+    "In Progress": (workOrders || []).filter((wo: any) => wo.status === "In Progress").length,
+    "Critical Open": (workOrders || []).filter((wo: any) => wo.status === "Open" && wo.priority === "Critical").length,
+    Completed: (workOrders || []).filter((wo: any) => wo.status === "Completed").length,
   };
 
   return (

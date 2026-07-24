@@ -54,10 +54,10 @@ export default function ContractsPage() {
   // Filter + search + sort
   const filtered = useMemo(() => {
     let list = contracts;
-    if (statusFilter !== "all") list = list.filter((c: any) => c.status === statusFilter);
+    if (statusFilter !== "all") list = (list || []).filter((c: any) => c.status === statusFilter);
     if (searchQ) {
       const q = searchQ.toLowerCase();
-      list = list.filter((c: any) =>
+      list = (list || []).filter((c: any) =>
         (c.title ?? "").toLowerCase().includes(q) ||
         (c.hotel_id ?? "").toLowerCase().includes(q)
       );
@@ -72,7 +72,7 @@ export default function ContractsPage() {
   }, [contracts, statusFilter, searchQ, sortBy]);
 
   const now = new Date();
-  const expiringSoon = contracts.filter((c: any) =>
+  const expiringSoon = (contracts || []).filter((c: any) =>
     c.status === "active" && c.end_date &&
     new Date(c.end_date).getTime() - now.getTime() < 30 * 86400000
   ).length;
@@ -95,7 +95,7 @@ export default function ContractsPage() {
     <PageWrapper>
       <PageHeader
         title="Contracts"
-        subtitle={`${contracts.length} total · ${expiringSoon} expiring in 30 days`}
+        subtitle={`${(contracts || []).length} total · ${expiringSoon} expiring in 30 days`}
         badge="Program J"
       />
 
@@ -110,7 +110,7 @@ export default function ContractsPage() {
       {/* KPI strip */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {["active","expired","renewed","draft"].map(status => {
-          const count = contracts.filter((c: any) => c.status === status).length;
+          const count = (contracts || []).filter((c: any) => c.status === status).length;
           return (
             <button
               key={status}

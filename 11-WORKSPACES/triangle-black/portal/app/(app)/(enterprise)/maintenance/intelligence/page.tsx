@@ -72,7 +72,7 @@ export default function PredictiveMaintenancePage() {
         <div className="lg:col-span-2">
           <SectionCard title="Asset Health Scores (Worst First)">
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {assets.map((asset: any) => (
+              {(assets || []).map((asset: any) => (
                 <div key={asset.asset_id}
                      className={`p-3 rounded-lg border ${RISK_STYLES[asset.risk_level] ?? RISK_STYLES.healthy}`}>
                   <div className="flex justify-between items-start mb-1">
@@ -93,7 +93,7 @@ export default function PredictiveMaintenancePage() {
                   </div>
                 </div>
               ))}
-              {assets.length === 0 && (
+              {(assets || []).length === 0 && (
                 <p className="text-sm text-slate-400 text-center py-8">No assets found</p>
               )}
             </div>

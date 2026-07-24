@@ -32,7 +32,7 @@ const Vendor360Page = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load vendors" />;
 
-  const filteredVendors = vendors.filter((vendor) =>
+  const filteredVendors = (vendors || []).filter((vendor) =>
     vendor.name.toLowerCase().includes(searchText.toLowerCase())
   );
 

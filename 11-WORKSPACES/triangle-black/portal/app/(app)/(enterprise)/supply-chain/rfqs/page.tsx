@@ -75,11 +75,11 @@ const RFQsPage = () => {
       </SectionCard>
 
       <SectionCard title="Top Vendors">
-        {vendors.length === 0 ? (
+        {(vendors || []).length === 0 ? (
           <EmptyState />
         ) : (
           <ul className="space-y-4">
-            {vendors.slice(0, 8).map(vendor => (
+            {(vendors || []).slice(0, 8).map(vendor => (
               <li key={vendor.id} className="flex items-center space-x-4">
                 <span>{vendor.name}</span>
                 <StatusBadge status={vendor.category} />

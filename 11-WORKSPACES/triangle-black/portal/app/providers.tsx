@@ -1,32 +1,33 @@
 "use client"; // @ts-nocheck
 /**
- * Providers - Client component that wraps app with QueryClientProvider
- * This is the SINGLE place QueryClient is created.
+ * Providers - React Query v4 compatible
  */
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// Create QueryClient OUTSIDE component to avoid recreation
-let clientQueryClientSingleton: QueryClient | undefined;
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+        retry: 1,
+        refetchOnWindowFocus: false,
+        cacheTime: 5 * 60 * 1000,
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined;
 
 function getQueryClient() {
   if (typeof window === "undefined") {
-    // Server: always new instance
-    return new QueryClient({
-      defaultOptions: {
-        queries: { staleTime: 60000, retry: 1, refetchOnWindowFocus: false },
-      },
-    });
+    return makeQueryClient();
   }
-  // Browser: singleton
-  if (!clientQueryClientSingleton) {
-    clientQueryClientSingleton = new QueryClient({
-      defaultOptions: {
-        queries: { staleTime: 60000, retry: 1, refetchOnWindowFocus: false },
-      },
-    });
+  if (!browserQueryClient) {
+    browserQueryClient = makeQueryClient();
   }
-  return clientQueryClientSingleton;
+  return browserQueryClient;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {

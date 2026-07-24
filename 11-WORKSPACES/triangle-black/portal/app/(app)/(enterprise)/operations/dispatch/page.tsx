@@ -56,11 +56,11 @@ const DispatchPage = () => {
   if (techsLoading || wosLoading) return <LoadingState />;
   if (techsError || wosError) return <EmptyState />;
 
-  const availableTechs = techniciansData.technicians.filter(
+  const availableTechs = (techniciansData.technicians || []).filter(
     (tech: any) => tech.current_work_orders < tech.max_work_orders
   ).length;
-  const openWOS = workOrdersData.work_orders.filter((wo: any) => !wo.technician_id).length;
-  const needingDispatch = workOrdersData.work_orders.filter((wo: any) => !wo.technician_id && wo.priority > 0).length;
+  const openWOS = (workOrdersData.work_orders || []).filter((wo: any) => !wo.technician_id).length;
+  const needingDispatch = (workOrdersData.work_orders || []).filter((wo: any) => !wo.technician_id && wo.priority > 0).length;
   const aiRecommendations = Object.keys(dispatchResults).length;
 
   return (
@@ -77,10 +77,10 @@ const DispatchPage = () => {
         />
         <SectionCard title="Technician Capacity">
           <div className="grid grid-cols-3 gap-4">
-            {techniciansData.technicians.map((tech: any) => (
+            {(techniciansData.technicians || []).map((tech: any) => (
               <div key={tech.id} className="bg-white p-4 rounded-lg shadow-md">
                 <h3>{tech.name}</h3>
-                <p>{Array.isArray(tech.specializations) ? tech.specializations.slice(0, 2).join(", ") : tech.specializations}</p>
+                <p>{Array.isArray(tech.specializations) ? (tech.specializations || []).slice(0, 2).join(", ") : tech.specializations}</p>
                 <Progress value={(tech.current_work_orders / tech.max_work_orders) * 100} />
               </div>
             ))}

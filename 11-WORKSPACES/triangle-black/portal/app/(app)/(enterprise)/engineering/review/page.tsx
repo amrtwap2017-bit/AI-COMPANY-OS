@@ -32,10 +32,10 @@ export default function EngineeringReviewPage() {
 
   const isLoading = w1 || a1;
 
-  const engWOs = wos.filter((w) => ENG_TYPES.includes(w.type));
+  const engWOs = (wos || []).filter((w) => ENG_TYPES.includes(w.type));
   const completed = engWOs.filter((w) => w.status === "completed");
   const criticalOpen = engWOs.filter((w) => w.priority === "critical" && w.status === "open");
-  const faultAssets = assets.filter((a) => a.status === "fault" || a.status === "breakdown");
+  const faultAssets = (assets || []).filter((a) => a.status === "fault" || a.status === "breakdown");
   const overallRate = engWOs.length > 0 ? Math.round((completed.length / engWOs.length) * 100) : 0;
 
   const byType = ENG_TYPES.reduce((acc, t) => {
@@ -47,8 +47,8 @@ export default function EngineeringReviewPage() {
 
   const byCriticality = ["critical", "high", "medium"].reduce((acc, c) => {
     acc[c] = {
-      total: assets.filter((a) => a.criticality === c).length,
-      fault: assets.filter((a) => a.criticality === c && (a.status === "fault" || a.status === "breakdown")).length,
+      total: (assets || []).filter((a) => a.criticality === c).length,
+      fault: (assets || []).filter((a) => a.criticality === c && (a.status === "fault" || a.status === "breakdown")).length,
     };
     return acc;
   }, {});

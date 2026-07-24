@@ -32,21 +32,21 @@ const EngineeringActionsPage = () => {
 
   if (woQuery.isError || signalsQuery.isError || pmPlansQuery.isError) return <EmptyState />;
 
-  const criticalWos = woQuery.data.filter((wo: any) => wo.priority === "critical" && ["hvac", "electrical", "mechanical"].includes(wo.type));
-  const overduePmPlans = pmPlansQuery.data.filter((plan: any) => new Date(plan.next_due_date) < new Date());
+  const criticalWos = (woQuery.data || []).filter((wo: any) => wo.priority === "critical" && ["hvac", "electrical", "mechanical"].includes(wo.type));
+  const overduePmPlans = (pmPlansQuery.data || []).filter((plan: any) => new Date(plan.next_due_date) < new Date());
   const maintenanceSignals = signalsQuery.data;
 
   return (
     <PageWrapper>
       <PageHeader title="Engineering Team Actions" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricStrip label="Engineering WOs Open" value={woQuery.data.length} />
-        <MetricStrip label="Critical WOs" value={criticalWos.length} />
-        <MetricStrip label="PM Plans Overdue" value={overduePmPlans.length} />
-        <MetricStrip label="Maintenance Signals" value={maintenanceSignals.length} />
+        <MetricStrip label="Engineering WOs Open" value={(woQuery.data || []).length} />
+        <MetricStrip label="Critical WOs" value={(criticalWos || []).length} />
+        <MetricStrip label="PM Plans Overdue" value={(overduePmPlans || []).length} />
+        <MetricStrip label="Maintenance Signals" value={(maintenanceSignals || []).length} />
       </div>
       <SectionCard title="Today's Engineering Actions">
-        {criticalWos.map((wo: any) => (
+        {(criticalWos || []).map((wo: any) => (
           <Link key={wo.id} href={`/engineering/work-orders/${wo.id}`}>
             <div className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{wo.title}</span>
@@ -54,7 +54,7 @@ const EngineeringActionsPage = () => {
             </div>
           </Link>
         ))}
-        {overduePmPlans.map((plan: any) => (
+        {(overduePmPlans || []).map((plan: any) => (
           <Link key={plan.id} href={`/engineering/pm-plans/${plan.id}`}>
             <div className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{plan.title}</span>
@@ -62,7 +62,7 @@ const EngineeringActionsPage = () => {
             </div>
           </Link>
         ))}
-        {maintenanceSignals.map((signal: any) => (
+        {(maintenanceSignals || []).map((signal: any) => (
           <Link key={signal.id} href={`/engineering/maintenance-signals/${signal.id}`}>
             <div className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{signal.title}</span>

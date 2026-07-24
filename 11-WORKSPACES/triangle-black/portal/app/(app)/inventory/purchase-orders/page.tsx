@@ -27,7 +27,7 @@ export default function Page() {
   return (
     <PageWrapper>
       <Breadcrumb/>
-      <PageHeader title="Purchase Orders" subtitle={`${items.length} records`} badge="PO"
+      <PageHeader title="Purchase Orders" subtitle={`${(items || []).length} records`} badge="PO"
         actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
       {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed"}/>}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">

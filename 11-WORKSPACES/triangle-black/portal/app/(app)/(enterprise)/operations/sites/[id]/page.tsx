@@ -39,7 +39,7 @@ export default function SiteDetailPage() {
   const techs  = Array.isArray(techsData)  ? techsData  : techsData?.data  ?? techsData?.items  ?? [];
   const wos    = Array.isArray(wosData)    ? wosData    : wosData?.data    ?? wosData?.items    ?? [];
 
-  const criticalAssets = assets.filter((a: any) => a.criticality === "critical").length;
+  const criticalAssets = (assets || []).filter((a: any) => a.criticality === "critical").length;
   const activeTechs    = techs.filter((t: any) => t.is_active).length;
 
   return (
@@ -53,10 +53,10 @@ export default function SiteDetailPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
         {[
-          { label: "Total Assets",     value: assets.length, icon: Wrench,   color: "text-blue-600" },
+          { label: "Total Assets",     value: (assets || []).length, icon: Wrench,   color: "text-blue-600" },
           { label: "Critical Assets",  value: criticalAssets, icon: Activity, color: "text-red-600" },
           { label: "Active Techs",     value: activeTechs,   icon: Users,    color: "text-emerald-600" },
-          { label: "Open WOs",         value: wos.length,    icon: Building, color: "text-amber-600" },
+          { label: "Open WOs",         value: (wos || []).length,    icon: Building, color: "text-amber-600" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
@@ -94,9 +94,9 @@ export default function SiteDetailPage() {
           </SectionCard>
 
           {/* Open WOs */}
-          {wos.length > 0 && (
-            <SectionCard title={`Open WOs (${wos.length})`}>
-              {wos.slice(0, 5).map((wo: any) => (
+          {(wos || []).length > 0 && (
+            <SectionCard title={`Open WOs (${(wos || []).length})`}>
+              {(wos || []).slice(0, 5).map((wo: any) => (
                 <div key={wo.id} className="p-2 mb-2 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="text-xs font-medium text-slate-700 truncate">{wo.title}</div>
                   <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
@@ -108,10 +108,10 @@ export default function SiteDetailPage() {
 
         <div className="lg:col-span-2 space-y-6">
           {/* Assets */}
-          <SectionCard title={`Assets (${assets.length})`}>
-            {assets.length > 0 ? (
+          <SectionCard title={`Assets (${(assets || []).length})`}>
+            {(assets || []).length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {assets.map((asset: any) => (
+                {(assets || []).map((asset: any) => (
                   <div key={asset.id}
                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />

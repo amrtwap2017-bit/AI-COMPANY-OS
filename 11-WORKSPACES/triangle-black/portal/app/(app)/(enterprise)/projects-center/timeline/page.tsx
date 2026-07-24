@@ -40,13 +40,13 @@ const ProjectTimelinePage = () => {
     <PageWrapper>
       <PageHeader title="Project Timeline" />
       <div className="flex justify-between mb-4">
-        <span>Total Projects: {projects.length}</span>
-        <span>Active: {projects.filter(p => p.status === "active").length}</span>
-        <span>Planning: {projects.filter(p => p.status === "planning").length}</span>
-        <span>Completed: {projects.filter(p => p.status === "completed").length}</span>
+        <span>Total Projects: {(projects || []).length}</span>
+        <span>Active: {(projects || []).filter(p => p.status === "active").length}</span>
+        <span>Planning: {(projects || []).filter(p => p.status === "planning").length}</span>
+        <span>Completed: {(projects || []).filter(p => p.status === "completed").length}</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {projects.map(project => (
+        {(projects || []).map(project => (
           <SectionCard key={project.id}>
             <h3>{project.name}</h3>
             <StatusBadge status={project.status} />

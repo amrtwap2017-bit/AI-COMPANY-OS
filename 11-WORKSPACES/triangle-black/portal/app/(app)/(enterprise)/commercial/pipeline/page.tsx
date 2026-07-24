@@ -41,11 +41,11 @@ const PipelinePage = () => {
   const contracts = contractsQuery.data;
 
   const statusCounts = {
-    new: leads.filter((lead) => lead.status === "new").length,
-    qualified: leads.filter((lead) => lead.status === "qualified").length,
-    negotiation: leads.filter((lead) => lead.status === "negotiation").length,
-    won: leads.filter((lead) => lead.status === "won").length,
-    lost: leads.filter((lead) => lead.status === "lost").length,
+    new: (leads || []).filter((lead) => lead.status === "new").length,
+    qualified: (leads || []).filter((lead) => lead.status === "qualified").length,
+    negotiation: (leads || []).filter((lead) => lead.status === "negotiation").length,
+    won: (leads || []).filter((lead) => lead.status === "won").length,
+    lost: (leads || []).filter((lead) => lead.status === "lost").length,
   };
 
   const totalLeads = statusCounts.new + statusCounts.qualified + statusCounts.negotiation + statusCounts.won;
@@ -89,9 +89,9 @@ const PipelinePage = () => {
                         <StatusBadge status={lead.status} />
                       </div>
                     ))}
-                  {leads.filter((lead) => lead.status === status).length > 5 && (
+                  {(leads || []).filter((lead) => lead.status === status).length > 5 && (
                     <button className="bg-gray-200 p-2 rounded-lg shadow-sm">
-                      +{leads.filter((lead) => lead.status === status).length - 5} more
+                      +{(leads || []).filter((lead) => lead.status === status).length - 5} more
                     </button>
                   )}
                 </div>

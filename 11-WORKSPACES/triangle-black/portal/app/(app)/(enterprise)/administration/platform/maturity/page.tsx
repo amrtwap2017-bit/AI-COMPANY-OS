@@ -98,12 +98,12 @@ export default function PlatformMaturityPage() {
 
   // Calculate maturity scores
   const allItems = MATURITY_BENCHMARKS.flatMap(cat => cat.items);
-  const totalScore  = allItems.reduce((s, i) => s + i.score, 0);
-  const maxScore    = allItems.length * 10;
+  const totalScore  = (allItems || []).reduce((s, i) => s + i.score, 0);
+  const maxScore    = (allItems || []).length * 10;
   const maturityPct = Math.round(totalScore / maxScore * 100);
 
-  const completeCount = allItems.filter(i => i.status === "complete").length;
-  const partialCount  = allItems.filter(i => i.status === "partial").length;
+  const completeCount = (allItems || []).filter(i => i.status === "complete").length;
+  const partialCount  = (allItems || []).filter(i => i.status === "partial").length;
 
   // Update Triangle Black benchmark
   ENTERPRISE_BENCHMARKS[4].score = maturityPct;
@@ -133,7 +133,7 @@ export default function PlatformMaturityPage() {
         </div>
         <div className="lg:col-span-3 grid grid-cols-3 gap-4">
           {[
-            { label: "Total Features",    value: allItems.length,   icon: Target,     color: "text-slate-700" },
+            { label: "Total Features",    value: (allItems || []).length,   icon: Target,     color: "text-slate-700" },
             { label: "Complete",          value: completeCount,     icon: CheckCircle, color: "text-emerald-600" },
             { label: "Partial / WIP",     value: partialCount,      icon: AlertCircle, color: "text-amber-600" },
             { label: "Backend Routes",    value: `200+`,            icon: TrendingUp, color: "text-blue-600" },
@@ -175,8 +175,8 @@ export default function PlatformMaturityPage() {
       {/* Category breakdown */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {MATURITY_BENCHMARKS.map(cat => {
-          const catScore = cat.items.reduce((s, i) => s + i.score, 0);
-          const catMax   = cat.items.length * 10;
+          const catScore = (cat.items || []).reduce((s, i) => s + i.score, 0);
+          const catMax   = (cat.items || []).length * 10;
           const catPct   = Math.round(catScore / catMax * 100);
           return (
             <SectionCard key={cat.category} title={`${cat.category} — ${catPct}%`}>
@@ -187,7 +187,7 @@ export default function PlatformMaturityPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                {cat.items.map(item => (
+                {(cat.items || []).map(item => (
                   <div key={item.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {item.status === "complete"

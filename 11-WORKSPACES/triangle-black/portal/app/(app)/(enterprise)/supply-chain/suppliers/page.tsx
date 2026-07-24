@@ -42,12 +42,12 @@ const SupplierPage = () => {
   const rfqs = rfqsQuery.data;
   const purchaseOrders = purchaseOrdersQuery.data;
 
-  const totalSuppliers = vendors.length;
+  const totalSuppliers = (vendors || []).length;
   const activeRFQs = rfqs.filter(rfq => rfq.status === "sent").length;
   const totalSpend = purchaseOrders.reduce((acc, po) => acc + po.total_amount, 0);
-  const avgLeadTime = vendors.reduce((acc, vendor) => acc + (vendor.lead_time_days || 0), 0) / vendors.length;
+  const avgLeadTime = vendors.reduce((acc, vendor) => acc + (vendor.lead_time_days || 0), 0) / (vendors || []).length;
 
-  const vendorScores = vendors.map(vendor => {
+  const vendorScores = (vendors || []).map(vendor => {
     const poCount = purchaseOrders.filter(po => po.vendor_id === vendor.id).length;
     const totalSpend = purchaseOrders.filter(po => po.vendor_id === vendor.id).reduce((acc, po) => acc + po.total_amount, 0);
     const responseRate = rfqs.some(rfq => rfq.vendor_id === vendor.id) ? Math.floor(Math.random() * (100 - 85) + 85) : null;

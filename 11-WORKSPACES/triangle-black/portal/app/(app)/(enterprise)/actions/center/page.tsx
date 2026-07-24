@@ -51,10 +51,10 @@ export default function ActionsCenterPage() {
 
   const signals = sigsData.signals || [];
   const pendingPRs = prs.filter((p) => p.status === "draft" || p.status === "pending");
-  const criticalWOs = wos.filter((w) => w.priority === "critical" && w.status === "open");
+  const criticalWOs = (wos || []).filter((w) => w.priority === "critical" && w.status === "open");
 
-  const totalActions = signals.length + pendingPRs.length + criticalWOs.length;
-  const criticalCount = signals.filter((s) => s.priority === "critical").length + criticalWOs.length;
+  const totalActions = (signals || []).length + pendingPRs.length + criticalWOs.length;
+  const criticalCount = (signals || []).filter((s) => s.priority === "critical").length + criticalWOs.length;
 
   const isLoading = s1 || s2 || s3;
   if (isLoading) return <LoadingState message="Loading action center..." />;
@@ -95,7 +95,7 @@ export default function ActionsCenterPage() {
       ) : (
         <SectionCard title="Pending Actions">
           <div className="space-y-2">
-            {(tab === "all" || tab === "signals") && signals.map((s) => (
+            {(tab === "all" || tab === "signals") && (signals || []).map((s) => (
               <div key={s.signal_id} className={`px-4 py-3 rounded-lg border-l-4 ${
                 s.priority === "critical" ? "border-red-500 bg-red-50" :
                 s.priority === "high" ? "border-amber-400 bg-amber-50" : "border-blue-400 bg-blue-50"

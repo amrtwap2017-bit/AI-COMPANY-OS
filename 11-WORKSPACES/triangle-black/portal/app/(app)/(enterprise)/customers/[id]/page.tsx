@@ -46,12 +46,12 @@ export default function CustomerDetailPage() {
 
   const isLoading = c1 || c2 || c3;
 
-  const custContracts = contracts.filter(
+  const custContracts = (contracts || []).filter(
     (c) => c.client_name?.toLowerCase().includes(name.toLowerCase())
   );
   const contractIds   = new Set(custContracts.map((c) => c.id));
   const custInvoices  = invoices.filter((i) => contractIds.has(i.contract_id));
-  const custWOs       = wos.filter((w) => contractIds.has(w.contract_id));
+  const custWOs       = (wos || []).filter((w) => contractIds.has(w.contract_id));
   const activeCount   = custContracts.filter((c) => c.status === "active").length;
   const totalValue    = custContracts.reduce((s, c) => s + (Number(c.contract_value) || 0), 0);
 

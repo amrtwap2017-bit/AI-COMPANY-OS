@@ -35,7 +35,7 @@ const StockBalancesPage = () => {
 
   const filteredStockBalances = stockBalances.filter(sb => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
 
-  const totalItems = items.length;
+  const totalItems = (items || []).length;
   const totalValueEGP = stockBalances.reduce((acc, sb) => acc + sb.total_value, 0);
   const belowMinimum = stockBalances.filter(sb => sb.qty_on_hand < sb.min_stock).length;
 
@@ -80,7 +80,7 @@ const StockBalancesPage = () => {
         </thead>
         <tbody>
           {filteredStockBalances.map(sb => {
-            const item = items.find(i => i.id === sb.item_id);
+            const item = (items || []).find(i => i.id === sb.item_id);
             if (!item) return null;
             return (
               <tr key={sb.id}>

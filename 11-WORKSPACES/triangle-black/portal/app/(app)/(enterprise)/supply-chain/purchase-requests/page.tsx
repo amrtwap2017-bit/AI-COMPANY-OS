@@ -35,13 +35,13 @@ export default function PurchaseRequestsPage() {
     staleTime: 30_000,
   });
 
-  const filtered1 = statusFilter === "all" ? data : data.filter(r => r.status === statusFilter);
+  const filtered1 = statusFilter === "all" ? data : (data || []).filter(r => r.status === statusFilter);
   const { query, setQuery, filtered } = useSearch(filtered1, ["pr_number","requester","department","justification"]);
   const { page, totalPages, items, goToPage } = usePagination(filtered, pageSize);
 
   const tabs = STATUS_TABS.map(t => ({
     ...t,
-    count: t.value === "all" ? data.length : data.filter(r => r.status === t.value).length,
+    count: t.value === "all" ? (data || []).length : (data || []).filter(r => r.status === t.value).length,
   }));
 
   const columns = [
@@ -61,7 +61,7 @@ export default function PurchaseRequestsPage() {
 
   return (
     <PageWrapper>
-      <PageHeader title="Purchase Requests" subtitle={data.length + " purchase requests"} badge="PR"
+      <PageHeader title="Purchase Requests" subtitle={(data || []).length + " purchase requests"} badge="PR"
         actions={
           <button onClick={() => { refetch(); toast.success("Refreshed"); }} disabled={isFetching}
             className="p-2 text-slate-500 hover:bg-slate-100 rounded-xl">
@@ -74,11 +74,11 @@ export default function PurchaseRequestsPage() {
       <StatusFilterTabs tabs={tabs} active={statusFilter} onChange={v => { setStatusFilter(v); goToPage(1); }} />
 
       <ActionBar search={{ value: query, onChange: setQuery, placeholder: "Search PRs..." }}
-        resultCount={filtered.length} totalCount={data.length} />
+        resultCount={filtered.length} totalCount={(data || []).length} />
 
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         {isLoading ? <LoadingState type="table" rows={6} /> :
-         items.length === 0 ? <EmptyState icon="📋" title="No purchase requests" description="Purchase requests will appear here" /> :
+         (items || []).length === 0 ? <EmptyState icon="📋" title="No purchase requests" description="Purchase requests will appear here" /> :
          <DataTable columns={columns} data={items} />}
       </div>
 

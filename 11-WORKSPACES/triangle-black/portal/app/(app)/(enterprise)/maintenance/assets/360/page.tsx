@@ -40,8 +40,8 @@ const MaintenancePage = () => {
 
   if (!assets || !workOrders || !signals) return <EmptyState />;
 
-  const assetHealthScores = assets.map(asset => {
-    const correctiveCount = workOrders.filter(wo => wo.type === "corrective" && wo.asset_id === asset.id).length;
+  const assetHealthScores = (assets || []).map(asset => {
+    const correctiveCount = (workOrders || []).filter(wo => wo.type === "corrective" && wo.asset_id === asset.id).length;
     const health = Math.max(0, Math.min(100, 100 - (correctiveCount * 20)));
     return { ...asset, health };
   });
@@ -52,10 +52,10 @@ const MaintenancePage = () => {
     <PageWrapper>
       <PageHeader title="Asset Health 360" />
       <SectionCard title="Metrics">
-        <MetricStrip label="Total Assets" value={assets.length} />
-        <MetricStrip label="Critical Assets" value={assets.filter(a => a.criticality === "critical").length} />
-        <MetricStrip label="Assets In Fault" value={assets.filter(a => a.health < 40).length} />
-        <MetricStrip label="High Risk Assets" value={assets.filter(a => a.health < 40).length} />
+        <MetricStrip label="Total Assets" value={(assets || []).length} />
+        <MetricStrip label="Critical Assets" value={(assets || []).filter(a => a.criticality === "critical").length} />
+        <MetricStrip label="Assets In Fault" value={(assets || []).filter(a => a.health < 40).length} />
+        <MetricStrip label="High Risk Assets" value={(assets || []).filter(a => a.health < 40).length} />
       </SectionCard>
       <SectionCard title="Asset Health Scores">
         {assetHealthScores.map(asset => (
@@ -70,7 +70,7 @@ const MaintenancePage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Maintenance Signals">
-        {signals.map(signal => (
+        {(signals || []).map(signal => (
           <div key={signal.id} className="p-2 border-b last:border-b-0">
             {signal.message}
           </div>

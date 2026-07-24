@@ -73,13 +73,13 @@ export default function SchedulesPage() {
           ].map(({ label, items }) => (
             <div key={label} className="bg-slate-50 rounded-lg p-3">
               <p className="text-xs font-semibold text-slate-600 mb-2">{label}</p>
-              <p className="text-2xl font-bold text-slate-800">{items.length}</p>
+              <p className="text-2xl font-bold text-slate-800">{(items || []).length}</p>
               <div className="mt-2 space-y-1">
-                {items.slice(0, 3).map((p) => (
+                {(items || []).slice(0, 3).map((p) => (
                   <p key={p.id} className="text-xs text-slate-500 truncate">{p.title}</p>
                 ))}
-                {items.length > 3 && (
-                  <p className="text-xs text-slate-400">+{items.length - 3} more</p>
+                {(items || []).length > 3 && (
+                  <p className="text-xs text-slate-400">+{(items || []).length - 3} more</p>
                 )}
               </div>
             </div>

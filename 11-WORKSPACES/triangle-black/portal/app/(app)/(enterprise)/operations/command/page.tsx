@@ -46,7 +46,7 @@ export default function CommandPage() {
           { label: "Open WOs", value: kpis.open_wo_count },
           { label: "Critical WOs", value: kpis.critical_wo_count },
           { label: "Available Technicians", value: technicians.available_technician_count },
-          { label: "Active Signals", value: signals.length },
+          { label: "Active Signals", value: (signals || []).length },
         ]}
       />
       <div className="grid grid-cols-2 gap-4 mb-8">
@@ -65,14 +65,14 @@ export default function CommandPage() {
       </div>
       <SectionCard title="Live Signal Feed">
         <ul className="list-disc pl-4">
-          {signals.slice(0, 5).map((signal) => (
+          {(signals || []).slice(0, 5).map((signal) => (
             <li key={signal.id}>{signal.description}</li>
           ))}
         </ul>
       </SectionCard>
       <SectionCard title="Technician Status">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {technicians.slice(0, 5).map((tech) => (
+          {(technicians || []).slice(0, 5).map((tech) => (
             <div key={tech.id} className="bg-gray-100 p-4 rounded-lg flex items-center justify-between">
               <p>{tech.name}</p>
               <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">

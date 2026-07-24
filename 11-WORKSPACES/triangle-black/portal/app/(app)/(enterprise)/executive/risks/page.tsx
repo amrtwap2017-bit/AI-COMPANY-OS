@@ -43,8 +43,8 @@ const RiskRegisterPage = () => {
   const slaData = slaQuery.data;
   const contracts = contractsQuery.data;
 
-  const highRisks = signals.filter(signal => signal.priority === "critical");
-  const mediumRisks = signals.filter(signal => signal.priority === "high");
+  const highRisks = (signals || []).filter(signal => signal.priority === "critical");
+  const mediumRisks = (signals || []).filter(signal => signal.priority === "high");
 
   const complianceRisk = slaData.compliance < 95 ? (
     <SectionCard title="SLA Risk" status="red">
@@ -52,7 +52,7 @@ const RiskRegisterPage = () => {
     </SectionCard>
   ) : null;
 
-  const financialRisk = contracts.filter(contract => contract.expiryDate <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).reduce((acc, contract) => acc + contract.valueAtRisk, 0);
+  const financialRisk = (contracts || []).filter(contract => contract.expiryDate <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).reduce((acc, contract) => acc + contract.valueAtRisk, 0);
 
   return (
     <PageWrapper>
@@ -76,7 +76,7 @@ const RiskRegisterPage = () => {
             </tr>
           </thead>
           <tbody>
-            {signals.sort((a, b) => (b.priority === "critical" ? -1 : 1)).map(signal => (
+            {(signals || []).sort((a, b) => (b.priority === "critical" ? -1 : 1)).map(signal => (
               <tr key={signal.id}>
                 <td>{signal.id}</td>
                 <td>{signal.title}</td>

@@ -40,10 +40,10 @@ export default function ProjectsReviewPage() {
     return Math.ceil((new Date(end) - new Date()) / 86400000);
   };
 
-  const withDays = projects.map((p) => ({
+  const withDays = (projects || []).map((p) => ({
     ...p,
     daysLeft: getDays(p.end_date),
-    woCount: wos.filter((w) => w.contract_id === p.contract_id).length,
+    woCount: (wos || []).filter((w) => w.contract_id === p.contract_id).length,
   }));
 
   const active    = withDays.filter((p) => p.status === "active");
@@ -73,7 +73,7 @@ export default function ProjectsReviewPage() {
       />
 
       <MetricStrip metrics={[
-        { label: "Total",     value: projects.length },
+        { label: "Total",     value: (projects || []).length },
         { label: "Active",    value: active.length,    color: "green" as const },
         { label: "At Risk",   value: atRisk.length,    color: atRisk.length > 0 ? "red" as const : "slate" as const },
         { label: "Completed", value: completed.length, color: "blue" as const },

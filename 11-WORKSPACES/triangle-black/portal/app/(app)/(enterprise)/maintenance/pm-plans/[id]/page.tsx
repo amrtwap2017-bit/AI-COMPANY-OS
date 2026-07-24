@@ -128,10 +128,10 @@ export default function PMPlanDetailPage() {
 
         <div className="lg:col-span-2 space-y-6">
           {/* WOs linked to this plan */}
-          <SectionCard title={`Work Orders (${wos.length})`}>
-            {wos.length > 0 ? (
+          <SectionCard title={`Work Orders (${(wos || []).length})`}>
+            {(wos || []).length > 0 ? (
               <div className="space-y-2">
-                {wos.map((wo: any) => (
+                {(wos || []).map((wo: any) => (
                   <div key={wo.id}
                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-3">

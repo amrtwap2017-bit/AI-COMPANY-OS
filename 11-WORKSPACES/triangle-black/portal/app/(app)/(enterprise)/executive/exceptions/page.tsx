@@ -43,8 +43,8 @@ const ExecutiveExceptionsPage = () => {
   const kpis = kpisQuery.data;
   const workOrders = workOrdersQuery.data;
 
-  const criticalSignals = signals.filter((signal: any) => signal.priority === "critical");
-  const highPrioritySignals = signals.filter((signal: any) => signal.priority === "high");
+  const criticalSignals = (signals || []).filter((signal: any) => signal.priority === "critical");
+  const highPrioritySignals = (signals || []).filter((signal: any) => signal.priority === "high");
 
   const exceptionsCount = criticalSignals.length + highPrioritySignals.length;
 
@@ -59,7 +59,7 @@ const ExecutiveExceptionsPage = () => {
         />
         <MetricStrip
           title="Critical WOs Open"
-          value={workOrders.filter((wo: any) => wo.status === "open").length}
+          value={(workOrders || []).filter((wo: any) => wo.status === "open").length}
           badge={<StatusBadge status="red" />}
         />
         <MetricStrip

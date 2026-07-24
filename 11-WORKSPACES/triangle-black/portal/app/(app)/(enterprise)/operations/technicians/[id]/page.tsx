@@ -31,10 +31,10 @@ export default function TechnicianDetailPage() {
 
   const wos = Array.isArray(wosData) ? wosData : wosData?.data ?? wosData?.items ?? [];
 
-  const completed = wos.filter((w: any) => w.status === "completed").length;
-  const inProgress = wos.filter((w: any) => w.status === "in_progress").length;
-  const open = wos.filter((w: any) => w.status === "open").length;
-  const completionRate = wos.length > 0 ? Math.round(completed / wos.length * 100) : 0;
+  const completed = (wos || []).filter((w: any) => w.status === "completed").length;
+  const inProgress = (wos || []).filter((w: any) => w.status === "in_progress").length;
+  const open = (wos || []).filter((w: any) => w.status === "open").length;
+  const completionRate = (wos || []).length > 0 ? Math.round(completed / (wos || []).length * 100) : 0;
   const utilization = tech.max_work_orders > 0
     ? Math.round(tech.current_work_orders / tech.max_work_orders * 100)
     : 0;
@@ -59,7 +59,7 @@ export default function TechnicianDetailPage() {
           { label: "Current WOs",      value: tech.current_work_orders ?? 0, icon: Wrench,      color: "text-blue-600" },
           { label: "Utilization",      value: `${utilization}%`,             icon: TrendingUp,  color: utilization > 80 ? "text-red-600" : "text-emerald-600" },
           { label: "Completion Rate",  value: `${completionRate}%`,          icon: CheckCircle, color: completionRate >= 80 ? "text-emerald-600" : "text-amber-600" },
-          { label: "Total WOs",        value: wos.length,                    icon: Star,        color: "text-slate-700" },
+          { label: "Total WOs",        value: (wos || []).length,                    icon: Star,        color: "text-slate-700" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
@@ -129,9 +129,9 @@ export default function TechnicianDetailPage() {
 
         {/* WO History */}
         <div className="lg:col-span-2">
-          <SectionCard title={`Work Order History (${wos.length})`}>
+          <SectionCard title={`Work Order History (${(wos || []).length})`}>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {wos.map((wo: any) => (
+              {(wos || []).map((wo: any) => (
                 <div key={wo.id} className="flex items-center justify-between p-3
                                              bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3">
@@ -149,7 +149,7 @@ export default function TechnicianDetailPage() {
                   </span>
                 </div>
               ))}
-              {wos.length === 0 && (
+              {(wos || []).length === 0 && (
                 <p className="text-sm text-slate-400 text-center py-8">No work orders assigned</p>
               )}
             </div>

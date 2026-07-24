@@ -35,7 +35,7 @@ const AssetPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load assets" />;
 
-  const filteredAssets = assets.filter((asset: any) =>
+  const filteredAssets = (assets || []).filter((asset: any) =>
     categoryFilter ? asset.category.toLowerCase().includes(categoryFilter.toLowerCase()) : true
   );
 

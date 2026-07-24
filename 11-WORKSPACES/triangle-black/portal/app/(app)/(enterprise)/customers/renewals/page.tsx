@@ -60,9 +60,9 @@ export default function RenewalsPage() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Expiring <30d",  value: renewals.filter((r: any) => r.risk_level === "high").length,   color: "text-red-600" },
-          { label: "Expiring <60d",  value: renewals.filter((r: any) => r.risk_level === "medium").length, color: "text-amber-600" },
-          { label: "Expiring <90d",  value: renewals.filter((r: any) => r.risk_level === "low").length,    color: "text-blue-600" },
+          { label: "Expiring <30d",  value: (renewals || []).filter((r: any) => r.risk_level === "high").length,   color: "text-red-600" },
+          { label: "Expiring <60d",  value: (renewals || []).filter((r: any) => r.risk_level === "medium").length, color: "text-amber-600" },
+          { label: "Expiring <90d",  value: (renewals || []).filter((r: any) => r.risk_level === "low").length,    color: "text-blue-600" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
             <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
@@ -71,9 +71,9 @@ export default function RenewalsPage() {
         ))}
       </div>
 
-      <SectionCard title={`${renewals.length} Contracts to Renew`}>
+      <SectionCard title={`${(renewals || []).length} Contracts to Renew`}>
         <div className="space-y-3">
-          {renewals.map((contract: any) => {
+          {(renewals || []).map((contract: any) => {
             const cid = contract.contract_id || contract.id;
             const isRenewed = renewed[cid];
             const error     = errors[cid];
@@ -130,7 +130,7 @@ export default function RenewalsPage() {
             );
           })}
 
-          {renewals.length === 0 && (
+          {(renewals || []).length === 0 && (
             <div className="text-center py-8 text-slate-400">
               <CheckCircle className="w-10 h-10 mx-auto mb-2 text-emerald-400" />
               <p className="text-sm">No contracts expiring in the next 90 days</p>

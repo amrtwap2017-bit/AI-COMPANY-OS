@@ -38,7 +38,7 @@ const SpendPage = () => {
   }, {} as { [key: string]: number });
 
   const vendorSpend = purchaseOrders.reduce((acc, po) => {
-    const vendor = vendors.find(vendor => vendor.id === po.vendor_id);
+    const vendor = (vendors || []).find(vendor => vendor.id === po.vendor_id);
     if (vendor) {
       acc[vendor.name] = (acc[vendor.name] || 0) + po.total_amount;
     }

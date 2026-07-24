@@ -27,10 +27,10 @@ const CommercialReviewPage = () => {
   const contracts = contractsQuery.data;
 
   // Calculate metrics
-  const totalLeads = leads.length;
-  const wonLeads = leads.filter(lead => lead.status === "won").length;
+  const totalLeads = (leads || []).length;
+  const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
   const conversionRate = (wonLeads / totalLeads * 100).toFixed(2);
-  const activeContracts = contracts.filter(contract => contract.status === "active").length;
+  const activeContracts = (contracts || []).filter(contract => contract.status === "active").length;
 
   // Lead status summary
   const statusSummary = leads.reduce((acc, lead) => {
@@ -39,10 +39,10 @@ const CommercialReviewPage = () => {
   }, {} as { [key: string]: number });
 
   // Top 5 leads by value
-  const topLeads = leads.sort((a, b) => b.value - a.value).slice(0, 5);
+  const topLeads = (leads || []).sort((a, b) => b.value - a.value).slice(0, 5);
 
   // Contract health
-  const expiringContracts = contracts.filter(contract => {
+  const expiringContracts = (contracts || []).filter(contract => {
     const today = new Date();
     const expirationDate = new Date(contract.expiration_date);
     return expirationDate <= new Date(today.setMonth(today.getMonth() + 1));

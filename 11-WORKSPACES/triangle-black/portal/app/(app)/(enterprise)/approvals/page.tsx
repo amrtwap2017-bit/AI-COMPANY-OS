@@ -51,7 +51,7 @@ export default function ApprovalsPage() {
   const projs = Array.isArray(projData) ? projData : projData?.data ?? projData?.items ?? [];
   const wos   = Array.isArray(woData)   ? woData   : woData?.data   ?? woData?.items   ?? [];
 
-  const totalPending = prs.length + projs.length + wos.length;
+  const totalPending = prs.length + projs.length + (wos || []).length;
 
   const openModal = (entityType: string, entity: any, invalidateKey: string[]) => {
     setModal({ entityType, entity, invalidateKey });
@@ -77,7 +77,7 @@ export default function ApprovalsPage() {
         {[
           { label: "Purchase Requests", value: prs.length,   icon: ShoppingCart, color: "text-amber-600" },
           { label: "Projects",          value: projs.length, icon: FolderOpen,   color: "text-blue-600" },
-          { label: "Critical WOs",      value: wos.length,   icon: Wrench,       color: "text-red-600" },
+          { label: "Critical WOs",      value: (wos || []).length,   icon: Wrench,       color: "text-red-600" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
@@ -154,10 +154,10 @@ export default function ApprovalsPage() {
       )}
 
       {/* Critical WOs */}
-      {wos.length > 0 && (
-        <SectionCard title={`Critical WOs — Unassigned (${wos.length})`} className="mb-6">
+      {(wos || []).length > 0 && (
+        <SectionCard title={`Critical WOs — Unassigned (${(wos || []).length})`} className="mb-6">
           <div className="space-y-2">
-            {wos.map((wo: any) => (
+            {(wos || []).map((wo: any) => (
               <div key={wo.id}
                    className="flex items-center justify-between p-4
                               bg-red-50 border border-red-200 rounded-xl">

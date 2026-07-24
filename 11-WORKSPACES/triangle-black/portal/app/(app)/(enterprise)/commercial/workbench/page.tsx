@@ -33,12 +33,12 @@ const CommercialWorkbenchPage = () => {
 
   if (leadsQuery.isError || contractsQuery.isError || signalsQuery.isError) return <EmptyState />;
 
-  const todayLeads = leadsQuery.data.filter(lead => lead.created_at.startsWith(getToday()));
+  const todayLeads = (leadsQuery.data || []).filter(lead => lead.created_at.startsWith(getToday()));
   const hotLeads = leadsQuery.data
     .filter(lead => ["negotiation", "qualified"].includes(lead.status))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
-  const contractRenewals = contractsQuery.data.filter(contract => {
+  const contractRenewals = (contractsQuery.data || []).filter(contract => {
     const endDate = new Date(contract.end_date);
     return endDate >= new Date() && endDate <= new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
   });
@@ -49,27 +49,27 @@ const CommercialWorkbenchPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <MetricStrip
           title="Today's Pipeline"
-          value={todayLeads.length}
+          value={(todayLeads || []).length}
           icon="/icons/leads.svg"
         />
         <MetricStrip
           title="Won This Week"
-          value={contractsQuery.data.filter(contract => contract.status === "won").length}
+          value={(contractsQuery.data || []).filter(contract => contract.status === "won").length}
           icon="/icons/won.svg"
         />
         <MetricStrip
           title="Active Contracts"
-          value={contractsQuery.data.filter(contract => contract.status !== "won").length}
+          value={(contractsQuery.data || []).filter(contract => contract.status !== "won").length}
           icon="/icons/active-contracts.svg"
         />
         <MetricStrip
           title="Commercial Alerts"
-          value={signalsQuery.data.length}
+          value={(signalsQuery.data || []).length}
           icon="/icons/alerts.svg"
         />
       </div>
       <SectionCard title="Hot Leads">
-        {hotLeads.map(lead => (
+        {(hotLeads || []).map(lead => (
           <div key={lead.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
             <span>{lead.company_name}</span>
             <StatusBadge status={lead.status} />
@@ -78,7 +78,7 @@ const CommercialWorkbenchPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Contract Renewals Due">
-        {contractRenewals.map(contract => {
+        {(contractRenewals || []).map(contract => {
           const daysRemaining = Math.ceil((new Date(contract.end_date) - new Date()) / (1000 * 60 * 60 * 24));
           return (
             <div key={contract.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
@@ -91,7 +91,7 @@ const CommercialWorkbenchPage = () => {
         })}
       </SectionCard>
       <SectionCard title="Commercial Signals">
-        {signalsQuery.data.map(signal => (
+        {(signalsQuery.data || []).map(signal => (
           <div key={signal.id} className="p-2 border-b last:border-b-0">
             <p>{signal.description}</p>
           </div>

@@ -36,7 +36,7 @@ export default function DowntimeReviewPage() {
 
   const isLoading = woLoading || assetLoading;
 
-  const corrective = wos.filter(
+  const corrective = (wos || []).filter(
     (w) => w.type === "corrective" &&
            w.status === "completed" &&
            w.started_at &&
@@ -45,7 +45,7 @@ export default function DowntimeReviewPage() {
 
   const withHours = corrective.map((w) => {
     const hours = (new Date(w.completed_at) - new Date(w.started_at)) / 3600000;
-    const asset = assets.find((a) => a.id === w.asset_id);
+    const asset = (assets || []).find((a) => a.id === w.asset_id);
     return { ...w, hours, assetName: asset?.name || "Unknown", category: asset?.category || "General" };
   }).filter((w) => w.hours > 0);
 

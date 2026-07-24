@@ -40,12 +40,12 @@ export default function VendorAnalyticsPage() {
 
   const isLoading = v1 || v2 || v3;
 
-  const vendorScores = vendors.map((v) => {
+  const vendorScores = (vendors || []).map((v) => {
     const vendorPOs   = pos.filter((p) => p.vendor_id === v.id);
     const poCount     = vendorPOs.length;
     const totalSpend  = vendorPOs.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
     const leadScore   = v.lead_time_days ? Math.max(0, 40 - v.lead_time_days * 2) : 20;
-    const maxPOs      = Math.max(...vendors.map((x) => pos.filter((p) => p.vendor_id === x.id).length), 1);
+    const maxPOs      = Math.max(...(vendors || []).map((x) => pos.filter((p) => p.vendor_id === x.id).length), 1);
     const poScore     = Math.round((poCount / maxPOs) * 50);
     const score       = Math.min(100, 10 + leadScore + poScore);
     return { ...v, poCount, totalSpend, score };
@@ -53,8 +53,8 @@ export default function VendorAnalyticsPage() {
 
   const totalSpend      = pos.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
   const activeVendors   = vendorScores.filter((v) => v.poCount > 0).length;
-  const avgLead         = vendors.length > 0
-    ? Math.round(vendors.reduce((s, v) => s + (v.lead_time_days || 0), 0) / vendors.length)
+  const avgLead         = (vendors || []).length > 0
+    ? Math.round(vendors.reduce((s, v) => s + (v.lead_time_days || 0), 0) / (vendors || []).length)
     : 0;
   const rfqResponded    = rfqs.filter((r) => r.status === "received").length;
   const responseRate    = rfqs.length > 0 ? Math.round((rfqResponded / rfqs.length) * 100) : 0;
@@ -71,7 +71,7 @@ export default function VendorAnalyticsPage() {
       />
 
       <MetricStrip metrics={[
-        { label: "Total Vendors",  value: vendors.length },
+        { label: "Total Vendors",  value: (vendors || []).length },
         { label: "Active",         value: activeVendors,               color: "green" as const },
         { label: "Total Spend",    value: `${totalSpend.toLocaleString()} EGP` },
         { label: "Avg Lead Time",  value: `${avgLead}d` },

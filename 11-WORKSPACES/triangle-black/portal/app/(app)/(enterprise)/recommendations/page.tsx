@@ -24,10 +24,10 @@ const RecommendationsPage = () => {
 
   if (signalsQuery.isError || kpisQuery.isError) return <p>Error fetching data</p>;
 
-  const signals = signalsQuery.data.filter(signal => signal.recommended_action);
-  const totalRecommendations = signals.length;
-  const criticalActions = signals.filter(signal => signal.priority === "critical").length;
-  const highPriority = signals.filter(signal => signal.priority === "high").length;
+  const signals = (signalsQuery.data || []).filter(signal => signal.recommended_action);
+  const totalRecommendations = (signals || []).length;
+  const criticalActions = (signals || []).filter(signal => signal.priority === "critical").length;
+  const highPriority = (signals || []).filter(signal => signal.priority === "high").length;
 
   if (totalRecommendations === 0) {
     return (
@@ -56,7 +56,7 @@ const RecommendationsPage = () => {
         />
       </SectionCard>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sortedSignals.map(signal => (
+        {(sortedSignals || []).map(signal => (
           <SectionCard key={signal.id}>
             <StatusBadge label={signal.priority} color={signal.priority === "critical" ? "red" : signal.priority === "high" ? "amber" : "blue"} />
             <h2 className="font-bold">{signal.title}</h2>

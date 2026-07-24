@@ -87,16 +87,16 @@ export default function QRCodesPage() {
         badge="Field Operations"
       />
 
-      <SectionCard title={`${assets.length} Assets`}>
+      <SectionCard title={`${(assets || []).length} Assets`}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {assets.map((asset: any) => (
+          {(assets || []).map((asset: any) => (
             <QRCodeBox
               key={asset.id}
               assetId={asset.id}
               assetName={asset.name || asset.category || "Asset"}
             />
           ))}
-          {assets.length === 0 && (
+          {(assets || []).length === 0 && (
             <div className="col-span-4 py-12 text-center text-slate-400">
               <QrCode className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="text-sm">No assets found</p>

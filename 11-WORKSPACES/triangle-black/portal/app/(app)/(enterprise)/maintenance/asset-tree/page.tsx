@@ -48,15 +48,15 @@ const AssetTreePage = () => {
     Other: { count: 0, faultCount: 0, list: [] },
   };
 
-  assets.forEach(asset => {
+  (assets || []).forEach(asset => {
     categories[asset.category].count++;
     if (asset.status === "In Fault") categories[asset.category].faultCount++;
     categories[asset.category].list.push(asset.name);
   });
 
   const totalAssets = Object.values(categories).reduce((acc, category) => acc + category.count, 0);
-  const criticalAssets = assets.filter(asset => asset.criticality === "Critical").length;
-  const inFaultAssets = assets.filter(asset => asset.status === "In Fault").length;
+  const criticalAssets = (assets || []).filter(asset => asset.criticality === "Critical").length;
+  const inFaultAssets = (assets || []).filter(asset => asset.status === "In Fault").length;
 
   return (
     <PageWrapper>
@@ -94,12 +94,12 @@ const AssetTreePage = () => {
             </button>
             {expandedCategories[category] && (
               <ul className="mt-2">
-                {categories[category].list.map(assetName => (
+                {(categories[category] || []).map(assetName => (
                   <li key={assetName} className="flex items-center justify-between py-1 border-b last:border-b-0">
                     <span>{assetName}</span>
                     <div className="flex items-center space-x-2">
-                      <StatusBadge status={assets.find(asset => asset.name === assetName)?.status || "Unknown"} />
-                      <StatusBadge criticality={assets.find(asset => asset.name === assetName)?.criticality || "Unknown"} />
+                      <StatusBadge status={(assets || []).find(asset => asset.name === assetName)?.status || "Unknown"} />
+                      <StatusBadge criticality={(assets || []).find(asset => asset.name === assetName)?.criticality || "Unknown"} />
                     </div>
                   </li>
                 ))}

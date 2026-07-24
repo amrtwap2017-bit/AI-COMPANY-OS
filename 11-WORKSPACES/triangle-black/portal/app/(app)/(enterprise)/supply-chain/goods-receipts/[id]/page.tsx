@@ -79,8 +79,8 @@ export default function GoodsReceiptDetailPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <SectionCard title={`Received Items (${items.length})`}>
-            {items.length > 0 ? (
+          <SectionCard title={`Received Items (${(items || []).length})`}>
+            {(items || []).length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -92,7 +92,7 @@ export default function GoodsReceiptDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {items.map((item: any) => (
+                    {(items || []).map((item: any) => (
                       <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50">
                         <td className="py-2">
                           <div className="font-medium text-slate-800">

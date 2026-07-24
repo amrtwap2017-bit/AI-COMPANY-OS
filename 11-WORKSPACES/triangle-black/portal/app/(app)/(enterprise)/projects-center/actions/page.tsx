@@ -34,20 +34,20 @@ const ProjectsCenterPage = () => {
   const workOrders = workOrdersQuery.data;
   const signals = signalsQuery.data;
 
-  const atRiskProjects = projects.filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000);
-  const openWOs = workOrders.filter(w => !w.project_id);
+  const atRiskProjects = (projects || []).filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000);
+  const openWOs = (workOrders || []).filter(w => !w.project_id);
 
   const actionItems = [
     ...atRiskProjects.map(p => ({ project: p, text: "Schedule closeout review", urgency: "high" })),
-    ...projects.filter(p => openWOs.some(w => w.project_id === p.id)).map(p => ({ project: p, text: "No work orders assigned", urgency: "medium" })),
-    ...signals.filter(s => s.category === "operations").map(s => ({ project: projects.find(p => p.id === s.project_id), text: s.message, urgency: "low" }))
+    ...(projects || []).filter(p => openWOs.some(w => w.project_id === p.id)).map(p => ({ project: p, text: "No work orders assigned", urgency: "medium" })),
+    ...(signals || []).filter(s => s.category === "operations").map(s => ({ project: (projects || []).find(p => p.id === s.project_id), text: s.message, urgency: "low" }))
   ];
 
   return (
     <PageWrapper>
       <PageHeader title="Project Action Items" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricStrip label="Active Projects" value={projects.length} />
+        <MetricStrip label="Active Projects" value={(projects || []).length} />
         <MetricStrip label="At Risk" value={atRiskProjects.length} />
         <MetricStrip label="Open WOs" value={openWOs.length} />
         <MetricStrip label="Actions Required" value={actionItems.length} />

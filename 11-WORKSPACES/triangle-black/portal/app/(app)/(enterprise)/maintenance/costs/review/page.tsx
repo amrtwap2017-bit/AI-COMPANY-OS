@@ -50,7 +50,7 @@ export default function MaintenanceCostsReviewPage() {
     fetchAllData();
   }, []);
 
-  const completedWorkOrders = workOrders.filter(
+  const completedWorkOrders = (workOrders || []).filter(
     (wo) => wo.status === "completed"
   );
 

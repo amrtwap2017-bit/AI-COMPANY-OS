@@ -29,10 +29,10 @@ const ProjectIntelligencePage = () => {
   if (isLoading || isSignalsLoading) return <LoadingState />;
   if (isError || isSignalsError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
 
-  const totalProjects = projects.length;
-  const atRiskCount = projects.filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000).length;
-  const activeSignalsCount = signals.filter(s => s.category === "operations" || s.category === "commercial").length;
-  const openWosCount = projects.reduce((acc, p) => acc + fetchWorkOrders(p.id).then(wos => wos.length), 0);
+  const totalProjects = (projects || []).length;
+  const atRiskCount = (projects || []).filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000).length;
+  const activeSignalsCount = (signals || []).filter(s => s.category === "operations" || s.category === "commercial").length;
+  const openWosCount = projects.reduce((acc, p) => acc + fetchWorkOrders(p.id).then(wos => (wos || []).length), 0);
 
   return (
     <PageWrapper>
@@ -44,7 +44,7 @@ const ProjectIntelligencePage = () => {
         <MetricStrip label="Open WOs" value={openWosCount} badge={<StatusBadge status="INFO" />} />
       </div>
       <SectionCard title="Project Risk Assessment">
-        {projects.map(project => (
+        {(projects || []).map(project => (
           <div key={project.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <span>{project.name}</span>
             <StatusBadge status={project.end_date < new Date().toISOString() ? "CRITICAL" : project.end_date - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000 ? "WARNING" : "INFO"} />
@@ -52,7 +52,7 @@ const ProjectIntelligencePage = () => {
         ))}
       </SectionCard>
       <SectionCard title="AI Insights">
-        {signals.map(signal => (
+        {(signals || []).map(signal => (
           <div key={signal.id} className="p-4 border-b last:border-b-0">
             <h3>{signal.title}</h3>
             <p>{signal.description}</p>

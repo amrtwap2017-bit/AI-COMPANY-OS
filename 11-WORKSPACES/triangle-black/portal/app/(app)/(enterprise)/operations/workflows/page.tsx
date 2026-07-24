@@ -23,10 +23,10 @@ const WorkflowPage = () => {
   if (signalsLoading || kpisLoading) return <LoadingState />;
   if (signalsError || kpisError) return <EmptyState />;
 
-  const activeWorkflows = signals.length;
+  const activeWorkflows = (signals || []).length;
   const autoPRsCreated = 5; // Example value
   const dispatchesMade = 3; // Example value
-  const signalsProcessed = signals.length;
+  const signalsProcessed = (signals || []).length;
 
   return (
     <PageWrapper>
@@ -42,7 +42,7 @@ const WorkflowPage = () => {
         />
       </SectionCard>
       <SectionCard title="Active Automated Workflows">
-        {signals.map((signal) => (
+        {(signals || []).map((signal) => (
           <div key={signal.signal_id} className="flex items-center space-x-4 p-2 border-b last:border-b-0">
             <span>{signal.title}</span>
             <StatusBadge status="TRIGGERED" />

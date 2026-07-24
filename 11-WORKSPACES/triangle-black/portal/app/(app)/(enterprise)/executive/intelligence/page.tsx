@@ -47,7 +47,7 @@ const ExecutiveIntelligencePage = () => {
   const { compliance, status } = analyticsQuery.data;
   const { WOs_total, critical_open } = kpisQuery.data;
 
-  const riskMatrix = signalsQuery.data.map((signal) => {
+  const riskMatrix = (signalsQuery.data || []).map((signal) => {
     if (signal.level === "critical") return { level: "HIGH RISK", title: signal.title, action: signal.action };
     if (signal.level === "high") return { level: "MEDIUM RISK", title: signal.title, action: signal.action };
     return null;
@@ -72,7 +72,7 @@ const ExecutiveIntelligencePage = () => {
           <MetricStrip label="Critical WOs Open" value={critical_open} />
         </SectionCard>
         <SectionCard title="Executive Risk Assessment">
-          {riskMatrix.map((item, index) => (
+          {(riskMatrix || []).map((item, index) => (
             <div key={index} className="flex items-center space-x-2 mb-2">
               <StatusBadge color={item.level === "HIGH RISK" ? "red" : "orange"} />
               <span>{item.title}</span>
@@ -81,7 +81,7 @@ const ExecutiveIntelligencePage = () => {
           ))}
         </SectionCard>
         <SectionCard title="Business Impact Summary">
-          {businessImpact.map((impact, index) => (
+          {(businessImpact || []).map((impact, index) => (
             <p key={index} className="mb-2">{impact}</p>
           ))}
         </SectionCard>

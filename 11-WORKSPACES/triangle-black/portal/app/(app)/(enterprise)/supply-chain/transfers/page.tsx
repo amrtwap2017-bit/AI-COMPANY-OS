@@ -30,19 +30,19 @@ const TransferPage = () => {
       <div className="grid grid-cols-3 gap-4">
         <MetricStrip
           title="Total Transfers"
-          value={transfersQuery.data ? transfersQuery.data.length : 0}
+          value={transfersQuery.data ? (transfersQuery.data || []).length : 0}
         />
         <MetricStrip
           title="Pending"
-          value={transfersQuery.data ? transfersQuery.data.filter(t => t.status === "pending").length : 0}
+          value={transfersQuery.data ? (transfersQuery.data || []).filter(t => t.status === "pending").length : 0}
         />
         <MetricStrip
           title="Completed"
-          value={transfersQuery.data ? transfersQuery.data.filter(t => t.status === "completed").length : 0}
+          value={transfersQuery.data ? (transfersQuery.data || []).filter(t => t.status === "completed").length : 0}
         />
         <MetricStrip
           title="Warehouses Count"
-          value={warehousesQuery.data ? warehousesQuery.data.length : 0}
+          value={warehousesQuery.data ? (warehousesQuery.data || []).length : 0}
         />
       </div>
       <SectionCard title="Warehouses">
@@ -50,7 +50,7 @@ const TransferPage = () => {
         {warehousesQuery.isError && <EmptyState message="Failed to fetch warehouses" />}
         {warehousesQuery.isSuccess && (
           <ul className="grid grid-cols-1 gap-4">
-            {warehousesQuery.data.map(warehouse => (
+            {(warehousesQuery.data || []).map(warehouse => (
               <li key={warehouse.id} className="bg-white p-4 rounded-lg shadow-md">
                 <strong>{warehouse.name}</strong> - {warehouse.location}
               </li>
@@ -63,12 +63,12 @@ const TransferPage = () => {
         {transfersQuery.isError && (
           <EmptyState message="Failed to fetch transfers" note="Transfers are recorded when items move between warehouses" />
         )}
-        {transfersQuery.isSuccess && transfersQuery.data.length === 0 && (
+        {transfersQuery.isSuccess && (transfersQuery.data || []).length === 0 && (
           <EmptyState message="No transfer records" note="Transfers are recorded when items move between warehouses" />
         )}
-        {transfersQuery.isSuccess && transfersQuery.data.length > 0 && (
+        {transfersQuery.isSuccess && (transfersQuery.data || []).length > 0 && (
           <ul className="grid grid-cols-1 gap-4">
-            {transfersQuery.data.map(transfer => (
+            {(transfersQuery.data || []).map(transfer => (
               <li key={transfer.id} className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
                 <div>
                   From: {transfer.from_warehouse.name}, To: {transfer.to_warehouse.name}

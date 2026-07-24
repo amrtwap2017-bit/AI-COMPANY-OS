@@ -52,8 +52,8 @@ const WorkflowInstancesPage = () => {
   if (isWorkflowLoading || isWorkOrdersLoading) return <LoadingState />;
   if (isWorkflowError && isWorkOrdersError) return <EmptyState title="No workflow history" />;
 
-  const totalInstances = workflows.length + workOrders.length;
-  const runningInstances = workOrders.filter((wo) => wo.status === "in_progress").length;
+  const totalInstances = workflows.length + (workOrders || []).length;
+  const runningInstances = (workOrders || []).filter((wo) => wo.status === "in_progress").length;
   const completedInstances = workflows.length - runningInstances;
   const failedInstances = 0; // No failure tracking
 
@@ -79,7 +79,7 @@ const WorkflowInstancesPage = () => {
             {wf.completed_at && <p>Duration: {new Date(wf.completed_at - wf.created_at).toISOString().slice(14, 19)}</p>}
           </SectionCard>
         ))}
-        {workOrders.map((wo) => (
+        {(workOrders || []).map((wo) => (
           <SectionCard key={wo.id}>
             <h3>{wo.title}</h3>
             <StatusBadge status={wo.status} />

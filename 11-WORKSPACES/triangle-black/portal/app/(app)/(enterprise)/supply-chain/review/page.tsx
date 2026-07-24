@@ -76,7 +76,7 @@ const ReviewPage = () => {
     }
   });
 
-  const vendorPerformance = vendors.map(vendor => ({
+  const vendorPerformance = (vendors || []).map(vendor => ({
     ...vendor,
     poCount: purchaseOrders.filter(po => po.vendor_id === vendor.id).length,
   })).sort((a, b) => b.poCount - a.poCount).slice(0, 5);

@@ -135,10 +135,10 @@ export default function ServiceRequestDetailPage() {
 
         {/* Linked Work Orders */}
         <div className="lg:col-span-2">
-          <SectionCard title={`Linked Work Orders (${wos.length})`}>
-            {wos.length > 0 ? (
+          <SectionCard title={`Linked Work Orders (${(wos || []).length})`}>
+            {(wos || []).length > 0 ? (
               <div className="space-y-3">
-                {wos.map((wo: any) => (
+                {(wos || []).map((wo: any) => (
                   <div key={wo.id}
                        className="flex items-center justify-between p-3
                                   bg-slate-50 rounded-lg border border-slate-100">

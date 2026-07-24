@@ -40,7 +40,7 @@ export default function BulkOperationsPage() {
   const techs = Array.isArray(techsData) ? techsData : techsData?.data ?? techsData?.items ?? [];
   const prs   = Array.isArray(prsData) ? prsData : prsData?.data ?? prsData?.items ?? [];
 
-  const unassignedWOs = wos.filter((w: any) => !w.technician_id);
+  const unassignedWOs = (wos || []).filter((w: any) => !w.technician_id);
   const pendingPRs    = prs.filter((p: any) => ["submitted","pending","draft"].includes(p.status));
 
   const bulkAssign = useMutation({
@@ -74,7 +74,7 @@ export default function BulkOperationsPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        wo_ids: wos.filter((w: any) => w.status === "in_progress").slice(0, 20).map((w: any) => w.id),
+        wo_ids: (wos || []).filter((w: any) => w.status === "in_progress").slice(0, 20).map((w: any) => w.id),
         status: "completed",
         comment: "Bulk completed via portal",
       }),

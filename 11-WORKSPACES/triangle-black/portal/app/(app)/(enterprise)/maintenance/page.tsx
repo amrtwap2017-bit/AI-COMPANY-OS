@@ -29,10 +29,10 @@ const MaintenancePage = () => {
 
   if (isAssetsLoading || isPMPlansLoading || isSignalsLoading) return <LoadingState />;
 
-  const totalAssets = assets.length;
-  const inFaultCount = assets.filter(asset => asset.status === "in-fault").length;
+  const totalAssets = (assets || []).length;
+  const inFaultCount = (assets || []).filter(asset => asset.status === "in-fault").length;
   const activePMPlans = pmPlans.filter(plan => plan.status === "active").length;
-  const maintenanceSignals = signals.slice(0, 3);
+  const maintenanceSignals = (signals || []).slice(0, 3);
 
   return (
     <PageWrapper>
@@ -48,7 +48,7 @@ const MaintenancePage = () => {
       <div className="grid grid-cols-3 gap-4">
         <SectionCard title="Assets" description="Manage all assets" count={totalAssets} href="/maintenance/assets" />
         <SectionCard title="PM Plans" description="Review and manage PM plans" count={activePMPlans} href="/maintenance/pm-plans" />
-        <SectionCard title="Intelligence" description="Analyze maintenance signals" count={signals.length} href="/maintenance/intelligence" />
+        <SectionCard title="Intelligence" description="Analyze maintenance signals" count={(signals || []).length} href="/maintenance/intelligence" />
         <SectionCard title="Schedule" description="View and edit schedules" count={0} href="/maintenance/review/schedules" />
         <SectionCard title="Costs" description="Review maintenance costs" count={0} href="/maintenance/costs/review" />
         <SectionCard title="Downtime" description="Manage downtime" count={0} href="/maintenance/downtime/review" />

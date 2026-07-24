@@ -44,9 +44,9 @@ const AlertsPage = () => {
   const signals = signalsData?.data || [];
   const notifications = notificationsData ? notificationsData.data : [];
 
-  const totalAlerts = signals.length + (notifications ? notifications.length : 0);
-  const criticalCount = signals.filter(signal => signal.priority === "Critical").length;
-  const highCount = signals.filter(signal => signal.priority === "High").length;
+  const totalAlerts = (signals || []).length + (notifications ? (notifications || []).length : 0);
+  const criticalCount = (signals || []).filter(signal => signal.priority === "Critical").length;
+  const highCount = (signals || []).filter(signal => signal.priority === "High").length;
 
   const filteredSignals = signals
     .filter(signal => priorityFilter === "All" || signal.priority === priorityFilter)
@@ -60,7 +60,7 @@ const AlertsPage = () => {
             { label: "Total Alerts", value: totalAlerts },
             { label: "Critical", value: criticalCount, color: "red" },
             { label: "High", value: highCount, color: "amber" },
-            { label: "Notifications", value: notifications ? notifications.length : 0, color: "blue" },
+            { label: "Notifications", value: notifications ? (notifications || []).length : 0, color: "blue" },
           ]}
         />
       </PageHeader>
@@ -109,14 +109,14 @@ const AlertsPage = () => {
       )}
       {notifications ? (
         <SectionCard title="System Notifications">
-          {notifications.map(notification => (
+          {(notifications || []).map(notification => (
             <p key={notification.id}>{notification.message}</p>
           ))}
         </SectionCard>
       ) : (
         <EmptyState />
       )}
-      {totalAlerts === 0 && signals.length === 0 && notifications ? (
+      {totalAlerts === 0 && (signals || []).length === 0 && notifications ? (
         <SectionCard className="bg-green-500 text-white">
           <h3>All Clear</h3>
           <p>No active alerts or notifications.</p>

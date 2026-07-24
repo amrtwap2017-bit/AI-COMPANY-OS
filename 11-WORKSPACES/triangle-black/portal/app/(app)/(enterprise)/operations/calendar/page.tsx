@@ -75,12 +75,12 @@ export default function OperationsCalendarPage() {
   ];
 
   function getItemsForDay(day: Date) {
-    const pms = pmPlans.filter((p: any) => {
+    const pms = (pmPlans || []).filter((p: any) => {
       if (!p.next_due_date) return false;
       try { return isSameDay(new Date(p.next_due_date), day); }
       catch { return false; }
     });
-    const wos = workOrders.filter((w: any) => {
+    const wos = (workOrders || []).filter((w: any) => {
       if (!w.due_date) return false;
       try { return isSameDay(new Date(w.due_date), day); }
       catch { return false; }
@@ -93,7 +93,7 @@ export default function OperationsCalendarPage() {
   const endOfWeek = thisWeek[6];
   const endOf3Weeks = weeks[2][6];
 
-  const wosThisWeek = workOrders.filter((w: any) => {
+  const wosThisWeek = (workOrders || []).filter((w: any) => {
     if (!w.due_date) return false;
     try {
       const d = new Date(w.due_date);
@@ -101,7 +101,7 @@ export default function OperationsCalendarPage() {
     } catch { return false; }
   }).length;
 
-  const pmsThisWeek = pmPlans.filter((p: any) => {
+  const pmsThisWeek = (pmPlans || []).filter((p: any) => {
     if (!p.next_due_date) return false;
     try {
       const d = new Date(p.next_due_date);
@@ -110,12 +110,12 @@ export default function OperationsCalendarPage() {
   }).length;
 
   const overdue = [
-    ...pmPlans.filter((p: any) => {
+    ...(pmPlans || []).filter((p: any) => {
       if (!p.next_due_date) return false;
       try { return new Date(p.next_due_date) < today; }
       catch { return false; }
     }),
-    ...workOrders.filter((w: any) => {
+    ...(workOrders || []).filter((w: any) => {
       if (!w.due_date) return false;
       try { return new Date(w.due_date) < today && w.status !== "completed"; }
       catch { return false; }
@@ -123,14 +123,14 @@ export default function OperationsCalendarPage() {
   ].length;
 
   const total14 = [
-    ...pmPlans.filter((p: any) => {
+    ...(pmPlans || []).filter((p: any) => {
       if (!p.next_due_date) return false;
       try {
         const d = new Date(p.next_due_date);
         return d >= today && d <= endOf3Weeks;
       } catch { return false; }
     }),
-    ...workOrders.filter((w: any) => {
+    ...(workOrders || []).filter((w: any) => {
       if (!w.due_date) return false;
       try {
         const d = new Date(w.due_date);
@@ -162,7 +162,7 @@ export default function OperationsCalendarPage() {
         <LoadingState message="Loading calendar data..." />
       ) : (
         <>
-          {weeks.map((week, wi) => (
+          {(weeks || []).map((week, wi) => (
             <SectionCard
               key={wi}
               title={
@@ -172,12 +172,12 @@ export default function OperationsCalendarPage() {
               }
             >
               <div className="grid grid-cols-7 gap-1">
-                {week.map((day, di) => {
+                {(week || []).map((day, di) => {
                   const { pms, wos } = getItemsForDay(day);
                   const isToday = isSameDay(day, today);
                   const isSelected = isSameDay(day, selectedDate);
                   const isPast = day < today;
-                  const hasItems = pms.length > 0 || wos.length > 0;
+                  const hasItems = (pms || []).length > 0 || (wos || []).length > 0;
 
                   return (
                     <button
@@ -205,23 +205,23 @@ export default function OperationsCalendarPage() {
                         {day.getDate()} {MONTH_NAMES[day.getMonth()]}
                       </div>
                       <div className="space-y-0.5">
-                        {pms.slice(0, 2).map((p: any, i: number) => (
+                        {(pms || []).slice(0, 2).map((p: any, i: number) => (
                           <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate ${
                             isSelected ? "bg-blue-400 text-white" : "bg-blue-100 text-blue-700"
                           }`}>
                             {p.title?.slice(0, 16) || "PM Plan"}
                           </div>
                         ))}
-                        {wos.slice(0, 2).map((w: any, i: number) => (
+                        {(wos || []).slice(0, 2).map((w: any, i: number) => (
                           <div key={i} className={`text-[10px] px-1 py-0.5 rounded truncate ${
                             isSelected ? "bg-amber-400 text-white" : "bg-amber-100 text-amber-700"
                           }`}>
                             {w.title?.slice(0, 16) || "Work Order"}
                           </div>
                         ))}
-                        {(pms.length + wos.length) > 4 && (
+                        {((pms || []).length + (wos || []).length) > 4 && (
                           <div className={`text-[10px] ${isSelected ? "text-slate-300" : "text-slate-400"}`}>
-                            +{pms.length + wos.length - 4} more
+                            +{(pms || []).length + (wos || []).length - 4} more
                           </div>
                         )}
                         {!hasItems && (
@@ -240,14 +240,14 @@ export default function OperationsCalendarPage() {
           <SectionCard
             title={`${DAY_NAMES[selectedDate.getDay()]} ${selectedDate.getDate()} ${MONTH_NAMES[selectedDate.getMonth()]} — Items Due`}
           >
-            {selectedItems.pms.length === 0 && selectedItems.wos.length === 0 ? (
+            {(selectedItems.pms || []).length === 0 && (selectedItems.wos || []).length === 0 ? (
               <EmptyState
                 title="Nothing scheduled"
                 description="No PM plans or work orders due on this day"
               />
             ) : (
               <div className="space-y-2">
-                {selectedItems.pms.map((p: any) => (
+                {(selectedItems.pms || []).map((p: any) => (
                   <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-blue-50 rounded-lg border border-blue-100">
                     <div>
                       <p className="text-sm font-medium text-slate-800">{p.title}</p>
@@ -259,7 +259,7 @@ export default function OperationsCalendarPage() {
                     </div>
                   </div>
                 ))}
-                {selectedItems.wos.map((w: any) => (
+                {(selectedItems.wos || []).map((w: any) => (
                   <div key={w.id} className="flex items-center justify-between px-4 py-3 bg-amber-50 rounded-lg border border-amber-100">
                     <div>
                       <p className="text-sm font-medium text-slate-800">{w.title}</p>

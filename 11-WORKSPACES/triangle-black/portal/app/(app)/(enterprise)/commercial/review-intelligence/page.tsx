@@ -36,10 +36,10 @@ const CommercialReviewIntelligencePage = () => {
   const signals = signalsQuery.data;
 
   // Calculate metrics
-  const wonLeads = leads.filter(lead => lead.status === "won").length;
-  const lostLeads = leads.filter(lead => lead.status === "lost").length;
-  const activePipeline = leads.length - wonLeads - lostLeads;
-  const winRate = (wonLeads / leads.length) * 100;
+  const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
+  const lostLeads = (leads || []).filter(lead => lead.status === "lost").length;
+  const activePipeline = (leads || []).length - wonLeads - lostLeads;
+  const winRate = (wonLeads / (leads || []).length) * 100;
 
   // Monthly trend
   const monthlyTrend = Array.from({ length: 3 }, (_, i) => {
@@ -47,7 +47,7 @@ const CommercialReviewIntelligencePage = () => {
     month.setMonth(month.getMonth() - i);
     return {
       month,
-      wonCount: leads.filter(lead => 
+      wonCount: (leads || []).filter(lead => 
         lead.created_at >= month.toISOString().split('T')[0] && 
         lead.created_at < new Date(month.getFullYear(), month.getMonth() + 1, 0).toISOString().split('T')[0]
       ).filter(lead => lead.status === "won").length,
@@ -63,10 +63,10 @@ const CommercialReviewIntelligencePage = () => {
   const bestStageName = Object.keys(bestStage).reduce((a, b) => (bestStage[a] > bestStage[b] ? a : b), '');
 
   // Pipeline velocity
-  const pipelineVelocity = leads.filter(lead => lead.status === "won").reduce((acc, lead) => {
+  const pipelineVelocity = (leads || []).filter(lead => lead.status === "won").reduce((acc, lead) => {
     const daysDifference = Math.floor((new Date().getTime() - new Date(lead.created_at).getTime()) / (1000 * 3600 * 24));
     return acc + daysDifference;
-  }, 0) / leads.filter(lead => lead.status === "won").length;
+  }, 0) / (leads || []).filter(lead => lead.status === "won").length;
 
   return (
     <PageWrapper>
@@ -84,8 +84,8 @@ const CommercialReviewIntelligencePage = () => {
           {/* Best performing stage */}
         </SectionCard>
         <SectionCard title="AI Insights">
-          {signals.length > 0 ? (
-            signals.map(signal => (
+          {(signals || []).length > 0 ? (
+            (signals || []).map(signal => (
               <div key={signal.id} className="p-4 bg-white rounded-md shadow-md mb-2">
                 <h3>{signal.title}</h3>
                 <p>{signal.description}</p>

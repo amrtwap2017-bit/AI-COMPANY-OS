@@ -59,20 +59,20 @@ export default function ReorderPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
           <AlertTriangle className="w-5 h-5 text-amber-500 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-amber-600">{alerts.length}</div>
+          <div className="text-2xl font-bold text-amber-600">{(alerts || []).length}</div>
           <div className="text-xs text-slate-500">Items Below Min Stock</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
           <ShoppingCart className="w-5 h-5 text-blue-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-blue-600">
-            {alerts.filter((a: any) => a.current_stock === 0).length}
+            {(alerts || []).filter((a: any) => a.current_stock === 0).length}
           </div>
           <div className="text-xs text-slate-500">Completely Out of Stock</div>
         </div>
         <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl p-4">
           <button
             onClick={() => autoReorder.mutate()}
-            disabled={autoReorder.isPending || alerts.length === 0}
+            disabled={autoReorder.isPending || (alerts || []).length === 0}
             className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm
                        font-semibold rounded-lg hover:bg-amber-700 disabled:opacity-50"
           >
@@ -81,13 +81,13 @@ export default function ReorderPage() {
             ) : (
               <Zap className="w-4 h-4" />
             )}
-            Auto-Create PRs ({alerts.length})
+            Auto-Create PRs ({(alerts || []).length})
           </button>
           <div className="text-xs text-slate-400 mt-2">Creates purchase requests for all</div>
         </div>
       </div>
 
-      <SectionCard title={`Low Stock Alerts (${alerts.length})`}>
+      <SectionCard title={`Low Stock Alerts (${(alerts || []).length})`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -101,7 +101,7 @@ export default function ReorderPage() {
               </tr>
             </thead>
             <tbody>
-              {alerts.map((alert: any) => (
+              {(alerts || []).map((alert: any) => (
                 <tr key={alert.id} className="border-b border-slate-50 hover:bg-slate-50">
                   <td className="py-2">
                     <div className="font-medium text-slate-800">{alert.name}</div>
@@ -124,7 +124,7 @@ export default function ReorderPage() {
                   </td>
                 </tr>
               ))}
-              {alerts.length === 0 && (
+              {(alerts || []).length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400 text-sm">
                     ✅ All items are above minimum stock levels
