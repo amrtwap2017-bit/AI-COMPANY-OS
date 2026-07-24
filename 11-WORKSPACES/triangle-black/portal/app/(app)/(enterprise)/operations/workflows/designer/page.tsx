@@ -117,7 +117,7 @@ export default function WorkflowDesignerPage() {
         badge="Program C"
       />
 
-      <MetricStrip metrics={(metrics) || []} className="mb-6" />
+      <MetricStrip metrics={metrics} className="mb-6" />
 
       {/* Work Order State Machine */}
       <SectionCard title="Work Order State Machine" className="mb-6">

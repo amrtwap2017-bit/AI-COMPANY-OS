@@ -59,8 +59,8 @@ export default function SchedulesPage() {
         badge={overdue.length > 0 ? `${overdue.length} Overdue` : undefined}
       />
 
-      <MetricStrip metrics={([
-        { label: "Total Plans",    value: plans.length ) || []},
+      <MetricStrip metrics={[
+        { label: "Total Plans",    value: plans.length },
         { label: "Overdue",        value: overdue.length,  color: overdue.length > 0 ? "red" as const : "slate" as const },
         { label: "Due This Week",  value: thisWeek.length, color: "amber" as const },
         { label: "Due This Month", value: thisMonth.length },

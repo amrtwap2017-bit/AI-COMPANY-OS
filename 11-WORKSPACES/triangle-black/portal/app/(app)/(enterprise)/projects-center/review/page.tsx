@@ -78,9 +78,8 @@ export default function ProjectsReviewPage() {
         badge={atRisk.length > 0 ? `${atRisk.length} At Risk` : undefined}
       />
 
-      <MetricStrip metrics={Array.isArray([
-        { label: "Total",     value: (projects || []).length ) ? [
-        { label: "Total",     value: (projects || []).length  : []},
+      <MetricStrip metrics={[
+        { label: "Total",     value: (projects || []).length },
         { label: "Active",    value: active.length,    color: "green" as const },
         { label: "At Risk",   value: atRisk.length,    color: atRisk.length > 0 ? "red" as const : "slate" as const },
         { label: "Completed", value: completed.length, color: "blue" as const },

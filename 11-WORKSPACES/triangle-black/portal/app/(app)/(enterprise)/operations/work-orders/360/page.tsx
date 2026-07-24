@@ -69,9 +69,8 @@ export default function WO360Page() {
     <PageWrapper>
       <PageHeader title="Work Orders 360" subtitle="Search and filter all work orders" badge={`${(wos || []).length} Total`} />
 
-      <MetricStrip metrics={Array.isArray([
-        { label: "Total",       value: (wos || []).length ) ? [
-        { label: "Total",       value: (wos || []).length  : []},
+      <MetricStrip metrics={[
+        { label: "Total",       value: (wos || []).length },
         { label: "Open",        value: open,   color: open > 0 ? "amber" as const : "slate" as const },
         { label: "In Progress", value: inProg, color: "blue" as const },
         { label: "Completed",   value: done,   color: "green" as const },

@@ -49,8 +49,9 @@ const PmPlansPage = () => {
     <PageWrapper>
       <PageHeader title="PM Plan 360" />
       <SectionCard>
-        <MetricStrip metrics={([
-            { label: "Total Plans", value: pmPlans.length ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Total Plans", value: pmPlans.length },
             { label: "Active", value: filteredPlans.filter((p: any) => p.status === "active").length },
             {
               label: "Overdue",

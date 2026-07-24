@@ -67,8 +67,9 @@ const SupplierPage = () => {
     <PageWrapper>
       <PageHeader title="Supplier Scoreboard" />
       <SectionCard>
-        <MetricStrip metrics={([
-            { label: "Total Suppliers", value: totalSuppliers ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Total Suppliers", value: totalSuppliers },
             { label: "Active RFQs", value: activeRFQs },
             { label: "Total Spend EGP", value: totalSpend.toLocaleString() },
             { label: "Avg Lead Time", value: `${(Number(avgLeadTime) || 0).toFixed(2)} days` },

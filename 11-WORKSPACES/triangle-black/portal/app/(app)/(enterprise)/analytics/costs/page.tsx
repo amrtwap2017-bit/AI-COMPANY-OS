@@ -89,9 +89,8 @@ export default function CostsPage() {
         badge={atRisk > 0 ? `${atRisk} At Risk` : "97.6% Margin"}
       />
 
-      <MetricStrip metrics={Array.isArray([
-        { label: "Total WO Cost",  value: `${woCost.toLocaleString()) ? [
-        { label: "Total WO Cost",  value: `${woCost.toLocaleString() : []} EGP` },
+      <MetricStrip metrics={[
+        { label: "Total WO Cost",  value: `${woCost.toLocaleString()} EGP` },
         { label: "Avg WO Cost",    value: `${avgCost.toLocaleString()} EGP` },
         { label: "Portfolio Rev",  value: `${revenue.toLocaleString()} EGP` },
         { label: "Margin",         value: `${marginPct}%`, color: marginPct >= 30 ? "green" as const : marginPct >= 20 ? "amber" as const : "red" as const },

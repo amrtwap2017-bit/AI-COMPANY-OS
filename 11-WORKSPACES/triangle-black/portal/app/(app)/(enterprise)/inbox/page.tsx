@@ -53,9 +53,8 @@ export default function InboxPage() {
         subtitle="Notifications and AI operational alerts"
         badge={unread + critical > 0 ? `${unread + critical} Unread` : undefined}
       />
-      <MetricStrip metrics={Array.isArray([
-        { label: "Notifications", value: (notifications || []).length ) ? [
-        { label: "Notifications", value: (notifications || []).length  : []},
+      <MetricStrip metrics={[
+        { label: "Notifications", value: (notifications || []).length },
         { label: "Unread",        value: unread,   color: "amber" as const },
         { label: "AI Signals",    value: (signals || []).length },
         { label: "Critical",      value: critical, color: critical > 0 ? "red" as const : "slate" as const },

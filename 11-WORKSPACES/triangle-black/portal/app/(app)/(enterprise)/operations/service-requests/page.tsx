@@ -71,8 +71,9 @@ const ServiceRequestsPage = () => {
     <PageWrapper>
       <PageHeader title="Service Requests" />
       <SectionCard>
-        <MetricStrip metrics={([
-            { label: "Total Requests", value: totalRequests ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Total Requests", value: totalRequests },
             { label: "Open", value: openRequests, color: "green" },
             { label: "In Progress", value: inProgressRequests, color: "blue" },
             { label: "Converted to WO", value: convertedToWO, color: "purple" },

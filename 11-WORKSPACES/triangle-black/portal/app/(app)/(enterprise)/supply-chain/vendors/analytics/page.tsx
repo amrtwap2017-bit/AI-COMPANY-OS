@@ -79,9 +79,8 @@ export default function VendorAnalyticsPage() {
         badge="AI Scored"
       />
 
-      <MetricStrip metrics={Array.isArray([
-        { label: "Total Vendors",  value: (vendors || []).length ) ? [
-        { label: "Total Vendors",  value: (vendors || []).length  : []},
+      <MetricStrip metrics={[
+        { label: "Total Vendors",  value: (vendors || []).length },
         { label: "Active",         value: activeVendors,               color: "green" as const },
         { label: "Total Spend",    value: `${totalSpend.toLocaleString()} EGP` },
         { label: "Avg Lead Time",  value: `${avgLead}d` },

@@ -65,8 +65,9 @@ const AssetTreePage = () => {
     <PageWrapper>
       <PageHeader title="Asset Hierarchy Tree" />
       <SectionCard>
-        <MetricStrip metrics={([
-            { label: "Total Assets", value: totalAssets ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Total Assets", value: totalAssets },
             { label: "Critical", value: criticalAssets },
             { label: "In Fault", value: inFaultAssets },
             { label: "With PM Plans", value: 0 }, // Placeholder for actual count

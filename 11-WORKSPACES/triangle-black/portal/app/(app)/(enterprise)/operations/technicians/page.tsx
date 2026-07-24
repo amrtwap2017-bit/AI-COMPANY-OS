@@ -56,8 +56,9 @@ const TechniciansPage = () => {
     <PageWrapper>
       <PageHeader title="Technician Management" />
       <SectionCard>
-        <MetricStrip metrics={([
-            { label: "Total Technicians", value: totalTechnicians ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Total Technicians", value: totalTechnicians },
             { label: "Active", value: activeTechnicians, color: "green" },
             { label: "At Capacity", value: atCapacityTechnicians, color: "red" },
             { label: "Avg Utilization %", value: (Number(avgUtilization) || 0).toFixed(2) },

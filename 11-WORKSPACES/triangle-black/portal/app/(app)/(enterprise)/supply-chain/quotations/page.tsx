@@ -58,7 +58,7 @@ const QuotationsPage = () => {
     <PageWrapper>
       <PageHeader title="Supplier Quotations" />
       <SectionCard>
-        <MetricStrip metrics={(metrics) || []} />
+        <MetricStrip metrics={metrics} />
       </SectionCard>
       <div className="flex gap-4">
         <button

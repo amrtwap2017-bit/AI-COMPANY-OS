@@ -91,8 +91,8 @@ export default function CustomerDetailPage() {
         badge="Customer"
       />
 
-      <MetricStrip metrics={([
-        { label: "Active Contracts", value: activeCount,                        color: "green" as const ) || []},
+      <MetricStrip metrics={[
+        { label: "Active Contracts", value: activeCount,                        color: "green" as const },
         { label: "Total Value EGP",  value: totalValue.toLocaleString() },
         { label: "Work Orders",      value: custWOs.length,                     color: "blue" as const },
         { label: "Invoices",         value: custInvoices.length },

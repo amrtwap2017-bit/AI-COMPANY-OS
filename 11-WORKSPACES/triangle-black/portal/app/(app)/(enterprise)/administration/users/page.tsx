@@ -67,8 +67,9 @@ const UsersPage = () => {
     <PageWrapper>
       <PageHeader title="User Management" />
       <SectionCard>
-        <MetricStrip metrics={([
-            { label: "Total Users", value: usersData.length ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Total Users", value: usersData.length },
             { label: "Active Users", value: filteredUsers.filter(user => user.is_active).length },
             { label: "Technicians", value: 25 },
             { label: "Admins", value: adminCount },

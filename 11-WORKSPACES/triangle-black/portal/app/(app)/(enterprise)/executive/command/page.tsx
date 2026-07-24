@@ -46,8 +46,9 @@ const ExecutiveCommandPage = () => {
         <SectionCard title="Status">
           <StatusBadge status={status} />
         </SectionCard>
-        <MetricStrip metrics={([
-            { label: "Critical Signals", value: criticalSignalsCount ) || []},
+        <MetricStrip
+          metrics={[
+            { label: "Critical Signals", value: criticalSignalsCount },
             { label: "Critical WOs", value: signals?.critical_wos || 0 },
             { label: "SLA Status", value: sla?.sla_status || "OK" },
             { label: "Technician Utilization %", value: kpisSla?.technician_utilization || 0 },
