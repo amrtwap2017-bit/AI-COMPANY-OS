@@ -49,7 +49,6 @@ def list_projects(
     return rows(db.execute(text(q), p).fetchall())
 
 
-):
     q = "SELECT * FROM projects WHERE 1=1"
     p: dict = {}
     if hotel_id: q += " AND hotel_id=:hotel_id"; p["hotel_id"] = hotel_id
@@ -58,7 +57,6 @@ def list_projects(
     p["limit"] = limit; p["skip"] = skip
     return rows(db.execute(text(q), p).fetchall())
 
-):
     q = "SELECT * FROM projects WHERE 1=1"
     p: dict = {}
     if hotel_id: q += " AND hotel_id=:hotel_id"; p["hotel_id"] = hotel_id
