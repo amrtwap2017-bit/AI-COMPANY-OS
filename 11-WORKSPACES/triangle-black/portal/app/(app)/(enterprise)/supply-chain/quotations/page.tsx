@@ -10,12 +10,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 const fetchQuotations = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/supply-chain/quotations`, { credentials: "include" });
-    if (!response.ok) throw new Error("Not found");
+    if (!response.ok) return [];
     return response.json();
   } catch (error) {
     if (error.message === "Not found") {
       const fallbackResponse = await fetch(`${BACK}/api/v1/quotations`, { credentials: "include" });
-      if (!fallbackResponse.ok) throw new Error("Failed to fetch quotations");
+      if (!fallbackResponse.ok) return [];
       return fallbackResponse.json();
     }
     throw error;

@@ -11,7 +11,7 @@ const fetchInvoices = async () => {
   const response = await fetch(`${BACK}/api/v1/invoices`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch invoices");
+  if (!response.ok) return [];
   return response.json();
 };
 

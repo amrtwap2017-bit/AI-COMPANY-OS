@@ -42,7 +42,7 @@ const ExecutiveExceptionsPage = () => {
     return <EmptyState message="Failed to load data" />;
   }
 
-  const signals = signalsQuery.data;
+  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
   const kpis = kpisQuery.data;
   const workOrders = workOrdersQuery.data;
 

@@ -18,7 +18,7 @@ const fetchSLAData = async () => {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch SLA data");
+    return [];
   }
   return response.json();
 };

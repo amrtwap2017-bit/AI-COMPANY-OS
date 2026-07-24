@@ -21,7 +21,7 @@ const fetchAssets = async () => {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch assets");
+    return [];
   }
   return response.json();
 };

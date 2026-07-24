@@ -11,18 +11,27 @@ import Link from "next/link";
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchSignals() {
-  const r = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/ai/signals`, { credentials: "include" });
   if (!r.ok) return { signals: [] };
   return r.json();
 }
 async function fetchPRs() {
-  const r = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchWOs() {
-  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/work-orders`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
@@ -49,7 +58,7 @@ export default function ActionsCenterPage() {
     queryKey: ["actions-wos"], queryFn: fetchWOs, refetchInterval: 60000,
   });
 
-  const signals = sigsData.signals || [];
+  const signals = Array.isArray(sigsData) ? sigsData : (sigsData?.signals || []);
   const pendingPRs = (Array.isArray(prs) ? prs : []).filter((p: any) => p.status === "draft" || p.status === "pending");
   const criticalWOs = (wos || []).filter((w: any) => w.priority === "critical" && w.status === "open");
 

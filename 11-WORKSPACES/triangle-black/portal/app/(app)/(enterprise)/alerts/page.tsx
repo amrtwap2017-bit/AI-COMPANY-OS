@@ -10,7 +10,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -18,7 +18,7 @@ const fetchNotifications = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/notifications`, { credentials: "include" });
     if (response.status === 404) return null;
-    if (!response.ok) throw new Error("Failed to fetch notifications");
+    if (!response.ok) return [];
     return response.json();
   } catch (error) {
     console.error(error);

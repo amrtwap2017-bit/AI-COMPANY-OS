@@ -16,13 +16,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchLeads = async () => {
   const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch leads");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
   const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch contracts");
+  if (!response.ok) return [];
   return response.json();
 };
 

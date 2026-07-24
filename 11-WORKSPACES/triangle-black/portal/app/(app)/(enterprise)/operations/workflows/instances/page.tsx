@@ -12,7 +12,7 @@ const fetchWorkflows = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/workflows/instances`, { credentials: "include" });
     if (response.ok) return response.json();
-    throw new Error("Failed to fetch workflows");
+    return [];
   } catch (error) {
     console.error(error);
     return null;
@@ -23,7 +23,7 @@ const fetchWorkOrders = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
     if (response.ok) return response.json();
-    throw new Error("Failed to fetch work orders");
+    return [];
   } catch (error) {
     console.error(error);
     return null;

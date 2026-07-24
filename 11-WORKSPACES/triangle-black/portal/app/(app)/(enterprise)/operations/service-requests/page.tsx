@@ -20,7 +20,7 @@ const fetchServiceRequests = async () => {
     const response = await fetch(`${BACK}/api/v1/service-requests`, {
       credentials: "include",
     });
-    if (!response.ok) throw new Error("No service requests found");
+    if (!response.ok) return [];
     return response.json();
   } catch (error) {
     return fetch(`${BACK}/api/v1/operations/service-requests`, {

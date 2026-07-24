@@ -7,7 +7,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 const ExecutiveScorecardPage = () => {
   const fetchScorecard = async () => {
     const response = await authFetch("/api/v1/executive-kpi/scorecard");
-    if (!response.ok) throw new Error("Failed to fetch scorecard data");
+    if (!response.ok) return [];
     return response.json();
   };
 

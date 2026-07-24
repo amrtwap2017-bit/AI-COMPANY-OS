@@ -20,7 +20,7 @@ const fetchPurchaseOrders = async () => {
   const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch purchase orders");
+  if (!response.ok) return [];
   return response.json();
 };
 

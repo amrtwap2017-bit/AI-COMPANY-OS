@@ -9,19 +9,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpisSla = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs and SLA");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSlas = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch SLAs");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -32,7 +32,7 @@ export default function ExecutiveWorkbench() {
 
   if (signalsQuery.isLoading || kpisSlaQuery.isLoading || slasQuery.isLoading) return <LoadingState />;
 
-  const signals = signalsQuery.data;
+  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
   const kpisSla = kpisSlaQuery.data;
   const slas = slasQuery.data;
 

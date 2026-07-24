@@ -25,16 +25,22 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 async function fetchInventory(category: string) {
-  const res = await fetch(
-    `${BACK}/api/v1/ai/supply/inventory-check?work_order_type=${category}`,
+  try {  
+    const res = await fetch(
+      `${BACK
+  } catch { return []; }
+}/api/v1/ai/supply/inventory-check?work_order_type=${category}`,
     { credentials: "include" }
   );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) return [];
   return res.json();
 }
 
 async function fetchPRs() {
-  const res = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, {
+  try {  
+    const res = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/inventory/purchase-requests/`, {
     credentials: "include",
   });
   if (!res.ok) return { items: [], total: 0 };
@@ -52,7 +58,7 @@ async function createAutoPR(category: string) {
       requester: "Supply Chain Workbench",
     }),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) return [];
   return res.json();
 }
 

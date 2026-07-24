@@ -11,19 +11,28 @@ import Link from "next/link";
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchContracts() {
-  const r = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/contracts`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchInvoices() {
-  const r = await fetch(`${BACK}/api/v1/invoices`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/invoices`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchWOs() {
-  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/work-orders`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];

@@ -12,7 +12,7 @@ const fetchContracts = async () => {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch contracts");
+    return [];
   }
   return response.json();
 };

@@ -9,13 +9,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchUsers = async () => {
   const response = await fetch(`${BACK}/api/v1/auth/users`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch users");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchHealth = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/health`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch health");
+  if (!response.ok) return [];
   return response.json();
 };
 

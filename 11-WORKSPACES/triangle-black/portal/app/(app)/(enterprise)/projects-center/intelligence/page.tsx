@@ -9,19 +9,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchProjects = async () => {
   const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch projects");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchWorkOrders = async (projectId: string) => {
   const response = await fetch(`${BACK}/api/v1/work-orders?project_id=${projectId}`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch work orders");
+  if (!response.ok) return [];
   return response.json();
 };
 

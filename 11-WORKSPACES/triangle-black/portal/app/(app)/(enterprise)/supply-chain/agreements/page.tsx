@@ -11,7 +11,7 @@ const fetchAgreements = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/supply-chain/agreements`, { credentials: "include" });
     if (response.ok) return response.json();
-    throw new Error("Failed to fetch agreements");
+    return [];
   } catch (_) {
     return fetch(`${BACK}/api/v1/contracts`, { credentials: "include" }).then((res) => res.json());
   }

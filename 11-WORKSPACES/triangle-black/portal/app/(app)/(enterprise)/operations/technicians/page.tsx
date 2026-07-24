@@ -21,7 +21,7 @@ const fetchTechnicians = async () => {
   const response = await fetch(`${BACK}/api/v1/technicians`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch technicians");
+  if (!response.ok) return [];
   return response.json();
 };
 

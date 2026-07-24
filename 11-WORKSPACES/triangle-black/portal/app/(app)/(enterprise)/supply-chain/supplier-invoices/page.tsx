@@ -9,7 +9,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchInvoices = async () => {
   const response = await fetch(`${BACK}/api/v1/supply-chain/supplier-invoices`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch invoices");
+  if (!response.ok) return [];
   return response.json();
 };
 

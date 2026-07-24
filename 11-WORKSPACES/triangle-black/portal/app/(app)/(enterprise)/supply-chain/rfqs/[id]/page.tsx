@@ -19,13 +19,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchRfqs = async () => {
   const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch RFQs");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchVendors = async () => {
   const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch vendors");
+  if (!response.ok) return [];
   return response.json();
 };
 

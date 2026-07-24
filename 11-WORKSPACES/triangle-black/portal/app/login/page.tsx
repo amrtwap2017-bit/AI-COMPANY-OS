@@ -26,8 +26,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || "Login failed");
-
+      if (!res.ok) return [];
       const token = data.access_token || data.token;
       if (!token) throw new Error("No token received");
 

@@ -42,7 +42,7 @@ const RiskRegisterPage = () => {
     return <EmptyState message="Failed to load data" />;
   }
 
-  const signals = signalsQuery.data;
+  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
   const slaData = slaQuery.data;
   const contracts = contractsQuery.data;
 

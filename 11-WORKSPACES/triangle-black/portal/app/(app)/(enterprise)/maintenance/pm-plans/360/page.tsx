@@ -18,13 +18,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchPmPlans = async () => {
   const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAssets = async (asset_node_id: string) => {
   const response = await fetch(`${BACK}/api/v1/assets?node_id=${asset_node_id}`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch asset details");
+  if (!response.ok) return [];
   return response.json();
 };
 

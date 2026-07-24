@@ -9,14 +9,20 @@ import {
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchWOs() {
-  const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/work-orders`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? d.data ?? [];
 }
 
 async function fetchAssets() {
-  const r = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/assets`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? d.data ?? [];

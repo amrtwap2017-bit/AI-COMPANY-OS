@@ -35,7 +35,7 @@ export default function AIAssistantPage() {
         method: "POST",
         body: JSON.stringify({ text }),
       });
-      if (!res.ok) throw new Error("Parse failed");
+      if (!res.ok) return [];
       const d = await res.json();
       setParsed(d);
     } catch (e) {
@@ -54,7 +54,7 @@ export default function AIAssistantPage() {
         method: "POST",
         body: JSON.stringify(parsed.work_order_payload),
       });
-      if (!res.ok) throw new Error("Create failed");
+      if (!res.ok) return [];
       const d = await res.json();
       setCreated(d);
       qc.invalidateQueries({ queryKey: ["ops-work-orders"] });

@@ -9,19 +9,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchAssets = async () => {
   const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch assets");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchPMPlans = async () => {
   const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch maintenance signals");
+  if (!response.ok) return [];
   return response.json();
 };
 

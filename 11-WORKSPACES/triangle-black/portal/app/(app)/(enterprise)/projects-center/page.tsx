@@ -17,7 +17,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchProjects = async () => {
   const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
-  if (!response.ok) throw new Error("No projects configured yet");
+  if (!response.ok) return [];
   return response.json();
 };
 

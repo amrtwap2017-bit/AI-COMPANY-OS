@@ -11,19 +11,19 @@ const getToday = () => new Date().toISOString().split('T')[0];
 
 const fetchLeads = async () => {
   const response = await fetch(`${BACK}/api/v1/leads?created_at=${getToday()}`, { credentials: 'include' });
-  if (!response.ok) throw new Error("Failed to fetch leads");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
   const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: 'include' });
-  if (!response.ok) throw new Error("Failed to fetch contracts");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: 'include' });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -94,7 +94,7 @@ const CommercialWorkbenchPage = () => {
         })}
       </SectionCard>
       <SectionCard title="Commercial Signals">
-        {(signalsQuery.data || []).map(signal => (
+        {(signalsQuery.data?.signals || signalsQuery.data || []).map(signal => (
           <div key={signal.id} className="p-2 border-b last:border-b-0">
             <p>{signal.description}</p>
           </div>

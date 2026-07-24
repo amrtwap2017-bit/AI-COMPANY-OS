@@ -9,13 +9,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -27,7 +27,7 @@ const RecommendationsPage = () => {
 
   if (signalsQuery.isError || kpisQuery.isError) return <p>Error fetching data</p>;
 
-  const signals = (signalsQuery.data || []).filter(signal => signal.recommended_action);
+  const signals = (signalsQuery.data?.signals || signalsQuery.data || []).filter(signal => signal.recommended_action);
   const totalRecommendations = (signals || []).length;
   const criticalActions = (signals || []).filter(signal => signal.priority === "critical").length;
   const highPriority = (signals || []).filter(signal => signal.priority === "high").length;

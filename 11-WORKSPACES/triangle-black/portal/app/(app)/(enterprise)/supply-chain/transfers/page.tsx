@@ -10,7 +10,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 const fetchTransfers = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/supply-chain/transfers`, { credentials: "include" });
-    if (!response.ok) throw new Error("Failed to fetch transfers");
+    if (!response.ok) return [];
     return response.json();
   } catch (error) {
     return fetch(`${BACK}/api/v1/inventory/transfers`, { credentials: "include" }).then(response => response.json());
@@ -19,7 +19,7 @@ const fetchTransfers = async () => {
 
 const fetchWarehouses = async () => {
   const response = await fetch(`${BACK}/api/v1/supply-chain/warehouses`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch warehouses");
+  if (!response.ok) return [];
   return response.json();
 };
 

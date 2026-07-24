@@ -10,19 +10,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchWorkOrders = async () => {
   const response = await fetch(`${BACK}/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch work orders");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch maintenance signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchPmPlans = async () => {
   const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  if (!response.ok) return [];
   return response.json();
 };
 

@@ -9,19 +9,28 @@ import {
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchVendors() {
-  const r = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/inventory/vendors`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchPOs() {
-  const r = await fetch(`${BACK}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/inventory/purchase-orders/`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchRFQs() {
-  const r = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
+  try {  
+    const r = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/rfqs`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];

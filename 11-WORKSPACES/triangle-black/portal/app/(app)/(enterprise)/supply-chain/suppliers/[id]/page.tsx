@@ -21,7 +21,7 @@ const fetchVendor = async (id: string) => {
   const response = await fetch(`${BACK}/api/v1/inventory/vendors?id=${id}`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch vendor");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -29,7 +29,7 @@ const fetchPurchaseOrders = async (vendor_id: string) => {
   const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch purchase orders");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -37,7 +37,7 @@ const fetchRFQs = async (vendor_reference: string) => {
   const response = await fetch(`${BACK}/api/v1/rfqs?vendor_reference=${vendor_reference}`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch RFQs");
+  if (!response.ok) return [];
   return response.json();
 };
 

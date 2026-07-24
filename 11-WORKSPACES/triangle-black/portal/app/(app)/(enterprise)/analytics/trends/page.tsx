@@ -11,7 +11,7 @@ const fetchTrends = async () => {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to fetch trends");
+    return [];
   }
   return response.json();
 };

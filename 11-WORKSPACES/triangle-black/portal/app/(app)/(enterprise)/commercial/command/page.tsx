@@ -10,19 +10,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchLeads = async () => {
   const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch leads");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
   const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch contracts");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -35,7 +35,7 @@ const CommercialCommandPage = () => {
 
   const leads = leadsQuery.data;
   const contracts = contractsQuery.data;
-  const signals = signalsQuery.data;
+  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
 
   const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
   const totalLeads = (leads || []).length;

@@ -19,7 +19,7 @@ const fetchAssets = async () => {
   const response = await fetch(`${BACK}/api/v1/assets`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch assets");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -27,7 +27,7 @@ const fetchPMPlans = async (assetId: number) => {
   const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans/${assetId}`, {
     credentials: "include",
   });
-  if (!response.ok) throw new Error("Failed to fetch PM plans");
+  if (!response.ok) return [];
   return response.json();
 };
 

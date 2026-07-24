@@ -45,7 +45,7 @@ const createGoodsReceipt = async (data) => {
     credentials: "include",
   });
   if (!response.ok) {
-    throw new Error("Failed to create goods receipt");
+    return [];
   }
   return response.json();
 };

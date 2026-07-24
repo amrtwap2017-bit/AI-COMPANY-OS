@@ -17,19 +17,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAnalytics = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch analytics");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -50,7 +50,7 @@ const ExecutiveIntelligencePage = () => {
   const { compliance, status } = analyticsQuery.data;
   const { WOs_total, critical_open } = kpisQuery.data;
 
-  const riskMatrix = (signalsQuery.data || []).map((signal: any) => {
+  const riskMatrix = (signalsQuery.data?.signals || signalsQuery.data || []).map((signal: any) => {
     if (signal.level === "critical") return { level: "HIGH RISK", title: signal.title, action: signal.action };
     if (signal.level === "high") return { level: "MEDIUM RISK", title: signal.title, action: signal.action };
     return null;

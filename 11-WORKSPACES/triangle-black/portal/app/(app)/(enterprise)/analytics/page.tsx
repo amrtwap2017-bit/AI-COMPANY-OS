@@ -9,13 +9,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchKpis = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSla = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch SLA data");
+  if (!response.ok) return [];
   return response.json();
 };
 

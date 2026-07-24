@@ -10,19 +10,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchTechnicians = async () => {
   const response = await fetch(`${BACK}/api/v1/technicians`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch technicians");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -33,7 +33,7 @@ export default function CommandPage() {
 
   if (signalsQuery.isLoading || kpisQuery.isLoading || techniciansQuery.isLoading) return <LoadingState />;
 
-  const signals = signalsQuery.data;
+  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
   const kpis = kpisQuery.data;
   const technicians = techniciansQuery.data;
 

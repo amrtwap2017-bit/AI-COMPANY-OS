@@ -15,14 +15,20 @@ import {
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchPMPlans() {
-  const res = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+  try {  
+    const res = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/maintenance/pm-plans`, { credentials: "include" });
   if (!res.ok) return [];
   const data = await res.json();
   return Array.isArray(data) ? data : data.items ?? data.data ?? [];
 }
 
 async function fetchWorkOrders() {
-  const res = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  try {  
+    const res = await fetch(`${BACK
+  } catch { return []; }
+}/api/v1/work-orders`, { credentials: "include" });
   if (!res.ok) return [];
   const data = await res.json();
   return Array.isArray(data) ? data : data.items ?? data.work_orders ?? [];

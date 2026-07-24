@@ -8,19 +8,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAssets = async () => {
   const response = await fetch(`${BACK}/api/v1/assets?category=HVAC,Electrical,Mechanical,Elevator`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch assets");
+  if (!response.ok) return [];
   return response.json();
 };
 
@@ -33,7 +33,7 @@ const MyComponent = () => {
     return <EmptyState message="Failed to load data" />;
   }
 
-  const signals = (signalsQuery.data || []).filter(signal => signal.category === "engineering");
+  const signals = (signalsQuery.data?.signals || signalsQuery.data || []).filter(signal => signal.category === "engineering");
   const criticalSignals = signals.filter(signal => signal.priority === "critical");
   const openWorkOrders = kpisQuery.data?.(open_work_orders || []).filter(wo => wo.status === "open");
 

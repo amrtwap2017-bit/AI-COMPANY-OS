@@ -9,25 +9,25 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch signals");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchCostsSummary = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/costs/summary`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch costs summary");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSLA = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch SLA");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKPIsLive = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch KPIs live");
+  if (!response.ok) return [];
   return response.json();
 };
 

@@ -10,19 +10,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchContracts = async () => {
   const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch contracts");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchInvoices = async () => {
   const response = await fetch(`${BACK}/api/v1/invoices`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch invoices");
+  if (!response.ok) return [];
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
   const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch work orders");
+  if (!response.ok) return [];
   return response.json();
 };
 
