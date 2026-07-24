@@ -11,9 +11,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchPlans() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? d.data ?? [];

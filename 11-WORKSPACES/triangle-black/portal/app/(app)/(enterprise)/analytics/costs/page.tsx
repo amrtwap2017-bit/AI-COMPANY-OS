@@ -11,25 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchSummary() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/ai/analytics/costs/summary`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/ai/analytics/costs/summary`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return {};
   return r.json();
 }
 async function fetchFull() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/ai/analytics/costs`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/ai/analytics/costs`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return { work_orders: [], contracts: [] };
   return r.json();
 }
 async function fetchBOQ(type) {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/ai/documents/boq/template?wo_type=${type}`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/ai/documents/boq/template?wo_type=${type}`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return null;
   return r.json();
 }

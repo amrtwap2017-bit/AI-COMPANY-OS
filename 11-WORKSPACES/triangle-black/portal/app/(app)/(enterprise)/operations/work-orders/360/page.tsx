@@ -11,27 +11,21 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchWOs() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/work-orders`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? d.work_orders ?? [];
 }
 async function fetchTechs() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/technicians`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/technicians`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchAssets() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/assets`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];

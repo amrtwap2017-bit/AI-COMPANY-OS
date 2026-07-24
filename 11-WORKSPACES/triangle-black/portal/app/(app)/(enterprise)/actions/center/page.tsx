@@ -12,26 +12,20 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchSignals() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/ai/signals`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return { signals: [] };
   return r.json();
 }
 async function fetchPRs() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/inventory/purchase-requests/`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/inventory/purchase-requests/`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
 }
 async function fetchWOs() {
   try {  
-    const r = await fetch(`${BACK
-  } catch { return []; }
-}/api/v1/work-orders`, { credentials: "include" });
+    const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });`, { credentials: "include" });
   if (!r.ok) return [];
   const d = await r.json();
   return Array.isArray(d) ? d : d.items ?? [];
