@@ -1,44 +1,27 @@
 "use client"; // @ts-nocheck
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { LoadingState } from "@/components/ui";
 
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-} from "@/components/ui";
-
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchProjects = async (section: string) => {
-  const response = await fetch(`${BACK}/api/v1/projects?section=${section}`, {
-    credentials: "include",
-  });
-  if (!response.ok) throw new Error("Failed to fetch projects");
-  return response.json();
+const SECTION_MAP = {
+  "overview":  "/projects-center",
+  "active":    "/projects-center",
+  "completed": "/projects-center/review",
+  "reports":   "/executive/reports",
+  "intelligence": "/projects-center/intelligence",
+  "actions":   "/projects-center/actions",
 };
 
-const ProjectsSectionPage = () => {
-  const { section } = useParams();
+export default function ProjectSectionPage() {
   const router = useRouter();
+  const params = useParams();
+  const section = String(params?.section || "overview");
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["projects", section],
-    queryFn: () => fetchProjects(section!),
-    refetchInterval: 300000,
-  });
+  useEffect(() => {
+    const target = SECTION_MAP[section] || "/projects-center";
+    router.replace(target);
+  }, [router, section]);
 
-  if (isLoading) return <LoadingState />;
-  if (isError && error instanceof Error) return <EmptyState message={error.message} />;
-
-  const projects = data?.projects || [];
-
-  // Rest of the component logic remains unchanged
-};
+  return <LoadingState message={`Loading ${section} section...`} />;
+}
