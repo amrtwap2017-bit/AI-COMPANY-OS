@@ -11,6 +11,18 @@ from src.commercial.invoices.repository import InvoiceRepository
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
+
+@router.get("/", summary="List invoices")
+def list_invoices(db = Depends(get_db)):
+    try:
+        from sqlalchemy import text
+        rows = db.execute(text(
+            "SELECT id, invoice_number, total_amount, status, due_date, created_at FROM invoices"
+        )).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception as e:
+        return []
+
 @router.post("/", response_model=InvoiceResponse, status_code=201)
 def create_invoice(
     payload: InvoiceCreate,

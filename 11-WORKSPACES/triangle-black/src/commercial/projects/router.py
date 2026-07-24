@@ -19,6 +19,18 @@ def row_to_dict(row):
 def rows(result): return [row_to_dict(r) for r in result]
 router = APIRouter(prefix="/projects", tags=["projects"])
 
+
+@router.get("/", summary="List projects")
+def list_projects(db = Depends(get_db)):
+    try:
+        from sqlalchemy import text
+        rows = db.execute(text(
+            "SELECT id, name, status, start_date, end_date, budget FROM projects"
+        )).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception as e:
+        return []
+
 @router.get("/", summary="List projects")
 def list_projects(
     hotel_id: Optional[str] = None,
