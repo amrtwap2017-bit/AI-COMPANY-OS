@@ -110,7 +110,7 @@ app.add_middleware(
 
 API_PREFIX = "/api/v1"
 
-app.include_router(leads_router,         prefix=API_PREFIX)
+app.include_router(leads_router,         prefix=API_PREFIX + "/leads")
 app.include_router(agents_router,        prefix=API_PREFIX)
 app.include_router(pipeline_router,      prefix=API_PREFIX)
 app.include_router(activity_router,      prefix=API_PREFIX)
