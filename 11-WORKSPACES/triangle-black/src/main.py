@@ -621,3 +621,16 @@ try:
     print("  OK: goods_receipt_workflow_router")
 except Exception as e:
     print(f"  WARN goods_receipt_workflow: {e}")
+
+
+# Sprint 94: signals/summary alias for compatibility
+@app.get("/api/v1/ai/signals/summary", tags=["ai-signals"])
+async def signals_summary_alias():
+    """Alias for /api/v1/ai/signals/v2 — backward compatibility."""
+    from fastapi import Request
+    import httpx
+    try:
+        r = httpx.get("http://localhost:8030/api/v1/ai/signals/v2", timeout=10)
+        return r.json()
+    except Exception as e:
+        return {"signals": [], "total": 0, "error": str(e)}
