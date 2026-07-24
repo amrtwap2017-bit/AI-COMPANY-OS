@@ -10,7 +10,7 @@ import {
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchKPIs() {
-  try {  
+  try {
     const r = await fetch(`${BACK
   } catch { return []; }
 }/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
@@ -19,7 +19,7 @@ async function fetchKPIs() {
 }
 
 async function fetchSignals() {
-  try {  
+  try {
     const r = await fetch(`${BACK
   } catch { return []; }
 }/api/v1/ai/signals/summary`, { credentials: "include" });
