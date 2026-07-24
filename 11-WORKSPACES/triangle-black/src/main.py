@@ -651,3 +651,30 @@ async def signals_summary_alias():
         return r.json()
     except Exception as e:
         return {"signals": [], "total": 0, "error": str(e)}
+
+# ── Sprint 68: Additional missing routers
+
+try:
+    from src.commercial.predictive_maintenance.router import router as predictive_maintenance_router
+    app.include_router(predictive_maintenance_router, prefix="/api/v1")
+    print("  OK: predictive_maintenance_router")
+except Exception as e:
+    print(f"  WARN: predictive_maintenance_router: {e}")
+try:
+    from src.commercial.maintenance_enterprise.router import router as maintenance_enterprise_router
+    app.include_router(maintenance_enterprise_router, prefix="/api/v1")
+    print("  OK: maintenance_enterprise_router")
+except Exception as e:
+    print(f"  WARN: maintenance_enterprise_router: {e}")
+try:
+    from src.maintenance_schedule_module.router import router as maintenance_schedule_module_router
+    app.include_router(maintenance_schedule_module_router, prefix="/api/v1")
+    print("  OK: maintenance_schedule_module_router")
+except Exception as e:
+    print(f"  WARN: maintenance_schedule_module_router: {e}")
+try:
+    from src.commercial.invoices.router import router as invoices_router_commercial
+    app.include_router(invoices_router_commercial, prefix="/api/v1")
+    print("  OK: invoices_router_commercial")
+except Exception as e:
+    print(f"  WARN: invoices_router_commercial: {e}")
