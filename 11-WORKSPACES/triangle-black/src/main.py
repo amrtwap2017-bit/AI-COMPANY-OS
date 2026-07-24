@@ -135,6 +135,18 @@ try:
     print("  OK: work_orders_router")
 except Exception as e:
     print(f"  WARN: work_orders_router: {e}")
+try:
+    from src.commercial.technicians.router import router as technicians_router
+    app.include_router(technicians_router, prefix="/api/v1")
+    print("  OK: technicians_router")
+except Exception as e:
+    print(f"  WARN: technicians_router: {e}")
+try:
+    from src.commercial.assets.router import router as assets_router
+    app.include_router(assets_router, prefix="/api/v1")
+    print("  OK: assets_router")
+except Exception as e:
+    print(f"  WARN: assets_router: {e}")
 app.include_router(warehouses_router, prefix="/api/v1")
 app.include_router(inv_vendors_router, prefix="/api/v1")
 app.include_router(stock_movements_router, prefix="/api/v1")
