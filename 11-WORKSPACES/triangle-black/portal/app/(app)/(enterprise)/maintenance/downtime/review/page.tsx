@@ -85,9 +85,8 @@ export default function DowntimeReviewPage() {
         badge={mttrOk ? "On Target" : "Exceeds Target"}
       />
 
-      <MetricStrip metrics={Array.isArray([
-        { label: "Corrective WOs",  value: corrective.length ) ? [
-        { label: "Corrective WOs",  value: corrective.length  : []},
+      <MetricStrip metrics={([
+        { label: "Corrective WOs",  value: corrective.length ) || []},
         { label: "Avg MTTR (hrs)",  value: avgMTTR, color: mttrOk ? "green" as const : "red" as const },
         { label: "Longest Repair",  value: `${maxRepair}h` },
         { label: "Assets Affected", value: uniqueAssets },

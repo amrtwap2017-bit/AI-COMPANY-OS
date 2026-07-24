@@ -57,9 +57,8 @@ const PipelinePage = () => {
     <PageWrapper>
       <PageHeader title="Pipeline" />
       <SectionCard title="Metrics">
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Leads", value: totalLeads ) ? [
-            { label: "Total Leads", value: totalLeads  : []},
+        <MetricStrip metrics={([
+            { label: "Total Leads", value: totalLeads ) || []},
             { label: "New", value: statusCounts.new },
             { label: "Qualified", value: statusCounts.qualified },
             { label: "In Negotiation", value: statusCounts.negotiation },

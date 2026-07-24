@@ -43,9 +43,8 @@ const InvoiceMatchingPage = () => {
     <PageWrapper>
       <PageHeader title="Invoice Matching" />
       <SectionCard>
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total POs", value: purchaseOrders.length ) ? [
-            { label: "Total POs", value: purchaseOrders.length  : []},
+        <MetricStrip metrics={([
+            { label: "Total POs", value: purchaseOrders.length ) || []},
             { label: "Matched Invoices", value: matchedInvoices.length },
             { label: "Unmatched POs", value: unmatchedPOs.length },
             { label: "Total PO Value EGP", value: purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0) }

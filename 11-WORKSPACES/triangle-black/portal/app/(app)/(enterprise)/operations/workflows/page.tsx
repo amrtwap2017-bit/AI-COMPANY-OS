@@ -35,9 +35,8 @@ const WorkflowPage = () => {
     <PageWrapper>
       <PageHeader title="Workflow Automation Status" />
       <SectionCard>
-        <MetricStrip metrics={Array.isArray([
-            { label: "Active Workflows", value: activeWorkflows ) ? [
-            { label: "Active Workflows", value: activeWorkflows  : []},
+        <MetricStrip metrics={([
+            { label: "Active Workflows", value: activeWorkflows ) || []},
             { label: "Auto-PRs Created", value: autoPRsCreated },
             { label: "Dispatches Made", value: dispatchesMade },
             { label: "Signals Processed", value: signalsProcessed },

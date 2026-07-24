@@ -36,9 +36,8 @@ const ContractRenewalPage = () => {
   return (
     <PageWrapper>
       <PageHeader title="Contract Renewal Pipeline" />
-      <MetricStrip metrics={Array.isArray([
-          { label: "Total Contracts", value: totalContracts ) ? [
-          { label: "Total Contracts", value: totalContracts  : []},
+      <MetricStrip metrics={([
+          { label: "Total Contracts", value: totalContracts ) || []},
           { label: "Active", value: activeContracts },
           { label: "Expiring in 30 days", value: expiringUrgently, color: "red" },
           { label: "Expiring in 90 days", value: expiringSoon - expiringUrgently, color: "amber" },

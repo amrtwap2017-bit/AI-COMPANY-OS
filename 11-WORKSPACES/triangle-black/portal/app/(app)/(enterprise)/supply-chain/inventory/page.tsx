@@ -56,9 +56,8 @@ const InventoryPage = () => {
     <PageWrapper>
       <PageHeader title="Inventory Management" />
       <SectionCard>
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Items", value: totalItems ) ? [
-            { label: "Total Items", value: totalItems  : []},
+        <MetricStrip metrics={([
+            { label: "Total Items", value: totalItems ) || []},
             { label: "Low Stock", value: lowStockCount, color: "amber" },
             { label: "Out of Stock", value: outOfStockCount, color: "red" },
             { label: "Categories", value: categoriesCount }

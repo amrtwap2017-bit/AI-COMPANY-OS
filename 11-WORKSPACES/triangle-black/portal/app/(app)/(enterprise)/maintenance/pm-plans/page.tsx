@@ -61,9 +61,8 @@ export default function PMPlansPage() {
         badge={overdue.length > 0 ? `${overdue.length} Overdue` : undefined}
       />
 
-      <MetricStrip metrics={Array.isArray([
-        { label: "Total Plans",  value: plans.length ) ? [
-        { label: "Total Plans",  value: plans.length  : []},
+      <MetricStrip metrics={([
+        { label: "Total Plans",  value: plans.length ) || []},
         { label: "Active",       value: active.length,   color: "green" as const },
         { label: "Overdue",      value: overdue.length,  color: overdue.length > 0 ? "red" as const : "slate" as const },
         { label: "Due This Week",value: dueSoon.length,  color: "amber" as const },

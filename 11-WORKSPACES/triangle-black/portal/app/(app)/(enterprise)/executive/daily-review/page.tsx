@@ -39,9 +39,8 @@ export default function DailyReviewPage() {
   return (
     <PageWrapper>
       <PageHeader title={new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })} />
-      <MetricStrip metrics={Array.isArray([
-          { label: "Critical WOs", value: criticalWOs, color: "red" ) ? [
-          { label: "Critical WOs", value: criticalWOs, color: "red"  : []},
+      <MetricStrip metrics={([
+          { label: "Critical WOs", value: criticalWOs, color: "red" ) || []},
           { label: "SLA Compliance %", value: (Number(compliancePercentage) || 0).toFixed(1), color: compliancePercentage < targetSLA ? "orange" : "green" },
           { label: "Active Signals", value: (signals || []).length, color: "blue" },
           { label: "Technician Utilization %", value: 85, color: "purple" }

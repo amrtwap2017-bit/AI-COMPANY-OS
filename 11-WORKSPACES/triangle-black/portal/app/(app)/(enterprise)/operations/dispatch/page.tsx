@@ -70,9 +70,8 @@ const DispatchPage = () => {
     <PageWrapper>
       <PageHeader title="AI Crew Planning and Dispatch" />
       <div className="grid grid-cols-1 gap-4">
-        <MetricStrip metrics={Array.isArray([
-            { label: "Available Techs", value: availableTechs ) ? [
-            { label: "Available Techs", value: availableTechs  : []},
+        <MetricStrip metrics={([
+            { label: "Available Techs", value: availableTechs ) || []},
             { label: "Open WOs", value: openWOS },
             { label: "WOs Needing Dispatch", value: needingDispatch },
             { label: "AI Recommendations Made", value: aiRecommendations },

@@ -56,9 +56,8 @@ export default function WorkspacePage() {
       />
 
       {!k1 && !k2 && (
-        <MetricStrip metrics={Array.isArray([
-          { label: "Open WOs",    value: wo.open          ?? 0 ) ? [
-          { label: "Open WOs",    value: wo.open          ?? 0  : []},
+        <MetricStrip metrics={([
+          { label: "Open WOs",    value: wo.open          ?? 0 ) || []},
           { label: "Critical",    value: wo.critical_open ?? 0, color: "red"   as const },
           { label: "Technicians", value: tec.active       ?? 0, color: "blue"  as const },
           { label: "AI Signals",  value: signals.total    ?? 0, color: "amber" as const },

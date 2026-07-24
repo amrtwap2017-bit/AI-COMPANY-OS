@@ -155,9 +155,8 @@ export default function OperationsCalendarPage() {
         badge="Live"
       />
 
-      <MetricStrip metrics={Array.isArray([
-          { label: "WOs Due This Week", value: wosThisWeek, color: "amber" ) ? [
-          { label: "WOs Due This Week", value: wosThisWeek, color: "amber"  : []},
+      <MetricStrip metrics={([
+          { label: "WOs Due This Week", value: wosThisWeek, color: "amber" ) || []},
           { label: "PM Plans This Week", value: pmsThisWeek, color: "blue" },
           { label: "Overdue Items", value: overdue, color: "red" },
           { label: "Next 21 Days Total", value: total14, color: "slate" },

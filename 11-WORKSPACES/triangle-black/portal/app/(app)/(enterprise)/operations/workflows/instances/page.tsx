@@ -64,9 +64,8 @@ const WorkflowInstancesPage = () => {
     <PageWrapper>
       <PageHeader title="Workflow Execution History" />
       <SectionCard>
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Instances", value: totalInstances ) ? [
-            { label: "Total Instances", value: totalInstances  : []},
+        <MetricStrip metrics={([
+            { label: "Total Instances", value: totalInstances ) || []},
             { label: "Running", value: runningInstances, badgeColor: "bg-green-500" },
             { label: "Completed", value: completedInstances, badgeColor: "bg-blue-500" },
             { label: "Failed", value: failedInstances, badgeColor: "bg-red-500" },

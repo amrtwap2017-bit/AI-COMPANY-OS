@@ -46,9 +46,8 @@ const StockBalancesPage = () => {
     <PageWrapper>
       <PageHeader title="Stock Balances" />
       <SectionCard>
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Items", value: totalItems ) ? [
-            { label: "Total Items", value: totalItems  : []},
+        <MetricStrip metrics={([
+            { label: "Total Items", value: totalItems ) || []},
             { label: "Total Value EGP", value: (Number(totalValueEGP) || 0).toFixed(2) },
             { label: "Below Minimum", value: belowMinimum, color: "red" },
             { label: "Warehouses Count", value: warehouses.length }

@@ -58,9 +58,8 @@ const AlertsPage = () => {
   return (
     <PageWrapper>
       <PageHeader title="Operational Alerts">
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Alerts", value: totalAlerts ) ? [
-            { label: "Total Alerts", value: totalAlerts  : []},
+        <MetricStrip metrics={([
+            { label: "Total Alerts", value: totalAlerts ) || []},
             { label: "Critical", value: criticalCount, color: "red" },
             { label: "High", value: highCount, color: "amber" },
             { label: "Notifications", value: notifications ? (notifications || []).length : 0, color: "blue" },

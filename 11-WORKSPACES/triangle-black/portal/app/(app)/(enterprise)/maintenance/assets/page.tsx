@@ -52,9 +52,8 @@ const AssetPage = () => {
   return (
     <PageWrapper>
       <PageHeader title="Asset Registry">
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Assets", value: totalAssets ) ? [
-            { label: "Total Assets", value: totalAssets  : []},
+        <MetricStrip metrics={([
+            { label: "Total Assets", value: totalAssets ) || []},
             { label: "Critical", value: criticalAssets, color: "red" },
             { label: "Operational", value: operationalAssets, color: "green" },
             { label: "In Fault", value: inFaultAssets, color: "yellow" },

@@ -78,9 +78,8 @@ export default function RfqPage() {
         <p className="text-sm text-gray-500">{new Date(rfq.created_at).toLocaleDateString()}</p>
       </PageHeader>
       <SectionCard title="Metrics">
-        <MetricStrip metrics={Array.isArray([
-            { label: "Lines Count", value: rfq.lines_count ) ? [
-            { label: "Lines Count", value: rfq.lines_count  : []},
+        <MetricStrip metrics={([
+            { label: "Lines Count", value: rfq.lines_count ) || []},
             { label: "Vendors Invited", value: rfq.vendor_ids.length },
             { label: "Quotes Received", value: rfq.quotes_received },
             { label: "Days Open", value: Math.floor((new Date() - new Date(rfq.created_at)) / (1000 * 60 * 60 * 24)) },

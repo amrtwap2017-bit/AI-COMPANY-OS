@@ -38,9 +38,8 @@ export default function SupplyChainPage() {
   return (
     <PageWrapper>
       <PageHeader title="Supply Chain Hub" />
-      <MetricStrip metrics={Array.isArray([
-          { label: "Active POs", value: activePOs ) ? [
-          { label: "Active POs", value: activePOs  : []},
+      <MetricStrip metrics={([
+          { label: "Active POs", value: activePOs ) || []},
           { label: "Pending PRs", value: pendingPRs },
           { label: "Open RFQs", value: openRFQs },
           { label: "Inventory Alerts", value: inventoryAlerts, status: inventoryAlerts > 0 ? <StatusBadge type="error" /> : null }

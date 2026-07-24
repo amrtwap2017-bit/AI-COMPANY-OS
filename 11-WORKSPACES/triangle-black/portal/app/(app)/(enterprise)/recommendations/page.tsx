@@ -49,9 +49,8 @@ const RecommendationsPage = () => {
     <PageWrapper>
       <PageHeader title="AI Recommendations" />
       <SectionCard>
-        <MetricStrip metrics={Array.isArray([
-            { label: "Total Recommendations", value: totalRecommendations ) ? [
-            { label: "Total Recommendations", value: totalRecommendations  : []},
+        <MetricStrip metrics={([
+            { label: "Total Recommendations", value: totalRecommendations ) || []},
             { label: "Critical Actions", value: criticalActions, color: "red" },
             { label: "High Priority", value: highPriority, color: "amber" },
             { label: "Completed", value: 0 }
