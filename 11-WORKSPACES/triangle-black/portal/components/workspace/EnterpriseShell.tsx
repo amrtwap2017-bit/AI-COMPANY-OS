@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 // Triangle Black - Enterprise Shell
-// UI-3: Added CenterSubNav for within-center navigation
+// Keyboard shortcuts handled by ClientKeyboardHandler (dedicated component)
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { EnterpriseSidebar }   from "./EnterpriseSidebar";
@@ -12,9 +12,7 @@ import { MobileBottomBar }     from "./MobileBottomBar";
 import { CommandPalette }      from "./CommandPalette";
 import { EntityContextDrawer } from "./EntityContextDrawer";
 import { CENTER_SUB_NAV }      from "./center-nav";
-
-import { useKeyboardShortcuts } from "@/lib/hooks/useKeyboardShortcuts";
-import { KeyboardShortcutsModal } from "@/components/ui/KeyboardShortcutsModal";
+import { ClientKeyboardHandler } from "@/components/ui/ClientKeyboardHandler";
 
 type EnterpriseShellProps = {
   children: React.ReactNode;
@@ -23,16 +21,8 @@ type EnterpriseShellProps = {
 
 export function EnterpriseShell({ children, rail }: EnterpriseShellProps) {
   const [commandOpen, setCommandOpen] = useState(false);
-  const [kbHelpOpen, setKbHelpOpen] = useState(false);
-  const [kbPaletteOpen, setKbPaletteOpen] = useState(false);
-
-  const { isGChordActive } = useKeyboardShortcuts({
-    onOpenSearch: () => setKbPaletteOpen(true),
-    onShowHelp:   () => setKbHelpOpen(true),
-  });
   const pathname = usePathname();
 
-  // Determine which center is active and get its sub-nav
   const centerKey = Object.keys(CENTER_SUB_NAV).find(key =>
     pathname.startsWith("/" + key)
   );
@@ -69,19 +59,7 @@ export function EnterpriseShell({ children, rail }: EnterpriseShellProps) {
       </div>
 
       <MobileBottomBar />
-    
-      <KeyboardShortcutsModal isOpen={kbHelpOpen} onClose={() => setKbHelpOpen(false)} />
-      {kbPaletteOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40"
-             onClick={() => setKbPaletteOpen(false)} />
-      )}
-      {isGChordActive && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50
-                        px-4 py-2 bg-slate-800 text-white text-sm rounded-lg shadow-xl
-                        pointer-events-none">
-          G + ? — waiting for shortcut key...
-        </div>
-      )}
+      <ClientKeyboardHandler onOpenSearch={() => setCommandOpen(true)} />
     </div>
   );
 }
