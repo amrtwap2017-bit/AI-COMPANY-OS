@@ -32,23 +32,23 @@ export default function EngineeringReviewPage() {
 
   const isLoading = w1 || a1;
 
-  const engWOs = (wos || []).filter((w) => ENG_TYPES.includes(w.type));
-  const completed = engWOs.filter((w) => w.status === "completed");
-  const criticalOpen = engWOs.filter((w) => w.priority === "critical" && w.status === "open");
-  const faultAssets = (assets || []).filter((a) => a.status === "fault" || a.status === "breakdown");
+  const engWOs = (wos || []).filter((w: any) => ENG_TYPES.includes(w.type));
+  const completed = engWOs.filter((w: any) => w.status === "completed");
+  const criticalOpen = engWOs.filter((w: any) => w.priority === "critical" && w.status === "open");
+  const faultAssets = (assets || []).filter((a: any) => a.status === "fault" || a.status === "breakdown");
   const overallRate = engWOs.length > 0 ? Math.round((completed.length / engWOs.length) * 100) : 0;
 
-  const byType = ENG_TYPES.reduce((acc, t) => {
-    const total = engWOs.filter((w) => w.type === t).length;
-    const done  = engWOs.filter((w) => w.type === t && w.status === "completed").length;
+  const byType = ENG_TYPES.reduce((acc: any, t: any) => {
+    const total = engWOs.filter((w: any) => w.type === t).length;
+    const done  = engWOs.filter((w: any) => w.type === t && w.status === "completed").length;
     if (total > 0) acc[t] = { total, done, rate: Math.round(done / total * 100) };
     return acc;
   }, {});
 
-  const byCriticality = ["critical", "high", "medium"].reduce((acc, c) => {
+  const byCriticality = ["critical", "high", "medium"].reduce((acc: any, c: any) => {
     acc[c] = {
-      total: (assets || []).filter((a) => a.criticality === c).length,
-      fault: (assets || []).filter((a) => a.criticality === c && (a.status === "fault" || a.status === "breakdown")).length,
+      total: (assets || []).filter((a: any) => a.criticality === c).length,
+      fault: (assets || []).filter((a: any) => a.criticality === c && (a.status === "fault" || a.status === "breakdown")).length,
     };
     return acc;
   }, {});

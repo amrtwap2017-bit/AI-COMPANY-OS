@@ -77,7 +77,7 @@ const MyDayPage = () => {
 
   const priorityWorkOrders = workOrders
     .filter(w => w.status !== "completed" && (w.priority === "critical" || w.priority === "high" || w.due_date === today))
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       if (a.priority === "critical" && b.priority !== "critical") return -1;
       if (b.priority === "critical" && a.priority !== "critical") return 1;
       if (a.priority === "high" && b.priority !== "high") return -1;
@@ -88,7 +88,7 @@ const MyDayPage = () => {
   const technicianCapacity = (technicians || []).map(t => ({
     ...t,
     capacity: t.current_work_orders / t.max_work_orders * 100
-  })).sort((a, b) => b.capacity - a.capacity);
+  })).sort((a: any, b: any) => b.capacity - a.capacity);
 
   return (
     <PageWrapper>

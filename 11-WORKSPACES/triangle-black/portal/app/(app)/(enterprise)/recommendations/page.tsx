@@ -40,7 +40,7 @@ const RecommendationsPage = () => {
     );
   }
 
-  const sortedSignals = [...signals].sort((a, b) => {
+  const sortedSignals = [...signals].sort((a: any, b: any) => {
     if (a.priority !== b.priority) return a.priority === "critical" ? -1 : 1;
     return 0;
   });

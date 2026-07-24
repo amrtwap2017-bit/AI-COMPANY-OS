@@ -26,21 +26,21 @@ export default function SchedulesPage() {
   const w3 = new Date(Date.now() + 21*86400000).toISOString().slice(0, 10);
   const w4 = new Date(Date.now() + 28*86400000).toISOString().slice(0, 10);
 
-  const overdue   = plans.filter((p) => p.next_due_date && p.next_due_date < today);
-  const thisWeek  = plans.filter((p) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= w1);
-  const week2     = plans.filter((p) => p.next_due_date && p.next_due_date > w1 && p.next_due_date <= w2);
-  const week3     = plans.filter((p) => p.next_due_date && p.next_due_date > w2 && p.next_due_date <= w3);
-  const week4     = plans.filter((p) => p.next_due_date && p.next_due_date > w3 && p.next_due_date <= w4);
+  const overdue   = plans.filter((p: any) => p.next_due_date && p.next_due_date < today);
+  const thisWeek  = plans.filter((p: any) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= w1);
+  const week2     = plans.filter((p: any) => p.next_due_date && p.next_due_date > w1 && p.next_due_date <= w2);
+  const week3     = plans.filter((p: any) => p.next_due_date && p.next_due_date > w2 && p.next_due_date <= w3);
+  const week4     = plans.filter((p: any) => p.next_due_date && p.next_due_date > w3 && p.next_due_date <= w4);
 
-  const thisMonth = plans.filter((p) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= w4);
+  const thisMonth = plans.filter((p: any) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= w4);
 
-  const freqGroups = plans.reduce((acc, p) => {
+  const freqGroups = plans.reduce((acc: any, p: any) => {
     const f = p.frequency || "unknown";
     acc[f] = (acc[f] || 0) + 1;
     return acc;
   }, {});
 
-  const sorted = [...plans].sort((a, b) => {
+  const sorted = [...plans].sort((a: any, b: any) => {
     if (!a.next_due_date) return 1;
     if (!b.next_due_date) return -1;
     return a.next_due_date.localeCompare(b.next_due_date);
@@ -75,7 +75,7 @@ export default function SchedulesPage() {
               <p className="text-xs font-semibold text-slate-600 mb-2">{label}</p>
               <p className="text-2xl font-bold text-slate-800">{(items || []).length}</p>
               <div className="mt-2 space-y-1">
-                {(items || []).slice(0, 3).map((p) => (
+                {(items || []).slice(0, 3).map((p: any) => (
                   <p key={p.id} className="text-xs text-slate-500 truncate">{p.title}</p>
                 ))}
                 {(items || []).length > 3 && (
@@ -90,7 +90,7 @@ export default function SchedulesPage() {
       {overdue.length > 0 && (
         <SectionCard title="Overdue Plans">
           <div className="space-y-2">
-            {overdue.map((p) => (
+            {overdue.map((p: any) => (
               <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-red-50 rounded-lg border border-red-100">
                 <div>
                   <p className="text-sm font-medium text-slate-800">{p.title}</p>

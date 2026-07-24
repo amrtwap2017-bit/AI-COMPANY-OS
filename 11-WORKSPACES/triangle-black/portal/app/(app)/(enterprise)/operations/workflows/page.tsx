@@ -45,7 +45,7 @@ const WorkflowPage = () => {
         />
       </SectionCard>
       <SectionCard title="Active Automated Workflows">
-        {(signals || []).map((signal) => (
+        {(signals || []).map((signal: any) => (
           <div key={signal.signal_id} className="flex items-center space-x-4 p-2 border-b last:border-b-0">
             <span>{signal.title}</span>
             <StatusBadge status="TRIGGERED" />

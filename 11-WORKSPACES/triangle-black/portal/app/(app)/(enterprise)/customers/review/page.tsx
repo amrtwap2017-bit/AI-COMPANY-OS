@@ -51,13 +51,13 @@ const CustomerSuccessPage = () => {
   const expiringSoonContracts = contractData.filter(
     contract => Math.ceil((new Date(contract.end_date) - new Date(today)) / 86400000) <= 60
   ).length;
-  const monthlyRevenueEGP = contractData.reduce((acc, contract) => acc + contract.monthly_value, 0);
+  const monthlyRevenueEGP = contractData.reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
 
   const activeRevenue = activeContracts * 12;
   const portfolioHealth = (activeContracts / totalContracts) * 100;
 
   const renewalRisk = expiringSoonContracts;
-  const topRevenueContracts = contractData.sort((a, b) => b.total_value - a.total_value).slice(0, 5);
+  const topRevenueContracts = contractData.sort((a: any, b: any) => b.total_value - a.total_value).slice(0, 5);
 
   return (
     <PageWrapper>

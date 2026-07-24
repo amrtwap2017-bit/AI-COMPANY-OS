@@ -69,13 +69,13 @@ const GoodsReceiptsPage = () => {
   const pendingDeliveriesCount = purchaseOrders.filter(
     (po) => ["approved", "sent", "ordered"].includes(po.status)
   ).length;
-  const thisMonthReceipts = receipts.filter((grn) =>
+  const thisMonthReceipts = receipts.filter((grn: any) =>
     new Date(grn.received_date).toLocaleDateString("en-US", { month: "long" }) ===
     new Date().toLocaleDateString("en-US", { month: "long" })
   );
   const totalPOValuePending = purchaseOrders
-    .filter((po) => ["approved"].includes(po.status))
-    .reduce((acc, po) => acc + po.total_amount, 0);
+    .filter((po: any) => ["approved"].includes(po.status))
+    .reduce((acc: any, po: any) => acc + po.total_amount, 0);
 
   return (
     <PageWrapper>
@@ -95,8 +95,8 @@ const GoodsReceiptsPage = () => {
       </SectionCard>
       <SectionCard title="Pending Purchase Orders — Awaiting Delivery">
         {purchaseOrders
-          .filter((po) => ["approved", "sent", "ordered"].includes(po.status))
-          .map((po) => (
+          .filter((po: any) => ["approved", "sent", "ordered"].includes(po.status))
+          .map((po: any) => (
             <div key={po.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <strong>{po.po_number}</strong>
               <StatusBadge status={po.status} />
@@ -115,7 +115,7 @@ const GoodsReceiptsPage = () => {
         {receipts.length === 0 ? (
           <EmptyState message="No goods receipts recorded yet" />
         ) : (
-          receipts.map((grn) => (
+          receipts.map((grn: any) => (
             <div key={grn.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <span>{grn.grn_number}</span>
               <span>{grn.po_id}</span>

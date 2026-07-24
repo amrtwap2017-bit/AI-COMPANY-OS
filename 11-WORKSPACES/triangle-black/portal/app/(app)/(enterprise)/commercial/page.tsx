@@ -82,7 +82,7 @@ const CommercialPage = () => {
       <div className="mt-8">
         <h3>Recent Activity</h3>
         <ul>
-          {leadsData.wonLeads.slice(-3).map((lead) => (
+          {leadsData.wonLeads.slice(-3).map((lead: any) => (
             <li key={lead.id}>{lead.name}</li>
           ))}
         </ul>

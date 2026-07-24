@@ -47,7 +47,7 @@ export default function WorkOrdersPage() {
       <PageHeader title="Work Orders" actions={<Link href="/operations/work-orders/new">New WO</Link>} />
       <MetricStrip data={metricData} />
       <div className="flex gap-4">
-        {["All", "Open", "In Progress", "Completed", "Cancelled"].map((status) => (
+        {["All", "Open", "In Progress", "Completed", "Cancelled"].map((status: any) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
@@ -60,7 +60,7 @@ export default function WorkOrdersPage() {
         ))}
       </div>
       <div className="flex gap-4">
-        {["All", "Critical", "High", "Medium"].map((priority) => (
+        {["All", "Critical", "High", "Medium"].map((priority: any) => (
           <button
             key={priority}
             onClick={() => setPriorityFilter(priority)}
@@ -73,7 +73,7 @@ export default function WorkOrdersPage() {
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredWorkOrders.sort((a, b) => {
+        {filteredWorkOrders.sort((a: any, b: any) => {
           if (a.priority === "Critical" && b.priority !== "Critical") return -1;
           if (b.priority === "Critical" && a.priority !== "Critical") return 1;
           return new Date(b.created_at) - new Date(a.created_at);

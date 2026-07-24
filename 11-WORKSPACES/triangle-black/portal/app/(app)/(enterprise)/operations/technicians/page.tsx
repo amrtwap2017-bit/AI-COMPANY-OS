@@ -41,7 +41,7 @@ const TechniciansPage = () => {
   const totalTechnicians = (technicians || []).length;
   const activeTechnicians = (technicians || []).filter(t => t.is_active).length;
   const atCapacityTechnicians = (technicians || []).filter(t => t.current_work_orders >= t.max_work_orders).length;
-  const avgUtilization = (technicians.reduce((acc, t) => acc + t.current_work_orders / t.max_work_orders, 0) / totalTechnicians) * 100;
+  const avgUtilization = (technicians.reduce((acc: any, t: any) => acc + t.current_work_orders / t.max_work_orders, 0) / totalTechnicians) * 100;
 
   const filteredTechnicians = technicians
     .filter(t => {
@@ -50,7 +50,7 @@ const TechniciansPage = () => {
       if (availabilityFilter === "inactive") return !t.is_active;
       return true;
     })
-    .sort((a, b) => b.current_work_orders - a.current_work_orders);
+    .sort((a: any, b: any) => b.current_work_orders - a.current_work_orders);
 
   return (
     <PageWrapper>

@@ -59,7 +59,7 @@ export default function MaintenanceCostsReviewPage() {
 
   const totalWOsClosed = completedWorkOrders.length;
   const avgResolutionTime =
-    completedWorkOrders.reduce((acc, wo) => {
+    completedWorkOrders.reduce((acc: any, wo: any) => {
       if (wo.started_at && wo.completed_at) {
         return acc + (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000;
       }
@@ -67,9 +67,9 @@ export default function MaintenanceCostsReviewPage() {
     }, 0) / totalWOsClosed;
 
   const poCount = purchaseOrders.length;
-  const poTotalValueEGP = purchaseOrders.reduce((acc, po) => acc + po.amount, 0);
+  const poTotalValueEGP = purchaseOrders.reduce((acc: any, po: any) => acc + po.amount, 0);
 
-  const workOrderTypeCounts = completedWorkOrders.reduce((acc, wo) => {
+  const workOrderTypeCounts = completedWorkOrders.reduce((acc: any, wo: any) => {
     if (!acc[wo.type]) {
       acc[wo.type] = 1;
     } else {
@@ -79,12 +79,12 @@ export default function MaintenanceCostsReviewPage() {
   }, {});
 
   const resolutionTimes = completedWorkOrders
-    .filter((wo) => wo.started_at && wo.completed_at)
-    .map((wo) => (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000);
+    .filter((wo: any) => wo.started_at && wo.completed_at)
+    .map((wo: any) => (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000);
 
   const top5LongestWOs = completedWorkOrders
-    .filter((wo) => wo.started_at && wo.completed_at)
-    .sort((a, b) =>
+    .filter((wo: any) => wo.started_at && wo.completed_at)
+    .sort((a: any, b: any) =>
       (new Date(b.completed_at).getTime() - new Date(b.started_at).getTime()) -
       (new Date(a.completed_at).getTime() - new Date(a.started_at).getTime())
     )
@@ -125,7 +125,7 @@ export default function MaintenanceCostsReviewPage() {
         <p>MAX: {Math.max(...resolutionTimes).toFixed(2)} hours</p>
         <p>MIN: {Math.min(...resolutionTimes).toFixed(2)} hours</p>
         <ul>
-          {top5LongestWOs.map((wo) => (
+          {top5LongestWOs.map((wo: any) => (
             <li key={wo.id}>
               {wo.title} - {wo.type} - {(Number(wo.hours) || 0).toFixed(2)} hours
             </li>
@@ -134,7 +134,7 @@ export default function MaintenanceCostsReviewPage() {
       </SectionCard>
       <SectionCard title="Recent POs">
         <ul>
-          {recentPOs.map((po) => (
+          {recentPOs.map((po: any) => (
             <li key={po.id}>
               {po.po_number} - {(Number(po.amount) || 0).toFixed(2)} EGP -{" "}
               <StatusBadge status={po.status} />

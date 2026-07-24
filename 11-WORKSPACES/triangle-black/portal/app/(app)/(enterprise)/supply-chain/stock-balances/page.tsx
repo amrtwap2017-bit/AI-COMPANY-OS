@@ -39,7 +39,7 @@ const StockBalancesPage = () => {
   const filteredStockBalances = stockBalances.filter(sb => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
 
   const totalItems = (items || []).length;
-  const totalValueEGP = stockBalances.reduce((acc, sb) => acc + sb.total_value, 0);
+  const totalValueEGP = stockBalances.reduce((acc: any, sb: any) => acc + sb.total_value, 0);
   const belowMinimum = stockBalances.filter(sb => sb.qty_on_hand < sb.min_stock).length;
 
   return (

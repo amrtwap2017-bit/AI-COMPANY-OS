@@ -31,7 +31,7 @@ export default function NotFound() {
               { label: "Supply Chain", href: "/supply-chain" },
               { label: "Analytics",    href: "/analytics" },
               { label: "Executive",    href: "/executive" },
-            ].map((l) => (
+            ].map((l: any) => (
               <Link key={l.href} href={l.href}
                 className="px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg hover:border-amber-300 hover:text-amber-700 transition-colors">
                 {l.label}

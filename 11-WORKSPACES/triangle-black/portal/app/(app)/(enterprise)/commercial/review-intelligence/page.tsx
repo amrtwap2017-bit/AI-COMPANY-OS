@@ -58,15 +58,15 @@ const CommercialReviewIntelligencePage = () => {
   }).reverse();
 
   // Best performing stage
-  const bestStage = leads.reduce((acc, lead) => {
+  const bestStage = leads.reduce((acc: any, lead: any) => {
     if (!acc[lead.status]) acc[lead.status] = 0;
     acc[lead.status]++;
     return acc;
   }, {} as { [key: string]: number });
-  const bestStageName = Object.keys(bestStage).reduce((a, b) => (bestStage[a] > bestStage[b] ? a : b), '');
+  const bestStageName = Object.keys(bestStage).reduce((a: any, b: any) => (bestStage[a] > bestStage[b] ? a : b), '');
 
   // Pipeline velocity
-  const pipelineVelocity = (leads || []).filter(lead => lead.status === "won").reduce((acc, lead) => {
+  const pipelineVelocity = (leads || []).filter(lead => lead.status === "won").reduce((acc: any, lead: any) => {
     const daysDifference = Math.floor((new Date().getTime() - new Date(lead.created_at).getTime()) / (1000 * 3600 * 24));
     return acc + daysDifference;
   }, 0) / (leads || []).filter(lead => lead.status === "won").length;

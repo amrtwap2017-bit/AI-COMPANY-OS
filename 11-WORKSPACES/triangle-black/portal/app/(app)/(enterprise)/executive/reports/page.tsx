@@ -106,7 +106,7 @@ export default function ReportsPage() {
     queryFn: () => authFetch("/api/v1/executive-kpi/summary").then(r => r.json()),
   });
 
-  const totalReports = REPORTS.reduce((sum, cat) => sum + cat.reports.length, 0);
+  const totalReports = REPORTS.reduce((sum: any, cat: any) => sum + cat.reports.length, 0);
 
   return (
     <PageWrapper>

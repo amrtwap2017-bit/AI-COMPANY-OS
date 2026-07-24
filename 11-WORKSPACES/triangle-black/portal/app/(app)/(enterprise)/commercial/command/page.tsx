@@ -50,7 +50,7 @@ const CommercialCommandPage = () => {
       value: lead.value,
     }));
 
-  const monthlyRevenueEstimate = contracts.reduce((acc, contract) => acc + contract.contract_value, 0);
+  const monthlyRevenueEstimate = contracts.reduce((acc: any, contract: any) => acc + contract.contract_value, 0);
 
   return (
     <PageWrapper>

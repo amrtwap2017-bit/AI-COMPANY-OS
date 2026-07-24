@@ -104,7 +104,7 @@ export default function WorkflowDesignerPage() {
 
   const metrics = [
     { label: "Active Workflows",    value: WORKFLOW_TEMPLATES.filter(w => w.status === "active").length,      suffix: "" },
-    { label: "Total Executions",    value: WORKFLOW_TEMPLATES.reduce((a, w) => a + w.runs, 0),                suffix: "" },
+    { label: "Total Executions",    value: WORKFLOW_TEMPLATES.reduce((a: any, w: any) => a + w.runs, 0),                suffix: "" },
     { label: "State Transitions",   value: WO_STATE_MACHINE.length,                                           suffix: "" },
     { label: "AI Signals Active",   value: Array.isArray(signals) ? (signals || []).length : 0,                       suffix: "" },
   ];
@@ -197,7 +197,7 @@ export default function WorkflowDesignerPage() {
           AI-triggered workflows that run automatically based on operational events.
         </p>
         <div className="space-y-3">
-          {WORKFLOW_TEMPLATES.map((template) => (
+          {WORKFLOW_TEMPLATES.map((template: any) => (
             <div
               key={template.id}
               className="border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition-colors"

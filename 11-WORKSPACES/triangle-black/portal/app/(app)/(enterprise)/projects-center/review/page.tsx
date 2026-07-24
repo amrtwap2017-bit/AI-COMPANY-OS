@@ -40,16 +40,16 @@ export default function ProjectsReviewPage() {
     return Math.ceil((new Date(end) - new Date()) / 86400000);
   };
 
-  const withDays = (projects || []).map((p) => ({
+  const withDays = (projects || []).map((p: any) => ({
     ...p,
     daysLeft: getDays(p.end_date),
-    woCount: (wos || []).filter((w) => w.contract_id === p.contract_id).length,
+    woCount: (wos || []).filter((w: any) => w.contract_id === p.contract_id).length,
   }));
 
-  const active    = withDays.filter((p) => p.status === "active");
-  const atRisk    = active.filter((p) => p.daysLeft !== null && p.daysLeft <= 14);
-  const completed = withDays.filter((p) => p.status === "completed");
-  const onHold    = withDays.filter((p) => p.status === "on_hold");
+  const active    = withDays.filter((p: any) => p.status === "active");
+  const atRisk    = active.filter((p: any) => p.daysLeft !== null && p.daysLeft <= 14);
+  const completed = withDays.filter((p: any) => p.status === "completed");
+  const onHold    = withDays.filter((p: any) => p.status === "on_hold");
 
   const filtered = filter === "all"      ? withDays
     : filter === "active"    ? active
@@ -57,7 +57,7 @@ export default function ProjectsReviewPage() {
     : filter === "on_hold"   ? onHold
     : withDays;
 
-  const onTrackCount = active.filter((p) => p.daysLeft === null || p.daysLeft > 14).length;
+  const onTrackCount = active.filter((p: any) => p.daysLeft === null || p.daysLeft > 14).length;
   const healthPct    = active.length > 0 ? Math.round((onTrackCount / active.length) * 100) : 100;
 
   const TABS = ["all", "active", "completed", "on_hold"];
@@ -93,7 +93,7 @@ export default function ProjectsReviewPage() {
 
       <SectionCard title="Project List">
         <div className="flex gap-2 mb-4 flex-wrap">
-          {TABS.map((t) => (
+          {TABS.map((t: any) => (
             <button
               key={t}
               onClick={() => setFilter(t)}
@@ -110,7 +110,7 @@ export default function ProjectsReviewPage() {
           <EmptyState title="No projects" description="No projects match this filter" />
         ) : (
           <div className="space-y-3">
-            {filtered.map((p) => {
+            {filtered.map((p: any) => {
               const isAtRisk  = p.daysLeft !== null && p.daysLeft <= 14 && p.status === "active";
               const isSoon    = p.daysLeft !== null && p.daysLeft > 14 && p.daysLeft <= 30 && p.status === "active";
               return (

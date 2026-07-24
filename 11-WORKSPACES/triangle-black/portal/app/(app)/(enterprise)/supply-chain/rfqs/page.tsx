@@ -60,7 +60,7 @@ const RFQsPage = () => {
         ) : (
           <ul className="space-y-4">
             {openRfqs
-              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
               .concat(rfqs.filter(rfq => rfq.status !== "sent" && rfq.status !== "open"))
               .map(rfq => (
                 <li key={rfq.id} className="flex items-center space-x-4">

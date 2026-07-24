@@ -68,14 +68,14 @@ export default function CommandPage() {
       </div>
       <SectionCard title="Live Signal Feed">
         <ul className="list-disc pl-4">
-          {(signals || []).slice(0, 5).map((signal) => (
+          {(signals || []).slice(0, 5).map((signal: any) => (
             <li key={signal.id}>{signal.description}</li>
           ))}
         </ul>
       </SectionCard>
       <SectionCard title="Technician Status">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(technicians || []).slice(0, 5).map((tech) => (
+          {(technicians || []).slice(0, 5).map((tech: any) => (
             <div key={tech.id} className="bg-gray-100 p-4 rounded-lg flex items-center justify-between">
               <p>{tech.name}</p>
               <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">

@@ -49,7 +49,7 @@ const MaintenancePage = () => {
     return { ...asset, health };
   });
 
-  assetHealthScores.sort((a, b) => a.health - b.health);
+  assetHealthScores.sort((a: any, b: any) => a.health - b.health);
 
   return (
     <PageWrapper>

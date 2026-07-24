@@ -41,16 +41,16 @@ export default function WO360Page() {
   const today = new Date().toISOString().slice(0, 10);
 
   const filtered = wos
-    .filter((w) => statusF === "all" || w.status === statusF)
-    .filter((w) => !search || w.title?.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    .filter((w: any) => statusF === "all" || w.status === statusF)
+    .filter((w: any) => !search || w.title?.toLowerCase().includes(search.toLowerCase()))
+    .sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
 
-  const open    = (wos || []).filter((w) => w.status === "open").length;
-  const inProg  = (wos || []).filter((w) => w.status === "in_progress").length;
-  const done    = (wos || []).filter((w) => w.status === "completed").length;
+  const open    = (wos || []).filter((w: any) => w.status === "open").length;
+  const inProg  = (wos || []).filter((w: any) => w.status === "in_progress").length;
+  const done    = (wos || []).filter((w: any) => w.status === "completed").length;
 
-  const techName  = (id) => techs.find((t) => t.id === id)?.name || null;
-  const assetName = (id) => (assets || []).find((a) => a.id === id)?.name || null;
+  const techName  = (id) => techs.find((t: any) => t.id === id)?.name || null;
+  const assetName = (id) => (assets || []).find((a: any) => a.id === id)?.name || null;
 
   const STATUS_TABS = ["all", "open", "in_progress", "completed", "cancelled"];
 
@@ -77,7 +77,7 @@ export default function WO360Page() {
             className="flex-1 min-w-48 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
           />
           <div className="flex gap-1 flex-wrap">
-            {STATUS_TABS.map((s) => (
+            {STATUS_TABS.map((s: any) => (
               <button
                 key={s}
                 onClick={() => setStatusF(s)}
@@ -95,7 +95,7 @@ export default function WO360Page() {
           <EmptyState title="No work orders found" description="Try a different search or filter" />
         ) : (
           <div className="space-y-2">
-            {filtered.map((w) => {
+            {filtered.map((w: any) => {
               const isOverdue = w.due_date && w.due_date.slice(0,10) < today && w.status !== "completed";
               const isExpanded = expanded === w.id;
               const tech  = techName(w.technician_id);

@@ -29,13 +29,13 @@ const InvoicesPage = () => {
 
   const today = new Date().toISOString().slice(0, 10);
   const totalInvoices = invoices.length;
-  const totalValueEGP = invoices.reduce((acc, invoice) => acc + invoice.total_amount, 0);
+  const totalValueEGP = invoices.reduce((acc: any, invoice: any) => acc + invoice.total_amount, 0);
   const pendingCount = invoices.filter(invoice => invoice.status === "pending").length;
   const overdueCount = invoices.filter(invoice => new Date(invoice.due_date) < new Date(today) && invoice.status !== "paid").length;
 
   const filteredInvoices = invoices
     .filter(invoice => statusFilter === "all" || invoice.status === statusFilter)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <PageWrapper>

@@ -63,7 +63,7 @@ const SchedulePage = () => {
         <SectionCard title="Upcoming Milestones">
           {data
             .filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 30)) && new Date(p.end_date) > today)
-            .sort((a, b) => new Date(a.end_date) - new Date(b.end_date))
+            .sort((a: any, b: any) => new Date(a.end_date) - new Date(b.end_date))
             .map(project => (
               <div key={project.id} className="flex items-center justify-between py-2">
                 <span>{project.name}</span>

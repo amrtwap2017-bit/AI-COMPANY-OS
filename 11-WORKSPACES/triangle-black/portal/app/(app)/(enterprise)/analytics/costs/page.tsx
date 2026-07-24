@@ -51,16 +51,16 @@ export default function CostsPage() {
   const contracts = full.contracts    || [];
 
   // Group WO costs by type
-  const byType = wos.reduce((acc, w) => {
+  const byType = wos.reduce((acc: any, w: any) => {
     const t = w.wo_type || "general";
     if (!acc[t]) acc[t] = { count: 0, total: 0 };
     acc[t].count += 1;
     acc[t].total += w.total_cost_egp || 0;
     return acc;
   }, {});
-  const maxTypeCost = Math.max(...Object.values(byType).map((v) => v.total), 1);
+  const maxTypeCost = Math.max(...Object.values(byType).map((v: any) => v.total), 1);
 
-  const topContracts = [...contracts].sort((a, b) => a.margin_pct - b.margin_pct).slice(0, 5);
+  const topContracts = [...contracts].sort((a: any, b: any) => a.margin_pct - b.margin_pct).slice(0, 5);
 
   async function loadBOQ(type) {
     setBoqType(type);
@@ -122,7 +122,7 @@ export default function CostsPage() {
           <EmptyState title="No contracts" description="No contract profitability data" />
         ) : (
           <div className="space-y-2">
-            {topContracts.map((c) => (
+            {topContracts.map((c: any) => (
               <div key={c.contract_id} className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
                 c.profitability === "at_risk" ? "border-red-200 bg-red-50" : "border-slate-200 bg-slate-50"
               }`}>
@@ -147,7 +147,7 @@ export default function CostsPage() {
 
       <SectionCard title="BOQ Templates">
         <div className="flex gap-2 mb-4 flex-wrap">
-          {BOQ_TYPES.map((t) => (
+          {BOQ_TYPES.map((t: any) => (
             <button
               key={t}
               onClick={() => loadBOQ(t)}

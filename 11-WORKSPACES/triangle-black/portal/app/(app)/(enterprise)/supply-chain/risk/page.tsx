@@ -46,23 +46,23 @@ const RiskPage = () => {
 
   if (isPurchaseOrdersLoading || isItemsLoading || isStockBalancesLoading || isInventorySignalsLoading) return <LoadingState />;
 
-  const stockBalancesWithItems = stockBalances.map((balance) => ({
+  const stockBalancesWithItems = stockBalances.map((balance: any) => ({
     ...balance,
-    item: (items || []).find((item) => item.item_id === balance.item_id),
+    item: (items || []).find((item: any) => item.item_id === balance.item_id),
   }));
 
   // Filter and group data for MetricStrip
-  const highRiskItems = stockBalancesWithItems.filter((b) => b.qty_on_hand === 0);
-  const mediumRiskItems = stockBalancesWithItems.filter((b) => b.qty_on_hand < b.min_stock);
-  const overduePOs = purchaseOrders.filter((po) => new Date(po.expected_delivery) < new Date());
-  const activeSignals = inventorySignals.filter((signal) => signal.status === "active");
+  const highRiskItems = stockBalancesWithItems.filter((b: any) => b.qty_on_hand === 0);
+  const mediumRiskItems = stockBalancesWithItems.filter((b: any) => b.qty_on_hand < b.min_stock);
+  const overduePOs = purchaseOrders.filter((po: any) => new Date(po.expected_delivery) < new Date());
+  const activeSignals = inventorySignals.filter((signal: any) => signal.status === "active");
 
   // Filter and group data for Risk Matrix
-  const highRiskItemsForMatrix = stockBalancesWithItems.filter((b) => b.qty_on_hand === 0 || new Date(b.expected_delivery) < new Date());
+  const highRiskItemsForMatrix = stockBalancesWithItems.filter((b: any) => b.qty_on_hand === 0 || new Date(b.expected_delivery) < new Date());
   const mediumRiskItemsForMatrix = stockBalancesWithItems.filter(
     (b) => b.qty_on_hand < b.min_stock && new Date(b.expected_delivery) > new Date() && new Date(b.expected_delivery) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
-  const lowRiskItemsForMatrix = stockBalancesWithItems.filter((b) => b.qty_on_hand >= b.reorder_point);
+  const lowRiskItemsForMatrix = stockBalancesWithItems.filter((b: any) => b.qty_on_hand >= b.reorder_point);
 
   return (
     <PageWrapper>
@@ -70,7 +70,7 @@ const RiskPage = () => {
       <div className="grid grid-cols-3 gap-4">
         <SectionCard title="High Risk Items">
           {highRiskItems.length > 0 ? (
-            highRiskItems.map((item) => (
+            highRiskItems.map((item: any) => (
               <div key={item.item_id} className="p-2 border rounded-md">
                 <h3>{item.item.name}</h3>
                 <p>Reason: Out of stock</p>

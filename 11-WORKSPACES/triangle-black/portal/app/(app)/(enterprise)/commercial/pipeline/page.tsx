@@ -44,11 +44,11 @@ const PipelinePage = () => {
   const contracts = contractsQuery.data;
 
   const statusCounts = {
-    new: (leads || []).filter((lead) => lead.status === "new").length,
-    qualified: (leads || []).filter((lead) => lead.status === "qualified").length,
-    negotiation: (leads || []).filter((lead) => lead.status === "negotiation").length,
-    won: (leads || []).filter((lead) => lead.status === "won").length,
-    lost: (leads || []).filter((lead) => lead.status === "lost").length,
+    new: (leads || []).filter((lead: any) => lead.status === "new").length,
+    qualified: (leads || []).filter((lead: any) => lead.status === "qualified").length,
+    negotiation: (leads || []).filter((lead: any) => lead.status === "negotiation").length,
+    won: (leads || []).filter((lead: any) => lead.status === "won").length,
+    lost: (leads || []).filter((lead: any) => lead.status === "lost").length,
   };
 
   const totalLeads = statusCounts.new + statusCounts.qualified + statusCounts.negotiation + statusCounts.won;
@@ -77,9 +77,9 @@ const PipelinePage = () => {
                 <p className="text-gray-600">EGP Sum: {toLocaleString(count * 1000)}</p>
                 <div className="mt-4 space-y-2 max-h-80 overflow-y-auto">
                   {leads
-                    .filter((lead) => lead.status === status)
+                    .filter((lead: any) => lead.status === status)
                     .slice(0, 5)
-                    .map((lead) => (
+                    .map((lead: any) => (
                       <div key={lead.id} className="bg-gray-100 p-3 rounded-lg shadow-sm">
                         <h5 className="font-bold">{lead.company_name}</h5>
                         <p>{lead.contact_name}</p>
@@ -92,9 +92,9 @@ const PipelinePage = () => {
                         <StatusBadge status={lead.status} />
                       </div>
                     ))}
-                  {(leads || []).filter((lead) => lead.status === status).length > 5 && (
+                  {(leads || []).filter((lead: any) => lead.status === status).length > 5 && (
                     <button className="bg-gray-200 p-2 rounded-lg shadow-sm">
-                      +{(leads || []).filter((lead) => lead.status === status).length - 5} more
+                      +{(leads || []).filter((lead: any) => lead.status === status).length - 5} more
                     </button>
                   )}
                 </div>
@@ -130,9 +130,9 @@ const PipelinePage = () => {
           </thead>
           <tbody>
             {leads
-              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
               .slice(0, 10)
-              .map((lead) => (
+              .map((lead: any) => (
                 <tr key={lead.id}>
                   <td>{lead.company_name}</td>
                   <td>{lead.contact_name}</td>

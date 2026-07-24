@@ -31,7 +31,7 @@ const CustomerHubPage = () => {
   const invoices = invoicesQuery.data;
 
   const uniqueClients = Array.from(new Set((contracts || []).map(contract => contract.client_name)));
-  const totalRevenue = invoices.reduce((acc, invoice) => acc + invoice.revenue, 0);
+  const totalRevenue = invoices.reduce((acc: any, invoice: any) => acc + invoice.revenue, 0);
   const expiringSoon = (contracts || []).filter(contract => Date.now() - new Date(contract.end_date).getTime() < 60 * 24 * 60 * 1000);
 
   const topClientsByValue = uniqueClients
@@ -40,10 +40,10 @@ const CustomerHubPage = () => {
       return {
         clientName,
         contractCount: clientContracts.length,
-        totalContractValue: clientContracts.reduce((acc, contract) => acc + contract.contract_value, 0),
+        totalContractValue: clientContracts.reduce((acc: any, contract: any) => acc + contract.contract_value, 0),
       };
     })
-    .sort((a, b) => b.totalContractValue - a.totalContractValue)
+    .sort((a: any, b: any) => b.totalContractValue - a.totalContractValue)
     .slice(0, 5);
 
   return (
@@ -58,12 +58,12 @@ const CustomerHubPage = () => {
       <SectionCard title="Customer List">
         {uniqueClients.map(clientName => {
           const clientContracts = (contracts || []).filter(contract => contract.client_name === clientName);
-          const mostRecentContract = clientContracts.sort((a, b) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime())[0];
+          const mostRecentContract = clientContracts.sort((a: any, b: any) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime())[0];
           return (
             <div key={clientName} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <strong>{clientName}</strong>
               <span>Contract Count: {clientContracts.length}</span>
-              <span>Total Contract Value EGP: {clientContracts.reduce((acc, contract) => acc + contract.contract_value, 0)}</span>
+              <span>Total Contract Value EGP: {clientContracts.reduce((acc: any, contract: any) => acc + contract.contract_value, 0)}</span>
               <StatusBadge status={mostRecentContract.status} />
               <Link href={`/customers/review?q=${clientName}`} className="text-blue-500 hover:text-blue-700">Review</Link>
             </div>

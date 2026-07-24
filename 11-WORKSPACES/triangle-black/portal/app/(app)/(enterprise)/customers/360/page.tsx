@@ -39,7 +39,7 @@ const Customer360Page = () => {
     enabled: !!searchText,
   });
 
-  const contractIds = contracts?.map((contract) => contract.id) || [];
+  const contractIds = contracts?.map((contract: any) => contract.id) || [];
 
   const { data: workOrders, isFetchingWorkOrders } = useQuery({
     queryKey: ["work-orders", contractIds],

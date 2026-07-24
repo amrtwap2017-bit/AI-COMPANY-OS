@@ -43,31 +43,31 @@ export default function DowntimeReviewPage() {
            w.completed_at
   );
 
-  const withHours = corrective.map((w) => {
+  const withHours = corrective.map((w: any) => {
     const hours = (new Date(w.completed_at) - new Date(w.started_at)) / 3600000;
-    const asset = (assets || []).find((a) => a.id === w.asset_id);
+    const asset = (assets || []).find((a: any) => a.id === w.asset_id);
     return { ...w, hours, assetName: asset?.name || "Unknown", category: asset?.category || "General" };
-  }).filter((w) => w.hours > 0);
+  }).filter((w: any) => w.hours > 0);
 
   const avgMTTR = withHours.length > 0
-    ? (withHours.reduce((s, w) => s + w.hours, 0) / withHours.length).toFixed(1)
+    ? (withHours.reduce((s: any, w: any) => s + w.hours, 0) / withHours.length).toFixed(1)
     : 0;
 
   const maxRepair = withHours.length > 0
-    ? Math.max(...withHours.map((w) => w.hours)).toFixed(1)
+    ? Math.max(...withHours.map((w: any) => w.hours)).toFixed(1)
     : 0;
 
-  const uniqueAssets = new Set(withHours.map((w) => w.asset_id)).size;
+  const uniqueAssets = new Set(withHours.map((w: any) => w.asset_id)).size;
   const mttrOk = Number(avgMTTR) < 8;
 
-  const byCategory = withHours.reduce((acc, w) => {
+  const byCategory = withHours.reduce((acc: any, w: any) => {
     if (!acc[w.category]) acc[w.category] = { count: 0, totalHours: 0 };
     acc[w.category].count += 1;
     acc[w.category].totalHours += w.hours;
     return acc;
   }, {});
 
-  const top5 = [...withHours].sort((a, b) => b.hours - a.hours).slice(0, 5);
+  const top5 = [...withHours].sort((a: any, b: any) => b.hours - a.hours).slice(0, 5);
 
   if (isLoading) return <LoadingState message="Loading downtime data..." />;
 
@@ -129,7 +129,7 @@ export default function DowntimeReviewPage() {
           <EmptyState title="No repairs recorded" description="No completed corrective WOs with timing found" />
         ) : (
           <div className="space-y-2">
-            {top5.map((w) => (
+            {top5.map((w: any) => (
               <div key={w.id} className="flex items-center justify-between px-4 py-3 bg-amber-50 rounded-lg border border-amber-100">
                 <div>
                   <p className="text-sm font-medium text-slate-800">{w.title}</p>

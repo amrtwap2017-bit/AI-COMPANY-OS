@@ -35,8 +35,8 @@ export default function InboxPage() {
 
   const isLoading = notifLoading || sigLoading;
   const signals = signalsData.signals || [];
-  const unread = (notifications || []).filter((n) => !n.read_at && !n.is_read).length;
-  const critical = (signals || []).filter((s) => s.priority === "critical").length;
+  const unread = (notifications || []).filter((n: any) => !n.read_at && !n.is_read).length;
+  const critical = (signals || []).filter((s: any) => s.priority === "critical").length;
 
   if (isLoading) return <LoadingState message="Loading inbox..." />;
 
@@ -59,7 +59,7 @@ export default function InboxPage() {
           <EmptyState title="All clear" description="No active signals at this time" />
         ) : (
           <div className="space-y-2">
-            {(signals || []).map((sig) => (
+            {(signals || []).map((sig: any) => (
               <div
                 key={sig.signal_id}
                 className={`px-4 py-3 rounded-lg border-l-4 ${

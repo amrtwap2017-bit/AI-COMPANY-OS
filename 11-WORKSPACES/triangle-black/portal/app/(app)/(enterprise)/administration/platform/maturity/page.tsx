@@ -98,7 +98,7 @@ export default function PlatformMaturityPage() {
 
   // Calculate maturity scores
   const allItems = MATURITY_BENCHMARKS.flatMap(cat => cat.items);
-  const totalScore  = (allItems || []).reduce((s, i) => s + i.score, 0);
+  const totalScore  = (allItems || []).reduce((s: any, i: any) => s + i.score, 0);
   const maxScore    = (allItems || []).length * 10;
   const maturityPct = Math.round(totalScore / maxScore * 100);
 
@@ -175,7 +175,7 @@ export default function PlatformMaturityPage() {
       {/* Category breakdown */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {MATURITY_BENCHMARKS.map(cat => {
-          const catScore = (cat.items || []).reduce((s, i) => s + i.score, 0);
+          const catScore = (cat.items || []).reduce((s: any, i: any) => s + i.score, 0);
           const catMax   = (cat.items || []).length * 10;
           const catPct   = Math.round(catScore / catMax * 100);
           return (

@@ -52,9 +52,9 @@ const Contract360Page = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load contracts" />;
 
-  const filteredContracts = (contracts || []).filter((contract) =>
+  const filteredContracts = (contracts || []).filter((contract: any) =>
     contract.client_name.toLowerCase().includes(searchText.toLowerCase())
-  ).sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
+  ).sort((a: any, b: any) => new Date(b.end_date) - new Date(a.end_date));
 
   const handleContractClick = (contract) => {
     setSelectedContract(contract);
@@ -73,7 +73,7 @@ const Contract360Page = () => {
       {filteredContracts.length === 0 ? (
         <EmptyState message="No contracts found" />
       ) : (
-        filteredContracts.map((contract) => (
+        filteredContracts.map((contract: any) => (
           <SectionCard key={contract.id} onClick={() => handleContractClick(contract)}>
             <h3 className="font-bold">{contract.client_name}</h3>
             <StatusBadge status={contract.status} />

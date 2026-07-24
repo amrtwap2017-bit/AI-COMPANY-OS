@@ -50,7 +50,7 @@ export default function RfqPage() {
 
   if (isError || isVendorsError) return <EmptyState message="Failed to load data" />;
 
-  const rfq = rfqs.find((r) => r.id === id);
+  const rfq = rfqs.find((r: any) => r.id === id);
 
   if (!rfq) {
     return (
@@ -68,7 +68,7 @@ export default function RfqPage() {
   }
 
   const vendorNames = rfq.vendor_ids
-    .map((vendorId) => (vendors || []).find((v) => v.id === vendorId)?.name)
+    .map((vendorId: any) => (vendors || []).find((v: any) => v.id === vendorId)?.name)
     .filter(Boolean);
 
   return (

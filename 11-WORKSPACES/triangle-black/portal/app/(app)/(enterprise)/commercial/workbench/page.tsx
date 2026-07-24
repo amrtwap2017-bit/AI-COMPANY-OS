@@ -39,7 +39,7 @@ const CommercialWorkbenchPage = () => {
   const todayLeads = (leadsQuery.data || []).filter(lead => lead.created_at.startsWith(getToday()));
   const hotLeads = leadsQuery.data
     .filter(lead => ["negotiation", "qualified"].includes(lead.status))
-    .sort((a, b) => b.value - a.value)
+    .sort((a: any, b: any) => b.value - a.value)
     .slice(0, 5);
   const contractRenewals = (contractsQuery.data || []).filter(contract => {
     const endDate = new Date(contract.end_date);

@@ -49,11 +49,11 @@ export default function CustomerDetailPage() {
   const custContracts = (contracts || []).filter(
     (c) => c.client_name?.toLowerCase().includes(name.toLowerCase())
   );
-  const contractIds   = new Set(custContracts.map((c) => c.id));
-  const custInvoices  = invoices.filter((i) => contractIds.has(i.contract_id));
-  const custWOs       = (wos || []).filter((w) => contractIds.has(w.contract_id));
-  const activeCount   = custContracts.filter((c) => c.status === "active").length;
-  const totalValue    = custContracts.reduce((s, c) => s + (Number(c.contract_value) || 0), 0);
+  const contractIds   = new Set(custContracts.map((c: any) => c.id));
+  const custInvoices  = invoices.filter((i: any) => contractIds.has(i.contract_id));
+  const custWOs       = (wos || []).filter((w: any) => contractIds.has(w.contract_id));
+  const activeCount   = custContracts.filter((c: any) => c.status === "active").length;
+  const totalValue    = custContracts.reduce((s: any, c: any) => s + (Number(c.contract_value) || 0), 0);
 
   if (isLoading) return <LoadingState message="Loading customer..." />;
 
@@ -91,7 +91,7 @@ export default function CustomerDetailPage() {
 
       <SectionCard title="Contracts">
         <div className="space-y-2">
-          {custContracts.map((c) => (
+          {custContracts.map((c: any) => (
             <div key={c.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-lg">
               <div>
                 <p className="text-sm font-medium text-slate-800">
@@ -115,7 +115,7 @@ export default function CustomerDetailPage() {
       {custWOs.length > 0 && (
         <SectionCard title="Work Orders">
           <div className="space-y-2">
-            {custWOs.slice(0, 5).map((w) => (
+            {custWOs.slice(0, 5).map((w: any) => (
               <div key={w.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-lg">
                 <p className="text-sm text-slate-800">{w.title}</p>
                 <div className="flex gap-2">

@@ -35,7 +35,7 @@ const Vendor360Page = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load vendors" />;
 
-  const filteredVendors = (vendors || []).filter((vendor) =>
+  const filteredVendors = (vendors || []).filter((vendor: any) =>
     vendor.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -45,7 +45,7 @@ const Vendor360Page = () => {
 
   const renderVendorList = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredVendors.map((vendor) => (
+      {filteredVendors.map((vendor: any) => (
         <SectionCard key={vendor.id} onClick={() => handleVendorSelect(vendor)}>
           <h3 className="font-bold">{vendor.name}</h3>
           <StatusBadge>{vendor.category}</StatusBadge>
@@ -74,7 +74,7 @@ const Vendor360Page = () => {
     if (isPOError) return <EmptyState title="Failed to load POs" />;
 
     const poCount = purchaseOrders.length;
-    const totalSpend = purchaseOrders.reduce((acc, po) => acc + po.total_spend_egp, 0);
+    const totalSpend = purchaseOrders.reduce((acc: any, po: any) => acc + po.total_spend_egp, 0);
     const lastPODate = purchaseOrders.length > 0 ? new Date(purchaseOrders[0].created_at).toLocaleDateString() : null;
 
     let performanceBadge = "No History";
@@ -92,7 +92,7 @@ const Vendor360Page = () => {
 
         <h3>PO History</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {purchaseOrders.map((po) => (
+          {purchaseOrders.map((po: any) => (
             <SectionCard key={po.id}>
               <h4>{po.order_number}</h4>
               <MetricStrip label="Total Spend" value={`${po.total_spend_egp} EGP`} />

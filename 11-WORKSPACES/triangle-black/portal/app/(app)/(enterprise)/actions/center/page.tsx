@@ -50,11 +50,11 @@ export default function ActionsCenterPage() {
   });
 
   const signals = sigsData.signals || [];
-  const pendingPRs = (Array.isArray(prs) ? prs : []).filter((p) => p.status === "draft" || p.status === "pending");
-  const criticalWOs = (wos || []).filter((w) => w.priority === "critical" && w.status === "open");
+  const pendingPRs = (Array.isArray(prs) ? prs : []).filter((p: any) => p.status === "draft" || p.status === "pending");
+  const criticalWOs = (wos || []).filter((w: any) => w.priority === "critical" && w.status === "open");
 
   const totalActions = (signals || []).length + pendingPRs.length + criticalWOs.length;
-  const criticalCount = (signals || []).filter((s) => s.priority === "critical").length + criticalWOs.length;
+  const criticalCount = (signals || []).filter((s: any) => s.priority === "critical").length + criticalWOs.length;
 
   const isLoading = s1 || s2 || s3;
   if (isLoading) return <LoadingState message="Loading action center..." />;
@@ -75,7 +75,7 @@ export default function ActionsCenterPage() {
       ]} />
 
       <div className="flex gap-2 px-1 mb-2">
-        {["all", "signals", "approvals", "work-orders"].map((t) => (
+        {["all", "signals", "approvals", "work-orders"].map((t: any) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -95,7 +95,7 @@ export default function ActionsCenterPage() {
       ) : (
         <SectionCard title="Pending Actions">
           <div className="space-y-2">
-            {(tab === "all" || tab === "signals") && (signals || []).map((s) => (
+            {(tab === "all" || tab === "signals") && (signals || []).map((s: any) => (
               <div key={s.signal_id} className={`px-4 py-3 rounded-lg border-l-4 ${
                 s.priority === "critical" ? "border-red-500 bg-red-50" :
                 s.priority === "high" ? "border-amber-400 bg-amber-50" : "border-blue-400 bg-blue-50"
@@ -115,7 +115,7 @@ export default function ActionsCenterPage() {
                 </div>
               </div>
             ))}
-            {(tab === "all" || tab === "approvals") && pendingPRs.map((pr) => (
+            {(tab === "all" || tab === "approvals") && pendingPRs.map((pr: any) => (
               <div key={pr.id} className="px-4 py-3 rounded-lg border-l-4 border-amber-400 bg-amber-50">
                 <div className="flex items-center justify-between">
                   <div>
@@ -128,7 +128,7 @@ export default function ActionsCenterPage() {
                 </div>
               </div>
             ))}
-            {(tab === "all" || tab === "work-orders") && criticalWOs.map((w) => (
+            {(tab === "all" || tab === "work-orders") && criticalWOs.map((w: any) => (
               <div key={w.id} className="px-4 py-3 rounded-lg border-l-4 border-red-500 bg-red-50">
                 <div className="flex items-center justify-between">
                   <div>

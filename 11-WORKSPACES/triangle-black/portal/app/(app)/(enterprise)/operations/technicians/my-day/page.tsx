@@ -30,9 +30,9 @@ const MyDayPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <div>Error fetching work orders</div>;
 
-  const openCount = (data || []).filter((wo) => wo.status === "open").length;
-  const inProgressCount = (data || []).filter((wo) => wo.status === "in_progress").length;
-  const completedCount = (data || []).filter((wo) => wo.status === "completed").length;
+  const openCount = (data || []).filter((wo: any) => wo.status === "open").length;
+  const inProgressCount = (data || []).filter((wo: any) => wo.status === "in_progress").length;
+  const completedCount = (data || []).filter((wo: any) => wo.status === "completed").length;
 
   return (
     <PageWrapper>
@@ -42,7 +42,7 @@ const MyDayPage = () => {
         <StatusBadge label={`In Progress: ${inProgressCount}`} color="green" />
         <StatusBadge label={`Completed: ${completedCount}`} color="gray" />
       </div>
-      {(data || []).map((wo) => (
+      {(data || []).map((wo: any) => (
         <SectionCard key={wo.id} className="swipeable-card">
           <h3>{wo.title}</h3>
           <div className="flex items-center">

@@ -43,15 +43,15 @@ const ServiceRequestsPage = () => {
   if (isError || !data) return <EmptyState message="No service requests found" />;
 
   const totalRequests = (data || []).length;
-  const openRequests = (data || []).filter((sr) => sr.status === "open").length;
-  const inProgressRequests = (data || []).filter((sr) => sr.status === "in_progress").length;
-  const convertedToWO = (data || []).filter((sr) => sr.status === "converted").length;
+  const openRequests = (data || []).filter((sr: any) => sr.status === "open").length;
+  const inProgressRequests = (data || []).filter((sr: any) => sr.status === "in_progress").length;
+  const convertedToWO = (data || []).filter((sr: any) => sr.status === "converted").length;
 
   const filteredRequests = data
-    .filter((sr) =>
+    .filter((sr: any) =>
       priorityFilter === "All" || sr.priority === priorityFilter.toLowerCase()
     )
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       if (a.priority === b.priority) return 0;
       if (a.priority === "Critical") return -1;
       if (b.priority === "Critical") return 1;
@@ -119,7 +119,7 @@ const ServiceRequestsPage = () => {
         </button>
       </div>
       {filteredRequests.length > 0 ? (
-        filteredRequests.map((sr) => (
+        filteredRequests.map((sr: any) => (
           <SectionCard key={sr.id}>
             <h3>{sr.title}</h3>
             <StatusBadge status={sr.status} />

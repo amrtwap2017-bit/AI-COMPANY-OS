@@ -50,11 +50,11 @@ const ExecutiveIntelligencePage = () => {
   const { compliance, status } = analyticsQuery.data;
   const { WOs_total, critical_open } = kpisQuery.data;
 
-  const riskMatrix = (signalsQuery.data || []).map((signal) => {
+  const riskMatrix = (signalsQuery.data || []).map((signal: any) => {
     if (signal.level === "critical") return { level: "HIGH RISK", title: signal.title, action: signal.action };
     if (signal.level === "high") return { level: "MEDIUM RISK", title: signal.title, action: signal.action };
     return null;
-  }).filter(Boolean).sort((a, b) => b.level.localeCompare(a.level));
+  }).filter(Boolean).sort((a: any, b: any) => b.level.localeCompare(a.level));
 
   const businessImpact = [];
   if (compliance < 80) businessImpact.push("SLA CRITICAL — client contracts at risk");

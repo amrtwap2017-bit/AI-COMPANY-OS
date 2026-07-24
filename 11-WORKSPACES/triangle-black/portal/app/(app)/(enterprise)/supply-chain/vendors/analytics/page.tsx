@@ -40,25 +40,25 @@ export default function VendorAnalyticsPage() {
 
   const isLoading = v1 || v2 || v3;
 
-  const vendorScores = (vendors || []).map((v) => {
-    const vendorPOs   = pos.filter((p) => p.vendor_id === v.id);
+  const vendorScores = (vendors || []).map((v: any) => {
+    const vendorPOs   = pos.filter((p: any) => p.vendor_id === v.id);
     const poCount     = vendorPOs.length;
-    const totalSpend  = vendorPOs.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
+    const totalSpend  = vendorPOs.reduce((s: any, p: any) => s + (Number(p.total_amount) || 0), 0);
     const leadScore   = v.lead_time_days ? Math.max(0, 40 - v.lead_time_days * 2) : 20;
-    const maxPOs      = Math.max(...(vendors || []).map((x) => pos.filter((p) => p.vendor_id === x.id).length), 1);
+    const maxPOs      = Math.max(...(vendors || []).map((x: any) => pos.filter((p: any) => p.vendor_id === x.id).length), 1);
     const poScore     = Math.round((poCount / maxPOs) * 50);
     const score       = Math.min(100, 10 + leadScore + poScore);
     return { ...v, poCount, totalSpend, score };
-  }).sort((a, b) => b.score - a.score);
+  }).sort((a: any, b: any) => b.score - a.score);
 
-  const totalSpend      = pos.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
-  const activeVendors   = vendorScores.filter((v) => v.poCount > 0).length;
+  const totalSpend      = pos.reduce((s: any, p: any) => s + (Number(p.total_amount) || 0), 0);
+  const activeVendors   = vendorScores.filter((v: any) => v.poCount > 0).length;
   const avgLead         = (vendors || []).length > 0
-    ? Math.round(vendors.reduce((s, v) => s + (v.lead_time_days || 0), 0) / (vendors || []).length)
+    ? Math.round(vendors.reduce((s: any, v: any) => s + (v.lead_time_days || 0), 0) / (vendors || []).length)
     : 0;
-  const rfqResponded    = rfqs.filter((r) => r.status === "received").length;
+  const rfqResponded    = rfqs.filter((r: any) => r.status === "received").length;
   const responseRate    = rfqs.length > 0 ? Math.round((rfqResponded / rfqs.length) * 100) : 0;
-  const maxSpend        = Math.max(...vendorScores.map((v) => v.totalSpend), 1);
+  const maxSpend        = Math.max(...vendorScores.map((v: any) => v.totalSpend), 1);
 
   if (isLoading) return <LoadingState message="Loading vendor analytics..." />;
 
@@ -110,7 +110,7 @@ export default function VendorAnalyticsPage() {
 
       <SectionCard title="Spend Distribution (Top 5)">
         <div className="space-y-3">
-          {vendorScores.slice(0, 5).map((v) => (
+          {vendorScores.slice(0, 5).map((v: any) => (
             <div key={v.id} className="flex items-center gap-3">
               <div className="w-32 text-xs font-medium text-slate-700 truncate">{v.name}</div>
               <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">

@@ -55,7 +55,7 @@ const RiskRegisterPage = () => {
     </SectionCard>
   ) : null;
 
-  const financialRisk = (contracts || []).filter(contract => contract.expiryDate <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).reduce((acc, contract) => acc + contract.valueAtRisk, 0);
+  const financialRisk = (contracts || []).filter(contract => contract.expiryDate <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).reduce((acc: any, contract: any) => acc + contract.valueAtRisk, 0);
 
   return (
     <PageWrapper>
@@ -79,7 +79,7 @@ const RiskRegisterPage = () => {
             </tr>
           </thead>
           <tbody>
-            {(signals || []).sort((a, b) => (b.priority === "critical" ? -1 : 1)).map(signal => (
+            {(signals || []).sort((a: any, b: any) => (b.priority === "critical" ? -1 : 1)).map(signal => (
               <tr key={signal.id}>
                 <td>{signal.id}</td>
                 <td>{signal.title}</td>

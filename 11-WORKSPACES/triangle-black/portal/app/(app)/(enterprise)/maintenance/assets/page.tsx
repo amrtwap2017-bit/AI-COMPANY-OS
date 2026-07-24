@@ -70,7 +70,7 @@ const AssetPage = () => {
         >
           All
         </button>
-        {["HVAC", "Electrical", "Plumbing", "Mechanical", "Elevator"].map((category) => (
+        {["HVAC", "Electrical", "Plumbing", "Mechanical", "Elevator"].map((category: any) => (
           <button
             key={category}
             onClick={() => setCategoryFilter(category)}

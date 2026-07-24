@@ -26,7 +26,7 @@ const SupplierInvoicesPage = () => {
   const totalInvoices = invoices.length;
   const pendingPayment = invoices.filter(i => i.status === "Pending").length;
   const overdue = invoices.filter(i => new Date(i.due_date) < new Date() && i.status !== "Paid").length;
-  const totalAmount = invoices.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalAmount = invoices.reduce((acc: any, curr: any) => acc + curr.amount, 0);
 
   const filteredInvoices = invoices.filter(invoice => {
     if (statusFilter === "All") return true;
@@ -68,7 +68,7 @@ const SupplierInvoicesPage = () => {
       {overdueInvoices.length > 0 && (
         <SectionCard title="Overdue Invoices">
           <ul className="list-disc pl-4">
-            {overdueInvoices.map((invoice) => (
+            {overdueInvoices.map((invoice: any) => (
               <li key={invoice.id} className="flex items-center justify-between mb-2">
                 <span className="font-bold">{invoice.invoice_number}</span>
                 <StatusBadge status={invoice.status} />
@@ -80,7 +80,7 @@ const SupplierInvoicesPage = () => {
       {filteredInvoices.length > 0 && (
         <SectionCard title="Invoice List">
           <ul className="list-disc pl-4">
-            {filteredInvoices.map((invoice) => (
+            {filteredInvoices.map((invoice: any) => (
               <li key={invoice.id} className="flex items-center justify-between mb-2">
                 <span className="font-bold">{invoice.invoice_number}</span>
                 <StatusBadge status={invoice.status} />

@@ -127,7 +127,7 @@ export default function SupplyChainWorkbenchPage() {
       {/* Category Tabs */}
       <SectionCard title="Inventory by Category">
         <div className="flex gap-2 mb-4">
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.map((cat: any) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}

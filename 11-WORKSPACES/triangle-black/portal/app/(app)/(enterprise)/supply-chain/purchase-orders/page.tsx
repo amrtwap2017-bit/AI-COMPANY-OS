@@ -42,7 +42,7 @@ const PurchaseOrdersPage = () => {
   const receivedPOs = purchaseOrders.filter(po => po.status === "received").length;
   const cancelledPOs = purchaseOrders.filter(po => po.status === "cancelled").length;
 
-  const totalValueEGP = purchaseOrders.reduce((acc, po) => acc + po.total_amount, 0).toLocaleString() + " EGP";
+  const totalValueEGP = purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0).toLocaleString() + " EGP";
 
   const filteredPOs = statusFilter === "all"
     ? purchaseOrders

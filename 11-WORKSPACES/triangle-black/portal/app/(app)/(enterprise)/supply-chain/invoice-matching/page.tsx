@@ -48,7 +48,7 @@ const InvoiceMatchingPage = () => {
             { label: "Total POs", value: purchaseOrders.length },
             { label: "Matched Invoices", value: matchedInvoices.length },
             { label: "Unmatched POs", value: unmatchedPOs.length },
-            { label: "Total PO Value EGP", value: purchaseOrders.reduce((acc, po) => acc + po.total_amount, 0) }
+            { label: "Total PO Value EGP", value: purchaseOrders.reduce((acc: any, po: any) => acc + po.total_amount, 0) }
           ]}
         />
       </SectionCard>

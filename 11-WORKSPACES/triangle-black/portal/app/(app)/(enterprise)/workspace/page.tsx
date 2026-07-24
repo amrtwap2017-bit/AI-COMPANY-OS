@@ -68,7 +68,7 @@ export default function WorkspacePage() {
 
       <SectionCard title="Quick Navigation">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {QUICK_LINKS.map((link) => (
+          {QUICK_LINKS.map((link: any) => (
             <Link
               key={link.href}
               href={link.href}

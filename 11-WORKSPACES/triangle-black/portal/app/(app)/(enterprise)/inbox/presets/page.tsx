@@ -25,7 +25,7 @@ const InboxPresetsPage = () => {
     <PageWrapper>
       <PageHeader title="Inbox Presets" description="Saved filters and views for inbox" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {presets.map((preset) => (
+        {presets.map((preset: any) => (
           <SectionCard
             key={preset.name}
             title={preset.name}

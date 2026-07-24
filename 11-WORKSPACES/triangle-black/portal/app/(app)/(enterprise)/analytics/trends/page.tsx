@@ -45,7 +45,7 @@ export default function TrendsPage() {
 
       <SectionCard>
         <div className="flex flex-row gap-4">
-          {months.map((month) => (
+          {months.map((month: any) => (
             <div key={month.month} className="flex flex-col items-center">
               <span>{month.month}</span>
               <div
@@ -74,7 +74,7 @@ export default function TrendsPage() {
             </tr>
           </thead>
           <tbody>
-            {months.sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime()).map((month) => (
+            {months.sort((a: any, b: any) => new Date(b.month).getTime() - new Date(a.month).getTime()).map((month: any) => (
               <tr key={month.month}>
                 <td>{month.month}</td>
                 <td>{month.total}</td>
@@ -92,9 +92,9 @@ export default function TrendsPage() {
 
       <SectionCard>
         <div className="flex flex-row gap-4">
-          <div className="bg-green-500 p-2 rounded">Completed: {months.reduce((acc, month) => acc + month.completed, 0)}</div>
-          <div className="bg-yellow-500 p-2 rounded">Open: {months.reduce((acc, month) => acc + month.open, 0)}</div>
-          <div className="bg-red-500 p-2 rounded">Critical: {months.reduce((acc, month) => acc + month.critical, 0)}</div>
+          <div className="bg-green-500 p-2 rounded">Completed: {months.reduce((acc: any, month: any) => acc + month.completed, 0)}</div>
+          <div className="bg-yellow-500 p-2 rounded">Open: {months.reduce((acc: any, month: any) => acc + month.open, 0)}</div>
+          <div className="bg-red-500 p-2 rounded">Critical: {months.reduce((acc: any, month: any) => acc + month.critical, 0)}</div>
         </div>
       </SectionCard>
     </PageWrapper>

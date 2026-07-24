@@ -57,7 +57,7 @@ const AssetTreePage = () => {
     categories[asset.category].list.push(asset.name);
   });
 
-  const totalAssets = Object.values(categories).reduce((acc, category) => acc + category.count, 0);
+  const totalAssets = Object.values(categories).reduce((acc: any, category: any) => acc + category.count, 0);
   const criticalAssets = (assets || []).filter(asset => asset.criticality === "Critical").length;
   const inFaultAssets = (assets || []).filter(asset => asset.status === "In Fault").length;
 

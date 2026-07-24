@@ -36,13 +36,13 @@ const CommercialReviewPage = () => {
   const activeContracts = (contracts || []).filter(contract => contract.status === "active").length;
 
   // Lead status summary
-  const statusSummary = leads.reduce((acc, lead) => {
+  const statusSummary = leads.reduce((acc: any, lead: any) => {
     acc[lead.status] = (acc[lead.status] || 0) + 1;
     return acc;
   }, {} as { [key: string]: number });
 
   // Top 5 leads by value
-  const topLeads = (leads || []).sort((a, b) => b.value - a.value).slice(0, 5);
+  const topLeads = (leads || []).sort((a: any, b: any) => b.value - a.value).slice(0, 5);
 
   // Contract health
   const expiringContracts = (contracts || []).filter(contract => {

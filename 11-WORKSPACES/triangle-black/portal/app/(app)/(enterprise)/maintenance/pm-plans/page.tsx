@@ -34,11 +34,11 @@ export default function PMPlansPage() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const overdue   = plans.filter((p) => p.next_due_date && p.next_due_date < today);
-  const dueSoon   = plans.filter((p) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
-  const active    = plans.filter((p) => p.status === "active");
-  const byType    = filter === "all" ? plans : plans.filter((p) => p.plan_type === filter);
-  const sorted    = [...byType].sort((a, b) => {
+  const overdue   = plans.filter((p: any) => p.next_due_date && p.next_due_date < today);
+  const dueSoon   = plans.filter((p: any) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+  const active    = plans.filter((p: any) => p.status === "active");
+  const byType    = filter === "all" ? plans : plans.filter((p: any) => p.plan_type === filter);
+  const sorted    = [...byType].sort((a: any, b: any) => {
     const aOver = a.next_due_date && a.next_due_date < today;
     const bOver = b.next_due_date && b.next_due_date < today;
     if (aOver && !bOver) return -1;
@@ -68,7 +68,7 @@ export default function PMPlansPage() {
       {overdue.length > 0 && (
         <SectionCard title="Overdue Plans">
           <div className="space-y-2">
-            {overdue.slice(0, 5).map((p) => (
+            {overdue.slice(0, 5).map((p: any) => (
               <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-red-50 rounded-lg border border-red-200">
                 <div>
                   <p className="text-sm font-semibold text-slate-800">{p.title}</p>
@@ -88,7 +88,7 @@ export default function PMPlansPage() {
 
       <SectionCard title="All Plans">
         <div className="flex gap-2 mb-4 flex-wrap">
-          {TYPES.map((t) => (
+          {TYPES.map((t: any) => (
             <button
               key={t}
               onClick={() => setFilter(t)}
@@ -96,7 +96,7 @@ export default function PMPlansPage() {
                 filter === t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              {t === "all" ? `All (${plans.length})` : `${t} (${plans.filter((p) => p.plan_type === t).length})`}
+              {t === "all" ? `All (${plans.length})` : `${t} (${plans.filter((p: any) => p.plan_type === t).length})`}
             </button>
           ))}
         </div>
@@ -105,7 +105,7 @@ export default function PMPlansPage() {
           <EmptyState title="No plans" description="No PM plans match this filter" />
         ) : (
           <div className="space-y-2">
-            {sorted.map((p) => {
+            {sorted.map((p: any) => {
               const diff = daysDiff(p.next_due_date);
               const isOver = diff !== null && diff < 0;
               const isSoon = diff !== null && diff >= 0 && diff <= 7;

@@ -53,7 +53,7 @@ const AlertsPage = () => {
 
   const filteredSignals = signals
     .filter(signal => priorityFilter === "All" || signal.priority === priorityFilter)
-    .sort((a, b) => (b.priority === "Critical" ? -1 : a.priority === "Critical" ? 1 : 0));
+    .sort((a: any, b: any) => (b.priority === "Critical" ? -1 : a.priority === "Critical" ? 1 : 0));
 
   return (
     <PageWrapper>
