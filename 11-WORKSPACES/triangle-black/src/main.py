@@ -439,7 +439,7 @@ async def detailed_health():
 @app.get("/api/v1/version", tags=["system"])
 async def get_version():
     return {
-        "version": "2.0.0",
+        "version": "2.0.1",
         "sprint":  76,
         "platform": "Triangle Black Enterprise Operations Platform",
         "programs": 14,
@@ -537,8 +537,8 @@ async def platform_summary():
     db_ok = check_connection()
     return {
         "platform":       "Triangle Black Enterprise Operations Platform",
-        "version":        "2.0.0",
-        "sprint":         89,
+        "version":        "2.0.1",
+        "sprint":         92,
         "status":         "production-ready",
         "database":       "ok" if db_ok else "error",
         "programs": {

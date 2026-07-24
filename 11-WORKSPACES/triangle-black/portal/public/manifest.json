@@ -1,16 +1,12 @@
 {
-  "name": "Triangle Black \u2014 Enterprise Operations",
-  "short_name": "Triangle Black",
+  "name": "Triangle Black",
+  "short_name": "TB Platform",
   "description": "Enterprise Operations Platform for Engineering Companies",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "orientation": "portrait-primary",
-  "categories": [
-    "business",
-    "productivity"
-  ],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -28,20 +24,20 @@
   "shortcuts": [
     {
       "name": "Work Orders",
-      "url": "/operations/work-orders",
-      "description": "View work orders"
+      "url": "/operations/work-orders"
     },
     {
       "name": "Dashboard",
-      "url": "/executive",
-      "description": "Executive dashboard"
+      "url": "/executive"
+    },
+    {
+      "name": "New Request",
+      "url": "/supply-chain/intake"
     },
     {
       "name": "Technicians",
-      "url": "/operations/technicians",
-      "description": "Manage technicians"
+      "url": "/operations/technicians"
     }
   ],
-  "screenshots": [],
   "prefer_related_applications": false
 }
