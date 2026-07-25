@@ -13,6 +13,7 @@ const fmtDate = (d: any): string => {
   catch { return String(d).slice(0, 10); }
 };
 
+const workOrders: any[] = [];
 const toArr = (d: any): any[] => {
   if (!d) return [];
   if (Array.isArray(d)) return d;

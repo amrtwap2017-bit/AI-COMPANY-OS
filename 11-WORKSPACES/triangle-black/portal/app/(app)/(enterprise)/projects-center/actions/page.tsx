@@ -13,6 +13,7 @@ const fmtDate = (d: any): string => {
   catch { return String(d).slice(0, 10); }
 };
 
+const workOrders: any[] = [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 

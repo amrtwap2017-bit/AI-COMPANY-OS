@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 // Safe array extractor — handles all backend response shapes
+const workOrders: any[] = [];
 const toArr = (d: any): any[] => {
   if (!d) return [];
   if (Array.isArray(d)) return d;

@@ -14,6 +14,7 @@ const fmtDate = (d: any): string => {
   catch { return String(d).slice(0, 10); }
 };
 
+const workOrders: any[] = [];
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -45,6 +46,7 @@ const CustomerSuccessPage = () => {
   const { data: contractData, isLoading: isContractLoading } = useQuery(["contracts"], fetchContracts, {
     refetchInterval: 300000,
   });
+  const workOrders = toArr(contractData);
 
   const { data: invoiceData, isLoading: isInvoiceLoading } = useQuery(["invoices"], fetchInvoices, {
     refetchInterval: 300000,

@@ -6,6 +6,7 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, Loading
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+const workOrders: any[] = [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
