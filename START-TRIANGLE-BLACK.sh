@@ -57,14 +57,14 @@ echo "  Backend PID: $!"
 sleep 22
 
 # Check backend
-if curl -s http://localhost:8030/api/v1/ai/health | grep -q "ok"; then
+if curl -s --max-time 5 http://localhost:8030/api/v1/ai/health | grep -q "ok"; then
     echo "  OK: Backend alive on :8030"
 else
     echo "  WARN: Backend not responding — check: cat /tmp/tb_backend.log"
 fi
 
 # ── STEP 5: Build Portal (only if .next missing) ──────────
-echo "[5/6] Checking Portal build..."
+echo "[5/6] Checking Portal..."
 if [ -d "$TB/portal/.next" ] && [ -f "$TB/portal/.next/BUILD_ID" ]; then
     echo "  OK: Portal already built"
 else
@@ -105,7 +105,7 @@ echo "  BACKEND: http://localhost:8030"
 echo "  API DOCS: http://localhost:8030/docs"
 echo ""
 echo "  HEALTH CHECK:"
-curl -s http://localhost:8030/api/v1/version | \
+curl -s --max-time 5 http://localhost:8030/api/v1/version | \
     python3 -c "import json,sys; d=json.load(sys.stdin); print(f'    Version: {d[\"version\"]} | Sprint: {d[\"sprint\"]}')" 2>/dev/null
 echo ""
 echo "  LOGS:"
