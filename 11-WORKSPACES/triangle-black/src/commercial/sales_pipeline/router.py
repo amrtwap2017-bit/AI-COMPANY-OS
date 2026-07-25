@@ -67,7 +67,7 @@ def conversion_rates(db: Session = Depends(get_db)):
     active_contracts = db.execute(text("SELECT count(*) FROM contracts WHERE status='active'")).scalar() or 0
 
     return {
-        "lead_to_quote_rate": round(total_quotes / total_leads * 100, 1),
+        "lead_to_quote_rate": min(100.0, round(total_quotes / total_leads * 100, 1)),
         "quote_win_rate": round(won_quotes / max(total_quotes,1) * 100, 1),
         "contract_active_rate": round(active_contracts / max(total_contracts,1) * 100, 1),
         "totals": {

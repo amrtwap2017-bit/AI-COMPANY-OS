@@ -1,160 +1,94 @@
 // @ts-nocheck
 "use client";
+import { useQuery } from "@tanstack/react-query";
+import { PageWrapper, PageHeader, SectionCard, MetricStrip, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-} from "@/components/ui";
-
-
-// Safe date formatter
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); }
-  catch { return String(d).slice(0, 10); }
-};
-
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchLeads = async () => {
-  const res = await authFetch(`/api/v1/leads`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchContracts = async () => {
-  const res = await authFetch(`/api/v1/contracts`);
-  if (!res.ok) return [];
-  return res.json();
-};
+const fmtEGP = (n: any) => `EGP ${Number(n || 0).toLocaleString()}`;
 
 const PipelinePage = () => {
-  const leadsQuery = useQuery(["leads"], fetchLeads, {
-    refetchInterval: 120000,
-  });
+  const { data: pipeline, isLoading } = useQuery(
+    ["sales-pipeline"],
+    () => authFetch("/api/v1/sales-pipeline/").then(r => r.json()),
+    { refetchInterval: 120000 }
+  );
 
-  const contractsQuery = useQuery(["contracts"], fetchContracts, {
-    refetchInterval: 120000,
-  });
+  const { data: conversion } = useQuery(
+    ["sales-conversion"],
+    () => authFetch("/api/v1/sales-pipeline/conversion").then(r => r.json()),
+    { refetchInterval: 120000 }
+  );
 
-  if (leadsQuery.isLoading || contractsQuery.isLoading) return <LoadingState />;
-
-  if (leadsQuery.isError || contractsQuery.isError)
-    return <EmptyState message="Failed to load data" />;
-
-  const leads = leadsQuery.data;
-  const contracts = contractsQuery.data;
-
-  const statusCounts = {
-    new: toArr(leads).filter((lead: any) => lead.status === "new").length,
-    qualified: toArr(leads).filter((lead: any) => lead.status === "qualified").length,
-    negotiation: toArr(leads).filter((lead: any) => lead.status === "negotiation").length,
-    won: toArr(leads).filter((lead: any) => lead.status === "won").length,
-    lost: toArr(leads).filter((lead: any) => lead.status === "lost").length,
-  };
-
-  const totalLeads = statusCounts.new + statusCounts.qualified + statusCounts.negotiation + statusCounts.won;
+  if (isLoading) return <LoadingState />;
+  const kpis = pipeline?.kpis || {};
+  const conv = conversion || {};
 
   return (
     <PageWrapper>
-      <PageHeader title="Pipeline" />
-      <SectionCard title="Metrics">
-        <MetricStrip
-          metrics={[
-            { label: "Total Leads", value: totalLeads },
-            { label: "New", value: statusCounts.new },
-            { label: "Qualified", value: statusCounts.qualified },
-            { label: "In Negotiation", value: statusCounts.negotiation },
-            { label: "Won", value: statusCounts.won },
-          ]}
-        />
-      </SectionCard>
-      <div className="flex flex-col md:flex-row">
-        <div className="w-full md:w-1/2 p-4 overflow-x-auto">
-          <h3 className="text-lg font-bold mb-4">Kanban Pipeline</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {Object.entries(statusCounts).map(([status, count]) => (
-              <div key={status} className="bg-white p-4 rounded-lg shadow-md">
-                <h4 className="text-xl font-bold mb-2">{count}</h4>
-                <p className="text-gray-600">EGP Sum: {toLocaleString(count * 1000)}</p>
-                <div className="mt-4 space-y-2 max-h-80 overflow-y-auto">
-                  {leads
-                    .filter((lead: any) => lead.status === status)
-                    .slice(0, 5)
-                    .map((lead: any) => (
-                      <div key={lead.id} className="bg-gray-100 p-3 rounded-lg shadow-sm">
-                        <h5 className="font-bold">{lead.company_name}</h5>
-                        <p>{lead.contact_name}</p>
-                        <p>{toLocaleString(lead.value)} EGP</p>
-                        <p
-                          className={`text-red-600 ${new Date(lead.expected_close_date) < new Date() ? 'font-bold' : ''}`}
-                        >
-                          {lead.expected_close_date}
-                        </p>
-                        <StatusBadge status={lead.status} />
-                      </div>
-                    ))}
-                  {toArr(leads).filter((lead: any) => lead.status === status).length > 5 && (
-                    <button className="bg-gray-200 p-2 rounded-lg shadow-sm">
-                      +{toArr(leads).filter((lead: any) => lead.status === status).length - 5} more
-                    </button>
-                  )}
+      <PageHeader title="Sales Pipeline" subtitle="Lead to Revenue journey" badge="SALES" />
+      <MetricStrip metrics={[
+        { label: "Total Leads",   value: kpis.total_leads || 0 },
+        { label: "Quotes",        value: kpis.total_quotes || 0 },
+        { label: "Contracts",     value: kpis.total_contracts || 0 },
+        { label: "Pipeline Value", value: fmtEGP(kpis.pipeline_value_egp), color: "amber" },
+        { label: "Revenue",       value: fmtEGP(kpis.total_revenue_egp), color: "green" },
+      ]} />
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <SectionCard title="Conversion Rates">
+          <div className="space-y-4 p-2">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-slate-600">Lead → Quote</span>
+                <span className="font-semibold">{conv.lead_to_quote_rate || 0}%</span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div className="bg-amber-500 h-2 rounded-full" style={{width: `${Math.min(100, conv.lead_to_quote_rate || 0)}%`}}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-slate-600">Quote Win Rate</span>
+                <span className="font-semibold">{conv.quote_win_rate || 0}%</span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full" style={{width: `${conv.quote_win_rate || 0}%`}}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-slate-600">Active Contracts</span>
+                <span className="font-semibold">{conv.contract_active_rate || 0}%</span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div className="bg-blue-500 h-2 rounded-full" style={{width: `${conv.contract_active_rate || 0}%`}}></div>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Funnel Breakdown">
+          <div className="space-y-3 p-2">
+            {[
+              { label: "Leads", items: toArr(pipeline?.funnel?.leads), color: "bg-slate-400" },
+              { label: "Quotes", items: toArr(pipeline?.funnel?.quotes), color: "bg-amber-400" },
+              { label: "Contracts", items: toArr(pipeline?.funnel?.contracts), color: "bg-green-400" },
+            ].map(stage => (
+              <div key={stage.label}>
+                <p className="text-xs font-semibold text-slate-500 mb-1">{stage.label}</p>
+                <div className="flex gap-2 flex-wrap">
+                  {stage.items.map((item: any) => (
+                    <span key={item.status} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 rounded text-xs">
+                      <span className={`w-2 h-2 rounded-full ${stage.color}`}></span>
+                      {item.status}: {item.count}
+                    </span>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-        <div className="w-full md:w-1/2 p-4">
-          <h3 className="text-lg font-bold mb-4">Pipeline Metrics Bar Chart</h3>
-          <div className="flex flex-col space-y-4">
-            {Object.entries(statusCounts).map(([status, count]) => (
-              <div key={status} className="bg-white p-4 rounded-lg shadow-md">
-                <div
-                  className={`bg-${status === "new" ? "blue" : status === "qualified" ? "purple" : status === "negotiation" ? "amber" : status === "won" ? "green" : "red"}-500 h-12 rounded-lg`}
-                  style={{ width: `${(count / totalLeads) * 100}%` }}
-                />
-                <p className="text-center">{count}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        </SectionCard>
       </div>
-      <SectionCard title="Recent Leads">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Contact</th>
-              <th>Status</th>
-              <th>Value EGP</th>
-              <th>Expected Close</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads
-              .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-              .slice(0, 10)
-              .map((lead: any) => (
-                <tr key={lead.id}>
-                  <td>{lead.company_name}</td>
-                  <td>{lead.contact_name}</td>
-                  <td><StatusBadge status={lead.status} /></td>
-                  <td>{toLocaleString(lead.value)} EGP</td>
-                  <td>{lead.expected_close_date}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </SectionCard>
     </PageWrapper>
   );
 };

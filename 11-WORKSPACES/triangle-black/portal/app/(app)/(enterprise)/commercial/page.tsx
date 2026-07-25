@@ -20,6 +20,11 @@ const fetchContracts = async () => {
   return res.json();
 };
 
+const fetchPipeline = async () => {
+  const r = await authFetch("/api/v1/sales-pipeline/");
+  return r.json();
+};
+
 const fetchSignals = async () => {
   const res = await authFetch(`/api/v1/ai/signals?category=commercial`);
   return res.json();
@@ -28,6 +33,7 @@ const fetchSignals = async () => {
 const CommercialPage = () => {
   const leadsQuery = useQuery(["leads"], fetchLeads, { refetchInterval: 300000 });
   const contractsQuery = useQuery(["contracts"], fetchContracts, { refetchInterval: 300000 });
+  const pipelineQuery = useQuery(["pipeline"], fetchPipeline, { refetchInterval: 300000 });
   const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 300000 });
 
   if (leadsQuery.isLoading || contractsQuery.isLoading || signalsQuery.isLoading) return <LoadingState />;
