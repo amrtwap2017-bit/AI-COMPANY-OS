@@ -152,7 +152,7 @@ export default function DataExportsPage() {
       </div>
 
       <div className="space-y-4">
-        {toArr(EXPORTS).map(exp  => (
+        {toArr(EXPORTS).map(exp => (
           <ExportCard key={exp.label} exp={exp} />
         ))}
       </div>

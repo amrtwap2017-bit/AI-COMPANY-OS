@@ -122,7 +122,7 @@ const InventoryPage = () => {
       <SectionCard title="Reorder Alerts">
         {reorderAlerts.length > 0 ? (
           <ul>
-            {toArr(reorderAlerts).map(alert  => (
+            {toArr(reorderAlerts).map(alert => (
               <li key={alert.name}>
                 {alert.name} - Current Qty: {alert.currentQty}, Reorder Qty: {alert.reorderQty}
               </li>

@@ -33,8 +33,8 @@ const SupplyChainCommandPage = () => {
   if (signalsLoading || prsLoading || posLoading) return <LoadingState />;
 
   const status = (signals || []).length > 0 ? "AT RISK" : "NORMAL";
-  const pendingPRs = toArr(prs).filter(pr  => pr.status === "PENDING").length;
-  const activePOs = toArr(pos).filter(po  => po.status === "ACTIVE").length;
+  const pendingPRs = toArr(prs).filter(pr => pr.status === "PENDING").length;
+  const activePOs = toArr(pos).filter(po => po.status === "ACTIVE").length;
   const inventoryAlerts = toArr(signals).filter(signal => signal.type === "INVENTORY_ALERT").length;
   const vendorsCount = 13;
 
@@ -57,7 +57,7 @@ const SupplyChainCommandPage = () => {
           {toArr(signals).map(signal => (
             <li key={signal.id}>{signal.description}</li>
           ))}
-          {toArr(prs).filter(pr  => pr.status === "PENDING").map(pr => (
+          {toArr(prs).filter(pr => pr.status === "PENDING").map(pr => (
             <li key={pr.id}>{pr.title}</li>
           ))}
         </ul>

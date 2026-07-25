@@ -97,7 +97,7 @@ const AlertsPage = () => {
       </div>
       {filteredSignals.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {toArr(filteredSignals).map(signal  => (
+          {toArr(filteredSignals).map(signal => (
             <SectionCard key={signal.signal_id} className={`border-l-4 ${signal.priority === "Critical" ? "border-red-500" : signal.priority === "High" ? "border-amber-500" : "border-blue-500"}`}>
               <div className="flex items-center justify-between">
                 <h3 className="font-bold">{signal.title}</h3>

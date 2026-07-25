@@ -39,11 +39,11 @@ const StockBalancesPage = () => {
 
   if (!stockBalances || !items || !warehouses) return <EmptyState />;
 
-  const filteredStockBalances = toArr(stockBalances).filter(sb  => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
+  const filteredStockBalances = toArr(stockBalances).filter(sb => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
 
   const totalItems = (items || []).length;
   const totalValueEGP = toArr(stockBalances).reduce((acc: any, sb: any) => acc + sb.total_value, 0);
-  const belowMinimum = toArr(stockBalances).filter(sb  => sb.qty_on_hand < sb.min_stock).length;
+  const belowMinimum = toArr(stockBalances).filter(sb => sb.qty_on_hand < sb.min_stock).length;
 
   return (
     <PageWrapper>
@@ -59,7 +59,7 @@ const StockBalancesPage = () => {
         />
       </SectionCard>
       <div className="flex gap-4">
-        {toArr(warehouses).map(w  => (
+        {toArr(warehouses).map(w => (
           <button
             key={w.id}
             onClick={() => setSelectedWarehouse(w.id)}
@@ -85,7 +85,7 @@ const StockBalancesPage = () => {
           </tr>
         </thead>
         <tbody>
-          {toArr(filteredStockBalances).map(sb  => {
+          {toArr(filteredStockBalances).map(sb => {
             const item = toArr(items).find(i => i.id === sb.item_id);
             if (!item) return null;
             return (

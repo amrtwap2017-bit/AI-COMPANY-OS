@@ -58,7 +58,7 @@ const CustomerHubPage = () => {
         <MetricStrip label="Expiring Soon" value={expiringSoon.length} />
       </div>
       <SectionCard title="Customer List">
-        {toArr(uniqueClients).map(clientName  => {
+        {toArr(uniqueClients).map(clientName => {
           const clientContracts = toArr(contracts).filter(contract => contract.client_name === clientName);
           const mostRecentContract = clientContracts.sort((a: any, b: any) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime())[0];
           return (
@@ -73,7 +73,7 @@ const CustomerHubPage = () => {
         })}
       </SectionCard>
       <SectionCard title="Top Clients by Value">
-        {toArr(topClientsByValue).map(client  => (
+        {toArr(topClientsByValue).map(client => (
           <div key={client.clientName} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <strong>{client.clientName}</strong>
             <span>Contract Count: {client.contractCount}</span>

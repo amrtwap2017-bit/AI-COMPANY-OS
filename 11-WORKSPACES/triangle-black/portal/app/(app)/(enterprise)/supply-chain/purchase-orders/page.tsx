@@ -103,7 +103,7 @@ const PurchaseOrdersPage = () => {
       <SectionCard>
         {filteredPOs.length > 0 ? (
           <ul className="divide-y divide-gray-200">
-            {toArr(filteredPOs).map(po  => (
+            {toArr(filteredPOs).map(po => (
               <li key={po.id} className="py-4">
                 <div className="flex justify-between items-center">
                   <strong>{po.po_number}</strong>

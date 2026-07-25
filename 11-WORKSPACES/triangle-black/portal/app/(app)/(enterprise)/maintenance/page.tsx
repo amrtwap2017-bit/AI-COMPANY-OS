@@ -37,7 +37,7 @@ const MaintenancePage = () => {
 
   const totalAssets = (assets || []).length;
   const inFaultCount = toArr(assets).filter(asset => asset.status === "in-fault").length;
-  const activePMPlans = toArr(pmPlans).filter(plan  => plan.status === "active").length;
+  const activePMPlans = toArr(pmPlans).filter(plan => plan.status === "active").length;
   const maintenanceSignals = toArr(signals).slice(0, 3);
 
   return (

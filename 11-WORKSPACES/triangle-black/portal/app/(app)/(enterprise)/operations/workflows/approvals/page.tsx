@@ -52,8 +52,8 @@ const ApprovalsPage = () => {
 
   if (!prsData.length && !wosData.length) return <EmptyState message="Approval queue is clear" />;
 
-  const pendingApprovals = toArr(prsData).filter(pr  => pr.status === "draft" || pr.status === "pending");
-  const completedWOs = toArr(wosData).filter(wo  => wo.status === "completed");
+  const pendingApprovals = toArr(prsData).filter(pr => pr.status === "draft" || pr.status === "pending");
+  const completedWOs = toArr(wosData).filter(wo => wo.status === "completed");
 
   return (
     <PageWrapper>
@@ -78,7 +78,7 @@ const ApprovalsPage = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SectionCard title="Purchase Requests">
-          {toArr(pendingApprovals).map(pr  => (
+          {toArr(pendingApprovals).map(pr => (
             <div key={pr.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
                 <p>{pr.pr_number}</p>
@@ -100,7 +100,7 @@ const ApprovalsPage = () => {
           ))}
         </SectionCard>
         <SectionCard title="Completed Work Orders">
-          {toArr(completedWOs).map(wo  => (
+          {toArr(completedWOs).map(wo => (
             <div key={wo.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
                 <p>{wo.title}</p>

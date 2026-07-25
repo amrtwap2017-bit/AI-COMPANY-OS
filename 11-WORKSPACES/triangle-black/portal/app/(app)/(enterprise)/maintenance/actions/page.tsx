@@ -32,7 +32,7 @@ const fetchMaintenanceData = async () => {
       ...toArr(signals).filter(signal => signal.urgency === "critical"),
       ...toArr(assets).filter(asset => asset.status === "faulted")
     ],
-    overduePMs: toArr(pmPlans).filter(plan  => plan.next_due_date < today),
+    overduePMs: toArr(pmPlans).filter(plan => plan.next_due_date < today),
     openWOs: toArr(wos).filter(wo => wo.status === "open")
   };
 };

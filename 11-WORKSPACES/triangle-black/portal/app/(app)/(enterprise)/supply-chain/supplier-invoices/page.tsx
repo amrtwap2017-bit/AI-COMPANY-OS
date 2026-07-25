@@ -40,7 +40,7 @@ const SupplierInvoicesPage = () => {
     return false;
   });
 
-  const overdueInvoices = toArr(filteredInvoices).filter(i  => new Date(i.due_date) < new Date() && i.status !== "Paid");
+  const overdueInvoices = toArr(filteredInvoices).filter(i => new Date(i.due_date) < new Date() && i.status !== "Paid");
 
   return (
     <PageWrapper>

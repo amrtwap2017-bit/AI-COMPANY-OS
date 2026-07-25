@@ -99,7 +99,7 @@ const ReviewPage = () => {
         </SectionCard>
         <SectionCard title="Vendor Performance">
           <ul>
-            {toArr(vendorPerformance).map(vendor  => (
+            {toArr(vendorPerformance).map(vendor => (
               <li key={vendor.id}>
                 {vendor.name}: {vendor.poCount}
                 <div className="w-full bg-gray-200 rounded-full mt-1">

@@ -40,7 +40,7 @@ function WidgetData({ endpoint }: { endpoint: string }) {
   const keys = Object.keys(data).slice(0, 4);
   return (
     <div className="space-y-1">
-      {toArr(keys).map(k  => {
+      {toArr(keys).map(k => {
         const v = data[k];
         const display = typeof v === "object" ? JSON.stringify(v).slice(0,40) : String(v ?? "—");
         return (
@@ -80,7 +80,7 @@ export default function ExecutiveDashboardPage() {
   const twinLabel   = twin?.health_label ?? "Unknown";
   const criticalBadge = notifs?.critical ?? 0;
 
-  const visibleWidgets = toArr(WIDGETS).filter(w  => widgetVisible(w.key));
+  const visibleWidgets = toArr(WIDGETS).filter(w => widgetVisible(w.key));
 
   return (
     <PageWrapper>
@@ -119,7 +119,7 @@ export default function ExecutiveDashboardPage() {
       {showConfig && (
         <SectionCard title="Dashboard Widgets" className="mb-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {toArr(WIDGETS).map(w  => (
+            {toArr(WIDGETS).map(w => (
               <label key={w.key} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -140,7 +140,7 @@ export default function ExecutiveDashboardPage() {
 
       {/* Dynamic widget grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {toArr(visibleWidgets).map(widget  => (
+        {toArr(visibleWidgets).map(widget => (
           <SectionCard key={widget.key} title={widget.label}>
             <WidgetData endpoint={widget.endpoint} />
           </SectionCard>

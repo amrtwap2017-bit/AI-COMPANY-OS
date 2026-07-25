@@ -100,7 +100,7 @@ const InvoiceMatchingPage = () => {
         </SectionCard>
         <SectionCard title="Unmatched POs">
           <ul>
-            {toArr(unmatchedPOs).map(po  => (
+            {toArr(unmatchedPOs).map(po => (
               <li key={po.id}>
                 PO Number: {po.po_number}, Amount EGP: {po.total_amount}, Created At: {po.created_at}
               </li>

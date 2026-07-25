@@ -40,8 +40,8 @@ const MaintenanceReviewPage = () => {
   if (isAssetsLoading || isPMPlansLoading || isMaintenanceSignalsLoading) return <LoadingState />;
 
   const totalAssets = (assets || []).length;
-  const activePMPlans = toArr(pmPlans).filter(plan  => plan.status === "active").length;
-  const overduePMPlans = toArr(pmPlans).filter(plan  => new Date(plan.dueDate) < new Date()).length;
+  const activePMPlans = toArr(pmPlans).filter(plan => plan.status === "active").length;
+  const overduePMPlans = toArr(pmPlans).filter(plan => new Date(plan.dueDate) < new Date()).length;
   const maintenanceSignalsCount = maintenanceSignals.length;
 
   return (
