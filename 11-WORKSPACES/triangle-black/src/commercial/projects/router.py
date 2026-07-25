@@ -20,16 +20,6 @@ def rows(result): return [row_to_dict(r) for r in result]
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
-@router.get("/", summary="List projects")
-def list_projects(db = Depends(get_db)):
-    try:
-        from sqlalchemy import text
-        rows = db.execute(text(
-            "SELECT id, name, status, start_date, end_date, budget FROM projects"
-        )).fetchall()
-        return [dict(r._mapping) for r in rows]
-    except Exception as e:
-        return []
 
 @router.get("/", summary="List projects")
 def list_projects(
@@ -40,32 +30,6 @@ def list_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    q = "SELECT * FROM projects WHERE 1=1"
-    p: dict = {}
-    if hotel_id: q += " AND hotel_id=:hotel_id"; p["hotel_id"] = hotel_id
-    if status:   q += " AND status=:status";     p["status"]   = status
-    q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
-    p["limit"] = limit; p["skip"] = skip
-    return rows(db.execute(text(q), p).fetchall())
-
-
-    q = "SELECT * FROM projects WHERE 1=1"
-    p: dict = {}
-    if hotel_id: q += " AND hotel_id=:hotel_id"; p["hotel_id"] = hotel_id
-    if status:   q += " AND status=:status";     p["status"]   = status
-    q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
-    p["limit"] = limit; p["skip"] = skip
-    return rows(db.execute(text(q), p).fetchall())
-
-    q = "SELECT * FROM projects WHERE 1=1"
-    p: dict = {}
-    if hotel_id: q += " AND hotel_id=:hotel_id"; p["hotel_id"] = hotel_id
-    if status:   q += " AND status=:status";     p["status"]   = status
-    q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
-    p["limit"] = limit; p["skip"] = skip
-    return rows(db.execute(text(q), p).fetchall())
-
-
 @router.get("/dashboard", summary="Projects dashboard")
 def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
@@ -75,13 +39,6 @@ def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get
     completed = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id AND status='completed'"), h).scalar() or 0
     at_risk   = rows(db.execute(text("SELECT * FROM project_risks WHERE status='open' ORDER BY created_at DESC LIMIT 5")).fetchall())
     return {"total": total, "active": active, "completed": completed, "at_risk_count": len(at_risk), "top_risks": at_risk}
-
-@router.get("/{project_id}", summary="Get project")
-def get_project(project_id: str, db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-    r = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": project_id}).fetchone()
-    if not r: raise HTTPException(404, "Project not found")
-    return row_to_dict(r)
 
 @router.post("/", status_code=201, summary="Create project")
 def create_project(data: dict, db: Session = Depends(get_db),
@@ -109,21 +66,6 @@ def create_project(data: dict, db: Session = Depends(get_db),
     db.commit()
     return get_project(pid, db)
 
-@router.get("/{project_id}/phases", summary="Project phases")
-def project_phases(project_id: str, db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-    return rows(db.execute(text("SELECT * FROM project_phases WHERE project_id=:id ORDER BY created_at"), {"id": project_id}).fetchall())
-
-@router.get("/{project_id}/risks", summary="Project risks")
-def project_risks(project_id: str, db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-    return rows(db.execute(text("SELECT * FROM project_risks WHERE project_id=:id ORDER BY created_at DESC"), {"id": project_id}).fetchall())
-
-@router.get("/{project_id}/milestones", summary="Project milestones")
-def project_milestones(project_id: str, db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)):
-    return rows(db.execute(text("SELECT * FROM project_milestones WHERE project_id=:id ORDER BY due_date"), {"id": project_id}).fetchall())
-
 @router.get("/intelligence/summary", summary="Projects intelligence")
 def projects_intelligence(db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
@@ -146,6 +88,72 @@ PROJECT_TRANSITIONS = {
     "closed": [],
     "cancelled": []
 }
+
+@router.get("/portfolio/summary", summary="All projects portfolio summary")
+def portfolio_summary(db: Session = Depends(get_db)):
+    """Portfolio-level view of all projects with financial health."""
+    try:
+        rows = db.execute(text("""
+            SELECT id, name, status,
+                   COALESCE(budget, total_value, contract_value, 0) as budget,
+                   COALESCE(progress_percentage, completion_pct, 0) as progress
+            FROM projects
+            ORDER BY created_at DESC
+            LIMIT 50
+        """)).fetchall()
+    except Exception:
+        try:
+            rows = db.execute(text("SELECT id, status FROM projects LIMIT 50")).fetchall()
+        except Exception:
+            rows = []
+
+    total_budget = 0
+    by_status = {}
+    projects_list = []
+
+    for row in rows:
+        p = row_to_dict(row)
+        status = p.get("status", "unknown")
+        budget = float(p.get("budget") or 0)
+        total_budget += budget
+        by_status[status] = by_status.get(status, 0) + 1
+        projects_list.append({
+            "id":       p.get("id"),
+            "name":     p.get("name") or p.get("title") or p.get("id"),
+            "status":   status,
+            "budget":   budget,
+            "progress": float(p.get("progress") or 0),
+        })
+
+    return {
+        "total_projects":   len(projects_list),
+        "total_budget_egp": round(total_budget, 2),
+        "by_status":        by_status,
+        "projects":         projects_list,
+        "currency":         "EGP",
+        "generated_at":     datetime.datetime.utcnow().isoformat(),
+    }
+@router.get("/{project_id}", summary="Get project")
+def get_project(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    r = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": project_id}).fetchone()
+    if not r: raise HTTPException(404, "Project not found")
+    return row_to_dict(r)
+
+@router.get("/{project_id}/phases", summary="Project phases")
+def project_phases(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    return rows(db.execute(text("SELECT * FROM project_phases WHERE project_id=:id ORDER BY created_at"), {"id": project_id}).fetchall())
+
+@router.get("/{project_id}/risks", summary="Project risks")
+def project_risks(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    return rows(db.execute(text("SELECT * FROM project_risks WHERE project_id=:id ORDER BY created_at DESC"), {"id": project_id}).fetchall())
+
+@router.get("/{project_id}/milestones", summary="Project milestones")
+def project_milestones(project_id: str, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    return rows(db.execute(text("SELECT * FROM project_milestones WHERE project_id=:id ORDER BY due_date"), {"id": project_id}).fetchall())
 
 @router.post("/{project_id}/transition")
 def project_transition(project_id: str, data: dict, db: Session = Depends(get_db),
@@ -276,47 +284,3 @@ def project_financials(project_id: str, db: Session = Depends(get_db)):
         "generated_at": datetime.datetime.utcnow().isoformat(),
     }
 
-@router.get("/portfolio/summary", summary="All projects portfolio summary")
-def portfolio_summary(db: Session = Depends(get_db)):
-    """Portfolio-level view of all projects with financial health."""
-    try:
-        rows = db.execute(text("""
-            SELECT id, name, status,
-                   COALESCE(budget, total_value, contract_value, 0) as budget,
-                   COALESCE(progress_percentage, completion_pct, 0) as progress
-            FROM projects
-            ORDER BY created_at DESC
-            LIMIT 50
-        """)).fetchall()
-    except Exception:
-        try:
-            rows = db.execute(text("SELECT id, status FROM projects LIMIT 50")).fetchall()
-        except Exception:
-            rows = []
-
-    total_budget = 0
-    by_status = {}
-    projects_list = []
-
-    for row in rows:
-        p = row_to_dict(row)
-        status = p.get("status", "unknown")
-        budget = float(p.get("budget") or 0)
-        total_budget += budget
-        by_status[status] = by_status.get(status, 0) + 1
-        projects_list.append({
-            "id":       p.get("id"),
-            "name":     p.get("name") or p.get("title") or p.get("id"),
-            "status":   status,
-            "budget":   budget,
-            "progress": float(p.get("progress") or 0),
-        })
-
-    return {
-        "total_projects":   len(projects_list),
-        "total_budget_egp": round(total_budget, 2),
-        "by_status":        by_status,
-        "projects":         projects_list,
-        "currency":         "EGP",
-        "generated_at":     datetime.datetime.utcnow().isoformat(),
-    }
