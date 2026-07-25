@@ -11,7 +11,7 @@ const EXPORTS = [
     label:       "Work Orders",
     icon:        Wrench,
     endpoint:    "/api/v1/export/work-orders",
-    filename:    "work_orders.csv",
+    filename:    "workOrders.csv",
     description: "All work orders with status, priority, technician, asset",
     filters: [
       { key: "status",   label: "Status",   options: ["open","in_progress","completed","cancelled"] },

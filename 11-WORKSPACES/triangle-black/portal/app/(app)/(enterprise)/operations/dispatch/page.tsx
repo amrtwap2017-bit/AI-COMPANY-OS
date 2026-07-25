@@ -62,8 +62,8 @@ const DispatchPage = () => {
   const availableTechs = (techniciansData.technicians || []).filter(
     (tech: any) => tech.current_work_orders < tech.max_work_orders
   ).length;
-  const openWOS = (workOrdersData.work_orders || []).filter((wo: any) => !wo.technician_id).length;
-  const needingDispatch = (workOrdersData.work_orders || []).filter((wo: any) => !wo.technician_id && wo.priority > 0).length;
+  const openWOS = (workOrdersData.workOrders || []).filter((wo: any) => !wo.technician_id).length;
+  const needingDispatch = (workOrdersData.workOrders || []).filter((wo: any) => !wo.technician_id && wo.priority > 0).length;
   const aiRecommendations = Object.keys(dispatchResults).length;
 
   return (
@@ -90,7 +90,7 @@ const DispatchPage = () => {
           </div>
         </SectionCard>
         <SectionCard title="Open WOs Needing Assignment">
-          {workOrdersData.work_orders
+          {workOrdersData.workOrders
             .filter((wo: any) => !wo.technician_id)
             .map((wo: any) => (
               <div key={wo.id} className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">

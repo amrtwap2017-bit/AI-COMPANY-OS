@@ -15,7 +15,7 @@ export default function Page() {
     queryFn:  () => authFetchJSON("/api/v1/inventory/vendors"),
     staleTime: 30_000, retry: 2,
   });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchase_requests||[];
+  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchaseRequests||[];
   const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
   const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
   const columns = [
