@@ -672,3 +672,17 @@ def list_rfqs(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)
         return [dict(r._mapping) for r in rows]
     except Exception:
         return []
+
+# ── Sprint 119: Data Architecture — Customer 360 + Sales Pipeline ──
+try:
+    from src.commercial.customer360.router import router as customer360_router
+    app.include_router(customer360_router, prefix="/api/v1")
+    logger.info("OK: customer360_router")
+except Exception as e:
+    logger.warning(f"WARN customer360: {e}")
+try:
+    from src.commercial.sales_pipeline.router import router as sales_pipeline_router
+    app.include_router(sales_pipeline_router, prefix="/api/v1")
+    logger.info("OK: sales_pipeline_router")
+except Exception as e:
+    logger.warning(f"WARN sales_pipeline: {e}")
