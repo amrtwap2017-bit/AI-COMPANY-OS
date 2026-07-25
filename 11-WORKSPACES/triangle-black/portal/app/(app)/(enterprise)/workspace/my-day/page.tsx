@@ -59,7 +59,6 @@ const MyDayPage = () => {
       refetchInterval: 30000
     }
   );
-  const technicians: any[] = toArr(data);
 
   const { isLoading: techsLoading, isError: techsError } = useQuery(
     "technicians",

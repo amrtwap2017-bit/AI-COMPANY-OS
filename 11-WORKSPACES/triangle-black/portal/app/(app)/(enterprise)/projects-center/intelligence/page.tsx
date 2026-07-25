@@ -38,7 +38,7 @@ const fetchWorkOrders = async (projectId: string) => {
 
 const ProjectIntelligencePage = () => {
   const { data: projects, isLoading, isError } = useQuery(["projects"], fetchProjects, { refetchInterval: 120000 });
-  const projects: any[] = toArr(projects);
+  // projects already declared above
   const { data: signals, isSignalsLoading, isSignalsError } = useQuery(["signals"], fetchSignals, { refetchInterval: 120000 });
 
   if (isLoading || isSignalsLoading) return <LoadingState />;

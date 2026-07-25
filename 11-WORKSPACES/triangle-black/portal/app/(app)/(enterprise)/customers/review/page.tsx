@@ -46,7 +46,6 @@ const CustomerSuccessPage = () => {
   const { data: contractData, isLoading: isContractLoading } = useQuery(["contracts"], fetchContracts, {
     refetchInterval: 300000,
   });
-  const workOrders = toArr(contractData);
 
   const { data: invoiceData, isLoading: isInvoiceLoading } = useQuery(["invoices"], fetchInvoices, {
     refetchInterval: 300000,

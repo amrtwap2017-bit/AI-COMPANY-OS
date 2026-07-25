@@ -5,7 +5,7 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, LoadingState } from 
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n: any) => `EGP ${Number(n || 0).toLocaleString()}`;
+const fmtEGP = (n: any) => { try { return `EGP ${Number(n || 0).toLocaleString()}`; } catch { return 'EGP 0'; } };
 
 const PipelinePage = () => {
   const { data: pipeline, isLoading } = useQuery(

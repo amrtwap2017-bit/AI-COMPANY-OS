@@ -85,7 +85,7 @@ const Customer360Page = () => {
               {/* Contracts */}
               <SectionCard title="Contracts">
                 <div className="space-y-2">
-                  {toArr(detail.contracts).slice(0,5).map((c: any) => (
+                  {toArr(detail?.contracts).slice(0,5).map((c: any) => (
                     <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{c.title || c.contract_number}</p>
@@ -97,14 +97,14 @@ const Customer360Page = () => {
                       </div>
                     </div>
                   ))}
-                  {toArr(detail.contracts).length === 0 && <EmptyState />}
+                  {toArr(detail?.contracts).length === 0 && <EmptyState />}
                 </div>
               </SectionCard>
 
               {/* Work Orders */}
               <SectionCard title="Work Orders">
                 <div className="space-y-2">
-                  {toArr(detail.work_orders).slice(0,5).map((w: any) => (
+                  {toArr(detail?.work_orders).slice(0,5).map((w: any) => (
                     <div key={w.id} className="flex items-center justify-between p-3 bg-slate-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{w.title}</p>
@@ -113,14 +113,14 @@ const Customer360Page = () => {
                       <StatusBadge status={w.status} />
                     </div>
                   ))}
-                  {toArr(detail.work_orders).length === 0 && <p className="text-sm text-slate-400">No work orders linked</p>}
+                  {toArr(detail?.work_orders).length === 0 && <p className="text-sm text-slate-400">No work orders linked</p>}
                 </div>
               </SectionCard>
 
               {/* Invoices */}
               <SectionCard title="Invoices">
                 <div className="space-y-2">
-                  {toArr(detail.invoices).slice(0,5).map((inv: any) => (
+                  {toArr(detail?.invoices).slice(0,5).map((inv: any) => (
                     <div key={inv.id} className="flex items-center justify-between p-3 bg-slate-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{inv.invoice_number}</p>
@@ -132,7 +132,7 @@ const Customer360Page = () => {
                       </div>
                     </div>
                   ))}
-                  {toArr(detail.invoices).length === 0 && <p className="text-sm text-slate-400">No invoices found</p>}
+                  {toArr(detail?.invoices).length === 0 && <p className="text-sm text-slate-400">No invoices found</p>}
                 </div>
               </SectionCard>
             </div>
