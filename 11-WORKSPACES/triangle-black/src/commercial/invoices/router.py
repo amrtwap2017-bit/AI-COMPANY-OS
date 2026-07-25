@@ -34,6 +34,44 @@ def create_invoice(
     invoice_data["hotel_id"] = hotel_id
     return InvoiceRepository(db).create_invoice(invoice_data)
 
+@router.get("/payment-summary", summary="Overall invoice payment summary")
+def payment_summary(db: Session = Depends(get_db)):
+    """Finance overview — total invoiced, collected, outstanding."""
+    try:
+        inv_row = db.execute(text("""
+            SELECT
+                count(*) as total,
+                COALESCE(sum(total_amount),0) as total_invoiced,
+                sum(CASE WHEN status='paid' THEN total_amount ELSE 0 END) as collected,
+                sum(CASE WHEN status IN ('unpaid','overdue','partially_paid')
+                         THEN total_amount ELSE 0 END) as outstanding
+            FROM invoices
+        """)).fetchone()
+        d = row_to_dict(inv_row)
+    except Exception:
+        d = {"total":0,"total_invoiced":0,"collected":0,"outstanding":0}
+
+    try:
+        _ensure_payment_table(db)
+        pay_row = db.execute(text(
+            "SELECT COALESCE(sum(amount),0) as total_payments FROM invoice_payments"
+        )).fetchone()
+        actual_collected = float(row_to_dict(pay_row).get("total_payments") or 0)
+    except Exception:
+        actual_collected = float(d.get("collected") or 0)
+
+    total_invoiced = float(d.get("total_invoiced") or 0)
+    collection_rate = round(actual_collected / total_invoiced * 100, 1) if total_invoiced > 0 else 0
+
+    return {
+        "total_invoices":     int(d.get("total") or 0),
+        "total_invoiced_egp": round(total_invoiced, 2),
+        "collected_egp":      round(actual_collected, 2),
+        "outstanding_egp":    round(total_invoiced - actual_collected, 2),
+        "collection_rate_pct": collection_rate,
+        "currency":           "EGP",
+        "generated_at":       datetime.datetime.utcnow().isoformat(),
+    }
 @router.get("/{invoice_id}", response_model=InvoiceResponse)
 def get_invoice(
     invoice_id: str,
@@ -188,41 +226,3 @@ def get_invoice_payments(invoice_id: str, db: Session = Depends(get_db)):
         "currency":      "EGP",
     }
 
-@router.get("/payment-summary", summary="Overall invoice payment summary")
-def payment_summary(db: Session = Depends(get_db)):
-    """Finance overview — total invoiced, collected, outstanding."""
-    try:
-        inv_row = db.execute(text("""
-            SELECT
-                count(*) as total,
-                COALESCE(sum(total_amount),0) as total_invoiced,
-                sum(CASE WHEN status='paid' THEN total_amount ELSE 0 END) as collected,
-                sum(CASE WHEN status IN ('unpaid','overdue','partially_paid')
-                         THEN total_amount ELSE 0 END) as outstanding
-            FROM invoices
-        """)).fetchone()
-        d = row_to_dict(inv_row)
-    except Exception:
-        d = {"total":0,"total_invoiced":0,"collected":0,"outstanding":0}
-
-    try:
-        _ensure_payment_table(db)
-        pay_row = db.execute(text(
-            "SELECT COALESCE(sum(amount),0) as total_payments FROM invoice_payments"
-        )).fetchone()
-        actual_collected = float(row_to_dict(pay_row).get("total_payments") or 0)
-    except Exception:
-        actual_collected = float(d.get("collected") or 0)
-
-    total_invoiced = float(d.get("total_invoiced") or 0)
-    collection_rate = round(actual_collected / total_invoiced * 100, 1) if total_invoiced > 0 else 0
-
-    return {
-        "total_invoices":     int(d.get("total") or 0),
-        "total_invoiced_egp": round(total_invoiced, 2),
-        "collected_egp":      round(actual_collected, 2),
-        "outstanding_egp":    round(total_invoiced - actual_collected, 2),
-        "collection_rate_pct": collection_rate,
-        "currency":           "EGP",
-        "generated_at":       datetime.datetime.utcnow().isoformat(),
-    }
