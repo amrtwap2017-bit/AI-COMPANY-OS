@@ -629,3 +629,46 @@ try:
     logger.info("  OK: maintenance_schedule_module_router")
 except Exception as e:
     logger.warning("WARN: maintenance_schedule_module_router: {e}")
+
+# ── Stock Balances direct endpoint ──────────────────────────────────────────
+from sqlalchemy import text as _text
+from src.core.database import get_db as _get_db
+from sqlalchemy.orm import Session as _Session
+from fastapi import Depends as _Depends, Query as _Query
+
+@app.get("/api/v1/stock-balances/", tags=["inventory"])
+@app.get("/api/v1/stock-balances", tags=["inventory"])
+def list_stock_balances(
+    warehouse_id: str = _Query(default=None),
+    item_id: str = _Query(default=None),
+    limit: int = _Query(default=100, le=500),
+    db: _Session = _Depends(_get_db)
+):
+    q = "SELECT sb.*, ii.name as item_name, ii.item_code, w.name as warehouse_name FROM stock_balances sb LEFT JOIN inventory_items ii ON sb.item_id=ii.id LEFT JOIN warehouses w ON sb.warehouse_id=w.id WHERE 1=1"
+    p = {}
+    if warehouse_id: q += " AND sb.warehouse_id=:wid"; p["wid"] = warehouse_id
+    if item_id: q += " AND sb.item_id=:iid"; p["iid"] = item_id
+    q += " ORDER BY sb.updated_at DESC LIMIT :limit"; p["limit"] = limit
+    try:
+        rows = db.execute(_text(q), p).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
+
+@app.get("/api/v1/suppliers/", tags=["suppliers"])
+@app.get("/api/v1/suppliers", tags=["suppliers"])
+def list_suppliers(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM suppliers ORDER BY company_name LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
+
+@app.get("/api/v1/rfqs/", tags=["rfqs"])
+@app.get("/api/v1/rfqs", tags=["rfqs"])
+def list_rfqs(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM rfqs ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
