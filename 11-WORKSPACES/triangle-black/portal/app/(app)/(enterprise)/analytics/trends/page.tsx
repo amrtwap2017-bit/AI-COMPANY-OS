@@ -36,7 +36,7 @@ export default function TrendsPage() {
   if (isError || !data) return <EmptyState />;
 
   const { months, summary } = data;
-  const trendBadgeColor = summary.trend === "improving" ? "green" : "blue";
+  const trendBadgeColor = summary?.trend === "improving" ? "green" : "blue";
 
   return (
     <PageWrapper>
@@ -44,10 +44,10 @@ export default function TrendsPage() {
       <SectionCard>
         <MetricStrip
           metrics={[
-            { label: "6-Month Total WOs", value: summary.total_6_months },
-            { label: "6-Month Completed", value: summary.completed_6_months },
-            { label: "Avg Completion Rate %", value: (Number(summary.avg_completion_rate) || 0).toFixed(1) },
-            { label: "Trend", value: summary.trend, badgeColor: trendBadgeColor },
+            { label: "6-Month Total WOs", value: summary?.total_6_months },
+            { label: "6-Month Completed", value: summary?.completed_6_months },
+            { label: "Avg Completion Rate %", value: (Number(summary?.avg_completion_rate) || 0).toFixed(1) },
+            { label: "Trend", value: summary?.trend, badgeColor: trendBadgeColor },
           ]}
         />
       </SectionCard>

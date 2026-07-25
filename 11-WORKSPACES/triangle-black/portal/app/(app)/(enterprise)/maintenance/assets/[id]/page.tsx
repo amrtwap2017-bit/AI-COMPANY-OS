@@ -44,6 +44,9 @@ export default function AssetDetailPage() {
     queryFn: () => authFetch(`/api/v1/assets/${id}`).then(r => r.json()),
     enabled: !!id,
   });
+  const assets: any[] = toArr(asset);
+const maintenance: any[] = toArr(asset);
+const items: any[] = toArr(asset);
 
   const { data: relationships = [] } = useQuery({
     queryKey: ["asset-graph", id],

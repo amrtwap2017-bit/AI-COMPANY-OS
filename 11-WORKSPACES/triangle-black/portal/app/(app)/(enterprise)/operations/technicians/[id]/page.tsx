@@ -26,6 +26,8 @@ export default function TechnicianDetailPage() {
     queryFn: () => authFetch(`/api/v1/technicians/${id}`).then(r => r.json()),
     enabled: !!id,
   });
+  const technicians: any[] = toArr(tech);
+const items: any[] = toArr(tech);
 
   const { data: wosData = {} } = useQuery({
     queryKey: ["tech-wos", id],

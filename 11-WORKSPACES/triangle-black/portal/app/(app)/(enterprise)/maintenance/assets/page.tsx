@@ -34,6 +34,8 @@ const AssetPage = () => {
     queryFn: fetchAssets,
     refetchInterval: 120000,
   });
+  const maintenance: any[] = toArr(assets);
+const items: any[] = toArr(assets);
 
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load assets" />;

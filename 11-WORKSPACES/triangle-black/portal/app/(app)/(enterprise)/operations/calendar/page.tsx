@@ -59,6 +59,8 @@ const CalendarPage: React.FC = () => {
     queryKey: ["pm-plans"],
     queryFn: fetchPMPlans,
   });
+  const maintenance: any[] = toArr(pmPlans);
+const items: any[] = toArr(pmPlans);
 
   const { data: workOrders, isLoading: isWorkOrdersLoading, isError: isWorkOrdersError } = useQuery({
     queryKey: ["work-orders"],

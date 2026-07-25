@@ -25,7 +25,7 @@ const ExecutiveScorecardPage = () => {
 
   return (
     <PageWrapper>
-      <PageHeader title="Executive Scorecard" period={kpis.period} />
+      <PageHeader title="Executive Scorecard" period={kpis?.period} />
       <div className="flex justify-center mb-8">
         <SectionCard
           title="Overall"

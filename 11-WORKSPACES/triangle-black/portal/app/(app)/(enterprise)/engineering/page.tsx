@@ -37,7 +37,7 @@ export default function EngineeringPage() {
 
   const totalAssets = (assets || []).length;
   const inFault = toArr(assets).filter(asset => asset.status === "in-fault").length;
-  const engineeringWosOpen = kpis.engineeringWosOpen;
+  const engineeringWosOpen = kpis?.engineeringWosOpen;
   const maintenanceSignalsCount = (signals || []).length;
 
   return (

@@ -30,15 +30,15 @@ const calculateGrade = (score: number) => {
 };
 
 const OperationsProgramScorecard = ({ kpis }) => {
-  const completedWOs = kpis.total - kpis.open;
-  const score = ((completedWOs / kpis.total) * 100).toFixed(2);
+  const completedWOs = kpis?.total - kpis?.open;
+  const score = ((completedWOs / kpis?.total) * 100).toFixed(2);
   const grade = calculateGrade(score);
 
   return (
     <SectionCard title="Operations Performance" grade={grade}>
-      <MetricStrip label="Total WOs" value={kpis.total} />
-      <MetricStrip label="Open WOs" value={kpis.open} />
-      <MetricStrip label="Critical Open" value={kpis.critical} />
+      <MetricStrip label="Total WOs" value={kpis?.total} />
+      <MetricStrip label="Open WOs" value={kpis?.open} />
+      <MetricStrip label="Critical Open" value={kpis?.critical} />
       <MetricStrip label="Completion Rate %" value={`${score}%`} />
     </SectionCard>
   );
@@ -60,27 +60,27 @@ const SLAQualityScorecard = ({ sla }) => {
 };
 
 const ResourceUtilizationScorecard = ({ kpis }) => {
-  const score = (100 - kpis.utilization).toFixed(2);
+  const score = (100 - kpis?.utilization).toFixed(2);
   const grade = calculateGrade(score);
 
   return (
     <SectionCard title="Resource Management" grade={grade}>
-      <MetricStrip label="Active Technicians" value={kpis.active} />
-      <MetricStrip label="Utilization %" value={`${kpis.utilization}%`} />
-      <MetricStrip label="Items Below Min Stock" value={kpis.below_min} />
+      <MetricStrip label="Active Technicians" value={kpis?.active} />
+      <MetricStrip label="Utilization %" value={`${kpis?.utilization}%`} />
+      <MetricStrip label="Items Below Min Stock" value={kpis?.below_min} />
     </SectionCard>
   );
 };
 
 const ProcurementScorecard = ({ kpis }) => {
-  const score = (100 - (kpis.below_minimum / kpis.total) * 100).toFixed(2);
+  const score = (100 - (kpis?.below_minimum / kpis?.total) * 100).toFixed(2);
   const grade = calculateGrade(score);
 
   return (
     <SectionCard title="Supply Chain" grade={grade}>
-      <MetricStrip label="Total POs" value={kpis.total} />
-      <MetricStrip label="Items Out of Stock" value={kpis.below_minimum} />
-      <MetricStrip label="PO Value EGP" value={kpis.value_egp} />
+      <MetricStrip label="Total POs" value={kpis?.total} />
+      <MetricStrip label="Items Out of Stock" value={kpis?.below_minimum} />
+      <MetricStrip label="PO Value EGP" value={kpis?.value_egp} />
     </SectionCard>
   );
 };
@@ -114,8 +114,8 @@ const AnalyticsPage = () => {
         <tbody>
           <tr>
             <td>Operations Performance</td>
-            <td>{((kpis.total - kpis.open) / kpis.total) * 100}</td>
-            <td>{calculateGrade(((kpis.total - kpis.open) / kpis.total) * 100)}</td>
+            <td>{((kpis?.total - kpis?.open) / kpis?.total) * 100}</td>
+            <td>{calculateGrade(((kpis?.total - kpis?.open) / kpis?.total) * 100)}</td>
             <td>On Track</td>
             <td>Stable</td>
           </tr>
@@ -128,15 +128,15 @@ const AnalyticsPage = () => {
           </tr>
           <tr>
             <td>Resource Management</td>
-            <td>{100 - kpis.utilization}</td>
-            <td>{calculateGrade(100 - kpis.utilization)}</td>
+            <td>{100 - kpis?.utilization}</td>
+            <td>{calculateGrade(100 - kpis?.utilization)}</td>
             <td>On Track</td>
             <td>Stable</td>
           </tr>
           <tr>
             <td>Supply Chain</td>
-            <td>{100 - (kpis.below_minimum / kpis.total) * 100}</td>
-            <td>{calculateGrade(100 - (kpis.below_minimum / kpis.total) * 100)}</td>
+            <td>{100 - (kpis?.below_minimum / kpis?.total) * 100}</td>
+            <td>{calculateGrade(100 - (kpis?.below_minimum / kpis?.total) * 100)}</td>
             <td>On Track</td>
             <td>Stable</td>
           </tr>

@@ -93,8 +93,8 @@ export default function ExecutiveDashboardPage() {
       {/* Top KPI strip */}
       <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
         {[
-          { label: "Revenue (EGP)",    value: Number(kpis.revenue_egp||0).toLocaleString(),  color: "text-emerald-600" },
-          { label: "WO Completion",    value: `${kpis.wo_completion_pct ?? 0}%`,             color: kpis.wo_completion_pct >= 90 ? "text-emerald-600" : "text-amber-600" },
+          { label: "Revenue (EGP)",    value: Number(kpis?.revenue_egp||0).toLocaleString(),  color: "text-emerald-600" },
+          { label: "WO Completion",    value: `${kpis.wo_completion_pct ?? 0}%`,             color: kpis?.wo_completion_pct >= 90 ? "text-emerald-600" : "text-amber-600" },
           { label: "Platform Health",  value: `${twinHealth}/100`,                           color: twinHealth >= 70 ? "text-emerald-600" : twinHealth >= 50 ? "text-amber-600" : "text-red-600" },
           { label: "Active Alerts",    value: notifs?.badge ?? 0,                            color: (notifs?.badge ?? 0) > 0 ? "text-red-600" : "text-emerald-600" },
         ].map(s => (

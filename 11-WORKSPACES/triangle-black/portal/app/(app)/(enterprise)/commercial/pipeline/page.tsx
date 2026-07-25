@@ -28,11 +28,11 @@ const PipelinePage = () => {
     <PageWrapper>
       <PageHeader title="Sales Pipeline" subtitle="Lead to Revenue journey" badge="SALES" />
       <MetricStrip metrics={[
-        { label: "Total Leads",   value: kpis.total_leads || 0 },
-        { label: "Quotes",        value: kpis.total_quotes || 0 },
-        { label: "Contracts",     value: kpis.total_contracts || 0 },
-        { label: "Pipeline Value", value: fmtEGP(kpis.pipeline_value_egp), color: "amber" },
-        { label: "Revenue",       value: fmtEGP(kpis.total_revenue_egp), color: "green" },
+        { label: "Total Leads",   value: kpis?.total_leads || 0 },
+        { label: "Quotes",        value: kpis?.total_quotes || 0 },
+        { label: "Contracts",     value: kpis?.total_contracts || 0 },
+        { label: "Pipeline Value", value: fmtEGP(kpis?.pipeline_value_egp), color: "amber" },
+        { label: "Revenue",       value: fmtEGP(kpis?.total_revenue_egp), color: "green" },
       ]} />
       <div className="grid grid-cols-2 gap-4 mt-4">
         <SectionCard title="Conversion Rates">

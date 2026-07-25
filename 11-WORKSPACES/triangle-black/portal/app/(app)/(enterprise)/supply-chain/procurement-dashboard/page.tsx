@@ -54,14 +54,14 @@ export default function ProcurementDashboardPage() {
       />
 
       {/* Critical alerts banner */}
-      {(summary.critical > 0 || overduePOs > 0) && (
+      {(summary?.critical > 0 || overduePOs > 0) && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <div className="font-semibold text-red-800">Action Required</div>
             <div className="text-sm text-red-600 mt-1 space-y-1">
-              {summary.critical > 0 && (
-                <div>{summary.critical} items completely out of stock - create emergency PRs</div>
+              {summary?.critical > 0 && (
+                <div>{summary?.critical} items completely out of stock - create emergency PRs</div>
               )}
               {overduePOs > 0 && (
                 <div>{overduePOs} purchase orders overdue for delivery - follow up with vendors</div>

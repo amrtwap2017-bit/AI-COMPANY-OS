@@ -30,6 +30,8 @@ const fetchMaintenanceSignals = async () => {
 
 const MaintenanceReviewPage = () => {
   const { data: assets, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, { refetchInterval: 120000 });
+  const signals: any[] = toArr(assets);
+const items: any[] = toArr(assets);
   const { data: pmPlans, isLoading: isPMPlansLoading } = useQuery(["pm-plans"], fetchPMPlans, { refetchInterval: 120000 });
   const { data: maintenanceSignals, isLoading: isMaintenanceSignalsLoading } = useQuery(
     ["maintenance-signals"],

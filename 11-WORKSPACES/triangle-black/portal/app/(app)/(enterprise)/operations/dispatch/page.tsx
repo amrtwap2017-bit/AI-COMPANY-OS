@@ -20,6 +20,8 @@ const fetchWorkOrders = async () => {
 const DispatchPage = () => {
   const [dispatchResults, setDispatchResults] = useState<{[key:string]:any}>({});
   const { data: techData, isLoading: techLoading } = useQuery(["dispatch-techs"], fetchTechnicians, { refetchInterval: 60000 });
+  const technicians: any[] = toArr(techData);
+const items: any[] = toArr(techData);
   const { data: woData, isLoading: woLoading } = useQuery(["dispatch-wos"], fetchWorkOrders, { refetchInterval: 60000 });
 
   if (techLoading || woLoading) return <LoadingState />;

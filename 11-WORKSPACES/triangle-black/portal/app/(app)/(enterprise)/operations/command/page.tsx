@@ -43,13 +43,13 @@ export default function CommandPage() {
     <PageWrapper>
       <PageHeader title="Operations Command Center" />
       <div className="flex justify-between items-center mb-4">
-        <StatusBadge status={kpis.system_status} />
+        <StatusBadge status={kpis?.system_status} />
         <p>Last Refresh: {new Date().toLocaleTimeString()}</p>
       </div>
       <MetricStrip
         metrics={[
-          { label: "Open WOs", value: kpis.open_wo_count },
-          { label: "Critical WOs", value: kpis.critical_wo_count },
+          { label: "Open WOs", value: kpis?.open_wo_count },
+          { label: "Critical WOs", value: kpis?.critical_wo_count },
           { label: "Available Technicians", value: technicians.available_technician_count },
           { label: "Active Signals", value: (signals || []).length },
         ]}

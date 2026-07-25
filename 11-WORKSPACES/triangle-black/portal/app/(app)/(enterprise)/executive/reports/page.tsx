@@ -130,10 +130,10 @@ export default function ReportsPage() {
       />
 
       {/* Quick KPI strip */}
-      {kpis.revenue_egp !== undefined && (
+      {kpis?.revenue_egp !== undefined && (
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
-            { label: "Revenue (EGP)",    value: `${Number(kpis.revenue_egp||0).toLocaleString()}` },
+            { label: "Revenue (EGP)",    value: `${Number(kpis?.revenue_egp||0).toLocaleString()}` },
             { label: "WO Completion",    value: `${kpis.wo_completion_pct ?? 0}%` },
             { label: "Active Contracts", value: kpis.active_contracts ?? 0 },
             { label: "Tech Utilization", value: `${kpis.technician_utilization_pct ?? 0}%` },

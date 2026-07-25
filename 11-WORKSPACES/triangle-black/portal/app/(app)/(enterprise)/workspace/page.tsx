@@ -48,8 +48,8 @@ export default function WorkspacePage() {
     queryKey: ["workspace-signals"], queryFn: fetchSignals, refetchInterval: 120000,
   });
 
-  const wo  = kpis.workOrders  || {};
-  const tec = kpis.technicians  || {};
+  const wo  = kpis?.workOrders  || {};
+  const tec = kpis?.technicians  || {};
 
   return (
     <PageWrapper>
