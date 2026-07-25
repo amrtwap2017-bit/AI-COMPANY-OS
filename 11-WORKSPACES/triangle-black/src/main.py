@@ -672,35 +672,3 @@ try:
     print("  OK: maintenance_schedule_module_router")
 except Exception as e:
     print(f"  WARN: maintenance_schedule_module_router: {e}")
-try:
-    from src.commercial.invoices.router import router as invoices_router_commercial
-    app.include_router(invoices_router_commercial, prefix="/api/v1")
-    print("  OK: invoices_router_commercial")
-except Exception as e:
-    print(f"  WARN: invoices_router_commercial: {e}")
-
-# ── Sprint 68: Force-register commercial projects router LAST ──
-try:
-    from src.commercial.projects.router import router as _fresh_projects_router
-    app.include_router(_fresh_projects_router, prefix="/api/v1")
-    print("  OK: fresh_projects_router (override)")
-except Exception as e:
-    print(f"  WARN: fresh_projects_router: {e}")
-
-# ── Sprint 68: Direct projects list endpoint (bypasses router conflict) ──
-@app.get("/api/v1/projects", tags=["projects"])
-@app.get("/api/v1/projects/", tags=["projects"])
-def list_projects_direct():
-    try:
-        from src.core.database import SessionLocal
-        from sqlalchemy import text
-        db = SessionLocal()
-        try:
-            rows = db.execute(text(
-                "SELECT id, name, status, start_date, end_date FROM projects LIMIT 100"
-            )).fetchall()
-            return [dict(r._mapping) for r in rows]
-        finally:
-            db.close()
-    except Exception as e:
-        return []

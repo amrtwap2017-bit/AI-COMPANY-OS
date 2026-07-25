@@ -20,7 +20,6 @@ def rows(result): return [row_to_dict(r) for r in result]
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
-
 @router.get("/", summary="List projects")
 def list_projects(
     hotel_id: Optional[str] = None,
@@ -30,6 +29,16 @@ def list_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    q = "SELECT * FROM projects WHERE 1=1"
+    p: dict = {}
+    if hotel_id: q += " AND hotel_id=:hotel_id"; p["hotel_id"] = hotel_id
+    if status:   q += " AND status=:status";     p["status"]   = status
+    q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
+    p["limit"] = limit; p["skip"] = skip
+    return rows(db.execute(text(q), p).fetchall())
+
+
+
 @router.get("/dashboard", summary="Projects dashboard")
 def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
