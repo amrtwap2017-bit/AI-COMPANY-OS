@@ -11,7 +11,7 @@ import { useState } from "react";
 // Safe date formatter
 const fmtDate = (d: any): string => {
   if (!d) return "—";
-  try { return fmtDate(d); }
+  try { return new Date(d).toLocaleDateString("en-GB"); }
   catch { return String(d).slice(0, 10); }
 };
 
