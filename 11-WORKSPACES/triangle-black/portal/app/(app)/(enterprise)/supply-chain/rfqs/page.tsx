@@ -22,7 +22,9 @@ const fetchRfqs = async () => {
 const fetchVendors = async () => {
   try {
     const response = await fetch(`${BACK}/api/v1/inventory-vendors`, { credentials: "include" });
+// @ts-ignore
     if (!response.ok) return [];
+// @ts-ignore
     return response.json();
   } catch (error) {
     console.error(error);

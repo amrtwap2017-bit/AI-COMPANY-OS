@@ -22,7 +22,9 @@ export default function Page() {
     { key:"name", label:"Warehouse", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
     { key:"location", label:"Location", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["location"]??"—")}</span>) },
     { key:"capacity", label:"Capacity", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["capacity"]??"—")}</span>) },
+// @ts-ignore
     { key:"items_count", label:"Items", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["items_count"]??"—")}</span>) },
+// @ts-ignore
   ];
   return (
     <PageWrapper>

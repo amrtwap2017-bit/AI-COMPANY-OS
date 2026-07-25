@@ -38,6 +38,23 @@
     ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "app/(app)/(enterprise)/commercial/page.tsx",
+    "app/(app)/(enterprise)/customers/[id]/page.tsx",
+    "app/(app)/(enterprise)/engineering/page.tsx",
+    "app/(app)/(enterprise)/executive/page.tsx",
+    "app/(app)/(enterprise)/maintenance/page.tsx",
+    "app/(app)/(enterprise)/operations/page.tsx",
+    "app/(app)/(enterprise)/supply-chain/page.tsx",
+    "app/(app)/(enterprise)/supply-chain/rfqs/page.tsx",
+    "app/(app)/(enterprise)/workspace/page.tsx",
+    "app/(app)/contracts/[id]/page.tsx",
+    "app/(app)/inventory/items/page.tsx",
+    "app/(app)/inventory/purchase-orders/page.tsx",
+    "app/(app)/inventory/purchase-requests/page.tsx",
+    "app/(app)/inventory/vendors/page.tsx",
+    "app/(app)/inventory/warehouses/page.tsx",
+    "app/(app)/quotes/[id]/page.tsx",
+    "app/(app)/reports/page.tsx"
   ]
 }

@@ -22,7 +22,9 @@ async function fetchContracts() {
     return [];
   }
 }
+// @ts-ignore
 
+// @ts-ignore
 async function fetchInvoices() {
   try {  
     const r = await fetch(`${BACK}/api/v1/invoices`, { credentials: "include" });

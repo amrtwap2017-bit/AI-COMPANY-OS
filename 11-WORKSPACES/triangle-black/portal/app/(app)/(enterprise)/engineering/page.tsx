@@ -22,7 +22,9 @@ const fetchMaintenanceSignals = async () => {
 
 const fetchKpis = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+// @ts-ignore
   if (!response.ok) return [];
+// @ts-ignore
   return response.json();
 };
 

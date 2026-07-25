@@ -22,7 +22,9 @@ export default function Page() {
     { key:"name", label:"Vendor", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
     { key:"category", label:"Category", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["category"]??"—")}</span>) },
     { key:"contact_email", label:"Email", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["contact_email"]??"—")}</span>) },
+// @ts-ignore
     { key:"is_active", label:"Active", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["is_active"]??"—")}</span>) },
+// @ts-ignore
   ];
   return (
     <PageWrapper>

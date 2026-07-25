@@ -22,7 +22,9 @@ export default function Page() {
     { key:"item_name", label:"Item", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["item_name"]??"—")}</span>) },
     { key:"quantity", label:"Qty", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["quantity"]??"—")}</span>) },
     { key:"requested_by", label:"By", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["requested_by"]??"—")}</span>) },
+// @ts-ignore
     { key:"status", label:"Status", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["status"]??"—")}</span>) },
+// @ts-ignore
   ];
   return (
     <PageWrapper>

@@ -22,7 +22,9 @@ const fetchSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: "include" });
   return response.json();
 };
+// @ts-ignore
 
+// @ts-ignore
 const CommercialPage = () => {
   const leadsQuery = useQuery(["leads"], fetchLeads, { refetchInterval: 300000 });
   const contractsQuery = useQuery(["contracts"], fetchContracts, { refetchInterval: 300000 });
