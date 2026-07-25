@@ -14,6 +14,14 @@ import {
   Button,
 } from "@/components/ui";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -69,7 +77,7 @@ const GoodsReceiptsPage = () => {
     (po) => ["approved", "sent", "ordered"].includes(po.status)
   ).length;
   const thisMonthReceipts = toArr(receipts).filter((grn: any) =>
-    new Date(grn.received_date).toLocaleDateString("en-US", { month: "long" }) ===
+    fmtDate(grn.received_date) ===
     new Date().toLocaleDateString("en-US", { month: "long" })
   );
   const totalPOValuePending = purchaseOrders
@@ -119,7 +127,7 @@ const GoodsReceiptsPage = () => {
               <span>{grn.grn_number}</span>
               <span>{grn.po_id}</span>
               <span>{grn.received_by}</span>
-              <span>{new Date(grn.received_date).toLocaleDateString()}</span>
+              <span>{fmtDate(grn.received_date)}</span>
               <StatusBadge status={grn.status} />
             </div>
           ))

@@ -14,6 +14,14 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -110,10 +118,10 @@ const PurchaseOrdersPage = () => {
                   <StatusBadge status={po.status} />
                 </div>
                 <div className="text-gray-500 text-sm">
-                  {new Date(po.expected_delivery).toLocaleDateString()}{" "}
+                  {fmtDate(po.expected_delivery)}{" "}
                   {new Date(po.expected_delivery) < new Date() && <span className="text-red-500">Past Due</span>}
                 </div>
-                <div className="text-gray-500 text-sm">{po.created_at.toLocaleDateString()}</div>
+                <div className="text-gray-500 text-sm">{fmtDate(po.created_at)}</div>
               </li>
             ))}
           </ul>

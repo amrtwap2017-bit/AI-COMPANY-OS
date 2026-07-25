@@ -14,6 +14,14 @@ import {
 } from "@/components/ui";
 import { useState } from "react";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -123,7 +131,7 @@ const ServiceRequestsPage = () => {
             <h3>{sr.title}</h3>
             <StatusBadge status={sr.status} />
             <p className="text-sm">
-              Requested by {sr.requester} on {new Date(sr.created_at).toLocaleDateString()}
+              Requested by {sr.requester} on {fmtDate(sr.created_at)}
             </p>
             <p className="truncate">{sr.description}</p>
             {sr.status === "open" && (

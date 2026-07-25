@@ -14,6 +14,14 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -77,7 +85,7 @@ const Vendor360Page = () => {
 
     const poCount = purchaseOrders.length;
     const totalSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_spend_egp, 0);
-    const lastPODate = purchaseOrders.length > 0 ? new Date(purchaseOrders[0].created_at).toLocaleDateString() : null;
+    const lastPODate = purchaseOrders.length > 0 ? fmtDate(purchaseOrders[0].created_at) : null;
 
     let performanceBadge = "No History";
     if (poCount >= 3) performanceBadge = "Good";
@@ -98,7 +106,7 @@ const Vendor360Page = () => {
             <SectionCard key={po.id}>
               <h4>{po.order_number}</h4>
               <MetricStrip label="Total Spend" value={`${po.total_spend_egp} EGP`} />
-              <MetricStrip label="Date" value={new Date(po.created_at).toLocaleDateString()} />
+              <MetricStrip label="Date" value={fmtDate(po.created_at)} />
             </SectionCard>
           ))}
         </div>

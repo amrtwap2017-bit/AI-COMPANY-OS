@@ -6,6 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -82,7 +90,7 @@ const CustomerSuccessPage = () => {
           <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <div>{contract.title}</div>
             <StatusBadge label={contract.status} />
-            <div>{new Date(contract.end_date).toLocaleDateString()}</div>
+            <div>{fmtDate(contract.end_date)}</div>
             <div>{contract.monthly_value} EGP</div>
             <div>{contract.total_value} EGP</div>
           </div>

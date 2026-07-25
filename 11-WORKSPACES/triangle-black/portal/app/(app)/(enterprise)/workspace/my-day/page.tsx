@@ -16,6 +16,14 @@ import {
   Button
 } from "@/components/ui";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -133,7 +141,7 @@ const MyDayPage = () => {
                     </span>
                   </div>
                   <div className="flex-grow" />
-                  <span>{w.due_date === today ? "Due today" : new Date(w.due_date).toLocaleDateString()}</span>
+                  <span>{w.due_date === today ? "Due today" : fmtDate(w.due_date)}</span>
                   <StatusBadge status={w.status} />
                   {w.status === "open" && (
                     <Button

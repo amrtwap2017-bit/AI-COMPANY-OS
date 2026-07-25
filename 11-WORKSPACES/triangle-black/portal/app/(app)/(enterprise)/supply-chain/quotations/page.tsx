@@ -6,6 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -102,7 +110,7 @@ const QuotationsPage = () => {
             <StatusBadge status={q.status} />
             <p>{new Intl.NumberFormat("en-US", { style: "currency", currency: "EGP" }).format(q.total_amount)}</p>
             <p className={q.valid_until < new Date().toISOString() ? "text-red-500" : ""}>
-              Valid Until: {new Date(q.valid_until).toLocaleDateString()}
+              Valid Until: {fmtDate(q.valid_until)}
             </p>
             {q.rfq_id && (
               <a href={`/supply-chain/rfqs/${q.rfq_id}`} className="block mt-2 text-blue-500 hover:text-blue-700">

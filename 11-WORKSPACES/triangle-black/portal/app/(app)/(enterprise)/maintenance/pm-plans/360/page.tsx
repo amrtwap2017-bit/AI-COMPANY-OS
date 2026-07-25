@@ -14,6 +14,14 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -76,7 +84,7 @@ const PmPlansPage = () => {
             <h3 className="font-bold">{plan.title}</h3>
             <StatusBadge status={plan.status} />
             <p>{plan.frequency}</p>
-            <p>{new Date(plan.next_due_date).toLocaleDateString()}</p>
+            <p>{fmtDate(plan.next_due_date)}</p>
           </div>
         ))}
       </div>
@@ -85,7 +93,7 @@ const PmPlansPage = () => {
           <h2 className="font-bold">{selectedPlan.title}</h2>
           <p>Type: {selectedPlan.type}</p>
           <p>Frequency: {selectedPlan.frequency}</p>
-          <p>Next Due Date: {new Date(selectedPlan.next_due_date).toLocaleDateString()}</p>
+          <p>Next Due Date: {fmtDate(selectedPlan.next_due_date)}</p>
           <p>Status: {selectedPlan.status}</p>
           {/* Fetch owner name and notes */}
           {/* Fetch related asset name */}

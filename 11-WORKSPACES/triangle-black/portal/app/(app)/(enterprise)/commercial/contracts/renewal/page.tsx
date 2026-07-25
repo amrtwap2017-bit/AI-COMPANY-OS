@@ -6,6 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -56,7 +64,7 @@ const ContractRenewalPage = () => {
                 <StatusBadge status={c.status} />
               </div>
               <p className="text-gray-600">
-                {new Date(c.end_date).toLocaleDateString()}{" "}
+                {fmtDate(c.end_date)}{" "}
                 {Math.ceil((new Date(c.end_date) - new Date()) / 86400000)} days left
               </p>
               <p className="font-bold">{c.contract_value.toLocaleString("en-GB")} EGP</p>
@@ -73,7 +81,7 @@ const ContractRenewalPage = () => {
               <StatusBadge status={c.status} />
             </div>
             <p className="text-gray-600">
-              {new Date(c.end_date).toLocaleDateString()} Expired
+              {fmtDate(c.end_date)} Expired
             </p>
             <p className="font-bold">{c.contract_value.toLocaleString("en-GB")} EGP</p>
           </SectionCard>

@@ -5,6 +5,14 @@ import { PageWrapper, PageHeader, SectionCard } from "@/components/ui";
 import { Download, FileText, Package, Users, TrendingUp, Wrench, CreditCard } from "lucide-react";
 
 // Safe array extractor — handles all backend response shapes
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => {
   if (!d) return [];
   if (Array.isArray(d)) return d;

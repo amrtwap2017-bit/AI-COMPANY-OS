@@ -16,6 +16,14 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+
+// Safe date formatter
+const fmtDate = (d: any): string => {
+  if (!d) return "—";
+  try { return fmtDate(d); }
+  catch { return String(d).slice(0, 10); }
+};
+
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -78,7 +86,7 @@ export default function RfqPage() {
     <PageWrapper>
       <PageHeader title={rfq.rfq_number}>
         <StatusBadge status={rfq.status} />
-        <p className="text-sm text-gray-500">{new Date(rfq.created_at).toLocaleDateString()}</p>
+        <p className="text-sm text-gray-500">{fmtDate(rfq.created_at)}</p>
       </PageHeader>
       <SectionCard title="Metrics">
         <MetricStrip
@@ -92,7 +100,7 @@ export default function RfqPage() {
       </SectionCard>
       <SectionCard title="Details">
         <p>{rfq.description}</p>
-        <p>Deadline: {new Date(rfq.deadline).toLocaleDateString()}</p>
+        <p>Deadline: {fmtDate(rfq.deadline)}</p>
         <p>Notes: {rfq.notes}</p>
       </SectionCard>
       <SectionCard title="Vendor Quotes">
