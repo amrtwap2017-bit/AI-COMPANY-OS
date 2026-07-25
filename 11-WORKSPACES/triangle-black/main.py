@@ -236,3 +236,19 @@ for _mod_path, _name in _ai_routers:
         print(f"  OK: {_name}")
     except Exception as _e:
         print(f"  WARN: {_name}: {_e}")
+
+
+# ── Sprint 68: Workflow Engine + Finance + AI Signals v2 + Digital Twin ──────
+print("Registering Sprint 68 routers...")
+_s68_routers = [
+    ("src.commercial.analytics_kpi.router",   "analytics-kpi"),
+    ("src.commercial.ai_signals.router",      "ai-signals-v2"),
+    ("src.commercial.digital_twin.router",    "digital-twin"),
+]
+for _mod_path, _name in _s68_routers:
+    try:
+        _mod = __import__(_mod_path, fromlist=["router"])
+        app.include_router(_mod.router, prefix="/api/v1")
+        print(f"  OK: {_name}")
+    except Exception as _e:
+        print(f"  WARN: {_name}: {_e}")
