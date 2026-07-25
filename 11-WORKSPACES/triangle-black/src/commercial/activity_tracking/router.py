@@ -15,7 +15,7 @@ from src.core.tenant import get_hotel_id
 from .schemas import ActivityCreate, ActivityUpdate, ActivityResponse
 from .repository import ActivityRepository
 
-router = APIRouter(prefix="/activitys", tags=["activitys"])
+router = APIRouter(prefix="/activities", tags=["activities"])
 
 @router.post("/", response_model=ActivityResponse, status_code=201)
 def create(
