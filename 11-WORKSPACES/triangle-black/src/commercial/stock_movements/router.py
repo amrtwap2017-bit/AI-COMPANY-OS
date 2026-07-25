@@ -15,7 +15,7 @@ from src.core.tenant import get_hotel_id
 from .schemas import StockMovementCreate, StockMovementResponse
 from .repository import StockMovementRepository
 
-router = APIRouter(prefix="/inventory/movements", tags=["stock-movements"])
+router = APIRouter(prefix="/stock-movements", tags=["stock-movements"])
 
 @router.post("/", response_model=StockMovementResponse, status_code=201)
 def create(

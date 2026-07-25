@@ -15,7 +15,7 @@ from src.core.tenant import get_hotel_id
 from .schemas import WarehouseCreate, WarehouseUpdate, WarehouseResponse
 from .repository import WarehouseRepository
 
-router = APIRouter(prefix="/inventory/warehouses", tags=["warehouses"])
+router = APIRouter(prefix="/warehouses", tags=["warehouses"])
 
 @router.post("/", response_model=WarehouseResponse, status_code=201)
 def create(

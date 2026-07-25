@@ -15,7 +15,7 @@ from src.core.tenant import get_hotel_id
 from .schemas import PurchaseOrderCreate, PurchaseOrderUpdate, PurchaseOrderResponse
 from .repository import PurchaseOrderRepository
 
-router = APIRouter(prefix="/inventory/purchase-orders", tags=["purchase-orders"])
+router = APIRouter(prefix="/purchase-orders", tags=["purchase-orders"])
 
 @router.post("/", response_model=PurchaseOrderResponse, status_code=201)
 def create(

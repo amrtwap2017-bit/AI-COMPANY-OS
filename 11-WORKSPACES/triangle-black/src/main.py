@@ -154,6 +154,8 @@ except Exception as e:
 app.include_router(warehouses_router, prefix="/api/v1")
 app.include_router(inv_vendors_router, prefix="/api/v1")
 app.include_router(stock_movements_router, prefix="/api/v1")
+app.include_router(sites_router, prefix="/api/v1")
+app.include_router(service_requests_router, prefix="/api/v1")
 app.include_router(purchase_requests_router, prefix="/api/v1")
 app.include_router(purchase_orders_router, prefix="/api/v1")
 app.include_router(goods_receipts_router, prefix="/api/v1")

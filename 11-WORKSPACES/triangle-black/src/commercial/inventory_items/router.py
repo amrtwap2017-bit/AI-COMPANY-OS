@@ -15,7 +15,7 @@ from src.core.tenant import get_hotel_id
 from .schemas import InventoryItemCreate, InventoryItemUpdate, InventoryItemResponse
 from .repository import InventoryItemRepository
 
-router = APIRouter(prefix="/inventory/items", tags=["inventory-items"])
+router = APIRouter(prefix="/inventory-items", tags=["inventory-items"])
 
 @router.post("/", response_model=InventoryItemResponse, status_code=201)
 def create(

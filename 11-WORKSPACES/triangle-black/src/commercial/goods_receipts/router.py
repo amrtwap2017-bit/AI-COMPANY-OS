@@ -15,7 +15,7 @@ from src.core.tenant import get_hotel_id
 from .schemas import GoodsReceiptCreate, GoodsReceiptUpdate, GoodsReceiptResponse
 from .repository import GoodsReceiptRepository
 
-router = APIRouter(prefix="/inventory/goods-receipts", tags=["goods-receipts"])
+router = APIRouter(prefix="/goods-receipts", tags=["goods-receipts"])
 
 @router.post("/", response_model=GoodsReceiptResponse, status_code=201)
 def create(
