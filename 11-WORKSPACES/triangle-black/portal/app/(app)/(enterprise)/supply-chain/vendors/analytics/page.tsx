@@ -55,7 +55,7 @@ export default function VendorAnalyticsPage() {
 
   const totalSpend    = toArr(pos).reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
   const activeVendors = toArr(vendorScores).filter((v) => v.poCount > 0).length;
-  const avgLead       = vendors.length > 0 ? Math.round(toArr(vendors).reduce((s, v) => s + (v.lead_time_days || 0), 0) / vendors.length) : 0;
+  const avgLead       = vendors.length > 0 ? Math.round(toArr(vendors).reduce((s, v) => s + (v.lead_time_days || 0), 0) / (vendors.length || 1)) : 0;
   const rfqResponded  = toArr(rfqs).filter((r) => r.status === "received").length;
   const maxSpend      = Math.max(...toArr(vendorScores).map((v) => v.totalSpend), 1);
 

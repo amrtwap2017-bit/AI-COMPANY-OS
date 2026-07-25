@@ -31,7 +31,7 @@ const SchedulePage = () => {
   const atRiskCount = toArr(data).filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(p.end_date) > today).length;
   const overdueCount = toArr(data).filter(p => new Date(p.end_date) < today).length;
 
-  const scheduleHealth = (onScheduleCount / totalDays) * 100;
+  const scheduleHealth = ((totalDays || 1) === 0 ? 0 : (onScheduleCount / (totalDays || 1)) * 100);
 
   return (
     <PageWrapper>

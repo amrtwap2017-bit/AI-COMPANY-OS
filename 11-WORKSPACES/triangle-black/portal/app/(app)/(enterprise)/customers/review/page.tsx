@@ -66,7 +66,7 @@ const CustomerSuccessPage = () => {
   const monthlyRevenueEGP = toArr(contractData).reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
 
   const activeRevenue = activeContracts * 12;
-  const portfolioHealth = (activeContracts / totalContracts) * 100;
+  const portfolioHealth = ((totalContracts || 1) === 0 ? 0 : (activeContracts / (totalContracts || 1)) * 100);
 
   const renewalRisk = expiringSoonContracts;
   const topRevenueContracts = contractData.sort((a: any, b: any) => b.total_value - a.total_value).slice(0, 5);

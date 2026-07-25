@@ -47,7 +47,7 @@ const CommercialPage = () => {
   const activeContracts = contractsData?.active || [];
   const commercialSignals = signalsData?.length || [];
 
-  const winRate = (wonLeads / totalLeads) * 100 || 0;
+  const winRate = ((totalLeads || 1) === 0 ? 0 : (wonLeads / (totalLeads || 1)) * 100) || 0;
   const targetWinRate = 30;
 
   return (
