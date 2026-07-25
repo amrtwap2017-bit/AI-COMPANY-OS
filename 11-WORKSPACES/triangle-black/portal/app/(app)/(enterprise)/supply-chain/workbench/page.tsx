@@ -8,6 +8,7 @@ import {
   MetricStrip, StatusBadge, LoadingState, EmptyState, Button
 } from "@/components/ui";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 const CATEGORIES = ["hvac", "electrical", "plumbing", "mechanical"];
 const CATEGORY_LABELS = { hvac: "HVAC", electrical: "Electrical", plumbing: "Plumbing", mechanical: "Mechanical" };

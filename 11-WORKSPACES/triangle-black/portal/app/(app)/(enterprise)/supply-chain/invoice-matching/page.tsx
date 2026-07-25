@@ -4,6 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -37,8 +38,8 @@ const InvoiceMatchingPage = () => {
   if (isLoading || isFetching) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
 
-  const matchedInvoices = (purchaseOrders || []).filter(po => supplierInvoices.some(inv => inv.po_id === po.id));
-  const unmatchedPOs = (purchaseOrders || []).filter(po => !supplierInvoices.some(inv => inv.po_id === po.id));
+  const matchedInvoices = (purchaseOrders || []).filter(po => (supplierInvoices || []).some(inv => inv.po_id === po.id));
+  const unmatchedPOs = (purchaseOrders || []).filter(po => !(supplierInvoices || []).some(inv => inv.po_id === po.id));
 
   return (
     <PageWrapper>
@@ -74,14 +75,14 @@ const InvoiceMatchingPage = () => {
                   <td>{po.total_amount}</td>
                   <td><StatusBadge status={po.status} /></td>
                   <td>
-                    {supplierInvoices.some(inv => inv.po_id === po.id) ? (
+                    {(supplierInvoices || []).some(inv => inv.po_id === po.id) ? (
                       <span className="text-green-500">Matched</span>
                     ) : (
                       <span className="text-red-500">No invoice</span>
                     )}
                   </td>
                   <td>
-                    {supplierInvoices.some(inv => inv.po_id === po.id) ? (
+                    {(supplierInvoices || []).some(inv => inv.po_id === po.id) ? (
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green">
                         <path d="M5 13l4 4 6-6" />
                       </svg>

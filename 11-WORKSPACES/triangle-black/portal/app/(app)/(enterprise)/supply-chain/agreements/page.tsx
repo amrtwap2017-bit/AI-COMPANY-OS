@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -44,14 +45,14 @@ const AgreementsPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load agreements" />;
 
-  const filteredAgreements = agreements.filter((a: any) => {
+  const filteredAgreements = (agreements || []).filter((a: any) => {
     if (statusFilter === "Active") return a.status === "Active";
     if (statusFilter === "Expiring") return new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000;
     if (statusFilter === "Expired") return new Date(a.end_date) < new Date();
     return true;
   });
 
-  const totalValue = agreements.reduce((acc: number, a: any) => acc + a.contract_value, 0);
+  const totalValue = (agreements || []).reduce((acc: number, a: any) => acc + a.contract_value, 0);
 
   return (
     <PageWrapper>
@@ -64,12 +65,12 @@ const AgreementsPage = () => {
         />
         <MetricStrip
           title="Active"
-          value={agreements.filter((a: any) => a.status === "Active").length}
+          value={(agreements || []).filter((a: any) => a.status === "Active").length}
           icon="check-circle"
         />
         <MetricStrip
           title="Expiring Soon"
-          value={agreements.filter((a: any) => new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000).length}
+          value={(agreements || []).filter((a: any) => new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000).length}
           icon="clock"
         />
         <MetricStrip

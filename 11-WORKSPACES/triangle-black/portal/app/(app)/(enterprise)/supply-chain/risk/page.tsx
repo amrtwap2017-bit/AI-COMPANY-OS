@@ -12,6 +12,7 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -47,7 +48,7 @@ const RiskPage = () => {
 
   if (isPurchaseOrdersLoading || isItemsLoading || isStockBalancesLoading || isInventorySignalsLoading) return <LoadingState />;
 
-  const stockBalancesWithItems = stockBalances.map((balance: any) => ({
+  const stockBalancesWithItems = (stockBalances || []).map((balance: any) => ({
     ...balance,
     item: (items || []).find((item: any) => item.item_id === balance.item_id),
   }));
@@ -56,7 +57,7 @@ const RiskPage = () => {
   const highRiskItems = stockBalancesWithItems.filter((b: any) => b.qty_on_hand === 0);
   const mediumRiskItems = stockBalancesWithItems.filter((b: any) => b.qty_on_hand < b.min_stock);
   const overduePOs = (purchaseOrders || []).filter((po: any) => new Date(po.expected_delivery) < new Date());
-  const activeSignals = inventorySignals.filter((signal: any) => signal.status === "active");
+  const activeSignals = (inventorySignals || []).filter((signal: any) => signal.status === "active");
 
   // Filter and group data for Risk Matrix
   const highRiskItemsForMatrix = stockBalancesWithItems.filter((b: any) => b.qty_on_hand === 0 || new Date(b.expected_delivery) < new Date());

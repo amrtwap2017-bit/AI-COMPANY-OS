@@ -13,6 +13,7 @@ import {
   Button,
 } from "@/components/ui";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -70,7 +71,7 @@ const GoodsReceiptsPage = () => {
   const pendingDeliveriesCount = (purchaseOrders || []).filter(
     (po) => ["approved", "sent", "ordered"].includes(po.status)
   ).length;
-  const thisMonthReceipts = receipts.filter((grn: any) =>
+  const thisMonthReceipts = (receipts || []).filter((grn: any) =>
     new Date(grn.received_date).toLocaleDateString("en-US", { month: "long" }) ===
     new Date().toLocaleDateString("en-US", { month: "long" })
   );
@@ -116,7 +117,7 @@ const GoodsReceiptsPage = () => {
         {receipts.length === 0 ? (
           <EmptyState message="No goods receipts recorded yet" />
         ) : (
-          receipts.map((grn: any) => (
+          (receipts || []).map((grn: any) => (
             <div key={grn.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <span>{grn.grn_number}</span>
               <span>{grn.po_id}</span>

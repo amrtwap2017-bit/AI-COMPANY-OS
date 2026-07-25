@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -40,7 +41,7 @@ const StockBalancesPage = () => {
   const filteredStockBalances = (stockBalances || []).filter(sb  => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
 
   const totalItems = (items || []).length;
-  const totalValueEGP = stockBalances.reduce((acc: any, sb: any) => acc + sb.total_value, 0);
+  const totalValueEGP = (stockBalances || []).reduce((acc: any, sb: any) => acc + sb.total_value, 0);
   const belowMinimum = (stockBalances || []).filter(sb  => sb.qty_on_hand < sb.min_stock).length;
 
   return (

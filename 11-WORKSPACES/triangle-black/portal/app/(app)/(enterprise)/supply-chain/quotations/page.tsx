@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -33,7 +34,7 @@ const QuotationsPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError || !quotations) return <EmptyState title="No quotations recorded" note="Create RFQs in Supply Chain Workbench" />;
 
-  const filteredQuotations = quotations.filter((q: any) => {
+  const filteredQuotations = (quotations || []).filter((q: any) => {
     switch (statusFilter) {
       case "received":
         return q.status === "received" || q.status === "pending";
@@ -50,9 +51,9 @@ const QuotationsPage = () => {
 
   const metrics = {
     totalQuotes: quotations.length,
-    pendingReview: quotations.filter((q: any) => q.status === "received" || q.status === "pending").length,
-    accepted: quotations.filter((q: any) => q.status === "accepted").length,
-    expired: quotations.filter((q: any) => q.status === "expired").length,
+    pendingReview: (quotations || []).filter((q: any) => q.status === "received" || q.status === "pending").length,
+    accepted: (quotations || []).filter((q: any) => q.status === "accepted").length,
+    expired: (quotations || []).filter((q: any) => q.status === "expired").length,
   };
 
   return (

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
 import Link from "next/link";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -82,10 +83,10 @@ const AnalyticsPage = () => {
         </Link>
       </div>
       <div className="mt-8">
-        <MetricStrip title="Total WOs" value={work_orders.total} />
-        <MetricStrip title="Completed" value={work_orders.completed} />
-        <MetricStrip title="In-Progress" value={work_orders.in_progress} />
-        <MetricStrip title="Overdue" value={work_orders.overdue} />
+        <MetricStrip title="Total WOs" value={workOrders.total} />
+        <MetricStrip title="Completed" value={workOrders.completed} />
+        <MetricStrip title="In-Progress" value={workOrders.in_progress} />
+        <MetricStrip title="Overdue" value={workOrders.overdue} />
       </div>
     </PageWrapper>
   );

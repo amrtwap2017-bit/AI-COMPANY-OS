@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";
+import { AlertBanner, Breadcrumb, LoadingState, PageHeader, PageWrapper } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
 import { tokenManager } from "@/lib/auth/token-manager";
@@ -11,6 +11,7 @@ import { Save, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 

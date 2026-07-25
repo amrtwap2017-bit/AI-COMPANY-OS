@@ -6,6 +6,7 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, Loading
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -40,7 +41,7 @@ const Customer360Page = () => {
     enabled: !!searchText,
   });
 
-  const contractIds = contracts?.map((contract: any) => contract.id) || [];
+  const contractIds = (contracts || [])..map[1:]((contract: any) => contract.id) || [];
 
   const { data: workOrders, isFetchingWorkOrders } = useQuery({
     queryKey: ["work-orders", contractIds],

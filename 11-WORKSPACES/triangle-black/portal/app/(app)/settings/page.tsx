@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 import Link from "next/link";
-import { PageWrapper, PageHeader } from "@/components/ui";
+import { Breadcrumb, PageHeader, PageWrapper } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { User, Bell, Shield, Globe, Database, Cpu, Users, Building2, ArrowRight, Settings } from "lucide-react";
 

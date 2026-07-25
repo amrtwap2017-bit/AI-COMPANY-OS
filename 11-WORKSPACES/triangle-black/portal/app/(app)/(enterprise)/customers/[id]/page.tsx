@@ -9,6 +9,7 @@ import {
 } from "@/components/ui";
 import Link from "next/link";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchContracts() {

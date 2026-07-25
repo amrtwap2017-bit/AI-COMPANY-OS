@@ -13,6 +13,7 @@ import {
   EmptyState,
 } from "@/components/ui";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -39,7 +40,7 @@ const PmPlansPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load PM plans" />;
 
-  const filteredPlans = pmPlans.filter((plan: any) =>
+  const filteredPlans = (pmPlans || []).filter((plan: any) =>
     plan.title.toLowerCase().includes(search.toLowerCase())
   );
 

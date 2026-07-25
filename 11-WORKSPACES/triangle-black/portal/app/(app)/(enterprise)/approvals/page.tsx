@@ -2,7 +2,7 @@
 "use client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
+import { LoadingState, Modal, PageHeader, PageWrapper, SectionCard } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { CheckCircle, XCircle, Clock, ShoppingCart, Wrench, FolderOpen } from "lucide-react";
 import { ApprovalModal } from "@/components/ui/ApprovalModal";
@@ -170,7 +170,7 @@ export default function ApprovalsPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => openModal("work_order", wo, ["approvals-wos"])}
+                  onClick={() => openModal("workOrder", wo, ["approvals-wos"])}
                   className="px-3 py-1.5 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700"
                 >
                   Dispatch

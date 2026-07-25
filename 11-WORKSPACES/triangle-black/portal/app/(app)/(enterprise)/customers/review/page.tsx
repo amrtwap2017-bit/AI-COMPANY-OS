@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useState } from "react";
 
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -46,12 +47,12 @@ const CustomerSuccessPage = () => {
 
   if (isContractLoading || isInvoiceLoading || isWorkOrderLoading) return <LoadingState />;
 
-  const totalContracts = contractData.length;
+  const totalContracts = contractData?.length || [];
   const activeContracts = (contractData || []).filter(contract  => contract.status === "active").length;
   const expiringSoonContracts = (contractData || []).filter(
     contract  => Math.ceil((new Date(contract.end_date) - new Date(today)) / 86400000) <= 60
   ).length;
-  const monthlyRevenueEGP = contractData.reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
+  const monthlyRevenueEGP = (contractData || []).reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
 
   const activeRevenue = activeContracts * 12;
   const portfolioHealth = (activeContracts / totalContracts) * 100;

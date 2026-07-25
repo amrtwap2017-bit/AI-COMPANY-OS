@@ -12,7 +12,7 @@ const fetchAuditLogs = async (endpoint: string) => {
 };
 
 const AuditPage = () => {
-  const [entityTypeFilter, setEntityTypeFilter] = useState<"All" | "work_order" | "asset" | "contract" | "purchase_order" | "user">("All");
+  const [entityTypeFilter, setEntityTypeFilter] = useState<"All" | "workOrder" | "asset" | "contract" | "purchase_order" | "user">("All");
 
   const { data: auditLogs, isLoading, isError } = useQuery(
     {
