@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,20 +19,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchProjects = async () => {
-  const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/projects`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchWorkOrders = async (contractId: string) => {
-  const response = await fetch(`${BACK}/api/v1/work-orders?contract_id=${contractId}`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/work-orders?contract_id=${contractId}`).then(r => r.json());
   return response.json();
 };
 
 const fetchAISignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   return response.json();
 };
 

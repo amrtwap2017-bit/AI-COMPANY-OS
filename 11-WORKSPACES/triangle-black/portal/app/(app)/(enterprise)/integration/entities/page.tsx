@@ -4,6 +4,18 @@
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge } from "@/components/ui";
 import Link from "next/link";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const entities = [
   { name: "Work Orders", records: 72, operations: ["Create", "Read", "Update"], link: "/operations/work-orders" },
   { name: "Technicians", records: 25, operations: ["Read", "Assign"], link: "/operations/technicians" },
@@ -45,12 +57,12 @@ export default function Page() {
             </tr>
           </thead>
           <tbody>
-            {entities.map((entity, index) => (
+            {toArr(entities).map((entity, index) => (
               <tr key={index}>
                 <td className="border px-4 py-2">{entity.name}</td>
                 <td className="border px-4 py-2">{entity.records !== null ? entity.records : "varies"}</td>
                 <td className="border px-4 py-2">
-                  {entity.operations.map((operation, opIndex) => (
+                  {entity.toArr(operations).map((operation, opIndex) => (
                     <span key={opIndex} className="mr-2">
                       {operation}
                     </span>

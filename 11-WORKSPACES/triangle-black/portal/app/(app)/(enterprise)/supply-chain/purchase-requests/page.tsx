@@ -12,6 +12,18 @@ import { fmtDate } from "@/lib/design-tokens";
 import { RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STATUS_TABS = [
   { value: "all",      label: "All" },
   { value: "draft",    label: "Draft" },
@@ -35,13 +47,13 @@ export default function PurchaseRequestsPage() {
     staleTime: 30_000,
   });
 
-  const filtered1 = statusFilter === "all" ? data : (data || []).filter(r => r.status === statusFilter);
+  const filtered1 = statusFilter === "all" ? data : toArr(data).filter(r => r.status === statusFilter);
   const { query, setQuery, filtered } = useSearch(filtered1, ["pr_number","requester","department","justification"]);
   const { page, totalPages, items, goToPage } = usePagination(filtered, pageSize);
 
-  const tabs = (STATUS_TABS || []).map(t  => ({
+  const tabs = toArr(STATUS_TABS).map(t  => ({
     ...t,
-    count: t.value === "all" ? (data || []).length : (data || []).filter(r => r.status === t.value).length,
+    count: t.value === "all" ? (data || []).length : toArr(data).filter(r => r.status === t.value).length,
   }));
 
   const columns = [

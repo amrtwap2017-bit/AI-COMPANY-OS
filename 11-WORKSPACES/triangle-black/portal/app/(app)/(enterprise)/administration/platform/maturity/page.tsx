@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { CheckCircle, AlertCircle, TrendingUp, Target, Star, Award } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const MATURITY_BENCHMARKS = [
   {
     category: "Platform Foundation",
@@ -99,12 +111,12 @@ export default function PlatformMaturityPage() {
 
   // Calculate maturity scores
   const allItems = MATURITY_BENCHMARKS.flatMap(cat => cat.items);
-  const totalScore  = (allItems || []).reduce((s: any, i: any) => s + i.score, 0);
+  const totalScore  = toArr(allItems).reduce((s: any, i: any) => s + i.score, 0);
   const maxScore    = (allItems || []).length * 10;
   const maturityPct = Math.round(totalScore / maxScore * 100);
 
-  const completeCount = (allItems || []).filter(i => i.status === "complete").length;
-  const partialCount  = (allItems || []).filter(i => i.status === "partial").length;
+  const completeCount = toArr(allItems).filter(i => i.status === "complete").length;
+  const partialCount  = toArr(allItems).filter(i => i.status === "partial").length;
 
   // Update Triangle Black benchmark
   ENTERPRISE_BENCHMARKS[4].score = maturityPct;
@@ -153,7 +165,7 @@ export default function PlatformMaturityPage() {
       {/* Enterprise benchmark comparison */}
       <SectionCard title="Benchmark vs Enterprise Platforms" className="mb-6">
         <div className="space-y-3">
-          {(ENTERPRISE_BENCHMARKS || []).map(b  => (
+          {toArr(ENTERPRISE_BENCHMARKS).map(b  => (
             <div key={b.name} className="flex items-center gap-4">
               <div className="w-48 text-sm font-medium text-slate-700 flex-shrink-0">{b.name}</div>
               <div className="flex-1 bg-slate-100 rounded-full h-5 relative">
@@ -175,7 +187,7 @@ export default function PlatformMaturityPage() {
 
       {/* Category breakdown */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {(MATURITY_BENCHMARKS || []).map(cat  => {
+        {toArr(MATURITY_BENCHMARKS).map(cat  => {
           const catScore = (Array.isArray(cat.items) ? cat.items : []).reduce((s: any, i: any) => s + i.score, 0);
           const catMax   = (cat.items || []).length * 10;
           const catPct   = Math.round(catScore / catMax * 100);

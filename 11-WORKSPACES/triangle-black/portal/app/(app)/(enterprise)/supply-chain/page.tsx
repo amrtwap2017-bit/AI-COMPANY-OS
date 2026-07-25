@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,17 +11,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   return response.json();
 };
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
   return response.json();
 };
 
 const fetchSignalsSummary = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals/summary`).then(r => r.json());
   return response.json();
 };
 
@@ -31,8 +32,8 @@ export default function SupplyChainPage() {
 
   if (isPurchaseOrdersLoading || isPurchaseRequestsLoading || isSignalsSummaryLoading) return <LoadingState />;
 
-  const activePOs = (purchaseOrders || []).filter(po => po.status === "active").length;
-  const pendingPRs = (purchaseRequests || []).filter(pr => pr.status === "pending").length;
+  const activePOs = toArr(purchaseOrders).filter(po => po.status === "active").length;
+  const pendingPRs = toArr(purchaseRequests).filter(pr => pr.status === "pending").length;
   const openRFQs = signalsSummary.open_rfq_count;
   const inventoryAlerts = signalsSummary.inventory_alerts_count;
 

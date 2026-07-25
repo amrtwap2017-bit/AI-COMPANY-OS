@@ -36,8 +36,8 @@ export default function NotificationsPage() {
     ? data
     : data?.notifications || data?.items || data?.data || [];
 
-  const visible = filter === "unread" ? notifs.filter((n:any)=>!n.is_read&&!n.read) : notifs;
-  const unreadCount = notifs.filter((n:any)=>!n.is_read&&!n.read).length;
+  const visible = filter === "unread" ? toArr(notifs).filter((n:any)=>!n.is_read&&!n.read) : notifs;
+  const unreadCount = toArr(notifs).filter((n:any)=>!n.is_read&&!n.read).length;
 
   async function markRead(id: string) {
     try {

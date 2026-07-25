@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { CheckCircle, AlertCircle, Server, Database, Cpu, Globe } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const PROGRAMS = [
   {id:"A",name:"UX Foundation",   desc:"146 pages, PWA, Command Palette"},
   {id:"B",name:"Operations",      desc:"SLA, dispatch, mobile my-day"},
@@ -64,7 +76,7 @@ export default function PlatformStatusPage() {
         badge="Administration"
       />
       <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
-        {(services || []).map(s  => (
+        {toArr(services).map(s  => (
           <div key={s.label} className={`bg-white border-2 rounded-xl p-4 ${s.ok ? "border-emerald-200" : "border-red-200"}`}>
             <div className="flex items-center gap-2 mb-2">
               <s.icon className={`w-5 h-5 ${s.ok ? "text-emerald-600" : "text-red-600"}`} />
@@ -77,7 +89,7 @@ export default function PlatformStatusPage() {
       </div>
       <SectionCard title="14 Programs — All Live">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {(PROGRAMS || []).map(p  => (
+          {toArr(PROGRAMS).map(p  => (
             <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
               <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">{p.id}</div>
               <div className="flex-1 min-w-0">

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,7 +11,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchInvoices = async () => {
-  const response = await fetch(`${BACK}/api/v1/supply-chain/supplier-invoices`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/supply-chain/supplier-invoices`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -26,11 +27,11 @@ const SupplierInvoicesPage = () => {
   if (isError || !invoices) return <EmptyState title="No supplier invoices recorded" description="Please create an invoice via the PO workflow." />;
 
   const totalInvoices = invoices.length;
-  const pendingPayment = (invoices || []).filter(i => i.status === "Pending").length;
-  const overdue = (invoices || []).filter(i => new Date(i.due_date) < new Date() && i.status !== "Paid").length;
-  const totalAmount = (invoices || []).reduce((acc: any, curr: any) => acc + curr.amount, 0);
+  const pendingPayment = toArr(invoices).filter(i => i.status === "Pending").length;
+  const overdue = toArr(invoices).filter(i => new Date(i.due_date) < new Date() && i.status !== "Paid").length;
+  const totalAmount = toArr(invoices).reduce((acc: any, curr: any) => acc + curr.amount, 0);
 
-  const filteredInvoices = (invoices || []).filter(invoice => {
+  const filteredInvoices = toArr(invoices).filter(invoice => {
     if (statusFilter === "All") return true;
     if (statusFilter === "Pending" && invoice.status === "Pending") return true;
     if (statusFilter === "Paid" && invoice.status === "Paid") return true;
@@ -39,7 +40,7 @@ const SupplierInvoicesPage = () => {
     return false;
   });
 
-  const overdueInvoices = (filteredInvoices || []).filter(i  => new Date(i.due_date) < new Date() && i.status !== "Paid");
+  const overdueInvoices = toArr(filteredInvoices).filter(i  => new Date(i.due_date) < new Date() && i.status !== "Paid");
 
   return (
     <PageWrapper>
@@ -70,7 +71,7 @@ const SupplierInvoicesPage = () => {
       {overdueInvoices.length > 0 && (
         <SectionCard title="Overdue Invoices">
           <ul className="list-disc pl-4">
-            {overdueInvoices.map((invoice: any) => (
+            {toArr(overdueInvoices).map((invoice: any) => (
               <li key={invoice.id} className="flex items-center justify-between mb-2">
                 <span className="font-bold">{invoice.invoice_number}</span>
                 <StatusBadge status={invoice.status} />
@@ -82,7 +83,7 @@ const SupplierInvoicesPage = () => {
       {filteredInvoices.length > 0 && (
         <SectionCard title="Invoice List">
           <ul className="list-disc pl-4">
-            {filteredInvoices.map((invoice: any) => (
+            {toArr(filteredInvoices).map((invoice: any) => (
               <li key={invoice.id} className="flex items-center justify-between mb-2">
                 <span className="font-bold">{invoice.invoice_number}</span>
                 <StatusBadge status={invoice.status} />

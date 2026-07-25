@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Calendar, CheckCircle, Clock, AlertTriangle, Wrench, Activity } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const FREQ_COLORS: Record<string, string> = {
   daily:     "bg-red-100 text-red-700",
   weekly:    "bg-orange-100 text-orange-700",
@@ -132,7 +144,7 @@ export default function PMPlanDetailPage() {
           <SectionCard title={`Work Orders (${(wos || []).length})`}>
             {(wos || []).length > 0 ? (
               <div className="space-y-2">
-                {(wos || []).map((wo: any) => (
+                {toArr(wos).map((wo: any) => (
                   <div key={wo.id}
                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-3">

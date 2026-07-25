@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,9 +11,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchInvoices = async () => {
-  const response = await fetch(`${BACK}/api/v1/invoices`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/invoices`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -31,9 +30,9 @@ const InvoicesPage = () => {
 
   const today = new Date().toISOString().slice(0, 10);
   const totalInvoices = invoices.length;
-  const totalValueEGP = (invoices || []).reduce((acc: any, invoice: any) => acc + invoice.total_amount, 0);
-  const pendingCount = (invoices || []).filter(invoice => invoice.status === "pending").length;
-  const overdueCount = (invoices || []).filter(invoice => new Date(invoice.due_date) < new Date(today) && invoice.status !== "paid").length;
+  const totalValueEGP = toArr(invoices).reduce((acc: any, invoice: any) => acc + invoice.total_amount, 0);
+  const pendingCount = toArr(invoices).filter(invoice => invoice.status === "pending").length;
+  const overdueCount = toArr(invoices).filter(invoice => new Date(invoice.due_date) < new Date(today) && invoice.status !== "paid").length;
 
   const filteredInvoices = invoices
     .filter(invoice => statusFilter === "all" || invoice.status === statusFilter)
@@ -86,7 +85,7 @@ const InvoicesPage = () => {
       </div>
       {filteredInvoices.length > 0 ? (
         <ul>
-          {(filteredInvoices || []).map(invoice  => (
+          {toArr(filteredInvoices).map(invoice  => (
             <li key={invoice.id} className="flex items-center justify-between mb-2">
               <span className="font-bold">{invoice.invoice_number}</span>
               <StatusBadge status={invoice.status} />

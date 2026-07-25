@@ -11,7 +11,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -50,8 +50,8 @@ const AlertsPage = () => {
   const notifications = notificationsData ? notificationsData.data : [];
 
   const totalAlerts = (signals || []).length + (notifications ? (notifications || []).length : 0);
-  const criticalCount = (signals || []).filter(signal => signal.priority === "Critical").length;
-  const highCount = (signals || []).filter(signal => signal.priority === "High").length;
+  const criticalCount = toArr(signals).filter(signal => signal.priority === "Critical").length;
+  const highCount = toArr(signals).filter(signal => signal.priority === "High").length;
 
   const filteredSignals = signals
     .filter(signal => priorityFilter === "All" || signal.priority === priorityFilter)
@@ -97,7 +97,7 @@ const AlertsPage = () => {
       </div>
       {filteredSignals.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {(filteredSignals || []).map(signal  => (
+          {toArr(filteredSignals).map(signal  => (
             <SectionCard key={signal.signal_id} className={`border-l-4 ${signal.priority === "Critical" ? "border-red-500" : signal.priority === "High" ? "border-amber-500" : "border-blue-500"}`}>
               <div className="flex items-center justify-between">
                 <h3 className="font-bold">{signal.title}</h3>
@@ -114,7 +114,7 @@ const AlertsPage = () => {
       )}
       {notifications ? (
         <SectionCard title="System Notifications">
-          {(notifications || []).map(notification => (
+          {toArr(notifications).map(notification => (
             <p key={notification.id}>{notification.message}</p>
           ))}
         </SectionCard>

@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { ChevronRight, Loader2, Clock, User, Wrench, FileText } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const PRIORITY_COLORS: Record<string, string> = {
   critical: "bg-red-100 text-red-700",
   high:     "bg-orange-100 text-orange-700",
@@ -162,7 +174,7 @@ export default function WorkOrderDetailPage() {
         <div className="lg:col-span-2">
           <SectionCard title={`Activity History (${historyItems.length})`}>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {historyItems.map((item: any, idx: number) => (
+              {toArr(historyItems).map((item: any, idx: number) => (
                 <div key={item.id ?? idx}
                      className="flex gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                   <Clock className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />

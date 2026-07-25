@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { Building, Phone, Mail, TrendingUp, ChevronRight, Loader2, Calendar } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STAGE_COLORS: Record<string, string> = {
   new:         "bg-slate-100 text-slate-600",
   qualified:   "bg-blue-100 text-blue-700",
@@ -75,7 +87,7 @@ export default function LeadDetailPage() {
       {/* Pipeline progress */}
       <SectionCard title="Pipeline Stage">
         <div className="flex items-center gap-1 overflow-x-auto pb-2">
-          {(STAGE_ORDER || []).filter(s  => s !== "lost").map((stage, idx) => {
+          {toArr(STAGE_ORDER).filter(s  => s !== "lost").map((stage, idx) => {
             const isActive  = stage === currentStage;
             const isPast    = stageIdx > idx && currentStage !== "lost";
             const isFuture  = stageIdx < idx;
@@ -91,7 +103,7 @@ export default function LeadDetailPage() {
                 >
                   {stage}
                 </button>
-                {idx < (STAGE_ORDER || []).filter(s  => s !== "lost").length - 1 && (
+                {idx < toArr(STAGE_ORDER).filter(s  => s !== "lost").length - 1 && (
                   <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0" />
                 )}
               </div>
@@ -163,7 +175,7 @@ export default function LeadDetailPage() {
           <SectionCard title={`Activity Timeline (${acts.length})`}>
             {acts.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {acts.map((act: any, idx: number) => (
+                {toArr(acts).map((act: any, idx: number) => (
                   <div key={act.id ?? idx}
                        className="flex gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <Calendar className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />

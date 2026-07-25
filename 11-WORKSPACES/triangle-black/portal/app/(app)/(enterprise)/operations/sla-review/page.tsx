@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { CheckCircle, AlertCircle } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const PRIORITY_COLORS: Record<string, string> = {
   critical: "text-red-700 bg-red-50",
   high:     "text-amber-700 bg-amber-50",
@@ -93,7 +105,7 @@ export default function SLAReviewPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r: any) => (
+              {toArr(rows).map((r: any) => (
                 <tr key={r.priority} className="border-b border-slate-50">
                   <td className="py-2">
                     <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize

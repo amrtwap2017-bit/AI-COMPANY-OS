@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,15 +20,11 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchServiceRequests = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/service-requests/`, {
-      credentials: "include",
-    });
+    const response = await authFetch(`/api/v1/service-requests/`).then(r => r.json());
     if (!response.ok) return [];
     return response.json();
   } catch (error) {
-    return fetch(`${BACK}/api/v1/operations/service-requests`, {
-      credentials: "include",
-    }).then((response) => response.json());
+    return authFetch(`/api/v1/operations/service-requests`).then((response) => response.json());
   }
 };
 
@@ -45,9 +42,9 @@ const ServiceRequestsPage = () => {
   if (isError || !data) return <EmptyState message="No service requests found" />;
 
   const totalRequests = (data || []).length;
-  const openRequests = (data || []).filter((sr: any) => sr.status === "open").length;
-  const inProgressRequests = (data || []).filter((sr: any) => sr.status === "in_progress").length;
-  const convertedToWO = (data || []).filter((sr: any) => sr.status === "converted").length;
+  const openRequests = toArr(data).filter((sr: any) => sr.status === "open").length;
+  const inProgressRequests = toArr(data).filter((sr: any) => sr.status === "in_progress").length;
+  const convertedToWO = toArr(data).filter((sr: any) => sr.status === "converted").length;
 
   const filteredRequests = data
     .filter((sr: any) =>
@@ -121,7 +118,7 @@ const ServiceRequestsPage = () => {
         </button>
       </div>
       {filteredRequests.length > 0 ? (
-        filteredRequests.map((sr: any) => (
+        toArr(filteredRequests).map((sr: any) => (
           <SectionCard key={sr.id}>
             <h3>{sr.title}</h3>
             <StatusBadge status={sr.status} />

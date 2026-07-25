@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -11,7 +12,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchWorkflows = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/workflows/instances`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/workflows/instances`).then(r => r.json());
     if (response.ok) return response.json();
     return [];
   } catch (error) {
@@ -22,7 +23,7 @@ const fetchWorkflows = async () => {
 
 const fetchWorkOrders = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
     if (response.ok) return response.json();
     return [];
   } catch (error) {
@@ -57,7 +58,7 @@ const WorkflowInstancesPage = () => {
   if (isWorkflowError && isWorkOrdersError) return <EmptyState title="No workflow history" />;
 
   const totalInstances = workflows.length + (workOrders || []).length;
-  const runningInstances = (workOrders || []).filter((wo: any) => wo.status === "in_progress").length;
+  const runningInstances = toArr(workOrders).filter((wo: any) => wo.status === "in_progress").length;
   const completedInstances = workflows.length - runningInstances;
   const failedInstances = 0; // No failure tracking
 
@@ -75,7 +76,7 @@ const WorkflowInstancesPage = () => {
         />
       </SectionCard>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {workflows.map((wf: any) => (
+        {toArr(workflows).map((wf: any) => (
           <SectionCard key={wf.id}>
             <h3>{wf.name}</h3>
             <StatusBadge status={wf.status} />
@@ -83,7 +84,7 @@ const WorkflowInstancesPage = () => {
             {wf.completed_at && <p>Duration: {new Date(wf.completed_at - wf.created_at).toISOString().slice(14, 19)}</p>}
           </SectionCard>
         ))}
-        {(workOrders || []).map((wo: any) => (
+        {toArr(workOrders).map((wo: any) => (
           <SectionCard key={wo.id}>
             <h3>{wo.title}</h3>
             <StatusBadge status={wo.status} />

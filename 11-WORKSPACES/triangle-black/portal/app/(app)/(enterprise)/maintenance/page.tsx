@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAssets = async () => {
-  const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchPMPlans = async () => {
-  const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals?category=maintenance`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -35,9 +36,9 @@ const MaintenancePage = () => {
   if (isAssetsLoading || isPMPlansLoading || isSignalsLoading) return <LoadingState />;
 
   const totalAssets = (assets || []).length;
-  const inFaultCount = (assets || []).filter(asset => asset.status === "in-fault").length;
-  const activePMPlans = (pmPlans || []).filter(plan  => plan.status === "active").length;
-  const maintenanceSignals = (signals || []).slice(0, 3);
+  const inFaultCount = toArr(assets).filter(asset => asset.status === "in-fault").length;
+  const activePMPlans = toArr(pmPlans).filter(plan  => plan.status === "active").length;
+  const maintenanceSignals = toArr(signals).slice(0, 3);
 
   return (
     <PageWrapper>
@@ -61,7 +62,7 @@ const MaintenancePage = () => {
       <div className="mt-4">
         <h2 className="text-lg font-semibold">Current Alerts</h2>
         <ul className="list-disc pl-4">
-          {maintenanceSignals.map((signal, index) => (
+          {toArr(maintenanceSignals).map((signal, index) => (
             <li key={index}>{signal.description}</li>
           ))}
         </ul>

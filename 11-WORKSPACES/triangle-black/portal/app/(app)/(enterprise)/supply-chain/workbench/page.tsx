@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -15,14 +16,14 @@ const CATEGORY_LABELS = { hvac: "HVAC", electrical: "Electrical", plumbing: "Plu
 
 async function fetchInventory(category) {
   try {
-    const r = await fetch(`${BACK}/api/v1/ai/supply/inventory-check?work_order_type=${category}`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/ai/supply/inventory-check?work_order_type=${category}`).then(r => r.json());
     if (!r.ok) return {};
     return r.json();
   } catch { return {}; }
 }
 async function fetchPRs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);
@@ -63,7 +64,7 @@ export default function SupplyChainWorkbenchPage() {
     { label: "Out of Stock",   value: summary.out_of_stock_count ?? outOfStock.length,  color: "red" as const },
     { label: "Below Minimum",  value: summary.below_minimum_count ?? belowMin.length,   color: "amber" as const },
     { label: "Available",      value: summary.available_count ?? available.length,       color: "green" as const },
-    { label: "Open PRs",       value: safePRs.filter((p) => p.status === "draft" || p.status === "pending").length, color: "blue" as const },
+    { label: "Open PRs",       value: toArr(safePRs).filter((p) => p.status === "draft" || p.status === "pending").length, color: "blue" as const },
   ];
 
   return (
@@ -126,7 +127,7 @@ export default function SupplyChainWorkbenchPage() {
           <EmptyState title="No purchase requests" description="Create a purchase request from the inventory section above" />
         ) : (
           <div className="space-y-2">
-            {safePRs.slice(0, 5).map((pr) => (
+            {(safePRs || []).slice(0, 5).map((pr) => (
               <div key={pr.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-lg">
                 <div>
                   <p className="text-sm font-medium text-slate-800">{pr.pr_number || `PR-${pr.id?.slice(0, 8)}`}</p>

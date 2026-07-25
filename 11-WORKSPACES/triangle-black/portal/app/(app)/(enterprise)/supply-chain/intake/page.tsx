@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Send, Loader2, CheckCircle, Package, Users, AlertTriangle, Lightbulb, ArrowRight } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const CHANNELS = [
   { key: "whatsapp", label: "WhatsApp" },
   { key: "email",    label: "Email" },
@@ -96,7 +108,7 @@ export default function ProcurementIntakePage() {
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Request Channel</label>
                   <div className="flex flex-wrap gap-2">
-                    {(CHANNELS || []).map(c  => (
+                    {toArr(CHANNELS).map(c  => (
                       <button key={c.key}
                         onClick={() => setChannel(c.key)}
                         className={`px-3 py-1.5 text-sm rounded-lg border transition-all
@@ -109,7 +121,7 @@ export default function ProcurementIntakePage() {
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Urgency</label>
                   <div className="space-y-2">
-                    {(URGENCY || []).map(u  => (
+                    {toArr(URGENCY).map(u  => (
                       <label key={u.key}
                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all
                           ${urgency === u.key ? u.color + " border-2" : "border-slate-200 hover:bg-slate-50"}`}>

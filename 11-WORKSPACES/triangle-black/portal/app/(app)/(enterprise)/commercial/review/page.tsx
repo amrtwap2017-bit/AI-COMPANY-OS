@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,13 +11,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchLeads = async () => {
-  const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/leads`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -33,12 +34,12 @@ const CommercialReviewPage = () => {
 
   // Calculate metrics
   const totalLeads = (leads || []).length;
-  const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
+  const wonLeads = toArr(leads).filter(lead => lead.status === "won").length;
   const conversionRate = (wonLeads / totalLeads * 100).toFixed(2);
-  const activeContracts = (contracts || []).filter(contract => contract.status === "active").length;
+  const activeContracts = toArr(contracts).filter(contract => contract.status === "active").length;
 
   // Lead status summary
-  const statusSummary = (leads || []).reduce((acc: any, lead: any) => {
+  const statusSummary = toArr(leads).reduce((acc: any, lead: any) => {
     acc[lead.status] = (acc[lead.status] || 0) + 1;
     return acc;
   }, {} as { [key: string]: number });
@@ -47,7 +48,7 @@ const CommercialReviewPage = () => {
   const topLeads = (leads || []).sort((a: any, b: any) => b.value - a.value).slice(0, 5);
 
   // Contract health
-  const expiringContracts = (contracts || []).filter(contract => {
+  const expiringContracts = toArr(contracts).filter(contract => {
     const today = new Date();
     const expirationDate = new Date(contract.expiration_date);
     return expirationDate <= new Date(today.setMonth(today.getMonth() + 1));
@@ -71,7 +72,7 @@ const CommercialReviewPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Top 5 Leads by Value">
-        {(topLeads || []).map(lead  => (
+        {toArr(topLeads).map(lead  => (
           <div key={lead.id} className="flex items-center justify-between mb-2">
             <Link href={`/leads/${lead.id}`} className="text-blue-500 hover:underline">{lead.company_name}</Link>
             <StatusBadge status={lead.status} />

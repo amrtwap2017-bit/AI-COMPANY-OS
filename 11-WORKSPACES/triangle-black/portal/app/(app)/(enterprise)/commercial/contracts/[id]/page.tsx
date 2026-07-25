@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { RefreshCw, FileText, CreditCard, CheckCircle, Loader2 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function ContractDetailPage() {
   const { id } = useParams();
   const qc = useQueryClient();
@@ -148,7 +160,7 @@ export default function ContractDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(invoices || []).map((inv: any) => (
+                    {toArr(invoices).map((inv: any) => (
                       <tr key={inv.id} className="border-b border-slate-50 hover:bg-slate-50">
                         <td className="py-2 font-mono text-xs text-slate-500">{inv.id?.slice(0,8)}</td>
                         <td className="py-2">

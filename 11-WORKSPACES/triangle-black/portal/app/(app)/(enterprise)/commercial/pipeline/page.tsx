@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,13 +18,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchLeads = async () => {
-  const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/leads`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -46,11 +47,11 @@ const PipelinePage = () => {
   const contracts = contractsQuery.data;
 
   const statusCounts = {
-    new: (leads || []).filter((lead: any) => lead.status === "new").length,
-    qualified: (leads || []).filter((lead: any) => lead.status === "qualified").length,
-    negotiation: (leads || []).filter((lead: any) => lead.status === "negotiation").length,
-    won: (leads || []).filter((lead: any) => lead.status === "won").length,
-    lost: (leads || []).filter((lead: any) => lead.status === "lost").length,
+    new: toArr(leads).filter((lead: any) => lead.status === "new").length,
+    qualified: toArr(leads).filter((lead: any) => lead.status === "qualified").length,
+    negotiation: toArr(leads).filter((lead: any) => lead.status === "negotiation").length,
+    won: toArr(leads).filter((lead: any) => lead.status === "won").length,
+    lost: toArr(leads).filter((lead: any) => lead.status === "lost").length,
   };
 
   const totalLeads = statusCounts.new + statusCounts.qualified + statusCounts.negotiation + statusCounts.won;
@@ -94,9 +95,9 @@ const PipelinePage = () => {
                         <StatusBadge status={lead.status} />
                       </div>
                     ))}
-                  {(leads || []).filter((lead: any) => lead.status === status).length > 5 && (
+                  {toArr(leads).filter((lead: any) => lead.status === status).length > 5 && (
                     <button className="bg-gray-200 p-2 rounded-lg shadow-sm">
-                      +{(leads || []).filter((lead: any) => lead.status === status).length - 5} more
+                      +{toArr(leads).filter((lead: any) => lead.status === status).length - 5} more
                     </button>
                   )}
                 </div>

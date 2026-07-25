@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,17 +11,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   return response.json();
 };
 
 const fetchKpisSla = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   return response.json();
 };
 
 const fetchSla = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/sla`).then(r => r.json());
   return response.json();
 };
 
@@ -52,7 +53,7 @@ export default function DailyReviewPage() {
       <div className="grid grid-cols-2 gap-4">
         <SectionCard title="Today's Priorities">
           <ul>
-            {(signals || []).map(signal => (
+            {toArr(signals).map(signal => (
               <li key={signal.id} className={`flex items-center p-2 border-l-4 ${signal.priority === 1 ? 'border-red-500' : signal.priority === 2 ? 'border-yellow-500' : 'border-green-500'}`}>
                 <div className="flex-grow">
                   <h3>{signal.title}</h3>

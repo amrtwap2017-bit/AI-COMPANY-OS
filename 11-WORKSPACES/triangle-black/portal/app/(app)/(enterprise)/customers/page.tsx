@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,13 +11,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchInvoices = async () => {
-  const response = await fetch(`${BACK}/api/v1/invoices`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/invoices`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -31,17 +32,17 @@ const CustomerHubPage = () => {
   const contracts = contractsQuery.data;
   const invoices = invoicesQuery.data;
 
-  const uniqueClients = Array.from(new Set((contracts || []).map(contract => contract.client_name)));
-  const totalRevenue = (invoices || []).reduce((acc: any, invoice: any) => acc + invoice.revenue, 0);
-  const expiringSoon = (contracts || []).filter(contract => Date.now() - new Date(contract.end_date).getTime() < 60 * 24 * 60 * 1000);
+  const uniqueClients = Array.from(new Set(toArr(contracts).map(contract => contract.client_name)));
+  const totalRevenue = toArr(invoices).reduce((acc: any, invoice: any) => acc + invoice.revenue, 0);
+  const expiringSoon = toArr(contracts).filter(contract => Date.now() - new Date(contract.end_date).getTime() < 60 * 24 * 60 * 1000);
 
   const topClientsByValue = uniqueClients
     .map(clientName => {
-      const clientContracts = (contracts || []).filter(contract => contract.client_name === clientName);
+      const clientContracts = toArr(contracts).filter(contract => contract.client_name === clientName);
       return {
         clientName,
         contractCount: clientContracts.length,
-        totalContractValue: clientContracts.reduce((acc: any, contract: any) => acc + contract.contract_value, 0),
+        totalContractValue: toArr(clientContracts).reduce((acc: any, contract: any) => acc + contract.contract_value, 0),
       };
     })
     .sort((a: any, b: any) => b.totalContractValue - a.totalContractValue)
@@ -57,14 +58,14 @@ const CustomerHubPage = () => {
         <MetricStrip label="Expiring Soon" value={expiringSoon.length} />
       </div>
       <SectionCard title="Customer List">
-        {(uniqueClients || []).map(clientName  => {
-          const clientContracts = (contracts || []).filter(contract => contract.client_name === clientName);
+        {toArr(uniqueClients).map(clientName  => {
+          const clientContracts = toArr(contracts).filter(contract => contract.client_name === clientName);
           const mostRecentContract = clientContracts.sort((a: any, b: any) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime())[0];
           return (
             <div key={clientName} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <strong>{clientName}</strong>
               <span>Contract Count: {clientContracts.length}</span>
-              <span>Total Contract Value EGP: {clientContracts.reduce((acc: any, contract: any) => acc + contract.contract_value, 0)}</span>
+              <span>Total Contract Value EGP: {toArr(clientContracts).reduce((acc: any, contract: any) => acc + contract.contract_value, 0)}</span>
               <StatusBadge status={mostRecentContract.status} />
               <Link href={`/customers/review?q=${clientName}`} className="text-blue-500 hover:text-blue-700">Review</Link>
             </div>
@@ -72,7 +73,7 @@ const CustomerHubPage = () => {
         })}
       </SectionCard>
       <SectionCard title="Top Clients by Value">
-        {(topClientsByValue || []).map(client  => (
+        {toArr(topClientsByValue).map(client  => (
           <div key={client.clientName} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <strong>{client.clientName}</strong>
             <span>Contract Count: {client.contractCount}</span>

@@ -5,6 +5,18 @@ import { Breadcrumb, PageHeader, PageWrapper } from "@/components/ui";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { User, Bell, Shield, Globe, Database, Cpu, Users, Building2, ArrowRight, Settings } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const SECTIONS = [
   { title:"Account",      items:[
     { icon:User,     label:"My Profile",          desc:"Personal info, avatar, password",    href:"/profile" },
@@ -29,7 +41,7 @@ export default function SettingsPage() {
       <Breadcrumb/>
       <PageHeader title="Settings" subtitle="Platform configuration and preferences" badge="CFG"/>
       <div className="space-y-6 max-w-3xl">
-        {(SECTIONS || []).map(section=>(
+        {toArr(SECTIONS).map(section=>(
           <div key={section.title}>
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{section.title}</h2>
             <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">

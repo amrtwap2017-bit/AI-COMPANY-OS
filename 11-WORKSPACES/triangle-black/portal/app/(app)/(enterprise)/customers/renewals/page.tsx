@@ -6,6 +6,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
 import { useState } from "react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const RISK_STYLES: Record<string, string> = {
   high:   "bg-red-100 text-red-700 border-red-200",
   medium: "bg-amber-100 text-amber-700 border-amber-200",
@@ -61,9 +73,9 @@ export default function RenewalsPage() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Expiring <30d",  value: (renewals || []).filter((r: any) => r.risk_level === "high").length,   color: "text-red-600" },
-          { label: "Expiring <60d",  value: (renewals || []).filter((r: any) => r.risk_level === "medium").length, color: "text-amber-600" },
-          { label: "Expiring <90d",  value: (renewals || []).filter((r: any) => r.risk_level === "low").length,    color: "text-blue-600" },
+          { label: "Expiring <30d",  value: toArr(renewals).filter((r: any) => r.risk_level === "high").length,   color: "text-red-600" },
+          { label: "Expiring <60d",  value: toArr(renewals).filter((r: any) => r.risk_level === "medium").length, color: "text-amber-600" },
+          { label: "Expiring <90d",  value: toArr(renewals).filter((r: any) => r.risk_level === "low").length,    color: "text-blue-600" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
             <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
@@ -74,7 +86,7 @@ export default function RenewalsPage() {
 
       <SectionCard title={`${(renewals || []).length} Contracts to Renew`}>
         <div className="space-y-3">
-          {(renewals || []).map((contract: any) => {
+          {toArr(renewals).map((contract: any) => {
             const cid = contract.contract_id || contract.id;
             const isRenewed = renewed[cid];
             const error     = errors[cid];

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -9,19 +10,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/purchase-orders`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSupplierInvoices = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/supply-chain/supplier-invoices`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/supply-chain/supplier-invoices`).then(r => r.json());
     if (response.status === 404) throw new Error("Not Found");
     if (!response.ok) return [];
     return response.json();
   } catch {
-    const response = await fetch(`${BACK}/api/v1/supplier-invoices`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/supplier-invoices`).then(r => r.json());
     if (!response.ok) return [];
     return response.json();
   }
@@ -38,8 +39,8 @@ const InvoiceMatchingPage = () => {
   if (isLoading || isFetching) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
 
-  const matchedInvoices = (purchaseOrders || []).filter(po => (supplierInvoices || []).some(inv => inv.po_id === po.id));
-  const unmatchedPOs = (purchaseOrders || []).filter(po => !(supplierInvoices || []).some(inv => inv.po_id === po.id));
+  const matchedInvoices = toArr(purchaseOrders).filter(po => toArr(supplierInvoices).some(inv => inv.po_id === po.id));
+  const unmatchedPOs = toArr(purchaseOrders).filter(po => !toArr(supplierInvoices).some(inv => inv.po_id === po.id));
 
   return (
     <PageWrapper>
@@ -50,7 +51,7 @@ const InvoiceMatchingPage = () => {
             { label: "Total POs", value: purchaseOrders.length },
             { label: "Matched Invoices", value: matchedInvoices.length },
             { label: "Unmatched POs", value: unmatchedPOs.length },
-            { label: "Total PO Value EGP", value: (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0) }
+            { label: "Total PO Value EGP", value: toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0) }
           ]}
         />
       </SectionCard>
@@ -68,21 +69,21 @@ const InvoiceMatchingPage = () => {
               </tr>
             </thead>
             <tbody>
-              {(purchaseOrders || []).map(po => (
+              {toArr(purchaseOrders).map(po => (
                 <tr key={po.id}>
                   <td>{po.po_number}</td>
                   <td>{/* Fetch vendor name from API */}</td>
                   <td>{po.total_amount}</td>
                   <td><StatusBadge status={po.status} /></td>
                   <td>
-                    {(supplierInvoices || []).some(inv => inv.po_id === po.id) ? (
+                    {toArr(supplierInvoices).some(inv => inv.po_id === po.id) ? (
                       <span className="text-green-500">Matched</span>
                     ) : (
                       <span className="text-red-500">No invoice</span>
                     )}
                   </td>
                   <td>
-                    {(supplierInvoices || []).some(inv => inv.po_id === po.id) ? (
+                    {toArr(supplierInvoices).some(inv => inv.po_id === po.id) ? (
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green">
                         <path d="M5 13l4 4 6-6" />
                       </svg>
@@ -99,7 +100,7 @@ const InvoiceMatchingPage = () => {
         </SectionCard>
         <SectionCard title="Unmatched POs">
           <ul>
-            {(unmatchedPOs || []).map(po  => (
+            {toArr(unmatchedPOs).map(po  => (
               <li key={po.id}>
                 PO Number: {po.po_number}, Amount EGP: {po.total_amount}, Created At: {po.created_at}
               </li>

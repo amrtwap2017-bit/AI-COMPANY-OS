@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, Progress } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -9,19 +10,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAssets = async () => {
-  const response = await fetch(`${BACK}/api/v1/assets?category=HVAC,Electrical,Mechanical,Elevator`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/assets?category=HVAC,Electrical,Mechanical,Elevator`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -36,11 +37,11 @@ const MyComponent = () => {
   }
 
   const signals = (signalsQuery.data?.signals || signalsQuery.data || []).filter(signal => signal.category === "engineering");
-  const criticalSignals = (signals || []).filter(signal => signal.priority === "critical");
-  const openWorkOrders = kpisQuery.data?.(open_work_orders || []).filter(wo => wo.status === "open");
+  const criticalSignals = toArr(signals).filter(signal => signal.priority === "critical");
+  const openWorkOrders = kpisQuery.data?.toArr(open_work_orders).filter(wo => wo.status === "open");
 
   const assets = assetsQuery.data;
-  const healthScores = (assets || []).map(asset => {
+  const healthScores = toArr(assets).map(asset => {
     // Your logic here
   });
 

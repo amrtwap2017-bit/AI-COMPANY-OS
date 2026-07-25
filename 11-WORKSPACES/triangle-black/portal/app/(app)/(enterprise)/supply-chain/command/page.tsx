@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,17 +11,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchInventorySignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=inventory`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals?category=inventory`).then(r => r.json());
   return response.json();
 };
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
   return response.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   return response.json();
 };
 
@@ -32,9 +33,9 @@ const SupplyChainCommandPage = () => {
   if (signalsLoading || prsLoading || posLoading) return <LoadingState />;
 
   const status = (signals || []).length > 0 ? "AT RISK" : "NORMAL";
-  const pendingPRs = (prs || []).filter(pr  => pr.status === "PENDING").length;
-  const activePOs = (pos || []).filter(po  => po.status === "ACTIVE").length;
-  const inventoryAlerts = (signals || []).filter(signal => signal.type === "INVENTORY_ALERT").length;
+  const pendingPRs = toArr(prs).filter(pr  => pr.status === "PENDING").length;
+  const activePOs = toArr(pos).filter(po  => po.status === "ACTIVE").length;
+  const inventoryAlerts = toArr(signals).filter(signal => signal.type === "INVENTORY_ALERT").length;
   const vendorsCount = 13;
 
   return (
@@ -53,10 +54,10 @@ const SupplyChainCommandPage = () => {
       </div>
       <SectionCard title="Action Required">
         <ul className="list-disc pl-5">
-          {(signals || []).map(signal => (
+          {toArr(signals).map(signal => (
             <li key={signal.id}>{signal.description}</li>
           ))}
-          {(prs || []).filter(pr  => pr.status === "PENDING").map(pr => (
+          {toArr(prs).filter(pr  => pr.status === "PENDING").map(pr => (
             <li key={pr.id}>{pr.title}</li>
           ))}
         </ul>

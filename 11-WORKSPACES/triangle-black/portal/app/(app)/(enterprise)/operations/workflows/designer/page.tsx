@@ -15,6 +15,18 @@ import {
 import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
 import { CheckCircle, Zap, AlertTriangle, Clock, ArrowRight, Play, Pause } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 // ── State machine definition — mirrors useWorkflow.ts ─────────────────────
 const WO_STATE_MACHINE = [
   { from: "open",          to: "assigned",      label: "Assign Technician",  color: "bg-purple-100 text-purple-700" },
@@ -104,7 +116,7 @@ export default function WorkflowDesignerPage() {
   });
 
   const metrics = [
-    { label: "Active Workflows",    value: (WORKFLOW_TEMPLATES || []).filter(w  => w.status === "active").length,      suffix: "" },
+    { label: "Active Workflows",    value: toArr(WORKFLOW_TEMPLATES).filter(w  => w.status === "active").length,      suffix: "" },
     { label: "Total Executions",    value: WORKFLOW_TEMPLATES.reduce((a: any, w: any) => a + w.runs, 0),                suffix: "" },
     { label: "State Transitions",   value: WO_STATE_MACHINE.length,                                           suffix: "" },
     { label: "AI Signals Active",   value: Array.isArray(signals) ? (signals || []).length : 0,                       suffix: "" },
@@ -129,7 +141,7 @@ export default function WorkflowDesignerPage() {
 
         {/* State nodes */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {(STATES || []).map(s  => (
+          {toArr(STATES).map(s  => (
             <button
               key={s}
               onMouseEnter={() => setHoveredState(s)}

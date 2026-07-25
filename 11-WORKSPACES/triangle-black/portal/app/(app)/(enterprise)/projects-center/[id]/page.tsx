@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { ChevronRight, Loader2, TrendingUp, DollarSign, Clock, CheckCircle } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STATUS_COLORS: Record<string, string> = {
   planning:  "bg-blue-100 text-blue-700",
   active:    "bg-emerald-100 text-emerald-700",
@@ -161,7 +173,7 @@ export default function ProjectDetailPage() {
           <SectionCard title={`Work Orders (${woList.length})`}>
             {woList.length > 0 ? (
               <div className="space-y-2 max-h-80 overflow-y-auto">
-                {woList.map((wo: any) => (
+                {toArr(woList).map((wo: any) => (
                   <div key={wo.id} className="flex items-center justify-between p-3
                                                bg-slate-50 rounded-lg border border-slate-100">
                     <div>

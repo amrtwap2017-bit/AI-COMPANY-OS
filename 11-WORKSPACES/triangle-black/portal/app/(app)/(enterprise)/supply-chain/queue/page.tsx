@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,17 +11,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
   return response.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   return response.json();
 };
 
 const fetchRFQs = async () => {
-  const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/rfqs`).then(r => r.json());
   return response.json();
 };
 
@@ -41,9 +42,9 @@ const QueuePage = () => {
 
   if (prLoading || poLoading || rfqLoading) return <LoadingState />;
 
-  const urgentPRs = (purchaseRequests || []).filter((pr: any) => pr.urgency === "urgent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
-  const pendingPOs = (purchaseOrders || []).filter((po: any) => ["pending", "approved"].includes(po.status)).sort((a: any, b: any) => new Date(b.expected_delivery) - new Date(a.expected_delivery));
-  const awaitingQuotes = (rfqs || []).filter((rfq: any) => rfq.status === "sent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
+  const urgentPRs = toArr(purchaseRequests).filter((pr: any) => pr.urgency === "urgent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
+  const pendingPOs = toArr(purchaseOrders).filter((po: any) => ["pending", "approved"].includes(po.status)).sort((a: any, b: any) => new Date(b.expected_delivery) - new Date(a.expected_delivery));
+  const awaitingQuotes = toArr(rfqs).filter((rfq: any) => rfq.status === "sent").sort((a: any, b: any) => new Date(b.created_at) - new Date(a.created_at));
 
   setTotalQueueItems(urgentPRs.length + pendingPOs.length + awaitingQuotes.length);
 
@@ -52,15 +53,15 @@ const QueuePage = () => {
       <PageHeader title="Procurement Queue" badge={<StatusBadge type="info">{totalQueueItems}</StatusBadge>} />
       <MetricStrip
         items={[
-          { label: "PRs Pending", value: (purchaseRequests || []).filter((pr: any) => ["draft", "pending"].includes(pr.status)).length, color: "primary" },
-          { label: "POs Active", value: (purchaseOrders || []).filter((po: any) => !["received", "cancelled"].includes(po.status)).length, color: "success" },
-          { label: "Open RFQs", value: (rfqs || []).filter((rfq: any) => rfq.status === "sent").length, color: "warning" },
+          { label: "PRs Pending", value: toArr(purchaseRequests).filter((pr: any) => ["draft", "pending"].includes(pr.status)).length, color: "primary" },
+          { label: "POs Active", value: toArr(purchaseOrders).filter((po: any) => !["received", "cancelled"].includes(po.status)).length, color: "success" },
+          { label: "Open RFQs", value: toArr(rfqs).filter((rfq: any) => rfq.status === "sent").length, color: "warning" },
           { label: "Total Queue Items", value: totalQueueItems, color: "info" },
         ]}
       />
       <SectionCard title="Urgent PRs">
         {urgentPRs.length > 0 ? (
-          urgentPRs.map((pr: any) => (
+          toArr(urgentPRs).map((pr: any) => (
             <div key={pr.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{pr.reference_number}</span>
               <StatusBadge type="primary">{pr.type}</StatusBadge>
@@ -74,7 +75,7 @@ const QueuePage = () => {
       </SectionCard>
       <SectionCard title="Pending POs">
         {pendingPOs.length > 0 ? (
-          pendingPOs.map((po: any) => (
+          toArr(pendingPOs).map((po: any) => (
             <div key={po.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{po.reference_number}</span>
               <StatusBadge type="primary">{po.type}</StatusBadge>
@@ -88,7 +89,7 @@ const QueuePage = () => {
       </SectionCard>
       <SectionCard title="Awaiting Quotes">
         {awaitingQuotes.length > 0 ? (
-          awaitingQuotes.map((rfq: any) => (
+          toArr(awaitingQuotes).map((rfq: any) => (
             <div key={rfq.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{rfq.reference_number}</span>
               <StatusBadge type="primary">{rfq.type}</StatusBadge>

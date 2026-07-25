@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,9 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAssets = async () => {
-  const response = await fetch(`${BACK}/api/v1/assets`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
   if (!response.ok) {
     return [];
   }
@@ -39,14 +38,14 @@ const AssetPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load assets" />;
 
-  const filteredAssets = (assets || []).filter((asset: any) =>
+  const filteredAssets = toArr(assets).filter((asset: any) =>
     categoryFilter ? asset.category.toLowerCase().includes(categoryFilter.toLowerCase()) : true
   );
 
   const totalAssets = filteredAssets.length;
-  const criticalAssets = filteredAssets.filter((asset: any) => asset.criticality === "critical").length;
-  const operationalAssets = filteredAssets.filter((asset: any) => asset.status === "operational").length;
-  const inFaultAssets = filteredAssets.filter(
+  const criticalAssets = toArr(filteredAssets).filter((asset: any) => asset.criticality === "critical").length;
+  const operationalAssets = toArr(filteredAssets).filter((asset: any) => asset.status === "operational").length;
+  const inFaultAssets = toArr(filteredAssets).filter(
     (asset: any) => asset.status === "fault" || asset.status === "breakdown"
   ).length;
 
@@ -85,7 +84,7 @@ const AssetPage = () => {
       </div>
       <SectionCard title="Assets">
         {filteredAssets.length > 0 ? (
-          filteredAssets.map((asset: any) => (
+          toArr(filteredAssets).map((asset: any) => (
             <a
               key={asset.id}
               href={`/maintenance/assets/${asset.id}`}

@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, StatusBadge, LoadingState } from 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const fetchWorkOrders = async () => {
   const response = await authFetch("/api/v1/work-orders/?status=open&limit=20");
   return response.json();
@@ -31,9 +43,9 @@ const MyDayPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <div>Error fetching work orders</div>;
 
-  const openCount = (data || []).filter((wo: any) => wo.status === "open").length;
-  const inProgressCount = (data || []).filter((wo: any) => wo.status === "in_progress").length;
-  const completedCount = (data || []).filter((wo: any) => wo.status === "completed").length;
+  const openCount = toArr(data).filter((wo: any) => wo.status === "open").length;
+  const inProgressCount = toArr(data).filter((wo: any) => wo.status === "in_progress").length;
+  const completedCount = toArr(data).filter((wo: any) => wo.status === "completed").length;
 
   return (
     <PageWrapper>
@@ -43,7 +55,7 @@ const MyDayPage = () => {
         <StatusBadge label={`In Progress: ${inProgressCount}`} color="green" />
         <StatusBadge label={`Completed: ${completedCount}`} color="gray" />
       </div>
-      {(data || []).map((wo: any) => (
+      {toArr(data).map((wo: any) => (
         <SectionCard key={wo.id} className="swipeable-card">
           <h3>{wo.title}</h3>
           <div className="flex items-center">

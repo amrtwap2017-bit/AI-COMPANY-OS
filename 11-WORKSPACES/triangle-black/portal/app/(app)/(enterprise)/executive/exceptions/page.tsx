@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,17 +18,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
   return response.json();
 };
 
@@ -48,8 +49,8 @@ const ExecutiveExceptionsPage = () => {
   const kpis = kpisQuery.data;
   const workOrders = workOrdersQuery.data;
 
-  const criticalSignals = (signals || []).filter((signal: any) => signal.priority === "critical");
-  const highPrioritySignals = (signals || []).filter((signal: any) => signal.priority === "high");
+  const criticalSignals = toArr(signals).filter((signal: any) => signal.priority === "critical");
+  const highPrioritySignals = toArr(signals).filter((signal: any) => signal.priority === "high");
 
   const exceptionsCount = criticalSignals.length + highPrioritySignals.length;
 
@@ -64,7 +65,7 @@ const ExecutiveExceptionsPage = () => {
         />
         <MetricStrip
           title="Critical WOs Open"
-          value={(workOrders || []).filter((wo: any) => wo.status === "open").length}
+          value={toArr(workOrders).filter((wo: any) => wo.status === "open").length}
           badge={<StatusBadge status="red" />}
         />
         <MetricStrip
@@ -80,7 +81,7 @@ const ExecutiveExceptionsPage = () => {
       </div>
       {exceptionsCount > 0 && (
         <SectionCard title="Requires Immediate Action">
-          {criticalSignals.map((signal: any) => (
+          {toArr(criticalSignals).map((signal: any) => (
             <div key={signal.id} className="border-4 border-red-500 p-4 mb-2 rounded-lg">
               <h3>{signal.title}</h3>
               <p>{signal.message}</p>
@@ -91,7 +92,7 @@ const ExecutiveExceptionsPage = () => {
       )}
       {highPrioritySignals.length > 0 && (
         <SectionCard title="High Priority Items">
-          {highPrioritySignals.map((signal: any) => (
+          {toArr(highPrioritySignals).map((signal: any) => (
             <div key={signal.id} className="border-2 border-yellow-500 p-4 mb-2 rounded-lg">
               <h3>{signal.title}</h3>
               <p>{signal.message}</p>

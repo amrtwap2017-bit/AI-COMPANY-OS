@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { Wrench, User, Clock, AlertTriangle, ChevronRight, Loader2 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STATUS_COLORS: Record<string, string> = {
   open:          "bg-slate-100 text-slate-600",
   assigned:      "bg-blue-100 text-blue-700",
@@ -139,7 +151,7 @@ export default function ServiceRequestDetailPage() {
           <SectionCard title={`Linked Work Orders (${(wos || []).length})`}>
             {(wos || []).length > 0 ? (
               <div className="space-y-3">
-                {(wos || []).map((wo: any) => (
+                {toArr(wos).map((wo: any) => (
                   <div key={wo.id}
                        className="flex items-center justify-between p-3
                                   bg-slate-50 rounded-lg border border-slate-100">

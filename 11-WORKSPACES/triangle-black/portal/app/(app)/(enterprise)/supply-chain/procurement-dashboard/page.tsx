@@ -115,7 +115,7 @@ export default function ProcurementDashboardPage() {
         <SectionCard title={`Pending Deliveries (${pendingPOs.length})`}>
           {pendingPOs.length > 0 ? (
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {pendingPOs.slice(0, 8).map((po: any) => {
+              {(pendingPOs || []).slice(0, 8).map((po: any) => {
                 const isOverdue = (po.days_overdue ?? 0) > 0;
                 return (
                   <div key={po.id}
@@ -156,7 +156,7 @@ export default function ProcurementDashboardPage() {
         {/* AI Mentor - Best Practices */}
         <SectionCard title="AI Mentor - Best Practices">
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {practices.slice(0, 6).map((p: any, i: number) => (
+            {(practices || []).slice(0, 6).map((p: any, i: number) => (
               <div key={i} className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
                 <div className="text-xs font-semibold text-blue-700">{p.rule}</div>
                 <div className="text-xs text-slate-600 mt-0.5">{p.guidance}</div>

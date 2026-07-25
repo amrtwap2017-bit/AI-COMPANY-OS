@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -13,7 +14,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchKPIs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
     if (!r.ok) return {};
     return r.json();
   } catch { return {}; }
@@ -21,7 +22,7 @@ async function fetchKPIs() {
 
 async function fetchSignals() {
   try {
-    const r = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/ai/signals/summary`).then(r => r.json());
     if (!r.ok) return { critical: 0, high: 0, total: 0 };
     return r.json();
   } catch { return { critical: 0, high: 0, total: 0 }; }

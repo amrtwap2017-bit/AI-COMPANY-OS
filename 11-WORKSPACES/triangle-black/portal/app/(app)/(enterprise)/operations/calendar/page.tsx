@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -18,7 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchPMPlans() {
   try {  
-    const res = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+    const res = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : data.items ?? data.data ?? [];
@@ -30,7 +31,7 @@ async function fetchPMPlans() {
 
 async function fetchWorkOrders() {
   try {  
-    const res = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+    const res = await authFetch(`/api/v1/work-orders`).then(r => r.json());
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : data.items ?? data.work_orders ?? [];

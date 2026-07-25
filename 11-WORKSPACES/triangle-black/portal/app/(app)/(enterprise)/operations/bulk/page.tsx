@@ -6,6 +6,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { Users, CheckSquare, ShoppingCart, Zap, Loader2 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function BulkOperationsPage() {
   const qc = useQueryClient();
   const [result, setResult] = useState<any>(null);
@@ -41,15 +53,15 @@ export default function BulkOperationsPage() {
   const techs = Array.isArray(techsData) ? techsData : techsData?.data ?? techsData?.items ?? [];
   const prs   = Array.isArray(prsData) ? prsData : prsData?.data ?? prsData?.items ?? [];
 
-  const unassignedWOs = (wos || []).filter((w: any) => !w.technician_id);
-  const pendingPRs    = prs.filter((p: any) => ["submitted","pending","draft"].includes(p.status));
+  const unassignedWOs = toArr(wos).filter((w: any) => !w.technician_id);
+  const pendingPRs    = toArr(prs).filter((p: any) => ["submitted","pending","draft"].includes(p.status));
 
   const bulkAssign = useMutation({
     mutationFn: (techId: string) => authFetch("/api/v1/bulk/work-orders/assign", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        wo_ids: unassignedWOs.slice(0, 10).map((w: any) => w.id),
+        wo_ids: (unassignedWOs || []).slice(0, 10).map((w: any) => w.id),
         technician_id: techId,
         comment: "Bulk assigned via portal",
       }),
@@ -62,7 +74,7 @@ export default function BulkOperationsPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        pr_ids: pendingPRs.slice(0, 20).map((p: any) => p.id),
+        pr_ids: (pendingPRs || []).slice(0, 20).map((p: any) => p.id),
         approved_by: "portal_bulk",
         comment: "Bulk approved via portal",
       }),
@@ -75,7 +87,7 @@ export default function BulkOperationsPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        wo_ids: (wos || []).filter((w: any) => w.status === "in_progress").slice(0, 20).map((w: any) => w.id),
+        wo_ids: toArr(wos).filter((w: any) => w.status === "in_progress").slice(0, 20).map((w: any) => w.id),
         status: "completed",
         comment: "Bulk completed via portal",
       }),
@@ -132,7 +144,7 @@ export default function BulkOperationsPage() {
             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select technician...</option>
-            {techs.map((t: any) => (
+            {toArr(techs).map((t: any) => (
               <option key={t.id} value={t.id}>
                 {t.name} ({t.current_work_orders}/{t.max_work_orders} WOs)
               </option>

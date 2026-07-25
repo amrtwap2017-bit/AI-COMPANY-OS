@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,17 +19,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAssets = async () => {
-  const response = await fetch(`${BACK}/api/v1/assets`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchPMPlans = async (assetId: number) => {
-  const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans/${assetId}`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/maintenance/pm-plans/${assetId}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -53,15 +50,15 @@ const AssetTreePage = () => {
     Other: { count: 0, faultCount: 0, list: [] },
   };
 
-  (assets || []).forEach(asset => {
+  toArr(assets).forEach(asset => {
     categories[asset.category].count++;
     if (asset.status === "In Fault") categories[asset.category].faultCount++;
     categories[asset.category].list.push(asset.name);
   });
 
   const totalAssets = Object.values(categories).reduce((acc: any, category: any) => acc + category.count, 0);
-  const criticalAssets = (assets || []).filter(asset => asset.criticality === "Critical").length;
-  const inFaultAssets = (assets || []).filter(asset => asset.status === "In Fault").length;
+  const criticalAssets = toArr(assets).filter(asset => asset.criticality === "Critical").length;
+  const inFaultAssets = toArr(assets).filter(asset => asset.status === "In Fault").length;
 
   return (
     <PageWrapper>
@@ -103,8 +100,8 @@ const AssetTreePage = () => {
                   <li key={assetName} className="flex items-center justify-between py-1 border-b last:border-b-0">
                     <span>{assetName}</span>
                     <div className="flex items-center space-x-2">
-                      <StatusBadge status={(assets || []).find(asset => asset.name === assetName)?.status || "Unknown"} />
-                      <StatusBadge criticality={(assets || []).find(asset => asset.name === assetName)?.criticality || "Unknown"} />
+                      <StatusBadge status={toArr(assets).find(asset => asset.name === assetName)?.status || "Unknown"} />
+                      <StatusBadge criticality={toArr(assets).find(asset => asset.name === assetName)?.criticality || "Unknown"} />
                     </div>
                   </li>
                 ))}

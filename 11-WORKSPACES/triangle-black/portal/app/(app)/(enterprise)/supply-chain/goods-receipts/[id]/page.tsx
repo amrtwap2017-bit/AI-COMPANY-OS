@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Package, Truck, CheckCircle, ClipboardList, Calendar } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function GoodsReceiptDetailPage() {
   const { id } = useParams();
 
@@ -93,7 +105,7 @@ export default function GoodsReceiptDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(items || []).map((item: any) => (
+                    {toArr(items).map((item: any) => (
                       <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50">
                         <td className="py-2">
                           <div className="font-medium text-slate-800">

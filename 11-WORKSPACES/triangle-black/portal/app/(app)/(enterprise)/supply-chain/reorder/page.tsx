@@ -6,6 +6,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { AlertTriangle, ShoppingCart, Zap, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function ReorderPage() {
   const qc = useQueryClient();
   const [result, setResult] = useState<any>(null);
@@ -66,7 +78,7 @@ export default function ReorderPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
           <ShoppingCart className="w-5 h-5 text-blue-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-blue-600">
-            {(alerts || []).filter((a: any) => a.current_stock === 0).length}
+            {toArr(alerts).filter((a: any) => a.current_stock === 0).length}
           </div>
           <div className="text-xs text-slate-500">Completely Out of Stock</div>
         </div>
@@ -102,7 +114,7 @@ export default function ReorderPage() {
               </tr>
             </thead>
             <tbody>
-              {(alerts || []).map((alert: any) => (
+              {toArr(alerts).map((alert: any) => (
                 <tr key={alert.id} className="border-b border-slate-50 hover:bg-slate-50">
                   <td className="py-2">
                     <div className="font-medium text-slate-800">{alert.name}</div>

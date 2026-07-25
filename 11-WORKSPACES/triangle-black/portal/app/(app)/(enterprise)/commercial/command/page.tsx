@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchLeads = async () => {
-  const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/leads`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals?category=commercial`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -38,7 +39,7 @@ const CommercialCommandPage = () => {
   const contracts = contractsQuery.data;
   const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
 
-  const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
+  const wonLeads = toArr(leads).filter(lead => lead.status === "won").length;
   const totalLeads = (leads || []).length;
   const winRate = (wonLeads / totalLeads) * 100 || 0;
 
@@ -51,7 +52,7 @@ const CommercialCommandPage = () => {
       value: lead.value,
     }));
 
-  const monthlyRevenueEstimate = (contracts || []).reduce((acc: any, contract: any) => acc + contract.contract_value, 0);
+  const monthlyRevenueEstimate = toArr(contracts).reduce((acc: any, contract: any) => acc + contract.contract_value, 0);
 
   return (
     <PageWrapper>
@@ -94,7 +95,7 @@ const CommercialCommandPage = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SectionCard title="Top Active Leads">
-          {topActiveLeads.map((lead, index) => (
+          {toArr(topActiveLeads).map((lead, index) => (
             <div key={index} className="flex items-center justify-between">
               <span>{lead.company_name}</span>
               <StatusBadge type={lead.status}>{lead.status}</StatusBadge>
@@ -110,7 +111,7 @@ const CommercialCommandPage = () => {
         </SectionCard>
       </div>
       <SectionCard title="Commercial Signals">
-        {(signals || []).map((signal, index) => (
+        {toArr(signals).map((signal, index) => (
           <div key={index} className="p-4 border-b last:border-b-0">{signal.message}</div>
         ))}
       </SectionCard>

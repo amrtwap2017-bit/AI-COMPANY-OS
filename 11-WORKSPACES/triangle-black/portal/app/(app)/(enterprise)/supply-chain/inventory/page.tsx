@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,17 +11,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchItems = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/items`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/items`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchStockBalances = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/stock-balances`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/stock-balances`).then(r => r.json());
     if (response.ok) return response.json();
   } catch (error) {}
-  const response = await fetch(`${BACK}/api/v1/stock-balances`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/stock-balances`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -39,17 +40,17 @@ const InventoryPage = () => {
   const stockBalances = stockBalancesQuery.data;
 
   const totalItems = (items || []).length;
-  const lowStockCount = (items || []).filter(item => (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
-  const outOfStockCount = (items || []).filter(item => (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand === 0).length;
-  const categoriesCount = new Set((items || []).map(item => item.category)).size;
+  const lowStockCount = toArr(items).filter(item => toArr(stockBalances).find(balance  => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
+  const outOfStockCount = toArr(items).filter(item => toArr(stockBalances).find(balance  => balance.item_id === item.id)?.qty_on_hand === 0).length;
+  const categoriesCount = new Set(toArr(items).map(item => item.category)).size;
 
-  const filteredItems = selectedCategory ? (items || []).filter(item => item.category === selectedCategory) : items;
+  const filteredItems = selectedCategory ? toArr(items).filter(item => item.category === selectedCategory) : items;
 
   const reorderAlerts = items
-    .filter(item => (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand < item.reorder_qty)
+    .filter(item => toArr(stockBalances).find(balance  => balance.item_id === item.id)?.qty_on_hand < item.reorder_qty)
     .map(item => ({
       name: item.name,
-      currentQty: (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand || 0,
+      currentQty: toArr(stockBalances).find(balance  => balance.item_id === item.id)?.qty_on_hand || 0,
       reorderQty: item.reorder_qty
     }));
 
@@ -94,8 +95,8 @@ const InventoryPage = () => {
             </tr>
           </thead>
           <tbody>
-            {(filteredItems || []).map(item => {
-              const balance = stockBalances.find(balance  => balance.item_id === item.id);
+            {toArr(filteredItems).map(item => {
+              const balance = toArr(stockBalances).find(balance  => balance.item_id === item.id);
               const status =
                 balance?.qty_on_hand === 0
                   ? "out_of_stock"
@@ -121,7 +122,7 @@ const InventoryPage = () => {
       <SectionCard title="Reorder Alerts">
         {reorderAlerts.length > 0 ? (
           <ul>
-            {(reorderAlerts || []).map(alert  => (
+            {toArr(reorderAlerts).map(alert  => (
               <li key={alert.name}>
                 {alert.name} - Current Qty: {alert.currentQty}, Reorder Qty: {alert.reorderQty}
               </li>

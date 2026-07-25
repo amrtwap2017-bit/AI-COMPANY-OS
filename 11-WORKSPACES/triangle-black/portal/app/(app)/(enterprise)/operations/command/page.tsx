@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchTechnicians = async () => {
-  const response = await fetch(`${BACK}/api/v1/technicians`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/technicians`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -69,14 +70,14 @@ export default function CommandPage() {
       </div>
       <SectionCard title="Live Signal Feed">
         <ul className="list-disc pl-4">
-          {(signals || []).slice(0, 5).map((signal: any) => (
+          {toArr(signals).slice(0, 5).map((signal: any) => (
             <li key={signal.id}>{signal.description}</li>
           ))}
         </ul>
       </SectionCard>
       <SectionCard title="Technician Status">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(technicians || []).slice(0, 5).map((tech: any) => (
+          {toArr(technicians).slice(0, 5).map((tech: any) => (
             <div key={tech.id} className="bg-gray-100 p-4 rounded-lg flex items-center justify-between">
               <p>{tech.name}</p>
               <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">

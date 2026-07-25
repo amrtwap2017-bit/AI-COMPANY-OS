@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchInvoices = async () => {
-  const response = await fetch(`${BACK}/api/v1/invoices`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/invoices`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -48,11 +49,11 @@ const CustomerSuccessPage = () => {
   if (isContractLoading || isInvoiceLoading || isWorkOrderLoading) return <LoadingState />;
 
   const totalContracts = contractData?.length || [];
-  const activeContracts = (contractData || []).filter(contract  => contract.status === "active").length;
-  const expiringSoonContracts = (contractData || []).filter(
+  const activeContracts = toArr(contractData).filter(contract  => contract.status === "active").length;
+  const expiringSoonContracts = toArr(contractData).filter(
     contract  => Math.ceil((new Date(contract.end_date) - new Date(today)) / 86400000) <= 60
   ).length;
-  const monthlyRevenueEGP = (contractData || []).reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
+  const monthlyRevenueEGP = toArr(contractData).reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
 
   const activeRevenue = activeContracts * 12;
   const portfolioHealth = (activeContracts / totalContracts) * 100;
@@ -77,7 +78,7 @@ const CustomerSuccessPage = () => {
         </div>
       </SectionCard>
       <SectionCard title="Contract List with Renewal Status">
-        {(contractData || []).map(contract  => (
+        {toArr(contractData).map(contract  => (
           <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <div>{contract.title}</div>
             <StatusBadge label={contract.status} />
@@ -88,7 +89,7 @@ const CustomerSuccessPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Top Revenue Contracts">
-        {(topRevenueContracts || []).map(contract  => (
+        {toArr(topRevenueContracts).map(contract  => (
           <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <div>{contract.title}</div>
             <div>{contract.total_value} EGP</div>

@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Package, FileText, Building, CreditCard, Truck } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STATUS_COLORS: Record<string, string> = {
   draft:     "bg-slate-100 text-slate-600",
   submitted: "bg-blue-100 text-blue-700",
@@ -130,7 +142,7 @@ export default function PurchaseOrderDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {lineItems.map((item: any) => (
+                    {toArr(lineItems).map((item: any) => (
                       <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50">
                         <td className="py-2">
                           <div className="font-medium text-slate-800">{item.name ?? item.description}</div>

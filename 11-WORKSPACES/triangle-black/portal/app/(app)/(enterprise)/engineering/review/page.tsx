@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -13,7 +14,7 @@ const ENG_TYPES = ["hvac", "electrical", "mechanical", "corrective", "plumbing"]
 
 async function fetchWOs() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/work-orders`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : d.items ?? [];
@@ -25,7 +26,7 @@ async function fetchWOs() {
 
 async function fetchAssets() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/assets`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : d.items ?? [];
@@ -45,10 +46,10 @@ export default function EngineeringReviewPage() {
 
   const isLoading = w1 || a1;
 
-  const engWOs = (wos || []).filter((w: any) => ENG_TYPES.includes(w.type));
-  const completed = engWOs.filter((w: any) => w.status === "completed");
-  const criticalOpen = engWOs.filter((w: any) => w.priority === "critical" && w.status === "open");
-  const faultAssets = (assets || []).filter((a: any) => a.status === "fault" || a.status === "breakdown");
+  const engWOs = toArr(wos).filter((w: any) => ENG_TYPES.includes(w.type));
+  const completed = toArr(engWOs).filter((w: any) => w.status === "completed");
+  const criticalOpen = toArr(engWOs).filter((w: any) => w.priority === "critical" && w.status === "open");
+  const faultAssets = toArr(assets).filter((a: any) => a.status === "fault" || a.status === "breakdown");
 
   return (
     <PageWrapper>

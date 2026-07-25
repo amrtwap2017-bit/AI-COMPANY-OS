@@ -6,6 +6,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Calendar, CheckCircle, AlertTriangle, Clock } from "lucide-react";
 import { useState } from "react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const TYPE_COLORS: Record<string, string> = {
@@ -33,18 +45,18 @@ export default function MaintenanceSchedulePage() {
   const startOfMonth = new Date(viewYear, viewMonth, 1);
   const endOfMonth   = new Date(viewYear, viewMonth + 1, 0);
 
-  const thisMonth = plans.filter((p: any) => {
+  const thisMonth = toArr(plans).filter((p: any) => {
     if (!p.next_due_date) return false;
     const due = new Date(p.next_due_date);
     return due >= startOfMonth && due <= endOfMonth;
   });
 
-  const overdue = plans.filter((p: any) => {
+  const overdue = toArr(plans).filter((p: any) => {
     if (!p.next_due_date || p.status !== "active") return false;
     return new Date(p.next_due_date) < now;
   });
 
-  const upcoming7 = plans.filter((p: any) => {
+  const upcoming7 = toArr(plans).filter((p: any) => {
     if (!p.next_due_date || p.status !== "active") return false;
     const due = new Date(p.next_due_date);
     const diff = (due.getTime() - now.getTime()) / 86400000;
@@ -122,7 +134,7 @@ export default function MaintenanceSchedulePage() {
 
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1">
-          {calendarDays.map((day, idx) => {
+          {toArr(calendarDays).map((day, idx) => {
             if (!day) return <div key={`empty-${idx}`} className="h-16" />;
             const dayPlans = byDay[day] ?? [];
             const isToday  = day === now.getDate() && viewMonth === now.getMonth() && viewYear === now.getFullYear();
@@ -136,7 +148,7 @@ export default function MaintenanceSchedulePage() {
                 <div className={`font-semibold mb-1 ${isToday ? "text-blue-700" : "text-slate-600"}`}>
                   {day}
                 </div>
-                {dayPlans.slice(0, 2).map((p: any) => (
+                {(dayPlans || []).slice(0, 2).map((p: any) => (
                   <div
                     key={p.id}
                     className={`px-1 py-0.5 rounded text-xs mb-0.5 truncate border
@@ -159,7 +171,7 @@ export default function MaintenanceSchedulePage() {
       {overdue.length > 0 && (
         <SectionCard title={`Overdue Plans (${overdue.length})`}>
           <div className="space-y-2">
-            {overdue.slice(0, 10).map((p: any) => {
+            {(overdue || []).slice(0, 10).map((p: any) => {
               const daysOverdue = Math.floor(
                 (now.getTime() - new Date(p.next_due_date).getTime()) / 86400000
               );

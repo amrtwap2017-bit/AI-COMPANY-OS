@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { MapPin, Wrench, Users, Activity, Building } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function SiteDetailPage() {
   const { id } = useParams();
 
@@ -40,8 +52,8 @@ export default function SiteDetailPage() {
   const techs  = Array.isArray(techsData)  ? techsData  : techsData?.data  ?? techsData?.items  ?? [];
   const wos    = Array.isArray(wosData)    ? wosData    : wosData?.data    ?? wosData?.items    ?? [];
 
-  const criticalAssets = (assets || []).filter((a: any) => a.criticality === "critical").length;
-  const activeTechs    = techs.filter((t: any) => t.is_active).length;
+  const criticalAssets = toArr(assets).filter((a: any) => a.criticality === "critical").length;
+  const activeTechs    = toArr(techs).filter((t: any) => t.is_active).length;
 
   return (
     <PageWrapper>
@@ -97,7 +109,7 @@ export default function SiteDetailPage() {
           {/* Open WOs */}
           {(wos || []).length > 0 && (
             <SectionCard title={`Open WOs (${(wos || []).length})`}>
-              {(wos || []).slice(0, 5).map((wo: any) => (
+              {toArr(wos).slice(0, 5).map((wo: any) => (
                 <div key={wo.id} className="p-2 mb-2 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="text-xs font-medium text-slate-700 truncate">{wo.title}</div>
                   <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
@@ -112,7 +124,7 @@ export default function SiteDetailPage() {
           <SectionCard title={`Assets (${(assets || []).length})`}>
             {(assets || []).length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {(assets || []).map((asset: any) => (
+                {toArr(assets).map((asset: any) => (
                   <div key={asset.id}
                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -138,7 +150,7 @@ export default function SiteDetailPage() {
           <SectionCard title={`Technicians (${techs.length})`}>
             {techs.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {techs.map((tech: any) => {
+                {toArr(techs).map((tech: any) => {
                   const util = tech.max_work_orders > 0
                     ? Math.round(tech.current_work_orders / tech.max_work_orders * 100) : 0;
                   return (

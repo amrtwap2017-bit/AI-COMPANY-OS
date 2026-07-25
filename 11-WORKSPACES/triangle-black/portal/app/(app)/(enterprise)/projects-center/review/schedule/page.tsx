@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -9,7 +10,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchProjects = async () => {
-  const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/projects`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -26,9 +27,9 @@ const SchedulePage = () => {
 
   const today = new Date();
   const totalDays = (data || []).length;
-  const onScheduleCount = (data || []).filter(p => new Date(p.end_date) > new Date(today.setDate(today.getDate() + 14))).length;
-  const atRiskCount = (data || []).filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(p.end_date) > today).length;
-  const overdueCount = (data || []).filter(p => new Date(p.end_date) < today).length;
+  const onScheduleCount = toArr(data).filter(p => new Date(p.end_date) > new Date(today.setDate(today.getDate() + 14))).length;
+  const atRiskCount = toArr(data).filter(p => new Date(p.end_date) <= new Date(today.setDate(today.getDate() + 14)) && new Date(p.end_date) > today).length;
+  const overdueCount = toArr(data).filter(p => new Date(p.end_date) < today).length;
 
   const scheduleHealth = (onScheduleCount / totalDays) * 100;
 
@@ -43,7 +44,7 @@ const SchedulePage = () => {
           <MetricStrip label="Overdue" value={overdueCount} color="red" />
         </SectionCard>
         <SectionCard title="Schedule Timeline">
-          {(data || []).map(project => (
+          {toArr(data).map(project => (
             <div key={project.id} className="flex items-center justify-between border-b py-2 last:border-b-0">
               <span>{project.name}</span>
               <div className="relative w-full">

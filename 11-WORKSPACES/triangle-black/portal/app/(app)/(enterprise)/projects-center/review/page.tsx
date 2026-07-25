@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchProjects() {
   try {
-    const r = await fetch(`${BACK}/api/v1/projects/`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/projects/`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);
@@ -21,7 +22,7 @@ async function fetchProjects() {
 }
 async function fetchWOs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/work-orders/`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/work-orders/`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);
@@ -38,20 +39,20 @@ export default function ProjectsReviewPage() {
 
   const getDays = (end) => end ? Math.ceil((new Date(end) - new Date()) / 86400000) : null;
 
-  const withDays = (projects || []).map((p) => ({
+  const withDays = toArr(projects).map((p) => ({
     ...p,
     daysLeft: getDays(p.end_date),
-    woCount: (wos || []).filter((w) => w.contract_id === p.contract_id).length,
+    woCount: toArr(wos).filter((w) => w.contract_id === p.contract_id).length,
   }));
 
-  const active    = withDays.filter((p) => p.status === "active");
+  const active    = toArr(withDays).filter((p) => p.status === "active");
   const atRisk    = active.filter((p) => p.daysLeft !== null && p.daysLeft <= 14);
-  const completed = withDays.filter((p) => p.status === "completed");
+  const completed = toArr(withDays).filter((p) => p.status === "completed");
 
   const filtered = filter === "all" ? withDays
     : filter === "active" ? active
     : filter === "completed" ? completed
-    : withDays.filter((p) => p.status === filter);
+    : toArr(withDays).filter((p) => p.status === filter);
 
   if (isLoading) return <LoadingState message="Loading project review..." />;
 

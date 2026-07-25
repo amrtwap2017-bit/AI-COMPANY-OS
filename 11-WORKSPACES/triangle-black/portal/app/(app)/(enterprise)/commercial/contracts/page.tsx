@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { FileText, Filter, RefreshCw, AlertTriangle, CheckCircle, Search, Loader2 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STATUS_COLORS: Record<string, string> = {
   active:   "bg-emerald-100 text-emerald-700",
   expired:  "bg-red-100 text-red-700",
@@ -40,7 +52,7 @@ export default function ContractsPage() {
         )
       ),
     onSuccess: (results) => {
-      const succeeded = (results || []).filter(r => r.success).length;
+      const succeeded = toArr(results).filter(r => r.success).length;
       setRenewResult({ succeeded, total: results.length });
       setSelectedIds(new Set());
       qc.invalidateQueries({ queryKey: ["contracts-list"] });
@@ -55,10 +67,10 @@ export default function ContractsPage() {
   // Filter + search + sort
   const filtered = useMemo(() => {
     let list = contracts;
-    if (statusFilter !== "all") list = (list || []).filter((c: any) => c.status === statusFilter);
+    if (statusFilter !== "all") list = toArr(list).filter((c: any) => c.status === statusFilter);
     if (searchQ) {
       const q = searchQ.toLowerCase();
-      list = (list || []).filter((c: any) =>
+      list = toArr(list).filter((c: any) =>
         (c.title ?? "").toLowerCase().includes(q) ||
         (c.hotel_id ?? "").toLowerCase().includes(q)
       );
@@ -73,7 +85,7 @@ export default function ContractsPage() {
   }, [contracts, statusFilter, searchQ, sortBy]);
 
   const now = new Date();
-  const expiringSoon = (contracts || []).filter((c: any) =>
+  const expiringSoon = toArr(contracts).filter((c: any) =>
     c.status === "active" && c.end_date &&
     new Date(c.end_date).getTime() - now.getTime() < 30 * 86400000
   ).length;
@@ -111,7 +123,7 @@ export default function ContractsPage() {
       {/* KPI strip */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {["active","expired","renewed","draft"].map(status => {
-          const count = (contracts || []).filter((c: any) => c.status === status).length;
+          const count = toArr(contracts).filter((c: any) => c.status === status).length;
           return (
             <button
               key={status}

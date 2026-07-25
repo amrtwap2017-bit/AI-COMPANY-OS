@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,7 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchVendors = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -36,7 +37,7 @@ const Vendor360Page = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load vendors" />;
 
-  const filteredVendors = (vendors || []).filter((vendor: any) =>
+  const filteredVendors = toArr(vendors).filter((vendor: any) =>
     vendor.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -46,7 +47,7 @@ const Vendor360Page = () => {
 
   const renderVendorList = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredVendors.map((vendor: any) => (
+      {toArr(filteredVendors).map((vendor: any) => (
         <SectionCard key={vendor.id} onClick={() => handleVendorSelect(vendor)}>
           <h3 className="font-bold">{vendor.name}</h3>
           <StatusBadge>{vendor.category}</StatusBadge>
@@ -60,7 +61,7 @@ const Vendor360Page = () => {
     if (!selectedVendor) return null;
 
     const fetchPOs = async (vendorId) => {
-      const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders?vendor_id=${vendorId}`, { credentials: "include" });
+      const response = await authFetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendorId}`).then(r => r.json());
       if (!response.ok) return [];
       return response.json();
     };
@@ -75,7 +76,7 @@ const Vendor360Page = () => {
     if (isPOError) return <EmptyState title="Failed to load POs" />;
 
     const poCount = purchaseOrders.length;
-    const totalSpend = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_spend_egp, 0);
+    const totalSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_spend_egp, 0);
     const lastPODate = purchaseOrders.length > 0 ? new Date(purchaseOrders[0].created_at).toLocaleDateString() : null;
 
     let performanceBadge = "No History";
@@ -93,7 +94,7 @@ const Vendor360Page = () => {
 
         <h3>PO History</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(purchaseOrders || []).map((po: any) => (
+          {toArr(purchaseOrders).map((po: any) => (
             <SectionCard key={po.id}>
               <h4>{po.order_number}</h4>
               <MetricStrip label="Total Spend" value={`${po.total_spend_egp} EGP`} />

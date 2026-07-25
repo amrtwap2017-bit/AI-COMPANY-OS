@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -12,19 +13,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 const getToday = () => new Date().toISOString().split('T')[0];
 
 const fetchLeads = async () => {
-  const response = await fetch(`${BACK}/api/v1/leads?created_at=${getToday()}`, { credentials: 'include' });
+  const response = await authFetch(`/api/v1/leads?created_at=${getToday()}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: 'include' });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: 'include' });
+  const response = await authFetch(`/api/v1/ai/signals?category=commercial`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -74,7 +75,7 @@ const CommercialWorkbenchPage = () => {
         />
       </div>
       <SectionCard title="Hot Leads">
-        {(hotLeads || []).map(lead => (
+        {toArr(hotLeads).map(lead => (
           <div key={lead.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
             <span>{lead.company_name}</span>
             <StatusBadge status={lead.status} />
@@ -83,7 +84,7 @@ const CommercialWorkbenchPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Contract Renewals Due">
-        {(contractRenewals || []).map(contract => {
+        {toArr(contractRenewals).map(contract => {
           const daysRemaining = Math.ceil((new Date(contract.end_date) - new Date()) / (1000 * 60 * 60 * 24));
           return (
             <div key={contract.id} className="flex items-center justify-between p-2 border-b last:border-b-0">

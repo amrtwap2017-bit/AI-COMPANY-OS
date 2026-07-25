@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,13 +19,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPmPlans = async () => {
-  const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAssets = async (asset_node_id: string) => {
-  const response = await fetch(`${BACK}/api/v1/assets?node_id=${asset_node_id}`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/assets?node_id=${asset_node_id}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -40,7 +41,7 @@ const PmPlansPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load PM plans" />;
 
-  const filteredPlans = (pmPlans || []).filter((plan: any) =>
+  const filteredPlans = toArr(pmPlans).filter((plan: any) =>
     plan.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -53,14 +54,14 @@ const PmPlansPage = () => {
         <MetricStrip
           metrics={[
             { label: "Total Plans", value: pmPlans.length },
-            { label: "Active", value: filteredPlans.filter((p: any) => p.status === "active").length },
+            { label: "Active", value: toArr(filteredPlans).filter((p: any) => p.status === "active").length },
             {
               label: "Overdue",
-              value: filteredPlans.filter((p: any) => new Date(p.next_due_date) < new Date(today)).length,
+              value: toArr(filteredPlans).filter((p: any) => new Date(p.next_due_date) < new Date(today)).length,
             },
             {
               label: "Due This Week",
-              value: filteredPlans.filter(
+              value: toArr(filteredPlans).filter(
                 (p: any) =>
                   new Date(p.next_due_date).getTime() >= new Date(today).getTime() &&
                   new Date(p.next_due_date).getTime() <= new Date(today).getTime() + 604800000
@@ -70,7 +71,7 @@ const PmPlansPage = () => {
         />
       </SectionCard>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredPlans.map((plan: any) => (
+        {toArr(filteredPlans).map((plan: any) => (
           <div key={plan.id} onClick={() => setSelectedPlan(plan)} className="cursor-pointer p-4 border rounded hover:bg-gray-50">
             <h3 className="font-bold">{plan.title}</h3>
             <StatusBadge status={plan.status} />

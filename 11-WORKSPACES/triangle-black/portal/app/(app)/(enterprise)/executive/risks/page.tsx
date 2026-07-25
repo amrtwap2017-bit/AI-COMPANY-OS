@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,17 +18,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   return response.json();
 };
 
 const fetchSLA = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/sla`).then(r => r.json());
   return response.json();
 };
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   return response.json();
 };
 
@@ -48,8 +49,8 @@ const RiskRegisterPage = () => {
   const slaData = slaQuery.data;
   const contracts = contractsQuery.data;
 
-  const highRisks = (signals || []).filter(signal => signal.priority === "critical");
-  const mediumRisks = (signals || []).filter(signal => signal.priority === "high");
+  const highRisks = toArr(signals).filter(signal => signal.priority === "critical");
+  const mediumRisks = toArr(signals).filter(signal => signal.priority === "high");
 
   const complianceRisk = slaData.compliance < 95 ? (
     <SectionCard title="SLA Risk" status="red">
@@ -57,7 +58,7 @@ const RiskRegisterPage = () => {
     </SectionCard>
   ) : null;
 
-  const financialRisk = (contracts || []).filter(contract => contract.expiryDate <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).reduce((acc: any, contract: any) => acc + contract.valueAtRisk, 0);
+  const financialRisk = toArr(contracts).filter(contract => contract.expiryDate <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).reduce((acc: any, contract: any) => acc + contract.valueAtRisk, 0);
 
   return (
     <PageWrapper>

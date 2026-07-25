@@ -4,6 +4,18 @@ import { useState } from "react";
 import { PageWrapper, PageHeader, SectionCard } from "@/components/ui";
 import { Download, FileText, Package, Users, TrendingUp, Wrench, CreditCard } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const EXPORTS = [
@@ -95,7 +107,7 @@ function ExportCard({ exp }: { exp: any }) {
 
           {exp.filters.length > 0 && (
             <div className="flex gap-2 mt-3 flex-wrap">
-              {exp.filters.map((f: any) => (
+              {exp.toArr(filters).map((f: any) => (
                 <select
                   key={f.key}
                   value={filters[f.key] ?? ""}
@@ -103,7 +115,7 @@ function ExportCard({ exp }: { exp: any }) {
                   className="text-xs border border-slate-200 rounded-lg px-2 py-1"
                 >
                   <option value="">All {f.label}</option>
-                  {f.options.map((o: string) => (
+                  {f.toArr(options).map((o: string) => (
                     <option key={o} value={o}>{o}</option>
                   ))}
                 </select>
@@ -140,7 +152,7 @@ export default function DataExportsPage() {
       </div>
 
       <div className="space-y-4">
-        {(EXPORTS || []).map(exp  => (
+        {toArr(EXPORTS).map(exp  => (
           <ExportCard key={exp.label} exp={exp} />
         ))}
       </div>

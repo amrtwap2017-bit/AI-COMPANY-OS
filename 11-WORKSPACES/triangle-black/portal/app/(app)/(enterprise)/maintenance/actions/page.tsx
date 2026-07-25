@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -12,10 +13,10 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 const fetchMaintenanceData = async () => {
   const today = new Date().toISOString().slice(0, 10);
   const [signalsResponse, pmPlansResponse, wosResponse, assetsResponse] = await Promise.all([
-    fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" }),
-    fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" }),
-    fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" }),
-    fetch(`${BACK}/api/v1/assets`, { credentials: "include" })
+    authFetch(`/api/v1/ai/signals?category=maintenance`).then(r => r.json()),
+    authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json()),
+    authFetch(`/api/v1/work-orders`).then(r => r.json()),
+    authFetch(`/api/v1/assets`).then(r => r.json())
   ]);
 
   const [signals, pmPlans, wos, assets] = await Promise.all([
@@ -28,11 +29,11 @@ const fetchMaintenanceData = async () => {
   return {
     totalActions: (signals || []).length + pmPlans.length + (wos || []).length + (assets || []).length,
     criticalActions: [
-      ...(signals || []).filter(signal => signal.urgency === "critical"),
-      ...(assets || []).filter(asset => asset.status === "faulted")
+      ...toArr(signals).filter(signal => signal.urgency === "critical"),
+      ...toArr(assets).filter(asset => asset.status === "faulted")
     ],
-    overduePMs: (pmPlans || []).filter(plan  => plan.next_due_date < today),
-    openWOs: (wos || []).filter(wo => wo.status === "open")
+    overduePMs: toArr(pmPlans).filter(plan  => plan.next_due_date < today),
+    openWOs: toArr(wos).filter(wo => wo.status === "open")
   };
 };
 

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,9 +11,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchContracts = async () => {
-  const response = await fetch(`${BACK}/api/v1/contracts`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
   if (!response.ok) {
     return [];
   }
@@ -30,10 +29,10 @@ const ContractRenewalPage = () => {
 
   const contracts = data.contracts;
   const totalContracts = (contracts || []).length;
-  const activeContracts = (contracts || []).filter(c => c.status === "active").length;
-  const expiringSoon = (contracts || []).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90).length;
-  const expiringUrgently = (contracts || []).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 30).length;
-  const totalValueEGP = (contracts || []).reduce((acc: any, c: any) => acc + c.contract_value, 0);
+  const activeContracts = toArr(contracts).filter(c => c.status === "active").length;
+  const expiringSoon = toArr(contracts).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90).length;
+  const expiringUrgently = toArr(contracts).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 30).length;
+  const totalValueEGP = toArr(contracts).reduce((acc: any, c: any) => acc + c.contract_value, 0);
 
   return (
     <PageWrapper>

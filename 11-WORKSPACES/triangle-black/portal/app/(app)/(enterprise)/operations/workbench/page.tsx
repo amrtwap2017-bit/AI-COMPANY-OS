@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchCostSummary = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/costs/summary`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/costs/summary`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -42,7 +43,7 @@ const DashboardPage = () => {
     <PageWrapper>
       <PageHeader title="Dashboard" />
       <SectionCard title="Signals">
-        {(signals || []).map((signal: any) => (
+        {toArr(signals).map((signal: any) => (
           <div key={signal.id} className="flex items-center mt-1">
             <StatusBadge category={signal.category} />
             <StatusBadge priority={signal.priority} />

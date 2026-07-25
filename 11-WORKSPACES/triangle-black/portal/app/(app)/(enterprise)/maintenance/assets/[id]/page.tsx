@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState, StatusBadge } from 
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Activity, Wrench, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 function HealthBar({ score }: { score: number }) {
   const color = score < 20 ? "bg-red-500" : score < 40 ? "bg-orange-500" :
                 score < 60 ? "bg-amber-500" : score < 80 ? "bg-blue-500" : "bg-emerald-500";
@@ -143,7 +155,7 @@ export default function AssetDetailPage() {
           <SectionCard title={`Work Order History (${(wos || []).length})`}>
             {(wos || []).length > 0 ? (
               <div className="space-y-2">
-                {(wos || []).map((wo: any) => (
+                {toArr(wos).map((wo: any) => (
                   <div key={wo.id} className="flex items-center justify-between p-3
                                                bg-slate-50 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-3">
@@ -170,7 +182,7 @@ export default function AssetDetailPage() {
           <SectionCard title={`Maintenance Plans (${pms.length})`}>
             {pms.length > 0 ? (
               <div className="space-y-2">
-                {(pms || []).map((pm: any) => (
+                {toArr(pms).map((pm: any) => (
                   <div key={pm.id} className="flex items-center justify-between p-3
                                                bg-slate-50 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-3">

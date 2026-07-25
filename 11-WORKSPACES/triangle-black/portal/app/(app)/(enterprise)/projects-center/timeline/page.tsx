@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, StatusBadge, LoadingState } from 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const ProjectTimelinePage = () => {
   const fetchProjects = async () => {
     const response = await authFetch("/api/v1/projects");
@@ -42,12 +54,12 @@ const ProjectTimelinePage = () => {
       <PageHeader title="Project Timeline" />
       <div className="flex justify-between mb-4">
         <span>Total Projects: {(projects || []).length}</span>
-        <span>Active: {(projects || []).filter(p => p.status === "active").length}</span>
-        <span>Planning: {(projects || []).filter(p => p.status === "planning").length}</span>
-        <span>Completed: {(projects || []).filter(p => p.status === "completed").length}</span>
+        <span>Active: {toArr(projects).filter(p => p.status === "active").length}</span>
+        <span>Planning: {toArr(projects).filter(p => p.status === "planning").length}</span>
+        <span>Completed: {toArr(projects).filter(p => p.status === "completed").length}</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(projects || []).map(project => (
+        {toArr(projects).map(project => (
           <SectionCard key={project.id}>
             <h3>{project.name}</h3>
             <StatusBadge status={project.status} />

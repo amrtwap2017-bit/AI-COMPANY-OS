@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Package, MapPin, ArrowUp, ArrowDown, BarChart3 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function WarehouseDetailPage() {
   const { id } = useParams();
 
@@ -36,12 +48,12 @@ export default function WarehouseDetailPage() {
   const movements = Array.isArray(movementsData) ? movementsData : movementsData?.data ?? movementsData?.items ?? [];
 
   const totalItems    = stocks.length;
-  const belowMinItems = stocks.filter((s: any) => {
+  const belowMinItems = toArr(stocks).filter((s: any) => {
     const min = Number(s.min_stock || s.item?.min_stock || 0);
     return Number(s.quantity || 0) <= min;
   }).length;
 
-  const totalValue = stocks.reduce((sum: number, s: any) => {
+  const totalValue = toArr(stocks).reduce((sum: number, s: any) => {
     return sum + (Number(s.quantity || 0) * Number(s.unit_cost || 0));
   }, 0);
 
@@ -72,7 +84,7 @@ export default function WarehouseDetailPage() {
         {/* Stock levels */}
         <SectionCard title={`Stock Levels (${stocks.length})`}>
           <div className="space-y-2 max-h-80 overflow-y-auto">
-            {stocks.map((s: any) => {
+            {toArr(stocks).map((s: any) => {
               const qty = Number(s.quantity || 0);
               const min = Number(s.min_stock || s.item?.min_stock || 0);
               const max = Number(s.max_stock || s.item?.max_stock || qty * 2 || 100);
@@ -110,7 +122,7 @@ export default function WarehouseDetailPage() {
         {/* Recent movements */}
         <SectionCard title={`Recent Movements (${movements.length})`}>
           <div className="space-y-2 max-h-80 overflow-y-auto">
-            {movements.map((m: any) => {
+            {toArr(movements).map((m: any) => {
               const isIn = m.movement_type === "in" || Number(m.quantity) > 0;
               return (
                 <div key={m.id}

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,19 +19,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
   return response.json();
 };
 
 const fetchAssets = async () => {
-  const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
   return response.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   return response.json();
 };
 
@@ -54,13 +53,13 @@ export default function MaintenanceCostsReviewPage() {
     fetchAllData();
   }, []);
 
-  const completedWorkOrders = (workOrders || []).filter(
+  const completedWorkOrders = toArr(workOrders).filter(
     (wo) => wo.status === "completed"
   );
 
   const totalWOsClosed = completedWorkOrders.length;
   const avgResolutionTime =
-    completedWorkOrders.reduce((acc: any, wo: any) => {
+    toArr(completedWorkOrders).reduce((acc: any, wo: any) => {
       if (wo.started_at && wo.completed_at) {
         return acc + (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000;
       }
@@ -68,9 +67,9 @@ export default function MaintenanceCostsReviewPage() {
     }, 0) / totalWOsClosed;
 
   const poCount = purchaseOrders.length;
-  const poTotalValueEGP = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.amount, 0);
+  const poTotalValueEGP = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.amount, 0);
 
-  const workOrderTypeCounts = completedWorkOrders.reduce((acc: any, wo: any) => {
+  const workOrderTypeCounts = toArr(completedWorkOrders).reduce((acc: any, wo: any) => {
     if (!acc[wo.type]) {
       acc[wo.type] = 1;
     } else {
@@ -91,7 +90,7 @@ export default function MaintenanceCostsReviewPage() {
     )
     .slice(0, 5);
 
-  const recentPOs = (purchaseOrders || []).slice(-5);
+  const recentPOs = toArr(purchaseOrders).slice(-5);
 
   return (
     <PageWrapper>
@@ -126,7 +125,7 @@ export default function MaintenanceCostsReviewPage() {
         <p>MAX: {Math.max(...resolutionTimes).toFixed(2)} hours</p>
         <p>MIN: {Math.min(...resolutionTimes).toFixed(2)} hours</p>
         <ul>
-          {top5LongestWOs.map((wo: any) => (
+          {toArr(top5LongestWOs).map((wo: any) => (
             <li key={wo.id}>
               {wo.title} - {wo.type} - {(Number(wo.hours) || 0).toFixed(2)} hours
             </li>
@@ -135,7 +134,7 @@ export default function MaintenanceCostsReviewPage() {
       </SectionCard>
       <SectionCard title="Recent POs">
         <ul>
-          {recentPOs.map((po: any) => (
+          {toArr(recentPOs).map((po: any) => (
             <li key={po.id}>
               {po.po_number} - {(Number(po.amount) || 0).toFixed(2)} EGP -{" "}
               <StatusBadge status={po.status} />

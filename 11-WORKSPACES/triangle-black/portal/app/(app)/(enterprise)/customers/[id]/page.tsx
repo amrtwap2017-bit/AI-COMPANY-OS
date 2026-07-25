@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
@@ -14,7 +15,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchContracts() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/contracts`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/contracts`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : d.items ?? [];
@@ -26,7 +27,7 @@ async function fetchContracts() {
 
 async function fetchInvoices() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/invoices`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/invoices`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : d.items ?? [];
@@ -38,7 +39,7 @@ async function fetchInvoices() {
 
 async function fetchWOs() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/work-orders`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : d.items ?? [];

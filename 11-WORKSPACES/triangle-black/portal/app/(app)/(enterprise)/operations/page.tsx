@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,12 +11,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   return response.json();
 };
 
 const fetchSignalsSummary = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals/summary`).then(r => r.json());
   return response.json();
 };
 

@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { User, Wrench, Star, TrendingUp, Clock, CheckCircle } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function TechnicianDetailPage() {
   const { id } = useParams();
 
@@ -32,9 +44,9 @@ export default function TechnicianDetailPage() {
 
   const wos = Array.isArray(wosData) ? wosData : wosData?.data ?? wosData?.items ?? [];
 
-  const completed = (wos || []).filter((w: any) => w.status === "completed").length;
-  const inProgress = (wos || []).filter((w: any) => w.status === "in_progress").length;
-  const open = (wos || []).filter((w: any) => w.status === "open").length;
+  const completed = toArr(wos).filter((w: any) => w.status === "completed").length;
+  const inProgress = toArr(wos).filter((w: any) => w.status === "in_progress").length;
+  const open = toArr(wos).filter((w: any) => w.status === "open").length;
   const completionRate = (wos || []).length > 0 ? Math.round(completed / (wos || []).length * 100) : 0;
   const utilization = tech.max_work_orders > 0
     ? Math.round(tech.current_work_orders / tech.max_work_orders * 100)
@@ -100,7 +112,7 @@ export default function TechnicianDetailPage() {
             <div className="mt-4">
               <div className="text-xs text-slate-500 mb-2 font-medium uppercase">Specializations</div>
               <div className="flex flex-wrap gap-1">
-                {specs.map((s: string) => (
+                {toArr(specs).map((s: string) => (
                   <span key={s} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">{s}</span>
                 ))}
                 {specs.length === 0 && <span className="text-xs text-slate-400">None specified</span>}
@@ -132,7 +144,7 @@ export default function TechnicianDetailPage() {
         <div className="lg:col-span-2">
           <SectionCard title={`Work Order History (${(wos || []).length})`}>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {(wos || []).map((wo: any) => (
+              {toArr(wos).map((wo: any) => (
                 <div key={wo.id} className="flex items-center justify-between p-3
                                              bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3">

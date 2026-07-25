@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { AlertTriangle, Activity, TrendingDown, CheckCircle } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const RISK_STYLES: Record<string, string> = {
   critical: "bg-red-100 text-red-700 border-red-300",
   high:     "bg-orange-100 text-orange-700 border-orange-300",
@@ -73,7 +85,7 @@ export default function PredictiveMaintenancePage() {
         <div className="lg:col-span-2">
           <SectionCard title="Asset Health Scores (Worst First)">
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {(assets || []).map((asset: any) => (
+              {toArr(assets).map((asset: any) => (
                 <div key={asset.asset_id}
                      className={`p-3 rounded-lg border ${RISK_STYLES[asset.risk_level] ?? RISK_STYLES.healthy}`}>
                   <div className="flex justify-between items-start mb-1">

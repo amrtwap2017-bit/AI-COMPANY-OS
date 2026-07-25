@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,7 +13,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchVendors() {
   try {
-    const r = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);
@@ -20,7 +21,7 @@ async function fetchVendors() {
 }
 async function fetchPOs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);
@@ -28,7 +29,7 @@ async function fetchPOs() {
 }
 async function fetchRFQs() {
   try {
-    const r = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/rfqs`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : (d?.items ?? []);
@@ -42,21 +43,21 @@ export default function VendorAnalyticsPage() {
 
   const isLoading = v1 || v2 || v3;
 
-  const vendorScores = (vendors || []).map((v) => {
-    const vendorPOs  = (pos || []).filter((p) => p.vendor_id === v.id);
+  const vendorScores = toArr(vendors).map((v) => {
+    const vendorPOs  = toArr(pos).filter((p) => p.vendor_id === v.id);
     const poCount    = vendorPOs.length;
-    const totalSpend = vendorPOs.reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
+    const totalSpend = toArr(vendorPOs).reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
     const leadScore  = v.lead_time_days ? Math.max(0, 40 - v.lead_time_days * 2) : 20;
-    const maxPOs     = Math.max(...(vendors || []).map((x) => (pos || []).filter((p) => p.vendor_id === x.id).length), 1);
+    const maxPOs     = Math.max(...toArr(vendors).map((x) => toArr(pos).filter((p) => p.vendor_id === x.id).length), 1);
     const poScore    = Math.round((poCount / maxPOs) * 50);
     return { ...v, poCount, totalSpend, score: Math.min(100, 10 + leadScore + poScore) };
   }).sort((a, b) => b.score - a.score);
 
-  const totalSpend    = (pos || []).reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
-  const activeVendors = vendorScores.filter((v) => v.poCount > 0).length;
-  const avgLead       = vendors.length > 0 ? Math.round((vendors || []).reduce((s, v) => s + (v.lead_time_days || 0), 0) / vendors.length) : 0;
-  const rfqResponded  = (rfqs || []).filter((r) => r.status === "received").length;
-  const maxSpend      = Math.max(...vendorScores.map((v) => v.totalSpend), 1);
+  const totalSpend    = toArr(pos).reduce((s, p) => s + (Number(p.total_amount) || 0), 0);
+  const activeVendors = toArr(vendorScores).filter((v) => v.poCount > 0).length;
+  const avgLead       = vendors.length > 0 ? Math.round(toArr(vendors).reduce((s, v) => s + (v.lead_time_days || 0), 0) / vendors.length) : 0;
+  const rfqResponded  = toArr(rfqs).filter((r) => r.status === "received").length;
+  const maxSpend      = Math.max(...toArr(vendorScores).map((v) => v.totalSpend), 1);
 
   if (isLoading) return <LoadingState message="Loading vendor analytics..." />;
 
@@ -73,7 +74,7 @@ export default function VendorAnalyticsPage() {
       <SectionCard title="Vendor Performance Scorecard">
         {vendorScores.length === 0 ? <EmptyState title="No vendors" description="No vendor data available" /> : (
           <div className="space-y-3">
-            {vendorScores.map((v, i) => (
+            {toArr(vendorScores).map((v, i) => (
               <div key={v.id} className={`flex items-center gap-4 px-4 py-3 rounded-lg border ${i === 0 ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"}`}>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -97,7 +98,7 @@ export default function VendorAnalyticsPage() {
 
       <SectionCard title="Spend Distribution (Top 5)">
         <div className="space-y-3">
-          {vendorScores.slice(0, 5).map((v) => (
+          {(vendorScores || []).slice(0, 5).map((v) => (
             <div key={v.id} className="flex items-center gap-3">
               <div className="w-32 text-xs font-medium text-slate-700 truncate">{v.name}</div>
               <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">

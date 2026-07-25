@@ -2,8 +2,21 @@
 "use client";
 
 import { useState } from "react";
+import { Button, EmptyState, PageHeader, PageWrapper, SectionCard } from "@/components/ui";
 import Link from "next/link";
 import {
+
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
   PageWrapper,
   PageHeader,
   SectionCard,
@@ -26,7 +39,7 @@ const InboxPresetsPage = () => {
     <PageWrapper>
       <PageHeader title="Inbox Presets" description="Saved filters and views for inbox" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {presets.map((preset: any) => (
+        {toArr(presets).map((preset: any) => (
           <SectionCard
             key={preset.name}
             title={preset.name}

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -20,25 +21,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchVendor = async (id: string) => {
-  const response = await fetch(`${BACK}/api/v1/inventory/vendors?id=${id}`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/inventory/vendors?id=${id}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchPurchaseOrders = async (vendor_id: string) => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchRFQs = async (vendor_reference: string) => {
-  const response = await fetch(`${BACK}/api/v1/rfqs?vendor_reference=${vendor_reference}`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/rfqs?vendor_reference=${vendor_reference}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };

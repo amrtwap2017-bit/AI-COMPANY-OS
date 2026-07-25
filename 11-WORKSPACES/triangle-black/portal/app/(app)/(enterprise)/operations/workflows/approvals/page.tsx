@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,16 +20,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-requests/`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
   return response.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders?status=completed`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/work-orders?status=completed`).then(r => r.json());
   return response.json();
 };
 
@@ -55,8 +52,8 @@ const ApprovalsPage = () => {
 
   if (!prsData.length && !wosData.length) return <EmptyState message="Approval queue is clear" />;
 
-  const pendingApprovals = (prsData || []).filter(pr  => pr.status === "draft" || pr.status === "pending");
-  const completedWOs = (wosData || []).filter(wo  => wo.status === "completed");
+  const pendingApprovals = toArr(prsData).filter(pr  => pr.status === "draft" || pr.status === "pending");
+  const completedWOs = toArr(wosData).filter(wo  => wo.status === "completed");
 
   return (
     <PageWrapper>
@@ -81,7 +78,7 @@ const ApprovalsPage = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SectionCard title="Purchase Requests">
-          {(pendingApprovals || []).map(pr  => (
+          {toArr(pendingApprovals).map(pr  => (
             <div key={pr.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
                 <p>{pr.pr_number}</p>
@@ -91,10 +88,7 @@ const ApprovalsPage = () => {
               <Button
                 onClick={() => {
                   setLoading(true);
-                  fetch(`${BACK}/api/v1/actions/inventory/purchase-requests/${pr.id}/approve`, {
-                    method: "POST",
-                    credentials: "include",
-                  }).then(() => {
+                  authFetch(`/api/v1/actions/inventory/purchase-requests/${pr.id}/approve`).then(() => {
                     setLoading(false);
                   });
                 }}
@@ -106,7 +100,7 @@ const ApprovalsPage = () => {
           ))}
         </SectionCard>
         <SectionCard title="Completed Work Orders">
-          {(completedWOs || []).map(wo  => (
+          {toArr(completedWOs).map(wo  => (
             <div key={wo.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
                 <p>{wo.title}</p>

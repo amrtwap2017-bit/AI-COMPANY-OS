@@ -5,6 +5,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { FileText, Download, TrendingUp, Users, Wrench, DollarSign, BarChart3 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const REPORTS = [
   {
     category: "Operations",
@@ -136,10 +148,10 @@ export default function ReportsPage() {
 
       {/* Report categories */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {(REPORTS || []).map(cat => (
+        {toArr(REPORTS).map(cat => (
           <SectionCard key={cat.category} title={cat.category}>
             <div className="space-y-2">
-              {cat.reports.map(report  => (
+              {cat.toArr(reports).map(report  => (
                 <ReportRow key={report.name} report={report} />
               ))}
             </div>

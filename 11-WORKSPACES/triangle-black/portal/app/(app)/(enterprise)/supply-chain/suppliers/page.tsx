@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, DataTable, Button } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -10,26 +11,26 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchVendors = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/inventory-vendors`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/inventory-vendors`).then(r => r.json());
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
-    return fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" }).then(response => response.json());
+    return authFetch(`/api/v1/inventory/vendors`).then(response => response.json());
   }
 };
 
 const fetchRFQs = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/rfqs`).then(r => r.json());
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
-    return fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" }).then(response => response.json());
+    return authFetch(`/api/v1/rfqs`).then(response => response.json());
   }
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   if (!response.ok) return [];
   return await response.json();
 };
@@ -48,21 +49,21 @@ const SupplierPage = () => {
   const purchaseOrders = purchaseOrdersQuery.data;
 
   const totalSuppliers = (vendors || []).length;
-  const activeRFQs = (rfqs || []).filter(rfq => rfq.status === "sent").length;
-  const totalSpend = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0);
-  const avgLeadTime = (vendors || []).reduce((acc: any, vendor: any) => acc + (vendor.lead_time_days || 0), 0) / (vendors || []).length;
+  const activeRFQs = toArr(rfqs).filter(rfq => rfq.status === "sent").length;
+  const totalSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0);
+  const avgLeadTime = toArr(vendors).reduce((acc: any, vendor: any) => acc + (vendor.lead_time_days || 0), 0) / (vendors || []).length;
 
-  const vendorScores = (vendors || []).map(vendor => {
-    const poCount = (purchaseOrders || []).filter(po => po.vendor_id === vendor.id).length;
-    const totalSpend = (purchaseOrders || []).filter(po => po.vendor_id === vendor.id).reduce((acc: any, po: any) => acc + po.total_amount, 0);
-    const responseRate = rfqs.some(rfq => rfq.vendor_id === vendor.id) ? Math.floor(Math.random() * (100 - 85) + 85) : null;
+  const vendorScores = toArr(vendors).map(vendor => {
+    const poCount = toArr(purchaseOrders).filter(po => po.vendor_id === vendor.id).length;
+    const totalSpend = toArr(purchaseOrders).filter(po => po.vendor_id === vendor.id).reduce((acc: any, po: any) => acc + po.total_amount, 0);
+    const responseRate = toArr(rfqs).some(rfq => rfq.vendor_id === vendor.id) ? Math.floor(Math.random() * (100 - 85) + 85) : null;
     return { ...vendor, po_count: poCount, total_spend, response_rate };
   }).sort((a: any, b: any) => b.total_spend - a.total_spend);
 
   const rfqStatusCounts = {
-    sent: (rfqs || []).filter(rfq => rfq.status === "sent").length,
-    received: (rfqs || []).filter(rfq => rfq.status === "received").length,
-    expired: (rfqs || []).filter(rfq => rfq.status === "expired").length,
+    sent: toArr(rfqs).filter(rfq => rfq.status === "sent").length,
+    received: toArr(rfqs).filter(rfq => rfq.status === "received").length,
+    expired: toArr(rfqs).filter(rfq => rfq.status === "expired").length,
   };
 
   return (
@@ -99,7 +100,7 @@ const SupplierPage = () => {
         </div>
       </SectionCard>
       <SectionCard title="Quick Vendor Contact List">
-        {vendorScores.slice(0, 6).map(vendor => (
+        {(vendorScores || []).slice(0, 6).map(vendor => (
           <Button key={vendor.id} href={`/supply-chain/vendors/${vendor.id}`} className="flex items-center gap-2 w-full">
             <span>{vendor.name}</span>
             <span>{vendor.phone}</span>

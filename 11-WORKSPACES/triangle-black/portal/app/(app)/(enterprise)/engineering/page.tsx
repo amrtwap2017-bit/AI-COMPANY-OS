@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAssets = async () => {
-  const response = await fetch(`${BACK}/api/v1/assets`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals?category=maintenance`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -35,7 +36,7 @@ export default function EngineeringPage() {
   if (isAssetsLoading || isSignalsLoading || isKpisLoading) return <LoadingState />;
 
   const totalAssets = (assets || []).length;
-  const inFault = (assets || []).filter(asset => asset.status === "in-fault").length;
+  const inFault = toArr(assets).filter(asset => asset.status === "in-fault").length;
   const engineeringWosOpen = kpis.engineeringWosOpen;
   const maintenanceSignalsCount = (signals || []).length;
 

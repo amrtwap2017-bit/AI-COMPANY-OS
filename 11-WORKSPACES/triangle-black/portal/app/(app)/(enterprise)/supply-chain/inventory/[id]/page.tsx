@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Package, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function InventoryItemDetailPage() {
   const { id } = useParams();
 
@@ -32,7 +44,7 @@ export default function InventoryItemDetailPage() {
 
   const moves = Array.isArray(movements) ? movements : movements?.data ?? movements?.items ?? [];
   const stocks = Array.isArray(stockData) ? stockData : stockData?.data ?? stockData?.items ?? [];
-  const totalStock = stocks.reduce((sum: number, s: any) => sum + (Number(s.quantity) || 0), 0);
+  const totalStock = toArr(stocks).reduce((sum: number, s: any) => sum + (Number(s.quantity) || 0), 0);
   const belowMin = totalStock <= (item.min_stock || 0);
 
   return (
@@ -76,7 +88,7 @@ export default function InventoryItemDetailPage() {
           </SectionCard>
 
           <SectionCard title="Stock by Warehouse">
-            {stocks.length > 0 ? stocks.map((s: any) => (
+            {stocks.length > 0 ? toArr(stocks).map((s: any) => (
               <div key={s.id ?? s.warehouse_id} className="p-3 bg-slate-50 rounded-lg mb-2">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">{s.warehouse_name ?? s.warehouse_id ?? "Warehouse"}</span>
@@ -106,7 +118,7 @@ export default function InventoryItemDetailPage() {
         <div className="lg:col-span-2">
           <SectionCard title={`Stock Movements (${moves.length})`}>
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {moves.map((m: any) => (
+              {toArr(moves).map((m: any) => (
                 <div key={m.id} className="flex items-center justify-between p-3
                                              bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex items-center gap-3">

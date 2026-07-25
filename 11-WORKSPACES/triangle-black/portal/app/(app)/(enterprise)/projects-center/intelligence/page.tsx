@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchProjects = async () => {
-  const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/projects`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchWorkOrders = async (projectId: string) => {
-  const response = await fetch(`${BACK}/api/v1/work-orders?project_id=${projectId}`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/work-orders?project_id=${projectId}`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -35,9 +36,9 @@ const ProjectIntelligencePage = () => {
   if (isError || isSignalsError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
 
   const totalProjects = (projects || []).length;
-  const atRiskCount = (projects || []).filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000).length;
-  const activeSignalsCount = (signals || []).filter(s => s.category === "operations" || s.category === "commercial").length;
-  const openWosCount = (projects || []).reduce((acc: any, p: any) => acc + fetchWorkOrders(p.id).then(wos => (wos || []).length), 0);
+  const atRiskCount = toArr(projects).filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000).length;
+  const activeSignalsCount = toArr(signals).filter(s => s.category === "operations" || s.category === "commercial").length;
+  const openWosCount = toArr(projects).reduce((acc: any, p: any) => acc + fetchWorkOrders(p.id).then(wos => (wos || []).length), 0);
 
   return (
     <PageWrapper>
@@ -49,7 +50,7 @@ const ProjectIntelligencePage = () => {
         <MetricStrip label="Open WOs" value={openWosCount} badge={<StatusBadge status="INFO" />} />
       </div>
       <SectionCard title="Project Risk Assessment">
-        {(projects || []).map(project => (
+        {toArr(projects).map(project => (
           <div key={project.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <span>{project.name}</span>
             <StatusBadge status={project.end_date < new Date().toISOString() ? "CRITICAL" : project.end_date - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000 ? "WARNING" : "INFO"} />
@@ -57,7 +58,7 @@ const ProjectIntelligencePage = () => {
         ))}
       </SectionCard>
       <SectionCard title="AI Insights">
-        {(signals || []).map(signal => (
+        {toArr(signals).map(signal => (
           <div key={signal.id} className="p-4 border-b last:border-b-0">
             <h3>{signal.title}</h3>
             <p>{signal.description}</p>

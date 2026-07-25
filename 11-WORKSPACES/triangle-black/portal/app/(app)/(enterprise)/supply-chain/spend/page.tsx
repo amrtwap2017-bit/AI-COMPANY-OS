@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,12 +11,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/purchase-orders`).then(r => r.json());
   return response.json();
 };
 
 const fetchVendors = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
   return response.json();
 };
 
@@ -33,17 +34,17 @@ const SpendPage = () => {
 
   const purchaseOrders = purchaseOrdersQuery.data;
   const totalPOs = purchaseOrders.length;
-  const totalSpend = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0);
+  const totalSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0);
   const avgPOValue = totalPOs > 0 ? (totalSpend / totalPOs).toLocaleString() : "N/A";
-  const activeVendors = new Set((purchaseOrders || []).map(po => po.vendor_id)).size;
+  const activeVendors = new Set(toArr(purchaseOrders).map(po => po.vendor_id)).size;
 
-  const statusCounts = (purchaseOrders || []).reduce((acc: any, po: any) => {
+  const statusCounts = toArr(purchaseOrders).reduce((acc: any, po: any) => {
     acc[po.status] = (acc[po.status] || 0) + 1;
     return acc;
   }, {} as { [key: string]: number });
 
-  const vendorSpend = (purchaseOrders || []).reduce((acc: any, po: any) => {
-    const vendor = (vendors || []).find(vendor => vendor.id === po.vendor_id);
+  const vendorSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => {
+    const vendor = toArr(vendors).find(vendor => vendor.id === po.vendor_id);
     if (vendor) {
       acc[vendor.name] = (acc[vendor.name] || 0) + po.total_amount;
     }
@@ -54,7 +55,7 @@ const SpendPage = () => {
     .sort((a: any, b: any) => b[1] - a[1])
     .slice(0, 5);
 
-  const monthlyTrend = (purchaseOrders || []).reduce((acc: any, po: any) => {
+  const monthlyTrend = toArr(purchaseOrders).reduce((acc: any, po: any) => {
     const month = new Date(po.created_at).toLocaleString("default", { month: "long" });
     acc[month] = (acc[month] || { count: 0, totalAmount: 0 });
     acc[month].count++;

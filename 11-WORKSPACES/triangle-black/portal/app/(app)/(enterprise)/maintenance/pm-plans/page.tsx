@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 async function fetchPlans() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
     if (!r.ok) return [];
     const d = await r.json();
     return Array.isArray(d) ? d : d.items ?? d.data ?? [];
@@ -41,9 +42,9 @@ export default function PMPlansPage() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const overdue   = plans.filter((p: any) => p.next_due_date && p.next_due_date < today);
-  const dueSoon   = plans.filter((p: any) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
-  const active    = plans.filter((p: any) => p.status === "active");
+  const overdue   = toArr(plans).filter((p: any) => p.next_due_date && p.next_due_date < today);
+  const dueSoon   = toArr(plans).filter((p: any) => p.next_due_date && p.next_due_date >= today && p.next_due_date <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+  const active    = toArr(plans).filter((p: any) => p.status === "active");
 
   return (
     <PageWrapper>

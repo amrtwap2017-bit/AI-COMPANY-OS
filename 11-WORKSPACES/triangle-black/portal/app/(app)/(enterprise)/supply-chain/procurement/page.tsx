@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,12 +11,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseRequests = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-requests/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
   return response.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   return response.json();
 };
 
@@ -25,10 +26,10 @@ const ProcurementPage = () => {
 
   if (isPRLoading || isPOLoading) return <LoadingState />;
 
-  const draftPRs = (purchaseRequests || []).filter(pr => pr.status === "draft").length;
-  const approvedPRs = (purchaseRequests || []).filter(pr => pr.status === "approved").length;
-  const activePOs = (purchaseOrders || []).filter(po => po.status === "active").length;
-  const totalSpendEGP = ((purchaseRequests || []).reduce((acc: any, pr: any) => acc + pr.amount, 0) + (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.amount, 0)).toFixed(2);
+  const draftPRs = toArr(purchaseRequests).filter(pr => pr.status === "draft").length;
+  const approvedPRs = toArr(purchaseRequests).filter(pr => pr.status === "approved").length;
+  const activePOs = toArr(purchaseOrders).filter(po => po.status === "active").length;
+  const totalSpendEGP = (toArr(purchaseRequests).reduce((acc: any, pr: any) => acc + pr.amount, 0) + toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.amount, 0)).toFixed(2);
 
   return (
     <PageWrapper>
@@ -51,7 +52,7 @@ const ProcurementPage = () => {
         </div>
       </SectionCard>
       <SectionCard title="Recent Activity">
-        {(purchaseRequests || []).slice(0, 5).concat((purchaseOrders || []).slice(0, 5)).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(item => (
+        {toArr(purchaseRequests).slice(0, 5).concat(toArr(purchaseOrders).slice(0, 5)).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(item => (
           <div key={item.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
             <span>{item.reference_number}</span>
             <StatusBadge type={item.type} />

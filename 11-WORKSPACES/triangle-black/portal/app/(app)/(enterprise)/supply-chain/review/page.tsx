@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,23 +18,17 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/purchase-orders`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/inventory/purchase-orders`).then(r => r.json());
   return response.json();
 };
 
 const fetchVendors = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   return response.json();
 };
 
@@ -61,29 +56,29 @@ const ReviewPage = () => {
   }
 
   const totalPOs = purchaseOrders.length;
-  const totalSpendEGP = (purchaseOrders || []).reduce(
+  const totalSpendEGP = toArr(purchaseOrders).reduce(
     (acc, po) => acc + po.total_spend_egp,
     0
   );
-  const activeVendors = new Set((purchaseOrders || []).map(po => po.vendor_id)).size;
-  const avgLeadTime = (purchaseOrders || []).reduce(
+  const activeVendors = new Set(toArr(purchaseOrders).map(po => po.vendor_id)).size;
+  const avgLeadTime = toArr(purchaseOrders).reduce(
     (acc, po) => acc + po.lead_time_days,
     0
   ) / totalPOs;
 
   let procurementHealthScore = 100;
-  if ((purchaseOrders || []).some(po => new Date(po.created_at) < new Date() - 30 * 24 * 60 * 60 * 1000)) {
+  if (toArr(purchaseOrders).some(po => new Date(po.created_at) < new Date() - 30 * 24 * 60 * 60 * 1000)) {
     procurementHealthScore -= 10;
   }
-  (purchaseOrders || []).forEach(po => {
+  toArr(purchaseOrders).forEach(po => {
     if (po.out_of_stock_signal) {
       procurementHealthScore -= 5;
     }
   });
 
-  const vendorPerformance = (vendors || []).map(vendor => ({
+  const vendorPerformance = toArr(vendors).map(vendor => ({
     ...vendor,
-    poCount: (purchaseOrders || []).filter(po => po.vendor_id === vendor.id).length,
+    poCount: toArr(purchaseOrders).filter(po => po.vendor_id === vendor.id).length,
   })).sort((a: any, b: any) => b.poCount - a.poCount).slice(0, 5);
 
   return (
@@ -104,7 +99,7 @@ const ReviewPage = () => {
         </SectionCard>
         <SectionCard title="Vendor Performance">
           <ul>
-            {(vendorPerformance || []).map(vendor  => (
+            {toArr(vendorPerformance).map(vendor  => (
               <li key={vendor.id}>
                 {vendor.name}: {vendor.poCount}
                 <div className="w-full bg-gray-200 rounded-full mt-1">

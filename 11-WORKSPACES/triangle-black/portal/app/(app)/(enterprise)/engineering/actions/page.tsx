@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchMaintenanceSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals?category=maintenance`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchPmPlans = async () => {
-  const response = await fetch(`${BACK}/api/v1/maintenance/pm-plans`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -50,7 +51,7 @@ const EngineeringActionsPage = () => {
         <MetricStrip label="Maintenance Signals" value={(maintenanceSignals || []).length} />
       </div>
       <SectionCard title="Today's Engineering Actions">
-        {(criticalWos || []).map((wo: any) => (
+        {toArr(criticalWos).map((wo: any) => (
           <Link key={wo.id} href={`/engineering/work-orders/${wo.id}`}>
             <div className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{wo.title}</span>
@@ -58,7 +59,7 @@ const EngineeringActionsPage = () => {
             </div>
           </Link>
         ))}
-        {(overduePmPlans || []).map((plan: any) => (
+        {toArr(overduePmPlans).map((plan: any) => (
           <Link key={plan.id} href={`/engineering/pm-plans/${plan.id}`}>
             <div className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{plan.title}</span>
@@ -66,7 +67,7 @@ const EngineeringActionsPage = () => {
             </div>
           </Link>
         ))}
-        {(maintenanceSignals || []).map((signal: any) => (
+        {toArr(maintenanceSignals).map((signal: any) => (
           <Link key={signal.id} href={`/engineering/maintenance-signals/${signal.id}`}>
             <div className="flex items-center justify-between p-2 border-b last:border-b-0">
               <span>{signal.title}</span>

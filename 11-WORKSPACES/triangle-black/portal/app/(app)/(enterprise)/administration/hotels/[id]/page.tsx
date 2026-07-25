@@ -6,6 +6,18 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Building, Wrench, FileText, Activity, MapPin, Star } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 export default function HotelDetailPage() {
   const { id } = useParams();
 
@@ -49,9 +61,9 @@ export default function HotelDetailPage() {
   const wos       = Array.isArray(wosData)       ? wosData       : wosData?.data       ?? wosData?.items       ?? [];
   const techs     = Array.isArray(techsData)     ? techsData     : techsData?.data     ?? techsData?.items     ?? [];
 
-  const activeContracts = (contracts || []).filter((c: any) => c.status === "active");
-  const totalContractValue = activeContracts.reduce((s: number, c: any) => s + Number(c.total_value || 0), 0);
-  const criticalAssets = (assets || []).filter((a: any) => a.criticality === "critical").length;
+  const activeContracts = toArr(contracts).filter((c: any) => c.status === "active");
+  const totalContractValue = toArr(activeContracts).reduce((s: number, c: any) => s + Number(c.total_value || 0), 0);
+  const criticalAssets = toArr(assets).filter((a: any) => a.criticality === "critical").length;
 
   return (
     <PageWrapper>
@@ -123,7 +135,7 @@ export default function HotelDetailPage() {
                 <div className="text-xs text-slate-500 mt-1">Annual Contract Value (EGP)</div>
               </div>
               <div className="space-y-2">
-                {activeContracts.slice(0, 3).map((c: any) => (
+                {(activeContracts || []).slice(0, 3).map((c: any) => (
                   <div key={c.id} className="p-2 bg-slate-50 rounded border border-slate-100">
                     <div className="text-xs font-medium text-slate-700 truncate">{c.title}</div>
                     <div className="text-xs text-slate-400">
@@ -139,7 +151,7 @@ export default function HotelDetailPage() {
           {/* Technicians */}
           {techs.length > 0 && (
             <SectionCard title={`Technicians (${techs.length})`}>
-              {techs.slice(0, 5).map((t: any) => {
+              {(techs || []).slice(0, 5).map((t: any) => {
                 const util = t.max_work_orders > 0
                   ? Math.round(t.current_work_orders / t.max_work_orders * 100) : 0;
                 return (
@@ -161,7 +173,7 @@ export default function HotelDetailPage() {
           <SectionCard title={`Assets (${(assets || []).length})`}>
             {(assets || []).length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {(assets || []).map((asset: any) => (
+                {toArr(assets).map((asset: any) => (
                   <div key={asset.id}
                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                     <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -186,7 +198,7 @@ export default function HotelDetailPage() {
           {(wos || []).length > 0 && (
             <SectionCard title={`Open Work Orders (${(wos || []).length})`}>
               <div className="space-y-2">
-                {(wos || []).map((wo: any) => (
+                {toArr(wos).map((wo: any) => (
                   <div key={wo.id}
                        className={`flex items-center justify-between p-3 rounded-lg border
                          ${wo.priority === "critical" ? "bg-red-50 border-red-200" : "bg-slate-50 border-slate-100"}`}>

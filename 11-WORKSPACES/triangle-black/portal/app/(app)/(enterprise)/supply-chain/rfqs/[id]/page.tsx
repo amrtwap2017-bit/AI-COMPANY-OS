@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -20,13 +21,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchRfqs = async () => {
-  const response = await fetch(`${BACK}/api/v1/rfqs`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/rfqs`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchVendors = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/vendors`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -52,7 +53,7 @@ export default function RfqPage() {
 
   if (isError || isVendorsError) return <EmptyState message="Failed to load data" />;
 
-  const rfq = (rfqs || []).find((r: any) => r.id === id);
+  const rfq = toArr(rfqs).find((r: any) => r.id === id);
 
   if (!rfq) {
     return (
@@ -70,7 +71,7 @@ export default function RfqPage() {
   }
 
   const vendorNames = rfq.vendor_ids
-    .map((vendorId: any) => (vendors || []).find((v: any) => v.id === vendorId)?.name)
+    .map((vendorId: any) => toArr(vendors).find((v: any) => v.id === vendorId)?.name)
     .filter(Boolean);
 
   return (
@@ -96,7 +97,7 @@ export default function RfqPage() {
       </SectionCard>
       <SectionCard title="Vendor Quotes">
         <ul className="list-disc pl-4">
-          {vendorNames.map((name, index) => (
+          {toArr(vendorNames).map((name, index) => (
             <li key={index}>{name}</li>
           ))}
         </ul>

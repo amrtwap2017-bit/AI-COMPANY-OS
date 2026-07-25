@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpisSla = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSLA = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/sla`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -39,7 +40,7 @@ const ExecutiveCommandPage = () => {
   const criticalSignalsCount = signals?.critical || 0;
   const status = criticalSignalsCount > 0 ? "CRITICAL ALERT" : "NOMINAL";
 
-  const topSignals = signals?.top_(signals || []).slice(0, 3);
+  const topSignals = signals?.top_toArr(signals).slice(0, 3);
 
   return (
     <PageWrapper>
@@ -80,7 +81,7 @@ const ExecutiveCommandPage = () => {
       <div className="mt-4">
         <h2>Live Signal Feed</h2>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {topSignals.map((signal, index) => (
+          {toArr(topSignals).map((signal, index) => (
             <li key={index} className={`bg-${signal.priority}-500 text-white p-2 rounded`}>
               {signal.message}
             </li>

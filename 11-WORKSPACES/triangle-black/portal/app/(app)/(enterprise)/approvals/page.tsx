@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { CheckCircle, XCircle, Clock, ShoppingCart, Wrench, FolderOpen } from "lucide-react";
 import { ApprovalModal } from "@/components/ui/ApprovalModal";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const TYPE_ICONS: Record<string, any> = {
   purchase_request: ShoppingCart,
   work_order:       Wrench,
@@ -92,7 +104,7 @@ export default function ApprovalsPage() {
       {prs.length > 0 && (
         <SectionCard title={`Purchase Requests (${prs.length})`} className="mb-6">
           <div className="space-y-2">
-            {prs.map((pr: any) => (
+            {toArr(prs).map((pr: any) => (
               <div key={pr.id}
                    className="flex items-center justify-between p-4
                               bg-white border border-slate-200 rounded-xl hover:border-amber-300">
@@ -127,7 +139,7 @@ export default function ApprovalsPage() {
       {projs.length > 0 && (
         <SectionCard title={`Projects for Activation (${projs.length})`} className="mb-6">
           <div className="space-y-2">
-            {projs.map((proj: any) => (
+            {toArr(projs).map((proj: any) => (
               <div key={proj.id}
                    className="flex items-center justify-between p-4
                               bg-white border border-slate-200 rounded-xl hover:border-blue-300">
@@ -158,7 +170,7 @@ export default function ApprovalsPage() {
       {(wos || []).length > 0 && (
         <SectionCard title={`Critical WOs — Unassigned (${(wos || []).length})`} className="mb-6">
           <div className="space-y-2">
-            {(wos || []).map((wo: any) => (
+            {toArr(wos).map((wo: any) => (
               <div key={wo.id}
                    className="flex items-center justify-between p-4
                               bg-red-50 border border-red-200 rounded-xl">

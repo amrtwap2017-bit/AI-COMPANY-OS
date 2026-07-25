@@ -25,7 +25,7 @@ async function fetchNotifications() {
 
 async function fetchSignals() {
   try {  
-    const r = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+    const r = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
     if (!r.ok) return { signals: [], total: 0 };
     return r.json();
   } catch (error) {
@@ -48,7 +48,7 @@ export default function InboxPage() {
 
   const isLoading = notifLoading || sigLoading;
   const signals = signalsData.signals || [];
-  const unread = (notifications || []).filter((n: any) => !n.read_at && !n.is_read).length;
+  const unread = toArr(notifications).filter((n: any) => !n.read_at && !n.is_read).length;
 
   return (
     <PageWrapper>

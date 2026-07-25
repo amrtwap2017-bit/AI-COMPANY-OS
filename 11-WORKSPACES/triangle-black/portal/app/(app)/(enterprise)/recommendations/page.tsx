@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,13 +11,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -31,8 +32,8 @@ const RecommendationsPage = () => {
 
   const signals = (signalsQuery.data?.signals || signalsQuery.data || []).filter(signal => signal.recommended_action);
   const totalRecommendations = (signals || []).length;
-  const criticalActions = (signals || []).filter(signal => signal.priority === "critical").length;
-  const highPriority = (signals || []).filter(signal => signal.priority === "high").length;
+  const criticalActions = toArr(signals).filter(signal => signal.priority === "critical").length;
+  const highPriority = toArr(signals).filter(signal => signal.priority === "high").length;
 
   if (totalRecommendations === 0) {
     return (
@@ -61,7 +62,7 @@ const RecommendationsPage = () => {
         />
       </SectionCard>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(sortedSignals || []).map(signal => (
+        {toArr(sortedSignals).map(signal => (
           <SectionCard key={signal.id}>
             <StatusBadge label={signal.priority} color={signal.priority === "critical" ? "red" : signal.priority === "high" ? "amber" : "blue"} />
             <h2 className="font-bold">{signal.title}</h2>

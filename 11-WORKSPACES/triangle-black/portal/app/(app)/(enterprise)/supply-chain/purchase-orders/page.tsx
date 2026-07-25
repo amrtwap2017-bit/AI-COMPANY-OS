@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,9 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -38,16 +37,16 @@ const PurchaseOrdersPage = () => {
   if (isError || !purchaseOrders) return <EmptyState />;
 
   const totalPOs = purchaseOrders.length;
-  const pendingPOs = (purchaseOrders || []).filter(po => po.status === "pending" || po.status === "draft").length;
-  const approvedPOs = (purchaseOrders || []).filter(po => po.status === "approved").length;
-  const receivedPOs = (purchaseOrders || []).filter(po => po.status === "received").length;
-  const cancelledPOs = (purchaseOrders || []).filter(po => po.status === "cancelled").length;
+  const pendingPOs = toArr(purchaseOrders).filter(po => po.status === "pending" || po.status === "draft").length;
+  const approvedPOs = toArr(purchaseOrders).filter(po => po.status === "approved").length;
+  const receivedPOs = toArr(purchaseOrders).filter(po => po.status === "received").length;
+  const cancelledPOs = toArr(purchaseOrders).filter(po => po.status === "cancelled").length;
 
-  const totalValueEGP = (purchaseOrders || []).reduce((acc: any, po: any) => acc + po.total_amount, 0).toLocaleString() + " EGP";
+  const totalValueEGP = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0).toLocaleString() + " EGP";
 
   const filteredPOs = statusFilter === "all"
     ? purchaseOrders
-    : (purchaseOrders || []).filter(po => po.status === statusFilter);
+    : toArr(purchaseOrders).filter(po => po.status === statusFilter);
 
   return (
     <PageWrapper>
@@ -104,7 +103,7 @@ const PurchaseOrdersPage = () => {
       <SectionCard>
         {filteredPOs.length > 0 ? (
           <ul className="divide-y divide-gray-200">
-            {(filteredPOs || []).map(po  => (
+            {toArr(filteredPOs).map(po  => (
               <li key={po.id} className="py-4">
                 <div className="flex justify-between items-center">
                   <strong>{po.po_number}</strong>

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,13 +18,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchLeads = async () => {
-  const response = await fetch(`${BACK}/api/v1/leads`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/leads`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals?category=commercial`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals?category=commercial`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -40,8 +41,8 @@ const CommercialReviewIntelligencePage = () => {
   const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
 
   // Calculate metrics
-  const wonLeads = (leads || []).filter(lead => lead.status === "won").length;
-  const lostLeads = (leads || []).filter(lead => lead.status === "lost").length;
+  const wonLeads = toArr(leads).filter(lead => lead.status === "won").length;
+  const lostLeads = toArr(leads).filter(lead => lead.status === "lost").length;
   const activePipeline = (leads || []).length - wonLeads - lostLeads;
   const winRate = (wonLeads / (leads || []).length) * 100;
 
@@ -51,7 +52,7 @@ const CommercialReviewIntelligencePage = () => {
     month.setMonth(month.getMonth() - i);
     return {
       month,
-      wonCount: (leads || []).filter(lead => 
+      wonCount: toArr(leads).filter(lead => 
         lead.created_at >= month.toISOString().split('T')[0] && 
         lead.created_at < new Date(month.getFullYear(), month.getMonth() + 1, 0).toISOString().split('T')[0]
       ).filter(lead => lead.status === "won").length,
@@ -59,7 +60,7 @@ const CommercialReviewIntelligencePage = () => {
   }).reverse();
 
   // Best performing stage
-  const bestStage = (leads || []).reduce((acc: any, lead: any) => {
+  const bestStage = toArr(leads).reduce((acc: any, lead: any) => {
     if (!acc[lead.status]) acc[lead.status] = 0;
     acc[lead.status]++;
     return acc;
@@ -67,10 +68,10 @@ const CommercialReviewIntelligencePage = () => {
   const bestStageName = Object.keys(bestStage).reduce((a: any, b: any) => (bestStage[a] > bestStage[b] ? a : b), '');
 
   // Pipeline velocity
-  const pipelineVelocity = (leads || []).filter(lead => lead.status === "won").reduce((acc: any, lead: any) => {
+  const pipelineVelocity = toArr(leads).filter(lead => lead.status === "won").reduce((acc: any, lead: any) => {
     const daysDifference = Math.floor((new Date().getTime() - new Date(lead.created_at).getTime()) / (1000 * 3600 * 24));
     return acc + daysDifference;
-  }, 0) / (leads || []).filter(lead => lead.status === "won").length;
+  }, 0) / toArr(leads).filter(lead => lead.status === "won").length;
 
   return (
     <PageWrapper>
@@ -89,7 +90,7 @@ const CommercialReviewIntelligencePage = () => {
         </SectionCard>
         <SectionCard title="AI Insights">
           {(signals || []).length > 0 ? (
-            (signals || []).map(signal => (
+            toArr(signals).map(signal => (
               <div key={signal.id} className="p-4 bg-white rounded-md shadow-md mb-2">
                 <h3>{signal.title}</h3>
                 <p>{signal.description}</p>

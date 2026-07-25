@@ -6,6 +6,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { QrCode, Printer, Download } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 function QRCodeBox({ assetId, assetName }: { assetId: string; assetName: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const value = `${window?.location?.origin ?? ""}/maintenance/assets/${assetId}`;
@@ -58,7 +70,7 @@ function QRCodeBox({ assetId, assetName }: { assetId: string; assetName: string 
       <canvas ref={canvasRef} width={120} height={120} className="border border-slate-100 rounded" />
       <div className="text-center">
         <p className="text-sm font-semibold text-slate-800 truncate max-w-32">{assetName}</p>
-        <p className="text-xs text-slate-400 font-mono">{assetId.slice(0,8)}</p>
+        <p className="text-xs text-slate-400 font-mono">{(assetId || []).slice(0,8)}</p>
       </div>
       <button
         onClick={handlePrint}
@@ -90,7 +102,7 @@ export default function QRCodesPage() {
 
       <SectionCard title={`${(assets || []).length} Assets`}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {(assets || []).map((asset: any) => (
+          {toArr(assets).map((asset: any) => (
             <QRCodeBox
               key={asset.id}
               assetId={asset.id}

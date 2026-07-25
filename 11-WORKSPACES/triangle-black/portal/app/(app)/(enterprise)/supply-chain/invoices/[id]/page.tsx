@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 import { CreditCard, FileText, CheckCircle, Clock, AlertCircle, DollarSign, Loader2 } from "lucide-react";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const STATUS_STYLES: Record<string, string> = {
   paid:           "bg-emerald-100 text-emerald-700",
   partially_paid: "bg-blue-100 text-blue-700",
@@ -205,7 +217,7 @@ export default function InvoiceDetailPage() {
           <SectionCard title={`Payment History (${payments.length})`}>
             {payments.length > 0 ? (
               <div className="space-y-3">
-                {payments.map((p: any) => (
+                {toArr(payments).map((p: any) => (
                   <div key={p.id}
                        className="flex items-center justify-between p-4
                                   bg-emerald-50 border border-emerald-200 rounded-xl">

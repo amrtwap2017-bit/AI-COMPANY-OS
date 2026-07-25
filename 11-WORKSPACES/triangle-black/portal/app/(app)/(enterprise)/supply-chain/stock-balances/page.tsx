@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -10,19 +11,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchStockBalances = async () => {
-  const response = await fetch(`${BACK}/api/v1/stock-balances`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/stock-balances`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchItems = async () => {
-  const response = await fetch(`${BACK}/api/v1/inventory/items`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/inventory/items`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchWarehouses = async () => {
-  const response = await fetch(`${BACK}/api/v1/warehouses`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/warehouses`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -38,11 +39,11 @@ const StockBalancesPage = () => {
 
   if (!stockBalances || !items || !warehouses) return <EmptyState />;
 
-  const filteredStockBalances = (stockBalances || []).filter(sb  => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
+  const filteredStockBalances = toArr(stockBalances).filter(sb  => selectedWarehouse ? sb.warehouse_id === selectedWarehouse : true);
 
   const totalItems = (items || []).length;
-  const totalValueEGP = (stockBalances || []).reduce((acc: any, sb: any) => acc + sb.total_value, 0);
-  const belowMinimum = (stockBalances || []).filter(sb  => sb.qty_on_hand < sb.min_stock).length;
+  const totalValueEGP = toArr(stockBalances).reduce((acc: any, sb: any) => acc + sb.total_value, 0);
+  const belowMinimum = toArr(stockBalances).filter(sb  => sb.qty_on_hand < sb.min_stock).length;
 
   return (
     <PageWrapper>
@@ -58,7 +59,7 @@ const StockBalancesPage = () => {
         />
       </SectionCard>
       <div className="flex gap-4">
-        {(warehouses || []).map(w  => (
+        {toArr(warehouses).map(w  => (
           <button
             key={w.id}
             onClick={() => setSelectedWarehouse(w.id)}
@@ -84,8 +85,8 @@ const StockBalancesPage = () => {
           </tr>
         </thead>
         <tbody>
-          {(filteredStockBalances || []).map(sb  => {
-            const item = (items || []).find(i => i.id === sb.item_id);
+          {toArr(filteredStockBalances).map(sb  => {
+            const item = toArr(items).find(i => i.id === sb.item_id);
             if (!item) return null;
             return (
               <tr key={sb.id}>

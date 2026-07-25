@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -9,9 +10,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchTrends = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/trends`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/ai/analytics/trends`).then(r => r.json());
   if (!response.ok) {
     return [];
   }
@@ -47,7 +46,7 @@ export default function TrendsPage() {
 
       <SectionCard>
         <div className="flex flex-row gap-4">
-          {months.map((month: any) => (
+          {toArr(months).map((month: any) => (
             <div key={month.month} className="flex flex-col items-center">
               <span>{month.month}</span>
               <div
@@ -94,9 +93,9 @@ export default function TrendsPage() {
 
       <SectionCard>
         <div className="flex flex-row gap-4">
-          <div className="bg-green-500 p-2 rounded">Completed: {months.reduce((acc: any, month: any) => acc + month.completed, 0)}</div>
-          <div className="bg-yellow-500 p-2 rounded">Open: {months.reduce((acc: any, month: any) => acc + month.open, 0)}</div>
-          <div className="bg-red-500 p-2 rounded">Critical: {months.reduce((acc: any, month: any) => acc + month.critical, 0)}</div>
+          <div className="bg-green-500 p-2 rounded">Completed: {toArr(months).reduce((acc: any, month: any) => acc + month.completed, 0)}</div>
+          <div className="bg-yellow-500 p-2 rounded">Open: {toArr(months).reduce((acc: any, month: any) => acc + month.open, 0)}</div>
+          <div className="bg-red-500 p-2 rounded">Critical: {toArr(months).reduce((acc: any, month: any) => acc + month.critical, 0)}</div>
         </div>
       </SectionCard>
     </PageWrapper>

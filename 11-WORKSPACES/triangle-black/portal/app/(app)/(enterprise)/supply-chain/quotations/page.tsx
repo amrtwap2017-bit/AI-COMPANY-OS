@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -11,12 +12,12 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchQuotations = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/supply-chain/quotations`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/supply-chain/quotations`).then(r => r.json());
     if (!response.ok) return [];
     return response.json();
   } catch (error) {
     if (error.message === "Not found") {
-      const fallbackResponse = await fetch(`${BACK}/api/v1/quotations`, { credentials: "include" });
+      const fallbackResponse = await authFetch(`/api/v1/quotations`).then(r => r.json());
       if (!fallbackResponse.ok) return [];
       return fallbackResponse.json();
     }
@@ -34,7 +35,7 @@ const QuotationsPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError || !quotations) return <EmptyState title="No quotations recorded" note="Create RFQs in Supply Chain Workbench" />;
 
-  const filteredQuotations = (quotations || []).filter((q: any) => {
+  const filteredQuotations = toArr(quotations).filter((q: any) => {
     switch (statusFilter) {
       case "received":
         return q.status === "received" || q.status === "pending";
@@ -51,9 +52,9 @@ const QuotationsPage = () => {
 
   const metrics = {
     totalQuotes: quotations.length,
-    pendingReview: (quotations || []).filter((q: any) => q.status === "received" || q.status === "pending").length,
-    accepted: (quotations || []).filter((q: any) => q.status === "accepted").length,
-    expired: (quotations || []).filter((q: any) => q.status === "expired").length,
+    pendingReview: toArr(quotations).filter((q: any) => q.status === "received" || q.status === "pending").length,
+    accepted: toArr(quotations).filter((q: any) => q.status === "accepted").length,
+    expired: toArr(quotations).filter((q: any) => q.status === "expired").length,
   };
 
   return (
@@ -95,7 +96,7 @@ const QuotationsPage = () => {
         </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredQuotations.map((q: any) => (
+        {toArr(filteredQuotations).map((q: any) => (
           <SectionCard key={q.id}>
             <h3 className="font-bold">{q.quotation_number}</h3>
             <StatusBadge status={q.status} />

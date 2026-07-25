@@ -7,6 +7,18 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { AlertTriangle } from "lucide-react";
 import { useUserPreferences } from "@/lib/hooks/useUserPreferences";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const WIDGETS = [
   { key: "digital_twin",  label: "Digital Twin",    endpoint: "/api/v1/twin/state" },
   { key: "ai_signals",    label: "AI Signals",      endpoint: "/api/v1/ai/signals/v2" },
@@ -29,7 +41,7 @@ function WidgetData({ endpoint }: { endpoint: string }) {
   const keys = Object.keys(data).slice(0, 4);
   return (
     <div className="space-y-1">
-      {(keys || []).map(k  => {
+      {toArr(keys).map(k  => {
         const v = data[k];
         const display = typeof v === "object" ? JSON.stringify(v).slice(0,40) : String(v ?? "—");
         return (
@@ -69,7 +81,7 @@ export default function ExecutiveDashboardPage() {
   const twinLabel   = twin?.health_label ?? "Unknown";
   const criticalBadge = notifs?.critical ?? 0;
 
-  const visibleWidgets = (WIDGETS || []).filter(w  => widgetVisible(w.key));
+  const visibleWidgets = toArr(WIDGETS).filter(w  => widgetVisible(w.key));
 
   return (
     <PageWrapper>
@@ -108,7 +120,7 @@ export default function ExecutiveDashboardPage() {
       {showConfig && (
         <SectionCard title="Dashboard Widgets" className="mb-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {(WIDGETS || []).map(w  => (
+            {toArr(WIDGETS).map(w  => (
               <label key={w.key} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -129,7 +141,7 @@ export default function ExecutiveDashboardPage() {
 
       {/* Dynamic widget grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {(visibleWidgets || []).map(widget  => (
+        {toArr(visibleWidgets).map(widget  => (
           <SectionCard key={widget.key} title={widget.label}>
             <WidgetData endpoint={widget.endpoint} />
           </SectionCard>

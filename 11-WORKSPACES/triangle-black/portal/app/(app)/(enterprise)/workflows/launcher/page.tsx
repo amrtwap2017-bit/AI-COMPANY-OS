@@ -6,6 +6,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// Safe array extractor — handles all backend response shapes
+const toArr = (d: any): any[] => {
+  if (!d) return [];
+  if (Array.isArray(d)) return d;
+  if (Array.isArray(d?.items)) return d.items;
+  if (Array.isArray(d?.data)) return d.data;
+  if (Array.isArray(d?.results)) return d.results;
+  if (Array.isArray(d?.records)) return d.records;
+  return [];
+};
+
+
 const WorkflowLauncherPage = () => {
   const router = useRouter();
   const [hoveredWorkflow, setHoveredWorkflow] = useState<string | null>(null);
@@ -44,7 +56,7 @@ const WorkflowLauncherPage = () => {
   return (
     <PageWrapper>
       <PageHeader title="Workflow Launcher" description="Start a workflow from anywhere in the platform" />
-      {(workflows || []).map((category, index) => (
+      {toArr(workflows).map((category, index) => (
         <SectionCard key={index} title={category.category}>
           {(Array.isArray(category.items) ? category.items : []).map((item, i) => (
             <div

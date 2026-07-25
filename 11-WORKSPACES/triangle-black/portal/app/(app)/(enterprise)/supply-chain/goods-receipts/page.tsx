@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
@@ -18,9 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchGoodsReceipts = async () => {
-  const response = await fetch(`${BACK}/api/v1/supply-chain/goods-receipts`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/supply-chain/goods-receipts`).then(r => r.json());
   if (!response.ok) {
     return [];
   }
@@ -28,9 +27,7 @@ const fetchGoodsReceipts = async () => {
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/purchase-orders/`, {
-    credentials: "include",
-  });
+  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
   if (!response.ok) {
     return [];
   }
@@ -68,10 +65,10 @@ const GoodsReceiptsPage = () => {
   if (isReceiptsError || isPurchaseOrdersError) return <EmptyState />;
 
   const totalReceipts = receipts.length;
-  const pendingDeliveriesCount = (purchaseOrders || []).filter(
+  const pendingDeliveriesCount = toArr(purchaseOrders).filter(
     (po) => ["approved", "sent", "ordered"].includes(po.status)
   ).length;
-  const thisMonthReceipts = (receipts || []).filter((grn: any) =>
+  const thisMonthReceipts = toArr(receipts).filter((grn: any) =>
     new Date(grn.received_date).toLocaleDateString("en-US", { month: "long" }) ===
     new Date().toLocaleDateString("en-US", { month: "long" })
   );
@@ -117,7 +114,7 @@ const GoodsReceiptsPage = () => {
         {receipts.length === 0 ? (
           <EmptyState message="No goods receipts recorded yet" />
         ) : (
-          (receipts || []).map((grn: any) => (
+          toArr(receipts).map((grn: any) => (
             <div key={grn.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <span>{grn.grn_number}</span>
               <span>{grn.po_id}</span>

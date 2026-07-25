@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,19 +22,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchTechnicians = async () => {
-  const response = await fetch(`${BACK}/api/v1/technicians`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/technicians`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAISignalsSummary = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals/summary`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -56,7 +57,7 @@ const MyDayPage = () => {
     "technicians",
     fetchTechnicians,
     {
-      onSuccess: (data) => setTechnicians((data || []).filter(t => t.is_active)),
+      onSuccess: (data) => setTechnicians(toArr(data).filter(t => t.is_active)),
       refetchInterval: 30000
     }
   );
@@ -72,10 +73,10 @@ const MyDayPage = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const openWOsCount = (workOrders || []).filter(w => w.status === "open").length;
-  const inProgressCount = (workOrders || []).filter(w => w.status === "in_progress").length;
-  const completedTodayCount = (workOrders || []).filter(w => w.status === "completed" && new Date(w.completed_at).toDateString() === today).length;
-  const dueTodayCount = (workOrders || []).filter(w => w.due_date === today).length;
+  const openWOsCount = toArr(workOrders).filter(w => w.status === "open").length;
+  const inProgressCount = toArr(workOrders).filter(w => w.status === "in_progress").length;
+  const completedTodayCount = toArr(workOrders).filter(w => w.status === "completed" && new Date(w.completed_at).toDateString() === today).length;
+  const dueTodayCount = toArr(workOrders).filter(w => w.due_date === today).length;
 
   const priorityWorkOrders = workOrders
     .filter(w => w.status !== "completed" && (w.priority === "critical" || w.priority === "high" || w.due_date === today))
@@ -87,7 +88,7 @@ const MyDayPage = () => {
       return new Date(a.due_date) - new Date(b.due_date);
     });
 
-  const technicianCapacity = (technicians || []).map(t => ({
+  const technicianCapacity = toArr(technicians).map(t => ({
     ...t,
     capacity: t.current_work_orders / t.max_work_orders * 100
   })).sort((a: any, b: any) => b.capacity - a.capacity);
@@ -117,7 +118,7 @@ const MyDayPage = () => {
             {priorityWorkOrders.length === 0 ? (
               <EmptyState message="No priority work orders today" />
             ) : (
-              (priorityWorkOrders || []).map(w  => (
+              toArr(priorityWorkOrders).map(w  => (
                 <div key={w.id} className="flex items-center p-4 border-b border-gray-200 min-h-60">
                   <span
                     className={`border-r-4 mr-4 ${
@@ -159,12 +160,12 @@ const MyDayPage = () => {
             {technicianCapacity.length === 0 ? (
               <EmptyState message="No active technicians" />
             ) : (
-              (technicianCapacity || []).map(t  => (
+              toArr(technicianCapacity).map(t  => (
                 <div key={t.id} className="flex items-center p-4 border-b border-gray-200 min-h-60">
                   <div>
                     <h3>{t.name}</h3>
                     <Progress value={t.capacity} color={t.capacity < 50 ? "green" : t.capacity < 85 ? "amber" : "red"} />
-                    {t.specializations.slice(0, 2).map(s => (
+                    {t.(specializations || []).slice(0, 2).map(s => (
                       <span key={s} className="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2">
                         {s}
                       </span>

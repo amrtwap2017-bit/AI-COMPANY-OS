@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,19 +18,19 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchAnalytics = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/sla`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
 
 const fetchKpis = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/analytics/kpis/live`, { credentials: "include" });
+  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
   if (!response.ok) return [];
   return response.json();
 };
@@ -76,7 +77,7 @@ const ExecutiveIntelligencePage = () => {
           <MetricStrip label="Critical WOs Open" value={critical_open} />
         </SectionCard>
         <SectionCard title="Executive Risk Assessment">
-          {(riskMatrix || []).map((item, index) => (
+          {toArr(riskMatrix).map((item, index) => (
             <div key={index} className="flex items-center space-x-2 mb-2">
               <StatusBadge color={item.level === "HIGH RISK" ? "red" : "orange"} />
               <span>{item.title}</span>
@@ -85,7 +86,7 @@ const ExecutiveIntelligencePage = () => {
           ))}
         </SectionCard>
         <SectionCard title="Business Impact Summary">
-          {(businessImpact || []).map((impact, index) => (
+          {toArr(businessImpact).map((impact, index) => (
             <p key={index} className="mb-2">{impact}</p>
           ))}
         </SectionCard>

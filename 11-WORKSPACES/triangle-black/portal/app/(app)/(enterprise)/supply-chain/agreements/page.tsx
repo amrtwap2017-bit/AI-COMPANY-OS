@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -11,11 +12,11 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchAgreements = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/supply-chain/agreements`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/supply-chain/agreements`).then(r => r.json());
     if (response.ok) return response.json();
     return [];
   } catch (_) {
-    return fetch(`${BACK}/api/v1/contracts`, { credentials: "include" }).then((res) => res.json());
+    return authFetch(`/api/v1/contracts`).then((res) => res.json());
   }
 };
 
@@ -45,14 +46,14 @@ const AgreementsPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState message="Failed to load agreements" />;
 
-  const filteredAgreements = (agreements || []).filter((a: any) => {
+  const filteredAgreements = toArr(agreements).filter((a: any) => {
     if (statusFilter === "Active") return a.status === "Active";
     if (statusFilter === "Expiring") return new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000;
     if (statusFilter === "Expired") return new Date(a.end_date) < new Date();
     return true;
   });
 
-  const totalValue = (agreements || []).reduce((acc: number, a: any) => acc + a.contract_value, 0);
+  const totalValue = toArr(agreements).reduce((acc: number, a: any) => acc + a.contract_value, 0);
 
   return (
     <PageWrapper>
@@ -65,12 +66,12 @@ const AgreementsPage = () => {
         />
         <MetricStrip
           title="Active"
-          value={(agreements || []).filter((a: any) => a.status === "Active").length}
+          value={toArr(agreements).filter((a: any) => a.status === "Active").length}
           icon="check-circle"
         />
         <MetricStrip
           title="Expiring Soon"
-          value={(agreements || []).filter((a: any) => new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000).length}
+          value={toArr(agreements).filter((a: any) => new Date(a.end_date) - new Date() <= 60 * 24 * 60 * 1000).length}
           icon="clock"
         />
         <MetricStrip
@@ -107,7 +108,7 @@ const AgreementsPage = () => {
       </div>
       {filteredAgreements.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAgreements.map((a: any) => (
+          {toArr(filteredAgreements).map((a: any) => (
             <AgreementCard key={a.id} {...a} />
           ))}
         </div>
