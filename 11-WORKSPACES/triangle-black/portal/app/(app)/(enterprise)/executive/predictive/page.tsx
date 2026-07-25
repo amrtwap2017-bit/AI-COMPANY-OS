@@ -43,10 +43,10 @@ const PredictivePage = () => {
 
   if (signalsQuery.isError || costsSummaryQuery.isError || slaQuery.isError || kpisLiveQuery.isError) return <EmptyState />;
 
-  const { signals } = signalsQuery.data;
-  const { totalPredictions, highRisk, mediumRisk, monitoring } = costsSummaryQuery.data;
-  const { sla } = slaQuery.data;
-  const { wos } = kpisLiveQuery.data;
+  const { signals } = signalsQuery.data || {};
+  const { totalPredictions, highRisk, mediumRisk, monitoring } = costsSummaryQuery.data || {};
+  const { sla } = slaQuery.data || {};
+  const { wos } = kpisLiveQuery.data || {};
 
   return (
     <PageWrapper>

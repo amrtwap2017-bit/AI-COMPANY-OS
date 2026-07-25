@@ -6,7 +6,7 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, Loading
 import { useQuery } from "@tanstack/react-query";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const items: any[] = toArr(data);
+  const items: any[] = [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 

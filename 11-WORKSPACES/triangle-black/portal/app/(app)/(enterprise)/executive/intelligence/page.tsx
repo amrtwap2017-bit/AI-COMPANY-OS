@@ -48,9 +48,9 @@ const ExecutiveIntelligencePage = () => {
     return <EmptyState message="Failed to load data" />;
   }
 
-  const { total, critical } = signalsQuery.data;
-  const { compliance, status } = analyticsQuery.data;
-  const { WOs_total, critical_open } = kpisQuery.data;
+  const { total, critical } = signalsQuery.data || {};
+  const { compliance, status } = analyticsQuery.data || {};
+  const { WOs_total, critical_open } = kpisQuery.data || {};
 
   const riskMatrix = (signalsQuery.data?.signals || signalsQuery.data || []).map((signal: any) => {
     if (signal.level === "critical") return { level: "HIGH RISK", title: signal.title, action: signal.action };
