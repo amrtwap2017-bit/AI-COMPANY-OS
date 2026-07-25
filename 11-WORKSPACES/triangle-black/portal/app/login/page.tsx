@@ -31,7 +31,9 @@ export default function LoginPage() {
       if (!token) throw new Error("No token received");
 
       // Store in all locations
+      sessionStorage.setItem("tb_token", token);
       sessionStorage.setItem("tb_access_token", token);
+      localStorage.setItem("tb_token", token);
       localStorage.setItem("tb_access_token", token);
       // Cookie also set by server route
 

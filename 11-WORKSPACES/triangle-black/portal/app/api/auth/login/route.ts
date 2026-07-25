@@ -1,47 +1,46 @@
+// Triangle Black — Auth Login API Route
+// Proxies login to FastAPI backend using OAuth2 form format
+
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const form = new URLSearchParams();
-    form.append("username", body.email || body.username || "");
-    form.append("password", body.password || "");
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
-    const res = await fetch("http://localhost:8030/api/v1/auth/login", {
-      method:  "POST",
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { email, password } = body;
+
+    if (!email || !password) {
+      return NextResponse.json({ error: "Email and password required" }, { status: 400 });
+    }
+
+    // FastAPI OAuth2 expects form-urlencoded with 'username' field
+    const formData = new URLSearchParams();
+    formData.append("username", email);
+    formData.append("password", password);
+
+    const res = await fetch(`${BACKEND}/api/v1/auth/login`, {
+      method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body:    form.toString(),
+      body: formData.toString(),
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
+    if (!res.ok || !data.access_token) {
       return NextResponse.json(
-        { error: data.detail || "Login failed" },
-        { status: res.status }
+        { error: data.detail || "Invalid credentials" },
+        { status: 401 }
       );
     }
 
-    // Return token to client
-    const response = NextResponse.json({
-      token:        data.access_token,
+    // Return token — portal stores it in localStorage
+    return NextResponse.json({
       access_token: data.access_token,
-      role:         data.role,
-      name:         data.name,
-      email:        body.email,
+      token_type: data.token_type || "bearer",
     });
 
-    // Set httpOnly cookie so proxy.ts can read it
-    response.cookies.set("tb_access_token", data.access_token, {
-      httpOnly: false,
-      secure:   false,
-      sameSite: "lax",
-      maxAge:   28800,
-      path:     "/",
-    });
-
-    return response;
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: "Auth service unavailable" }, { status: 503 });
   }
 }
