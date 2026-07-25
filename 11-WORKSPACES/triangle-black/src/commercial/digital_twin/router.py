@@ -27,7 +27,9 @@ def _query(db, sql, params=None):
         if hasattr(row, "_mapping"):
             return dict(row._mapping)
         return {}
-    except Exception:
+    except Exception as _e:
+        import sys
+        print(f"[twin._query] ERROR: {_e}", file=sys.stderr)
         return {}
 
 @router.get("/state", summary="Digital Twin operational state")
