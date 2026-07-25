@@ -56,8 +56,8 @@ def get_twin_state(db: Session = Depends(get_db)):
     """)
     critical_open = _safe_int(wo.get("critical_open"))
     overdue_wo    = _safe_int(wo.get("overdue"))
-    health -= min(25, critical_open * 3)
-    health -= min(10, overdue_wo * 2)
+    health -= min(15, critical_open * 1)
+    health -= min(8, overdue_wo * 1)
 
     # Technicians
     tech = _query(db, """
@@ -66,7 +66,7 @@ def get_twin_state(db: Session = Depends(get_db)):
                sum(CASE WHEN current_work_orders >= max_work_orders THEN 1 ELSE 0 END) as at_capacity
         FROM technicians
     """)
-    health -= min(10, _safe_int(tech.get("at_capacity")) * 2)
+    health -= min(5, _safe_int(tech.get("at_capacity")) * 1)
 
     # Assets
     ast = _query(db, """
@@ -82,7 +82,7 @@ def get_twin_state(db: Session = Depends(get_db)):
                sum(CASE WHEN sb.qty_on_hand < ii.min_stock THEN 1 ELSE 0 END) as below_min
         FROM inventory_items ii LEFT JOIN stock_balances sb ON sb.item_id = ii.id
     """)
-    health -= min(10, _safe_int(inv.get("below_min")) * 2)
+    health -= min(5, _safe_int(inv.get("below_min")) * 1)
 
     # Finance
     fin = _query(db, """
@@ -92,7 +92,7 @@ def get_twin_state(db: Session = Depends(get_db)):
                COALESCE(sum(amount), 0) as total_value
         FROM invoices
     """)
-    health -= min(12, _safe_int(fin.get("overdue_inv")) * 1)
+    health -= min(8, _safe_int(fin.get("overdue_inv")) * 1)
 
     # Maintenance
     maint = _query(db, """
@@ -100,7 +100,7 @@ def get_twin_state(db: Session = Depends(get_db)):
                sum(CASE WHEN next_due_date::timestamp < NOW() AND status='active' THEN 1 ELSE 0 END) as overdue
         FROM maintenance_plans
     """)
-    health -= min(10, _safe_int(maint.get("overdue")) * 2)
+    health -= min(8, _safe_int(maint.get("overdue")) * 1)
 
     # Projects
     proj = _query(db, """
