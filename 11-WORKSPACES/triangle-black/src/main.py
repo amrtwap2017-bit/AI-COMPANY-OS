@@ -188,7 +188,6 @@ except Exception as e:
     print(f"[WARN] dashboard_router: {e}")
 try:
     from src.commercial.system_notifications.router import router as notifications_router
-    app.include_router(notifications_router, prefix="/api/v1")
 except Exception as e:
     print(f"[WARN] system_notifications_router: {e}")
 
