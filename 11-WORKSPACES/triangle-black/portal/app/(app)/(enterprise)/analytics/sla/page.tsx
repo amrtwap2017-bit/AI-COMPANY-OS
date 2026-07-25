@@ -1,16 +1,23 @@
 // @ts-nocheck
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
-import { , EmptyState, LoadingState, MetricStrip, PageHeader, PageWrapper, Progress, SectionCard, StatusBadge } from "@/components/ui";
+import {
+  PageWrapper,
+  PageHeader,
+  SectionCard,
+  MetricStrip,
+  StatusBadge,
+  Progress,
+} from "@/components/ui";
 
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSLAData = async () => {
-  const response = await authFetch(`/api/v1/ai/analytics/sla`).then(r => r.json());
+  const response = await fetch(`${BACK}/api/v1/ai/analytics/sla`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     return [];
   }
@@ -76,7 +83,7 @@ export default function SLAPage() {
         <SectionCard title="SLA by Work Order Type">
           <div className="grid grid-cols-2 gap-4">
             {Object.entries(by_type).map(([type, stats]) => (
-              <SectionCard key={type} title={type.charAt(0).toUpperCase() + (type || []).slice(1)}>
+              <SectionCard key={type} title={type.charAt(0).toUpperCase() + type.slice(1)}>
                 <Progress
                   value={stats.rate}
                   max={100}

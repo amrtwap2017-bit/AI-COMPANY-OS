@@ -10,9 +10,9 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchProjects = async () => {
-  const response = await authFetch(`/api/v1/projects`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/projects`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const SchedulePage = () => {

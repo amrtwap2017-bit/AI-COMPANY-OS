@@ -11,21 +11,21 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchWorkOrders = async () => {
-  const response = await authFetch(`/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders?type=hvac%2Celectrical%2Cmechanical`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchMaintenanceSignals = async () => {
-  const response = await authFetch(`/api/v1/ai/signals?category=maintenance`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals?category=maintenance`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchPmPlans = async () => {
-  const response = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/maintenance/pm-plans`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const EngineeringActionsPage = () => {

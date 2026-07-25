@@ -73,7 +73,7 @@ const ExecutiveScorecardPage = () => {
         <h3 className="text-lg font-semibold mb-2">Revenue Trend</h3>
         <div className="flex items-center space-x-4">
           {rev_trend.map(({ month, revenue_egp }) => (
-            <div key={month} style={{ width: `${(revenue_egp / Math.max((...rev_trend || []).map(t  => t.revenue_egp))) * 100}%`, height: "20px", backgroundColor: "#4caf50" }}></div>
+            <div key={month} style={{ width: `${(revenue_egp / Math.max(...rev_trend.map(t => t.revenue_egp))) * 100}%`, height: "20px", backgroundColor: "#4caf50" }}></div>
           ))}
         </div>
       </div>

@@ -21,21 +21,21 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchVendor = async (id: string) => {
-  const response = await authFetch(`/api/v1/inventory/vendors?id=${id}`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/inventory/vendors?id=${id}`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchPurchaseOrders = async (vendor_id: string) => {
-  const response = await authFetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendor_id}`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchRFQs = async (vendor_reference: string) => {
-  const response = await authFetch(`/api/v1/rfqs?vendor_reference=${vendor_reference}`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/rfqs?vendor_reference=${vendor_reference}`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const VendorPage = () => {

@@ -12,9 +12,9 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchRfqs = async () => {
   try {
-    const response = await authFetch(`/api/v1/rfqs`).then(r => r.json());
-    if (!response.ok) return [];
-    return response.json();
+    const res = await authFetch(`/api/v1/rfqs`);
+  if (!res.ok) return [];
+  return res.json();
   } catch (error) {
     console.error(error);
     return authFetch(`/api/v1/rfqs`).then(response => response.json());
@@ -23,9 +23,9 @@ const fetchRfqs = async () => {
 
 const fetchVendors = async () => {
   try {
-    const response = await authFetch(`/api/v1/inventory-vendors`).then(r => r.json());
-    if (!response.ok) return [];
-    return response.json();
+    const res = await authFetch(`/api/v1/inventory-vendors`);
+  if (!res.ok) return [];
+  return res.json();
   } catch (error) {
     console.error(error);
     return authFetch(`/api/v1/inventory/vendors`).then(response => response.json());

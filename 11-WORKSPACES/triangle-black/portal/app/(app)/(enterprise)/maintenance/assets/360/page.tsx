@@ -19,21 +19,21 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAssets = async () => {
-  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/assets`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchSignals = async () => {
-  const response = await authFetch(`/api/v1/ai/signals?category=maintenance`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals?category=maintenance`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const MaintenancePage = () => {

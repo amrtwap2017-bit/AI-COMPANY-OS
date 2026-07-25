@@ -19,15 +19,15 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPmPlans = async () => {
-  const response = await authFetch(`/api/v1/maintenance/pm-plans`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/maintenance/pm-plans`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchAssets = async (asset_node_id: string) => {
-  const response = await authFetch(`/api/v1/assets?node_id=${asset_node_id}`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/assets?node_id=${asset_node_id}`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const PmPlansPage = () => {

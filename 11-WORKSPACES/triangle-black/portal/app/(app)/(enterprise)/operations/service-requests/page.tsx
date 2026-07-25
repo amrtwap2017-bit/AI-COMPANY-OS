@@ -20,9 +20,9 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchServiceRequests = async () => {
   try {
-    const response = await authFetch(`/api/v1/service-requests/`).then(r => r.json());
-    if (!response.ok) return [];
-    return response.json();
+    const res = await authFetch(`/api/v1/service-requests/`);
+  if (!res.ok) return [];
+  return res.json();
   } catch (error) {
     return authFetch(`/api/v1/operations/service-requests`).then((response) => response.json());
   }

@@ -11,9 +11,9 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchInvoices = async () => {
-  const response = await authFetch(`/api/v1/invoices`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/invoices`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const InvoicesPage = () => {

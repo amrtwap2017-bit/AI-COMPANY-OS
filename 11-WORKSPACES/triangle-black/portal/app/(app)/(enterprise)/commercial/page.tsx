@@ -11,18 +11,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchLeads = async () => {
-  const response = await authFetch(`/api/v1/leads`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/leads`);
+  return res.json();
 };
 
 const fetchContracts = async () => {
-  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/contracts`);
+  return res.json();
 };
 
 const fetchSignals = async () => {
-  const response = await authFetch(`/api/v1/ai/signals?category=commercial`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals?category=commercial`);
+  return res.json();
 };
 
 const CommercialPage = () => {

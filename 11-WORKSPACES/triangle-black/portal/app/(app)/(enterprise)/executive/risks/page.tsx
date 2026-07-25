@@ -18,18 +18,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals`);
+  return res.json();
 };
 
 const fetchSLA = async () => {
-  const response = await authFetch(`/api/v1/ai/analytics/sla`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/analytics/sla`);
+  return res.json();
 };
 
 const fetchContracts = async () => {
-  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/contracts`);
+  return res.json();
 };
 
 const RiskRegisterPage = () => {

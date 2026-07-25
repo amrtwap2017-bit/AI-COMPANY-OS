@@ -19,18 +19,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchContracts = async () => {
-  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/contracts`);
+  return res.json();
 };
 
 const fetchWorkOrdersByContractId = async (contract_id: string) => {
-  const response = await authFetch(`/api/v1/work-orders?contract_id=${contract_id}`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders?contract_id=${contract_id}`);
+  return res.json();
 };
 
 const fetchInvoicesByContractId = async (contract_id: string) => {
-  const response = await authFetch(`/api/v1/invoices?contract_id=${contract_id}`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/invoices?contract_id=${contract_id}`);
+  return res.json();
 };
 
 const Contract360Page = () => {

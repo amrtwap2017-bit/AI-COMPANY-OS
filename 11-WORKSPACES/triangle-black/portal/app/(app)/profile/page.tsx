@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb, PageHeader, PageWrapper } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { authFetchJSON } from "@/lib/hooks/useAuthFetch";
 import { tokenManager } from "@/lib/auth/token-manager";
 import { User, Mail, Shield, Building2, LogOut, Key, Clock } from "lucide-react";

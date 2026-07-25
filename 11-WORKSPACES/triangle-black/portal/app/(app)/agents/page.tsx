@@ -10,18 +10,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAIHealth = async () => {
-  const response = await authFetch(`/api/v1/ai/health`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/health`);
+  return res.json();
 };
 
 const fetchSignalsSummary = async () => {
-  const response = await authFetch(`/api/v1/ai/signals/summary`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals/summary`);
+  return res.json();
 };
 
 const fetchCostsSummary = async () => {
-  const response = await authFetch(`/api/v1/ai/analytics/costs/summary`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/analytics/costs/summary`);
+  return res.json();
 };
 
 const AgentsPage = () => {

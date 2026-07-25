@@ -19,18 +19,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchWorkOrders = async () => {
-  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders`);
+  return res.json();
 };
 
 const fetchAssets = async () => {
-  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/assets`);
+  return res.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/purchase-orders/`);
+  return res.json();
 };
 
 export default function MaintenanceCostsReviewPage() {

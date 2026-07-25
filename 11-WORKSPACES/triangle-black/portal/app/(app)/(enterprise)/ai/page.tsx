@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertBanner, Button, PageHeader, PageWrapper, SectionCard } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { toast } from "@/lib/toast";

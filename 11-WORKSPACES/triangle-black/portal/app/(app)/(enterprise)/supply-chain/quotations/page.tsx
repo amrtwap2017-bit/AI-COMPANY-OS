@@ -12,9 +12,9 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchQuotations = async () => {
   try {
-    const response = await authFetch(`/api/v1/supply-chain/quotations`).then(r => r.json());
-    if (!response.ok) return [];
-    return response.json();
+    const res = await authFetch(`/api/v1/supply-chain/quotations`);
+  if (!res.ok) return [];
+  return res.json();
   } catch (error) {
     if (error.message === "Not found") {
       const fallbackResponse = await authFetch(`/api/v1/quotations`).then(r => r.json());

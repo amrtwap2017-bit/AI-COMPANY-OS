@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AlertBanner, Breadcrumb, LoadingState, PageHeader, PageWrapper } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { EntityTabs } from "@/components/ui/EntityTabs";
 import { getStateColor } from "@/lib/hooks/useWorkflow";
 import { authFetchJSON } from "@/lib/hooks/useAuthFetch";

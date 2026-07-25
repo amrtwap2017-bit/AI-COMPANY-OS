@@ -10,8 +10,8 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchTrends = async () => {
-  const response = await authFetch(`/api/v1/ai/analytics/trends`).then(r => r.json());
-  if (!response.ok) {
+  const res = await authFetch(`/api/v1/ai/analytics/trends`);
+  if (!res.ok) {
     return [];
   }
   return response.json();

@@ -11,21 +11,21 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchProjects = async () => {
-  const response = await authFetch(`/api/v1/projects`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/projects`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchSignals = async () => {
-  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchWorkOrders = async (projectId: string) => {
-  const response = await authFetch(`/api/v1/work-orders?project_id=${projectId}`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders?project_id=${projectId}`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const ProjectIntelligencePage = () => {

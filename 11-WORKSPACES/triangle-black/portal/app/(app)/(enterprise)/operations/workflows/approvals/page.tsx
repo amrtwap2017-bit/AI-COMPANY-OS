@@ -20,13 +20,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseRequests = async () => {
-  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/purchase-requests/`);
+  return res.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await authFetch(`/api/v1/work-orders?status=completed`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders?status=completed`);
+  return res.json();
 };
 
 const ApprovalsPage = () => {

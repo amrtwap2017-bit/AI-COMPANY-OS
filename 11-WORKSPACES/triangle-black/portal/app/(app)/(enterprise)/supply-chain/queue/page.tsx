@@ -11,18 +11,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseRequests = async () => {
-  const response = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/purchase-requests/`);
+  return res.json();
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/purchase-orders/`);
+  return res.json();
 };
 
 const fetchRFQs = async () => {
-  const response = await authFetch(`/api/v1/rfqs`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/rfqs`);
+  return res.json();
 };
 
 const QueuePage = () => {

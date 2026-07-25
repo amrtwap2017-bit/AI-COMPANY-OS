@@ -18,18 +18,18 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const response = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/signals`);
+  return res.json();
 };
 
 const fetchKpis = async () => {
-  const response = await authFetch(`/api/v1/ai/analytics/kpis/live`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/analytics/kpis/live`);
+  return res.json();
 };
 
 const fetchWorkOrders = async () => {
-  const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/work-orders`);
+  return res.json();
 };
 
 const ExecutiveExceptionsPage = () => {

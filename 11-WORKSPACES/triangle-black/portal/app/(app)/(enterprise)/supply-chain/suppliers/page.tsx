@@ -11,8 +11,8 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchVendors = async () => {
   try {
-    const response = await authFetch(`/api/v1/inventory-vendors`).then(r => r.json());
-    if (!response.ok) return [];
+    const res = await authFetch(`/api/v1/inventory-vendors`);
+  if (!res.ok) return [];
     return await response.json();
   } catch (error) {
     return authFetch(`/api/v1/inventory/vendors`).then(response => response.json());
@@ -21,8 +21,8 @@ const fetchVendors = async () => {
 
 const fetchRFQs = async () => {
   try {
-    const response = await authFetch(`/api/v1/rfqs`).then(r => r.json());
-    if (!response.ok) return [];
+    const res = await authFetch(`/api/v1/rfqs`);
+  if (!res.ok) return [];
     return await response.json();
   } catch (error) {
     return authFetch(`/api/v1/rfqs`).then(response => response.json());
@@ -30,8 +30,8 @@ const fetchRFQs = async () => {
 };
 
 const fetchPurchaseOrders = async () => {
-  const response = await authFetch(`/api/v1/purchase-orders/`).then(r => r.json());
-  if (!response.ok) return [];
+  const res = await authFetch(`/api/v1/purchase-orders/`);
+  if (!res.ok) return [];
   return await response.json();
 };
 

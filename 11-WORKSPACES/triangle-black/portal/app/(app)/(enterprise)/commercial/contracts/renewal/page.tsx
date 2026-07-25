@@ -11,8 +11,8 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchContracts = async () => {
-  const response = await authFetch(`/api/v1/contracts`).then(r => r.json());
-  if (!response.ok) {
+  const res = await authFetch(`/api/v1/contracts`);
+  if (!res.ok) {
     return [];
   }
   return response.json();

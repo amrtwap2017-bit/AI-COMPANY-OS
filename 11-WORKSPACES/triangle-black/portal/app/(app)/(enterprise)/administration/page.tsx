@@ -11,15 +11,15 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchUsers = async () => {
-  const response = await authFetch(`/api/v1/auth/users`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/auth/users`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchHealth = async () => {
-  const response = await authFetch(`/api/v1/ai/health`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/ai/health`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 export default function AdministrationPage() {

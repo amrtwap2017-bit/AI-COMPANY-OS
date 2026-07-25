@@ -19,9 +19,9 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchVendors = async () => {
-  const response = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/inventory/vendors`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const Vendor360Page = () => {
@@ -61,9 +61,9 @@ const Vendor360Page = () => {
     if (!selectedVendor) return null;
 
     const fetchPOs = async (vendorId) => {
-      const response = await authFetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendorId}`).then(r => r.json());
-      if (!response.ok) return [];
-      return response.json();
+      const res = await authFetch(`/api/v1/inventory/purchase-orders?vendor_id=${vendorId}`);
+  if (!res.ok) return [];
+  return res.json();
     };
 
     const { data: purchaseOrders, isLoading: isPOLoading, isError: isPOError } = useQuery({

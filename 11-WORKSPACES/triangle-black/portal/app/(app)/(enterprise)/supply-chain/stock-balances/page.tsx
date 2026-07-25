@@ -11,21 +11,21 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchStockBalances = async () => {
-  const response = await authFetch(`/api/v1/stock-balances`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/stock-balances`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchItems = async () => {
-  const response = await authFetch(`/api/v1/inventory/items`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/inventory/items`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchWarehouses = async () => {
-  const response = await authFetch(`/api/v1/warehouses`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/warehouses`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const StockBalancesPage = () => {

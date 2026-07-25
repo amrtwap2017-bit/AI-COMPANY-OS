@@ -2,7 +2,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { AlertBanner, Breadcrumb, DataTable, EmptyState, LoadingState, PageHeader, PageWrapper } from "@/components/ui";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePagination } from "@/lib/hooks/usePagination";
 import { useSearch } from "@/lib/hooks/useSearch";

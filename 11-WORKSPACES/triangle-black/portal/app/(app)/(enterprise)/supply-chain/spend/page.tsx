@@ -11,13 +11,13 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchPurchaseOrders = async () => {
-  const response = await authFetch(`/api/v1/inventory/purchase-orders`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/inventory/purchase-orders`);
+  return res.json();
 };
 
 const fetchVendors = async () => {
-  const response = await authFetch(`/api/v1/inventory/vendors`).then(r => r.json());
-  return response.json();
+  const res = await authFetch(`/api/v1/inventory/vendors`);
+  return res.json();
 };
 
 const SpendPage = () => {

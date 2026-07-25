@@ -19,15 +19,15 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchAssets = async () => {
-  const response = await authFetch(`/api/v1/assets`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/assets`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const fetchPMPlans = async (assetId: number) => {
-  const response = await authFetch(`/api/v1/maintenance/pm-plans/${assetId}`).then(r => r.json());
-  if (!response.ok) return [];
-  return response.json();
+  const res = await authFetch(`/api/v1/maintenance/pm-plans/${assetId}`);
+  if (!res.ok) return [];
+  return res.json();
 };
 
 const AssetTreePage = () => {
