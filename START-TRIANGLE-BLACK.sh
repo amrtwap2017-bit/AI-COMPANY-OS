@@ -52,12 +52,7 @@ fi
 echo "[4/6] Starting Backend API on :8030..."
 pkill -f "uvicorn.*src.main" 2>/dev/null || true
 sleep 2
-cd "$TB" && nohup $VENV -m uvicorn src.main:app \
-    --host 0.0.0.0 \
-    --port 8030 \
-    --workers 1 \
-    --log-level warning \
-    > /tmp/tb_backend.log 2>&1 &
+(cd "$TB" && nohup $VENV -m uvicorn src.main:app --host 0.0.0.0 --port 8030 --workers 1 --log-level warning > /tmp/tb_backend.log 2>&1 &)
 echo "  Backend PID: $!"
 sleep 22
 
