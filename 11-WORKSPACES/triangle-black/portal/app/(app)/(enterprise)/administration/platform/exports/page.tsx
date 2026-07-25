@@ -1,4 +1,5 @@
-"use client"; // @ts-nocheck
+// @ts-nocheck
+"use client";
 import { useState } from "react";
 import { PageWrapper, PageHeader, SectionCard } from "@/components/ui";
 import { Download, FileText, Package, Users, TrendingUp, Wrench, CreditCard } from "lucide-react";

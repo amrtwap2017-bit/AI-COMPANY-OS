@@ -1,5 +1,5 @@
-"use client"; // @ts-nocheck
 // @ts-nocheck
+"use client";
 
 import { useState } from "react";
 import { PageWrapper, PageHeader, SectionCard, EmptyState } from "@/components/ui";

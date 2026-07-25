@@ -113,7 +113,7 @@ def approve(
 @router.post("/{pr_id}/reject", status_code=200)
 def reject(
     pr_id: str,
-    payload: PurchaseRequestRejectionPayload,
+    payload: dict,
     db: Session = Depends(get_db),
     _: User = Depends(require_manager),
     hotel_id: str = Depends(get_hotel_id),

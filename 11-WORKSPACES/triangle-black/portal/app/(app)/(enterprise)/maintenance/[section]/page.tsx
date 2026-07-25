@@ -1,4 +1,5 @@
-"use client"; // @ts-nocheck
+// @ts-nocheck
+"use client";
 
 import { useParams, useRouter } from "next/navigation";
 import { PageWrapper, PageHeader, LoadingState } from "@/components/ui";

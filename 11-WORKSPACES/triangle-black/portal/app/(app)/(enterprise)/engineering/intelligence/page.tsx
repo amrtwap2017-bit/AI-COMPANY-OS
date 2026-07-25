@@ -1,4 +1,5 @@
-"use client"; // @ts-nocheck
+// @ts-nocheck
+"use client";
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState, Progress } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";

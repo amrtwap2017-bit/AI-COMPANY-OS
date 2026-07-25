@@ -1,5 +1,5 @@
-"use client"; // @ts-nocheck
 // @ts-nocheck
+"use client";
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge } from "@/components/ui";
 import Link from "next/link";

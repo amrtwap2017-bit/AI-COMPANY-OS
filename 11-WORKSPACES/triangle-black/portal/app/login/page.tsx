@@ -1,5 +1,5 @@
-"use client"; // @ts-nocheck
 // @ts-nocheck
+"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Mail, Lock, Loader2, AlertCircle } from "lucide-react";

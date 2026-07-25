@@ -1,5 +1,5 @@
-"use client"; // @ts-nocheck
 // @ts-nocheck
+"use client";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, LoadingState, AlertBanner } from "@/components/ui";

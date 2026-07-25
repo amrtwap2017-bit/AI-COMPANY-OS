@@ -1,4 +1,5 @@
-"use client"; // @ts-nocheck
+// @ts-nocheck
+"use client";
 
 import { PageWrapper, PageHeader, SectionCard, StatusBadge, LoadingState } from "@/components/ui";
 import { useQuery, useMutation } from "@tanstack/react-query";
