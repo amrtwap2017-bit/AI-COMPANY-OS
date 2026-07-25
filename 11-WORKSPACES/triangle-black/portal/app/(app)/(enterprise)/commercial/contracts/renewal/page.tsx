@@ -35,7 +35,7 @@ const ContractRenewalPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError) return <EmptyState title="Failed to load contracts" />;
 
-  const contracts = data.contracts;
+  const contracts = data?.contracts || [];
   const totalContracts = (contracts || []).length;
   const activeContracts = toArr(contracts).filter(c => c.status === "active").length;
   const expiringSoon = toArr(contracts).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90).length;
