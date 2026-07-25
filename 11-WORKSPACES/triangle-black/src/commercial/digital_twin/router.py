@@ -79,8 +79,8 @@ def get_twin_state(db: Session = Depends(get_db)):
     # Inventory
     inv = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN quantity IS NOT NULL AND quantity <= 0 THEN 1 ELSE 0 END) as below_min
-        FROM inventory_items
+               sum(CASE WHEN sb.qty_on_hand < ii.min_stock THEN 1 ELSE 0 END) as below_min
+        FROM inventory_items ii LEFT JOIN stock_balances sb ON sb.item_id = ii.id
     """)
     health -= min(10, _safe_int(inv.get("below_min")) * 2)
 
@@ -92,12 +92,12 @@ def get_twin_state(db: Session = Depends(get_db)):
                COALESCE(sum(amount), 0) as total_value
         FROM invoices
     """)
-    health -= min(10, _safe_int(fin.get("overdue_inv")) * 3)
+    health -= min(12, _safe_int(fin.get("overdue_inv")) * 1)
 
     # Maintenance
     maint = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN next_due_date < NOW() AND status='active' THEN 1 ELSE 0 END) as overdue
+               sum(CASE WHEN next_due_date::timestamp < NOW() AND status='active' THEN 1 ELSE 0 END) as overdue
         FROM maintenance_plans
     """)
     health -= min(10, _safe_int(maint.get("overdue")) * 2)
