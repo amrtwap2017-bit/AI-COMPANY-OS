@@ -73,18 +73,17 @@ def get_twin_state(db: Session = Depends(get_db)):
     # Inventory
     inv = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN sb.quantity <= ii.min_stock THEN 1 ELSE 0 END) as below_min
-        FROM inventory_items ii
-        LEFT JOIN stock_balances sb ON sb.item_id = ii.id
+               sum(CASE WHEN quantity IS NOT NULL AND quantity <= 0 THEN 1 ELSE 0 END) as below_min
+        FROM inventory_items
     """)
     health -= min(10, _safe_int(inv.get("below_min")) * 2)
 
     # Finance
     fin = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN status='unpaid' THEN 1 ELSE 0 END) as unpaid,
+               sum(CASE WHEN status IN ('sent','draft') THEN 1 ELSE 0 END) as unpaid,
                sum(CASE WHEN status='overdue' THEN 1 ELSE 0 END) as overdue_inv,
-               COALESCE(sum(total_amount), 0) as total_value
+               COALESCE(sum(amount), 0) as total_value
         FROM invoices
     """)
     health -= min(10, _safe_int(fin.get("overdue_inv")) * 3)
