@@ -52,7 +52,7 @@ const AssetTreePage = () => {
   };
 
   toArr(assets).forEach(asset => {
-    categories[asset.category].count++;
+    (categories[asset.category] || {}).count++;
     if (asset.status === "In Fault") categories[asset.category].faultCount++;
     categories[asset.category].list.push(asset.name);
   });

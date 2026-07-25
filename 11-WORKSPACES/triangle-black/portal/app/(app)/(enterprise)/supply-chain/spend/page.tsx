@@ -7,6 +7,7 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, Loading
 import { useState } from "react";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n: any) => { try { return `EGP ${Number(n||0)?.toLocaleString() || '0'}`; } catch { return "EGP 0"; } };
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -35,7 +36,7 @@ const SpendPage = () => {
   const purchaseOrders = purchaseOrdersQuery.data;
   const totalPOs = purchaseOrders.length;
   const totalSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0);
-  const avgPOValue = totalPOs > 0 ? (totalSpend / totalPOs).toLocaleString() : "N/A";
+  const avgPOValue = totalPOs > 0 ? (totalSpend / totalPOs)?.toLocaleString() || '0' : "N/A";
   const activeVendors = new Set(toArr(purchaseOrders).map(po => po.vendor_id)).size;
 
   const statusCounts = toArr(purchaseOrders).reduce((acc: any, po: any) => {
@@ -71,8 +72,8 @@ const SpendPage = () => {
       <SectionCard>
         <MetricStrip
           metrics={[
-            { label: "Total POs", value: totalPOs.toLocaleString() },
-            { label: "Total Spend EGP", value: totalSpend.toLocaleString() },
+            { label: "Total POs", value: (Number(totalPOs) || 0)?.toLocaleString() || '0' },
+            { label: "Total Spend EGP", value: (Number(totalSpend) || 0)?.toLocaleString() || '0' },
             { label: "Avg PO Value EGP", value: avgPOValue },
             { label: "Active Vendors", value: activeVendors.toString() },
           ]}

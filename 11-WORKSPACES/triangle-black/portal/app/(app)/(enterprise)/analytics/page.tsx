@@ -7,8 +7,8 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, Loading
 import Link from "next/link";
 
 const workOrders: any[] = [];
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-  const technicians: any[] = toArr(data);
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?._rawData || d?.results || [];
+  const technicians: any[] = toArr(_rawData);
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
@@ -35,8 +35,8 @@ const AnalyticsPage = () => {
     technicians,
     inventory,
     procurement
-  } = kpisQuery.data;
-  const { compliance_rate, sla_status } = slaQuery.data;
+  } = kpisQuery._rawData;
+  const { compliance_rate, sla_status } = slaQuery._rawData;
 
   return (
     <PageWrapper>

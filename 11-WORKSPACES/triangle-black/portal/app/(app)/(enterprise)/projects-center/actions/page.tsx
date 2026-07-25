@@ -68,7 +68,7 @@ const ProjectsCenterPage = () => {
       {actionItems.length > 0 ? (
         <SectionCard title="Action Items">
           {actionItems.map((item, index) => (
-            <Link key={index} href={`/projects/${item.project.id}`}>
+            <Link key={index} href={`/projects/${item.project?.id}`}>
               <div className="flex items-center justify-between p-4 border-b last:border-b-0">
                 <div>
                   <h3 className="text-lg font-medium">{item.project.name}</h3>
