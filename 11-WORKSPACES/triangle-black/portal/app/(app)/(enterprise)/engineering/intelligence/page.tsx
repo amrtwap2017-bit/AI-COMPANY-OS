@@ -38,7 +38,7 @@ const MyComponent = () => {
 
   const signals = (signalsQuery.data?.signals || signalsQuery.data || []).filter(signal => signal.category === "engineering");
   const criticalSignals = toArr(signals).filter(signal => signal.priority === "critical");
-  const openWorkOrders = kpisQuery.data?.toArr(open_work_orders).filter(wo => wo.status === "open");
+  const openWorkOrders = kpisQuery.toArr(data?.open_work_orders).filter(wo => wo.status === "open");
 
   const assets = assetsQuery.data;
   const healthScores = toArr(assets).map(asset => {

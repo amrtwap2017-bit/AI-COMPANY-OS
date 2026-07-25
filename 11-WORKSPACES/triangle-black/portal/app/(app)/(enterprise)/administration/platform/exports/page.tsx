@@ -107,7 +107,7 @@ function ExportCard({ exp }: { exp: any }) {
 
           {exp.filters.length > 0 && (
             <div className="flex gap-2 mt-3 flex-wrap">
-              {exp.toArr(filters).map((f: any) => (
+              {toArr(exp.filters).map((f: any) => (
                 <select
                   key={f.key}
                   value={filters[f.key] ?? ""}
@@ -115,7 +115,7 @@ function ExportCard({ exp }: { exp: any }) {
                   className="text-xs border border-slate-200 rounded-lg px-2 py-1"
                 >
                   <option value="">All {f.label}</option>
-                  {f.toArr(options).map((o: string) => (
+                  {toArr(f.options).map((o: string) => (
                     <option key={o} value={o}>{o}</option>
                   ))}
                 </select>

@@ -62,7 +62,7 @@ export default function Page() {
                 <td className="border px-4 py-2">{entity.name}</td>
                 <td className="border px-4 py-2">{entity.records !== null ? entity.records : "varies"}</td>
                 <td className="border px-4 py-2">
-                  {entity.toArr(operations).map((operation, opIndex) => (
+                  {toArr(entity.operations).map((operation, opIndex) => (
                     <span key={opIndex} className="mr-2">
                       {operation}
                     </span>
