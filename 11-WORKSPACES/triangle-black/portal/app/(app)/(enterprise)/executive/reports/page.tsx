@@ -151,7 +151,7 @@ export default function ReportsPage() {
         {toArr(REPORTS).map(cat => (
           <SectionCard key={cat.category} title={cat.category}>
             <div className="space-y-2">
-              {cat.toArr(reports).map(report  => (
+              {toArr(cat.reports).map(report  => (
                 <ReportRow key={report.name} report={report} />
               ))}
             </div>
