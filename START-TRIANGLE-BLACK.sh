@@ -84,7 +84,7 @@ echo "[6/6] Starting Portal on :3000..."
 pkill -9 -f "next-server" 2>/dev/null || true
 sleep 2
 cd "$TB/portal"
-nohup node node_modules/.bin/next start --port 3000 \
+nohup node node_modules/.bin/next start --port 3000 --hostname 0.0.0.0 \
     > /tmp/tb_portal.log 2>&1 &
 echo "  Portal PID: $!"
 sleep 8
