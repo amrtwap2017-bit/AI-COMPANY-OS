@@ -173,15 +173,24 @@ def root():
 # ── Sprint 20 Modules ─────────────────────────────────────────────────────────
 try:
     from src.commercial.payment_tracking.router import router as payment_tracking_router
-    from src.commercial.projects.router import router as projects_router
-    from src.commercial.dashboard.router import router as dashboard_router
-    from src.commercial.system_notifications.router import router as notifications_router
-
     app.include_router(payment_tracking_router, prefix="/api/v1")
-    app.include_router(projects_router,          prefix="/api/v1")
-    app.include_router(dashboard_router,         prefix="/api/v1")
-except ImportError as e:
-    print(f"[WARN] Sprint 20 module import failed: {e}")
+except Exception as e:
+    print(f"[WARN] payment_tracking_router: {e}")
+try:
+    from src.commercial.projects.router import router as projects_router
+    app.include_router(projects_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] projects_router: {e}")
+try:
+    from src.commercial.dashboard.router import router as dashboard_router
+    app.include_router(dashboard_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] dashboard_router: {e}")
+try:
+    from src.commercial.system_notifications.router import router as notifications_router
+    app.include_router(notifications_router, prefix="/api/v1")
+except Exception as e:
+    print(f"[WARN] system_notifications_router: {e}")
 
 # ── Auto-wired Sprint 20-22 modules ──────────────────────────────────────
 try:
