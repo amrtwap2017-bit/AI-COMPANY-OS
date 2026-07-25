@@ -27,7 +27,7 @@ export default function NotificationsPage() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["notifications"],
-    queryFn:  () => authFetchJSON("/api/v1/notifications/live/"),
+    queryFn:  () => authFetchJSON("/api/v1/notifications/?limit=20live/"),
     staleTime: 15_000,
   });
 
@@ -41,7 +41,7 @@ export default function NotificationsPage() {
   async function markRead(id: string) {
     try {
       const token = tokenManager.getToken();
-      await fetch(`${BACK}/api/v1/notifications/`+id+"/read", {
+      await fetch(`${BACK}/api/v1/notifications/?limit=20`+id+"/read", {
         method:"PATCH", headers:{"Authorization":"Bearer "+(token||"")}
       });
       qc.invalidateQueries({queryKey:["notifications"]});
@@ -51,7 +51,7 @@ export default function NotificationsPage() {
   async function markAllRead() {
     try {
       const token = tokenManager.getToken();
-      await fetch(`${BACK}/api/v1/notifications/read-all`, {
+      await fetch(`${BACK}/api/v1/notifications/?limit=20read-all`, {
         method:"POST", headers:{"Authorization":"Bearer "+(token||"")}
       });
       qc.invalidateQueries({queryKey:["notifications"]});

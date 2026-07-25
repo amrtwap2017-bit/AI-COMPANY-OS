@@ -30,7 +30,7 @@ export default function ServiceRequestDetailPage() {
 
   const { data: sr, isLoading } = useQuery({
     queryKey: ["sr", id],
-    queryFn: () => authFetch(`/api/v1/service-requests/${id}`).then(r => r.json()),
+    queryFn: () => authFetch(`/api/v1/service-requests//${id}`).then(r => r.json()),
     enabled: !!id,
   });
 
@@ -41,7 +41,7 @@ export default function ServiceRequestDetailPage() {
   });
 
   const escalate = useMutation({
-    mutationFn: () => authFetch(`/api/v1/service-requests/${id}`, {
+    mutationFn: () => authFetch(`/api/v1/service-requests//${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ priority: "critical", status: "assigned" }),

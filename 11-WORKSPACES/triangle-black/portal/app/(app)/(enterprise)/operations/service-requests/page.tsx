@@ -18,7 +18,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchServiceRequests = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/service-requests`, {
+    const response = await fetch(`${BACK}/api/v1/service-requests/`, {
       credentials: "include",
     });
     if (!response.ok) return [];

@@ -39,7 +39,7 @@ export default function PlatformStatusPage() {
   });
   const { data: notifs = {} } = useQuery({
     queryKey: ["notif-status"],
-    queryFn: () => authFetch("/api/v1/notifications/live/count").then(r => r.json()),
+    queryFn: () => authFetch("/api/v1/notifications/?limit=20live/count").then(r => r.json()),
     refetchInterval: 30000,
   });
 

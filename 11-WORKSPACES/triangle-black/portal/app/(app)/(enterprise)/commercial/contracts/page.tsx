@@ -40,7 +40,7 @@ export default function ContractsPage() {
         )
       ),
     onSuccess: (results) => {
-      const succeeded = results.filter(r => r.success).length;
+      const succeeded = (results || []).filter(r => r.success).length;
       setRenewResult({ succeeded, total: results.length });
       setSelectedIds(new Set());
       qc.invalidateQueries({ queryKey: ["contracts-list"] });
