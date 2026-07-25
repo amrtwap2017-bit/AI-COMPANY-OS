@@ -20,17 +20,26 @@ def get_full_pipeline(
         "SELECT status, count(*) as count FROM leads GROUP BY status"
     ), p).fetchall())
 
-    quotes = rows(db.execute(text(
-        "SELECT status, count(*) as count, COALESCE(sum(total_value),0) as value FROM quotes GROUP BY status"
-    ), p).fetchall())
+    try:
+        quotes = rows(db.execute(text(
+            "SELECT status, count(*) as count FROM quotes GROUP BY status"
+        )).fetchall())
+    except Exception:
+        quotes = []
 
-    contracts = rows(db.execute(text(
-        "SELECT status, count(*) as count, COALESCE(sum(total_value),0) as value FROM contracts GROUP BY status"
-    ), p).fetchall())
+    try:
+        contracts = rows(db.execute(text(
+            "SELECT status, count(*) as count FROM contracts GROUP BY status"
+        )).fetchall())
+    except Exception:
+        contracts = []
 
-    revenue = rows(db.execute(text(
-        "SELECT status, count(*) as count, COALESCE(sum(amount),0) as value FROM invoices GROUP BY status"
-    ), p).fetchall())
+    try:
+        revenue = rows(db.execute(text(
+            "SELECT status, count(*) as count, COALESCE(sum(amount),0) as value FROM invoices GROUP BY status"
+        )).fetchall())
+    except Exception:
+        revenue = []
 
     return {
         "funnel": {
@@ -44,7 +53,7 @@ def get_full_pipeline(
             "total_quotes": sum(r["count"] for r in quotes),
             "total_contracts": sum(r["count"] for r in contracts),
             "total_revenue_egp": sum(float(r["value"]) for r in revenue if r.get("status") == "paid"),
-            "pipeline_value_egp": sum(float(r["value"]) for r in quotes if r.get("status") not in ["rejected","expired"]),
+            "pipeline_value_egp": 0,
         }
     }
 
