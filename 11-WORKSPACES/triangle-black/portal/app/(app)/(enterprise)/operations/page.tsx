@@ -28,10 +28,10 @@ const OperationsPage = () => {
 
   if (isKpisLoading || isSignalsLoading) return <LoadingState />;
 
-  const openWOs = kpis?.workOrders.open || 41;
-  const criticalWOs = kpis?.workOrders.critical || 11;
-  const techniciansActive = signalsSummary?.technicians.active || 25;
-  const signalsTotal = signalsSummary?.signals.total || 0;
+  const openWOs = kpis?.workOrders?.open || 41;
+  const criticalWOs = kpis?.workOrders?.critical || 11;
+  const techniciansActive = signalsSummary?.technicians?.active || 25;
+  const signalsTotal = signalsSummary?.signals?.total || 0;
 
   return (
     <PageWrapper>
