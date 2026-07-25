@@ -6,6 +6,10 @@ Hotel Engineering Platform — Multi-hotel tenant isolation
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger('triangle_black')
+
 
 from src.core.database import check_connection, engine
 from src.core.base import Base
@@ -134,19 +138,19 @@ try:
     app.include_router(work_orders_router, prefix="/api/v1")
     print("  OK: work_orders_router")
 except Exception as e:
-    print(f"  WARN: work_orders_router: {e}")
+    logger.warning("WARN: work_orders_router: {e}")
 try:
     from src.commercial.technicians.router import router as technicians_router
     app.include_router(technicians_router, prefix="/api/v1")
     print("  OK: technicians_router")
 except Exception as e:
-    print(f"  WARN: technicians_router: {e}")
+    logger.warning("WARN: technicians_router: {e}")
 try:
     from src.commercial.assets.router import router as assets_router
     app.include_router(assets_router, prefix="/api/v1")
     print("  OK: assets_router")
 except Exception as e:
-    print(f"  WARN: assets_router: {e}")
+    logger.warning("WARN: assets_router: {e}")
 app.include_router(warehouses_router, prefix="/api/v1")
 app.include_router(inv_vendors_router, prefix="/api/v1")
 app.include_router(stock_movements_router, prefix="/api/v1")
@@ -175,48 +179,48 @@ try:
     from src.commercial.payment_tracking.router import router as payment_tracking_router
     app.include_router(payment_tracking_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] payment_tracking_router: {e}")
+    logger.warning("WARN: payment_tracking_router: {e}")
 try:
     from src.commercial.projects.router import router as projects_router
     app.include_router(projects_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] projects_router: {e}")
+    logger.warning("WARN: projects_router: {e}")
 try:
     from src.commercial.dashboard.router import router as dashboard_router
     app.include_router(dashboard_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] dashboard_router: {e}")
+    logger.warning("WARN: dashboard_router: {e}")
 try:
     from src.commercial.system_notifications.router import router as notifications_router
 except Exception as e:
-    print(f"[WARN] system_notifications_router: {e}")
+    logger.warning("WARN: system_notifications_router: {e}")
 
 # ── Auto-wired Sprint 20-22 modules ──────────────────────────────────────
 try:
     from src.commercial.documents.router import router as documents_router
     app.include_router(documents_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] documents: {e}")
+    logger.warning("WARN: documents: {e}")
 try:
     from src.commercial.email_service.router import router as email_service_router
     app.include_router(email_service_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] email_service: {e}")
+    logger.warning("WARN: email_service: {e}")
 try:
     from src.commercial.inventory_alerts.router import router as inventory_alerts_router
     app.include_router(inventory_alerts_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] inventory_alerts: {e}")
+    logger.warning("WARN: inventory_alerts: {e}")
 try:
     from src.commercial.pdf_service.router import router as pdf_service_router
     app.include_router(pdf_service_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] pdf_service: {e}")
+    logger.warning("WARN: pdf_service: {e}")
 try:
     from src.commercial.vendor_portal.router import router as vendor_portal_router
     app.include_router(vendor_portal_router, prefix="/api/v1")
 except Exception as e:
-    print(f"[WARN] vendor_portal: {e}")
+    logger.warning("WARN: vendor_portal: {e}")
 # ── Sprint 11: AI Operations Routers ──────────────────────────
 try:
   from src.commercial.ai_assistant.signals_router import router as ai_signals_router
@@ -245,7 +249,7 @@ try:
     app.include_router(ai_analytics_router, prefix="/api/v1")
     print("  OK: analytics_router")
 except Exception as e:
-    print(f"  WARN: analytics_router: {e}")
+    logger.warning("WARN: analytics_router: {e}")
 
 # ── Sprint 62: Document Control ──────────────────────────────
 try:
@@ -254,7 +258,7 @@ try:
 
     print("  OK: document_router")
 except Exception as e:
-    print(f"  WARN: document_router: {e}")
+    logger.warning("WARN: document_router: {e}")
 
 # ── Sprint 68 — Workflow + Finance + AI + Digital Twin ─────────────────────
 try:
@@ -616,10 +620,10 @@ try:
     app.include_router(maintenance_enterprise_router, prefix="/api/v1")
     print("  OK: maintenance_enterprise_router")
 except Exception as e:
-    print(f"  WARN: maintenance_enterprise_router: {e}")
+    logger.warning("WARN: maintenance_enterprise_router: {e}")
 try:
     from src.maintenance_schedule_module.router import router as maintenance_schedule_module_router
     app.include_router(maintenance_schedule_module_router, prefix="/api/v1")
     print("  OK: maintenance_schedule_module_router")
 except Exception as e:
-    print(f"  WARN: maintenance_schedule_module_router: {e}")
+    logger.warning("WARN: maintenance_schedule_module_router: {e}")
