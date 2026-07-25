@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useCallback, useEffect, useState } from "react";;
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -42,7 +43,7 @@ export function EnterpriseTopbar() {
   useEffect(() => {
     const token = tokenManager.getToken() || "";
     if (!token) return;
-    fetch("/api/v1/notifications/?limit=20", {
+    authFetch("/api/v1/notifications/?limit=20", {
       redirect: "follow",
       headers: { Authorization: "Bearer " + token }
     })

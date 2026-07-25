@@ -27,7 +27,7 @@ export default function NotificationsPage() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["notifications"],
-    queryFn:  () => authFetchJSON("/api/v1/notifications/?limit=20live/"),
+    queryFn:  () => authFetchJSON("/api/v1/notifications/live/"),
     staleTime: 15_000,
   });
 

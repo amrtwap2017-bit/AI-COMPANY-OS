@@ -26,7 +26,7 @@ const WIDGETS = [
   { key: "sla",           label: "SLA Overview",    endpoint: "/api/v1/sla/overview" },
   { key: "pred_maint",    label: "Asset Health",    endpoint: "/api/v1/predictive-maintenance/health-scores?max_score=40" },
   { key: "kpi",           label: "KPI Summary",     endpoint: "/api/v1/executive-kpi/summary" },
-  { key: "notifications", label: "Notifications",   endpoint: "/api/v1/notifications/?limit=20live/count" },
+  { key: "notifications", label: "Notifications",   endpoint: "/api/v1/notifications/live/count" },
   { key: "customer",      label: "Customer Success", endpoint: "/api/v1/customer-success/overview" },
 ];
 
@@ -73,7 +73,7 @@ export default function ExecutiveDashboardPage() {
 
   const { data: notifs = {} } = useQuery({
     queryKey: ["exec-notifs-main"],
-    queryFn: () => authFetch("/api/v1/notifications/?limit=20live/count").then(r => r.json()),
+    queryFn: () => authFetch("/api/v1/notifications/live/count").then(r => r.json()),
     refetchInterval: 30000,
   });
 
