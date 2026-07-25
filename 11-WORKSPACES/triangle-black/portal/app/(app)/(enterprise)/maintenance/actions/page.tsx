@@ -15,6 +15,9 @@ const fmtDate = (d: any): string => {
 };
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const assets: any[] = [];
+const signals: any[] = [];
+const maintenance: any[] = [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
