@@ -15,6 +15,7 @@ const fmtDate = (d: any): string => {
 
 const workOrders: any[] = [];
 const toArr = (d: any): any[] => {
+  const technicians: any[] = toArr(data);
   if (!d) return [];
   if (Array.isArray(d)) return d;
   if (Array.isArray(d?.items)) return d.items;

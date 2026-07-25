@@ -46,6 +46,7 @@ const ProjectTimelinePage = () => {
     queryKey: ["projects"],
     queryFn: fetchProjects,
   });
+  const projects: any[] = toArr(projects);
 
   if (isLoading) return <LoadingState />;
 
