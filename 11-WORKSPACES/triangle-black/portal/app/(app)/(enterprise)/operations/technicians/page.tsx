@@ -38,14 +38,13 @@ const TechniciansPage = () => {
   if (isLoading) return <LoadingState />;
   if (isError || !data) return <EmptyState />;
 
-  const technicians = data.technicians;
+  const technicians = Array.isArray(data) ? data : (data?.technicians || data?.items || data?.data || []);
   const totalTechnicians = (technicians || []).length;
   const activeTechnicians = (technicians || []).filter(t => t.is_active).length;
   const atCapacityTechnicians = (technicians || []).filter(t => t.current_work_orders >= t.max_work_orders).length;
   const avgUtilization = ((technicians || []).reduce((acc: any, t: any) => acc + t.current_work_orders / t.max_work_orders, 0) / totalTechnicians) * 100;
 
-  const filteredTechnicians = technicians
-    .filter(t => {
+  const filteredTechnicians = (technicians || []).filter(t => {
       if (availabilityFilter === "available") return t.current_work_orders < t.max_work_orders;
       if (availabilityFilter === "at_capacity") return t.current_work_orders >= t.max_work_orders;
       if (availabilityFilter === "inactive") return !t.is_active;
