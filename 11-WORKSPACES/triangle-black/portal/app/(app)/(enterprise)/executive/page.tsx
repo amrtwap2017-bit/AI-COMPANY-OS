@@ -22,9 +22,7 @@ function WidgetData({ endpoint }: { endpoint: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ["exec-widget", endpoint],
     queryFn: () => authFetch(endpoint).then(r => r.json()),
-// @ts-ignore
     refetchInterval: 60000,
-// @ts-ignore
   });
   if (isLoading) return <p className="text-xs text-slate-400">Loading...</p>;
   if (!data) return <p className="text-xs text-slate-400">No data</p>;

@@ -22,9 +22,7 @@ async function fetchSignals() {
   try {
     const r = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
     if (!r.ok) return { critical: 0, high: 0, total: 0 };
-// @ts-ignore
     return r.json();
-// @ts-ignore
   } catch { return { critical: 0, high: 0, total: 0 }; }
 }
 

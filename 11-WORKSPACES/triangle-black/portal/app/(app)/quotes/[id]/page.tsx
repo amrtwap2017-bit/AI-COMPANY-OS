@@ -22,9 +22,7 @@ export default function QuoteDetailPage() {
   if (isLoading) return <PageWrapper><LoadingState type="table" rows={5}/></PageWrapper>;
   if (isError || !data) return <PageWrapper><AlertBanner type="error" title="Quote not found"/></PageWrapper>;
 
-// @ts-ignore
   const q = Array.isArray(data) ? data[0] : data;
-// @ts-ignore
 
   const overview = (
     <div className="grid grid-cols-2 gap-3">

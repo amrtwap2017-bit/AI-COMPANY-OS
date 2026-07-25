@@ -22,9 +22,7 @@ const fetchSignalsSummary = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals/summary`, { credentials: "include" });
   return response.json();
 };
-// @ts-ignore
 
-// @ts-ignore
 export default function SupplyChainPage() {
   const { data: purchaseOrders, isLoading: isPurchaseOrdersLoading } = useQuery(["purchase-orders"], fetchPurchaseOrders, { refetchInterval: 120000 });
   const { data: purchaseRequests, isLoading: isPurchaseRequestsLoading } = useQuery(["purchase-requests"], fetchPurchaseRequests, { refetchInterval: 120000 });

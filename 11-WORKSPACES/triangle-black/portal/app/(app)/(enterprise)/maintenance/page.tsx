@@ -22,9 +22,7 @@ const fetchPMPlans = async () => {
 
 const fetchMaintenanceSignals = async () => {
   const response = await fetch(`${BACK}/api/v1/ai/signals?category=maintenance`, { credentials: "include" });
-// @ts-ignore
   if (!response.ok) return [];
-// @ts-ignore
   return response.json();
 };
 
