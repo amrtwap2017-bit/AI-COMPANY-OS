@@ -52,7 +52,7 @@ const ProjectTimelinePage = () => {
             <h3>{project.name}</h3>
             <StatusBadge status={project.status} />
             <div className="mt-4 flex space-x-2">
-              {project.allowed_transitions.map(transition => (
+              {(project.allowed_transitions || []).map(transition  => (
                 <button
                   key={transition}
                   onClick={() =>

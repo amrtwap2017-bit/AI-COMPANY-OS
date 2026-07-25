@@ -47,9 +47,9 @@ const CustomerSuccessPage = () => {
   if (isContractLoading || isInvoiceLoading || isWorkOrderLoading) return <LoadingState />;
 
   const totalContracts = contractData.length;
-  const activeContracts = contractData.filter(contract => contract.status === "active").length;
-  const expiringSoonContracts = contractData.filter(
-    contract => Math.ceil((new Date(contract.end_date) - new Date(today)) / 86400000) <= 60
+  const activeContracts = (contractData || []).filter(contract  => contract.status === "active").length;
+  const expiringSoonContracts = (contractData || []).filter(
+    contract  => Math.ceil((new Date(contract.end_date) - new Date(today)) / 86400000) <= 60
   ).length;
   const monthlyRevenueEGP = contractData.reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
 
@@ -76,7 +76,7 @@ const CustomerSuccessPage = () => {
         </div>
       </SectionCard>
       <SectionCard title="Contract List with Renewal Status">
-        {contractData.map(contract => (
+        {(contractData || []).map(contract  => (
           <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <div>{contract.title}</div>
             <StatusBadge label={contract.status} />
@@ -87,7 +87,7 @@ const CustomerSuccessPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Top Revenue Contracts">
-        {topRevenueContracts.map(contract => (
+        {(topRevenueContracts || []).map(contract  => (
           <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
             <div>{contract.title}</div>
             <div>{contract.total_value} EGP</div>

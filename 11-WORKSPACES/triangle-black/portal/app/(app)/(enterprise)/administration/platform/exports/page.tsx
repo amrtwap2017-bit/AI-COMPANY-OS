@@ -140,7 +140,7 @@ export default function DataExportsPage() {
       </div>
 
       <div className="space-y-4">
-        {EXPORTS.map(exp => (
+        {(EXPORTS || []).map(exp  => (
           <ExportCard key={exp.label} exp={exp} />
         ))}
       </div>

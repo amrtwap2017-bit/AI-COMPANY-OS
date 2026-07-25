@@ -42,7 +42,7 @@ const ProjectsCenterPage = () => {
   const openWOs = (workOrders || []).filter(w => !w.project_id);
 
   const actionItems = [
-    ...atRiskProjects.map(p => ({ project: p, text: "Schedule closeout review", urgency: "high" })),
+    (...atRiskProjects || []).map(p  => ({ project: p, text: "Schedule closeout review", urgency: "high" })),
     ...(projects || []).filter(p => openWOs.some(w => w.project_id === p.id)).map(p => ({ project: p, text: "No work orders assigned", urgency: "medium" })),
     ...(signals || []).filter(s => s.category === "operations").map(s => ({ project: (projects || []).find(p => p.id === s.project_id), text: s.message, urgency: "low" }))
   ];

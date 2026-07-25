@@ -94,7 +94,7 @@ const TechniciansPage = () => {
       </div>
       {filteredTechnicians.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTechnicians.map(t => (
+          {(filteredTechnicians || []).map(t  => (
             <Link key={t.id} href={`/operations/technicians/${t.id}`}>
               <SectionCard>
                 <h3 className="font-bold">{t.name}</h3>

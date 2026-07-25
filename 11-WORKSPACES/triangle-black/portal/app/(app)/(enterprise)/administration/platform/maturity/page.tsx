@@ -109,7 +109,7 @@ export default function PlatformMaturityPage() {
   // Update Triangle Black benchmark
   ENTERPRISE_BENCHMARKS[4].score = maturityPct;
 
-  const maxBenchmark = Math.max(...ENTERPRISE_BENCHMARKS.map(b => b.score));
+  const maxBenchmark = Math.max((...ENTERPRISE_BENCHMARKS || []).map(b  => b.score));
 
   return (
     <PageWrapper>
@@ -153,7 +153,7 @@ export default function PlatformMaturityPage() {
       {/* Enterprise benchmark comparison */}
       <SectionCard title="Benchmark vs Enterprise Platforms" className="mb-6">
         <div className="space-y-3">
-          {ENTERPRISE_BENCHMARKS.map(b => (
+          {(ENTERPRISE_BENCHMARKS || []).map(b  => (
             <div key={b.name} className="flex items-center gap-4">
               <div className="w-48 text-sm font-medium text-slate-700 flex-shrink-0">{b.name}</div>
               <div className="flex-1 bg-slate-100 rounded-full h-5 relative">
@@ -175,7 +175,7 @@ export default function PlatformMaturityPage() {
 
       {/* Category breakdown */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {MATURITY_BENCHMARKS.map(cat => {
+        {(MATURITY_BENCHMARKS || []).map(cat  => {
           const catScore = (Array.isArray(cat.items) ? cat.items : []).reduce((s: any, i: any) => s + i.score, 0);
           const catMax   = (cat.items || []).length * 10;
           const catPct   = Math.round(catScore / catMax * 100);

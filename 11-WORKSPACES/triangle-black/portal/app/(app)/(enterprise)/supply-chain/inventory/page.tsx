@@ -38,17 +38,17 @@ const InventoryPage = () => {
   const stockBalances = stockBalancesQuery.data;
 
   const totalItems = (items || []).length;
-  const lowStockCount = (items || []).filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
-  const outOfStockCount = (items || []).filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand === 0).length;
+  const lowStockCount = (items || []).filter(item => (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand < item.min_stock).length;
+  const outOfStockCount = (items || []).filter(item => (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand === 0).length;
   const categoriesCount = new Set((items || []).map(item => item.category)).size;
 
   const filteredItems = selectedCategory ? (items || []).filter(item => item.category === selectedCategory) : items;
 
   const reorderAlerts = items
-    .filter(item => stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand < item.reorder_qty)
+    .filter(item => (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand < item.reorder_qty)
     .map(item => ({
       name: item.name,
-      currentQty: stockBalances.find(balance => balance.item_id === item.id)?.qty_on_hand || 0,
+      currentQty: (stockBalances || []).find(balance  => balance.item_id === item.id)?.qty_on_hand || 0,
       reorderQty: item.reorder_qty
     }));
 
@@ -93,8 +93,8 @@ const InventoryPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredItems.map(item => {
-              const balance = stockBalances.find(balance => balance.item_id === item.id);
+            {(filteredItems || []).map(item => {
+              const balance = stockBalances.find(balance  => balance.item_id === item.id);
               const status =
                 balance?.qty_on_hand === 0
                   ? "out_of_stock"
@@ -120,7 +120,7 @@ const InventoryPage = () => {
       <SectionCard title="Reorder Alerts">
         {reorderAlerts.length > 0 ? (
           <ul>
-            {reorderAlerts.map(alert => (
+            {(reorderAlerts || []).map(alert  => (
               <li key={alert.name}>
                 {alert.name} - Current Qty: {alert.currentQty}, Reorder Qty: {alert.reorderQty}
               </li>

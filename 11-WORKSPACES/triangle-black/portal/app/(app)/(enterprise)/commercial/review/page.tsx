@@ -70,7 +70,7 @@ const CommercialReviewPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Top 5 Leads by Value">
-        {topLeads.map(lead => (
+        {(topLeads || []).map(lead  => (
           <div key={lead.id} className="flex items-center justify-between mb-2">
             <Link href={`/leads/${lead.id}`} className="text-blue-500 hover:underline">{lead.company_name}</Link>
             <StatusBadge status={lead.status} />

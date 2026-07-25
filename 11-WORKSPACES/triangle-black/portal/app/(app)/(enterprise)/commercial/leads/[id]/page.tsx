@@ -75,7 +75,7 @@ export default function LeadDetailPage() {
       {/* Pipeline progress */}
       <SectionCard title="Pipeline Stage">
         <div className="flex items-center gap-1 overflow-x-auto pb-2">
-          {STAGE_ORDER.filter(s => s !== "lost").map((stage, idx) => {
+          {(STAGE_ORDER || []).filter(s  => s !== "lost").map((stage, idx) => {
             const isActive  = stage === currentStage;
             const isPast    = stageIdx > idx && currentStage !== "lost";
             const isFuture  = stageIdx < idx;
@@ -91,7 +91,7 @@ export default function LeadDetailPage() {
                 >
                   {stage}
                 </button>
-                {idx < STAGE_ORDER.filter(s => s !== "lost").length - 1 && (
+                {idx < (STAGE_ORDER || []).filter(s  => s !== "lost").length - 1 && (
                   <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0" />
                 )}
               </div>

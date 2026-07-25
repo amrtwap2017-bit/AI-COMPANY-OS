@@ -52,8 +52,7 @@ const UsersPage = () => {
 
   if (!usersData || !techniciansData) return <EmptyState message="Failed to load data" />;
 
-  const filteredUsers = usersData.filter(user =>
-    activeFilter === "all" ||
+  const filteredUsers = (usersData || []).filter(user  => activeFilter === "all" ||
     (activeFilter === "admin" && user.role === "admin") ||
     (activeFilter === "manager" && user.role === "manager") ||
     (activeFilter === "technician" && user.role === "technician") ||
@@ -62,7 +61,7 @@ const UsersPage = () => {
     user.name.toLowerCase().includes(searchText.toLowerCase()) || user.email.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const adminCount = filteredUsers.filter(user => user.role === "admin").length;
+  const adminCount = (filteredUsers || []).filter(user  => user.role === "admin").length;
 
   return (
     <PageWrapper>
@@ -71,7 +70,7 @@ const UsersPage = () => {
         <MetricStrip
           metrics={[
             { label: "Total Users", value: usersData.length },
-            { label: "Active Users", value: filteredUsers.filter(user => user.is_active).length },
+            { label: "Active Users", value: (filteredUsers || []).filter(user  => user.is_active).length },
             { label: "Technicians", value: 25 },
             { label: "Admins", value: adminCount },
           ]}
@@ -99,7 +98,7 @@ const UsersPage = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map(user => (
+          {(filteredUsers || []).map(user  => (
             <tr key={user.id}>
               <td>{user.name}</td>
               <td>{user.email}</td>

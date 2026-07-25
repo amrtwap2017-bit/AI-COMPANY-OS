@@ -116,7 +116,7 @@ const MyDayPage = () => {
             {priorityWorkOrders.length === 0 ? (
               <EmptyState message="No priority work orders today" />
             ) : (
-              priorityWorkOrders.map(w => (
+              (priorityWorkOrders || []).map(w  => (
                 <div key={w.id} className="flex items-center p-4 border-b border-gray-200 min-h-60">
                   <span
                     className={`border-r-4 mr-4 ${
@@ -158,7 +158,7 @@ const MyDayPage = () => {
             {technicianCapacity.length === 0 ? (
               <EmptyState message="No active technicians" />
             ) : (
-              technicianCapacity.map(t => (
+              (technicianCapacity || []).map(t  => (
                 <div key={t.id} className="flex items-center p-4 border-b border-gray-200 min-h-60">
                   <div>
                     <h3>{t.name}</h3>

@@ -96,7 +96,7 @@ export default function ProcurementIntakePage() {
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Request Channel</label>
                   <div className="flex flex-wrap gap-2">
-                    {CHANNELS.map(c => (
+                    {(CHANNELS || []).map(c  => (
                       <button key={c.key}
                         onClick={() => setChannel(c.key)}
                         className={`px-3 py-1.5 text-sm rounded-lg border transition-all
@@ -109,7 +109,7 @@ export default function ProcurementIntakePage() {
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Urgency</label>
                   <div className="space-y-2">
-                    {URGENCY.map(u => (
+                    {(URGENCY || []).map(u  => (
                       <label key={u.key}
                         className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all
                           ${urgency === u.key ? u.color + " border-2" : "border-slate-200 hover:bg-slate-50"}`}>

@@ -92,12 +92,12 @@ export default function APIDocsPage() {
   }, [openapi]);
 
   const tags = useMemo(() => {
-    const t = new Set(endpoints.map(e => e.tag));
+    const t = new Set((endpoints || []).map(e  => e.tag));
     return ["all", ...Array.from(t).sort()];
   }, [endpoints]);
 
   const filtered = useMemo(() => {
-    return endpoints.filter(e => {
+    return (endpoints || []).filter(e  => {
       const matchSearch = !search ||
         e.path.toLowerCase().includes(search.toLowerCase()) ||
         e.summary.toLowerCase().includes(search.toLowerCase());
@@ -181,7 +181,7 @@ export default function APIDocsPage() {
         </div>
         <select value={tagFilter} onChange={e => setTag(e.target.value)}
                 className="text-sm border border-slate-200 rounded-lg px-3 py-2">
-          {tags.map(t => (
+          {(tags || []).map(t  => (
             <option key={t} value={t}>{t === "all" ? "All tags" : t}</option>
           ))}
         </select>
@@ -197,7 +197,7 @@ export default function APIDocsPage() {
       <div className="space-y-6">
         {Object.entries(byTag).map(([tag, eps]) => (
           <SectionCard key={tag} title={`${tag} (${eps.length})`}>
-            {eps.map(ep => (
+            {(eps || []).map(ep  => (
               <EndpointRow
                 key={`${ep.method}-${ep.path}`}
                 path={ep.path}

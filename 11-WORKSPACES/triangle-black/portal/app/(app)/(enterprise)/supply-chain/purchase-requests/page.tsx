@@ -39,7 +39,7 @@ export default function PurchaseRequestsPage() {
   const { query, setQuery, filtered } = useSearch(filtered1, ["pr_number","requester","department","justification"]);
   const { page, totalPages, items, goToPage } = usePagination(filtered, pageSize);
 
-  const tabs = STATUS_TABS.map(t => ({
+  const tabs = (STATUS_TABS || []).map(t  => ({
     ...t,
     count: t.value === "all" ? (data || []).length : (data || []).filter(r => r.status === t.value).length,
   }));

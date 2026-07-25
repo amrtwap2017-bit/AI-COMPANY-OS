@@ -136,10 +136,10 @@ export default function ReportsPage() {
 
       {/* Report categories */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {REPORTS.map(cat => (
+        {(REPORTS || []).map(cat => (
           <SectionCard key={cat.category} title={cat.category}>
             <div className="space-y-2">
-              {cat.reports.map(report => (
+              {cat.reports.map(report  => (
                 <ReportRow key={report.name} report={report} />
               ))}
             </div>

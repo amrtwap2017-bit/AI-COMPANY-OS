@@ -104,7 +104,7 @@ export default function WorkflowDesignerPage() {
   });
 
   const metrics = [
-    { label: "Active Workflows",    value: WORKFLOW_TEMPLATES.filter(w => w.status === "active").length,      suffix: "" },
+    { label: "Active Workflows",    value: (WORKFLOW_TEMPLATES || []).filter(w  => w.status === "active").length,      suffix: "" },
     { label: "Total Executions",    value: WORKFLOW_TEMPLATES.reduce((a: any, w: any) => a + w.runs, 0),                suffix: "" },
     { label: "State Transitions",   value: WO_STATE_MACHINE.length,                                           suffix: "" },
     { label: "AI Signals Active",   value: Array.isArray(signals) ? (signals || []).length : 0,                       suffix: "" },
@@ -129,7 +129,7 @@ export default function WorkflowDesignerPage() {
 
         {/* State nodes */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {STATES.map(s => (
+          {(STATES || []).map(s  => (
             <button
               key={s}
               onMouseEnter={() => setHoveredState(s)}

@@ -30,7 +30,7 @@ const fetchMaintenanceData = async () => {
       ...(signals || []).filter(signal => signal.urgency === "critical"),
       ...(assets || []).filter(asset => asset.status === "faulted")
     ],
-    overduePMs: pmPlans.filter(plan => plan.next_due_date < today),
+    overduePMs: (pmPlans || []).filter(plan  => plan.next_due_date < today),
     openWOs: (wos || []).filter(wo => wo.status === "open")
   };
 };
@@ -55,7 +55,7 @@ const MaintenanceActionsPage = () => {
         <MetricStrip label="WOs Open" value={data.openWOs.length} />
       </div>
       <SectionCard title="Critical Actions">
-        {data.criticalActions.map(action => (
+        {(data.criticalActions || []).map(action  => (
           <Link href={`/maintenance/actions/${action.id}`} key={action.id}>
             <div className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
@@ -68,7 +68,7 @@ const MaintenanceActionsPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Overdue PM Plans">
-        {data.overduePMs.map(plan => (
+        {(data.overduePMs || []).map(plan  => (
           <Link href={`/maintenance/pm-plans/${plan.id}`} key={plan.id}>
             <div className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
@@ -81,7 +81,7 @@ const MaintenanceActionsPage = () => {
         ))}
       </SectionCard>
       <SectionCard title="Open Work Orders">
-        {data.openWOs.map(wo => (
+        {(data.openWOs || []).map(wo  => (
           <Link href={`/maintenance/work-orders/${wo.id}`} key={wo.id}>
             <div className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>

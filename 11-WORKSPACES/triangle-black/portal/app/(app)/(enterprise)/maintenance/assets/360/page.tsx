@@ -61,14 +61,14 @@ const MaintenancePage = () => {
         <MetricStrip label="High Risk Assets" value={(assets || []).filter(a => a.health < 40).length} />
       </SectionCard>
       <SectionCard title="Asset Health Scores">
-        {assetHealthScores.map(asset => (
+        {(assetHealthScores || []).map(asset  => (
           <div key={asset.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
             <div className="flex items-center">
               <span>{asset.name}</span>
               <StatusBadge type={asset.criticality} />
             </div>
             <Progress value={asset.health} color={asset.health >= 70 ? "green" : asset.health >= 40 ? "amber" : "red"} />
-            <span>{`${assetHealthScores.filter(a => a.id === asset.id).length} corrective WOs in 90 days`}</span>
+            <span>{`${(assetHealthScores || []).filter(a  => a.id === asset.id).length} corrective WOs in 90 days`}</span>
           </div>
         ))}
       </SectionCard>

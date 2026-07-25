@@ -17,7 +17,7 @@ const AuditPage = () => {
   const { data: auditLogs, isLoading, isError } = useQuery(
     {
       queryKey: ["audit-logs", entityTypeFilter],
-      queryFn: () => fetchAuditLogs("/api/v1/administration/audit").catch(() => fetchAuditLogs("/api/v1/audit-logs")).catch(() => fetchAuditLogs("/api/v1/activity")),
+      queryFn: () => fetchAuditLogs("/api/v1/administration/audit").catch(() => fetchAuditLogs("/api/v1/audit-logs")).catch(() => fetchAuditLogs("/api/v1/activities")),
       refetchInterval: 60000,
     }
   );

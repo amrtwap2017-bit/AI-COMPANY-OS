@@ -85,7 +85,7 @@ const InvoicesPage = () => {
       </div>
       {filteredInvoices.length > 0 ? (
         <ul>
-          {filteredInvoices.map(invoice => (
+          {(filteredInvoices || []).map(invoice  => (
             <li key={invoice.id} className="flex items-center justify-between mb-2">
               <span className="font-bold">{invoice.invoice_number}</span>
               <StatusBadge status={invoice.status} />

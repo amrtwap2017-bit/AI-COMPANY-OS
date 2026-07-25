@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
@@ -16,7 +17,7 @@ const fetchSignals = async () => {
 
 const fetchNotifications = async () => {
   try {
-    const response = await fetch(`${BACK}/api/v1/notifications`, { credentials: "include" });
+    const response = await authFetch(`/api/v1/notifications`, { credentials: "include" });
     if (response.status === 404) return null;
     if (!response.ok) return [];
     return response.json();
@@ -95,7 +96,7 @@ const AlertsPage = () => {
       </div>
       {filteredSignals.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {filteredSignals.map(signal => (
+          {(filteredSignals || []).map(signal  => (
             <SectionCard key={signal.signal_id} className={`border-l-4 ${signal.priority === "Critical" ? "border-red-500" : signal.priority === "High" ? "border-amber-500" : "border-blue-500"}`}>
               <div className="flex items-center justify-between">
                 <h3 className="font-bold">{signal.title}</h3>
