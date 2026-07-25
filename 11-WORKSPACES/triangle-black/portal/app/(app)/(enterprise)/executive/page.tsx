@@ -80,7 +80,7 @@ export default function ExecutiveDashboardPage() {
   const twinLabel   = twin?.health_label ?? "Unknown";
   const criticalBadge = notifs?.critical ?? 0;
 
-  const visibleWidgets = toArr(WIDGETS).filter(w => widgetVisible(w.key));
+  const visibleWidgets = toArr(WIDGETS).filter(w => typeof widgetVisible === 'function' ? widgetVisible(w.key) : true);
 
   return (
     <PageWrapper>
@@ -123,7 +123,7 @@ export default function ExecutiveDashboardPage() {
               <label key={w.key} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={widgetVisible(w.key)}
+                  checked={typeof widgetVisible === 'function' ? widgetVisible(w.key) : true}
                   onChange={() => toggleWidget(w.key)}
                   disabled={isSaving}
                   className="w-4 h-4 rounded border-slate-300 text-blue-600"
