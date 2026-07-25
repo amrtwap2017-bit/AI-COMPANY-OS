@@ -20,7 +20,6 @@ const toArr = (d: any): any[] => {
 
 
 const WIDGETS = [
-  { key: "digital_twin",  label: "Digital Twin",    endpoint: "/api/v1/twin/state" },
   { key: "ai_signals",    label: "AI Signals",      endpoint: "/api/v1/ai/signals/v2" },
   { key: "cash_flow",     label: "Cash Flow",       endpoint: "/api/v1/analytics/cashflow" },
   { key: "sla",           label: "SLA Overview",    endpoint: "/api/v1/sla/overview" },
