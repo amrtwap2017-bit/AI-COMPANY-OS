@@ -30,6 +30,10 @@ def _query(db, sql, params=None):
     except Exception as _e:
         import sys
         print(f"[twin._query] ERROR: {_e}", file=sys.stderr)
+        try:
+            db.rollback()
+        except Exception:
+            pass
         return {}
 
 @router.get("/state", summary="Digital Twin operational state")
