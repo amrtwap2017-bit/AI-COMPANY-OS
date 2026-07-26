@@ -22,7 +22,7 @@ const fetchTrends = async () => {
   if (!res.ok) {
     return [];
   }
-  return response.json();
+  return res.json();
 };
 
 export default function TrendsPage() {

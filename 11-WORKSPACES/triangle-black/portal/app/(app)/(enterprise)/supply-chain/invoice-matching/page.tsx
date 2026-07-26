@@ -20,7 +20,7 @@ const fetchSupplierInvoices = async () => {
     const response = await authFetch(`/api/v1/supply-chain/supplier-invoices`).then(r => r.json());
     if (response.status === 404) throw new Error("Not Found");
     if (!response.ok) return [];
-    return response.json();
+    return res.json();
   } catch {
     const res = await authFetch(`/api/v1/supplier-invoices`);
   if (!res.ok) return [];

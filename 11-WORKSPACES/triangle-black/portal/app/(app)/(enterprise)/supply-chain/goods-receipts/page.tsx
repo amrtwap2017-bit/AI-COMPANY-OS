@@ -27,7 +27,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchGoodsReceipts = async () => {
-  const res = await authFetch(`/api/v1/supply-chain/goods-receipts`);
+  const res = await authFetch(`/api/v1/goods-receipts`);
   if (!res.ok) {
     return [];
   }

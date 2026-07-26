@@ -23,7 +23,7 @@ const fetchContracts = async () => {
   if (!res.ok) {
     return [];
   }
-  return response.json();
+  return res.json();
 };
 
 const ContractRenewalPage = () => {

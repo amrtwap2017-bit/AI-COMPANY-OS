@@ -23,7 +23,7 @@ const fetchAssets = async () => {
   if (!res.ok) {
     return [];
   }
-  return response.json();
+  return res.json();
 };
 
 const AssetPage = () => {

@@ -20,7 +20,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 const fetchQuotations = async () => {
   try {
-    const res = await authFetch(`/api/v1/supply-chain/quotations`);
+    const res = await authFetch(`/api/v1/quotes`);
   if (!res.ok) return [];
   return res.json();
   } catch (error) {

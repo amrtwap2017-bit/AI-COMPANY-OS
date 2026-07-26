@@ -21,7 +21,7 @@ const fetchNotifications = async () => {
     const response = await authFetch(`/api/v1/notifications`, { credentials: "include" });
     if (response.status === 404) return null;
     if (!response.ok) return [];
-    return response.json();
+    return res.json();
   } catch (error) {
     console.error(error);
     return null;

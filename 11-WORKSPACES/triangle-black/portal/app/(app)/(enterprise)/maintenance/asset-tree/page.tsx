@@ -97,7 +97,7 @@ const AssetTreePage = () => {
             </button>
             {expandedCategories[category] && (
               <ul className="mt-2">
-                {(categories[category] || []).map(assetName => (
+                {toArr(categories[category]).map(assetName => (
                   <li key={assetName} className="flex items-center justify-between py-1 border-b last:border-b-0">
                     <span>{assetName}</span>
                     <div className="flex items-center space-x-2">

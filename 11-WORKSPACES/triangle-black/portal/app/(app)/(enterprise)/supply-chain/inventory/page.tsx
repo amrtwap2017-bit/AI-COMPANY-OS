@@ -19,7 +19,7 @@ const fetchItems = async () => {
 const fetchStockBalances = async () => {
   try {
     const response = await authFetch(`/api/v1/stock-balances`).then(r => r.json());
-    if (response.ok) return response.json();
+    if (response.ok) return res.json();
   } catch (error) {}
   const res = await authFetch(`/api/v1/stock-balances`);
   if (!res.ok) return [];
