@@ -63,17 +63,8 @@ const PmPlansPage = () => {
           metrics={[
             { label: "Total Plans", value: pmPlans.length },
             { label: "Active", value: toArr(filteredPlans).filter((p: any) => p.status === "active").length },
-            {
-              value: toArr(filteredPlans).filter((p: any) => new Date(p.next_due_date) < new Date(today)).length,
-            },
-            {
-{ label: "Due This Week", }
-              value: toArr(filteredPlans).filter(
-                (p: any) =>
-                  new Date(p.next_due_date).getTime() >= new Date(today).getTime() &&
-                  new Date(p.next_due_date).getTime() <= new Date(today).getTime() + 604800000
-              ).length,
-            },
+            { label: "Overdue", value: toArr(filteredPlans).filter((p: any) => new Date(p.next_due_date) < new Date(today)).length },
+            { label: "Due This Week", value: toArr(filteredPlans).filter((p: any) => new Date(p.next_due_date).getTime() >= new Date(today).getTime() && new Date(p.next_due_date).getTime() <= new Date(today).getTime() + 604800000).length },
           ]}
         />
       </SectionCard>

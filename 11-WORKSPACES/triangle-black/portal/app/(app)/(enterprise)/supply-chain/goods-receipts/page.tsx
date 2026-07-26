@@ -92,10 +92,7 @@ const GoodsReceiptsPage = () => {
             { label: "Total Receipts", value: totalReceipts },
             { label: "Pending Deliveries", value: pendingDeliveriesCount },
             { label: "This Month", value: thisMonthReceipts.length },
-            {
-{ label: "Total PO Value Pending", }
-              value: `EGP ${(Number(totalPOValuePending) || 0).toFixed(2)}`,
-            },
+            { label: "Total PO Value Pending", value: `EGP ${(Number(totalPOValuePending) || 0).toFixed(2)}` },
           ]}
         />
       </SectionCard>
