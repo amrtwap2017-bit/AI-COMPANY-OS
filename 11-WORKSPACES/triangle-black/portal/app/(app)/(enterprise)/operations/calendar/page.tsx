@@ -35,7 +35,7 @@ async function fetchWorkOrders() {
     const res = await authFetch(`/api/v1/work-orders`).then(r => r.json());
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data) ? data : data.items ?? data.work_orders ?? [];
+    return Array.isArray(data) ? data : data.items ?? (data?.work_orders || []) ?? [];
   } catch (error) {
     console.error("Error fetching work orders:", error);
     return [];
