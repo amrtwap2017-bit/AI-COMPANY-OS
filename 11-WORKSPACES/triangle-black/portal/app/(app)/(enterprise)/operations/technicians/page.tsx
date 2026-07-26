@@ -101,7 +101,7 @@ const TechniciansPage = () => {
                 <p>{t.email}</p>
                 <p>{t.phone}</p>
                 <div className="flex gap-2">
-                  {Array.isArray(t.specializations) ? t.specializations.slice(0, 3).map(s => (
+                  {Array.isArray(t.specializations) ? t.specializations.slice(0, 3).map((spec: any) => (
                     <StatusBadge key={s} label={s} />
                   )) : null}
                 </div>

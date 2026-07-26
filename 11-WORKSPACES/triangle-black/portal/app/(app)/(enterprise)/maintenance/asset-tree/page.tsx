@@ -53,8 +53,8 @@ const AssetTreePage = () => {
 
   toArr(assets).forEach(asset => {
     (categories[asset.category] || {}).count++;
-    if (asset.status === "In Fault") categories[asset.category].faultCount++;
-    categories[asset.category].list.push(asset.name);
+    if (asset.status === "In Fault") (categories[asset.category] || {faultCount:0}).faultCount++;
+    (categories[asset.category] || {list:[]}).list.push(asset.name);
   });
 
   const totalAssets = Object.values(categories).reduce((acc: any, category: any) => acc + category.count, 0);

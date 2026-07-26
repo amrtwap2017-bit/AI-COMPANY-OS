@@ -11,7 +11,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals`);
+  const res = await authFetch(`/api/v1/ai/signals?limit=5`);
   if (!res.ok) return [];
   return res.json();
 };
