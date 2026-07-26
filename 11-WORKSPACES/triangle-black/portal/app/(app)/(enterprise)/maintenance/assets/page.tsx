@@ -3,130 +3,105 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import Link from "next/link";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
+import { Button } from "@/components/ui/Button";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0,10); } };
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
-const S = {Operational:"bg-emerald-100 text-emerald-800","Under Maintenance":"bg-amber-100 text-amber-800","In Fault":"bg-red-100 text-red-800",Decommissioned:"bg-slate-100 text-slate-500"};
-
-const CATEGORIES = ["all","HVAC","Electrical","Plumbing","Elevator","Fire Safety","BMS","Mechanical","Other"];
-const STATUSES   = ["all","Operational","Under Maintenance","In Fault","Decommissioned"];
+const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
 export default function AssetsPage() {
-  const [catFilter,  setCatFilter]  = useState("all");
-  const [statFilter, setStatFilter] = useState("all");
-  const [search,     setSearch]     = useState("");
+  const [q,   setQ]   = useState("");
+  const [sf,  setSf]  = useState("all");
+  const [showCreate, setShowCreate] = useState(false);
+  const [saving,     setSaving]     = useState(false);
+  const [form, setForm] = useState({"name": "", "category": "HVAC", "status": "Operational", "criticality": "medium", "location": "", "hotel_id": "tb-default-hotel-000000000001"});
 
-  const { data: raw = [], isLoading } = useQuery(
+  const { data: raw=[], isLoading, refetch } = useQuery(
     ["assets-page"],
-    () => authFetch("/api/v1/assets/?limit=200").then(r => r.json()),
-    { refetchInterval: 120000 }
+    () => authFetch("/api/v1/assets/?limit=200").then(r=>r.json()),
+    { refetchInterval: 60000 }
   );
 
-  const assets   = toArr(raw);
-  const filtered = assets.filter(a => {
-    if (catFilter  !== "all" && a.category !== catFilter)  return false;
-    if (statFilter !== "all" && a.status   !== statFilter) return false;
-    if (search && !a.name?.toLowerCase().includes(search.toLowerCase())) return false;
+  const items    = toArr(raw);
+  const filtered = items.filter(x => {
+    if (sf !== "all" && x.status !== sf) return false;
+    if (q && !String(x.name||"").toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
 
-  const operational = assets.filter(a => a.status === "Operational").length;
-  const fault       = assets.filter(a => a.status === "In Fault").length;
-  const maintenance = assets.filter(a => a.status === "Under Maintenance").length;
-  const catCounts   = assets.reduce((acc, a) => { acc[a.category] = (acc[a.category]||0)+1; return acc; }, {});
+  async function save(e) {
+    e.preventDefault(); setSaving(true);
+    try {
+      const payload = Object.fromEntries(Object.entries(form).filter(([k,v])=>v!==""));
+      const r = await authFetch("/api/v1/assets/", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if (r.ok) {
+        setShowCreate(false);
+        setForm({"name": "", "category": "HVAC", "status": "Operational", "criticality": "medium", "location": "", "hotel_id": "tb-default-hotel-000000000001"});
+        refetch();
+      } else {
+        const err = await r.json().catch(()=>({}));
+        alert(err?.detail || "Failed to create record");
+      }
+    } catch { alert("Network error"); }
+    finally { setSaving(false); }
+  }
+
+  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
 
   return (
     <PageWrapper>
       <PageHeader
-        title="Asset Registry"
-        subtitle={`${assets.length} total · ${operational} operational · ${fault} in fault`}
+        title="Assets"
+        subtitle={`${items.length} records`}
         breadcrumbs={[{label:"Maintenance",href:"/maintenance"},{label:"Assets"}]}
+        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Assets</Button>}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {[
-          {label:"Total Assets",   value:assets.length,  color:"text-slate-800"},
-          {label:"Operational",    value:operational,    color:"text-emerald-700"},
-          {label:"In Maintenance", value:maintenance,    color:"text-amber-700"},
-          {label:"In Fault",       value:fault,          color:"text-red-700"},
-        ].map(k => (
+          {label:"Total", value:items.length, color:"text-slate-800"},
+          {label:"Active",value:items.filter(x=>["active","open","Operational","planning"].includes(x.status)).length,color:"text-emerald-700"},
+          {label:"Completed",value:items.filter(x=>["completed","paid","resolved"].includes(x.status)).length,color:"text-blue-700"},
+          {label:"Issues",value:items.filter(x=>["overdue","In Fault","cancelled"].includes(x.status)).length,color:"text-red-700"},
+        ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
+            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
             <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
 
-      {!isLoading && Object.keys(catCounts).length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {Object.entries(catCounts).map(([cat, count]) => (
-            <button key={cat}
-              onClick={() => setCatFilter(catFilter === cat ? "all" : cat)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${catFilter === cat ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-200 hover:border-blue-300"}`}>
-              {cat} <span className={catFilter === cat ? "text-blue-200" : "text-slate-400"}>({count})</span>
-            </button>
-          ))}
-          {catFilter !== "all" && (
-            <button onClick={() => setCatFilter("all")} className="text-xs text-slate-400 hover:text-red-500 underline px-1">Clear</button>
-          )}
-        </div>
-      )}
-
-      <SectionCard title={`Assets (${filtered.length})`}>
+      <SectionCard title={`Records (${filtered.length})`}>
         <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search assets…" value={search}
-            onChange={e => setSearch(e.target.value)}
+          <input type="text" placeholder="Search…" value={q}
+            onChange={e=>setQ(e.target.value)}
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          <select value={statFilter} onChange={e => setStatFilter(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Status" : s}</option>)}
-          </select>
-          {(catFilter !== "all" || statFilter !== "all" || search) && (
-            <button onClick={() => { setCatFilter("all"); setStatFilter("all"); setSearch(""); }}
-              className="text-xs text-slate-400 hover:text-red-500 underline">Clear all</button>
-          )}
+          {q&&<button onClick={()=>setQ("")} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
         </div>
-
-        {isLoading ? <LoadingState /> : filtered.length === 0 ? (
-          <EmptyState title="No assets found" subtitle="Try adjusting your filters" />
-        ) : (
+        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No records found"
+          action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create First Record</Button>}
+        />:(
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Asset Name</th>
-                  <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Category</th>
-                  <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                  <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Criticality</th>
-                  <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Location</th>
-                  <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Installed</th>
-                </tr>
-              </thead>
+              <thead><tr className="border-b border-slate-100">
+                {"Title/Name,Status,Date".split(',').map(h=>(
+                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                ))}
+              </tr></thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered.map(a => (
-                  <tr key={a.id} className="hover:bg-slate-50 transition-colors">
+                {filtered.map(x=>(
+                  <tr key={x.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800">{a.name}</p>
-                      <p className="text-xs text-slate-400">{a.model || a.manufacturer || ""}</p>
+                      <p className="font-medium text-slate-800 truncate max-w-sm">{x.name||"—"}</p>
+                      {x.description&&<p className="text-xs text-slate-400 truncate">{x.description?.slice(0,60)}</p>}
+                      {x.category&&<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 mt-1">{x.category}</span>}
                     </td>
-                    <td className="py-3 px-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{a.category || "—"}</span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold " + (S[a.status] || "bg-slate-100 text-slate-600")}>
-                        {a.status || "—"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3">
-                      {a.criticality
-                        ? <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border " + (P[a.criticality] || P.low)}>{a.criticality}</span>
-                        : <span className="text-slate-300 text-xs">—</span>}
-                    </td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{a.location || "—"}</td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(a.installation_date || a.created_at)}</td>
+                    <td className="py-3 px-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${(x.status==="open"?"bg-blue-100 text-blue-800":x.status==="completed"?"bg-emerald-100 text-emerald-800":x.status==="active"?"bg-emerald-100 text-emerald-800":x.status==="planning"?"bg-amber-100 text-amber-800":x.status==="Operational"?"bg-emerald-100 text-emerald-800":x.status==="In Fault"?"bg-red-100 text-red-800":"bg-slate-100 text-slate-600")}`}>{x.status?.replace(/_/g," ")||"—"}</span></td>
+                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(x.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -134,6 +109,32 @@ export default function AssetsPage() {
           </div>
         )}
       </SectionCard>
+
+      {showCreate&&(
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-screen overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
+              <h2 className="font-bold text-slate-900">New Assets</h2>
+              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl leading-none font-bold">x</button>
+            </div>
+            <form onSubmit={save} className="p-6 space-y-4">
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Asset Name * *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="e.g. Chiller Unit 1" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Category</label><select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="HVAC" value="HVAC">HVAC</option><option key="Electrical" value="Electrical">Electrical</option><option key="Plumbing" value="Plumbing">Plumbing</option><option key="Elevator" value="Elevator">Elevator</option><option key="Fire Safety" value="Fire Safety">Fire Safety</option><option key="Mechanical" value="Mechanical">Mechanical</option><option key="Other" value="Other">Other</option></select></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Status</label><select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="Operational" value="Operational">Operational</option><option key="Under Maintenance" value="Under Maintenance">Under Maintenance</option><option key="In Fault" value="In Fault">In Fault</option></select></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Criticality</label><select value={form.criticality} onChange={e=>setForm({...form,criticality:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="critical" value="critical">critical</option><option key="high" value="high">high</option><option key="medium" value="medium">medium</option><option key="low" value="low">low</option></select></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Location</label><input type="text" value={form.location} onChange={e=>setForm({...form,location:e.target.value})} placeholder="e.g. B2 Plant Room" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onClick={()=>setShowCreate(false)}
+                  className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                <button type="submit" disabled={saving}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">
+                  {saving?"Saving…":"Create Assets"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </PageWrapper>
   );
 }

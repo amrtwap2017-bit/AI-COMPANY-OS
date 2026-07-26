@@ -1,96 +1,141 @@
 // @ts-nocheck
 "use client";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
+import { Button } from "@/components/ui/Button";
 
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n: any) => { try { return `EGP ${Number(n || 0).toLocaleString()}`; } catch { return 'EGP 0'; } };
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
-const PipelinePage = () => {
-  const { data: pipeline, isLoading } = useQuery(
-    ["sales-pipeline"],
-    () => authFetch("/api/v1/sales-pipeline/").then(r => r.json()),
-    { refetchInterval: 120000 }
+export default function PipelinePage() {
+  const [q,   setQ]   = useState("");
+  const [sf,  setSf]  = useState("all");
+  const [showCreate, setShowCreate] = useState(false);
+  const [saving,     setSaving]     = useState(false);
+  const [form, setForm] = useState({"name": "", "email": "", "company": "", "phone": "", "source": "web", "priority": "medium", "status": "new", "hotel_id": "tb-default-hotel-000000000001"});
+
+  const { data: raw=[], isLoading, refetch } = useQuery(
+    ["leads-page"],
+    () => authFetch("/api/v1/leads/?limit=200").then(r=>r.json()),
+    { refetchInterval: 60000 }
   );
 
-  const { data: conversion } = useQuery(
-    ["sales-conversion"],
-    () => authFetch("/api/v1/sales-pipeline/conversion").then(r => r.json()),
-    { refetchInterval: 120000 }
-  );
+  const items    = toArr(raw);
+  const filtered = items.filter(x => {
+    if (sf !== "all" && x.status !== sf) return false;
+    if (q && !String(x.name||"").toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
 
-  if (isLoading) return <LoadingState />;
-  const kpis = pipeline?.kpis || {};
-  const conv = conversion || {};
+  async function save(e) {
+    e.preventDefault(); setSaving(true);
+    try {
+      const payload = Object.fromEntries(Object.entries(form).filter(([k,v])=>v!==""));
+      const r = await authFetch("/api/v1/leads/", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if (r.ok) {
+        setShowCreate(false);
+        setForm({"name": "", "email": "", "company": "", "phone": "", "source": "web", "priority": "medium", "status": "new", "hotel_id": "tb-default-hotel-000000000001"});
+        refetch();
+      } else {
+        const err = await r.json().catch(()=>({}));
+        alert(err?.detail || "Failed to create record");
+      }
+    } catch { alert("Network error"); }
+    finally { setSaving(false); }
+  }
+
+  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
 
   return (
     <PageWrapper>
-      <PageHeader title="Sales Pipeline" subtitle="Lead to Revenue journey" badge="SALES" />
-      <MetricStrip metrics={[
-        { label: "Total Leads",   value: kpis?.total_leads || 0 },
-        { label: "Quotes",        value: kpis?.total_quotes || 0 },
-        { label: "Contracts",     value: kpis?.total_contracts || 0 },
-        { label: "Pipeline Value", value: fmtEGP(kpis?.pipeline_value_egp), color: "amber" },
-        { label: "Revenue",       value: fmtEGP(kpis?.total_revenue_egp), color: "green" },
-      ]} />
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <SectionCard title="Conversion Rates">
-          <div className="space-y-4 p-2">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Lead → Quote</span>
-                <span className="font-semibold">{conv.lead_to_quote_rate || 0}%</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div className="bg-amber-500 h-2 rounded-full" style={{width: `${Math.min(100, conv.lead_to_quote_rate || 0)}%`}}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Quote Win Rate</span>
-                <span className="font-semibold">{conv.quote_win_rate || 0}%</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{width: `${conv.quote_win_rate || 0}%`}}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-600">Active Contracts</span>
-                <span className="font-semibold">{conv.contract_active_rate || 0}%</span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{width: `${conv.contract_active_rate || 0}%`}}></div>
-              </div>
-            </div>
-          </div>
-        </SectionCard>
+      <PageHeader
+        title="Pipeline"
+        subtitle={`${items.length} records`}
+        breadcrumbs={[{label:"Commercial",href:"/commercial"},{label:"Pipeline"}]}
+        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Pipeline</Button>}
+      />
 
-        <SectionCard title="Funnel Breakdown">
-          <div className="space-y-3 p-2">
-            {[
-              { label: "Leads", items: toArr(pipeline?.funnel?.leads), color: "bg-slate-400" },
-              { label: "Quotes", items: toArr(pipeline?.funnel?.quotes), color: "bg-amber-400" },
-              { label: "Contracts", items: toArr(pipeline?.funnel?.contracts), color: "bg-green-400" },
-            ].map(stage => (
-              <div key={stage.label}>
-                <p className="text-xs font-semibold text-slate-500 mb-1">{stage.label}</p>
-                <div className="flex gap-2 flex-wrap">
-                  {stage.items.map((item: any) => (
-                    <span key={item.status} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 rounded text-xs">
-                      <span className={`w-2 h-2 rounded-full ${stage.color}`}></span>
-                      {item.status}: {item.count}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        {[
+          {label:"Total", value:items.length, color:"text-slate-800"},
+          {label:"Active",value:items.filter(x=>["active","open","Operational","planning"].includes(x.status)).length,color:"text-emerald-700"},
+          {label:"Completed",value:items.filter(x=>["completed","paid","resolved"].includes(x.status)).length,color:"text-blue-700"},
+          {label:"Issues",value:items.filter(x=>["overdue","In Fault","cancelled"].includes(x.status)).length,color:"text-red-700"},
+        ].map(k=>(
+          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
+            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
           </div>
-        </SectionCard>
+        ))}
       </div>
+
+      <SectionCard title={`Records (${filtered.length})`}>
+        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
+          <input type="text" placeholder="Search…" value={q}
+            onChange={e=>setQ(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
+          {q&&<button onClick={()=>setQ("")} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
+        </div>
+        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No records found"
+          action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create First Record</Button>}
+        />:(
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-slate-100">
+                {"Title/Name,Status,Date".split(',').map(h=>(
+                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                ))}
+              </tr></thead>
+              <tbody className="divide-y divide-slate-50">
+                {filtered.map(x=>(
+                  <tr key={x.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-3">
+                      <p className="font-medium text-slate-800 truncate max-w-sm">{x.name||"—"}</p>
+                      {x.description&&<p className="text-xs text-slate-400 truncate">{x.description?.slice(0,60)}</p>}
+                      {x.category&&<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 mt-1">{x.category}</span>}
+                    </td>
+                    <td className="py-3 px-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${(x.status==="open"?"bg-blue-100 text-blue-800":x.status==="completed"?"bg-emerald-100 text-emerald-800":x.status==="active"?"bg-emerald-100 text-emerald-800":x.status==="planning"?"bg-amber-100 text-amber-800":x.status==="Operational"?"bg-emerald-100 text-emerald-800":x.status==="In Fault"?"bg-red-100 text-red-800":"bg-slate-100 text-slate-600")}`}>{x.status?.replace(/_/g," ")||"—"}</span></td>
+                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(x.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </SectionCard>
+
+      {showCreate&&(
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-screen overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
+              <h2 className="font-bold text-slate-900">New Pipeline</h2>
+              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl leading-none font-bold">x</button>
+            </div>
+            <form onSubmit={save} className="p-6 space-y-4">
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Contact Name * *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full name" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Email * *</label><input required type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@hotel.com" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Company</label><input type="text" value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="Hotel or company" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Phone</label><input type="text" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+20 10 0000 0000" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Source</label><select value={form.source} onChange={e=>setForm({...form,source:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="web" value="web">web</option><option key="direct" value="direct">direct</option><option key="referral" value="referral">referral</option><option key="linkedin" value="linkedin">linkedin</option><option key="cold_call" value="cold_call">cold_call</option><option key="event" value="event">event</option></select></div>
+              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Priority</label><select value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="critical" value="critical">critical</option><option key="high" value="high">high</option><option key="medium" value="medium">medium</option><option key="low" value="low">low</option></select></div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onClick={()=>setShowCreate(false)}
+                  className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                <button type="submit" disabled={saving}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">
+                  {saving?"Saving…":"Create Pipeline"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </PageWrapper>
   );
-};
-
-export default PipelinePage;
+}
