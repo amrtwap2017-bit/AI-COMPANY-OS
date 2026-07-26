@@ -1,141 +1,109 @@
 // @ts-nocheck
 "use client";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
 
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-  Button,
-} from "@/components/ui";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0,10); } };
 
+const STATUSES = ["all","complete","partial","pending","rejected"];
+const S = {complete:"bg-emerald-100 text-emerald-800",partial:"bg-amber-100 text-amber-800",pending:"bg-blue-100 text-blue-700",rejected:"bg-red-100 text-red-700"};
 
-// Safe date formatter
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); }
-  catch { return String(d).slice(0, 10); }
-};
+export default function GoodsReceiptsPage() {
+  const [sf, setSf] = useState("all");
+  const [q,  setQ]  = useState("");
 
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchGoodsReceipts = async () => {
-  const res = await authFetch(`/api/v1/goods-receipts`);
-  if (!res.ok) {
-    return [];
-  }
-  return res.json();
-};
-
-const fetchPurchaseOrders = async () => {
-  const res = await authFetch(`/api/v1/purchase-orders/`);
-  if (!res.ok) {
-    return [];
-  }
-  return res.json();
-};
-
-const createGoodsReceipt = async (data) => {
-  const response = await fetch(`${BACK}/api/v1/goods-receipts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    credentials: "include",
-  });
-  if (!response.ok) {
-    return [];
-  }
-  return res.json();
-};
-
-const GoodsReceiptsPage = () => {
-  const { data: receipts, isLoading: isReceiptsLoading, isError: isReceiptsError } =
-    useQuery(["goods-receipts"], fetchGoodsReceipts);
-  const { data: purchaseOrders, isLoading: isPurchaseOrdersLoading, isError: isPurchaseOrdersError } =
-    useQuery(["purchase-orders"], fetchPurchaseOrders);
-
-  const createMutation = useMutation(createGoodsReceipt, {
-    onSuccess: () => {
-      toast.success("Receipt recorded successfully");
-    },
-  });
-
-  if (isReceiptsLoading || isPurchaseOrdersLoading) return <LoadingState />;
-  if (isReceiptsError || isPurchaseOrdersError) return <EmptyState />;
-
-  const totalReceipts = receipts.length;
-  const pendingDeliveriesCount = toArr(purchaseOrders).filter(
-    (po) => ["approved", "sent", "ordered"].includes(po.status)
-  ).length;
-  const thisMonthReceipts = toArr(receipts).filter((grn: any) =>
-    fmtDate(grn.received_date) ===
-    new Date().toLocaleDateString("en-US", { month: "long" })
+  const { data: raw = [], isLoading } = useQuery(
+    ["goods-receipts-page"],
+    () => authFetch("/api/v1/goods-receipts/?limit=200").then(r => r.json()),
+    { refetchInterval: 120000 }
   );
-  const totalPOValuePending = toArr(purchaseOrders).filter((po: any) => ["approved"].includes(po.status))
-    .reduce((acc: any, po: any) => acc + po.total_amount, 0);
+
+  const receipts = toArr(raw);
+  const filtered = receipts.filter(r => {
+    if (sf !== "all" && r.status !== sf) return false;
+    if (q && !(r.grn_number?.toLowerCase().includes(q.toLowerCase()) ||
+               r.received_by?.toLowerCase().includes(q.toLowerCase()))) return false;
+    return true;
+  });
+
+  const total    = receipts.length;
+  const complete = receipts.filter(r => r.status === "complete").length;
+  const partial  = receipts.filter(r => r.status === "partial").length;
+  const pending  = receipts.filter(r => r.status === "pending").length;
 
   return (
     <PageWrapper>
-      <PageHeader title="Goods Receipts" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Receipts", value: totalReceipts },
-            { label: "Pending Deliveries", value: pendingDeliveriesCount },
-            { label: "This Month", value: thisMonthReceipts.length },
-            { label: "Total PO Value Pending", value: `EGP ${(Number(totalPOValuePending) || 0).toFixed(2)}` },
-          ]}
-        />
-      </SectionCard>
-      <SectionCard title="Pending Purchase Orders — Awaiting Delivery">
-        {toArr(purchaseOrders).filter((po: any) => ["approved", "sent", "ordered"].includes(po.status))
-          .map((po: any) => (
-            <div key={po.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
-              <strong>{po.po_number}</strong>
-              <StatusBadge status={po.status} />
-              <span>EGP {(Number(po.total_amount) || 0).toFixed(2)}</span>
-              <Button
-                onClick={() => {
-                  // Show inline form with fields: received_by, notes, date (defaults today)
-                }}
-              >
-                Mark as Received
-              </Button>
-            </div>
-          ))}
-      </SectionCard>
-      <SectionCard title="Recent Goods Receipts">
-        {receipts.length === 0 ? (
-          <EmptyState message="No goods receipts recorded yet" />
+      <PageHeader
+        title="Goods Receipts"
+        subtitle={`${total} receipts · ${complete} complete · ${partial} partial`}
+        breadcrumbs={[{label:"Supply Chain",href:"/supply-chain"},{label:"Goods Receipts"}]}
+      />
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        {[
+          {label:"Total",    value:total,    color:"text-slate-800"},
+          {label:"Complete", value:complete, color:"text-emerald-700"},
+          {label:"Partial",  value:partial,  color:"text-amber-700"},
+          {label:"Pending",  value:pending,  color:"text-blue-700"},
+        ].map(k => (
+          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
+            <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <SectionCard title={`Goods Receipts (${filtered.length})`}>
+        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
+          <input type="text" placeholder="Search GRN number or received by…" value={q}
+            onChange={e => setQ(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" />
+          <select value={sf} onChange={e => setSf(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+            {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Status" : s}</option>)}
+          </select>
+          {(sf !== "all" || q) && (
+            <button onClick={() => { setSf("all"); setQ(""); }}
+              className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>
+          )}
+        </div>
+
+        {isLoading ? <LoadingState /> : filtered.length === 0 ? (
+          <EmptyState title="No goods receipts found" subtitle="Receipts appear here when purchase orders are received" />
         ) : (
-          toArr(receipts).map((grn: any) => (
-            <div key={grn.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
-              <span>{grn.grn_number}</span>
-              <span>{grn.po_id}</span>
-              <span>{grn.received_by}</span>
-              <span>{fmtDate(grn.received_date)}</span>
-              <StatusBadge status={grn.status} />
-            </div>
-          ))
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  {["GRN Number","Status","Received Date","Received By","Notes"].map(h => (
+                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filtered.map(r => (
+                  <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-3">
+                      <span className="font-mono text-xs font-semibold text-slate-700">{r.grn_number || "—"}</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold " + (S[r.status] || "bg-slate-100 text-slate-600")}>
+                        {r.status || "—"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-xs text-slate-500">{fmtDate(r.received_date || r.receipt_date || r.created_at)}</td>
+                    <td className="py-3 px-3 text-xs text-slate-600">{r.received_by || "—"}</td>
+                    <td className="py-3 px-3 text-xs text-slate-400 max-w-xs truncate">{r.notes || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </SectionCard>
-      <SectionCard title="Quick Receive Form">
-        {/* Standalone form to record receipt without PO */}
-        {/* Fields: PO reference (text), Received By (text), Notes (textarea), Date (date input) */}
-        {/* Submit: POST /api/v1/goods-receipts */}
-        {/* Success toast: "Receipt recorded successfully" */}
       </SectionCard>
     </PageWrapper>
   );
-};
-
-export default GoodsReceiptsPage;
+}
