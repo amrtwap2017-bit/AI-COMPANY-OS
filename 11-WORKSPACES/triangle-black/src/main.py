@@ -690,14 +690,16 @@ except Exception as e:
 
 
 
-# ── Sprint 149: PM Plans + Payment Tracking (correct session import) ───────
+
+# ── Sprint 149b: PM Plans + Payment Tracking (Session+engine pattern) ──────
 
 @app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
 def list_pm_plans(limit: int = 100, status: str = None):
     from sqlalchemy import text as _t
-    from src.core.database import SessionLocal as _SL
-    db = _SL()
+    from sqlalchemy.orm import Session as _S
+    from src.core.database import engine as _e
+    db = _S(_e)
     try:
         if status:
             rows = db.execute(
@@ -721,8 +723,9 @@ def list_pm_plans(limit: int = 100, status: str = None):
 @app.get("/api/v1/payment-tracking", tags=["finance"])
 def list_payment_tracking(limit: int = 100):
     from sqlalchemy import text as _t
-    from src.core.database import SessionLocal as _SL
-    db = _SL()
+    from sqlalchemy.orm import Session as _S
+    from src.core.database import engine as _e
+    db = _S(_e)
     try:
         rows = db.execute(
             _t("SELECT id, invoice_number, amount, status, due_date, paid_date, created_at, updated_at, hotel_id FROM invoices ORDER BY created_at DESC LIMIT :l"),
