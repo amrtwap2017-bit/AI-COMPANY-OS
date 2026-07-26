@@ -687,23 +687,42 @@ try:
 except Exception as e:
     logger.warning(f"WARN sales_pipeline: {e}")
 
+
+
+# ── Sprint 135: PM Plans + Payment Tracking endpoints ─────────────────────
 @app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
-def list_pm_plans_direct(hotel_id: str = None, limit: int = 100, db = Depends(get_db)):
+def list_pm_plans_direct(hotel_id: str = None, limit: int = 100):
     from sqlalchemy import text as _t
+    from src.core.database import SessionLocal as _SL
+    db = _SL()
     try:
         q = "SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_id=a.id WHERE 1=1"
         p = {"limit": limit}
-        if hotel_id: q += " AND mp.hotel_id=:hid"; p["hid"] = hotel_id
+        if hotel_id:
+            q += " AND mp.hotel_id=:hid"
+            p["hid"] = hotel_id
         q += " ORDER BY mp.next_due_date ASC LIMIT :limit"
         return [dict(r._mapping) for r in db.execute(_t(q), p).fetchall()]
-    except Exception: return []
+    except Exception:
+        return []
+    finally:
+        db.close()
 
 @app.get("/api/v1/payment-tracking/", tags=["finance"])
 @app.get("/api/v1/payment-tracking", tags=["finance"])
-def list_payment_tracking(limit: int = 100, db = Depends(get_db)):
+def list_payment_tracking_direct(limit: int = 100):
     from sqlalchemy import text as _t
+    from src.core.database import SessionLocal as _SL
+    db = _SL()
     try:
-        rows = db.execute(_t("SELECT i.id, i.invoice_number, i.amount, i.status, i.created_at FROM invoices i WHERE i.status='paid' ORDER BY i.updated_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        rows = db.execute(_t(
+            "SELECT i.id, i.invoice_number, i.amount, i.status, i.created_at "
+            "FROM invoices i WHERE i.status IN ('paid','sent','overdue') "
+            "ORDER BY i.updated_at DESC LIMIT :l"
+        ), {"l": limit}).fetchall()
         return [dict(r._mapping) for r in rows]
-    except Exception: return []
+    except Exception:
+        return []
+    finally:
+        db.close()
