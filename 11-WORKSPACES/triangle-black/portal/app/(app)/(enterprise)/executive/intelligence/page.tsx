@@ -73,7 +73,7 @@ const ExecutiveIntelligencePage = () => {
         <SectionCard title="Metrics">
           <MetricStrip label="Total Active Signals" value={total} />
           <MetricStrip label="Critical Signals" value={critical} />
-          <MetricStrip label="SLA Compliance %" value={`${compliance}%`} />
+          <MetricStrip label="SLA Compliance %" value={`${(compliance) || 0}%`} />
           <MetricStrip label="Critical WOs Open" value={critical_open} />
         </SectionCard>
         <SectionCard title="Executive Risk Assessment">

@@ -60,7 +60,7 @@ const CommercialReviewPage = () => {
       <div className="grid grid-cols-3 gap-4">
         <MetricStrip label="Total Leads" value={totalLeads} />
         <MetricStrip label="Won" value={wonLeads} />
-        <MetricStrip label="Conversion Rate" value={`${conversionRate}%`} />
+        <MetricStrip label="Conversion Rate" value={`${(conversionRate) || 0}%`} />
         <MetricStrip label="Active Contracts" value={activeContracts} />
       </div>
       <SectionCard title="Lead Status Summary">

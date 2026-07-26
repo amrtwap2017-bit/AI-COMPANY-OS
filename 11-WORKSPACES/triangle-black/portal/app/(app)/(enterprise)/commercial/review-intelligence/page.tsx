@@ -86,7 +86,7 @@ const CommercialReviewIntelligencePage = () => {
       <PageHeader title="Commercial AI Intelligence" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SectionCard title="Metrics">
-          <MetricStrip label="Win Rate %" value={`${(Number(winRate) || 0).toFixed(2)}%`} />
+          <MetricStrip label="Win Rate %" value={`${((Number(winRate) || 0).toFixed(2)) || 0}%`} />
           <MetricStrip label="Leads Won" value={wonLeads} />
           <MetricStrip label="Leads Lost" value={lostLeads} />
           <MetricStrip label="Active Pipeline" value={activePipeline} />

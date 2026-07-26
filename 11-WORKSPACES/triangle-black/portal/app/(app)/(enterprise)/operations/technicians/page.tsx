@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+<StatusBadge key={s} label={s} />
 import {
   PageWrapper,
   PageHeader,
@@ -19,7 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchTechnicians = async () => {
-  const response = await fetch(`$BACK}/api/v1/technicians`, {
+  const response = await fetch(`${BACK}/api/v1/technicians`, {
     credentials: "include",
   });
   if (!response.ok) return [];
@@ -27,7 +27,7 @@ const fetchTechnicians = async () => {
 };
 
 const TechniciansPage = () => {
-  const  data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["technicians"],
     queryFn: fetchTechnicians,
     refetchInterval: 60000,
@@ -42,7 +42,7 @@ const TechniciansPage = () => {
   const totalTechnicians = (technicians || []).length;
   const activeTechnicians = (technicians || []).filter(t => t.is_active).length;
   const atCapacityTechnicians = (technicians || []).filter(t => t.current_work_orders >= t.max_work_orders).length;
-  const avgUtilization = ((technicians || []).reduce((acc: any, t: any) => acc + t.current_work_orders / t.max_work_orders, 0) / (totalTechnicians || 1)) * 100).toFixed(1);
+  const avgUtilization = totalTechnicians > 0 ? (((technicians || []).reduce((acc: any, t: any) => acc + (t.current_work_orders||0) / (t.max_work_orders||1), 0) / totalTechnicians) * 100) : 0;
 
   const filteredTechnicians = (technicians || []).filter(t => {
       if (availabilityFilter === "available") return t.current_work_orders < t.max_work_orders;
@@ -58,7 +58,7 @@ const TechniciansPage = () => {
       <SectionCard>
         <MetricStrip
           metrics={[
-             label: "Total Technicians", value: totalTechnicians },
+            { label: "Total Technicians", value: totalTechnicians },
             { label: "Active", value: activeTechnicians, color: "green" },
             { label: "At Capacity", value: atCapacityTechnicians, color: "red" },
             { label: "Avg Utilization %", value: (Number(avgUtilization) || 0).toFixed(2) },
@@ -94,7 +94,7 @@ const TechniciansPage = () => {
       {filteredTechnicians.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTechnicians.map(t => (
-            <Link key=t.id} href={`/operations/technicians/$t.id}`}>
+            <Link key={t.id} href={`/operations/technicians/${t.id}`}>
               <SectionCard>
                 <h3 className="font-bold">{t.name}</h3>
                 <p>{t.email}</p>

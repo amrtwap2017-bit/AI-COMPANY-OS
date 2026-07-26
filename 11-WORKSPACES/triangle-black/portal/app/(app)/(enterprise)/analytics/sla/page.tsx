@@ -49,7 +49,7 @@ export default function SLAPage() {
           <MetricStrip
             metrics={[
               {
-                label: "Overall Compliance %",
+{ label: "Overall Compliance %",
                 value: compliance_rate,
                 color:
                   compliance_rate >= 95 ? "green" : compliance_rate < 80 ? "red" : "amber",
@@ -58,7 +58,7 @@ export default function SLAPage() {
               { label: "Total WOs", value: total_work_orders, color: "gray" },
               { label: "Completed", value: completed, color: "green" },
               {
-                label: "Overdue",
+                { label: "Overdue",
                 value: overdue,
                 color: overdue > 0 ? "red" : "gray",
               },

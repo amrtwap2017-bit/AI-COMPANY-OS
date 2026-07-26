@@ -64,11 +64,11 @@ const PmPlansPage = () => {
             { label: "Total Plans", value: pmPlans.length },
             { label: "Active", value: toArr(filteredPlans).filter((p: any) => p.status === "active").length },
             {
-              label: "Overdue",
+{ label: "Overdue", value: toArr(filteredPlans).filter((p: any) => new Date(p.next_due_date) < new Date(today)).length, },
               value: toArr(filteredPlans).filter((p: any) => new Date(p.next_due_date) < new Date(today)).length,
             },
             {
-              label: "Due This Week",
+              { label: "Due This Week",
               value: toArr(filteredPlans).filter(
                 (p: any) =>
                   new Date(p.next_due_date).getTime() >= new Date(today).getTime() &&
