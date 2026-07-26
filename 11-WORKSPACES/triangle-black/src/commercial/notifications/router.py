@@ -20,7 +20,7 @@ from .schemas import NotificationResponse, NotificationList
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
-@router.get("/", response_model=NotificationList)
+@router.get("/")
 def list_notifications(
     unread_only: bool = False,
     limit: int = 50,
@@ -33,11 +33,22 @@ def list_notifications(
         unread_only=unread_only,
         limit=limit,
     )
-    unread = repo.unread_count(current_user.role)
-    return NotificationList(
-        notifications=[NotificationResponse.model_validate(n) for n in items],
-        unread_count=unread,
-    )
+    return [
+        {
+            "id": n.id,
+            "title": n.title,
+            "message": n.message,
+            "type": n.type,
+            "entity_id": n.entity_id,
+            "entity_type": n.entity_type,
+            "recipient_role": n.recipient_role,
+            "is_read": n.is_read,
+            "hotel_id": n.hotel_id,
+            "created_at": str(n.created_at),
+            "updated_at": str(n.updated_at),
+        }
+        for n in items
+    ]
 
 @router.get("/unread", response_model=dict)
 def unread_count(

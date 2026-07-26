@@ -689,7 +689,8 @@ except Exception as e:
 
 
 
-# ── Sprint 148: Fixed PM Plans + Payment Tracking ─────────────────────────
+
+# ── Sprint 149: PM Plans + Payment Tracking (correct session import) ───────
 
 @app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
@@ -710,6 +711,7 @@ def list_pm_plans(limit: int = 100, status: str = None):
             ).fetchall()
         return [dict(r._mapping) for r in rows]
     except Exception as e:
+        print(f"PM plans error: {e}")
         return []
     finally:
         db.close()
@@ -723,11 +725,12 @@ def list_payment_tracking(limit: int = 100):
     db = _SL()
     try:
         rows = db.execute(
-            _t("SELECT id, invoice_number, amount, status, created_at, updated_at FROM invoices ORDER BY created_at DESC LIMIT :l"),
+            _t("SELECT id, invoice_number, amount, status, due_date, paid_date, created_at, updated_at, hotel_id FROM invoices ORDER BY created_at DESC LIMIT :l"),
             {"l": limit}
         ).fetchall()
         return [dict(r._mapping) for r in rows]
     except Exception as e:
+        print(f"Payment tracking error: {e}")
         return []
     finally:
         db.close()
