@@ -78,7 +78,7 @@ const AnalyticsPage = () => {
           <a className="flex items-center justify-between p-4 border-l-4 border-yellow-500 bg-white rounded-lg hover:bg-gray-100">
             <div>
               <h3>Operational KPIs</h3>
-              <p>{technicians}% technician utilization</p>
+              <p>{typeof technicians === 'object' ? (technicians?.utilization_pct || 0) : (technicians || 0)}% technician utilization</p>
             </div>
             <span className="text-yellow-500">→</span>
           </a>
@@ -86,9 +86,9 @@ const AnalyticsPage = () => {
       </div>
       <div className="mt-8">
         <MetricStrip title="Total WOs" value={Number(workOrders.total) || 0} />
-        <MetricStrip title="Completed" value={workOrders.completed} />
-        <MetricStrip title="In-Progress" value={workOrders.in_progress} />
-        <MetricStrip title="Overdue" value={workOrders.overdue} />
+        <MetricStrip title="Completed" value={Number(workOrders?.completed) || 0} />
+        <MetricStrip title="In-Progress" value={Number(workOrders?.in_progress) || 0} />
+        <MetricStrip title="Overdue" value={Number(workOrders?.overdue) || 0} />
       </div>
     </PageWrapper>
   );

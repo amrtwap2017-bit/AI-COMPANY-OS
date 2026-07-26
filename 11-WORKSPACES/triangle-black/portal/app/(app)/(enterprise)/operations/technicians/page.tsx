@@ -19,7 +19,7 @@ const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 
 const fetchTechnicians = async () => {
-  const response = await fetch(`${BACK}/api/v1/technicians`, {
+  const response = await fetch(`$BACK}/api/v1/technicians`, {
     credentials: "include",
   });
   if (!response.ok) return [];
@@ -27,7 +27,7 @@ const fetchTechnicians = async () => {
 };
 
 const TechniciansPage = () => {
-  const { data, isLoading, isError } = useQuery({
+  const  data, isLoading, isError } = useQuery({
     queryKey: ["technicians"],
     queryFn: fetchTechnicians,
     refetchInterval: 60000,
@@ -58,7 +58,7 @@ const TechniciansPage = () => {
       <SectionCard>
         <MetricStrip
           metrics={[
-            { label: "Total Technicians", value: totalTechnicians },
+             label: "Total Technicians", value: totalTechnicians },
             { label: "Active", value: activeTechnicians, color: "green" },
             { label: "At Capacity", value: atCapacityTechnicians, color: "red" },
             { label: "Avg Utilization %", value: (Number(avgUtilization) || 0).toFixed(2) },
@@ -68,25 +68,25 @@ const TechniciansPage = () => {
       <div className="flex gap-4">
         <button
           onClick={() => setAvailabilityFilter("all")}
-          className={`btn ${availabilityFilter === "all" ? "btn-active" : ""}`}
+          className={`btn $availabilityFilter === "all" ? "btn-active" : ""}`}
         >
           All
         </button>
         <button
           onClick={() => setAvailabilityFilter("available")}
-          className={`btn ${availabilityFilter === "available" ? "btn-active" : ""}`}
+          className={`btn $availabilityFilter === "available" ? "btn-active" : ""}`}
         >
           Available
         </button>
         <button
           onClick={() => setAvailabilityFilter("at_capacity")}
-          className={`btn ${availabilityFilter === "at_capacity" ? "btn-active" : ""}`}
+          className={`btn $availabilityFilter === "at_capacity" ? "btn-active" : ""}`}
         >
           At Capacity
         </button>
         <button
           onClick={() => setAvailabilityFilter("inactive")}
-          className={`btn ${availabilityFilter === "inactive" ? "btn-active" : ""}`}
+          className={`btn $availabilityFilter === "inactive" ? "btn-active" : ""}`}
         >
           Inactive
         </button>
@@ -94,14 +94,14 @@ const TechniciansPage = () => {
       {filteredTechnicians.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTechnicians.map(t => (
-            <Link key={t.id} href={`/operations/technicians/${t.id}`}>
+            <Link key=t.id} href={`/operations/technicians/$t.id}`}>
               <SectionCard>
                 <h3 className="font-bold">{t.name}</h3>
                 <p>{t.email}</p>
                 <p>{t.phone}</p>
                 <div className="flex gap-2">
                   {Array.isArray(t.specializations) ? t.specializations.slice(0, 3).map(s => (
-                    <StatusBadge key={s} label={s} />
+                    <StatusBadge key=s} label={s} />
                   )) : null}
                 </div>
                 <Progress value={t.current_work_orders} max={t.max_work_orders} color={t.current_work_orders / t.max_work_orders < 0.5 ? "green" : t.current_work_orders / t.max_work_orders < 0.85 ? "amber" : "red"} />
