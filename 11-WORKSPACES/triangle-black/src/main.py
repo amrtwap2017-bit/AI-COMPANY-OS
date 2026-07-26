@@ -717,9 +717,7 @@ def list_payment_tracking_direct(limit: int = 100):
     db = _SL()
     try:
         rows = db.execute(_t(
-            "SELECT i.id, i.invoice_number, i.amount, i.status, i.created_at "
-            "FROM invoices i WHERE i.status IN ('paid','sent','overdue') "
-            "ORDER BY i.updated_at DESC LIMIT :l"
+            "SELECT id, invoice_number, amount, status, created_at FROM invoices ORDER BY created_at DESC LIMIT :l"
         ), {"l": limit}).fetchall()
         return [dict(r._mapping) for r in rows]
     except Exception:
