@@ -101,7 +101,7 @@ const TechniciansPage = () => {
                 <p>{t.phone}</p>
                 <div className="flex gap-2">
                   {Array.isArray(t.specializations) ? t.specializations.slice(0, 3).map(s => (
-                    <StatusBadge key=s} label={s} />
+                    <StatusBadge key={s} label={s} />
                   )) : null}
                 </div>
                 <Progress value={t.current_work_orders} max={t.max_work_orders} color={t.current_work_orders / t.max_work_orders < 0.5 ? "green" : t.current_work_orders / t.max_work_orders < 0.85 ? "amber" : "red"} />
