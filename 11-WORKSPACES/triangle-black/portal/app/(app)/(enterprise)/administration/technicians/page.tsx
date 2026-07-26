@@ -1,83 +1,94 @@
 // @ts-nocheck
 "use client";
-import { useQuery } from 'react-query';
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState, Button } from "@/components/ui";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
 
-const toArr = (value) => Array.isArray(value) ? value : [value];
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
-const fmtDate = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString();
-};
+export default function AdminTechniciansPage() {
+  const [q, setQ] = useState("");
 
-const TechnicianCard = ({ technician }) => {
-  const { name, specialization, is_active, current_work_orders, max_work_orders } = technician;
-  const workloadProgress = ((current_work_orders / max_work_orders) * 100).toFixed(2);
-
-  return (
-    <SectionCard>
-      <h3>{name}</h3>
-      <p>Specialization: {toArr(specialization).join(", ")}</p>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{ marginRight: '10px' }}>{is_active ? 'Active' : 'Inactive'}</span>
-        <progress value={current_work_orders} max={max_work_orders} style={{ width: '80%' }} />
-      </div>
-    </SectionCard>
-  );
-};
-
-const TechnicianGrid = ({ technicians }) => {
-  if (technicians.length === 0) return <EmptyState message="No technicians found." />;
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
-      {technicians.map((technician) => (
-        <TechnicianCard key={technician.id} technician={technician} />
-      ))}
-    </div>
-  );
-};
-
-const TechnicianPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterActive, setFilterActive] = useState(false);
-
-  const { data: technicians, isLoading, isError } = useQuery(
-    'technicians',
-    () => authFetch('/api/v1/technicians/?limit=100'),
-    {
-      select: (data) =>
-        data.results.filter((tech) =>
-          tech.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          (!filterActive || tech.is_active)
-        ),
-    }
+  const { data: raw=[], isLoading } = useQuery(
+    ["admin-technicians"],
+    () => authFetch("/api/v1/technicians/?limit=100").then(r=>r.json()),
+    { refetchInterval: 120000 }
   );
 
-  if (isLoading) return <LoadingState />;
-  if (isError) return <EmptyState message="Failed to load technicians." />;
+  const techs    = toArr(raw);
+  const filtered = techs.filter(t =>
+    !q || t.name?.toLowerCase().includes(q.toLowerCase()) ||
+    t.specialization?.toLowerCase().includes(q.toLowerCase())
+  );
+
+  const active   = techs.filter(t => t.is_active !== false).length;
+  const atCap    = techs.filter(t => (t.current_work_orders||0) >= (t.max_work_orders||5)).length;
+  const avail    = techs.filter(t => t.is_active !== false && (t.current_work_orders||0) < (t.max_work_orders||5)).length;
 
   return (
     <PageWrapper>
-      <PageHeader title="Technician Management">
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ marginRight: '10px', padding: '5px' }}
-          />
-          <Button onClick={() => setFilterActive(!filterActive)}>
-            {filterActive ? 'Show All' : 'Show Active'}
-          </Button>
+      <PageHeader
+        title="Technician Management"
+        subtitle={`${techs.length} total · ${active} active · ${avail} available`}
+        breadcrumbs={[{label:"Administration",href:"/administration"},{label:"Technicians"}]}
+      />
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        {[
+          {label:"Total",      value:techs.length, color:"text-slate-800"},
+          {label:"Active",     value:active,       color:"text-emerald-700"},
+          {label:"Available",  value:avail,        color:"text-blue-700"},
+          {label:"At Capacity",value:atCap,        color:atCap>0?"text-red-700":"text-slate-500"},
+        ].map(k=>(
+          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
+            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <SectionCard title={`Technicians (${filtered.length})`}>
+        <div className="mb-4 pb-4 border-b border-slate-100">
+          <input type="text" placeholder="Search technician or specialization…" value={q}
+            onChange={e=>setQ(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-64 focus:outline-none focus:border-blue-400" />
         </div>
-      </PageHeader>
-      <TechnicianGrid technicians={technicians} />
+        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No technicians found"/>:(
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filtered.map(t=>{
+              const wos = t.current_work_orders||0;
+              const max = t.max_work_orders||5;
+              const pct = Math.min(100,(wos/max)*100);
+              const isActive = t.is_active !== false;
+              return (
+                <div key={t.id} className={`rounded-xl border p-4 ${isActive?"bg-white border-slate-200":"bg-slate-50 border-slate-200 opacity-70"}`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-semibold text-slate-800 truncate">{t.name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{t.specialization||t.trade||"General"}</p>
+                    </div>
+                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>
+                      {isActive?"Active":"Inactive"}
+                    </span>
+                  </div>
+                  {t.phone&&<p className="text-xs text-slate-400 mb-2">{t.phone}</p>}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs text-slate-500">
+                      <span>Workload</span>
+                      <span className="font-semibold">{wos}/{max} WOs</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className={`h-1.5 rounded-full ${pct>=100?"bg-red-500":pct>=70?"bg-amber-500":"bg-emerald-500"}`}
+                        style={{width:`${pct}%`}} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </SectionCard>
     </PageWrapper>
   );
-};
-
-export default TechnicianPage;
+}
