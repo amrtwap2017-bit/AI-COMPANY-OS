@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import {
@@ -30,7 +31,7 @@ const fetchGoodsReceipts = async () => {
   if (!res.ok) {
     return [];
   }
-  return response.json();
+  return res.json();
 };
 
 const fetchPurchaseOrders = async () => {
@@ -38,7 +39,7 @@ const fetchPurchaseOrders = async () => {
   if (!res.ok) {
     return [];
   }
-  return response.json();
+  return res.json();
 };
 
 const createGoodsReceipt = async (data) => {
@@ -53,14 +54,14 @@ const createGoodsReceipt = async (data) => {
   if (!response.ok) {
     return [];
   }
-  return response.json();
+  return res.json();
 };
 
 const GoodsReceiptsPage = () => {
   const { data: receipts, isLoading: isReceiptsLoading, isError: isReceiptsError } =
-    useQuery({ queryKey: ["goods-receipts"], queryFn: fetchGoodsReceipts });
+    useQuery(["goods-receipts"], fetchGoodsReceipts);
   const { data: purchaseOrders, isLoading: isPurchaseOrdersLoading, isError: isPurchaseOrdersError } =
-    useQuery({ queryKey: ["purchase-orders"], queryFn: fetchPurchaseOrders });
+    useQuery(["purchase-orders"], fetchPurchaseOrders);
 
   const createMutation = useMutation(createGoodsReceipt, {
     onSuccess: () => {
@@ -79,8 +80,7 @@ const GoodsReceiptsPage = () => {
     fmtDate(grn.received_date) ===
     new Date().toLocaleDateString("en-US", { month: "long" })
   );
-  const totalPOValuePending = purchaseOrders
-    .filter((po: any) => ["approved"].includes(po.status))
+  const totalPOValuePending = toArr(purchaseOrders).filter((po: any) => ["approved"].includes(po.status))
     .reduce((acc: any, po: any) => acc + po.total_amount, 0);
 
   return (
@@ -97,8 +97,7 @@ const GoodsReceiptsPage = () => {
         />
       </SectionCard>
       <SectionCard title="Pending Purchase Orders — Awaiting Delivery">
-        {purchaseOrders
-          .filter((po: any) => ["approved", "sent", "ordered"].includes(po.status))
+        {toArr(purchaseOrders).filter((po: any) => ["approved", "sent", "ordered"].includes(po.status))
           .map((po: any) => (
             <div key={po.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
               <strong>{po.po_number}</strong>

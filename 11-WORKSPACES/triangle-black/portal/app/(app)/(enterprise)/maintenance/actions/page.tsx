@@ -40,8 +40,8 @@ const fetchMaintenanceData = async () => {
   return {
     totalActions: (signals || []).length + pmPlans.length + (wos || []).length + (assets || []).length,
     criticalActions: [
-      ...toArr(signals).filter(signal => signal.urgency === "critical"),
-      ...toArr(assets).filter(asset => asset.status === "faulted")
+      ...toArr(signals || []).filter(signal => signal.urgency === "critical"),
+      ...toArr(assets || []).filter(asset => asset.status === "faulted")
     ],
     overduePMs: toArr(pmPlans).filter(plan => plan.next_due_date < today),
     openWOs: toArr(wos).filter(wo => wo.status === "open")
