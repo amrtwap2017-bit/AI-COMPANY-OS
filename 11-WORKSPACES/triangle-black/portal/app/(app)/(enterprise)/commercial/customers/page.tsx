@@ -1,75 +1,69 @@
 // @ts-nocheck
 "use client";
-
-import { useQuery } from "react-query";
+import { useQuery } from 'react-query';
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
+import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState, Button } from "@/components/ui";
+import { toArr, fmtDate } from "@/utils/helpers";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const LeadsPage = () => {
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-const CustomerListPage = () => {
-  const { data: customers, isLoading, isError } = useQuery(["customers"], () => authFetch("/api/v1/leads/?limit=100").then(r => r.json()), { refetchInterval: 60000 });
+  const fetchLeads = async () => {
+    const params = new URLSearchParams();
+    if (statusFilter) {
+      params.append('status', statusFilter);
+    }
+    return authFetch(`/api/v1/leads/?limit=100&${params.toString()}`);
+  };
 
-  if (isLoading) return <LoadingState />;
-  if (isError || !customers) return <EmptyState />;
+  const { data, isLoading, isError } = useQuery(['leads', statusFilter], fetchLeads);
 
-  const convertedLeads = customers.filter(c => c.status === "converted");
-  const activeClients = customers.filter(c => c.status === "active");
+  const leads = toArr(data?.data || []);
 
-  const kpiData = [
-    { v: convertedLeads.length, label: "Converted Leads" },
-    { v: activeClients.length, label: "Active Clients" },
-    { v: customers.length, label: "Total Customers" },
-    { v: Math.round(customers.reduce((acc, c) => acc + c.score, 0) / customers.length), label: "Average Score" }
-  ];
+  const totalLeads = leads.length;
+  const convertedLeads = leads.filter(lead => lead.priority === 'converted').length;
+  const newLeads = leads.filter(lead => lead.priority === 'new').length;
+  const avgScore = leads.reduce((acc, lead) => acc + lead.score, 0) / leads.length || 0;
 
   return (
     <PageWrapper>
-      <PageHeader title="Customer List" />
+      <PageHeader title="CRM Customers" />
       <div className="grid grid-cols-4 gap-4">
-        {kpiData.map((kpi, index) => (
-          <SectionCard key={index}>
-            <div className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-              <div className="text-2xl font-bold text-blue-700">{kpi.v}</div>
-              <div className="text-xs text-slate-500">{kpi.label}</div>
-            </div>
-          </SectionCard>
-        ))}
+        <SectionCard title="Total Leads" value={totalLeads} />
+        <SectionCard title="Converted Leads" value={convertedLeads} />
+        <SectionCard title="New Leads" value={newLeads} />
+        <SectionCard title="Avg Score" value={avgScore.toFixed(2)} />
       </div>
-      <div className="flex items-center justify-between mt-4">
-        <input type="search" placeholder="Search customers..." className="border border-slate-200 px-3 py-2 rounded-l" />
-        <select className="border border-slate-200 px-3 py-2 rounded-r">
+      <div className="flex items-center justify-between mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="border p-2 rounded mr-4"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border p-2 rounded"
+        >
           <option value="">All</option>
-          <option value="converted">Converted Leads</option>
-          <option value="active">Active Clients</option>
+          <option value="converted">Converted</option>
+          <option value="new">New</option>
         </select>
       </div>
-      <table className="w-full mt-4 border-collapse">
-        <thead>
-          <tr>
-            <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Company</th>
-            <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Contact</th>
-            <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Status</th>
-            <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {customers.map(customer => (
-            <tr key={customer.id} className="hover:bg-slate-50 transition-colors">
-              <td className="py-3 px-3 text-sm text-slate-700">{customer.company}</td>
-              <td className="py-3 px-3 text-sm text-slate-700">{customer.name}</td>
-              <td className="py-3 px-3 text-sm text-slate-700">
-                {customer.status === "converted" && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">Converted</span>}
-                {customer.status === "active" && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">Active</span>}
-              </td>
-              <td className="py-3 px-3 text-sm text-slate-700">{customer.score}</td>
-            </tr>
+      {isLoading && <LoadingState />}
+      {isError && <EmptyState title="Failed to load leads" />}
+      {!isLoading && !isError && leads.length === 0 && (
+        <EmptyState title="No leads found" />
+      )}
+      {!isLoading && !isError && leads.length > 0 && (
+        <div className="grid grid-cols-4 gap-4">
+          {leads.map(lead => (
+            <SectionCard key={lead.id} title={lead.name} value={`${lead.company} - ${fmtDate(lead.updated_at)}`} />
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
     </PageWrapper>
   );
 };
 
-export default CustomerListPage;
+export default LeadsPage;
