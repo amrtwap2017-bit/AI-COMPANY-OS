@@ -202,8 +202,8 @@ export default function ProcurementIntakePage() {
           {/* Summary */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: "Available in Stock",  value: result.summary?.available ?? 0,   color: "text-emerald-600", icon: CheckCircle },
-              { label: "Need to Procure",     value: result.summary?.to_procure ?? 0,  color: "text-red-600",     icon: Package },
+              { label: "Available in Stock",  value: result?.summary?.total || result?.summary?.count || 0?.available ?? 0,   color: "text-emerald-600", icon: CheckCircle },
+              { label: "Need to Procure",     value: result?.summary?.total || result?.summary?.count || 0?.to_procure ?? 0,  color: "text-red-600",     icon: Package },
               { label: "Vendors Found",       value: result.vendor_recommendations?.length ?? 0, color: "text-blue-600", icon: Users },
             ].map(s => (
               <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center">

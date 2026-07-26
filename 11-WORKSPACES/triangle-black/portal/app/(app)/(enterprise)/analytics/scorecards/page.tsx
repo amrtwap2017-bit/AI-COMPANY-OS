@@ -36,7 +36,7 @@ const OperationsProgramScorecard = ({ kpis }) => {
 
   return (
     <SectionCard title="Operations Performance" grade={grade}>
-      <MetricStrip label="Total WOs" value={kpis?.total} />
+      <MetricStrip label="Total WOs" value={Number(kpis?.total) || 0} />
       <MetricStrip label="Open WOs" value={kpis?.open} />
       <MetricStrip label="Critical Open" value={kpis?.critical} />
       <MetricStrip label="Completion Rate %" value={`${score}%`} />
@@ -65,8 +65,8 @@ const ResourceUtilizationScorecard = ({ kpis }) => {
 
   return (
     <SectionCard title="Resource Management" grade={grade}>
-      <MetricStrip label="Active Technicians" value={kpis?.active} />
-      <MetricStrip label="Utilization %" value={`${kpis?.utilization}%`} />
+      <MetricStrip label="Active Technicians" value={Number(kpis?.active) || 0} />
+      <MetricStrip label="Utilization %" value={Number(`${kpis?.utilization) || 0}%`} />
       <MetricStrip label="Items Below Min Stock" value={kpis?.below_min} />
     </SectionCard>
   );
@@ -78,7 +78,7 @@ const ProcurementScorecard = ({ kpis }) => {
 
   return (
     <SectionCard title="Supply Chain" grade={grade}>
-      <MetricStrip label="Total POs" value={kpis?.total} />
+      <MetricStrip label="Total POs" value={Number(kpis?.total) || 0} />
       <MetricStrip label="Items Out of Stock" value={kpis?.below_minimum} />
       <MetricStrip label="PO Value EGP" value={kpis?.value_egp} />
     </SectionCard>

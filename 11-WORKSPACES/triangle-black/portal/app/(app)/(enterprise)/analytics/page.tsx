@@ -85,7 +85,7 @@ const AnalyticsPage = () => {
         </Link>
       </div>
       <div className="mt-8">
-        <MetricStrip title="Total WOs" value={workOrders.total} />
+        <MetricStrip title="Total WOs" value={Number(workOrders.total) || 0} />
         <MetricStrip title="Completed" value={workOrders.completed} />
         <MetricStrip title="In-Progress" value={workOrders.in_progress} />
         <MetricStrip title="Overdue" value={workOrders.overdue} />

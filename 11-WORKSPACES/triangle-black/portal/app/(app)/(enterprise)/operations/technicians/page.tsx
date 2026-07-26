@@ -42,7 +42,7 @@ const TechniciansPage = () => {
   const totalTechnicians = (technicians || []).length;
   const activeTechnicians = (technicians || []).filter(t => t.is_active).length;
   const atCapacityTechnicians = (technicians || []).filter(t => t.current_work_orders >= t.max_work_orders).length;
-  const avgUtilization = ((technicians || []).reduce((acc: any, t: any) => acc + t.current_work_orders / t.max_work_orders, 0) / (totalTechnicians || 1)) * 100;
+  const avgUtilization = ((technicians || []).reduce((acc: any, t: any) => acc + t.current_work_orders / t.max_work_orders, 0) / (totalTechnicians || 1)) * 100).toFixed(1);
 
   const filteredTechnicians = (technicians || []).filter(t => {
       if (availabilityFilter === "available") return t.current_work_orders < t.max_work_orders;

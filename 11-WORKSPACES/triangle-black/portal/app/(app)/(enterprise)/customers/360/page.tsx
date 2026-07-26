@@ -74,10 +74,10 @@ const Customer360Page = () => {
             <div className="space-y-4">
               {/* Summary */}
               <MetricStrip metrics={[
-                { label: "Contracts",   value: detail.summary?.total_contracts || 0 },
-                { label: "Active",      value: detail.summary?.active_contracts || 0, color: "green" },
-                { label: "Work Orders", value: detail.summary?.total_work_orders || 0 },
-                { label: "Open WOs",    value: detail.summary?.open_work_orders || 0, color: "amber" },
+                { label: "Contracts",   value: detail?.summary?.total || detail?.summary?.count || 0?.total_contracts || 0 },
+                { label: "Active",      value: detail?.summary?.total || detail?.summary?.count || 0?.active_contracts || 0, color: "green" },
+                { label: "Work Orders", value: detail?.summary?.total || detail?.summary?.count || 0?.total_work_orders || 0 },
+                { label: "Open WOs",    value: detail?.summary?.total || detail?.summary?.count || 0?.open_work_orders || 0, color: "amber" },
                 { label: "Invoiced",    value: fmtEGP(detail.summary?.total_invoiced), color: "blue" },
                 { label: "CS Score",    value: `${detail.summary?.health_score || 0}/100`, color: "green" },
               ]} />

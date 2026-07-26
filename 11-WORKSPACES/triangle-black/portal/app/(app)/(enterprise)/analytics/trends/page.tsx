@@ -86,7 +86,7 @@ export default function TrendsPage() {
             {months.sort((a: any, b: any) => new Date(b.month).getTime() - new Date(a.month).getTime()).map((month: any) => (
               <tr key={month.month}>
                 <td>{month.month}</td>
-                <td>{month.total}</td>
+                <td>{Number(month.total) || 0}</td>
                 <td>{month.completed}</td>
                 <td>{month.open}</td>
                 <td>{month.critical}</td>

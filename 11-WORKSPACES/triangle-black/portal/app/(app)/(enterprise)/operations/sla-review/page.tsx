@@ -113,7 +113,7 @@ export default function SLAReviewPage() {
                       {r.priority}
                     </span>
                   </td>
-                  <td className="py-2 text-right text-slate-700">{r.total}</td>
+                  <td className="py-2 text-right text-slate-700">{Number(r.total) || 0}</td>
                   <td className="py-2 text-right text-slate-700">{r.completed}</td>
                   <td className={`py-2 text-right font-semibold
                     ${r.completion_rate_pct >= 95 ? "text-emerald-600" : "text-red-600"}`}>
