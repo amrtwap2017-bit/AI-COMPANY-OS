@@ -35,7 +35,7 @@ const CommercialReviewPage = () => {
   // Calculate metrics
   const totalLeads = (leads || []).length;
   const wonLeads = toArr(leads).filter(lead => lead.status === "won").length;
-  const conversionRate = (wonLeads / totalLeads * 100).toFixed(2);
+  const conversionRate = (wonLeads / (totalLeads || 1) * 100).toFixed(2);
   const activeContracts = toArr(contracts).filter(contract => contract.status === "active").length;
 
   // Lead status summary
@@ -67,7 +67,7 @@ const CommercialReviewPage = () => {
         {Object.keys(statusSummary).map(status => (
           <div key={status} className="flex items-center justify-between mb-2">
             <StatusBadge status={status} />
-            <span>{`${statusSummary[status]} (${((statusSummary[status] / totalLeads) * 100).toFixed(2)}%)`}</span>
+            <span>{`${statusSummary[status]} (${((statusSummary[status] / (totalLeads || 1)) * 100).toFixed(2)}%)`}</span>
           </div>
         ))}
       </SectionCard>

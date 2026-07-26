@@ -102,7 +102,7 @@ export default function VendorAnalyticsPage() {
             <div key={v.id} className="flex items-center gap-3">
               <div className="w-32 text-xs font-medium text-slate-700 truncate">{v.name}</div>
               <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div className="h-3 bg-blue-500 rounded-full" style={{ width: `${(v.totalSpend / maxSpend) * 100}%` }} />
+                <div className="h-3 bg-blue-500 rounded-full" style={{ width: `${(maxSpend ? (v.totalSpend / maxSpend) * 100 : 0)}%` }} />
               </div>
               <div className="w-36 text-xs text-slate-500 text-right">{v.totalSpend.toLocaleString()} EGP</div>
             </div>

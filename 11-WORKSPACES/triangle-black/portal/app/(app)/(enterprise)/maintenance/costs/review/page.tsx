@@ -22,7 +22,6 @@ const fmtDate = (d: any): string => {
   catch { return String(d).slice(0, 10); }
 };
 
-const workOrders: any[] = [];
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
@@ -73,7 +72,7 @@ export default function MaintenanceCostsReviewPage() {
         return acc + (new Date(wo.completed_at).getTime() - new Date(wo.started_at).getTime()) / 3600000;
       }
       return acc;
-    }, 0) / totalWOsClosed;
+    }, 0) / (totalWOsClosed || 1);
 
   const poCount = purchaseOrders.length;
   const poTotalValueEGP = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.amount, 0);

@@ -36,7 +36,7 @@ const SpendPage = () => {
   const purchaseOrders = purchaseOrdersQuery.data;
   const totalPOs = purchaseOrders.length;
   const totalSpend = toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0);
-  const avgPOValue = totalPOs > 0 ? (totalSpend / totalPOs)?.toLocaleString() || '0' : "N/A";
+  const avgPOValue = totalPOs > 0 ? (totalSpend / (totalPOs || 1))?.toLocaleString() || '0' : "N/A";
   const activeVendors = new Set(toArr(purchaseOrders).map(po => po.vendor_id)).size;
 
   const statusCounts = toArr(purchaseOrders).reduce((acc: any, po: any) => {

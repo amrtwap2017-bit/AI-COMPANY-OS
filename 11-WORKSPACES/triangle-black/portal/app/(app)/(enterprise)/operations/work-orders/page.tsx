@@ -7,7 +7,6 @@ import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, Loading
 import { useState } from "react";
 import Link from "next/link";
 
-const workOrders: any[] = [];
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 

@@ -82,7 +82,7 @@ export default function CommandPage() {
               <p>{tech.name}</p>
               <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                 <div
-                  style={{ width: `${(tech.current_work_orders / tech.max_work_orders) * 100}%` }}
+                  style={{ width: `${(tech.max_work_orders ? (tech.current_work_orders / tech.max_work_orders) * 100 : 0)}%` }}
                   className="bg-blue-500 h-full"
                 />
               </div>

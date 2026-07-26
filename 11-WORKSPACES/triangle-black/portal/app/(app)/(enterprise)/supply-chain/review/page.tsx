@@ -64,7 +64,7 @@ const ReviewPage = () => {
   const avgLeadTime = toArr(purchaseOrders).reduce(
     (acc, po) => acc + po.lead_time_days,
     0
-  ) / totalPOs;
+  ) / (totalPOs || 1);
 
   let procurementHealthScore = 100;
   if (toArr(purchaseOrders).some(po => new Date(po.created_at) < new Date() - 30 * 24 * 60 * 60 * 1000)) {

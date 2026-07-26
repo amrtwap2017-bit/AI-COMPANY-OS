@@ -74,7 +74,7 @@ export default function InvoiceDetailPage() {
   const paid      = Number(paymentsData?.total_paid || 0);
   const outstanding = Number(paymentsData?.outstanding || 0);
   const payments  = paymentsData?.payments ?? [];
-  const paidPct   = total > 0 ? Math.min(100, Math.round(paid / total * 100)) : 0;
+  const paidPct   = total > 0 ? Math.min(100, Math.round(paid / (total || 1) * 100)) : 0;
 
   return (
     <PageWrapper>
