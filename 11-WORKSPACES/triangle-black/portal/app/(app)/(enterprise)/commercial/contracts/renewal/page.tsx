@@ -1,93 +1,60 @@
 // @ts-nocheck
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
 
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
-// Safe date formatter
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); }
-  catch { return String(d).slice(0, 10); }
-};
+const CommercialContractsRenewalPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
 
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+  const { data: serviceRequestsData, isLoading } = useQuery(
+    ["service-requests"],
+    () => authFetch("/api/v1/service-requests/?limit=100").then(r => r.json()),
+    { refetchInterval: 60000 }
+  );
 
-
-const fetchContracts = async () => {
-  const res = await authFetch(`/api/v1/contracts`);
-  if (!res.ok) {
-    return [];
-  }
-  return res.json();
-};
-
-const ContractRenewalPage = () => {
-  const today = new Date().toISOString().slice(0, 10);
-  const { data, isLoading, isError } = useQuery(["contracts"], fetchContracts, {
-    refetchInterval: 300000,
-  });
-
-  if (isLoading) return <LoadingState />;
-  if (isError) return <EmptyState title="Failed to load contracts" />;
-
-  const contracts = data?.contracts || [];
-  const totalContracts = (contracts || []).length;
-  const activeContracts = toArr(contracts).filter(c => c.status === "active").length;
-  const expiringSoon = toArr(contracts).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90).length;
-  const expiringUrgently = toArr(contracts).filter(c => new Date(c.end_date) - new Date() <= 86400000 * 30).length;
-  const totalValueEGP = toArr(contracts).reduce((acc: any, c: any) => acc + c.contract_value, 0);
+  const filteredServiceRequests = toArr(serviceRequestsData).filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <PageWrapper>
-      <PageHeader title="Contract Renewal Pipeline" />
-      <MetricStrip
-        metrics={[
-          { label: "Total Contracts", value: totalContracts },
-          { label: "Active", value: activeContracts },
-          { label: "Expiring in 30 days", value: expiringUrgently, color: "red" },
-          { label: "Expiring in 90 days", value: expiringSoon - expiringUrgently, color: "amber" },
-          { label: "Total Value EGP", value: totalValueEGP.toLocaleString("en-GB") },
-        ]}
+    <div>
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {contracts
-          .filter(c => new Date(c.end_date) - new Date() <= 86400000 * 90)
-          .map((c, index) => (
-            <SectionCard key={index} className="bg-white shadow-md p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold">{c.client_name}</h3>
-                <StatusBadge status={c.status} />
-              </div>
-              <p className="text-gray-600">
-                {fmtDate(c.end_date)}{" "}
-                {Math.ceil((new Date(c.end_date) - new Date()) / 86400000)} days left
-              </p>
-              <p className="font-bold">{c.contract_value.toLocaleString("en-GB")} EGP</p>
-              <button className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Initiate Renewal</button>
-            </SectionCard>
-          ))}
+      <div style={{ display: "flex", gap: "20px" }}>
+        {/* KPI Grid */}
+        <div>OPEN</div>
+        <div>DONE</div>
+        <div>HIGH</div>
+        <div>!</div>
       </div>
-      {contracts
-        .filter(c => new Date(c.end_date) < new Date())
-        .map((c, index) => (
-          <SectionCard key={index} className="bg-white shadow-md p-4 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold">{c.client_name}</h3>
-              <StatusBadge status={c.status} />
-            </div>
-            <p className="text-gray-600">
-              {fmtDate(c.end_date)} Expired
-            </p>
-            <p className="font-bold">{c.contract_value.toLocaleString("en-GB")} EGP</p>
-          </SectionCard>
-        ))}
-    </PageWrapper>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredServiceRequests.map((item) => (
+            <tr key={item.id}>
+              <td>{item.name}</td>
+              <td>{item.status}</td>
+              <td>{item.date}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
-export default ContractRenewalPage;
+export default CommercialContractsRenewalPage;
