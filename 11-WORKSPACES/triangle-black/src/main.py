@@ -689,38 +689,45 @@ except Exception as e:
 
 
 
-# ── Sprint 135: PM Plans + Payment Tracking endpoints ─────────────────────
+# ── Sprint 148: Fixed PM Plans + Payment Tracking ─────────────────────────
+
 @app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
-def list_pm_plans_direct(hotel_id: str = None, limit: int = 100):
+def list_pm_plans(limit: int = 100, status: str = None):
     from sqlalchemy import text as _t
     from src.core.database import SessionLocal as _SL
     db = _SL()
     try:
-        q = "SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_id=a.id WHERE 1=1"
-        p = {"limit": limit}
-        if hotel_id:
-            q += " AND mp.hotel_id=:hid"
-            p["hid"] = hotel_id
-        q += " ORDER BY mp.next_due_date ASC LIMIT :limit"
-        return [dict(r._mapping) for r in db.execute(_t(q), p).fetchall()]
-    except Exception:
+        if status:
+            rows = db.execute(
+                _t("SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_node_id = a.id WHERE mp.status = :s ORDER BY mp.next_due_date ASC LIMIT :l"),
+                {"s": status, "l": limit}
+            ).fetchall()
+        else:
+            rows = db.execute(
+                _t("SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_node_id = a.id ORDER BY mp.next_due_date ASC LIMIT :l"),
+                {"l": limit}
+            ).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception as e:
         return []
     finally:
         db.close()
 
+
 @app.get("/api/v1/payment-tracking/", tags=["finance"])
 @app.get("/api/v1/payment-tracking", tags=["finance"])
-def list_payment_tracking_direct(limit: int = 100):
+def list_payment_tracking(limit: int = 100):
     from sqlalchemy import text as _t
     from src.core.database import SessionLocal as _SL
     db = _SL()
     try:
-        rows = db.execute(_t(
-            "SELECT id, invoice_number, amount, status, created_at FROM invoices ORDER BY created_at DESC LIMIT :l"
-        ), {"l": limit}).fetchall()
+        rows = db.execute(
+            _t("SELECT id, invoice_number, amount, status, created_at, updated_at FROM invoices ORDER BY created_at DESC LIMIT :l"),
+            {"l": limit}
+        ).fetchall()
         return [dict(r._mapping) for r in rows]
-    except Exception:
+    except Exception as e:
         return []
     finally:
         db.close()
