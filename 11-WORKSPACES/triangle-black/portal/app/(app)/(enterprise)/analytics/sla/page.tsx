@@ -49,7 +49,6 @@ export default function SLAPage() {
           <MetricStrip
             metrics={[
               {
-{ label: "Overall Compliance %",
                 value: compliance_rate,
                 color:
                   compliance_rate >= 95 ? "green" : compliance_rate < 80 ? "red" : "amber",

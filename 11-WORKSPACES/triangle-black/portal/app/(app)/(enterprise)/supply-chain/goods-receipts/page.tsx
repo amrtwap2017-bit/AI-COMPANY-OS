@@ -2,7 +2,6 @@
 "use client";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-value: `EGP ${(Number(totalPOValuePending) || 0).toFixed(2)}`,
 import {
   PageWrapper,
   PageHeader,
@@ -94,7 +93,7 @@ const GoodsReceiptsPage = () => {
             { label: "Pending Deliveries", value: pendingDeliveriesCount },
             { label: "This Month", value: thisMonthReceipts.length },
             {
-              { label: "Total PO Value Pending",
+{ label: "Total PO Value Pending", }
               value: `EGP ${(Number(totalPOValuePending) || 0).toFixed(2)}`,
             },
           ]}
