@@ -12,7 +12,8 @@ import {
   LoadingState,
   EmptyState,
 } from "@/components/ui";
-import { toArr, fmtDate } from "@/utils/helpers";
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any): string => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0,10); } };
 
 const fetchWorkOrders = async () => {
   const response = await authFetch("/api/v1/work-orders/?status=open&limit=20");
