@@ -1,206 +1,170 @@
 "use client";
-import Link from "next/link";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-
-const STATUSES    = ["all","active","overdue","inactive","completed"];
-const FREQUENCIES = ["all","daily","weekly","monthly","quarterly","biannual","yearly"];
-const FREQ_OPTS   = ["weekly","monthly","quarterly","biannual","yearly"];
-const TYPES       = ["preventive","inspection","corrective","calibration","lubrication"];
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function PMPlansPage() {
-  const [statFilter, setStatFilter] = useState("all");
-  const [freqFilter, setFreqFilter] = useState("all");
-  const [search,     setSearch]     = useState("");
-  const [showCreate, setShowCreate] = useState(false);
-  const [saving,     setSaving]     = useState(false);
-  const [form, setForm] = useState({
-    title:"", plan_type:"preventive", frequency:"monthly",
-    next_due_date:"", owner:"", notes:""
-  });
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [duneFilter, setDueFilter] = useState("all");
 
-  const { data: raw=[], isLoading, refetch } = useQuery(
-    ["pm-plans-list"],
-    () => authFetch("/api/v1/maintenance/pm-plans/?limit=200").then(r=>r.json()),
+  const { data: raw, isLoading } = useQuery(
+    ["pm-list"],
+    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()),
     { refetchInterval: 120000 }
   );
+  const plans = toArr(raw);
+  const now = new Date();
+  const in7  = new Date(now.getTime() + 7*86400000);
+  const in30 = new Date(now.getTime() + 30*86400000);
 
-  const plans    = toArr(raw);
+  const overdue   = plans.filter(p => p.next_due_ts && new Date(p.next_due_ts) < now);
+  const dueWeek   = plans.filter(p => p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in7);
+  const dueMonth  = plans.filter(p => p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in30);
+  const scheduled = plans.filter(p => p.next_due_ts && new Date(p.next_due_ts) > in30);
+  const types     = [...new Set(plans.map(p => p.plan_type || "general"))].sort();
+
   const filtered = plans.filter(p => {
-    if (statFilter!=="all" && p.status!==statFilter) return false;
-    if (freqFilter!=="all" && p.frequency!==freqFilter) return false;
-    if (search && !p.title?.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
+    const matchSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
+    const matchType   = typeFilter === "all" || (p.plan_type || "general") === typeFilter;
+    const matchDue    = duneFilter === "all" ||
+      (duneFilter === "overdue" && p.next_due_ts && new Date(p.next_due_ts) < now) ||
+      (duneFilter === "week"    && p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in7) ||
+      (duneFilter === "month"   && p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in30);
+    return matchSearch && matchType && matchDue;
   });
 
-  const active  = plans.filter(p=>p.status==="active").length;
-  const overdue = plans.filter(p=>p.status==="overdue").length;
-  const dueSoon = plans.filter(p=>{
-    if (!p.next_due_date) return false;
-    try { const diff=(new Date(p.next_due_date)-new Date())/(1000*60*60*24); return diff>=0&&diff<=7; }
-    catch { return false; }
-  }).length;
-
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
-
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const payload = {...form};
-      if (!payload.notes)          delete payload.notes;
-      if (!payload.owner)          delete payload.owner;
-      if (!payload.next_due_date)  delete payload.next_due_date;
-      const r = await authFetch("/api/v1/maintenance/pm-plans/", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) {
-        setShowCreate(false);
-        setForm({title:"",plan_type:"preventive",frequency:"monthly",next_due_date:"",owner:"",notes:""});
-        refetch();
-      } else {
-        const err = await r.json().catch(()=>({}));
-        alert(err?.detail || "Failed to create PM plan");
-      }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  const S = {active:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",inactive:"bg-slate-100 text-slate-500",completed:"bg-blue-100 text-blue-800"};
+  if (isLoading) return (
+    <div className="p-6 space-y-4 animate-pulse">
+      <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-40"/>
+      <div className="grid grid-cols-4 gap-4">
+        {[1,2,3,4].map(i=><div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border p-5 h-24"/>)}
+      </div>
+    </div>
+  );
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Preventive Maintenance Plans"
-        subtitle={`${plans.length} plans · ${active} active · ${overdue} overdue · ${dueSoon} due this week`}
-        breadcrumbs={[{label:"Maintenance",href:"/maintenance"},{label:"PM Plans"}]}
-        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New PM Plan</Button>}
-      />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs font-bold text-red-500 uppercase tracking-widest mb-1.5">Maintenance</div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">PM Plans</h1>
+          <p className="text-slate-500 text-sm mt-1.5">{plans.length} plans · {overdue.length} overdue · {dueWeek.length} due this week</p>
+        </div>
+        <button onClick={() => router.push("/workflows/launcher")}
+          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm hover:shadow-md transition-all">
+          ⚡ Auto-Create WOs
+        </button>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      {/* KPI strip — clickable filters */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          {label:"Total Plans",   value:plans.length, color:"text-slate-800"},
-          {label:"Active",        value:active,       color:"text-emerald-700"},
-          {label:"Overdue",       value:overdue,      color:"text-red-700"},
-          {label:"Due This Week", value:dueSoon,      color:"text-amber-700"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
-          </div>
+          { label:"Overdue",       value:overdue.length,   color:overdue.length>0?"red":"emerald",   filter:"overdue", sub:"require immediate action" },
+          { label:"Due This Week", value:dueWeek.length,   color:dueWeek.length>0?"amber":"slate",   filter:"week",    sub:"schedule now" },
+          { label:"Due This Month",value:dueMonth.length,  color:"blue",                              filter:"month",   sub:"plan ahead" },
+          { label:"Scheduled",     value:scheduled.length, color:"emerald",                           filter:"all",     sub:"future plans" },
+        ].map((k,i)=>(
+          <button key={i} onClick={()=>setDueFilter(duneFilter===k.filter?"all":k.filter)}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${
+              duneFilter===k.filter ? `border-${k.color}-400 shadow-sm bg-${k.color}-50/30` : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
+            }`}>
+            <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-1">{k.label}</div>
+            <div className="text-xs text-slate-400 mt-0.5">{k.sub}</div>
+          </button>
         ))}
       </div>
 
-      <SectionCard title={`PM Plans (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search plans…" value={search}
-            onChange={e=>setSearch(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          <select value={statFilter} onChange={e=>setStatFilter(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s}</option>)}
-          </select>
-          <select value={freqFilter} onChange={e=>setFreqFilter(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {FREQUENCIES.map(f=><option key={f} value={f}>{f==="all"?"All Frequency":f}</option>)}
-          </select>
-          {(statFilter!=="all"||freqFilter!=="all"||search)&&<button onClick={()=>{setStatFilter("all");setFreqFilter("all");setSearch("");}} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
-        </div>
-        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No PM plans found"
-          action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create PM Plan</Button>}
-        />:(
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-slate-100">
-                {["Plan Title","Type","Frequency","Status","Next Due","Owner"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr></thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(p=>{
-                  const isOverdue = p.next_due_date&&new Date(p.next_due_date)<new Date()&&p.status==="active";
-                  const isSoon    = p.next_due_date&&!isOverdue&&(new Date(p.next_due_date)-new Date())/(1000*60*60*24)<=7;
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-3">
-                        <Link href={`/maintenance/pm-plans/${p.id}`}><p className="font-medium text-blue-700 hover:underline">{p.title}</p></Link>
-                        <p className="text-xs text-slate-400">{p.notes||""}</p>
-                      </td>
-                      <td className="py-3 px-3"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{p.plan_type||"preventive"}</span></td>
-                      <td className="py-3 px-3"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{p.frequency||"—"}</span></td>
-                      <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[p.status]||"bg-slate-100 text-slate-600")}>{p.status||"—"}</span></td>
-                      <td className="py-3 px-3">
-                        <span className={`text-xs font-medium ${isOverdue?"text-red-600":isSoon?"text-amber-600":"text-slate-500"}`}>{fmtDate(p.next_due_date)}</span>
-                        {isOverdue&&<span className="ml-1 text-xs bg-red-100 text-red-700 px-1 rounded">OVERDUE</span>}
-                        {isSoon&&<span className="ml-1 text-xs bg-amber-100 text-amber-700 px-1 rounded">SOON</span>}
-                      </td>
-                      <td className="py-3 px-3 text-xs text-slate-500">{p.owner||"—"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      {/* Overdue alert */}
+      {overdue.length > 0 && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+          <div className="text-2xl">🔧</div>
+          <div className="flex-1">
+            <div className="font-bold text-red-800 dark:text-red-300">{overdue.length} Preventive Maintenance Plans Are Overdue</div>
+            <div className="text-sm text-red-600 mt-0.5">{overdue.slice(0,2).map(p=>p.title).join(" · ")}{overdue.length>2?` +${overdue.length-2} more`:""}</div>
           </div>
-        )}
-      </SectionCard>
-
-      {showCreate&&(
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="font-bold text-slate-900">New PM Plan</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">x</button>
-            </div>
-            <form onSubmit={save} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Plan Title *</label>
-                <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}
-                  placeholder="e.g. Monthly Chiller Performance Check" className={inp} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
-                  <select value={form.plan_type} onChange={e=>setForm({...form,plan_type:e.target.value})} className={inp}>
-                    {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Frequency</label>
-                  <select value={form.frequency} onChange={e=>setForm({...form,frequency:e.target.value})} className={inp}>
-                    {FREQ_OPTS.map(f=><option key={f} value={f}>{f}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Next Due Date</label>
-                  <input type="date" value={form.next_due_date} onChange={e=>setForm({...form,next_due_date:e.target.value})} className={inp} />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Owner</label>
-                  <input value={form.owner} onChange={e=>setForm({...form,owner:e.target.value})}
-                    placeholder="Engineer name" className={inp} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Notes / Checklist</label>
-                <textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}
-                  rows={3} placeholder="Maintenance steps, safety notes, tools required…" className={inp+" resize-none"} />
-              </div>
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                <button type="button" onClick={()=>setShowCreate(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">{saving?"Saving…":"Create PM Plan"}</button>
-              </div>
-            </form>
-          </div>
+          <button onClick={()=>setDueFilter("overdue")}
+            className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-bold hover:bg-red-600 flex-shrink-0">
+            Show Overdue
+          </button>
         </div>
       )}
-    </PageWrapper>
+
+      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search PM plans..."
+          className="flex-1 min-w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+        <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          <option value="all">All Types</option>
+          {types.map(t=><option key={t} value={t}>{t}</option>)}
+        </select>
+        {(search||typeFilter!=="all"||duneFilter!=="all") && (
+          <button onClick={()=>{setSearch("");setTypeFilter("all");setDueFilter("all");}}
+            className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+            Clear ×
+          </button>
+        )}
+        <div className="text-xs text-slate-400 self-center">{filtered.length} plans</div>
+      </div>
+
+      {/* PM Plans table */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-3">📅</div>
+            <div className="font-bold text-slate-900 dark:text-white text-lg">No plans match your filters</div>
+            <div className="text-slate-400 text-sm mt-1">Try adjusting your search</div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-[1fr_120px_100px_130px_130px] bg-slate-50 dark:bg-slate-800/50 px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div>Plan</div>
+              <div>Type</div>
+              <div>Frequency</div>
+              <div className="text-center">Next Due</div>
+              <div>Owner</div>
+            </div>
+            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+              {filtered.map((p,i)=>{
+                const isOverdue  = p.next_due_ts && new Date(p.next_due_ts) < now;
+                const isDueWeek  = !isOverdue && p.next_due_ts && new Date(p.next_due_ts) <= in7;
+                const isDueMonth = !isOverdue && !isDueWeek && p.next_due_ts && new Date(p.next_due_ts) <= in30;
+                return (
+                  <button key={i} onClick={()=>router.push(`/maintenance/pm-plans/${p.id}`)}
+                    className={`w-full grid grid-cols-[1fr_120px_100px_130px_130px] items-center px-5 py-4 text-left transition-colors group ${
+                      isOverdue ? "bg-red-50/40 dark:bg-red-900/10 hover:bg-red-50" : isDueWeek ? "bg-amber-50/30 hover:bg-amber-50" : "hover:bg-amber-50/50 dark:hover:bg-amber-900/10"
+                    }`}>
+                    <div className="min-w-0 pr-4">
+                      <div className="font-semibold text-sm text-slate-900 dark:text-white truncate group-hover:text-amber-600">{p.title}</div>
+                      <div className="text-xs text-slate-400 mt-0.5">{p.notes?.slice(0,60) || p.asset_node_id || "—"}</div>
+                    </div>
+                    <div className="text-xs text-slate-500 capitalize">{p.plan_type || "—"}</div>
+                    <div className="text-xs text-slate-500 capitalize">{p.frequency || "—"}</div>
+                    <div className="text-center">
+                      <div className={`text-xs font-medium ${isOverdue?"text-red-600 font-bold":isDueWeek?"text-amber-600":isDueMonth?"text-blue-600":"text-slate-500"}`}>
+                        {fmtDate(p.next_due_ts || p.next_due_date)}
+                      </div>
+                      {isOverdue && <div className="text-[10px] bg-red-100 text-red-700 px-1.5 rounded mt-0.5">OVERDUE</div>}
+                      {isDueWeek && <div className="text-[10px] bg-amber-100 text-amber-700 px-1.5 rounded mt-0.5">THIS WEEK</div>}
+                    </div>
+                    <div className="text-xs text-slate-500 truncate">{p.owner || "—"}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

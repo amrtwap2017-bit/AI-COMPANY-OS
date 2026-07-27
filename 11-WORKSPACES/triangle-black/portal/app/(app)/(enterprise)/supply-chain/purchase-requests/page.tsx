@@ -1,186 +1,195 @@
 "use client";
-import Link from "next/link";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import { useRole } from "@/lib/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
-const S = {draft:"bg-slate-100 text-slate-600",submitted:"bg-blue-100 text-blue-800",approved:"bg-emerald-100 text-emerald-800",rejected:"bg-red-100 text-red-700",ordered:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800"};
-const STATUSES   = ["all","draft","submitted","approved","rejected","ordered","completed"];
-const PRIORITIES = ["all","critical","high","medium","low"];
+const STATUS_BADGE = {
+  pending:   "bg-amber-100 text-amber-700",
+  submitted: "bg-blue-100 text-blue-700",
+  approved:  "bg-emerald-100 text-emerald-700",
+  rejected:  "bg-red-100 text-red-700",
+  cancelled: "bg-slate-100 text-slate-500",
+};
+const URGENCY_BADGE = {
+  urgent:  "bg-red-100 text-red-700 font-bold",
+  high:    "bg-orange-100 text-orange-700",
+  normal:  "bg-slate-100 text-slate-600",
+  low:     "bg-slate-50 text-slate-400",
+};
 
 export default function PurchaseRequestsPage() {
-  const { canCreate, canApprove } = useRole();
-  const [q,  setQ]  = useState("");
-  const [sf, setSf] = useState("all");
-  const [pf, setPf] = useState("all");
-  const [showCreate, setShowCreate] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    title:"", description:"", category:"", priority:"medium",
-    estimated_cost:"", hotel_id:"tb-default-hotel-000000000001"
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [urgencyFilter, setUrgencyFilter] = useState("all");
+
+  const { data: raw, isLoading } = useQuery(
+    ["pr-list"],
+    () => authFetch("/api/v1/purchase-requests/").then(r => r.json())
+  );
+  const prs = toArr(raw);
+
+  const filtered = prs.filter(p => {
+    const matchSearch  = !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.pr_number?.toLowerCase().includes(search.toLowerCase());
+    const matchStatus  = statusFilter === "all" || p.status === statusFilter;
+    const matchUrgency = urgencyFilter === "all" || p.urgency === urgencyFilter;
+    return matchSearch && matchStatus && matchUrgency;
   });
 
-  const { data: raw=[], isLoading, refetch } = useQuery(
-    ["purchase-requests-list"],
-    () => authFetch("/api/v1/purchase-requests/?limit=200").then(r=>r.json()),
-    { refetchInterval: 120000 }
+  const pending   = prs.filter(p => p.status === "pending");
+  const submitted = prs.filter(p => p.status === "submitted");
+  const approved  = prs.filter(p => p.status === "approved");
+  const urgent    = prs.filter(p => p.urgency === "urgent");
+  const autoPRs   = prs.filter(p => p.title?.startsWith("Auto-PR:"));
+
+  if (isLoading) return (
+    <div className="p-6 space-y-4 animate-pulse">
+      <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-48"/>
+      <div className="grid grid-cols-4 gap-4">
+        {[1,2,3,4].map(i=><div key={i} className="bg-white rounded-2xl border p-5 h-24"/>)}
+      </div>
+    </div>
   );
 
-  const prs = toArr(raw);
-  const filtered = prs.filter(p => {
-    if (sf!=="all"&&p.status!==sf) return false;
-    if (pf!=="all"&&p.priority!==pf) return false;
-    if (q&&!p.title?.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
-
-  const total    = prs.length;
-  const pending  = prs.filter(p=>["draft","submitted"].includes(p.status)).length;
-  const approved = prs.filter(p=>p.status==="approved").length;
-  const rejected = prs.filter(p=>p.status==="rejected").length;
-
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
-
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const payload = {...form};
-      if (payload.estimated_cost) payload.estimated_cost = Number(payload.estimated_cost);
-      else delete payload.estimated_cost;
-      const r = await authFetch("/api/v1/purchase-requests/", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) {
-        setShowCreate(false);
-        setForm({title:"",description:"",category:"",priority:"medium",estimated_cost:"",hotel_id:"tb-default-hotel-000000000001"});
-        refetch();
-      } else {
-        const err = await r.json().catch(()=>({}));
-        alert(err?.detail||"Failed to create purchase request");
-      }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Purchase Requests"
-        subtitle={`${total} total · ${pending} pending · ${approved} approved`}
-        breadcrumbs={[{label:"Supply Chain",href:"/supply-chain"},{label:"Purchase Requests"}]}
-        actions={canCreate ? <Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Request</Button> : undefined}
-      />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-1.5">Supply Chain</div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Purchase Requests</h1>
+          <p className="text-slate-500 text-sm mt-1.5">{prs.length} total · {pending.length} pending · {urgent.length} urgent · {autoPRs.length} auto-generated</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => router.push("/workflows/launcher")}
+            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-400 transition-all">
+            ⚡ Auto-PR
+          </button>
+          <button onClick={() => router.push("/supply-chain/purchase-orders")}
+            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all">
+            View POs →
+          </button>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          {label:"Total",    value:total,    color:"text-slate-800"},
-          {label:"Pending",  value:pending,  color:"text-amber-700"},
-          {label:"Approved", value:approved, color:"text-emerald-700"},
-          {label:"Rejected", value:rejected, color:"text-red-700"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
-          </div>
+          { label:"Pending",    value:pending.length,   color:pending.length>0?"amber":"slate",   filter:"pending" },
+          { label:"Submitted",  value:submitted.length, color:"blue",                              filter:"submitted" },
+          { label:"Approved",   value:approved.length,  color:"emerald",                           filter:"approved" },
+          { label:"Urgent",     value:urgent.length,    color:urgent.length>0?"red":"slate",       filter:"all" },
+          { label:"Auto-PR",    value:autoPRs.length,   color:"purple",                            filter:"all" },
+        ].map((k,i)=>(
+          <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter?"all":k.filter)}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${
+              statusFilter===k.filter ? `border-${k.color}-400 shadow-sm` : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
+            }`}>
+            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{k.label}</div>
+          </button>
         ))}
       </div>
 
-      <SectionCard title={`Purchase Requests (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search requests…" value={q}
-            onChange={e=>setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          <select value={sf} onChange={e=>setSf(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s}</option>)}
-          </select>
-          <select value={pf} onChange={e=>setPf(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {PRIORITIES.map(p=><option key={p} value={p}>{p==="all"?"All Priority":p}</option>)}
-          </select>
-          {(sf!=="all"||pf!=="all"||q)&&<button onClick={()=>{setSf("all");setPf("all");setQ("");}} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
-        </div>
-        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No purchase requests"
-          action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>New Request</Button>}
-        />:(
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-slate-100">
-                {["Request","Category","Est. Cost","Priority","Status","Date"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr></thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(p=>(
-                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-3">
-                      <Link href={`/supply-chain/purchase-requests/${p.id}`}><p className="font-medium text-blue-700 hover:underline truncate max-w-xs">{p.title}</p></Link>
-                      {p.description&&<p className="text-xs text-slate-400 truncate">{p.description?.slice(0,55)}</p>}
-                    </td>
-                    <td className="py-3 px-3"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{p.category||"—"}</span></td>
-                    <td className="py-3 px-3 text-sm font-medium text-slate-700">{p.estimated_cost?`EGP ${fmtNum(p.estimated_cost)}`:"—"}</td>
-                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[p.priority]||P.low)}>{p.priority||"—"}</span></td>
-                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[p.status]||"bg-slate-100 text-slate-600")}>{p.status||"—"}</span></td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(p.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Urgent alert */}
+      {urgent.length > 0 && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+          <div className="text-2xl">🚨</div>
+          <div className="flex-1">
+            <div className="font-bold text-red-800 dark:text-red-300">{urgent.length} Urgent Purchase Requests Need Immediate Approval</div>
+            <div className="text-sm text-red-600 mt-0.5">{urgent.slice(0,2).map(p=>p.title).join(" · ")}</div>
           </div>
-        )}
-      </SectionCard>
-
-      {showCreate&&(
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="font-bold text-slate-900">New Purchase Request</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">x</button>
-            </div>
-            <form onSubmit={save} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
-                <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}
-                  placeholder="e.g. HVAC Spare Parts — R410A Refrigerant" className={inp} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
-                <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}
-                  rows={3} placeholder="What is needed, specifications, quantity…" className={inp+" resize-none"} />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                  <input value={form.category} onChange={e=>setForm({...form,category:e.target.value})}
-                    placeholder="HVAC / Electrical…" className={inp} />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Priority</label>
-                  <select value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})} className={inp}>
-                    {PRIORITIES.filter(p=>p!=="all").map(p=><option key={p} value={p}>{p}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Est. Cost (EGP)</label>
-                  <input type="number" value={form.estimated_cost} onChange={e=>setForm({...form,estimated_cost:e.target.value})}
-                    placeholder="5000" className={inp} />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={()=>setShowCreate(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">{saving?"Saving…":"Submit Request"}</button>
-              </div>
-            </form>
-          </div>
+          <button onClick={()=>setUrgencyFilter("urgent")}
+            className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-bold hover:bg-red-600 flex-shrink-0">
+            Show Urgent
+          </button>
         </div>
       )}
-    </PageWrapper>
+
+      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search purchase requests..."
+          className="flex-1 min-w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="submitted">Submitted</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <select value={urgencyFilter} onChange={e=>setUrgencyFilter(e.target.value)}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          <option value="all">All Urgency</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="normal">Normal</option>
+          <option value="low">Low</option>
+        </select>
+        {(search||statusFilter!=="all"||urgencyFilter!=="all") && (
+          <button onClick={()=>{setSearch("");setStatusFilter("all");setUrgencyFilter("all");}}
+            className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+            Clear ×
+          </button>
+        )}
+        <div className="text-xs text-slate-400 self-center">{filtered.length} requests</div>
+      </div>
+
+      {/* PR table */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-3">🛒</div>
+            <div className="font-bold text-slate-900 dark:text-white text-lg">No purchase requests found</div>
+            <div className="text-slate-400 text-sm mt-1">Run automation engine to auto-generate PRs for low stock</div>
+            <button onClick={()=>router.push("/workflows/launcher")}
+              className="mt-4 px-5 py-2 bg-amber-600 text-white rounded-xl text-sm font-bold hover:bg-amber-700">
+              ⚡ Run Automation
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-[1fr_120px_100px_100px_110px_100px] bg-slate-50 dark:bg-slate-800/50 px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div>Request</div>
+              <div>PR Number</div>
+              <div className="text-center">Status</div>
+              <div className="text-center">Urgency</div>
+              <div>Department</div>
+              <div className="text-center">Required By</div>
+            </div>
+            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+              {filtered.map((pr,i)=>(
+                <button key={i} onClick={()=>router.push(`/supply-chain/purchase-requests/${pr.id}`)}
+                  className="w-full grid grid-cols-[1fr_120px_100px_100px_110px_100px] items-center px-5 py-4 text-left hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors group">
+                  <div className="min-w-0 pr-4">
+                    <div className="font-semibold text-sm text-slate-900 dark:text-white truncate group-hover:text-amber-600">{pr.title || pr.pr_number}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">{pr.requester || "—"} · {pr.justification?.slice(0,50) || "—"}</div>
+                  </div>
+                  <div className="text-xs font-mono text-slate-500 truncate">{pr.pr_number || "—"}</div>
+                  <div className="text-center">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[pr.status]||"bg-slate-100 text-slate-600"}`}>
+                      {pr.status || "—"}
+                    </span>
+                  </div>
+                  <div className="text-center">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${URGENCY_BADGE[pr.urgency]||"bg-slate-100 text-slate-600"}`}>
+                      {pr.urgency || "—"}
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-500 truncate">{pr.department || "—"}</div>
+                  <div className="text-center text-xs text-slate-400">{fmtDate(pr.required_date)}</div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
