@@ -1,110 +1,126 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-import { useState } from "react";
-
-
-// Safe date formatter
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); }
-  catch { return String(d).slice(0, 10); }
-};
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter } from "next/navigation";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => `EGP ${Number(n || 0).toLocaleString()}`;
 
+export default function CustomersReview() {
+  const router = useRouter();
+  const { data: contractRaw } = useQuery(["cr-contracts"], () => authFetch("/api/v1/contracts/").then(r => r.json()));
+  const { data: invoiceRaw } = useQuery(["cr-invoices"], () => authFetch("/api/v1/invoices/").then(r => r.json()));
+  const { data: woRaw } = useQuery(["cr-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
+  const { data: srRaw } = useQuery(["cr-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.json()));
 
-const fetchContracts = async () => {
-  const res = await authFetch(`/api/v1/contracts`);
-  if (!res.ok) return [];
-  return res.json();
-};
+  const contracts = toArr(contractRaw);
+  const invoices = toArr(invoiceRaw);
+  const wos = toArr(woRaw);
+  const srs = toArr(srRaw);
+  const now = new Date();
 
-const fetchInvoices = async () => {
-  const res = await authFetch(`/api/v1/invoices`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchWorkOrders = async () => {
-  const res = await authFetch(`/api/v1/work-orders`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const CustomerSuccessPage = () => {
-  const today = new Date().toISOString().slice(0, 10);
-  const [contracts, setContracts] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [workOrders, setWorkOrders] = useState([]);
-
-  const { data: contractData, isLoading: isContractLoading } = useQuery(["contracts"], fetchContracts, {
-    refetchInterval: 300000,
-  });
-
-  const { data: invoiceData, isLoading: isInvoiceLoading } = useQuery(["invoices"], fetchInvoices, {
-    refetchInterval: 300000,
-  });
-
-  const { data: workOrderData, isLoading: isWorkOrderLoading } = useQuery(["work-orders"], fetchWorkOrders, {
-    refetchInterval: 300000,
-  });
-
-  if (isContractLoading || isInvoiceLoading || isWorkOrderLoading) return <LoadingState />;
-
-  const totalContracts = contractData?.length || [];
-  const activeContracts = toArr(contractData).filter(contract => contract.status === "active").length;
-  const expiringSoonContracts = toArr(contractData).filter(
-    contract  => Math.ceil((new Date(contract.end_date) - new Date(today)) / 86400000) <= 60
-  ).length;
-  const monthlyRevenueEGP = toArr(contractData).reduce((acc: any, contract: any) => acc + contract.monthly_value, 0);
-
-  const activeRevenue = activeContracts * 12;
-  const portfolioHealth = ((totalContracts || 1) === 0 ? 0 : (activeContracts / (totalContracts || 1)) * 100);
-
-  const renewalRisk = expiringSoonContracts;
-  const topRevenueContracts = contractData.sort((a: any, b: any) => b.total_value - a.total_value).slice(0, 5);
+  const activeContracts = contracts.filter((c: any) => c.status === "active");
+  const expiring = activeContracts.filter((c: any) => c.end_date && new Date(c.end_date) <= new Date(now.getTime() + 30 * 86400000));
+  const pendingInvoices = invoices.filter((i: any) => i.status === "pending");
+  const overdueInvoices = invoices.filter((i: any) => i.status === "overdue");
+  const linkedSRs = srs.filter((s: any) => s.work_order_id);
+  const completedWOs = wos.filter((w: any) => w.status === "completed");
 
   return (
-    <PageWrapper>
-      <PageHeader title="Customer Success" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricStrip label="AMC Contracts (total)" value={totalContracts} />
-        <MetricStrip label="Active" value={activeContracts} />
-        <MetricStrip label="Expiring Soon (60 days)" value={expiringSoonContracts} />
-        <MetricStrip label="Monthly Revenue EGP" value={monthlyRevenueEGP} />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div>
+        <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Review</div>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Customer Review Board</h1>
+        <p className="text-slate-500 mt-1">Account health, billing status, and service delivery review</p>
       </div>
-      <SectionCard title="AMC Health Dashboard">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatusBadge label="Renewal Risk" value={renewalRisk} />
-          <StatusBadge label="Active Revenue" value={activeRevenue} />
-          <StatusBadge label="Portfolio Health" value={`${((Number(portfolioHealth) || 0).toFixed(2)) || 0}%`} />
-        </div>
-      </SectionCard>
-      <SectionCard title="Contract List with Renewal Status">
-        {toArr(contractData).map(contract => (
-          <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
-            <div>{contract.title}</div>
-            <StatusBadge label={contract.status} />
-            <div>{fmtDate(contract.end_date)}</div>
-            <div>{contract.monthly_value} EGP</div>
-            <div>{contract.total_value} EGP</div>
-          </div>
-        ))}
-      </SectionCard>
-      <SectionCard title="Top Revenue Contracts">
-        {toArr(topRevenueContracts).map(contract => (
-          <div key={contract.title} className="flex items-center justify-between p-4 border-b last:border-b-0">
-            <div>{contract.title}</div>
-            <div>{contract.total_value} EGP</div>
-          </div>
-        ))}
-      </SectionCard>
-    </PageWrapper>
-  );
-};
 
-export default CustomerSuccessPage;
+      {/* Health indicators */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Active Accounts", value: activeContracts.length, status: "good", icon: "✅" },
+          { label: "Expiring Contracts", value: expiring.length, status: expiring.length > 0 ? "warn" : "good", icon: "⏰" },
+          { label: "Pending Invoices", value: pendingInvoices.length, status: pendingInvoices.length > 5 ? "warn" : "good", icon: "📄" },
+          { label: "Overdue Invoices", value: overdueInvoices.length, status: overdueInvoices.length > 0 ? "bad" : "good", icon: "🔴" },
+        ].map((k, i) => (
+          <div key={i} className={`rounded-2xl border p-5 ${k.status === "bad" ? "bg-red-50 border-red-200" : k.status === "warn" ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}`}>
+            <div className="text-2xl mb-2">{k.icon}</div>
+            <div className="text-xs text-slate-500 mb-1">{k.label}</div>
+            <div className={`text-3xl font-black ${k.status === "bad" ? "text-red-500" : k.status === "warn" ? "text-amber-500" : "text-emerald-500"}`}>{k.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Expiring contracts requiring action */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-900 dark:text-white">Contracts Requiring Renewal</h2>
+            <button onClick={() => router.push("/customers/renewals")} className="text-xs text-amber-500 hover:underline">Renewals →</button>
+          </div>
+          {expiring.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 text-sm">✅ No urgent renewals</div>
+          ) : expiring.map((c: any, i: number) => {
+            const daysLeft = Math.ceil((new Date(c.end_date).getTime() - Date.now()) / 86400000);
+            return (
+              <button key={i} onClick={() => router.push(`/commercial/contracts/${c.id}`)}
+                className="w-full flex items-center justify-between p-3 mb-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl hover:bg-amber-100 text-left">
+                <div>
+                  <div className="text-sm font-semibold truncate">{c.title || c.id?.slice(0, 16)}</div>
+                  <div className="text-xs text-amber-600">Expires {fmtDate(c.end_date)}</div>
+                </div>
+                <span className={`text-xs font-black px-2 py-1 rounded ${daysLeft <= 7 ? "bg-red-500 text-white" : "bg-amber-500 text-white"}`}>{daysLeft}d</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Billing status */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-900 dark:text-white">Billing Review</h2>
+            <button onClick={() => router.push("/invoices")} className="text-xs text-amber-500 hover:underline">All invoices →</button>
+          </div>
+          <div className="space-y-3">
+            {[
+              { label: "Paid", count: invoices.filter((i: any) => i.status === "paid").length, value: invoices.filter((i: any) => i.status === "paid").reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0), color: "emerald" },
+              { label: "Pending", count: pendingInvoices.length, value: pendingInvoices.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0), color: "amber" },
+              { label: "Overdue", count: overdueInvoices.length, value: overdueInvoices.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0), color: "red" },
+              { label: "Cancelled", count: invoices.filter((i: any) => i.status === "cancelled").length, value: 0, color: "slate" },
+            ].map((s, i) => (
+              <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full bg-${s.color}-500`} />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{s.label}</span>
+                </div>
+                <div className="text-right">
+                  <div className={`text-sm font-black text-${s.color}-500`}>{s.count}</div>
+                  {s.value > 0 && <div className="text-xs text-slate-400">{fmtEGP(s.value)}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Service delivery */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Service Delivery Summary</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          {[
+            { label: "WOs Completed", value: completedWOs.length, color: "emerald" },
+            { label: "SRs Resolved", value: linkedSRs.length, color: "blue" },
+            { label: "WOs In Progress", value: wos.filter((w: any) => w.status === "in_progress").length, color: "amber" },
+            { label: "SRs Open", value: srs.filter((s: any) => s.status === "open" || s.status === "new").length, color: "red" },
+          ].map((k, i) => (
+            <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+              <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
+              <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

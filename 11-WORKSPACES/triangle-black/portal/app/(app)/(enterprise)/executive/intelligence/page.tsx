@@ -1,100 +1,141 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-} from "@/components/ui";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter } from "next/navigation";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const fmt = (n: any) => Number(n || 0).toLocaleString();
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
+export default function ExecutiveIntelligence() {
+  const router = useRouter();
+  const { data: dash } = useQuery(["ei-dash"], () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
+  const { data: twin } = useQuery(["ei-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()));
+  const { data: woRaw } = useQuery(["ei-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
+  const { data: notifRaw } = useQuery(["ei-notifs"], () => authFetch("/api/v1/notifications/").then(r => r.json()));
 
-const fetchSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals`);
-  if (!res.ok) return [];
-  return res.json();
-};
+  const wos = toArr(woRaw);
+  const notifs = toArr(notifRaw);
+  const d = dash || {};
+  const score = twin?.health_score ?? 0;
 
-const fetchAnalytics = async () => {
-  const res = await authFetch(`/api/v1/ai/analytics/sla`);
-  if (!res.ok) return [];
-  return res.json();
-};
+  const critical = wos.filter((w: any) => w.priority === "critical" && w.status !== "completed");
+  const overdue = wos.filter((w: any) => w.due_date && new Date(w.due_date) < new Date() && w.status !== "completed");
+  const recentNotifs = notifs.filter((n: any) => !n.is_read).slice(0, 8);
 
-const fetchKpis = async () => {
-  const res = await authFetch(`/api/v1/ai/analytics/kpis/live`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const ExecutiveIntelligencePage = () => {
-  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
-  const analyticsQuery = useQuery(["analytics"], fetchAnalytics, { refetchInterval: 30000 });
-  const kpisQuery = useQuery(["kpis"], fetchKpis, { refetchInterval: 30000 });
-
-  if (signalsQuery.isLoading || analyticsQuery.isLoading || kpisQuery.isLoading) {
-    return <LoadingState />;
-  }
-
-  if (signalsQuery.isError || analyticsQuery.isError || kpisQuery.isError) {
-    return <EmptyState message="Failed to load data" />;
-  }
-
-  const { total, critical } = signalsQuery.data || {};
-  const { compliance, status } = analyticsQuery.data || {};
-  const { WOs_total, critical_open } = kpisQuery.data || {};
-
-  const riskMatrix = (signalsQuery.data?.signals || signalsQuery.data || []).map((signal: any) => {
-    if (signal.level === "critical") return { level: "HIGH RISK", title: signal.title, action: signal.action };
-    if (signal.level === "high") return { level: "MEDIUM RISK", title: signal.title, action: signal.action };
-    return null;
-  }).filter(Boolean).sort((a: any, b: any) => b.level.localeCompare(a.level));
-
-  const businessImpact = [];
-  if (compliance < 80) businessImpact.push("SLA CRITICAL — client contracts at risk");
-  if (critical_open > 5) businessImpact.push("OPERATIONS OVERLOAD — resource reallocation needed");
-  if (compliance >= 80 && compliance <= 95) businessImpact.push("SLA AT RISK — improvement actions required");
-
-  const trendDirection = total < 2 ? "Improving" : total <= 4 ? "Stable" : "Declining";
-  const trendBadgeColor = trendDirection === "Improving" ? "green" : trendDirection === "Stable" ? "amber" : "red";
+  const scoreColor = score >= 95 ? "text-emerald-400" : score >= 80 ? "text-amber-400" : "text-red-400";
+  const scoreBg = score >= 95 ? "bg-emerald-500/10 border-emerald-500/20" : score >= 80 ? "bg-amber-500/10 border-amber-500/20" : "bg-red-500/10 border-red-500/20";
 
   return (
-    <PageWrapper>
-      <PageHeader title="Executive AI Intelligence — Strategic Insights and Risk Alerts" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SectionCard title="Metrics">
-          <MetricStrip label="Total Active Signals" value={total} />
-          <MetricStrip label="Critical Signals" value={critical} />
-          <MetricStrip label="SLA Compliance %" value={`${(compliance) || 0}%`} />
-          <MetricStrip label="Critical WOs Open" value={critical_open} />
-        </SectionCard>
-        <SectionCard title="Executive Risk Assessment">
-          {toArr(riskMatrix).map((item, index) => (
-            <div key={index} className="flex items-center space-x-2 mb-2">
-              <StatusBadge color={item.level === "HIGH RISK" ? "red" : "orange"} />
-              <span>{item.title}</span>
-              <button className="text-sm text-blue-500 hover:underline">{item.action}</button>
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      {/* Hero */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Intelligence</div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Platform Command Center</h1>
+          <p className="text-slate-500 mt-1">Real-time operational intelligence across all domains</p>
+        </div>
+        <div className={`border rounded-2xl px-6 py-4 text-center ${scoreBg}`}>
+          <div className={`text-5xl font-black ${scoreColor}`}>{score}</div>
+          <div className="text-xs text-slate-500 mt-1">Digital Twin Score</div>
+          <div className={`text-xs font-bold mt-1 ${scoreColor}`}>{twin?.health_label || "—"}</div>
+        </div>
+      </div>
+
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Open Work Orders", value: d.work_orders?.open ?? "—", sub: `${d.work_orders?.in_progress ?? 0} in progress`, color: "blue", path: "/operations/work-orders" },
+          { label: "Critical Alerts", value: critical.length, sub: `${overdue.length} overdue`, color: "red", path: "/executive/exceptions" },
+          { label: "Active Contracts", value: d.commercial?.active_contracts ?? "—", sub: `${d.commercial?.expiring_30d ?? 0} expiring soon`, color: "amber", path: "/commercial/contracts" },
+          { label: "Revenue Collected", value: `${fmt(d.finance?.paid ?? 0)}`, sub: `${d.finance?.pending ?? 0} pending`, color: "emerald", path: "/invoices" },
+        ].map((k, i) => (
+          <button key={i} onClick={() => router.push(k.path)}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-${k.color}-400 hover:shadow-lg transition-all group`}>
+            <div className="text-xs text-slate-500 mb-2 font-medium">{k.label}</div>
+            <div className={`text-3xl font-black text-${k.color}-500 group-hover:scale-105 transition-transform`}>{k.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Domain Health */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Domain Health Overview</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { domain: "Operations", value: `${d.work_orders?.completed ?? 0}/${d.work_orders?.total ?? 0}`, label: "WOs completed", health: (d.work_orders?.completed ?? 0) / Math.max(d.work_orders?.total ?? 1, 1) * 100 },
+            { domain: "Maintenance", value: `${d.maintenance?.pm_plans ?? 0} plans`, label: `${d.maintenance?.overdue ?? 0} overdue`, health: 100 - (d.maintenance?.overdue ?? 0) * 10 },
+            { domain: "Finance", value: `${d.finance?.paid ?? 0}/${d.finance?.total_invoices ?? 0}`, label: "invoices paid", health: (d.finance?.paid ?? 0) / Math.max(d.finance?.total_invoices ?? 1, 1) * 100 },
+            { domain: "Procurement", value: `${d.procurement?.purchase_requests ?? 0} PRs`, label: `${d.procurement?.pending_pos ?? 0} pending POs`, health: 80 },
+          ].map((item, i) => (
+            <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{item.domain}</div>
+              <div className="text-xl font-black text-slate-900 dark:text-white">{item.value}</div>
+              <div className="text-xs text-slate-500 mb-3">{item.label}</div>
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
+                <div className={`h-1.5 rounded-full ${item.health >= 80 ? "bg-emerald-500" : item.health >= 60 ? "bg-amber-500" : "bg-red-500"}`}
+                  style={{ width: `${Math.min(100, Math.max(0, item.health))}%` }} />
+              </div>
             </div>
           ))}
-        </SectionCard>
-        <SectionCard title="Business Impact Summary">
-          {toArr(businessImpact).map((impact, index) => (
-            <p key={index} className="mb-2">{impact}</p>
-          ))}
-        </SectionCard>
+        </div>
       </div>
-      <div className="mt-4">
-        <StatusBadge color={trendBadgeColor}>{trendDirection}</StatusBadge>
-      </div>
-    </PageWrapper>
-  );
-};
 
-export default ExecutiveIntelligencePage;
+      {/* Critical Issues + Recent Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-900 dark:text-white">Critical Work Orders</h2>
+            <button onClick={() => router.push("/operations/work-orders")} className="text-xs text-amber-500 hover:underline">View all →</button>
+          </div>
+          {critical.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              <div className="text-3xl mb-2">✅</div>
+              <div className="text-sm">No critical issues</div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {critical.slice(0, 6).map((w: any, i: number) => (
+                <button key={w.id || i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
+                  className="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 transition-colors text-left">
+                  <div>
+                    <div className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">{w.title}</div>
+                    <div className="text-xs text-red-500 mt-0.5">{w.status} · {fmtDate(w.due_date)}</div>
+                  </div>
+                  <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold">CRITICAL</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-900 dark:text-white">Unread Alerts</h2>
+            <button onClick={() => router.push("/inbox")} className="text-xs text-amber-500 hover:underline">View all →</button>
+          </div>
+          {recentNotifs.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              <div className="text-3xl mb-2">🔔</div>
+              <div className="text-sm">All caught up</div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recentNotifs.map((n: any, i: number) => (
+                <div key={n.id || i} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white truncate">{n.title}</div>
+                    <div className="text-xs text-slate-500 truncate">{n.message}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

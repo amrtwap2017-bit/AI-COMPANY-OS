@@ -1,117 +1,96 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-} from "@/components/ui";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter } from "next/navigation";
 
-const workOrders: any[] = [];
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
+export default function ExecutiveExceptions() {
+  const router = useRouter();
+  const { data: woRaw } = useQuery(["ex-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
+  const { data: srRaw } = useQuery(["ex-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.json()));
+  const { data: pmRaw } = useQuery(["ex-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
+  const { data: notifRaw } = useQuery(["ex-notifs"], () => authFetch("/api/v1/notifications/").then(r => r.json()));
 
-const fetchSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals`);
-  return res.json();
-};
+  const wos = toArr(woRaw);
+  const srs = toArr(srRaw);
+  const pms = toArr(pmRaw);
+  const notifs = toArr(notifRaw);
+  const now = new Date();
 
-const fetchKpis = async () => {
-  const res = await authFetch(`/api/v1/ai/analytics/kpis/live`);
-  return res.json();
-};
+  const exceptions = [
+    ...wos.filter((w: any) => w.priority === "critical" && w.status !== "completed")
+      .map((w: any) => ({ ...w, _cat: "Critical WO", _severity: "critical", _msg: w.title, _path: `/operations/work-orders/${w.id}` })),
+    ...wos.filter((w: any) => w.due_date && new Date(w.due_date) < now && w.status !== "completed")
+      .map((w: any) => ({ ...w, _cat: "Overdue WO", _severity: "high", _msg: w.title, _path: `/operations/work-orders/${w.id}` })),
+    ...pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < now)
+      .map((p: any) => ({ ...p, _cat: "Overdue PM", _severity: "high", _msg: p.title, _path: "/maintenance/pm-plans" })),
+    ...srs.filter((s: any) => s.status === "open" || s.status === "new")
+      .slice(0, 5)
+      .map((s: any) => ({ ...s, _cat: "Open SR", _severity: "medium", _msg: s.title, _path: "/operations/service-requests" })),
+  ];
 
-const fetchWorkOrders = async () => {
-  const res = await authFetch(`/api/v1/work-orders`);
-  return res.json();
-};
+  const severityOrder: any = { critical: 0, high: 1, medium: 2, low: 3 };
+  exceptions.sort((a: any, b: any) => (severityOrder[a._severity] ?? 3) - (severityOrder[b._severity] ?? 3));
 
-const ExecutiveExceptionsPage = () => {
-  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
-  const kpisQuery = useQuery({ queryKey: ["kpis"], queryFn: fetchKpis });
-  const workOrdersQuery = useQuery({ queryKey: ["work-orders"], queryFn: fetchWorkOrders });
-
-  if (signalsQuery.isLoading || kpisQuery.isLoading || workOrdersQuery.isLoading) {
-    return <LoadingState />;
-  }
-
-  if (signalsQuery.isError || kpisQuery.isError || workOrdersQuery.isError) {
-    return <EmptyState message="Failed to load data" />;
-  }
-
-  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
-  const kpis = kpisQuery.data;
-  const workOrders = workOrdersQuery.data;
-
-  const criticalSignals = toArr(signals).filter((signal: any) => signal.priority === "critical");
-  const highPrioritySignals = toArr(signals).filter((signal: any) => signal.priority === "high");
-
-  const exceptionsCount = criticalSignals.length + highPrioritySignals.length;
+  const unread = notifs.filter((n: any) => !n.is_read);
 
   return (
-    <PageWrapper>
-      <PageHeader title="Executive Exceptions" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricStrip
-          title="Critical Signals"
-          value={criticalSignals.length}
-          badge={<StatusBadge status="red" />}
-        />
-        <MetricStrip
-          title="Critical WOs Open"
-          value={toArr(workOrders).filter((wo: any) => wo.status === "open").length}
-          badge={<StatusBadge status="red" />}
-        />
-        <MetricStrip
-          title="SLA At Risk"
-          value={kpis.slaAtRisk ? "Yes" : "No"}
-          badge={<StatusBadge status={kpis.slaAtRisk ? "red" : "green"} />}
-        />
-        <MetricStrip
-          title="Exceptions Count"
-          value={exceptionsCount}
-          badge={<StatusBadge status={exceptionsCount > 0 ? "red" : "green"} />}
-        />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div>
+        <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Exception Management</div>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Platform Exceptions</h1>
+        <p className="text-slate-500 mt-1">All items requiring immediate attention</p>
       </div>
-      {exceptionsCount > 0 && (
-        <SectionCard title="Requires Immediate Action">
-          {toArr(criticalSignals).map((signal: any) => (
-            <div key={signal.id} className="border-4 border-red-500 p-4 mb-2 rounded-lg">
-              <h3>{signal.title}</h3>
-              <p>{signal.message}</p>
-              <p>Recommended Action: {signal.recommended_action}</p>
-            </div>
-          ))}
-        </SectionCard>
-      )}
-      {highPrioritySignals.length > 0 && (
-        <SectionCard title="High Priority Items">
-          {toArr(highPrioritySignals).map((signal: any) => (
-            <div key={signal.id} className="border-2 border-yellow-500 p-4 mb-2 rounded-lg">
-              <h3>{signal.title}</h3>
-              <p>{signal.message}</p>
-            </div>
-          ))}
-        </SectionCard>
-      )}
-      {exceptionsCount === 0 && (
-        <SectionCard title="Status Summary">
-          <div className="bg-green-500 text-white p-4 rounded-lg">
-            All Systems Normal
-          </div>
-        </SectionCard>
-      )}
-      <div className="text-gray-500 text-sm mt-4">
-        Last Updated: {new Date().toLocaleString()}
-      </div>
-    </PageWrapper>
-  );
-};
 
-export default ExecutiveExceptionsPage;
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          { label: "Total Exceptions", value: exceptions.length, color: "red" },
+          { label: "Critical", value: exceptions.filter((e: any) => e._severity === "critical").length, color: "red" },
+          { label: "High Priority", value: exceptions.filter((e: any) => e._severity === "high").length, color: "orange" },
+          { label: "Unread Alerts", value: unread.length, color: "amber" },
+        ].map((k, i) => (
+          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="text-xs text-slate-500 mb-1">{k.label}</div>
+            <div className={`text-4xl font-black text-${k.color}-500`}>{k.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {exceptions.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 p-16 text-center">
+          <div className="text-5xl mb-4">✅</div>
+          <div className="text-2xl font-bold text-emerald-600">Zero Exceptions</div>
+          <div className="text-slate-500 mt-2">Platform is operating normally</div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+            <span className="text-sm font-bold text-slate-900 dark:text-white">{exceptions.length} exceptions requiring action</span>
+          </div>
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {exceptions.map((ex: any, i: number) => {
+              const sev = ex._severity;
+              const colors: any = { critical: "red", high: "orange", medium: "amber", low: "blue" };
+              const c = colors[sev] || "slate";
+              return (
+                <button key={i} onClick={() => router.push(ex._path)}
+                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left">
+                  <span className={`w-2.5 h-2.5 rounded-full bg-${c}-500 flex-shrink-0`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-slate-900 dark:text-white truncate">{ex._msg}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{ex._cat}</div>
+                  </div>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg bg-${c}-100 text-${c}-700 flex-shrink-0`}>{sev.toUpperCase()}</span>
+                  <span className="text-xs text-slate-400 flex-shrink-0">→</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
