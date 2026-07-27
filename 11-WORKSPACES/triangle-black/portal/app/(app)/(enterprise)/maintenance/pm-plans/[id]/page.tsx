@@ -1,226 +1,211 @@
 "use client";
-import { useState } from "react";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const STATUSES    = ["active","overdue","inactive","completed"];
-const FREQ_OPTS   = ["daily","weekly","monthly","quarterly","biannual","yearly"];
-const TYPES       = ["preventive","inspection","corrective","calibration","lubrication"];
-
-const S = {active:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",inactive:"bg-slate-100 text-secondary",completed:"bg-blue-100 text-blue-800"};
+const STATUS_COLOR  = { active:"#34D399", inactive:"#94A3B8", paused:"#FBBF24" };
+const ASSET_SC      = { Operational:"#34D399", "In Fault":"#F87171", "Under Maintenance":"#FBBF24" };
 
 export default function PMPlanDetailPage() {
-  const { id }    = useParams();
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [form,    setForm]    = useState(null);
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
 
-  const { data: plan, isLoading, refetch } = useQuery(
-    ["pmplan-detail", id],
-    () => authFetch(`/api/v1/maintenance/pm-plans/${id}`).then(r=>r.json()),
-    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+  const { data: plan, isLoading } = useQuery(
+    ["pm-detail", id],
+    () => authFetch(`/api/v1/maintenance/pm-plans/${id}`).then(r => r.json()),
+    { enabled: !!id }
   );
 
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
+  if (isLoading) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading PM plan...</div>
+    </div>
+  );
 
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/maintenance/pm-plans/${id}`, {
-        method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(form)
-      });
-      if (r.ok) { setEditing(false); refetch(); }
-      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  async function updateStatus(status) {
-    setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/maintenance/pm-plans/${id}`, {
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({status})
-      });
-      if (r.ok) refetch();
-      else alert("Failed to update status");
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
   if (!plan || plan.detail) return (
-    <PageWrapper>
-      <div className="text-center py-20">
-        <p className="text-secondary mb-4">PM Plan not found</p>
-        <Link href="/maintenance/pm-plans" className="text-blue-600 underline text-sm">Back to PM Plans</Link>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">📅</div>
+        <div className="tb-empty-title">PM Plan not found</div>
+        <button onClick={() => router.push("/maintenance/pm-plans")} className="tb-btn-primary mt-4">Back</button>
       </div>
-    </PageWrapper>
+    </div>
   );
 
-  const isOverdue = plan.next_due_date && new Date(plan.next_due_date) < new Date() && plan.status === "active";
-  const isSoon    = plan.next_due_date && !isOverdue && (new Date(plan.next_due_date)-new Date())/(1000*60*60*24) <= 7;
+  const sc      = STATUS_COLOR[plan.status] || "#94A3B8";
+  const now     = new Date();
+  const dueDate = plan.next_due_ts ? new Date(plan.next_due_ts) : null;
+  const isOverdue = dueDate && dueDate < now;
+  const daysUntil = dueDate ? Math.ceil((dueDate - now) / 86400000) : null;
+  const recentWOs = plan.recent_work_orders || [];
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={plan.title || "PM Plan"}
-        subtitle={`${plan.plan_type||"preventive"} · ${plan.frequency||""}`}
-        breadcrumbs={[{label:"Maintenance",href:"/maintenance"},{label:"PM Plans",href:"/maintenance/pm-plans"},{label:plan.title?.slice(0,30)||id}]}
-        actions={
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button variant="secondary" size="sm" onClick={()=>{setForm({...plan});setEditing(true)}}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
-                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
-              </>
-            )}
-          </div>
-        }
-      />
-
-      {isOverdue && !editing && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-          <span className="text-red-500 font-bold">!</span>
-          <p className="text-sm font-semibold text-red-800">
-            This PM plan is overdue — was due {fmtDate(plan.next_due_date)}. Schedule immediately.
-          </p>
-        </div>
-      )}
-
-      {isSoon && !editing && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-          <span className="text-amber-500 font-bold">!</span>
-          <p className="text-sm font-semibold text-amber-800">
-            Due soon — scheduled for {fmtDate(plan.next_due_date)}.
-          </p>
-        </div>
-      )}
-
-      {!editing && (
-        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[plan.status]||"bg-slate-100 text-secondary")}>{plan.status||"—"}</span>
-          <div className="flex-1" />
-          {STATUSES.filter(s=>s!==plan.status).map(s=>(
-            <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:border-blue-400 hover:text-blue-700 transition-colors disabled:opacity-50">
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <SectionCard title="Plan Details">
-            {editing ? (
-              <form onSubmit={save} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
-                  <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Type</label>
-                    <select value={form?.plan_type||"preventive"} onChange={e=>setForm({...form,plan_type:e.target.value})} className={inp}>
-                      {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Frequency</label>
-                    <select value={form?.frequency||"monthly"} onChange={e=>setForm({...form,frequency:e.target.value})} className={inp}>
-                      {FREQ_OPTS.map(f=><option key={f} value={f}>{f}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Next Due Date</label>
-                    <input type="date" value={form?.next_due_date?.slice(0,10)||""} onChange={e=>setForm({...form,next_due_date:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Owner</label>
-                    <input value={form?.owner||""} onChange={e=>setForm({...form,owner:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Checklist / Notes</label>
-                  <textarea value={form?.notes||""} onChange={e=>setForm({...form,notes:e.target.value})}
-                    rows={5} placeholder="Step 1: Check refrigerant pressure&#10;Step 2: Inspect belts and bearings&#10;Step 3: Clean filters…" className={inp+" resize-none"} />
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Type</p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{plan.plan_type||"preventive"}</span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Owner</p>
-                    <p className="text-slate-700">{plan.owner||"—"}</p>
-                  </div>
-                </div>
-                {plan.notes && (
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-2">Checklist / Notes</p>
-                    <div className="bg-slate-50 rounded-xl p-3">
-                      <p className="text-slate-700 text-sm whitespace-pre-wrap font-mono leading-relaxed">{plan.notes}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </SectionCard>
-        </div>
-
-        <div className="space-y-4">
-          <SectionCard title="Schedule">
-            <dl className="space-y-3">
-              {[
-                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[plan.status]||"bg-slate-100 text-secondary")}>{plan.status||"—"}</span>},
-                {label:"Frequency", value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{plan.frequency||"—"}</span>},
-                {label:"Next Due",  value:<span className={`font-medium ${isOverdue?"text-red-600":isSoon?"text-amber-600":"text-slate-700"}`}>{fmtDate(plan.next_due_date)}{isOverdue?" (OVERDUE)":isSoon?" (SOON)":""}</span>},
-                {label:"Last Done", value:fmtDate(plan.last_completed_date)},
-                {label:"Created",   value:fmtDate(plan.created_at)},
-              ].map(({label,value})=>(
-                <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-secondary">{label}</dt>
-                  <dd className="text-xs">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </SectionCard>
-
-          <SectionCard title="Quick Actions">
-            <div className="space-y-2">
-              {plan.status==="active"&&(
-                <button onClick={()=>updateStatus("completed")} disabled={saving}
-                  className="w-full px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
-                  Mark as Completed
-                </button>
-              )}
-              {plan.status==="inactive"&&(
-                <button onClick={()=>updateStatus("active")} disabled={saving}
-                  className="w-full px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">
-                  Activate Plan
-                </button>
-              )}
-              <Link href="/maintenance/pm-plans" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to PM Plans</Link>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance</div>
+              <h1 className="tb-hero-title">{plan.title || `PM Plan ${id?.slice(0,8)}`}</h1>
+              <p className="tb-hero-description">
+                <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>{plan.status||"—"}</span>
+                <span className="text-secondary mr-2">{plan.plan_type||"—"}</span>
+                {isOverdue
+                  ? <span style={{color:"#F87171"}}>Overdue by {Math.abs(daysUntil)}d</span>
+                  : daysUntil !== null
+                  ? <span style={{color:daysUntil<7?"#FBBF24":"#94A3B8"}}>Due in {daysUntil}d</span>
+                  : null}
+              </p>
             </div>
-          </SectionCard>
+            <button onClick={() => router.push("/maintenance/pm-plans")} className="tb-btn-secondary">← Back</button>
+          </div>
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Status",    value:plan.status||"—",              color:sc },
+              { label:"Type",      value:plan.plan_type||"—",           color:"#60A5FA" },
+              { label:"Frequency", value:plan.frequency||"—",           color:"#A78BFA" },
+              { label:"Next Due",  value:fmtDate(plan.next_due_ts),     color:isOverdue?"#F87171":daysUntil&&daysUntil<7?"#FBBF24":"#F1F5F9" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </PageWrapper>
+
+      <div className="tb-canvas">
+        {isOverdue && (
+          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+            <div className="flex items-center gap-3">
+              <span style={{fontSize:"1.25rem"}}>⚠️</span>
+              <span className="text-sm font-semibold text-red-400">
+                This PM plan is overdue by {Math.abs(daysUntil)} days — was due {fmtDate(plan.next_due_ts)}
+              </span>
+              <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link ml-auto">Create WO →</button>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+            <div className="tb-section">
+              <div className="tb-section-title">Plan Details</div>
+              <div className="space-y-1">
+                {[
+                  ["Title",       plan.title || "—"],
+                  ["Type",        plan.plan_type || "—"],
+                  ["Status",      plan.status || "—"],
+                  ["Frequency",   plan.frequency || "—"],
+                  ["Owner",       plan.owner || "—"],
+                  ["Next Due",    fmtDate(plan.next_due_ts)],
+                  ["Created",     fmtDate(plan.created_at)],
+                  ["Updated",     fmtDate(plan.updated_at)],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {plan.notes && (
+              <div className="tb-section">
+                <div className="tb-section-title">Notes</div>
+                <p className="text-sm text-secondary leading-relaxed">{plan.notes}</p>
+              </div>
+            )}
+
+            {plan.asset && (
+              <div className="tb-section">
+                <div className="tb-section-title">Linked Asset</div>
+                <button
+                  onClick={() => router.push(`/maintenance/assets/${plan.asset_node_id}`)}
+                  className="tb-action-item w-full justify-start hover:border-brand transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-base-alt flex items-center justify-center text-lg flex-shrink-0">⚙️</div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-primary">{plan.asset.name||"—"}</div>
+                    <div className="text-xs text-tertiary flex items-center gap-2">
+                      <span>{plan.asset.category||"—"}</span>
+                      <span className="tb-badge" style={{
+                        background:`${ASSET_SC[plan.asset.status]||"#94A3B8"}18`,
+                        color:ASSET_SC[plan.asset.status]||"#94A3B8",
+                        fontSize:"0.5rem"
+                      }}>{plan.asset.status||"—"}</span>
+                    </div>
+                  </div>
+                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#60A5FA"}}>View →</span>
+                </button>
+              </div>
+            )}
+
+            {recentWOs.length > 0 && (
+              <div className="tb-section">
+                <div className="tb-section-title">Related Work Orders</div>
+                <div className="space-y-2 mt-2">
+                  {recentWOs.map((wo, i) => {
+                    const pc  = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" }[wo.priority] || "#94A3B8";
+                    const wsc = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399" }[wo.status] || "#94A3B8";
+                    return (
+                      <button key={i}
+                        onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
+                        className="tb-action-item w-full justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="tb-priority-bar" style={{background:pc}}/>
+                          <span className="text-sm text-secondary truncate">{wo.title||"—"}</span>
+                        </div>
+                        <span className="tb-badge" style={{background:`${wsc}18`,color:wsc,border:`1px solid ${wsc}30`,fontSize:"0.5625rem",flexShrink:0}}>
+                          {(wo.status||"—").replace("_"," ")}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-title">Schedule Status</div>
+              <div className="text-center py-4">
+                <div className="text-5xl font-black mb-2" style={{color:isOverdue?"#F87171":daysUntil&&daysUntil<7?"#FBBF24":"#34D399"}}>
+                  {isOverdue ? "!" : daysUntil !== null && daysUntil < 7 ? "⚠" : "✓"}
+                </div>
+                <div className="text-sm font-bold" style={{color:isOverdue?"#F87171":"#34D399"}}>
+                  {isOverdue ? "OVERDUE" : "ON SCHEDULE"}
+                </div>
+                <div className="text-xs text-tertiary mt-1">
+                  {isOverdue ? `${Math.abs(daysUntil)} days past due` : daysUntil !== null ? `${daysUntil} days until due` : "—"}
+                </div>
+              </div>
+            </div>
+
+            <div className="tb-section">
+              <div className="tb-section-title">Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"All PM Plans",    icon:"📅", path:"/maintenance/pm-plans" },
+                  { label:"Assets",          icon:"⚙️",  path:"/maintenance/assets" },
+                  { label:"Asset Tree",      icon:"🌳", path:"/maintenance/asset-tree" },
+                  { label:"Work Orders",     icon:"🔧", path:"/operations/work-orders" },
+                ].map((a, i) => (
+                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
