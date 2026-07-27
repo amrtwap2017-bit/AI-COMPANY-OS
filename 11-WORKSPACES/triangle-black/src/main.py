@@ -1819,3 +1819,115 @@ def get_invoice_detail(invoice_id: str):
             "work_order": {k: str(v) if v is not None else None for k, v in wo.items()} if wo else None,
         }
 
+
+
+# ── SPRINT 207: DETAIL ENDPOINTS ─────────────────────────────────────────────
+
+@app.get("/api/v1/work-orders/{wo_id}", tags=["operations"])
+def get_work_order_detail(wo_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else None
+            except Exception:
+                db.rollback()
+                return None
+        def safe_list(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception:
+                db.rollback()
+                return []
+        wo = safe("SELECT * FROM work_orders WHERE id = :id", {"id": wo_id})
+        if not wo:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Work order not found")
+        tech = None
+        if wo.get("technician_id"):
+            tech = safe("SELECT * FROM technicians WHERE id = :id", {"id": wo["technician_id"]})
+        asset = None
+        if wo.get("asset_id"):
+            asset = safe("SELECT * FROM assets WHERE id = :id", {"id": wo["asset_id"]})
+        sr = safe("SELECT * FROM service_requests WHERE work_order_id = :id LIMIT 1", {"id": wo_id})
+        str_wo = {k: str(v) if v is not None else None for k, v in wo.items()}
+        return {
+            **str_wo,
+            "technician": {k: str(v) if v is not None else None for k, v in tech.items()} if tech else None,
+            "asset": {k: str(v) if v is not None else None for k, v in asset.items()} if asset else None,
+            "service_request": {k: str(v) if v is not None else None for k, v in sr.items()} if sr else None,
+        }
+
+@app.get("/api/v1/contracts/{contract_id}", tags=["commercial"])
+def get_contract_detail(contract_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else None
+            except Exception:
+                db.rollback()
+                return None
+        def safe_list(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception:
+                db.rollback()
+                return []
+        contract = safe("SELECT * FROM contracts WHERE id = :id", {"id": contract_id})
+        if not contract:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Contract not found")
+        invoices = safe_list("SELECT id, invoice_number, total_amount, status, due_date, created_at FROM invoices WHERE contract_id = :id ORDER BY created_at DESC LIMIT 10", {"id": contract_id})
+        wos = safe_list("SELECT id, title, status, priority, created_at FROM work_orders WHERE contract_id = :id ORDER BY created_at DESC LIMIT 10", {"id": contract_id})
+        str_c = {k: str(v) if v is not None else None for k, v in contract.items()}
+        return {
+            **str_c,
+            "invoices": [{k: str(v) if v is not None else None for k, v in i.items()} for i in invoices],
+            "work_orders": [{k: str(v) if v is not None else None for k, v in w.items()} for w in wos],
+        }
+
+@app.get("/api/v1/projects/{project_id}", tags=["projects"])
+def get_project_detail(project_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else None
+            except Exception:
+                db.rollback()
+                return None
+        def safe_list(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception:
+                db.rollback()
+                return []
+        project = safe("SELECT * FROM projects WHERE id = :id", {"id": project_id})
+        if not project:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Project not found")
+        wos = safe_list("SELECT id, title, status, priority, created_at FROM work_orders WHERE project_id = :id ORDER BY created_at DESC LIMIT 10", {"id": project_id})
+        str_p = {k: str(v) if v is not None else None for k, v in project.items()}
+        return {
+            **str_p,
+            "work_orders": [{k: str(v) if v is not None else None for k, v in w.items()} for w in wos],
+        }

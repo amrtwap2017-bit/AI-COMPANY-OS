@@ -1,227 +1,186 @@
 "use client";
-import { useState } from "react";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const S = {active:"bg-blue-100 text-blue-800",planning:"bg-amber-100 text-amber-800",on_hold:"bg-slate-100 text-secondary",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-red-100 text-red-700"};
-const STATUSES = ["active","planning","on_hold","completed","cancelled"];
+const STATUS_COLOR = {
+  active:"#34D399", planning:"#60A5FA", completed:"#A78BFA",
+  on_hold:"#FBBF24", cancelled:"#F87171"
+};
 
 export default function ProjectDetailPage() {
-  const { id }    = useParams();
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [form,    setForm]    = useState(null);
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
 
-  const { data: project, isLoading, refetch } = useQuery(
-    ["project-detail", id],
-    () => authFetch(`/api/v1/projects/${id}`).then(r=>r.json()),
-    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+  const { data: proj, isLoading } = useQuery(
+    ["proj-detail", id],
+    () => authFetch(`/api/v1/projects/${id}`).then(r => r.json()),
+    { enabled: !!id }
   );
 
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
+  if (isLoading) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading project...</div>
+    </div>
+  );
 
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const payload = {...form};
-      if (payload.budget)   payload.budget   = Number(payload.budget);
-      if (payload.spent)    payload.spent    = Number(payload.spent);
-      const r = await authFetch(`/api/v1/projects/${id}`, {
-        method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) { setEditing(false); refetch(); }
-      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  async function updateStatus(status) {
-    setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/projects/${id}`, {
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({status})
-      });
-      if (r.ok) refetch();
-      else alert("Failed to update status");
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
-  if (!project || project.detail) return (
-    <PageWrapper>
-      <div className="text-center py-20">
-        <p className="text-secondary mb-4">Project not found</p>
-        <Link href="/projects-center" className="text-blue-600 underline text-sm">Back to Projects</Link>
+  if (!proj || proj.detail) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">🏗️</div>
+        <div className="tb-empty-title">Project not found</div>
+        <button onClick={() => router.push("/projects-center")} className="tb-btn-primary mt-4">Back</button>
       </div>
-    </PageWrapper>
+    </div>
   );
 
-  const title      = project.name || project.title || "Project";
-  const budget     = project.budget || 0;
-  const spent      = project.spent  || project.actual_cost || 0;
-  const progress   = project.progress_pct || project.completion_percentage || 0;
-  const budgetUsed = budget > 0 ? Math.min(100, (spent/budget)*100) : 0;
+  const sc  = STATUS_COLOR[proj.status] || "#94A3B8";
+  const wos = proj.work_orders || [];
+  const completedWOs = wos.filter(w => w.status === "completed").length;
+  const progress = wos.length > 0 ? Math.round((completedWOs / wos.length) * 100) : Number(proj.progress || 0);
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={title}
-        subtitle={project.site_name ? `${project.site_name} · ${project.status||""}` : project.status||""}
-        breadcrumbs={[{label:"Projects Center",href:"/projects-center"},{label:title?.slice(0,30)||id}]}
-        actions={
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button variant="secondary" size="sm" onClick={()=>{setForm({...project,budget:project.budget||"",spent:project.spent||""});setEditing(true)}}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
-                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
-              </>
-            )}
-          </div>
-        }
-      />
-
-      {!editing && (
-        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[project.status]||"bg-slate-100 text-secondary")}>{project.status?.replace(/_/g," ")||"—"}</span>
-          <div className="flex-1" />
-          {STATUSES.filter(s=>s!==project.status).slice(0,3).map(s=>(
-            <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:border-blue-400 hover:text-blue-700 transition-colors disabled:opacity-50">
-              {s.replace(/_/g," ")}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <SectionCard title="Project Details">
-            {editing ? (
-              <form onSubmit={save} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Project Name *</label>
-                  <input required value={form?.name||form?.title||""} onChange={e=>setForm({...form,name:e.target.value,title:e.target.value})} className={inp} />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
-                  <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
-                    rows={4} className={inp+" resize-none"} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Status</label>
-                    <select value={form?.status||"planning"} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
-                      {STATUSES.map(s=><option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Budget (EGP)</label>
-                    <input type="number" value={form?.budget||""} onChange={e=>setForm({...form,budget:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Start Date</label>
-                    <input type="date" value={form?.start_date?.slice(0,10)||""} onChange={e=>setForm({...form,start_date:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">End Date</label>
-                    <input type="date" value={form?.end_date?.slice(0,10)||""} onChange={e=>setForm({...form,end_date:e.target.value})} className={inp} />
-                  </div>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                {project.description && (
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
-                    <p className="text-slate-700 text-sm">{project.description}</p>
-                  </div>
-                )}
-                {progress > 0 && (
-                  <div>
-                    <div className="flex justify-between text-xs text-secondary mb-2">
-                      <span className="font-semibold text-slate-700">Progress</span>
-                      <span className="font-bold">{Math.round(progress)}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-3">
-                      <div className={`h-3 rounded-full transition-all ${progress>=100?"bg-emerald-500":progress>=60?"bg-blue-500":"bg-amber-500"}`}
-                        style={{width:`${Math.min(100,progress)}%`}} />
-                    </div>
-                  </div>
-                )}
-                {budget > 0 && (
-                  <div>
-                    <div className="flex justify-between text-xs text-secondary mb-2">
-                      <span className="font-semibold text-slate-700">Budget Used</span>
-                      <span className={`font-bold ${budgetUsed>90?"text-red-600":budgetUsed>70?"text-amber-600":"text-slate-700"}`}>{Math.round(budgetUsed)}% of EGP {fmtNum(budget)}</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
-                      <div className={`h-2 rounded-full transition-all ${budgetUsed>90?"bg-red-500":budgetUsed>70?"bg-amber-500":"bg-emerald-500"}`}
-                        style={{width:`${Math.min(100,budgetUsed)}%`}} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </SectionCard>
-        </div>
-
-        <div className="space-y-4">
-          <SectionCard title="Budget">
-            <div className="space-y-3">
-              <div className="text-center py-2 bg-slate-50 rounded-xl">
-                <div className="text-2xl font-black text-slate-800">EGP {fmtNum(budget)}</div>
-                <p className="text-xs text-secondary">Total Budget</p>
-              </div>
-              {spent > 0 && (
-                <>
-                  <div className="flex justify-between text-xs px-1">
-                    <span className="text-secondary">Spent</span>
-                    <span className="font-semibold text-slate-700">EGP {fmtNum(spent)}</span>
-                  </div>
-                  <div className="flex justify-between text-xs px-1">
-                    <span className="text-secondary">Remaining</span>
-                    <span className={`font-semibold ${budget-spent<0?"text-red-600":"text-emerald-600"}`}>EGP {fmtNum(Math.max(0,budget-spent))}</span>
-                  </div>
-                </>
-              )}
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A14 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-emerald-400 mb-1.5">Projects</div>
+              <h1 className="tb-hero-title">{proj.name || proj.title || `Project ${id?.slice(0,8)}`}</h1>
+              <p className="tb-hero-description">
+                <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>
+                  {proj.status||"—"}
+                </span>
+                {proj.client_name && <span className="text-secondary">{proj.client_name}</span>}
+              </p>
             </div>
-          </SectionCard>
-
-          <SectionCard title="Timeline">
-            <dl className="space-y-3">
-              {[
-                {label:"Status",  value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[project.status]||"bg-slate-100 text-secondary")}>{project.status?.replace(/_/g," ")||"—"}</span>},
-                {label:"Start",   value:fmtDate(project.start_date)},
-                {label:"End",     value:fmtDate(project.end_date)},
-                {label:"Manager", value:project.manager||project.project_manager||"—"},
-                {label:"Site",    value:project.site_name||"—"},
-              ].map(({label,value})=>(
-                <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-secondary">{label}</dt>
-                  <dd className="text-xs text-right">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </SectionCard>
-
-          <Link href="/projects-center" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Projects</Link>
+            <button onClick={() => router.push("/projects-center")} className="tb-btn-secondary">← Back</button>
+          </div>
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Progress",   value:`${progress}%`,                          color:progress>=80?"#34D399":"#FBBF24" },
+              { label:"Budget",     value:fmtEGP(proj.budget||proj.total_value||0), color:"#F1F5F9" },
+              { label:"Work Orders",value:wos.length,                              color:"#60A5FA" },
+              { label:"End Date",   value:fmtDate(proj.end_date),                  color:"#A78BFA" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </PageWrapper>
+
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+
+            <div className="tb-section">
+              <div className="tb-section-title">Project Progress</div>
+              <div className="mb-3">
+                <div className="tb-flex-between mb-2">
+                  <span className="text-sm text-secondary">{completedWOs}/{wos.length} work orders complete</span>
+                  <span className="text-sm font-bold" style={{color:progress>=80?"#34D399":"#FBBF24"}}>{progress}%</span>
+                </div>
+                <div className="tb-progress tb-progress--md">
+                  <div className="tb-progress-bar" style={{background:progress>=80?"#34D399":"#FBBF24",width:`${progress}%`,transition:"width 0.5s ease"}}/>
+                </div>
+              </div>
+            </div>
+
+            <div className="tb-section">
+              <div className="tb-section-title">Project Details</div>
+              <div className="space-y-1">
+                {[
+                  ["Name",       proj.name || proj.title || "—"],
+                  ["Client",     proj.client_name || "—"],
+                  ["Status",     proj.status || "—"],
+                  ["Budget",     fmtEGP(proj.budget || proj.total_value || 0)],
+                  ["Start Date", fmtDate(proj.start_date)],
+                  ["End Date",   fmtDate(proj.end_date)],
+                  ["Manager",    proj.project_manager || proj.manager || "—"],
+                  ["Created",    fmtDate(proj.created_at)],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {proj.description && (
+              <div className="tb-section">
+                <div className="tb-section-title">Description</div>
+                <p className="text-sm text-secondary leading-relaxed">{proj.description}</p>
+              </div>
+            )}
+
+            {wos.length > 0 && (
+              <div className="tb-section">
+                <div className="tb-section-header">
+                  <div className="tb-section-title" style={{marginBottom:0}}>Work Orders ({wos.length})</div>
+                  <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All →</button>
+                </div>
+                <div className="space-y-2 mt-3">
+                  {wos.map((wo, i) => {
+                    const pc = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" }[wo.priority] || "#94A3B8";
+                    const sc2 = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399" }[wo.status] || "#94A3B8";
+                    return (
+                      <button key={i}
+                        onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
+                        className="tb-action-item w-full justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="tb-priority-bar" style={{background:pc}}/>
+                          <span className="text-sm text-secondary truncate">{wo.title||"—"}</span>
+                        </div>
+                        <span className="tb-badge" style={{background:`${sc2}18`,color:sc2,border:`1px solid ${sc2}30`,fontSize:"0.5625rem",flexShrink:0}}>
+                          {(wo.status||"—").replace("_"," ")}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-title">Status Summary</div>
+              <div className="text-center py-4">
+                <div className="text-5xl font-black mb-2" style={{color:sc}}>
+                  {proj.status === "completed" ? "✓" : proj.status === "active" ? "▶" : "○"}
+                </div>
+                <div className="text-sm font-bold" style={{color:sc}}>{(proj.status||"—").replace("_"," ").toUpperCase()}</div>
+              </div>
+            </div>
+
+            <div className="tb-section">
+              <div className="tb-section-title">Quick Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"All Projects",  icon:"🏗️", path:"/projects-center" },
+                  { label:"Work Orders",   icon:"🔧", path:"/operations/work-orders" },
+                  { label:"Assets",        icon:"⚙️", path:"/maintenance/assets" },
+                  { label:"Contracts",     icon:"📄", path:"/commercial/contracts" },
+                ].map((a, i) => (
+                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
