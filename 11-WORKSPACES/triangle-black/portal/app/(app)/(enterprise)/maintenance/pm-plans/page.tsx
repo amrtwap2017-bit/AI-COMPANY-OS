@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -129,7 +130,7 @@ export default function PMPlansPage() {
                   return (
                     <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-3">
-                        <p className="font-medium text-slate-800">{p.title}</p>
+                        <Link href={`/maintenance/pm-plans/${p.id}`}><p className="font-medium text-blue-700 hover:underline">{p.title}</p></Link>
                         <p className="text-xs text-slate-400">{p.notes||""}</p>
                       </td>
                       <td className="py-3 px-3"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{p.plan_type||"preventive"}</span></td>
