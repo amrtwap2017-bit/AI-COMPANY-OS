@@ -282,7 +282,7 @@ export function EnterpriseSidebar() {
       {/* Header / Logo */}
       <div className="h-14 flex items-center border-b border-sidebar-border flex-shrink-0 px-3 gap-2.5">
         <Link href="/workspace" className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-brand flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0">
             <span className="text-white font-black text-sm">TB</span>
           </div>
           {!collapsed && (
