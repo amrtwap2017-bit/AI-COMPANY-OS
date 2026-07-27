@@ -866,16 +866,16 @@ def get_dashboard_summary():
             },
             "service_requests": {
                 "total": c("SELECT count(*) FROM service_requests"),
-                "open": c("SELECT count(*) FROM service_requests WHERE status='open'"),
+                "open": c("SELECT count(*) FROM service_requests WHERE status IN ('open','Open')"),
                 "linked_to_wo": c("SELECT count(*) FROM service_requests WHERE work_order_id IS NOT NULL"),
             },
             "procurement": {
                 "purchase_orders": c("SELECT count(*) FROM purchase_orders"),
                 "purchase_requests": c("SELECT count(*) FROM purchase_requests"),
-                "pending_pos": c("SELECT count(*) FROM purchase_orders WHERE status IN ('approved','sent')"),
+                "pending_pos": c("SELECT count(*) FROM purchase_orders WHERE status NOT IN ('delivered','received','cancelled')"),
             },
             "commercial": {
-                "active_contracts": c("SELECT count(*) FROM contracts WHERE status='active'"),
+                "active_contracts": c("SELECT count(*) FROM contracts WHERE status IN ('active','Active')"),  # check actual values
                 "open_leads": c("SELECT count(*) FROM leads WHERE status NOT IN ('won','lost')"),
                 "unpaid_invoices": c("SELECT count(*) FROM invoices WHERE status IN ('sent','overdue')"),
             }
