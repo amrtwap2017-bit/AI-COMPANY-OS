@@ -1,202 +1,77 @@
 "use client";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { ShoppingCart, CheckCircle, Truck, Package, AlertTriangle, TrendingUp, Clock, Zap } from "lucide-react";
-import Link from "next/link";
-
-export default function ProcurementDashboardPage() {
-  const { data: reorder = {}, isLoading: rl } = useQuery({
-    queryKey: ["proc-reorder"],
-    queryFn: () => authFetch("/api/v1/warehouse-intelligence/auto-reorder-plan").then(r => r.json()),
-    refetchInterval: 300000,
-  });
-
-  const { data: pending = {}, isLoading: pl } = useQuery({
-    queryKey: ["proc-pending"],
-    queryFn: () => authFetch("/api/v1/goods-receipt-workflow/pending-receipts").then(r => r.json()),
-    refetchInterval: 60000,
-  });
-
-  const { data: stockHealth = {}, isLoading: sl } = useQuery({
-    queryKey: ["proc-stock"],
-    queryFn: () => authFetch("/api/v1/warehouse-intelligence/stock-health").then(r => r.json()),
-    refetchInterval: 120000,
-  });
-
-  const { data: reorderAlerts = {} } = useQuery({
-    queryKey: ["proc-alerts"],
-    queryFn: () => authFetch("/api/v1/inventory-items/reorder-alerts").then(r => r.json()),
-    refetchInterval: 120000,
-  });
-
-  const { data: mentor = {} } = useQuery({
-    queryKey: ["proc-mentor"],
-    queryFn: () => authFetch("/api/v1/ai-mentor/guidance/procurement").then(r => r.json()),
-  });
-
-  if (rl || pl || sl) return <PageWrapper><LoadingState title="Loading procurement dashboard..." /></PageWrapper>;
-
-  const summary   = stockHealth?.summary ?? {};
-  const guidance  = stockHealth?.mentor_guidance ?? [];
-  const practices = mentor?.all_practices ?? [];
-  const pendingPOs = pending?.pending ?? [];
-  const overduePOs = pending?.overdue ?? 0;
-  const reorderItems = reorderAlerts?.alerts ?? [];
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+export default function ProcurementDashboard() {
+  const router = useRouter();
+  const { data: prRaw } = useQuery(["pd-prs"], () => authFetch("/api/v1/purchase-requests/").then(r=>r.json()));
+  const { data: poRaw } = useQuery(["pd-pos"], () => authFetch("/api/v1/purchase-orders/").then(r=>r.json()));
+  const { data: supplierRaw } = useQuery(["pd-sup"], () => authFetch("/api/v1/suppliers/").then(r=>r.json()));
+  const { data: stockRaw } = useQuery(["pd-stock"], () => authFetch("/api/v1/stock-balances/").then(r=>r.json()));
+  const { data: invRaw } = useQuery(["pd-inv"], () => authFetch("/api/v1/inventory-items/").then(r=>r.json()));
+  const prs=toArr(prRaw); const pos=toArr(poRaw); const suppliers=toArr(supplierRaw);
+  const stock=toArr(stockRaw); const invItems=toArr(invRaw);
+  const pendingPRs=prs.filter(p=>p.status==="pending"||p.status==="submitted");
+  const approvedPRs=prs.filter(p=>p.status==="approved");
+  const activePOs=pos.filter(p=>p.status==="pending"||p.status==="submitted"||p.status==="sent");
+  const totalPoValue=pos.reduce((s,p)=>s+Number(p.total_amount||p.amount||0),0);
+  const lowStock=stock.filter(s=>{const item=invItems.find(i=>i.id===s.item_id);return Number(s.qty_on_hand||0)<Number(item?.min_stock||999);});
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Procurement Intelligence"
-        subtitle="Complete procurement cycle - intake to goods received"
-        badge="Program K"
-      />
-
-      {/* Critical alerts banner */}
-      {(summary?.critical > 0 || overduePOs > 0) && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <div className="font-semibold text-red-800">Action Required</div>
-            <div className="text-sm text-red-600 mt-1 space-y-1">
-              {summary?.critical > 0 && (
-                <div>{summary?.critical} items completely out of stock - create emergency PRs</div>
-              )}
-              {overduePOs > 0 && (
-                <div>{overduePOs} purchase orders overdue for delivery - follow up with vendors</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4">
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Procurement</div>
+      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Procurement Dashboard</h1>
+      <p className="text-slate-500 mt-1">Purchase requests, orders, and supplier management</p></div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Critical Stock",    value: summary.critical ?? 0,        icon: AlertTriangle, color: "text-red-600",     href: "/supply-chain/reorder" },
-          { label: "Low Stock",         value: summary.low ?? 0,             icon: TrendingUp,    color: "text-amber-600",   href: "/supply-chain/reorder" },
-          { label: "Pending Deliveries",value: pending?.total ?? 0,         icon: Truck,         color: "text-blue-600",    href: "/supply-chain/purchase-orders" },
-          { label: "Need Reorder",      value: reorderItems.length,          icon: ShoppingCart,  color: "text-orange-600",  href: "/supply-chain/reorder" },
-        ].map(s => (
-          <Link key={s.label} href={s.href}>
-            <div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 cursor-pointer">
-              <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
-              <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-              <div className="text-xs text-slate-500 mt-1">{s.label}</div>
-            </div>
-          </Link>
+          {label:"Pending PRs",value:pendingPRs.length,sub:"awaiting approval",color:"amber",path:"/supply-chain/purchase-requests"},
+          {label:"Active POs",value:activePOs.length,sub:`${fmtEGP(totalPoValue)} total`,color:"blue",path:"/supply-chain/purchase-orders"},
+          {label:"Low Stock Items",value:lowStock.length,sub:"below minimum",color:lowStock.length>0?"red":"emerald",path:"/supply-chain/reorder"},
+          {label:"Suppliers",value:suppliers.length,sub:`${suppliers.filter(s=>s.preferred_flag).length} preferred`,color:"purple",path:"/supply-chain/suppliers"},
+        ].map((k,i)=>(
+          <button key={i} onClick={()=>router.push(k.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
+            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+          </button>
         ))}
       </div>
-
-      {/* Workflow Quick Access */}
-      <SectionCard title="Procurement Workflow" className="mb-6">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold">Purchase Request Status</h2>
+            <button onClick={()=>router.push("/supply-chain/purchase-requests")} className="text-xs text-amber-500">All →</button>
+          </div>
           {[
-            { label: "New Request",       href: "/supply-chain/intake",          icon: Zap,          color: "bg-blue-600",    desc: "Submit via any channel" },
-            { label: "Purchase Requests", href: "/supply-chain/purchase-requests", icon: ShoppingCart, color: "bg-amber-600",   desc: "Review pending PRs" },
-            { label: "Approvals",         href: "/approvals",                     icon: CheckCircle,  color: "bg-emerald-600", desc: "Approve PRs + POs" },
-            { label: "Orders",            href: "/supply-chain/purchase-orders",  icon: Package,      color: "bg-purple-600",  desc: "Track sent POs" },
-            { label: "Receive Goods",     href: "/supply-chain/goods-receipts",   icon: Truck,        color: "bg-slate-800",   desc: "Record deliveries" },
-          ].map(step => (
-            <Link key={step.label} href={step.href}>
-              <div className={`${step.color} text-white p-4 rounded-xl cursor-pointer hover:opacity-90 text-center`}>
-                <step.icon className="w-6 h-6 mx-auto mb-2" />
-                <div className="text-sm font-semibold">{step.label}</div>
-                <div className="text-xs opacity-80 mt-1">{step.desc}</div>
-              </div>
-            </Link>
+            {label:"Pending",count:prs.filter(p=>p.status==="pending").length,color:"amber"},
+            {label:"Submitted",count:prs.filter(p=>p.status==="submitted").length,color:"blue"},
+            {label:"Approved",count:approvedPRs.length,color:"emerald"},
+            {label:"Rejected",count:prs.filter(p=>p.status==="rejected").length,color:"red"},
+          ].map((s,i)=>(
+            <div key={i} className="flex items-center justify-between py-3 border-b border-slate-50 dark:border-slate-800 last:border-0">
+              <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${s.color}-500`}/><span className="text-sm">{s.label}</span></div>
+              <span className={`font-black text-${s.color}-500 text-lg`}>{s.count}</span>
+            </div>
           ))}
         </div>
-      </SectionCard>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Pending POs */}
-        <SectionCard title={`Pending Deliveries (${pendingPOs.length})`}>
-          {pendingPOs.length > 0 ? (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {(pendingPOs || []).slice(0, 8).map((po: any) => {
-                const isOverdue = (po.days_overdue ?? 0) > 0;
-                return (
-                  <div key={po.id}
-                       className={`flex items-center justify-between p-3 rounded-lg border
-                         ${isOverdue ? "bg-red-50 border-red-200" : "bg-slate-50 border-slate-200"}`}>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-slate-800 truncate">{po.title}</div>
-                      <div className="text-xs text-slate-400">
-                        {po.vendor_name} - {po.po_number}
-                      </div>
-                    </div>
-                    <div className="text-right ml-2 flex-shrink-0">
-                      {isOverdue ? (
-                        <span className="text-xs font-bold text-red-600">
-                          {Math.abs(po.days_overdue)}d late
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-500">
-                          {String(po.expected_delivery_date ?? "").slice(0,10)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No pending deliveries</p>
-            </div>
-          )}
-          <Link href="/supply-chain/purchase-orders" className="block mt-3 text-xs text-blue-600 text-center hover:text-blue-800">
-            View all purchase orders →
-          </Link>
-        </SectionCard>
-
-        {/* AI Mentor - Best Practices */}
-        <SectionCard title="AI Mentor - Best Practices">
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {(practices || []).slice(0, 6).map((p: any, i: number) => (
-              <div key={i} className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                <div className="text-xs font-semibold text-blue-700">{p.rule}</div>
-                <div className="text-xs text-slate-600 mt-0.5">{p.guidance}</div>
-              </div>
-            ))}
-            {practices.length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-4">Loading best practices...</p>
-            )}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold">Recent Purchase Orders</h2>
+            <button onClick={()=>router.push("/supply-chain/purchase-orders")} className="text-xs text-amber-500">All →</button>
           </div>
-          <Link href="/ai/page" className="block mt-3 text-xs text-blue-600 text-center hover:text-blue-800">
-            Full mentor guidance →
-          </Link>
-        </SectionCard>
-
-        {/* Stock Guidance from Mentor */}
-        {guidance.length > 0 && (
-          <SectionCard title="Warehouse Mentor Guidance" className="lg:col-span-2">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {guidance.map((g: any, i: number) => (
-                <div key={i} className={`p-4 rounded-xl border flex items-start gap-3
-                  ${g.priority === "CRITICAL" ? "bg-red-50 border-red-200" :
-                    g.priority === "HIGH" ? "bg-amber-50 border-amber-200" :
-                    "bg-blue-50 border-blue-200"}`}>
-                  <AlertTriangle className={`w-4 h-4 flex-shrink-0 mt-0.5
-                    ${g.priority === "CRITICAL" ? "text-red-600" :
-                      g.priority === "HIGH" ? "text-amber-600" : "text-blue-600"}`} />
-                  <div>
-                    <div className="text-sm font-semibold text-slate-800">{g.message}</div>
-                    <div className="text-xs text-slate-600 mt-1">{g.action}</div>
-                    {g.items?.length > 0 && (
-                      <div className="text-xs text-slate-400 mt-1">
-                        Items: {g.items.join(", ")}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        )}
+          {pos.slice(0,6).map((po,i)=>(
+            <button key={i} onClick={()=>router.push(`/supply-chain/purchase-orders/${po.id}`)}
+              className="w-full flex items-center justify-between p-2 mb-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg hover:bg-blue-50 text-left">
+              <div><div className="text-sm font-medium truncate">{po.po_number||po.id?.slice(0,12)}</div><div className="text-xs text-slate-400">{fmtDate(po.created_at)}</div></div>
+              <span className={`text-xs px-2 py-0.5 rounded font-bold ${po.status==="delivered"?"bg-emerald-100 text-emerald-700":po.status==="pending"?"bg-amber-100 text-amber-700":"bg-slate-100 text-slate-600"}`}>{po.status||"—"}</span>
+            </button>
+          ))}
+        </div>
       </div>
-    </PageWrapper>
+    </div>
   );
 }

@@ -1,112 +1,60 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
-import Link from "next/link";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchKpisSla = async () => {
-  const res = await authFetch(`/api/v1/ai/analytics/kpis/live`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchSLA = async () => {
-  const res = await authFetch(`/api/v1/ai/analytics/sla`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const ExecutiveCommandPage = () => {
-  const { data: signals, isLoading: signalsLoading } = useQuery(["signals"], fetchSignals, { refetchInterval: 30000 });
-  const { data: kpisSla, isLoading: kpisSlaLoading } = useQuery(["kpisSla"], fetchKpisSla, { refetchInterval: 60000 });
-  const { data: sla, isLoading: slaLoading } = useQuery(["sla"], fetchSLA, { refetchInterval: 60000 });
-
-  const [scheduleMeeting, setScheduleMeeting] = useState(false);
-
-  if (signalsLoading || kpisSlaLoading || slaLoading) return <LoadingState />;
-
-  const criticalSignalsCount = signals?.critical || 0;
-  const status = criticalSignalsCount > 0 ? "CRITICAL ALERT" : "NOMINAL";
-
-  const topSignals = signals?.top_toArr(signals).slice(0, 3);
-
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+export default function ExecutiveCommand() {
+  const router = useRouter();
+  const { data: twin } = useQuery(["ec-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: dash } = useQuery(["ec-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
+  const { data: notifRaw } = useQuery(["ec-notifs"], () => authFetch("/api/v1/notifications/").then(r=>r.json()));
+  const notifs = toArr(notifRaw); const d = dash||{}; const score = twin?.health_score??0;
+  const unread = notifs.filter(n=>!n.is_read);
+  const commands = [
+    {label:"Intelligence",icon:"🧠",path:"/executive/intelligence",desc:"Platform AI insights"},
+    {label:"Daily Review",icon:"☀️",path:"/executive/daily-review",desc:"Today's briefing"},
+    {label:"Portfolio",icon:"💼",path:"/executive/portfolio",desc:"Business portfolio"},
+    {label:"Risks",icon:"⚠️",path:"/executive/risks",desc:"Risk register"},
+    {label:"Exceptions",icon:"🚨",path:"/executive/exceptions",desc:"Items needing action"},
+    {label:"Reports",icon:"📊",path:"/executive/reports",desc:"Executive reports"},
+    {label:"Workbench",icon:"⚡",path:"/executive/workbench",desc:"Command workbench"},
+  ];
   return (
-    <PageWrapper>
-      <PageHeader title="Executive Command Center" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SectionCard title="Status">
-          <StatusBadge status={status} />
-        </SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Critical Signals", value: criticalSignalsCount },
-            { label: "Critical WOs", value: signals?.critical_wos || 0 },
-            { label: "SLA Status", value: sla?.sla_status || "OK" },
-            { label: "Technician Utilization %", value: kpisSla?.technician_utilization || 0 },
-          ]}
-        />
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Link href="/operations/command" passHref>
-          <SectionCard title="Operations">Go to Operations</SectionCard>
-        </Link>
-        <Link href="/supply-chain/command" passHref>
-          <SectionCard title="Supply Chain">Go to Supply Chain</SectionCard>
-        </Link>
-        <Link href="/maintenance/intelligence" passHref>
-          <SectionCard title="Maintenance">Go to Maintenance</SectionCard>
-        </Link>
-        <Link href="/customers/review" passHref>
-          <SectionCard title="Finance">Go to Finance</SectionCard>
-        </Link>
-        <Link href="/alerts" passHref>
-          <SectionCard title="Alerts">Go to Alerts</SectionCard>
-        </Link>
-        <Link href="/executive/reports" passHref>
-          <SectionCard title="Reports">Go to Reports</SectionCard>
-        </Link>
-      </div>
-      <div className="mt-4">
-        <h2>Live Signal Feed</h2>
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {toArr(topSignals).map((signal, index) => (
-            <li key={index} className={`bg-${signal.priority}-500 text-white p-2 rounded`}>
-              {signal.message}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="mt-4">
-        <h2>Quick Decisions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/operations/dispatch" passHref>
-            <button className="bg-blue-500 text-white p-2 rounded">Dispatch All Available</button>
-          </Link>
-          <Link href="/supply-chain/workbench" passHref>
-            <button className="bg-green-500 text-white p-2 rounded">Create Emergency PR</button>
-          </Link>
-          <button
-            onClick={() => setScheduleMeeting(true)}
-            className={`bg-purple-500 text-white p-2 rounded ${scheduleMeeting ? "bg-gray-400 cursor-not-allowed" : ""}`}
-            disabled={scheduleMeeting}
-          >
-            {scheduleMeeting ? "Scheduled" : "Schedule Board Meeting"}
-          </button>
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div className="flex items-start justify-between">
+        <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Command</div>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Executive Command Center</h1>
+        <p className="text-slate-500 mt-1">Complete executive control and visibility</p></div>
+        <div className={`rounded-2xl border px-6 py-4 text-center ${score>=95?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
+          <div className={`text-4xl font-black ${score>=95?"text-emerald-500":"text-amber-500"}`}>{score}</div>
+          <div className="text-xs text-slate-500 mt-1">Twin Score</div>
         </div>
       </div>
-    </PageWrapper>
+      <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+        {[
+          {label:"Open WOs",value:d.work_orders?.open??0,color:"blue"},
+          {label:"Active Contracts",value:d.commercial?.active_contracts??0,color:"emerald"},
+          {label:"Pending Invoices",value:d.finance?.pending??0,color:"amber"},
+          {label:"PM Overdue",value:d.maintenance?.overdue??0,color:"red"},
+          {label:"Unread Alerts",value:unread.length,color:"purple"},
+        ].map((k,i)=>(
+          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-center">
+            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {commands.map((c,i)=>(
+          <button key={i} onClick={()=>router.push(c.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            <div className="text-3xl mb-2">{c.icon}</div>
+            <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600">{c.label}</div>
+            <div className="text-xs text-slate-500 mt-1">{c.desc}</div>
+          </button>
+        ))}
+      </div>
+    </div>
   );
-};
-
-export default ExecutiveCommandPage;
+}

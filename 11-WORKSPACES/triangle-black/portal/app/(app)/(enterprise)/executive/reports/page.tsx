@@ -1,162 +1,48 @@
 "use client";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { FileText, Download, TrendingUp, Users, Wrench, DollarSign, BarChart3 } from "lucide-react";
-
-// Safe array extractor — handles all backend response shapes
-const toArr = (d: any): any[] => {
-  if (!d) return [];
-  if (Array.isArray(d)) return d;
-  if (Array.isArray(d?.items)) return d.items;
-  if (Array.isArray(d?.data)) return d.data;
-  if (Array.isArray(d?.results)) return d.results;
-  if (Array.isArray(d?.records)) return d.records;
-  return [];
-};
-
-
-const REPORTS = [
-  {
-    category: "Operations",
-    icon: Wrench,
-    color: "text-blue-600",
-    reports: [
-      { name: "Monthly Operations Summary", url: "/api/v1/pdf-export/preview/monthly-report", desc: "Work orders, PM plans, technician utilization" },
-      { name: "SLA Compliance Report",      url: "/api/v1/sla/overview",                     desc: "Completion rates, breach analysis, by priority", isJson: true },
-      { name: "AI Signals Report",          url: "/api/v1/ai/signals/v2",                    desc: "Cross-domain operational alerts", isJson: true },
-    ],
-  },
-  {
-    category: "Finance",
-    icon: DollarSign,
-    color: "text-emerald-600",
-    reports: [
-      { name: "Cash Flow Report",           url: "/api/v1/analytics/cashflow",               desc: "Monthly revenue vs expenses EGP", isJson: true },
-      { name: "Executive KPI Scorecard",    url: "/api/v1/executive-kpi/scorecard",           desc: "Balanced scorecard + EV analysis", isJson: true },
-      { name: "Invoice Payment Summary",    url: "/api/v1/invoices/payment-summary",          desc: "Collection rate + outstanding", isJson: true },
-    ],
-  },
-  {
-    category: "Maintenance",
-    icon: BarChart3,
-    color: "text-amber-600",
-    reports: [
-      { name: "Predictive Health Scores",   url: "/api/v1/predictive-maintenance/health-scores", desc: "Asset health + failure predictions", isJson: true },
-      { name: "PM Risk Summary",            url: "/api/v1/predictive-maintenance/risk-summary",  desc: "Risk by asset category", isJson: true },
-      { name: "Warranty Overview",          url: "/api/v1/warranty/overview",                    desc: "Active + expiring warranties", isJson: true },
-    ],
-  },
-  {
-    category: "Customer",
-    icon: Users,
-    color: "text-purple-600",
-    reports: [
-      { name: "Customer Success Overview",  url: "/api/v1/customer-success/overview",         desc: "NPS + renewals + at-risk clients", isJson: true },
-      { name: "Contract Renewals",          url: "/api/v1/customer-success/renewals",          desc: "Contracts expiring in 90 days", isJson: true },
-      { name: "NPS Summary",               url: "/api/v1/customer-success/nps/summary",       desc: "Promoters, passives, detractors", isJson: true },
-    ],
-  },
-  {
-    category: "Procurement",
-    icon: TrendingUp,
-    color: "text-orange-600",
-    reports: [
-      { name: "Reorder Alerts",            url: "/api/v1/inventory-items/reorder-alerts",    desc: "Items below minimum stock", isJson: true },
-      { name: "Tenant Audit",              url: "/api/v1/tenant-audit/isolation-check",      desc: "Multi-hotel data isolation", isJson: true },
-      { name: "Knowledge Graph Stats",     url: "/api/v1/knowledge-graph/stats",             desc: "Entity counts + vector embeddings", isJson: true },
-    ],
-  },
-];
-
-function ReportRow({ report }: { report: any }) {
-  const handleDownload = async () => {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-      const url = report.url.startsWith("http") ? report.url : `${baseUrl}${report.url}`;
-
-      if (report.isJson) {
-        const r = await authFetch(report.url);
-        const data = await r.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `${report.name.replace(/\s+/g, "-").toLowerCase()}.json`;
-        a.click();
-      } else {
-        window.open(url, "_blank");
-      }
-    } catch (e) {
-      console.error("Download failed:", e);
-    }
-  };
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+export default function ExecutiveReports() {
+  const router = useRouter();
+  const { data: dash } = useQuery(["er2-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
+  const { data: twin } = useQuery(["er2-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: invRaw } = useQuery(["er2-inv"], () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: woRaw } = useQuery(["er2-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const invoices=toArr(invRaw); const wos=toArr(woRaw); const d=dash||{};
+  const totalRevenue=invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const completionRate=wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
+  const collectionRate=invoices.length>0?Math.round(invoices.filter(i=>i.status==="paid").length/invoices.length*100):0;
+  const reports = [
+    {title:"Operations Report",desc:`${d.work_orders?.total||0} WOs tracked · ${completionRate}% completion rate`,icon:"⚙️",path:"/operations/work-orders",metrics:[`Open: ${d.work_orders?.open||0}`,`Completed: ${d.work_orders?.completed||0}`,`Critical: ${d.work_orders?.critical||0}`]},
+    {title:"Financial Report",desc:`${fmtEGP(totalRevenue)} collected · ${collectionRate}% collection rate`,icon:"💰",path:"/invoices",metrics:[`Paid: ${d.finance?.paid||0}`,`Pending: ${d.finance?.pending||0}`,`Overdue: ${d.finance?.overdue||0}`]},
+    {title:"Maintenance Report",desc:`${d.maintenance?.pm_plans||0} PM plans · ${d.maintenance?.overdue||0} overdue`,icon:"🔧",path:"/maintenance/pm-plans",metrics:[`Due week: ${d.maintenance?.due_this_week||0}`,`Assets: ${d.assets?.total||0}`,`Operational: ${d.assets?.operational||0}`]},
+    {title:"Commercial Report",desc:`${d.commercial?.active_contracts||0} active contracts`,icon:"💼",path:"/commercial",metrics:[`Open leads: ${d.commercial?.open_leads||0}`,`Expiring: ${d.commercial?.expiring_30d||0}`,`Unpaid: ${d.commercial?.unpaid_invoices||0}`]},
+    {title:"Platform Health",desc:`Digital Twin: ${twin?.health_score||0}/100 · ${twin?.health_label||""}`,icon:"🔮",path:"/executive/intelligence",metrics:[`Technicians: ${d.platform?.technicians||0}`,`Projects: ${d.platform?.projects||0}`,`Notifications: ${d.platform?.notifications||0}`]},
+    {title:"Procurement Report",desc:`${d.procurement?.purchase_requests||0} PRs · ${d.procurement?.purchase_orders||0} POs`,icon:"📦",path:"/supply-chain",metrics:[`Pending POs: ${d.procurement?.pending_pos||0}`,`Approved PRs: ${d.procurement?.approved_prs||0}`,`Suppliers: ${d.procurement?.suppliers||0}`]},
+  ];
   return (
-    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg
-                    border border-slate-200 hover:border-slate-300 hover:bg-slate-100">
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-slate-800">{report.name}</div>
-        <div className="text-xs text-slate-400 mt-0.5">{report.desc}</div>
-      </div>
-      <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-        <span className="text-xs text-slate-400">{report.isJson ? "JSON" : "HTML"}</span>
-        <button
-          onClick={handleDownload}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs bg-slate-800 text-white
-                     rounded-lg hover:bg-slate-700"
-        >
-          <Download className="w-3 h-3" /> Download
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export default function ReportsPage() {
-  const { data: kpis = {} } = useQuery({
-    queryKey: ["reports-kpis"],
-    queryFn: () => authFetch("/api/v1/executive-kpi/summary").then(r => r.json()),
-  });
-
-  const totalReports = REPORTS.reduce((sum: any, cat: any) => sum + cat.reports.length, 0);
-
-  return (
-    <PageWrapper>
-      <PageHeader
-        title="Reports & Exports"
-        subtitle={`${totalReports} reports available across all operational domains`}
-        badge="Program H"
-      />
-
-      {/* Quick KPI strip */}
-      {kpis?.revenue_egp !== undefined && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: "Revenue (EGP)",    value: `${Number(kpis?.revenue_egp||0).toLocaleString()}` },
-            { label: "WO Completion",    value: `${kpis.wo_completion_pct ?? 0}%` },
-            { label: "Active Contracts", value: kpis.active_contracts ?? 0 },
-            { label: "Tech Utilization", value: `${kpis.technician_utilization_pct ?? 0}%` },
-          ].map(k => (
-            <div key={k.label} className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-              <div className="text-lg font-bold text-slate-800">{k.value}</div>
-              <div className="text-xs text-slate-400 mt-1">{k.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Report categories */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {toArr(REPORTS).map(cat => (
-          <SectionCard key={cat.category} title={cat.category}>
-            <div className="space-y-2">
-              {toArr(cat.reports).map(report  => (
-                <ReportRow key={report.name} report={report} />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Reports</div>
+      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Executive Reports</h1>
+      <p className="text-slate-500 mt-1">Comprehensive platform performance reports</p></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {reports.map((r,i)=>(
+          <button key={i} onClick={()=>router.push(r.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            <div className="text-3xl mb-3">{r.icon}</div>
+            <div className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-amber-600 mb-1">{r.title}</div>
+            <div className="text-xs text-slate-500 mb-4">{r.desc}</div>
+            <div className="space-y-1">
+              {r.metrics.map((m,j)=>(
+                <div key={j} className="text-xs text-slate-400 flex items-center gap-1"><span className="text-amber-500">·</span>{m}</div>
               ))}
             </div>
-          </SectionCard>
+          </button>
         ))}
       </div>
-    </PageWrapper>
+    </div>
   );
 }
