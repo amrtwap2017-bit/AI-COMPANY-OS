@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB", {day:"numeric",month:"short",year:"numeric"}); } catch { return "—"; } };
@@ -23,6 +23,7 @@ const S_CONFIG = {
 export default function WorkOrderDetailPage() {
   const { id } = useParams();
   const router  = useRouter();
+  const qc      = useQueryClient();
 
   const { data: woData, isLoading, isError } = useQuery(
     ["wo-detail", id],
@@ -107,13 +108,32 @@ export default function WorkOrderDetailPage() {
             {/* Actions */}
             <div className="flex gap-2 flex-shrink-0 flex-wrap">
               {wo.status === "open" && (
-                <button style={{background:"rgba(180,83,9,0.15)",border:"1px solid rgba(180,83,9,0.4)",color:"#FCD34D",borderRadius:10,padding:"9px 18px",fontSize:"0.8125rem",fontWeight:700,cursor:"pointer"}}>
+                <button onClick={async()=>{
+                  const r = await authFetch(`/api/v1/work-orders/${wo.id}/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"in_progress"})});
+                  if(r.ok){qc.invalidateQueries(["wo-detail",id]);qc.invalidateQueries(["wo-list"]);}
+                }} style={{background:"rgba(180,83,9,0.15)",border:"1px solid rgba(180,83,9,0.4)",color:"#FCD34D",borderRadius:10,padding:"9px 18px",fontSize:"0.8125rem",fontWeight:700,cursor:"pointer",transition:"all 150ms"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(180,83,9,0.25)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(180,83,9,0.15)"}>
                   ▶ Start WO
                 </button>
               )}
               {wo.status === "in_progress" && (
-                <button style={{background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#34D399",borderRadius:10,padding:"9px 18px",fontSize:"0.8125rem",fontWeight:700,cursor:"pointer"}}>
-                  ✓ Complete
+                <button onClick={async()=>{
+                  const r = await authFetch(`/api/v1/work-orders/${wo.id}/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"completed"})});
+                  if(r.ok){qc.invalidateQueries(["wo-detail",id]);qc.invalidateQueries(["wo-list"]);}
+                }} style={{background:"rgba(16,185,129,0.15)",border:"1px solid rgba(16,185,129,0.4)",color:"#34D399",borderRadius:10,padding:"9px 18px",fontSize:"0.8125rem",fontWeight:700,cursor:"pointer",transition:"all 150ms"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(16,185,129,0.25)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="rgba(16,185,129,0.15)"}>
+                  ✓ Complete WO
+                </button>
+              )}
+              {(wo.status === "open" || wo.status === "in_progress") && (
+                <button onClick={async()=>{
+                  if(!confirm("Cancel this work order?"))return;
+                  const r = await authFetch(`/api/v1/work-orders/${wo.id}/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"cancelled"})});
+                  if(r.ok){qc.invalidateQueries(["wo-detail",id]);qc.invalidateQueries(["wo-list"]);}
+                }} style={{background:"rgba(148,163,184,0.08)",border:"1px solid rgba(148,163,184,0.2)",color:"#94A3B8",borderRadius:10,padding:"9px 14px",fontSize:"0.8125rem",fontWeight:600,cursor:"pointer"}}>
+                  ✕ Cancel
                 </button>
               )}
             </div>

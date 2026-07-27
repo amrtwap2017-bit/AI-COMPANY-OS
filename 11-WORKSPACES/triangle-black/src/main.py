@@ -1289,3 +1289,255 @@ def automation_status():
             }
         }
 
+
+
+# ── SPRINT 188: CREATE ACTION ENDPOINTS ────────────────────────────────────────
+
+@app.post("/api/v1/work-orders/", tags=["work-orders"])
+def create_work_order(body: dict):
+    """Create a new work order"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, uuid
+    from datetime import datetime, timedelta
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        wo_id = str(uuid.uuid4())
+        now   = datetime.utcnow()
+        priority = body.get("priority","medium")
+        sla_hours = {"critical":4,"high":8,"medium":24,"low":72}.get(priority,24)
+        due_date = body.get("due_date") or (now + timedelta(hours=sla_hours)).isoformat()
+        db.execute(text("""
+            INSERT INTO work_orders (id,hotel_id,title,description,priority,status,type,
+                technician_id,asset_id,contract_id,due_date,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:desc,:priority,'open',:type,
+                :tech_id,:asset_id,:contract_id,:due_date,:now,:now)
+        """),{
+            "id":wo_id, "hotel":body.get("hotel_id","tb-default-hotel-000000000001"),
+            "title":body.get("title","New Work Order"),
+            "desc":body.get("description",""),
+            "priority":priority,
+            "type":body.get("type","corrective"),
+            "tech_id":body.get("technician_id") or None,
+            "asset_id":body.get("asset_id") or None,
+            "contract_id":body.get("contract_id") or None,
+            "due_date":due_date, "now":now,
+        })
+        # Notification
+        db.execute(text("""
+            INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,recipient_role,is_read,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:msg,'work_order_created',:eid,'work_order','admin',false,:now,:now)
+        """),{"id":str(uuid.uuid4()),"hotel":"tb-default-hotel-000000000001",
+              "title":f"Work Order Created: {body.get('title','New WO')}",
+              "msg":f"Priority: {priority}","eid":wo_id,"now":now})
+        db.commit()
+        return {"id":wo_id,"status":"open","priority":priority,"title":body.get("title"),"created_at":now.isoformat()}
+
+
+@app.post("/api/v1/service-requests/", tags=["service-requests"])
+def create_service_request(body: dict):
+    """Create a new service request"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, uuid
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        sr_id = str(uuid.uuid4())
+        now   = datetime.utcnow()
+        db.execute(text("""
+            INSERT INTO service_requests (id,hotel_id,title,description,category,urgency,
+                status,submitted_by,contact_phone,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:desc,:category,:urgency,'open',:submitted_by,:phone,:now,:now)
+        """),{
+            "id":sr_id, "hotel":body.get("hotel_id","tb-default-hotel-000000000001"),
+            "title":body.get("title","New Service Request"),
+            "desc":body.get("description",""),
+            "category":body.get("category","general"),
+            "urgency":body.get("urgency","normal"),
+            "submitted_by":body.get("submitted_by","Portal User"),
+            "phone":body.get("contact_phone","") or None,
+            "now":now,
+        })
+        db.execute(text("""
+            INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,recipient_role,is_read,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:msg,'service_request_created',:eid,'service_request','admin',false,:now,:now)
+        """),{"id":str(uuid.uuid4()),"hotel":"tb-default-hotel-000000000001",
+              "title":f"Service Request: {body.get('title','New SR')}",
+              "msg":f"Urgency: {body.get('urgency','normal')}","eid":sr_id,"now":now})
+        db.commit()
+        return {"id":sr_id,"status":"open","urgency":body.get("urgency"),"title":body.get("title"),"created_at":now.isoformat()}
+
+
+@app.post("/api/v1/leads/", tags=["leads"])
+def create_lead(body: dict):
+    """Create a new lead"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, uuid
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        lead_id = str(uuid.uuid4())
+        now     = datetime.utcnow()
+        db.execute(text("""
+            INSERT INTO leads (id,hotel_id,name,company,email,phone,source,status,priority,score,notes,created_at,updated_at)
+            VALUES (:id,:hotel,:name,:company,:email,:phone,:source,'new',:priority,:score,:notes,:now,:now)
+        """),{
+            "id":lead_id, "hotel":body.get("hotel_id","tb-default-hotel-000000000001"),
+            "name":body.get("name","New Lead"),
+            "company":body.get("company","") or None,
+            "email":body.get("email","") or None,
+            "phone":body.get("phone","") or None,
+            "source":body.get("source","manual"),
+            "priority":body.get("priority","medium"),
+            "score":int(body.get("score",50)),
+            "notes":body.get("notes","") or None,
+            "now":now,
+        })
+        db.execute(text("""
+            INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,recipient_role,is_read,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:msg,'lead_created',:eid,'lead','admin',false,:now,:now)
+        """),{"id":str(uuid.uuid4()),"hotel":"tb-default-hotel-000000000001",
+              "title":f"New Lead: {body.get('name','Lead')}",
+              "msg":f"Company: {body.get('company','—')} · Source: {body.get('source','manual')}",
+              "eid":lead_id,"now":now})
+        db.commit()
+        return {"id":lead_id,"status":"new","name":body.get("name"),"company":body.get("company"),"created_at":now.isoformat()}
+
+
+@app.post("/api/v1/purchase-requests/", tags=["procurement"])
+def create_purchase_request(body: dict):
+    """Create a new purchase request"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, uuid
+    from datetime import datetime, timedelta
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        pr_id  = str(uuid.uuid4())
+        now    = datetime.utcnow()
+        pr_num = f"PR-{now.strftime('%Y%m%d')}-{pr_id[:6].upper()}"
+        required = body.get("required_date") or (now + timedelta(days=7)).isoformat()
+        db.execute(text("""
+            INSERT INTO purchase_requests (id,hotel_id,pr_number,title,justification,urgency,
+                status,department,requester,lines,required_date,created_at,updated_at)
+            VALUES (:id,:hotel,:pr_num,:title,:justification,:urgency,'pending',:dept,:requester,
+                :lines::json,:required,:now,:now)
+        """),{
+            "id":pr_id, "hotel":body.get("hotel_id","tb-default-hotel-000000000001"),
+            "pr_num":pr_num,
+            "title":body.get("title",f"Purchase Request {pr_num}"),
+            "justification":body.get("justification","") or "",
+            "urgency":body.get("urgency","normal"),
+            "dept":body.get("department","Engineering"),
+            "requester":body.get("requester","Portal User"),
+            "lines":body.get("lines","[]") or "[]",
+            "required":required, "now":now,
+        })
+        db.execute(text("""
+            INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,recipient_role,is_read,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:msg,'purchase_request_created',:eid,'purchase_request','admin',false,:now,:now)
+        """),{"id":str(uuid.uuid4()),"hotel":"tb-default-hotel-000000000001",
+              "title":f"New PR: {body.get('title',pr_num)}",
+              "msg":f"Dept: {body.get('department','Engineering')} · Urgency: {body.get('urgency','normal')}",
+              "eid":pr_id,"now":now})
+        db.commit()
+        return {"id":pr_id,"status":"pending","pr_number":pr_num,"title":body.get("title"),"created_at":now.isoformat()}
+
+
+@app.post("/api/v1/work-orders/{wo_id}/status", tags=["work-orders"])
+def update_wo_status(wo_id: str, body: dict):
+    """Update work order status — open/in_progress/completed/cancelled"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        now    = datetime.utcnow()
+        status = body.get("status","open")
+        extra  = {}
+        if status == "in_progress": extra["started_at"] = now
+        if status == "completed":   extra["completed_at"] = now
+
+        set_parts = ["status=:status","updated_at=:now"]
+        params    = {"status":status,"now":now,"wo_id":wo_id}
+        if "started_at"   in extra: set_parts.append("started_at=:started_at");   params["started_at"]   = extra["started_at"]
+        if "completed_at" in extra: set_parts.append("completed_at=:completed_at"); params["completed_at"] = extra["completed_at"]
+
+        db.execute(text(f"UPDATE work_orders SET {', '.join(set_parts)} WHERE id=:wo_id"), params)
+
+        # Sync asset if completed
+        if status == "completed":
+            db.execute(text("""
+                UPDATE assets SET last_maintenance_date=:now, next_maintenance_date=:next, updated_at=:now
+                FROM work_orders wo WHERE assets.id=wo.asset_id AND wo.id=:wo_id AND wo.asset_id IS NOT NULL
+            """),{"now":now,"next":now.replace(year=now.year+1 if now.month>9 else now.year, month=(now.month+3-1)%12+1),"wo_id":wo_id})
+
+        db.commit()
+        return {"id":wo_id,"status":status,"updated_at":now.isoformat()}
+
+
+@app.post("/api/v1/service-requests/{sr_id}/status", tags=["service-requests"])
+def update_sr_status(sr_id: str, body: dict):
+    """Update service request status"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        now    = datetime.utcnow()
+        status = body.get("status","open")
+        params = {"status":status,"now":now,"sr_id":sr_id}
+        sets   = ["status=:status","updated_at=:now"]
+        if status == "resolved":
+            sets.append("resolved_at=:now")
+            if body.get("resolution_notes"):
+                sets.append("resolution_notes=:notes"); params["notes"] = body["resolution_notes"]
+        db.execute(text(f"UPDATE service_requests SET {', '.join(sets)} WHERE id=:sr_id"), params)
+        db.commit()
+        return {"id":sr_id,"status":status,"updated_at":now.isoformat()}
+
+
+@app.post("/api/v1/leads/{lead_id}/status", tags=["leads"])
+def update_lead_status(lead_id: str, body: dict):
+    """Move lead through pipeline stages"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        now    = datetime.utcnow()
+        status = body.get("status","new")
+        score  = body.get("score")
+        sets   = ["status=:status","updated_at=:now"]
+        params = {"status":status,"now":now,"lead_id":lead_id}
+        if score is not None: sets.append("score=:score"); params["score"] = int(score)
+        db.execute(text(f"UPDATE leads SET {', '.join(sets)} WHERE id=:lead_id"), params)
+        db.commit()
+        return {"id":lead_id,"status":status,"updated_at":now.isoformat()}
+
+
+@app.post("/api/v1/purchase-requests/{pr_id}/approve", tags=["procurement"])
+def approve_purchase_request(pr_id: str, body: dict):
+    """Approve or reject a purchase request"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        now      = datetime.utcnow()
+        action   = body.get("action","approve")
+        new_status = "approved" if action == "approve" else "rejected"
+        params   = {"status":new_status,"now":now,"pr_id":pr_id,"approver":body.get("approved_by","Manager")}
+        sets     = ["status=:status","updated_at=:now","approved_by=:approver","approved_at=:now"]
+        if action == "reject" and body.get("rejection_note"):
+            sets.append("rejection_note=:note"); params["note"] = body["rejection_note"]
+        db.execute(text(f"UPDATE purchase_requests SET {', '.join(sets)} WHERE id=:pr_id"), params)
+        db.commit()
+        return {"id":pr_id,"status":new_status,"updated_at":now.isoformat()}
+

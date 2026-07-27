@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+  const [showCreate, setShowCreate] = useState(false);
 import { WorkspaceHeader } from "@/components/workspace/WorkspaceHeader";
+import { CreateModal } from "@/components/ui/CreateModal";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -58,7 +60,7 @@ export default function ServiceRequestsPage() {
           <h1 className="text-3xl font-black text-primary">Service Requests</h1>
           <p className="text-secondary text-sm mt-1.5">{srs.length} total · {open.length} open · {unlinked.length} need work order · {linked.length} linked</p>
         </div>
-        <button onClick={()=>router.push("/workflows/launcher")}
+        <button onClick={()=>setShowCreate(true)}
           className="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm transition-all">
           ⚡ Auto-Link WOs
         </button>
@@ -87,7 +89,7 @@ export default function ServiceRequestsPage() {
             <div className="font-bold text-blue-800 dark:text-blue-300">{unlinked.length} Open Service Requests Have No Work Order</div>
             <div className="text-sm text-blue-600 mt-0.5">Run automation to auto-create and link work orders</div>
           </div>
-          <button onClick={()=>router.push("/workflows/launcher")}
+          <button onClick={()=>setShowCreate(true)}
             className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 flex-shrink-0">
             ⚡ Auto-Link
           </button>
