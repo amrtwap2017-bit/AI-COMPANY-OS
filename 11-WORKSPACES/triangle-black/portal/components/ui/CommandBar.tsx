@@ -4,278 +4,279 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search, Zap, FileText, Users, Package, Wrench, BarChart3,
-  Plus, TrendingUp, ChevronRight, X, Clock, Settings, Clipboard,
+  Plus, TrendingUp, X, Settings, Loader2,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-interface CommandItem {
-  id: string;
-  label: string;
-  description?: string;
-  icon: any;
-  action: string;
-  type: "navigate" | "create" | "ai" | "result";
-  shortcut?: string;
-  badge?: string;
+// ── Types ─────────────────────────────────────────────────────
+interface SearchResult {
+  id:    string;
+  type:  string;
+  title: string;
+  sub:   string;
+  path:  string;
 }
 
-const NAV_COMMANDS: CommandItem[] = [
-  { id:"exec",     label:"Executive Dashboard",     icon:TrendingUp, action:"/executive",          type:"navigate" },
-  { id:"cust",     label:"Customer Success",         icon:Users,      action:"/customers",          type:"navigate" },
-  { id:"comm",     label:"Commercial Center",        icon:FileText,   action:"/commercial",         type:"navigate" },
-  { id:"proc",     label:"Procurement Center",       icon:Package,    action:"/supply-chain",       type:"navigate" },
-  { id:"maint",    label:"Maintenance Center",       icon:Wrench,     action:"/maintenance",        type:"navigate" },
-  { id:"analy",    label:"Analytics Platform",       icon:BarChart3,  action:"/analytics",          type:"navigate" },
-  { id:"ai",       label:"AI Assistant",             icon:Zap,        action:"/ai",                 type:"navigate" },
-  { id:"new-wo",   label:"New Work Order",           icon:Plus,       action:"/operations/work-orders/new", type:"create" },
-  { id:"new-lead", label:"New Lead",                 icon:Plus,       action:"/commercial/leads/new",       type:"create" },
-  { id:"new-pr",   label:"New Purchase Request",     icon:Plus,       action:"/supply-chain/purchase-requests/new", type:"create" },
-  { id:"ai-ask",   label:"Ask AI anything...",       icon:Zap,        action:"/ai",                 type:"ai", shortcut:"then type" },
+interface NavCommand {
+  id:          string;
+  label:       string;
+  description: string;
+  icon:        any;
+  action:      string;
+  type:        string;
+  shortcut?:   string;
+}
+
+// ── Static nav commands (shown when no query) ─────────────────
+const NAV_COMMANDS: NavCommand[] = [
+  { id:"exec",    label:"Executive Dashboard",  description:"KPIs, risks, portfolio",      icon:TrendingUp, action:"/executive",                    type:"navigate" },
+  { id:"ops",     label:"Operations Center",    description:"Work orders & dispatch",       icon:Wrench,     action:"/operations/work-orders",        type:"navigate" },
+  { id:"maint",   label:"Maintenance Center",   description:"Assets & PM plans",            icon:Wrench,     action:"/maintenance",                   type:"navigate" },
+  { id:"comm",    label:"Commercial Center",    description:"Leads, contracts, pipeline",   icon:FileText,   action:"/commercial",                    type:"navigate" },
+  { id:"supply",  label:"Supply Chain",         description:"Procurement & inventory",      icon:Package,    action:"/supply-chain",                  type:"navigate" },
+  { id:"analy",   label:"Analytics",            description:"Scorecards & trends",          icon:BarChart3,  action:"/analytics",                     type:"navigate" },
+  { id:"ai",      label:"AI Assistant",         description:"Platform intelligence",        icon:Zap,        action:"/ai",                            type:"navigate" },
+  { id:"new-wo",  label:"New Work Order",       description:"Create corrective/preventive WO", icon:Plus,   action:"/engineering/new-work-order",    type:"create"   },
+  { id:"settings",label:"Settings",             description:"Account & platform settings",  icon:Settings,   action:"/settings",                      type:"navigate" },
 ];
 
-const TYPE_ICON: Record<string, any> = {
-  "Work Order":      Wrench,
-  "Contract":        FileText,
-  "Asset":           Settings,
-  "Service Request": Clipboard,
+// ── Type icon + color map ────────────────────────────────────
+const TYPE_CONFIG: Record<string, {icon:string; color:string; bg:string}> = {
+  "Work Order": { icon:"🔧", color:"#60A5FA", bg:"rgba(96,165,250,0.1)"  },
+  "Asset":      { icon:"🏗️", color:"#F87171", bg:"rgba(239,68,68,0.1)"   },
+  "Lead":       { icon:"👤", color:"#A78BFA", bg:"rgba(167,139,250,0.1)" },
+  "Contract":   { icon:"📄", color:"#FCD34D", bg:"rgba(245,158,11,0.1)"  },
+  "Technician": { icon:"👷", color:"#34D399", bg:"rgba(16,185,129,0.1)"  },
+  "Invoice":    { icon:"💰", color:"#34D399", bg:"rgba(16,185,129,0.1)"  },
 };
 
-interface Props { open: boolean; onClose: () => void }
-
-export function CommandBar({ open, onClose }: Props) {
-  const [query, setQuery]           = useState("");
-  const [selected, setSelected]     = useState(0);
-  const [searchResults, setResults] = useState<CommandItem[]>([]);
-  const [searching, setSearching]   = useState(false);
+// ── CommandBar ────────────────────────────────────────────────
+export function CommandBar() {
+  const router = useRouter();
+  const [open,       setOpen]       = useState(false);
+  const [query,      setQuery]      = useState("");
+  const [results,    setResults]    = useState<SearchResult[]>([]);
+  const [loading,    setLoading]    = useState(false);
+  const [selected,   setSelected]   = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounce = useRef<NodeJS.Timeout | null>(null);
-  const router   = useRouter();
+  const debounceRef = useRef<any>(null);
 
-  // Real search via API
-  async function runSearch(q: string) {
-    if (q.trim().length < 2) { setResults([]); return; }
-    setSearching(true);
-    try {
-      const token = localStorage.getItem("tb_token") || "";
-      const res = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8030/api/v1") +
-        "/analytics/search/global?q=" + encodeURIComponent(q),
-        { headers: { Authorization: "Bearer " + token } }
-      );
-      if (!res.ok) { setResults([]); return; }
-      const data = await res.json();
-      const Icon_map: Record<string,any> = { "wrench":Wrench, "file-text":FileText, "settings":Settings, "clipboard":Clipboard };
-      const items: CommandItem[] = (data.results ?? []).map((r: any) => ({
-        id:          "sr-" + r.id,
-        label:       r.title,
-        description: r.subtitle + " · " + r.type,
-        icon:        Icon_map[r.icon] ?? FileText,
-        action:      r.url,
-        type:        "result" as const,
-        badge:       r.type,
-      }));
-      setResults(items);
-    } catch {
-      setResults([]);
-    } finally {
-      setSearching(false);
-    }
-  }
-
-  useEffect(() => {
-    if (debounce.current) clearTimeout(debounce.current);
-    if (query.trim().length >= 2) {
-      debounce.current = setTimeout(() => runSearch(query), 280);
-    } else {
-      setResults([]);
-    }
-    return () => { if (debounce.current) clearTimeout(debounce.current); };
-  }, [query]);
-
-  // Merge: search results first, then filtered nav commands
-  const navFiltered = query
-    ? NAV_COMMANDS.filter(c =>
-        c.label.toLowerCase().includes(query.toLowerCase()) ||
-        c.description?.toLowerCase().includes(query.toLowerCase())
-      )
-    : NAV_COMMANDS;
-
-  const all = query.trim().length >= 2
-    ? [...searchResults, ...navFiltered]
-    : NAV_COMMANDS;
-
-  useEffect(() => {
-    if (open) {
-      setQuery("");
-      setSelected(0);
-      setResults([]);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [open]);
-
-  const execute = useCallback((cmd: CommandItem) => {
-    router.push(cmd.action);
-    onClose();
-  }, [router, onClose]);
-
+  // Open on Ctrl+K / Cmd+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (!open) return;
-      if (e.key === "Escape") { onClose(); return; }
-      if (e.key === "ArrowDown") { e.preventDefault(); setSelected(s => Math.min(s+1, all.length-1)); }
-      if (e.key === "ArrowUp")   { e.preventDefault(); setSelected(s => Math.max(s-1, 0)); }
-      if (e.key === "Enter" && all[selected]) execute(all[selected]);
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setOpen(o => !o);
+        setQuery("");
+        setResults([]);
+        setSelected(0);
+      }
+      if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, all, selected, execute, onClose]);
+  }, []);
 
-  const typeColor: Record<string,string> = {
-    navigate: "text-tertiary",
-    create:   "text-emerald-600",
-    ai:       "text-amber-600",
-    result:   "text-blue-600",
+  // Focus input when opened
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 80);
+  }, [open]);
+
+  // Debounced search
+  const doSearch = useCallback(async (q: string) => {
+    if (!q || q.length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const r = await authFetch(`/api/v1/search?q=${encodeURIComponent(q)}&limit=8`);
+      const data = await r.json();
+      setResults(data.results || []);
+    } catch { setResults([]); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    if (query.length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    debounceRef.current = setTimeout(() => doSearch(query), 280);
+    return () => clearTimeout(debounceRef.current);
+  }, [query, doSearch]);
+
+  // Keyboard nav
+  const totalItems = query.length >= 2 ? results.length : NAV_COMMANDS.length;
+  useEffect(() => { setSelected(0); }, [query, results.length]);
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown")  { e.preventDefault(); setSelected(s => Math.min(s+1, totalItems-1)); }
+    if (e.key === "ArrowUp")    { e.preventDefault(); setSelected(s => Math.max(s-1, 0)); }
+    if (e.key === "Enter")      { e.preventDefault(); handleSelect(selected); }
   };
 
-  const badgeColor: Record<string,string> = {
-    "Work Order":      "bg-blue-50 text-blue-700 border-blue-200",
-    "Contract":        "bg-emerald-50 text-emerald-700 border-emerald-200",
-    "Asset":           "bg-amber-50 text-amber-700 border-amber-200",
-    "Service Request": "bg-purple-50 text-purple-700 border-purple-200",
+  const handleSelect = (idx: number) => {
+    if (query.length >= 2) {
+      const r = results[idx];
+      if (r) { router.push(r.path); setOpen(false); setQuery(""); }
+    } else {
+      const cmd = NAV_COMMANDS[idx];
+      if (cmd) { router.push(cmd.action); setOpen(false); setQuery(""); }
+    }
   };
+
+  if (!open) return null;
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            transition={{duration:0.15}}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
-            onClick={onClose}
+    <div style={{
+      position:"fixed", inset:0, zIndex:2000,
+      display:"flex", alignItems:"flex-start", justifyContent:"center",
+      paddingTop:"12vh", paddingLeft:16, paddingRight:16,
+    }}>
+      {/* Backdrop */}
+      <div onClick={() => setOpen(false)} style={{
+        position:"absolute", inset:0,
+        background:"rgba(0,0,0,0.55)", backdropFilter:"blur(6px)",
+      }}/>
+
+      {/* Panel */}
+      <div style={{
+        position:"relative", width:"100%", maxWidth:600,
+        background:"#111827", border:"1px solid rgba(255,255,255,0.1)",
+        borderRadius:20, overflow:"hidden",
+        boxShadow:"0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+      }}>
+
+        {/* Search input */}
+        <div style={{
+          display:"flex", alignItems:"center", gap:12,
+          padding:"14px 20px", borderBottom:"1px solid rgba(255,255,255,0.07)",
+        }}>
+          {loading
+            ? <Loader2 size={18} style={{color:"rgba(148,163,184,0.6)", flexShrink:0, animation:"spin 0.8s linear infinite"}}/>
+            : <Search size={18} style={{color:"rgba(148,163,184,0.6)", flexShrink:0}}/>
+          }
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder="Search work orders, assets, leads, contracts..."
+            style={{
+              flex:1, background:"transparent", border:"none", outline:"none",
+              fontSize:"1rem", color:"#F1F5F9", caretColor:"#F59E0B",
+            }}
           />
-          <motion.div
-            initial={{opacity:0,scale:0.97,y:-8}}
-            animate={{opacity:1,scale:1,y:0}}
-            exit={{opacity:0,scale:0.97,y:-8}}
-            transition={{duration:0.15,ease:[0.4,0,0.2,1]}}
-            className="fixed top-[10%] left-1/2 -translate-x-1/2 w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden"
-          >
-            {/* Input */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-              <Search className={`w-4 h-4 flex-shrink-0 transition-colors ${searching ? "text-amber-500 animate-pulse" : "text-tertiary"}`} />
-              <input
-                ref={inputRef}
-                value={query}
-                onChange={e => { setQuery(e.target.value); setSelected(0); }}
-                placeholder="Search work orders, contracts, assets... or run a command"
-                className="flex-1 text-sm text-slate-900 placeholder-slate-400 bg-transparent outline-none"
-              />
-              {query && (
-                <button onClick={() => { setQuery(""); setResults([]); }} className="text-tertiary hover:text-slate-600">
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-              <kbd className="text-xs bg-slate-100 text-secondary px-2 py-1 rounded-lg">ESC</kbd>
-            </div>
+          {query && (
+            <button onClick={() => setQuery("")} style={{background:"none",border:"none",cursor:"pointer",color:"rgba(148,163,184,0.5)",padding:2}}>
+              <X size={14}/>
+            </button>
+          )}
+          <kbd style={{
+            fontSize:"0.625rem", padding:"2px 6px", borderRadius:5,
+            background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)",
+            color:"rgba(148,163,184,0.5)", flexShrink:0,
+          }}>ESC</kbd>
+        </div>
 
-            {/* Results */}
-            <div className="max-h-80 overflow-y-auto py-2">
-              {/* Section label */}
-              {query.trim().length >= 2 && searchResults.length > 0 && (
-                <div className="px-4 py-1.5 text-xs font-semibold text-tertiary uppercase tracking-wide">
-                  Search Results
+        {/* Results */}
+        <div style={{maxHeight:400, overflowY:"auto"}}>
+
+          {/* Live search results */}
+          {query.length >= 2 && (
+            <>
+              {results.length === 0 && !loading && (
+                <div style={{padding:"24px 20px", textAlign:"center", color:"rgba(148,163,184,0.5)", fontSize:"0.875rem"}}>
+                  No results for "{query}"
                 </div>
               )}
-              {searching && query.trim().length >= 2 && searchResults.length === 0 && (
-                <div className="px-4 py-3 text-sm text-tertiary flex items-center gap-2">
-                  <Search className="w-3.5 h-3.5 animate-pulse" /> Searching...
-                </div>
-              )}
-              {query.trim().length >= 2 && !searching && searchResults.length === 0 && (
-                <div className="px-4 py-2 text-xs text-tertiary">No matching records found</div>
-              )}
-
-              {/* Search result items */}
-              {searchResults.map((cmd, idx) => {
-                const Icon = cmd.icon;
-                const isSelected = idx === selected;
+              {results.map((r, i) => {
+                const tc = TYPE_CONFIG[r.type] || {icon:"📋", color:"rgba(148,163,184,0.8)", bg:"rgba(148,163,184,0.1)"};
+                const isSelected = i === selected;
                 return (
-                  <button
-                    key={cmd.id}
-                    onClick={() => execute(cmd)}
-                    onMouseEnter={() => setSelected(idx)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${isSelected ? "bg-amber-50" : "hover:bg-slate-50"}`}
+                  <button key={r.id} onClick={() => { router.push(r.path); setOpen(false); setQuery(""); }}
+                    style={{
+                      width:"100%", display:"flex", alignItems:"center", gap:12,
+                      padding:"11px 20px", background:isSelected?"rgba(245,158,11,0.08)":"transparent",
+                      border:"none", cursor:"pointer", textAlign:"left",
+                      borderLeft:isSelected?"3px solid #F59E0B":"3px solid transparent",
+                      transition:"all 80ms ease",
+                    }}
+                    onMouseEnter={() => setSelected(i)}
                   >
-                    <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-3.5 h-3.5 text-blue-600" />
+                    <div style={{
+                      width:32, height:32, borderRadius:8, flexShrink:0,
+                      background:tc.bg, display:"flex", alignItems:"center",
+                      justifyContent:"center", fontSize:"1rem",
+                    }}>
+                      {tc.icon}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 truncate">{cmd.label}</div>
-                      {cmd.description && <div className="text-xs text-tertiary truncate">{cmd.description}</div>}
+                    <div style={{flex:1, minWidth:0}}>
+                      <div style={{fontSize:"0.875rem", fontWeight:600, color:"#F1F5F9"}} className="truncate">{r.title}</div>
+                      <div style={{fontSize:"0.6875rem", color:"rgba(148,163,184,0.6)", marginTop:2}}>{r.type}{r.sub ? ` · ${r.sub}` : ""}</div>
                     </div>
-                    {cmd.badge && (
-                      <span className={"text-xs px-2 py-0.5 rounded border font-medium flex-shrink-0 " + (badgeColor[cmd.badge] ?? "bg-slate-100 text-slate-600")}>
-                        {cmd.badge}
-                      </span>
+                    <div style={{fontSize:"0.625rem", color:tc.color, fontWeight:700, flexShrink:0}}>{r.type}</div>
+                  </button>
+                );
+              })}
+            </>
+          )}
+
+          {/* Nav commands (default state) */}
+          {query.length < 2 && (
+            <>
+              <div style={{padding:"10px 20px 4px", fontSize:"0.625rem", fontWeight:700, color:"rgba(148,163,184,0.4)", textTransform:"uppercase", letterSpacing:"0.1em"}}>
+                Navigation
+              </div>
+              {NAV_COMMANDS.map((cmd, i) => {
+                const Icon      = cmd.icon;
+                const isSelected = i === selected;
+                const isCreate   = cmd.type === "create";
+                return (
+                  <button key={cmd.id} onClick={() => { router.push(cmd.action); setOpen(false); }}
+                    style={{
+                      width:"100%", display:"flex", alignItems:"center", gap:12,
+                      padding:"10px 20px", background:isSelected?"rgba(245,158,11,0.08)":"transparent",
+                      border:"none", cursor:"pointer", textAlign:"left",
+                      borderLeft:isSelected?"3px solid #F59E0B":"3px solid transparent",
+                      transition:"all 80ms ease",
+                    }}
+                    onMouseEnter={() => setSelected(i)}
+                  >
+                    <div style={{
+                      width:30, height:30, borderRadius:8, flexShrink:0,
+                      background:isCreate?"rgba(245,158,11,0.1)":"rgba(255,255,255,0.05)",
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                    }}>
+                      <Icon size={14} style={{color:isCreate?"#FCD34D":"rgba(148,163,184,0.7)"}}/>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:"0.8125rem", fontWeight:600, color:"#F1F5F9"}}>{cmd.label}</div>
+                      <div style={{fontSize:"0.6875rem", color:"rgba(148,163,184,0.5)", marginTop:1}}>{cmd.description}</div>
+                    </div>
+                    {cmd.shortcut && (
+                      <kbd style={{fontSize:"0.5625rem", padding:"2px 6px", borderRadius:4, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)", color:"rgba(148,163,184,0.5)"}}>
+                        {cmd.shortcut}
+                      </kbd>
                     )}
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
                   </button>
                 );
               })}
+            </>
+          )}
+        </div>
 
-              {/* Nav commands section */}
-              {(navFiltered.length > 0 || !query) && (
-                <div className="px-4 pt-2 pb-1">
-                  <div className="text-xs font-semibold text-tertiary uppercase tracking-wide">
-                    {query.trim().length >= 2 ? "Commands" : "Quick Navigation"}
-                  </div>
-                </div>
-              )}
-
-              {navFiltered.map((cmd, navIdx) => {
-                const idx = searchResults.length + navIdx;
-                const Icon = cmd.icon;
-                const isSelected = idx === selected;
-                return (
-                  <button
-                    key={cmd.id}
-                    onClick={() => execute(cmd)}
-                    onMouseEnter={() => setSelected(idx)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${isSelected ? "bg-amber-50" : "hover:bg-slate-50"}`}
-                  >
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      cmd.type === "create" ? "bg-emerald-100" : cmd.type === "ai" ? "bg-amber-100" : "bg-slate-100"
-                    }`}>
-                      <Icon className={`w-3.5 h-3.5 ${typeColor[cmd.type]}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 truncate">{cmd.label}</div>
-                      {cmd.description && <div className="text-xs text-tertiary truncate">{cmd.description}</div>}
-                    </div>
-                    {cmd.shortcut && <span className="text-xs text-tertiary flex-shrink-0">{cmd.shortcut}</span>}
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
-                  </button>
-                );
-              })}
-
-              {all.length === 0 && !searching && query && (
-                <div className="py-10 text-center">
-                  <Search className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-                  <div className="text-sm text-tertiary">No results for <strong>{query}</strong></div>
-                </div>
-              )}
-            </div>
-
-            <div className="px-4 py-2.5 border-t border-slate-100 flex items-center gap-4 text-xs text-tertiary">
-              <span>↑↓ navigate</span>
-              <span>↵ open</span>
-              <span>esc close</span>
-              <span className="ml-auto">⌘K to toggle</span>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        {/* Footer */}
+        <div style={{
+          padding:"10px 20px", borderTop:"1px solid rgba(255,255,255,0.06)",
+          display:"flex", alignItems:"center", gap:16,
+          fontSize:"0.5625rem", color:"rgba(148,163,184,0.35)",
+        }}>
+          <span>↑↓ navigate</span>
+          <span>↵ open</span>
+          <span>esc close</span>
+          <span style={{marginLeft:"auto"}}>Ctrl+K to toggle</span>
+        </div>
+      </div>
+    </div>
   );
 }
+
+export default CommandBar;
