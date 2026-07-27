@@ -702,18 +702,16 @@ except Exception as e:
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
 def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
     from sqlalchemy import text, create_engine
-    from sqlalchemy.orm import Session as _Sess
+    from sqlalchemy.orm import Session as _S
     import os
-    _eng = create_engine(os.environ.get("DATABASE_URL", "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
-    with _Sess(_eng) as db:
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with _S(eng) as db:
         try:
-            q = "SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_id=a.id WHERE 1=1"
-            p = {"limit": limit}
-            if hotel_id: q += " AND mp.hotel_id=:h"; p["h"] = hotel_id
-            if status: q += " AND mp.status=:s"; p["s"] = status
-            q += " ORDER BY mp.next_due_date ASC NULLS LAST LIMIT :limit"
-            return [dict(r._mapping) for r in db.execute(text(q), p).fetchall()]
-        except: return []
+            rows = db.execute(text("SELECT * FROM maintenance_plans ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            print(f"pm-plans: {e}")
+            return []
 
 @app.get("/api/v1/payment-tracking/", tags=["finance"])
 @app.get("/api/v1/payment-tracking", tags=["finance"])
