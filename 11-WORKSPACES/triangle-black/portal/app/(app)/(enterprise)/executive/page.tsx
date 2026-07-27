@@ -57,7 +57,7 @@ export default function ExecutivePage() {
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#34D399"}} className="animate-pulse"/>
                 <span style={{color:"rgba(148,163,184,0.7)",fontSize:"0.6875rem",fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Executive Center</span>
               </div>
-              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Executive Dashboard</h1>
+              <h1 className="text-page-title" className="text-slate-100">Executive Dashboard</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.875rem",marginTop:6}}>Real-time business intelligence and decision support</p>
             </div>
             <div className="flex items-center gap-4">
@@ -132,7 +132,7 @@ export default function ExecutivePage() {
                   <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)} className="w-full text-left"
                     style={{background:"rgba(239,68,68,0.06)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:12,padding:"12px 14px",transition:"all 150ms ease",cursor:"pointer"}}>
                     <div style={{fontSize:"0.625rem",fontWeight:700,color:"#F87171",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:3}}>Critical WO</div>
-                    <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{w.title}</div>
+                    <div className="text-sm font-semibold text-primary" className="truncate">{w.title}</div>
                   </button>
                 ))}
                 {expiring30.slice(0,3).map((c,i)=>{
@@ -141,7 +141,7 @@ export default function ExecutivePage() {
                     <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)} className="w-full text-left"
                       style={{background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:"12px 14px",transition:"all 150ms ease",cursor:"pointer"}}>
                       <div style={{fontSize:"0.625rem",fontWeight:700,color:"#FBBF24",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:3}}>Contract Expiring · {days}d</div>
-                      <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{c.title||c.id?.slice(0,16)}</div>
+                      <div className="text-sm font-semibold text-primary" className="truncate">{c.title||c.id?.slice(0,16)}</div>
                     </button>
                   );
                 })}
@@ -154,7 +154,7 @@ export default function ExecutivePage() {
             {/* Twin domains */}
             <div className="tb-section">
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Digital Twin</div>
-              <div className="flex items-center justify-between" style={{marginBottom:20}}>
+              <div className="flex items-center justify-between" className="mb-5">
                 <div className="tb-empty-title">Domain Health — {score}/100</div>
                 <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Full →</button>
               </div>
@@ -177,14 +177,14 @@ export default function ExecutivePage() {
 
             {/* Finance snapshot */}
             <div className="tb-section">
-              <div className="flex items-center justify-between" style={{marginBottom:20}}>
+              <div className="flex items-center justify-between" className="mb-5">
                 <div>
                   <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Finance</div>
                   <div className="tb-empty-title">Revenue Snapshot</div>
                 </div>
                 <button onClick={()=>router.push("/invoices")} className="tb-section-link">Full report →</button>
               </div>
-              <div className="grid grid-cols-4 gap-3" style={{marginBottom:16}}>
+              <div className="grid grid-cols-4 gap-3" className="mb-4">
                 {[
                   {label:"Paid",      count:d.finance?.paid??0,     color:"#34D399"},
                   {label:"Pending",   count:d.finance?.pending??0,   color:"#FBBF24"},

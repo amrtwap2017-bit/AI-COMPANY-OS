@@ -18,7 +18,7 @@ export default function RedirectDetail() {
   
   return (
     <div className="min-h-screen flex items-center justify-center" className="bg-base">
-      <div style={{textAlign:"center"}}>
+      <div className="text-center">
         <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid var(--color-brand)",borderTopColor:"transparent",margin:"0 auto",animation:"spin 0.8s linear infinite"}}/>
         <div className="tb-empty-desc">Redirecting...</div>
       </div>

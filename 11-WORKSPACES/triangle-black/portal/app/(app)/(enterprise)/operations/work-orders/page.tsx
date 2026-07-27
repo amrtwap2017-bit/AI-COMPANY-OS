@@ -83,7 +83,7 @@ export default function WorkOrdersPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-label-upper text-orange-500 mb-1.5">Operations</div>
-              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Work Orders</h1>
+              <h1 className="text-page-title" className="text-slate-100">Work Orders</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:5}}>{wos.length} total · {open.length} open · {overdue.length} overdue · {compRate}% completion</p>
             </div>
             <button onClick={() => setShowCreate(true)}
@@ -124,7 +124,7 @@ export default function WorkOrdersPage() {
         {critical.length > 0 && (
           <div style={{background:"rgba(239,68,68,0.06)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:16,padding:"14px 20px",display:"flex",alignItems:"center",gap:16}}>
             <span style={{fontSize:"1.25rem"}}>🚨</span>
-            <div style={{flex:1}}>
+            <div className="flex-1">
               <div style={{fontWeight:700,color:"#F87171",fontSize:"0.875rem"}}>{critical.length} Critical Work Orders Need Immediate Action</div>
               <div style={{fontSize:"0.75rem",color:"rgba(239,68,68,0.7)",marginTop:2}}>{critical.slice(0,2).map(w=>w.title).join(" · ")}</div>
             </div>
@@ -191,12 +191,12 @@ export default function WorkOrdersPage() {
                     <div style={{display:"flex",alignItems:"center",gap:10,paddingRight:16}}>
                       <div style={{width:3,height:28,background:pc,borderRadius:99,flexShrink:0}}/>
                       <div>
-                        <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{w.title}</div>
+                        <div className="text-sm font-semibold text-primary" className="truncate">{w.title}</div>
                         <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2,textTransform:"capitalize"}}>{w.type||"corrective"}</div>
                       </div>
                     </div>
-                    <div style={{textAlign:"center"}}><span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 8px",borderRadius:6,background:`${pc}18`,color:pc}}>{w.priority}</span></div>
-                    <div style={{textAlign:"center"}}><span style={{fontSize:"0.6875rem",fontWeight:600,padding:"3px 10px",borderRadius:6,background:`${sc}18`,color:sc}}>{w.status}</span></div>
+                    <div className="text-center"><span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 8px",borderRadius:6,background:`${pc}18`,color:pc}}>{w.priority}</span></div>
+                    <div className="text-center"><span style={{fontSize:"0.6875rem",fontWeight:600,padding:"3px 10px",borderRadius:6,background:`${sc}18`,color:sc}}>{w.status}</span></div>
                     <div style={{textAlign:"center",fontSize:"0.6875rem",color:isOverdue?"#F87171":"var(--color-text-3)",fontWeight:isOverdue?700:400}}>
                       {fmtDate(w.due_date)}{isOverdue&&<div style={{fontSize:"0.5rem",textTransform:"uppercase"}}>OVERDUE</div>}
                     </div>

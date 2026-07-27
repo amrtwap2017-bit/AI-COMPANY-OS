@@ -102,7 +102,7 @@ export default function AssetsPage() {
         {faulted.length > 0 && (
           <div className="tb-alert tb-alert-critical" style={{borderRadius:14,marginBottom:20}}>
             <span style={{fontSize:"1.25rem"}}>⚠️</span>
-            <div style={{flex:1}}>
+            <div className="flex-1">
               <div style={{fontWeight:700,color:"var(--color-danger-text)",fontSize:"0.875rem"}}>{faulted.length} Asset{faulted.length>1?"s":""} In Fault — Immediate Attention Required</div>
               <div style={{fontSize:"0.75rem",color:"var(--color-danger-text)",opacity:0.75,marginTop:2}}>{faulted.slice(0,3).map(a=>a.name).join(" · ")}</div>
             </div>
@@ -141,17 +141,17 @@ export default function AssetsPage() {
                     <div style={{display:"flex",alignItems:"center",gap:10,paddingRight:16}}>
                       <div style={{width:3,height:32,background:critColor,borderRadius:99,flexShrink:0}}/>
                       <div>
-                        <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{a.name}</div>
-                        <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2}}>{a.manufacturer} {a.model}</div>
+                        <div className="text-sm font-semibold text-primary" className="truncate">{a.name}</div>
+                        <div className="text-xs text-tertiary mt-0.5">{a.manufacturer} {a.model}</div>
                       </div>
                     </div>
                     <div style={{textAlign:"center",fontSize:"0.75rem",color:"var(--color-text-2)"}}>{a.category||"—"}</div>
-                    <div style={{textAlign:"center"}}>
+                    <div className="text-center">
                       <span style={{fontSize:"0.6875rem",fontWeight:600,padding:"3px 10px",borderRadius:6,background:`${statColor}18`,color:statColor}}>
                         {a.status||"—"}
                       </span>
                     </div>
-                    <div style={{textAlign:"center"}}>
+                    <div className="text-center">
                       <span style={{fontSize:"0.6875rem",fontWeight:600,padding:"3px 8px",borderRadius:6,background:`${critColor}18`,color:critColor}}>
                         {a.criticality||"—"}
                       </span>

@@ -258,7 +258,7 @@ export function CommandBar({ open: externalOpen, onClose }: CommandBarProps = {}
                     }}>
                       <Icon size={14} style={{color:isCreate?"#FCD34D":"rgba(148,163,184,0.7)"}}/>
                     </div>
-                    <div style={{flex:1}}>
+                    <div className="flex-1">
                       <div style={{fontSize:"0.8125rem", fontWeight:600, color:"#F1F5F9"}}>{cmd.label}</div>
                       <div style={{fontSize:"0.6875rem", color:"rgba(148,163,184,0.5)", marginTop:1}}>{cmd.description}</div>
                     </div>

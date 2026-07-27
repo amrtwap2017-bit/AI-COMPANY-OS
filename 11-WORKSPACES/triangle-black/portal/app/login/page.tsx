@@ -61,7 +61,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-600 mb-4">
             <Building2 className="w-8 h-8 text-white"/>
           </div>
-          <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Triangle Black</h1>
+          <h1 className="text-page-title" className="text-slate-100">Triangle Black</h1>
           <p className="text-tertiary text-sm mt-1">Enterprise Operations Platform</p>
         </div>
 

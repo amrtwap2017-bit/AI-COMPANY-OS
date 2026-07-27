@@ -79,7 +79,7 @@ export default function AnalyticsHub() {
           <div className="flex items-start justify-between">
             <div>
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"#22D3EE",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:6}}>Analytics</div>
-              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Analytics Hub</h1>
+              <h1 className="text-page-title" className="text-slate-100">Analytics Hub</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:5}}>Live KPIs, performance metrics, and business intelligence</p>
             </div>
             <div style={{background:score>=95?"rgba(16,185,129,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${score>=95?"rgba(16,185,129,0.25)":"rgba(245,158,11,0.25)"}`,borderRadius:14,padding:"14px 22px",textAlign:"center"}}>
@@ -111,7 +111,7 @@ export default function AnalyticsHub() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {kpiGroups.map((group,gi)=>(
             <div key={gi} className="tb-section">
-              <div className="flex items-center justify-between" style={{marginBottom:20}}>
+              <div className="flex items-center justify-between" className="mb-5">
                 <div>
                   <div style={{fontSize:"0.625rem",fontWeight:700,color:group.color,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>{group.section}</div>
                   <div className="tb-empty-title">{group.section} KPIs</div>
@@ -143,7 +143,7 @@ export default function AnalyticsHub() {
 
         {/* Twin domain matrix */}
         <div className="tb-section">
-          <div className="flex items-center justify-between" style={{marginBottom:20}}>
+          <div className="flex items-center justify-between" className="mb-5">
             <div>
               <div style={{fontSize:"0.625rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Digital Twin</div>
               <div className="tb-empty-title">All 8 Operational Domains</div>

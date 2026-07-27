@@ -93,7 +93,7 @@ export default function InvoiceDetailPage() {
           <div className="flex items-start justify-between gap-6">
             <div>
               <div className="text-label-upper text-emerald-500 mb-1.5">Finance · Invoice</div>
-              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>
+              <h1 className="text-page-title" className="text-slate-100">
                 {inv.invoice_number || `INV-${inv.id?.slice(0,8)}`}
               </h1>
               {inv.title && <p style={{color:"rgba(148,163,184,0.65)",fontSize:"0.875rem",marginTop:6}}>{inv.title}</p>}
@@ -104,7 +104,7 @@ export default function InvoiceDetailPage() {
               <div style={{background:sc.bg,border:`1px solid ${sc.border}`,borderRadius:14,padding:"16px 24px",textAlign:"center"}}>
                 <div style={{fontSize:"1.75rem",fontWeight:900,color:sc.color,lineHeight:1}}>{fmtEGP(inv.total_amount)}</div>
                 <div style={{fontSize:"0.625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"}}>Total Amount</div>
-                <div style={{marginTop:8}}>
+                <div className="mt-2">
                   <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export default function InvoiceDetailPage() {
                 ].map(({label,value},i) => (
                   <div key={i} style={{background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
                     <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginBottom:6}}>{label}</div>
-                    <div style={{fontSize:"0.875rem",fontWeight:600,color:"var(--color-text-1)"}}>{value}</div>
+                    <div className="text-sm font-semibold text-primary">{value}</div>
                   </div>
                 ))}
               </div>
@@ -177,13 +177,13 @@ export default function InvoiceDetailPage() {
               {inv.description && (
                 <div style={{marginTop:16,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
                   <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginBottom:6}}>Description</div>
-                  <div style={{fontSize:"0.875rem",color:"var(--color-text-1)",lineHeight:1.6}}>{inv.description}</div>
+                  <div className="text-sm text-primary leading-relaxed">{inv.description}</div>
                 </div>
               )}
               {inv.notes && (
                 <div style={{marginTop:12,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
                   <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginBottom:6}}>Notes</div>
-                  <div style={{fontSize:"0.875rem",color:"var(--color-text-1)",lineHeight:1.6}}>{inv.notes}</div>
+                  <div className="text-sm text-primary leading-relaxed">{inv.notes}</div>
                 </div>
               )}
             </div>
@@ -202,9 +202,9 @@ export default function InvoiceDetailPage() {
                         onMouseEnter={e => {e.currentTarget.style.borderColor="var(--color-brand)";e.currentTarget.style.background="rgba(180,83,9,0.04)";}}
                         onMouseLeave={e => {e.currentTarget.style.borderColor="transparent";e.currentTarget.style.background="var(--color-bg-alt)";}}>
                         <div style={{width:3,height:32,background:rs.color,borderRadius:99,flexShrink:0}}/>
-                        <div style={{flex:1}}>
-                          <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}}>{ri.invoice_number}</div>
-                          <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2}}>{fmtDate(ri.due_date)}</div>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-primary">{ri.invoice_number}</div>
+                          <div className="text-xs text-tertiary mt-0.5">{fmtDate(ri.due_date)}</div>
                         </div>
                         <div style={{fontSize:"0.875rem",fontWeight:700,color:rs.color}}>{fmtEGP(ri.total_amount)}</div>
                         <span style={{fontSize:"0.625rem",fontWeight:700,padding:"3px 8px",borderRadius:99,background:rs.bg,color:rs.color,border:`1px solid ${rs.border}`}}>{rs.label}</span>
@@ -257,7 +257,7 @@ export default function InvoiceDetailPage() {
                       ["Expires",   fmtDate(linkedContract.end_date)],
                     ].map(([l,v],i) => (
                       <div key={i} className="flex justify-between" style={{fontSize:"0.75rem"}}>
-                        <span style={{color:"var(--color-text-3)"}}>{l}</span>
+                        <span className="text-tertiary">{l}</span>
                         <span style={{fontWeight:600,color:"var(--color-text-1)"}}>{v}</span>
                       </div>
                     ))}
@@ -277,7 +277,7 @@ export default function InvoiceDetailPage() {
                 ["Updated",     fmtDate(inv.updated_at)],
               ].map(([l,v],i) => (
                 <div key={i} className="flex justify-between" style={{fontSize:"0.75rem",padding:"8px 0",borderBottom:i<3?"1px solid var(--color-divider)":"none"}}>
-                  <span style={{color:"var(--color-text-3)"}}>{l}</span>
+                  <span className="text-tertiary">{l}</span>
                   <span style={{fontWeight:500,color:"var(--color-text-2)",fontFamily:"monospace"}}>{v}</span>
                 </div>
               ))}
