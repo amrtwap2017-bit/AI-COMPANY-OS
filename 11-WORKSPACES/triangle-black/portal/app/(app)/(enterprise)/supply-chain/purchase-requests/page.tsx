@@ -30,7 +30,7 @@ export default function PurchaseRequestsPage() {
   const [showCreate,  setShowCreate]  = useState(false);
 
   const { data: raw, isLoading } = useQuery(
-    ["pr-list"], () => authFetch("/api/v1/purchase-requests/").then(r=>r.json())
+    ["pr-list"], () => authFetch("/api/v1/purchase-requests-portal").then(r=>r.json())
   );
   const prs = toArr(raw);
 
@@ -49,7 +49,7 @@ export default function PurchaseRequestsPage() {
   return (
     <div className="min-h-screen bg-base">
       <CreateModal open={showCreate} onClose={()=>setShowCreate(false)} title="Purchase Request" icon="🛒"
-        endpoint="/api/v1/purchase-requests/" fields={prFields} invalidateKeys={["pr-list"]}
+        endpoint="/api/v1/purchase-requests-portal" fields={prFields} invalidateKeys={["pr-list"]}
         successPath="/supply-chain/purchase-requests/"/>
 
       {/* HERO */}

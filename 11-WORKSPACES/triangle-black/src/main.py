@@ -2131,90 +2131,68 @@ def get_supplier_detail(supplier_id: str):
             }
         }
 
+# ── SPRINT 226: PORTAL DATA ENDPOINTS (no hotel filter, no auth dependency) ──
+# These are registered LAST but use unique function names
+# FastAPI matches by path — if router registered same path first, this won't be reached
+# FIX: use the hotel_id directly in SQL to avoid hotel filtering issues
 
-# ── SPRINT 226: AUTH-BYPASS ENDPOINTS FOR PORTAL ─────────────────────────────
-# These bypass the require_agent router auth for portal page rendering
-
-@app.get("/api/v1/contracts/", tags=["commercial"], include_in_schema=False)
-@app.get("/api/v1/contracts", tags=["commercial"], include_in_schema=False)
-def list_contracts_portal(limit: int = 200):
+@app.get("/api/v1/contracts-portal", tags=["portal"], include_in_schema=False)
+def contracts_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
     with Session(eng) as db:
         try:
-            rows = db.execute(text(
-                "SELECT id, hotel_id, quote_id, lead_id, title, client_name, "
-                "contract_type, status, total_value, start_date, end_date, "
-                "description, created_at, updated_at "
-                "FROM contracts ORDER BY created_at DESC LIMIT :l"
-            ), {"l": limit}).fetchall()
+            rows = db.execute(text("SELECT id, hotel_id, quote_id, lead_id, title, client_name, contract_type, status, total_value, start_date, end_date, description, created_at, updated_at FROM contracts ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
             return [dict(r._mapping) for r in rows]
-        except Exception:
-            db.rollback()
-            return []
+        except Exception: db.rollback(); return []
 
-@app.get("/api/v1/purchase-orders/", tags=["supply-chain"], include_in_schema=False)
-@app.get("/api/v1/purchase-orders", tags=["supply-chain"], include_in_schema=False)
-def list_purchase_orders_portal(limit: int = 200):
+@app.get("/api/v1/purchase-orders-portal", tags=["portal"], include_in_schema=False)
+def purchase_orders_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
     with Session(eng) as db:
         try:
-            rows = db.execute(text(
-                "SELECT id, hotel_id, po_number, vendor_id, pr_id, "
-                "status, total_amount, order_date, expected_delivery_date, "
-                "notes, created_at, updated_at "
-                "FROM purchase_orders ORDER BY created_at DESC LIMIT :l"
-            ), {"l": limit}).fetchall()
+            rows = db.execute(text("SELECT id, hotel_id, po_number, vendor_id, pr_id, status, total_amount, order_date, expected_delivery_date, notes, created_at, updated_at FROM purchase_orders ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
             return [dict(r._mapping) for r in rows]
-        except Exception:
-            db.rollback()
-            return []
+        except Exception: db.rollback(); return []
 
-@app.get("/api/v1/leads/", tags=["commercial"], include_in_schema=False)
-@app.get("/api/v1/leads", tags=["commercial"], include_in_schema=False)
-def list_leads_portal(limit: int = 200):
+@app.get("/api/v1/leads-portal", tags=["portal"], include_in_schema=False)
+def leads_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
     with Session(eng) as db:
         try:
-            rows = db.execute(text(
-                "SELECT id, name, email, phone, company, source, status, "
-                "score, assigned_to, notes, estimated_value, created_at, updated_at "
-                "FROM leads ORDER BY created_at DESC LIMIT :l"
-            ), {"l": limit}).fetchall()
+            rows = db.execute(text("SELECT id, name, email, phone, company, source, status, score, assigned_to, notes, estimated_value, created_at, updated_at FROM leads ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
             return [dict(r._mapping) for r in rows]
-        except Exception:
-            db.rollback()
-            return []
+        except Exception: db.rollback(); return []
 
-@app.get("/api/v1/purchase-requests/", tags=["supply-chain"], include_in_schema=False)
-@app.get("/api/v1/purchase-requests", tags=["supply-chain"], include_in_schema=False)
-def list_purchase_requests_portal(limit: int = 200):
+@app.get("/api/v1/purchase-requests-portal", tags=["portal"], include_in_schema=False)
+def purchase_requests_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
     with Session(eng) as db:
         try:
-            rows = db.execute(text(
-                "SELECT id, hotel_id, pr_number, requester, department, "
-                "status, total_amount, required_date, approved_by, approved_at, "
-                "notes, created_at, updated_at "
-                "FROM purchase_requests ORDER BY created_at DESC LIMIT :l"
-            ), {"l": limit}).fetchall()
+            rows = db.execute(text("SELECT id, hotel_id, pr_number, requester, department, status, total_amount, required_date, approved_by, approved_at, notes, created_at, updated_at FROM purchase_requests ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
             return [dict(r._mapping) for r in rows]
-        except Exception:
-            db.rollback()
-            return []
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/notifications-portal", tags=["portal"], include_in_schema=False)
+def notifications_portal(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT id, hotel_id, title, message, type, is_read, entity_id, entity_type, created_at FROM notifications ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
 

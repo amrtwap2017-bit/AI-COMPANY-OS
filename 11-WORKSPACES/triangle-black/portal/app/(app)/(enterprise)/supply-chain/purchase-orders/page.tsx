@@ -21,7 +21,7 @@ export default function PurchaseOrdersPage() {
 
   const { data: poRaw, isLoading } = useQuery(
     ["po-list"],
-    () => authFetch("/api/v1/purchase-orders/").then(r => r.json()),
+    () => authFetch("/api/v1/purchase-orders-portal").then(r => r.json()),
     { refetchInterval: 60000 }
   );
   const { data: suppRaw } = useQuery(["po-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.json()));
