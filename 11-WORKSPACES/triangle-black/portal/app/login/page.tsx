@@ -25,6 +25,7 @@ export default function LoginPage() {
         if (typeof window !== "undefined") {
           localStorage.setItem("tb_token", data.access_token);
           document.cookie = "tb_token=" + data.access_token + "; path=/; max-age=86400";
+          document.cookie = "tb_access_token=" + data.access_token + "; path=/; max-age=86400";
         }
         router.push("/workspace");
       } else {
