@@ -84,8 +84,8 @@ const MaintenanceActionsPage = () => {
           <Link href={`/maintenance/pm-plans/${plan.id}`} key={plan.id}>
             <div className="flex items-center justify-between p-4 border-b last:border-b-0">
               <div>
-                <p>{plan.description}</p>
-                <p className="text-sm text-gray-500">{plan.name}</p>
+                <p>{plan.notes}</p>
+                <p className="text-sm text-gray-500">{plan.title}</p>
               </div>
               <StatusBadge status="overdue" />
             </div>
