@@ -1,35 +1,19 @@
 "use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-import { useState } from "react";
-
-const fetchAuditLogs = async (endpoint: string) => {
-  const response = await fetch(endpoint, { credentials: "include" });
-  if (!response.ok && response.status === 404) throw new Error("Not Found");
-  return response.json();
-};
-
-const AuditPage = () => {
-  const [entityTypeFilter, setEntityTypeFilter] = useState<"All" | "workOrder" | "asset" | "contract" | "purchase_order" | "user">("All");
-
-  const { data: auditLogs, isLoading, isError } = useQuery(
-    {
-      queryKey: ["audit-logs", entityTypeFilter],
-      queryFn: () => fetchAuditLogs("/api/v1/administration/audit").catch(() => fetchAuditLogs("/api/v1/audit-logs")).catch(() => fetchAuditLogs("/api/v1/activities")),
-      refetchInterval: 60000,
-    }
-  );
-
-  if (isLoading) return <LoadingState />;
-  if (isError || !auditLogs) return <EmptyState title="Audit logging not configured" note="Enable audit logs." />;
-
-  // Render your component using the fetched data
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/administration"); }, []);
   return (
-    <PageWrapper>
-      {/* Your component logic here */}
-    </PageWrapper>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /administration</p>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default AuditPage;
+}

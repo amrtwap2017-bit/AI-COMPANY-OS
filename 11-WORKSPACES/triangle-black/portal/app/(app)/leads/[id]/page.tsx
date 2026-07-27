@@ -1,26 +1,18 @@
 "use client";
 // @ts-nocheck
-import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-export default function RedirectDetail() {
-  const params = useParams();
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
   const router = useRouter();
-  const id = params?.id;
-  
-  useEffect(() => {
-    if (id) {
-      router.replace("/commercial/leads/" + id);
-    } else {
-      router.replace("/commercial/leads");
-    }
-  }, [id, router]);
-  
+  useEffect(() => { router.replace("/commercial/leads"); }, []);
   return (
-    <div className="min-h-screen flex items-center justify-center" className="bg-base">
-      <div className="text-center">
-        <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid var(--color-brand)",borderTopColor:"transparent",margin:"0 auto",animation:"spin 0.8s linear infinite"}}/>
-        <div className="tb-empty-desc">Redirecting...</div>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /commercial/leads</p>
+        </div>
       </div>
     </div>
   );
