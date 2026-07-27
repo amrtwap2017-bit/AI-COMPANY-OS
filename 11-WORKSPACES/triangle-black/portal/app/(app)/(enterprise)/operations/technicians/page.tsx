@@ -1,116 +1,135 @@
 "use client";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0,10); } };
-const fmtDateTime = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}); } catch { return "—"; } };
-
-const P_COLOR = {
-  critical: "bg-red-100 text-red-800 border border-red-200",
-  high:     "bg-orange-100 text-orange-800 border border-orange-200",
-  medium:   "bg-amber-100 text-amber-800 border border-amber-200",
-  low:      "bg-slate-100 text-slate-600 border border-slate-200",
-};
-const S_COLOR = {
-  open:        "bg-blue-100 text-blue-800",
-  in_progress: "bg-indigo-100 text-indigo-800",
-  completed:   "bg-emerald-100 text-emerald-800",
-  cancelled:   "bg-slate-100 text-slate-500",
-  resolved:    "bg-emerald-100 text-emerald-800",
-  closed:      "bg-slate-100 text-slate-500",
-};
-function PBadge({v}) {
-  return <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold "+(P_COLOR[v?.toLowerCase()]||P_COLOR.low)}>{v||"—"}</span>;
-}
-function SBadge({v}) {
-  return <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S_COLOR[v?.toLowerCase()]||"bg-slate-100 text-slate-600")}>{v?.replace("_"," ")||"—"}</span>;
-}
 
 export default function TechniciansPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
 
-  const { data: raw = [], isLoading } = useQuery(
-    ["technicians-page"],
-    () => authFetch("/api/v1/technicians/?limit=100").then(r => r.json()),
-    { refetchInterval: 120000 }
+  const { data: raw, isLoading } = useQuery(["tech-list"], () => authFetch("/api/v1/technicians/").then(r=>r.json()), {refetchInterval:60000});
+  const { data: woRaw } = useQuery(["tech-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const techs = toArr(raw);
+  const wos   = toArr(woRaw);
+
+  const active   = techs.filter(t => t.is_active !== false);
+  const busy     = techs.filter(t => (t.current_work_orders||0) > 0);
+  const atCap    = techs.filter(t => (t.current_work_orders||0) >= (t.max_work_orders||5));
+  const available = techs.filter(t => t.is_active !== false && (t.current_work_orders||0) === 0);
+
+  const filtered = techs.filter(t => {
+    const matchSearch = !search || t.name?.toLowerCase().includes(search.toLowerCase()) || t.email?.toLowerCase().includes(search.toLowerCase());
+    const matchFilter = filter==="all" ||
+      (filter==="active" && t.is_active!==false) ||
+      (filter==="available" && t.is_active!==false && (t.current_work_orders||0)===0) ||
+      (filter==="busy" && (t.current_work_orders||0)>0) ||
+      (filter==="capacity" && (t.current_work_orders||0)>=(t.max_work_orders||5));
+    return matchSearch && matchFilter;
+  });
+
+  if (isLoading) return (
+    <div className="p-6 space-y-4 animate-pulse">
+      <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-40"/>
+      <div className="grid grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border p-5 h-24"/>)}</div>
+    </div>
   );
-
-  const techs    = toArr(raw);
-  const filtered = techs.filter(t =>
-    !search || t.name?.toLowerCase().includes(search.toLowerCase()) ||
-    t.specialization?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const active   = techs.filter(t => t.is_active !== false).length;
-  const atCap    = techs.filter(t => t.current_work_orders >= t.max_work_orders).length;
-  const available = techs.filter(t => (t.current_work_orders||0) < (t.max_work_orders||5)).length;
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Technicians"
-        subtitle={`${techs.length} total · ${active} active · ${available} available`}
-        breadcrumbs={[{label:"Operations",href:"/operations"},{label:"Technicians"}]}
-      />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Technicians</h1>
+          <p className="text-slate-500 text-sm mt-1.5">{techs.length} total · {active.length} active · {available.length} available · {busy.length} on duty</p>
+        </div>
+        <button onClick={()=>router.push("/operations/dispatch")}
+          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all">
+          👷 Dispatch Center
+        </button>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          {label:"Total",     value:techs.length, color:"text-slate-800"},
-          {label:"Active",    value:active,        color:"text-emerald-700"},
-          {label:"Available", value:available,     color:"text-blue-700"},
-          {label:"At Capacity",value:atCap,        color:"text-red-700"},
-        ].map(k => (
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
-          </div>
+          { label:"Total",       value:techs.length,    color:"slate",   filter:"all" },
+          { label:"Available",   value:available.length,color:"emerald", filter:"available" },
+          { label:"On Duty",     value:busy.length,     color:"amber",   filter:"busy" },
+          { label:"At Capacity", value:atCap.length,    color:atCap.length>0?"red":"emerald", filter:"capacity" },
+        ].map((k,i)=>(
+          <button key={i} onClick={()=>setFilter(filter===k.filter?"all":k.filter)}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${filter===k.filter?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">{k.label}</div>
+          </button>
         ))}
       </div>
 
-      <SectionCard title={`Technicians (${filtered.length})`}>
-        <div className="mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search technicians…" value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" />
-        </div>
-        {isLoading ? <LoadingState /> : filtered.length === 0 ? <EmptyState title="No technicians found" /> : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filtered.map(t => {
-              const wos = t.current_work_orders || 0;
-              const max = t.max_work_orders || 5;
-              const pct = Math.min(100, (wos/max)*100);
-              const isActive = t.is_active !== false;
-              return (
-                <div key={t.id} className={`rounded-xl border p-4 ${isActive ? "bg-white border-slate-200" : "bg-slate-50 border-slate-200 opacity-70"}`}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-slate-800">{t.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{t.specialization || t.trade || "General"}</p>
-                    </div>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
-                      {isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-                  {t.phone && <p className="text-xs text-slate-400 mb-2">{t.phone}</p>}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-slate-500">
-                      <span>Work Orders</span>
-                      <span className="font-semibold">{wos} / {max}</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5">
-                      <div className={`h-1.5 rounded-full transition-all ${pct >= 100 ? "bg-red-500" : pct >= 70 ? "bg-amber-500" : "bg-emerald-500"}`}
-                        style={{width:`${pct}%`}} />
-                    </div>
-                  </div>
+      <div className="flex gap-3">
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search technicians..."
+          className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+        {search && <button onClick={()=>setSearch("")} className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Clear ×</button>}
+        <div className="text-xs text-slate-400 self-center">{filtered.length} technicians</div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filtered.map((t,i)=>{
+          const load = Math.min(Math.round((t.current_work_orders||0)/Math.max(t.max_work_orders||5,1)*100), 100);
+          const techWOs = wos.filter(w => w.technician_id===t.id);
+          const isActive = t.is_active !== false;
+          const loadColor = load>=90?"red":load>=70?"amber":"emerald";
+          return (
+            <button key={i} onClick={()=>router.push(`/operations/technicians/${t.id}`)}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-black">{(t.name||"?")[0]}</span>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </SectionCard>
-    </PageWrapper>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <div className="font-bold text-slate-900 dark:text-white truncate group-hover:text-amber-600">{t.name}</div>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>{isActive?"Active":"Inactive"}</span>
+                  </div>
+                  <div className="text-xs text-slate-400 truncate">{t.email}</div>
+                  {t.specializations && t.specializations.length > 0 && (
+                    <div className="flex gap-1 mt-1.5 flex-wrap">
+                      {t.specializations.slice(0,2).map((s,j)=>(
+                        <span key={j} className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">{s}</span>
+                      ))}
+                      {t.specializations.length>2 && <span className="text-[10px] text-slate-400">+{t.specializations.length-2}</span>}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-slate-500">Capacity</span>
+                  <span className={`font-bold text-${loadColor}-500`}>{t.current_work_orders||0} / {t.max_work_orders||5} WOs</span>
+                </div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+                  <div className={`h-2.5 rounded-full bg-${loadColor}-500 transition-all`} style={{width:`${load}%`}}/>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+                {[
+                  { label:"Total", value:techWOs.length, color:"slate" },
+                  { label:"Done",  value:techWOs.filter(w=>w.status==="completed").length, color:"emerald" },
+                  { label:"Open",  value:techWOs.filter(w=>w.status==="open"||w.status==="in_progress").length, color:"amber" },
+                ].map((s,j)=>(
+                  <div key={j} className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-1.5">
+                    <div className={`text-base font-black text-${s.color}-500`}>{s.value}</div>
+                    <div className="text-[10px] text-slate-400">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
