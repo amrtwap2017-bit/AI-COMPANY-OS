@@ -275,7 +275,7 @@ export function EnterpriseSidebar() {
 
   return (
     <aside className={[
-      "shrink-0 hidden lg:flex flex-col bg-slate-950 border-r border-slate-800 transition-all duration-200",
+      "shrink-0 flex flex-col bg-slate-950 border-r border-slate-800 transition-all duration-200",
       collapsed ? "w-16" : "w-60",
     ].join(" ")}>
 
