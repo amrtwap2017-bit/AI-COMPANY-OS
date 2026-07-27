@@ -112,7 +112,7 @@ def get_twin_state(db: Session = Depends(get_db)):
     # Contracts
     contracts = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN status='Operational' THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
                sum(CASE WHEN end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'
                         AND status='active' THEN 1 ELSE 0 END) as expiring_30
         FROM contracts

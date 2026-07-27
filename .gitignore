@@ -1,6 +1,5 @@
 07-AI-ENGINE/qdrant_storage/
 90-ARCHIVE/
-
 # Security auto-added
 *.env
 .env
@@ -15,13 +14,15 @@ __pycache__/
 .venv/
 node_modules/
 reports/*.md
-
 *.bak
 *.bak.*
-
 *.bak2
 *.tsfix.bak
 *.ts-fix.bak
 reports/daily/
 tasks/logs/
-**/*.log/home/amr/AI-COMPANY-OS/tasks/
+
+# Sprint task folders (local only)
+tasks/
+tasks/**
+SPRINT_*_ANALYSIS.md
