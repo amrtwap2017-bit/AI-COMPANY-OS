@@ -713,6 +713,18 @@ def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
             print(f"pm-plans: {e}")
             return []
 
+@app.get("/api/v1/maintenance/pm-plans/{plan_id}", tags=["maintenance"])
+def get_pm_plan_by_id(plan_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session as _S
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with _S(eng) as db:
+        try:
+            row = db.execute(text("SELECT * FROM maintenance_plans WHERE id=:id"), {"id": plan_id}).fetchone()
+            return dict(row._mapping) if row else {}
+        except: return {}
+
 @app.get("/api/v1/payment-tracking/", tags=["finance"])
 @app.get("/api/v1/payment-tracking", tags=["finance"])
 def get_payment_tracking_v2(limit: int = 50):
