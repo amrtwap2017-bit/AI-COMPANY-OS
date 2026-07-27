@@ -43,7 +43,7 @@ export default function WorkOrderDetailPage() {
   if (isError || !woData) return (
     <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
       <div style={{textAlign:"center"}}>
-        <div style={{fontSize:"3rem",marginBottom:16}}>🔧</div>
+        <div className="tb-empty-icon">🔧</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Work Order Not Found</div>
         <button onClick={() => router.push("/operations/work-orders")} style={{marginTop:20,background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Work Orders</button>
       </div>
@@ -233,7 +233,7 @@ export default function WorkOrderDetailPage() {
                   onMouseLeave={e => e.currentTarget.style.borderColor="transparent"}>
                   <div style={{width:44,height:44,borderRadius:12,background:"rgba(239,68,68,0.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:"1.5rem"}}>🏗️</div>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)"}}>{asset.name}</div>
+                    <div className="tb-section-title">{asset.name}</div>
                     <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginTop:2}}>{asset.category} · {asset.location_description||asset.serial_number||"—"}</div>
                     <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2}}>Last service: {fmtDate(asset.last_maintenance_date)}</div>
                   </div>
@@ -277,7 +277,7 @@ export default function WorkOrderDetailPage() {
 
             {/* Timeline */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Timeline</div>
+              <div className="tb-section-title">Timeline</div>
               <div className="space-y-3">
                 {timeline.map((event,i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -293,7 +293,7 @@ export default function WorkOrderDetailPage() {
 
             {/* Quick actions */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Quick Actions</div>
+              <div className="tb-section-title">Quick Actions</div>
               <div className="space-y-2">
                 {[
                   { label:"← All Work Orders",  icon:"🔧", path:"/operations/work-orders" },
@@ -302,7 +302,7 @@ export default function WorkOrderDetailPage() {
                   { label:"Create New WO",       icon:"➕", path:"/engineering/new-work-order" },
                 ].map((a,i) => (
                   <button key={i} onClick={() => router.push(a.path)} className="w-full text-left flex items-center gap-3"
-                    style={{padding:"10px 12px",borderRadius:10,background:"transparent",border:"1px solid transparent",fontSize:"0.8125rem",fontWeight:500,color:"var(--color-text-2)",cursor:"pointer",transition:"all 120ms"}}
+                    className="tb-action-item"
                     onMouseEnter={e => {e.currentTarget.style.background="rgba(180,83,9,0.06)";e.currentTarget.style.borderColor="rgba(180,83,9,0.2)";e.currentTarget.style.color="var(--color-brand)";}}
                     onMouseLeave={e => {e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="transparent";e.currentTarget.style.color="var(--color-text-2)";}}>
                     <span>{a.icon}</span>{a.label}
@@ -313,7 +313,7 @@ export default function WorkOrderDetailPage() {
 
             {/* Record meta */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              <div className="tb-section-title">Record Info</div>
               {[["ID",wo.id?.slice(0,16)+"..."],["Created",fmtDate(wo.created_at)],["Updated",fmtDate(wo.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.75rem",padding:"7px 0",borderBottom:i<2?"1px solid var(--color-divider)":"none"}}>
                   <span style={{color:"var(--color-text-3)"}}>{l}</span>

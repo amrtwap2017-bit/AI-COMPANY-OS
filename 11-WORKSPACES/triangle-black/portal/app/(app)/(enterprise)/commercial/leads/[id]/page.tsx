@@ -39,7 +39,7 @@ export default function LeadDetailPage() {
   if (isError || !leadData) return (
     <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
       <div style={{textAlign:"center"}}>
-        <div style={{fontSize:"3rem",marginBottom:16}}>👤</div>
+        <div className="tb-empty-icon">👤</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Lead Not Found</div>
         <button onClick={()=>router.push("/commercial/leads")} style={{marginTop:20,background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Leads</button>
       </div>
@@ -257,7 +257,7 @@ export default function LeadDetailPage() {
 
             {/* Score breakdown */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Lead Scoring</div>
+              <div className="tb-section-title">Lead Scoring</div>
               <div style={{textAlign:"center",marginBottom:16}}>
                 <div style={{fontSize:"3rem",fontWeight:900,color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",lineHeight:1}}>{score}</div>
                 <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginTop:4}}>out of 100</div>
@@ -272,7 +272,7 @@ export default function LeadDetailPage() {
 
             {/* Actions */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
+              <div className="tb-section-title">Actions</div>
               <div className="space-y-2">
                 {[
                   { label:"← All Leads",         icon:"👤", path:"/commercial/leads" },
@@ -293,7 +293,7 @@ export default function LeadDetailPage() {
 
             {/* Record meta */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              <div className="tb-section-title">Record Info</div>
               {[["ID",lead.id?.slice(0,14)+"..."],["Agent",lead.agent_id?.slice(0,12)||"—"],["Created",fmtDate(lead.created_at)],["Updated",fmtDate(lead.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<3?"1px solid var(--color-divider)":"none"}}>
                   <span style={{color:"var(--color-text-3)"}}>{l}</span>

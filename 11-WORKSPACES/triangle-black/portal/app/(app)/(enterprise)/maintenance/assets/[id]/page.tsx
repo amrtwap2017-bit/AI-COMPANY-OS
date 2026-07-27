@@ -41,7 +41,7 @@ export default function AssetDetailPage() {
   if (isError || !assetData) return (
     <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
       <div style={{textAlign:"center"}}>
-        <div style={{fontSize:"3rem",marginBottom:16}}>🏗️</div>
+        <div className="tb-empty-icon">🏗️</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Asset Not Found</div>
         <button onClick={() => router.push("/maintenance/assets")} style={{marginTop:20,background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Assets</button>
       </div>
@@ -283,7 +283,7 @@ export default function AssetDetailPage() {
 
             {/* Quick actions */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
+              <div className="tb-section-title">Actions</div>
               <div className="space-y-2">
                 {[
                   { label:"← All Assets",          icon:"🏗️", path:"/maintenance/assets" },
@@ -305,7 +305,7 @@ export default function AssetDetailPage() {
 
             {/* Health summary */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Asset Health</div>
+              <div className="tb-section-title">Asset Health</div>
               <div className="space-y-3">
                 {[
                   { label:"Status",       value:sc.label,          color:sc.color },
@@ -325,7 +325,7 @@ export default function AssetDetailPage() {
 
             {/* Record meta */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              <div className="tb-section-title">Record Info</div>
               {[["ID",asset.id?.slice(0,14)+"..."],["Created",fmtDate(asset.created_at)],["Updated",fmtDate(asset.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<2?"1px solid var(--color-divider)":"none"}}>
                   <span style={{color:"var(--color-text-3)"}}>{l}</span>

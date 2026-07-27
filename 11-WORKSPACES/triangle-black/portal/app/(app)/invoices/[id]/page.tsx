@@ -49,7 +49,7 @@ export default function InvoiceDetailPage() {
   if (isError || !invData) return (
     <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
       <div style={{textAlign:"center",padding:48}}>
-        <div style={{fontSize:"3rem",marginBottom:16}}>⚠️</div>
+        <div className="tb-empty-icon">⚠️</div>
         <div style={{fontSize:"1.25rem",fontWeight:700,color:"var(--color-text-1)"}}>Invoice Not Found</div>
         <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginTop:8,marginBottom:24}}>The invoice {id?.slice(0,8)} does not exist or you do not have access.</div>
         <button onClick={() => router.push("/invoices")} style={{background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Invoices</button>
@@ -221,7 +221,7 @@ export default function InvoiceDetailPage() {
 
             {/* Actions */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Actions</div>
+              <div className="tb-section-title">Actions</div>
               <div className="space-y-2">
                 {[
                   { label:"← All Invoices",       icon:"💰", path:"/invoices",                   variant:"secondary" },
@@ -269,7 +269,7 @@ export default function InvoiceDetailPage() {
 
             {/* Meta */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              <div className="tb-section-title">Record Info</div>
               {[
                 ["Invoice ID",  inv.id?.slice(0,16)+"..."],
                 ["Hotel",       inv.hotel_id?.slice(0,12)+"..."],

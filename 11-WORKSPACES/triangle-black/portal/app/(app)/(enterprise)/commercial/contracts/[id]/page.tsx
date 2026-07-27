@@ -36,7 +36,7 @@ export default function ContractDetailPage() {
   if (isError || !contractData) return (
     <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
       <div style={{textAlign:"center"}}>
-        <div style={{fontSize:"3rem",marginBottom:16}}>📄</div>
+        <div className="tb-empty-icon">📄</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Contract Not Found</div>
         <button onClick={()=>router.push("/commercial/contracts")} style={{marginTop:20,background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Contracts</button>
       </div>
@@ -245,7 +245,7 @@ export default function ContractDetailPage() {
 
             {/* Actions */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
+              <div className="tb-section-title">Actions</div>
               <div className="space-y-2">
                 {[
                   { label:"← All Contracts",     icon:"📄", path:"/commercial/contracts" },
@@ -266,7 +266,7 @@ export default function ContractDetailPage() {
 
             {/* Financial summary */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Financial Summary</div>
+              <div className="tb-section-title">Financial Summary</div>
               <div className="space-y-3">
                 {[
                   { label:"Contract Value",  value:fmtEGP(contract.total_value),              color:"#34D399" },
@@ -285,7 +285,7 @@ export default function ContractDetailPage() {
 
             {/* Record meta */}
             <div className="tb-section">
-              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              <div className="tb-section-title">Record Info</div>
               {[["ID",contract.id?.slice(0,14)+"..."],["Created",fmtDate(contract.created_at)],["Updated",fmtDate(contract.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<2?"1px solid var(--color-divider)":"none"}}>
                   <span style={{color:"var(--color-text-3)"}}>{l}</span>
