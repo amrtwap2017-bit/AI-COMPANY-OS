@@ -1,148 +1,203 @@
 "use client";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}); } catch { return "—"; } };
-
-const TYPES = ["all","alert","warning","info","success","reminder"];
-const T_COLOR = {
-  alert:    "bg-red-100 text-red-800",
-  warning:  "bg-amber-100 text-amber-800",
-  info:     "bg-blue-100 text-blue-800",
-  success:  "bg-emerald-100 text-emerald-800",
-  reminder: "bg-purple-100 text-purple-800",
+const fmtTimeAgo = (d) => {
+  try {
+    const diff = Date.now() - new Date(d).getTime();
+    const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), dy = Math.floor(diff/86400000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m}m ago`;
+    if (h < 24) return `${h}h ago`;
+    return `${dy}d ago`;
+  } catch { return "—"; }
 };
-const T_ICON = {alert:"🚨",warning:"⚠️",info:"ℹ️",success:"✅",reminder:"📋"};
+
+const TYPE_META = {
+  work_order_created:       { icon:"🔧", color:"#60A5FA", label:"Work Order",  path:"/operations/work-orders" },
+  work_order_completed:     { icon:"✅", color:"#34D399", label:"Completed",   path:"/operations/work-orders" },
+  contract_expiring:        { icon:"⏰", color:"#FBBF24", label:"Contract",    path:"/commercial/contracts" },
+  contract_renewed:         { icon:"🔄", color:"#A78BFA", label:"Renewal",     path:"/commercial/contracts" },
+  purchase_request_created: { icon:"🛒", color:"#F97316", label:"Procurement", path:"/supply-chain/purchase-requests" },
+  lead_created:             { icon:"👤", color:"#EC4899", label:"CRM",         path:"/commercial/leads" },
+  asset_fault:              { icon:"⚙️",  color:"#F87171", label:"Asset",       path:"/maintenance/assets" },
+  pm_overdue:               { icon:"📅", color:"#FB923C", label:"Maintenance", path:"/maintenance/pm-plans" },
+};
 
 export default function InboxPage() {
-  const [tf,  setTf]       = useState("all");
-  const [unreadOnly, setUnreadOnly] = useState(false);
-  const [q,   setQ]        = useState("");
-  const qc = useQueryClient();
+  const router = useRouter();
 
-  const { data: raw=[], isLoading, refetch } = useQuery(
+  const { data: notifRaw, isLoading } = useQuery(
     ["inbox-notifs"],
-    () => authFetch("/api/v1/notifications/?limit=200").then(r=>r.json()),
-    { refetchInterval: 30000 }
+    () => authFetch("/api/v1/notifications/?limit=100").then(r => r.json()),
+    { refetchInterval: 20000 }
+  );
+  const { data: actRaw } = useQuery(
+    ["inbox-activity"],
+    () => authFetch("/api/v1/activity-feed?limit=20").then(r => r.json())
   );
 
-  const notifs = toArr(raw);
-  const filtered = notifs.filter(n => {
-    if (tf !== "all" && n.type !== tf) return false;
-    if (unreadOnly && n.is_read) return false;
-    if (q && !(n.title?.toLowerCase().includes(q.toLowerCase()) || n.message?.toLowerCase().includes(q.toLowerCase()))) return false;
-    return true;
-  });
-
-  const total   = notifs.length;
-  const unread  = notifs.filter(n => !n.is_read).length;
-  const alerts  = notifs.filter(n => n.type === "alert").length;
-  const warnings = notifs.filter(n => n.type === "warning").length;
-
-  async function markRead(id) {
-    try {
-      await authFetch(`/api/v1/notifications/${id}/read`, { method:"PATCH" });
-      refetch();
-    } catch {}
-  }
-
-  async function markAllRead() {
-    try {
-      await authFetch("/api/v1/notifications/read-all", { method:"POST" });
-      refetch();
-    } catch {}
-  }
+  const notifs     = toArr(notifRaw);
+  const activities = actRaw?.activities || [];
+  const unread     = notifs.filter(n => !n.is_read);
+  const critical   = notifs.filter(n => !n.is_read && (
+    n.type === "contract_expiring" || n.type === "asset_fault" || n.type === "pm_overdue"
+  ));
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Notifications Inbox"
-        subtitle={`${total} total · ${unread} unread · ${alerts} alerts`}
-        breadcrumbs={[{label:"Inbox"}]}
-        actions={
-          unread > 0
-            ? <Button variant="secondary" size="sm" onClick={markAllRead}>Mark all read</Button>
-            : undefined
-        }
-      />
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        {[
-          {label:"Total",    value:total,    color:"text-slate-800"},
-          {label:"Unread",   value:unread,   color:unread>0?"text-blue-700":"text-emerald-700"},
-          {label:"Alerts",   value:alerts,   color:alerts>0?"text-red-700":"text-secondary"},
-          {label:"Warnings", value:warnings, color:warnings>0?"text-amber-700":"text-secondary"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0E28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-purple-400 mb-1.5">Platform</div>
+              <h1 className="tb-hero-title">Inbox</h1>
+              <p className="tb-hero-description">Platform alerts, notifications, and activity feed</p>
+            </div>
+            <button onClick={() => router.push("/notifications")} className="tb-btn-primary">
+              All Notifications
+            </button>
           </div>
-        ))}
-      </div>
-
-      <SectionCard title={`Notifications (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search notifications…" value={q}
-            onChange={e=>setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" />
-          <select value={tf} onChange={e=>setTf(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {TYPES.map(t=><option key={t} value={t}>{t==="all"?"All Types":t}</option>)}
-          </select>
-          <button
-            onClick={()=>setUnreadOnly(!unreadOnly)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${unreadOnly?"bg-blue-600 text-white border-blue-600":"bg-white text-secondary border-slate-200 hover:border-blue-300"}`}>
-            Unread only
-          </button>
-          {(tf!=="all"||unreadOnly||q)&&(
-            <button onClick={()=>{setTf("all");setUnreadOnly(false);setQ("");}}
-              className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>
-          )}
-        </div>
-
-        {isLoading ? <LoadingState /> : filtered.length===0 ? (
-          <EmptyState title="No notifications" subtitle={unreadOnly?"No unread notifications":"Your inbox is empty"} />
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {filtered.map(n=>(
-              <div key={n.id}
-                className={`flex items-start gap-3 py-4 px-2 hover:bg-slate-50 transition-colors rounded-lg cursor-pointer ${!n.is_read?"bg-blue-50/30":""}`}
-                onClick={()=>!n.is_read&&markRead(n.id)}>
-                <div className="shrink-0 mt-0.5">
-                  <span className="text-xl">{T_ICON[n.type]||"📢"}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className={`text-sm ${!n.is_read?"font-bold text-slate-900":"font-medium text-slate-700"} truncate`}>{n.title}</p>
-                    {!n.is_read && <span className="shrink-0 h-2 w-2 rounded-full bg-blue-600" />}
-                  </div>
-                  <p className="text-xs text-secondary line-clamp-2">{n.message}</p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${T_COLOR[n.type]||"bg-slate-100 text-secondary"}`}>
-                      {n.type||"info"}
-                    </span>
-                    {n.category && (
-                      <span className="text-xs text-tertiary">{n.category}</span>
-                    )}
-                    <span className="text-xs text-tertiary ml-auto">{fmtDate(n.created_at)}</span>
-                  </div>
-                </div>
-                {!n.is_read && (
-                  <button
-                    onClick={e=>{e.stopPropagation();markRead(n.id);}}
-                    className="shrink-0 text-xs text-tertiary hover:text-blue-600 transition-colors mt-0.5">
-                    ✓ Read
-                  </button>
-                )}
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Total",    value:notifs.length,  color:"#F1F5F9" },
+              { label:"Unread",   value:unread.length,  color:unread.length>0?"#FBBF24":"#34D399" },
+              { label:"Critical", value:critical.length,color:critical.length>0?"#F87171":"#34D399" },
+              { label:"Activity", value:activities.length, color:"#A78BFA" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
               </div>
             ))}
           </div>
-        )}
-      </SectionCard>
-    </PageWrapper>
+        </div>
+      </div>
+
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+          {/* Unread notifications */}
+          <div className="tb-section">
+            <div className="tb-section-header">
+              <div>
+                <div className="text-label-upper text-tertiary mb-1">Alerts</div>
+                <div className="tb-section-title" style={{marginBottom:0}}>
+                  Unread ({unread.length})
+                </div>
+              </div>
+              <button onClick={() => router.push("/notifications")} className="tb-section-link">All →</button>
+            </div>
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1,2,3,4].map(i => <div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse"/>)}
+              </div>
+            ) : unread.length === 0 ? (
+              <div className="tb-empty" style={{padding:"32px 0"}}>
+                <div className="tb-empty-icon" style={{fontSize:"2.5rem"}}>✅</div>
+                <div className="tb-empty-desc">Inbox clear — no unread notifications</div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {unread.slice(0,8).map((n, i) => {
+                  const meta = TYPE_META[n.type] || { icon:"🔔", color:"#A78BFA", label:"System", path:"/workspace" };
+                  return (
+                    <button key={i}
+                      onClick={() => router.push(meta.path)}
+                      className="w-full flex items-start gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left"
+                      style={{borderLeft:`3px solid ${meta.color}`}}>
+                      <div style={{
+                        width:32, height:32, borderRadius:8, flexShrink:0,
+                        background:`${meta.color}18`, border:`1px solid ${meta.color}30`,
+                        display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.875rem"
+                      }}>
+                        {meta.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between gap-2">
+                          <div className="text-sm font-semibold text-primary truncate">{n.title}</div>
+                          <div className="text-xs text-tertiary flex-shrink-0">{fmtTimeAgo(n.created_at)}</div>
+                        </div>
+                        {n.message && <div className="text-xs text-secondary mt-0.5 truncate">{n.message}</div>}
+                      </div>
+                    </button>
+                  );
+                })}
+                {unread.length > 8 && (
+                  <button onClick={() => router.push("/notifications")}
+                    className="w-full text-center text-xs text-brand py-2 hover:text-primary transition-colors">
+                    + {unread.length - 8} more unread notifications →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Activity feed */}
+          <div className="tb-section">
+            <div className="tb-section-header">
+              <div>
+                <div className="text-label-upper text-tertiary mb-1">Feed</div>
+                <div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div>
+              </div>
+              <button onClick={() => router.push("/workspace")} className="tb-section-link">Workspace →</button>
+            </div>
+            <div className="space-y-2">
+              {activities.length === 0 ? (
+                <div className="tb-empty" style={{padding:"32px 0"}}>
+                  <div className="tb-empty-icon" style={{fontSize:"2rem"}}>📋</div>
+                  <div className="tb-empty-desc">No recent activity</div>
+                </div>
+              ) : activities.slice(0,10).map((act, i) => (
+                <button key={i}
+                  onClick={() => act.path && router.push(act.path)}
+                  className="w-full flex items-start gap-3 text-left p-2 rounded-xl hover:bg-base-alt transition-colors">
+                  <div style={{
+                    width:32, height:32, borderRadius:8, flexShrink:0,
+                    background:`${act.color}18`, border:`1px solid ${act.color}30`,
+                    display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.875rem"
+                  }}>
+                    {act.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between gap-2">
+                      <div className="text-sm font-semibold text-primary truncate">{act.title}</div>
+                      <div className="text-xs text-tertiary flex-shrink-0">{fmtTimeAgo(act.time)}</div>
+                    </div>
+                    {act.description && (
+                      <div className="text-xs text-tertiary mt-0.5 truncate">{act.description}</div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick links */}
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Navigate to Domain</div>
+          <div className="tb-grid-4" style={{gridTemplateColumns:"repeat(6,1fr)"}}>
+            {[
+              { label:"Work Orders",  icon:"🔧", path:"/operations/work-orders" },
+              { label:"Contracts",    icon:"📄", path:"/commercial/contracts" },
+              { label:"Assets",       icon:"⚙️",  path:"/maintenance/assets" },
+              { label:"PM Plans",     icon:"📅", path:"/maintenance/pm-plans" },
+              { label:"Procurement",  icon:"🛒", path:"/supply-chain/purchase-requests" },
+              { label:"Workspace",    icon:"🏠", path:"/workspace" },
+            ].map((a, i) => (
+              <button key={i} onClick={() => router.push(a.path)}
+                className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span>
+                <span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
