@@ -56,8 +56,8 @@ def get_twin_state(db: Session = Depends(get_db)):
     """)
     critical_open = _safe_int(wo.get("critical_open"))
     overdue_wo    = _safe_int(wo.get("overdue"))
-    health -= min(15, critical_open * 1)
-    health -= min(8, overdue_wo * 1)
+    health -= min(10, critical_open * 2)
+    health -= min(5, round(overdue_wo * 0.5))
 
     # Technicians
     tech = _query(db, """
@@ -66,12 +66,12 @@ def get_twin_state(db: Session = Depends(get_db)):
                sum(CASE WHEN current_work_orders >= max_work_orders THEN 1 ELSE 0 END) as at_capacity
         FROM technicians
     """)
-    health -= min(5, _safe_int(tech.get("at_capacity")) * 1)
+    health -= min(3, round(_safe_int(tech.get("at_capacity")) * 0.5))
 
     # Assets
     ast = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN status='Operational' THEN 1 ELSE 0 END) as active,
                sum(CASE WHEN criticality='critical' THEN 1 ELSE 0 END) as critical_count
         FROM assets
     """)
@@ -82,7 +82,7 @@ def get_twin_state(db: Session = Depends(get_db)):
                sum(CASE WHEN sb.qty_on_hand < ii.min_stock THEN 1 ELSE 0 END) as below_min
         FROM inventory_items ii LEFT JOIN stock_balances sb ON sb.item_id = ii.id
     """)
-    health -= min(5, _safe_int(inv.get("below_min")) * 1)
+    health -= min(3, round(_safe_int(inv.get("below_min")) * 0.1))
 
     # Finance
     fin = _query(db, """
@@ -92,15 +92,15 @@ def get_twin_state(db: Session = Depends(get_db)):
                COALESCE(sum(amount), 0) as total_value
         FROM invoices
     """)
-    health -= min(8, _safe_int(fin.get("overdue_inv")) * 1)
+    health -= min(4, round(_safe_int(fin.get("overdue_inv")) * 0.5))
 
     # Maintenance
     maint = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN next_due_date::timestamp < NOW() AND status='active' THEN 1 ELSE 0 END) as overdue
+               sum(CASE WHEN next_due_ts < NOW() AND status='active' THEN 1 ELSE 0 END) as overdue
         FROM maintenance_plans
     """)
-    health -= min(8, _safe_int(maint.get("overdue")) * 1)
+    health -= min(5, round(_safe_int(maint.get("overdue")) * 0.5))
 
     # Projects
     proj = _query(db, """
@@ -112,7 +112,7 @@ def get_twin_state(db: Session = Depends(get_db)):
     # Contracts
     contracts = _query(db, """
         SELECT count(*) as total,
-               sum(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               sum(CASE WHEN status='Operational' THEN 1 ELSE 0 END) as active,
                sum(CASE WHEN end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'
                         AND status='active' THEN 1 ELSE 0 END) as expiring_30
         FROM contracts
@@ -134,7 +134,7 @@ def get_twin_state(db: Session = Depends(get_db)):
         "health_label":  label,
         "generated_at":  now.isoformat(),
         "platform":      "Triangle Black Enterprise Operations Platform",
-        "version":       "2.0-sprint74",
+        "version":       "2.0-sprint164",
         "operational_domains": [
             {"domain": "Work Orders",  "total": _safe_int(wo.get("total")),
              "active": _safe_int(wo.get("active")),
