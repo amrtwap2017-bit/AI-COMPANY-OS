@@ -24,7 +24,7 @@ def list_work_orders(
     priority:      Optional[str] = None,
     technician_id: Optional[str] = None,
     skip:          int = 0,
-    limit:         int = Query(default=500, le=200),
+    limit:         int = Query(default=500, le=1000),
     db: Session = Depends(get_db),
 ):
     q = "SELECT * FROM work_orders WHERE 1=1"
@@ -46,7 +46,7 @@ def list_work_orders_root(
     priority:      Optional[str] = None,
     technician_id: Optional[str] = None,
     skip:          int = 0,
-    limit:         int = Query(default=500, le=200),
+    limit:         int = Query(default=500, le=1000),
     db: Session = Depends(get_db),
 ):
     q = "SELECT * FROM work_orders WHERE 1=1"
