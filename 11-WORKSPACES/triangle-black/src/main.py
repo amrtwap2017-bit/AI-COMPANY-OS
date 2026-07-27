@@ -1474,12 +1474,22 @@ def update_wo_status(wo_id: str, body: dict):
 
         db.execute(text(f"UPDATE work_orders SET {', '.join(set_parts)} WHERE id=:wo_id"), params)
 
-        # Sync asset if completed
+        # Sync asset + create notification on completion
         if status == "completed":
             db.execute(text("""
                 UPDATE assets SET last_maintenance_date=:now, next_maintenance_date=:next, updated_at=:now
                 FROM work_orders wo WHERE assets.id=wo.asset_id AND wo.id=:wo_id AND wo.asset_id IS NOT NULL
             """),{"now":now,"next":now.replace(year=now.year+1 if now.month>9 else now.year, month=(now.month+3-1)%12+1),"wo_id":wo_id})
+            # Get WO title for notification
+            wo_row = db.execute(text("SELECT title FROM work_orders WHERE id=:id"),{"id":wo_id}).fetchone()
+            wo_title = wo_row[0] if wo_row else wo_id[:12]
+            db.execute(text("""
+                INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,
+                    recipient_role,is_read,created_at,updated_at)
+                VALUES (:id,'tb-default-hotel-000000000001',:title,:msg,
+                    'work_order_completed',:eid,'work_order','admin',false,:now,:now)
+            """),{"id":str(uuid.uuid4()),"title":f"WO Completed: {wo_title}",
+                  "msg":f"Work order completed at {now.strftime('%H:%M')}","eid":wo_id,"now":now})
 
         db.commit()
         return {"id":wo_id,"status":status,"updated_at":now.isoformat()}
@@ -1609,4 +1619,67 @@ def global_search(q: str = "", limit: int = 8):
     
     results = results[:limit]
     return {"results": results, "total": len(results), "query": q}
+
+
+
+# ── SPRINT 192: CONTRACT RENEWAL ENDPOINT ────────────────────────────────────
+
+@app.post("/api/v1/contracts/{contract_id}/renew", tags=["contracts"])
+def renew_contract(contract_id: str, body: dict = None):
+    """Create a contract renewal — extends end_date and increments renewal_count"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, uuid
+    from datetime import datetime, timedelta
+    
+    body = body or {}
+    eng  = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    
+    with Session(eng) as db:
+        now = datetime.utcnow()
+        
+        # Get current contract
+        row = db.execute(text("SELECT * FROM contracts WHERE id=:id"), {"id":contract_id}).fetchone()
+        if not row:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Contract not found")
+        
+        c = dict(row._mapping)
+        months   = int(body.get("duration_months") or c.get("duration_months") or 12)
+        old_end  = c.get("end_date") or now
+        if isinstance(old_end, str):
+            old_end = datetime.fromisoformat(old_end.replace("Z",""))
+        new_end  = old_end + timedelta(days=months*30)
+        new_count = int(c.get("renewal_count") or 0) + 1
+        
+        db.execute(text("""
+            UPDATE contracts
+            SET end_date=:new_end, renewal_count=:count,
+                status='active', updated_at=:now
+            WHERE id=:id
+        """), {"new_end":new_end,"count":new_count,"now":now,"id":contract_id})
+        
+        # Create renewal notification
+        db.execute(text("""
+            INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,
+                recipient_role,is_read,created_at,updated_at)
+            VALUES (:id,:hotel,:title,:msg,'contract_renewed',:eid,'contract','admin',false,:now,:now)
+        """), {
+            "id":str(uuid.uuid4()),
+            "hotel":c.get("hotel_id","tb-default-hotel-000000000001"),
+            "title":f"Contract Renewed: {c.get('title','Contract')}",
+            "msg":f"Extended by {months} months. New end: {new_end.strftime('%d %b %Y')}. Renewal #{new_count}",
+            "eid":contract_id, "now":now,
+        })
+        db.commit()
+        
+        return {
+            "id":contract_id,
+            "status":"active",
+            "end_date":new_end.isoformat(),
+            "renewal_count":new_count,
+            "months_extended":months,
+            "message":f"Contract renewed for {months} months",
+        }
 
