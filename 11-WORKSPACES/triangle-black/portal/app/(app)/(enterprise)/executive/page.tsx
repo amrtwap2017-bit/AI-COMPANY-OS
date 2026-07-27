@@ -13,10 +13,10 @@ export default function ExecutivePage() {
   const hour = now.getHours();
   const greeting = hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
 
-  const { data: woRaw=[] }        = useQuery(["ex-wo"],       () => authFetch("/api/v1/work-orders/?limit=500").then(r=>r.json()),      {refetchInterval:120000});
-  const { data: invRaw=[] }       = useQuery(["ex-inv"],      () => authFetch("/api/v1/invoices/?limit=500").then(r=>r.json()),         {refetchInterval:120000});
-  const { data: leadsRaw=[] }     = useQuery(["ex-leads"],    () => authFetch("/api/v1/leads/?limit=500").then(r=>r.json()),            {refetchInterval:120000});
-  const { data: contractsRaw=[] } = useQuery(["ex-contracts"],() => authFetch("/api/v1/contracts/?limit=500").then(r=>r.json()),        {refetchInterval:120000});
+  const { data: woRaw=[] }        = useQuery(["ex-wo"],       () => authFetch("/api/v1/work-orders/?limit=200").then(r=>r.json()),      {refetchInterval:120000});
+  const { data: invRaw=[] }       = useQuery(["ex-inv"],      () => authFetch("/api/v1/invoices/?limit=200").then(r=>r.json()),         {refetchInterval:120000});
+  const { data: leadsRaw=[] }     = useQuery(["ex-leads"],    () => authFetch("/api/v1/leads/?limit=200").then(r=>r.json()),            {refetchInterval:120000});
+  const { data: contractsRaw=[] } = useQuery(["ex-contracts"],() => authFetch("/api/v1/contracts/?limit=200").then(r=>r.json()),        {refetchInterval:120000});
   const { data: twin={} }         = useQuery(["ex-twin"],     () => authFetch("/api/v1/twin/state").then(r=>r.json()),                  {refetchInterval:60000});
   const { data: srRaw=[] }        = useQuery(["ex-sr"],       () => authFetch("/api/v1/service-requests/?limit=100").then(r=>r.json()), {refetchInterval:120000});
 
