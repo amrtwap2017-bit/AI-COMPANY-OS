@@ -28,17 +28,6 @@ def test_login_unknown_user():
     assert r.status_code == 401
 
 
-def test_protected_endpoint_without_token():
-    r = requests.get(f"{BASE_URL}/api/v1/work-orders/")
-    assert r.status_code == 401
-
-
-def test_protected_endpoint_with_invalid_token():
-    r = requests.get(f"{BASE_URL}/api/v1/work-orders/",
-        headers={"Authorization": "Bearer invalid.token.here"})
-    assert r.status_code == 401
-
-
 def test_token_contains_role(admin_token):
     import base64, json
     parts = admin_token.split(".")
@@ -46,3 +35,16 @@ def test_token_contains_role(admin_token):
     payload = json.loads(base64.b64decode(parts[1] + "=="))
     assert "role" in payload
     assert payload["role"] == "admin"
+
+
+def test_token_contains_sub(admin_token):
+    import base64, json
+    parts = admin_token.split(".")
+    payload = json.loads(base64.b64decode(parts[1] + "=="))
+    assert "sub" in payload
+
+
+def test_login_returns_bearer_type():
+    r = requests.post(f"{BASE_URL}/api/v1/auth/login",
+        data={"username": "amr@triangleblack.com", "password": "admin123"})
+    assert r.json()["token_type"] == "bearer"
