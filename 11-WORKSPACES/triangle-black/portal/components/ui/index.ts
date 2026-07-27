@@ -25,7 +25,6 @@ export { MetricStrip }       from "./MetricStrip";
 
 // Data display
 export { DataTable }         from "./DataTable";
-export { StatusBadge }       from "./StatusBadge";
 export { StatusPill }        from "./StatusPill";
 export { PriorityPill }      from "./PriorityPill";
 
@@ -64,3 +63,8 @@ export { ApprovalModal } from "./ApprovalModal";
 export { NotificationBell } from "./NotificationBell";
 export { WorkflowBar } from "./WorkflowBar";
 export { RoleBadge, RoleGate } from "./RoleBadge";
+
+// Design System — Sprint 177
+export { KpiCard } from "./KpiCard";
+export { KpiSkeleton, TableSkeleton, CardSkeleton, PageSkeleton } from "./LoadingSkeleton";
+export { StatusBadge } from "./StatusBadge";

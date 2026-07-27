@@ -1,60 +1,73 @@
+"use client";
 // @ts-nocheck
-// Triangle Black - Unified Status Badge
-// Consolidates StatusPill + StatusBadge into one component
+// Triangle Black — Unified Status Badge
+// Usage: <StatusBadge status="completed" /> or <StatusBadge status="open" type="wo" />
 
-interface StatusBadgeProps {
-  status:   string;
-  dot?:     boolean;
-  size?:    "sm" | "md";
-  className?: string;
-}
+const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
+  // Work Order statuses
+  open:           { label: "Open",           cls: "bg-blue-100 text-blue-700" },
+  in_progress:    { label: "In Progress",    cls: "bg-amber-100 text-amber-700" },
+  completed:      { label: "Completed",      cls: "bg-emerald-100 text-emerald-700" },
+  cancelled:      { label: "Cancelled",      cls: "bg-slate-100 text-slate-600" },
+  assigned:       { label: "Assigned",       cls: "bg-purple-100 text-purple-700" },
 
-const STATUS: Record<string, { bg: string; text: string; dot: string }> = {
-  active:      { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  inactive:    { bg: "bg-slate-100",  text: "text-slate-500",   dot: "bg-slate-400"   },
-  pending:     { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-500"   },
-  critical:    { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500"     },
-  emergency:   { bg: "bg-red-100",    text: "text-red-800",     dot: "bg-red-600"     },
-  warning:     { bg: "bg-orange-50",  text: "text-orange-700",  dot: "bg-orange-500"  },
-  completed:   { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-500"    },
-  done:        { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  draft:       { bg: "bg-slate-100",  text: "text-slate-600",   dot: "bg-slate-400"   },
-  approved:    { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  rejected:    { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500"     },
-  paid:        { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  overdue:     { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500"     },
-  open:        { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-500"    },
-  in_progress: { bg: "bg-indigo-50",  text: "text-indigo-700",  dot: "bg-indigo-500"  },
-  closed:      { bg: "bg-slate-100",  text: "text-slate-500",   dot: "bg-slate-400"   },
-  cancelled:   { bg: "bg-slate-100",  text: "text-slate-400",   dot: "bg-slate-300"   },
-  delivered:   { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  review:      { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-500"   },
-  sent:        { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-500"    },
-  new:         { bg: "bg-purple-50",  text: "text-purple-700",  dot: "bg-purple-500"  },
-  qualified:   { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-500"    },
-  negotiation: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-500"   },
-  won:         { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  lost:        { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500"     },
-  planning:    { bg: "bg-slate-100",  text: "text-slate-600",   dot: "bg-slate-500"   },
-  operational: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  low:         { bg: "bg-slate-100",  text: "text-slate-600",   dot: "bg-slate-400"   },
-  medium:      { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-500"    },
-  high:        { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-500"   },
+  // Contract statuses
+  active:              { label: "Active",             cls: "bg-emerald-100 text-emerald-700" },
+  pending_signature:   { label: "Pending Signature",  cls: "bg-amber-100 text-amber-700" },
+  expired:             { label: "Expired",            cls: "bg-red-100 text-red-700" },
+  draft:               { label: "Draft",              cls: "bg-slate-100 text-slate-600" },
+
+  // Invoice statuses
+  paid:           { label: "Paid",           cls: "bg-emerald-100 text-emerald-700" },
+  pending:        { label: "Pending",        cls: "bg-amber-100 text-amber-700" },
+  overdue:        { label: "Overdue",        cls: "bg-red-100 text-red-700 font-bold" },
+  sent:           { label: "Sent",           cls: "bg-blue-100 text-blue-700" },
+
+  // Asset statuses
+  Operational:         { label: "Operational",        cls: "bg-emerald-100 text-emerald-700" },
+  "In Fault":          { label: "In Fault",           cls: "bg-red-100 text-red-700" },
+  "Under Maintenance": { label: "Under Maintenance",  cls: "bg-amber-100 text-amber-700" },
+
+  // Lead statuses
+  new:            { label: "New",            cls: "bg-blue-100 text-blue-700" },
+  qualified:      { label: "Qualified",      cls: "bg-purple-100 text-purple-700" },
+  proposal:       { label: "Proposal",       cls: "bg-indigo-100 text-indigo-700" },
+  negotiation:    { label: "Negotiation",    cls: "bg-amber-100 text-amber-700" },
+  won:            { label: "Won",            cls: "bg-emerald-100 text-emerald-700 font-bold" },
+  lost:           { label: "Lost",           cls: "bg-red-100 text-red-700" },
+
+  // Priority
+  critical:       { label: "Critical",       cls: "bg-red-500 text-white font-bold" },
+  high:           { label: "High",           cls: "bg-orange-100 text-orange-700" },
+  medium:         { label: "Medium",         cls: "bg-amber-100 text-amber-700" },
+  low:            { label: "Low",            cls: "bg-slate-100 text-slate-600" },
+
+  // Generic
+  approved:       { label: "Approved",       cls: "bg-emerald-100 text-emerald-700" },
+  rejected:       { label: "Rejected",       cls: "bg-red-100 text-red-700" },
+  submitted:      { label: "Submitted",      cls: "bg-blue-100 text-blue-700" },
+  urgent:         { label: "Urgent",         cls: "bg-red-100 text-red-700 font-bold" },
+  normal:         { label: "Normal",         cls: "bg-slate-100 text-slate-600" },
 };
 
-const FALLBACK = { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" };
+interface StatusBadgeProps {
+  status: string;
+  size?: "xs" | "sm";
+}
 
-export function StatusBadge({ status, dot = false, size = "sm", className = "" }: StatusBadgeProps) {
-  const key = (status || "").toLowerCase().replace(/ /g, "_");
-  const s = STATUS[key] || FALLBACK;
-  const label = (status || "").replace(/_/g, " ");
-  const textSize = size === "sm" ? "text-[10px]" : "text-xs";
+export function StatusBadge({ status, size = "sm" }: StatusBadgeProps) {
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG[status?.toLowerCase()] || {
+    label: status || "—",
+    cls: "bg-slate-100 text-slate-600"
+  };
+
+  const padding = size === "xs" ? "px-1.5 py-0.5 text-[10px]" : "px-2.5 py-0.5 text-xs";
+
   return (
-    <span className={"inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold capitalize " + textSize + " " + s.bg + " " + s.text + " " + className}>
-      {dot && <span className={"w-1.5 h-1.5 rounded-full flex-shrink-0 " + s.dot} />}
-      {label}
+    <span className={`inline-flex items-center rounded-lg font-medium ${padding} ${config.cls}`}>
+      {config.label}
     </span>
   );
 }
 
-export { StatusBadge as StatusPill };
+export default StatusBadge;

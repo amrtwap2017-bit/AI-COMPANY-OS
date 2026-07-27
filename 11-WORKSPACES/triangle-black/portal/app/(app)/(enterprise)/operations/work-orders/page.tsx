@@ -1,193 +1,212 @@
 "use client";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { useRole } from "@/lib/hooks/useCurrentUser";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
-const S = {open:"bg-blue-100 text-blue-800",in_progress:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-slate-100 text-slate-500"};
-const STATUSES   = ["all","open","in_progress","completed","cancelled"];
-const PRIORITIES = ["all","critical","high","medium","low"];
-const TYPES      = ["corrective","preventive","inspection","emergency"];
+const PRIORITY_BADGE = {
+  critical: "bg-red-500 text-white",
+  high:     "bg-orange-100 text-orange-700",
+  medium:   "bg-amber-100 text-amber-700",
+  low:      "bg-slate-100 text-slate-600",
+};
+const STATUS_BADGE = {
+  open:        "bg-blue-100 text-blue-700",
+  in_progress: "bg-amber-100 text-amber-700",
+  completed:   "bg-emerald-100 text-emerald-700",
+  cancelled:   "bg-slate-100 text-slate-500",
+};
 
 export default function WorkOrdersPage() {
-  const { canCreate, isAdmin } = useRole();
-  const [q,  setQ]  = useState("");
-  const [sf, setSf] = useState("all");
-  const [pf, setPf] = useState("all");
-  const [showCreate, setShowCreate] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    title:"", description:"", type:"corrective", priority:"medium",
-    estimated_hours:"2", hotel_id:"tb-default-hotel-000000000001"
+  const router = useRouter();
+  const [search, setSearch]           = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+
+  const { data: raw, isLoading } = useQuery(
+    ["wo-list"],
+    () => authFetch("/api/v1/work-orders/").then(r => r.json()),
+    { refetchInterval: 60000 }
+  );
+  const wos = toArr(raw);
+  const now = new Date();
+
+  const filtered = wos.filter(w => {
+    const matchSearch   = !search || w.title?.toLowerCase().includes(search.toLowerCase()) || w.id?.toLowerCase().includes(search.toLowerCase());
+    const matchStatus   = statusFilter === "all" || w.status === statusFilter;
+    const matchPriority = priorityFilter === "all" || w.priority === priorityFilter;
+    return matchSearch && matchStatus && matchPriority;
   });
 
-  const { data: raw=[], isLoading, refetch } = useQuery(
-    ["work-orders-list"],
-    () => authFetch("/api/v1/work-orders/?limit=200").then(r=>r.json()),
-    { refetchInterval: 30000 }
+  const open        = wos.filter(w => w.status === "open");
+  const inProgress  = wos.filter(w => w.status === "in_progress");
+  const completed   = wos.filter(w => w.status === "completed");
+  const critical    = wos.filter(w => w.priority === "critical" && w.status !== "completed");
+  const overdue     = wos.filter(w => w.due_date && new Date(w.due_date) < now && w.status !== "completed");
+  const compRate    = wos.length > 0 ? Math.round(completed.length / wos.length * 100) : 0;
+
+  if (isLoading) return (
+    <div className="p-6 space-y-6">
+      <div className="animate-pulse">
+        <div className="h-3 bg-orange-200 rounded w-20 mb-2"/>
+        <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-48 mb-2"/>
+        <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-80"/>
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {[1,2,3,4].map(i=><div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border p-5 h-24 animate-pulse"/>)}
+      </div>
+    </div>
   );
 
-  const wos = toArr(raw);
-  const filtered = wos.filter(w => {
-    if (sf!=="all"&&w.status!==sf) return false;
-    if (pf!=="all"&&w.priority!==pf) return false;
-    if (q&&!w.title?.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
-
-  const total     = wos.length;
-  const open      = wos.filter(w=>w.status==="open").length;
-  const inProg    = wos.filter(w=>w.status==="in_progress").length;
-  const critical  = wos.filter(w=>w.priority==="critical"&&!["completed","cancelled"].includes(w.status)).length;
-  const completed = wos.filter(w=>w.status==="completed").length;
-
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
-
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const r = await authFetch("/api/v1/work-orders/", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({...form, estimated_hours: Number(form.estimated_hours)||2})
-      });
-      if (r.ok) {
-        setShowCreate(false);
-        setForm({title:"",description:"",type:"corrective",priority:"medium",estimated_hours:"2",hotel_id:"tb-default-hotel-000000000001"});
-        refetch();
-      } else {
-        const err = await r.json().catch(()=>({}));
-        alert(err?.detail||"Failed to create work order");
-      }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Work Orders"
-        subtitle={`${total} total · ${open} open · ${critical} critical`}
-        breadcrumbs={[{label:"Operations",href:"/operations"},{label:"Work Orders"}]}
-        actions={canCreate ? <Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Work Order</Button> : undefined}
-      />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      {/* Page header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Work Orders</h1>
+          <p className="text-slate-500 text-sm mt-1.5">
+            {wos.length} total · {open.length} open · {overdue.length} overdue
+          </p>
+        </div>
+        <button onClick={() => router.push("/engineering/new-work-order")}
+          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm hover:shadow-md transition-all">
+          + New Work Order
+        </button>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-5">
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {[
-          {label:"Total",      value:total,     color:"text-slate-800"},
-          {label:"Open",       value:open,      color:"text-blue-700"},
-          {label:"In Progress",value:inProg,    color:"text-indigo-700"},
-          {label:"Critical",   value:critical,  color:critical>0?"text-red-700":"text-slate-500"},
-          {label:"Completed",  value:completed, color:"text-emerald-700"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
+          { label:"Total",       value:wos.length,        color:"slate",   filter:"all",         priority:"all" },
+          { label:"Open",        value:open.length,       color:"blue",    filter:"open",         priority:"all" },
+          { label:"In Progress", value:inProgress.length, color:"amber",   filter:"in_progress",  priority:"all" },
+          { label:"Completed",   value:completed.length,  color:"emerald", filter:"completed",    priority:"all" },
+          { label:"Critical",    value:critical.length,   color:"red",     filter:"all",          priority:"critical" },
+          { label:"Completion",  value:`${compRate}%`,    color:compRate>=80?"emerald":"amber", filter:"all", priority:"all" },
+        ].map((k,i) => (
+          <button key={i}
+            onClick={() => { setStatusFilter(k.filter); setPriorityFilter(k.priority); }}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${
+              statusFilter === k.filter && priorityFilter === k.priority
+                ? `border-${k.color}-400 shadow-sm`
+                : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
+            }`}>
+            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
-          </div>
+          </button>
         ))}
       </div>
 
-      {!isLoading&&critical>0&&(
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-          <span className="text-red-600 font-bold">!</span>
-          <p className="text-sm font-semibold text-red-800">{critical} critical work order{critical>1?"s":""} require immediate attention</p>
+      {/* Critical alert banner */}
+      {critical.length > 0 && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+          <div className="text-2xl flex-shrink-0">🚨</div>
+          <div className="flex-1">
+            <div className="font-bold text-red-800 dark:text-red-300">{critical.length} Critical Work Orders Require Immediate Attention</div>
+            <div className="text-sm text-red-600 mt-0.5">{critical.slice(0,2).map(w=>w.title).join(" · ")}{critical.length > 2 ? ` +${critical.length-2} more` : ""}</div>
+          </div>
+          <button onClick={() => { setPriorityFilter("critical"); setStatusFilter("all"); }}
+            className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-bold hover:bg-red-600 transition-colors flex-shrink-0">
+            View Critical
+          </button>
         </div>
       )}
 
-      <SectionCard title={`Work Orders (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search work orders…" value={q}
-            onChange={e=>setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          <select value={sf} onChange={e=>setSf(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s.replace("_"," ")}</option>)}
-          </select>
-          <select value={pf} onChange={e=>setPf(e.target.value)} className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {PRIORITIES.map(p=><option key={p} value={p}>{p==="all"?"All Priority":p}</option>)}
-          </select>
-          {(sf!=="all"||pf!=="all"||q)&&<button onClick={()=>{setSf("all");setPf("all");setQ("");}} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
-        </div>
-        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No work orders found"
-          action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create Work Order</Button>}
-        />:(
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-slate-100">
-                {["Work Order","Type","Priority","Status","Est. Hours","Date"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr></thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(w=>(
-                  <tr key={w.id} className={`hover:bg-slate-50 hover:cursor-pointer transition-colors ${w.priority==="critical"?"bg-red-50/30":""}`}>
-                    <td className="py-3 px-3">
-                      <Link href={`/operations/work-orders/${w.id}`}><p className="font-medium text-blue-700 hover:underline truncate max-w-xs">{w.title}</p></Link>
-                      {w.description&&<p className="text-xs text-slate-400 truncate">{w.description?.slice(0,55)}</p>}
-                    </td>
-                    <td className="py-3 px-3"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{w.type||"maintenance"}</span></td>
-                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[w.priority]||P.low)}>{w.priority||"—"}</span></td>
-                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[w.status]||"bg-slate-100 text-slate-600")}>{w.status?.replace(/_/g," ")||"—"}</span></td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{w.estimated_hours||"—"}h</td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(w.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Search + filters */}
+      <div className="flex gap-3 flex-wrap">
+        <input
+          value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search work orders..."
+          className="flex-1 min-w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400 transition-colors"
+        />
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          <option value="all">All Status</option>
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          <option value="all">All Priority</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        {(search || statusFilter !== "all" || priorityFilter !== "all") && (
+          <button onClick={() => { setSearch(""); setStatusFilter("all"); setPriorityFilter("all"); }}
+            className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors">
+            Clear ×
+          </button>
         )}
-      </SectionCard>
+        <div className="text-xs text-slate-400 self-center">{filtered.length} results</div>
+      </div>
 
-      {showCreate&&(
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="font-bold text-slate-900">New Work Order</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">x</button>
-            </div>
-            <form onSubmit={save} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
-                <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}
-                  placeholder="e.g. Chiller Unit 1 — Refrigerant Recharge" className={inp} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
-                <textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}
-                  rows={3} placeholder="Describe the work required…" className={inp+" resize-none"} />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
-                  <select value={form.type} onChange={e=>setForm({...form,type:e.target.value})} className={inp}>
-                    {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Priority</label>
-                  <select value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})} className={inp}>
-                    {PRIORITIES.filter(p=>p!=="all").map(p=><option key={p} value={p}>{p}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Est. Hours</label>
-                  <input type="number" min="0.5" step="0.5" value={form.estimated_hours}
-                    onChange={e=>setForm({...form,estimated_hours:e.target.value})} className={inp} />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={()=>setShowCreate(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">{saving?"Saving…":"Create Work Order"}</button>
-              </div>
-            </form>
+      {/* Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-3">🔍</div>
+            <div className="font-bold text-slate-900 dark:text-white text-lg">No work orders found</div>
+            <div className="text-slate-400 text-sm mt-1">Try adjusting your filters</div>
+            <button onClick={() => router.push("/engineering/new-work-order")}
+              className="mt-4 px-5 py-2 bg-amber-600 text-white rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors">
+              + Create Work Order
+            </button>
           </div>
-        </div>
-      )}
-    </PageWrapper>
+        ) : (
+          <>
+            <div className="grid grid-cols-[1fr_100px_90px_100px_100px] bg-slate-50 dark:bg-slate-800/50 px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <div>Work Order</div>
+              <div className="text-center">Priority</div>
+              <div className="text-center">Status</div>
+              <div className="text-center">Due Date</div>
+              <div className="text-center">Created</div>
+            </div>
+            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+              {filtered.slice(0, 50).map((w, i) => {
+                const isOverdue = w.due_date && new Date(w.due_date) < now && w.status !== "completed";
+                return (
+                  <button key={i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
+                    className={`w-full grid grid-cols-[1fr_100px_90px_100px_100px] items-center px-5 py-4 text-left transition-colors hover:bg-amber-50/50 dark:hover:bg-amber-900/10 ${isOverdue && w.status !== "completed" ? "bg-red-50/30 dark:bg-red-900/5" : ""}`}>
+                    <div className="min-w-0 pr-4">
+                      <div className="font-semibold text-sm text-slate-900 dark:text-white truncate">{w.title}</div>
+                      {w.type && <div className="text-xs text-slate-400 mt-0.5 capitalize">{w.type}</div>}
+                    </div>
+                    <div className="text-center">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${PRIORITY_BADGE[w.priority] || "bg-slate-100 text-slate-600"}`}>
+                        {w.priority || "—"}
+                      </span>
+                    </div>
+                    <div className="text-center">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[w.status] || "bg-slate-100 text-slate-600"}`}>
+                        {w.status || "—"}
+                      </span>
+                    </div>
+                    <div className={`text-center text-xs ${isOverdue ? "text-red-500 font-semibold" : "text-slate-500"}`}>
+                      {fmtDate(w.due_date)}
+                      {isOverdue && <div className="text-[10px] text-red-400">OVERDUE</div>}
+                    </div>
+                    <div className="text-center text-xs text-slate-400">{fmtDate(w.created_at)}</div>
+                  </button>
+                );
+              })}
+            </div>
+            {filtered.length > 50 && (
+              <div className="text-center py-4 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30">
+                Showing 50 of {filtered.length} · <button onClick={() => router.push("/operations/dispatch")} className="text-amber-500 hover:underline">View Dispatch →</button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
