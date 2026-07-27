@@ -1,88 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-  Progress,
-} from "@/components/ui";
-
-const workOrders: any[] = [];
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchAssets = async () => {
-  const res = await authFetch(`/api/v1/assets`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchWorkOrders = async () => {
-  const res = await authFetch(`/api/v1/work-orders`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals?category=maintenance`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const MaintenancePage = () => {
-  const { data: assets, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, { refetchInterval: 120000 });
-  const { data: workOrders, isLoading: isWorkOrdersLoading } = useQuery(["work-orders"], fetchWorkOrders, { refetchInterval: 120000 });
-  const { data: signals, isLoading: isSignalsLoading } = useQuery(["signals"], fetchSignals, { refetchInterval: 120000 });
-
-  if (isAssetsLoading || isWorkOrdersLoading || isSignalsLoading) return <LoadingState />;
-
-  if (!assets || !workOrders || !signals) return <EmptyState />;
-
-  const assetHealthScores = toArr(assets).map(asset => {
-    const correctiveCount = toArr(workOrders).filter(wo => wo.type === "corrective" && wo.asset_id === asset.id).length;
-    const health = Math.max(0, Math.min(100, 100 - (correctiveCount * 20)));
-    return { ...asset, health };
-  });
-
-  assetHealthScores.sort((a: any, b: any) => a.health - b.health);
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/maintenance/assets"); }, []);
   return (
-    <PageWrapper>
-      <PageHeader title="Asset Health 360" />
-      <SectionCard title="Metrics">
-        <MetricStrip label="Total Assets" value={(assets || []).length} />
-        <MetricStrip label="Critical Assets" value={toArr(assets).filter(a => a.criticality === "critical").length} />
-        <MetricStrip label="Assets In Fault" value={toArr(assets).filter(a => a.health < 40).length} />
-        <MetricStrip label="High Risk Assets" value={toArr(assets).filter(a => a.health < 40).length} />
-      </SectionCard>
-      <SectionCard title="Asset Health Scores">
-        {toArr(assetHealthScores).map(asset => (
-          <div key={asset.id} className="flex items-center justify-between p-2 border-b last:border-b-0">
-            <div className="flex items-center">
-              <span>{asset.name}</span>
-              <StatusBadge type={asset.criticality} />
-            </div>
-            <Progress value={asset.health} color={asset.health >= 70 ? "green" : asset.health >= 40 ? "amber" : "red"} />
-            <span>{`${toArr(assetHealthScores).filter(a => a.id === asset.id).length} corrective WOs in 90 days`}</span>
-          </div>
-        ))}
-      </SectionCard>
-      <SectionCard title="Maintenance Signals">
-        {toArr(signals).map(signal => (
-          <div key={signal.id} className="p-2 border-b last:border-b-0">
-            {signal.message}
-          </div>
-        ))}
-      </SectionCard>
-    </PageWrapper>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /maintenance/assets</p>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default MaintenancePage;
+}

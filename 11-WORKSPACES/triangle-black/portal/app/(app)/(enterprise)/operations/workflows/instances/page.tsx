@@ -1,106 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-import { useState } from "react";
-
-
-// Safe date formatter
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); }
-  catch { return String(d).slice(0, 10); }
-};
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchWorkflows = async () => {
-  try {
-    const response = await authFetch(`/api/v1/workflows/instances`).then(r => r.json());
-    if (response.ok) return response.json();
-    return [];
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
-
-const fetchWorkOrders = async () => {
-  try {
-    const response = await authFetch(`/api/v1/work-orders`).then(r => r.json());
-    if (response.ok) return response.json();
-    return [];
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
-
-const WorkflowInstancesPage = () => {
-  const [workflows, setWorkflows] = useState<any[]>([]);
-  const [workOrders, setWorkOrders] = useState<any[]>([]);
-
-  const { data: workflowData, isLoading: isWorkflowLoading, isError: isWorkflowError } = useQuery(
-    "workflows",
-    fetchWorkflows,
-    {
-      refetchInterval: 60000,
-      onSuccess: (data) => setWorkflows(data),
-    }
-  );
-
-  const { data: workOrdersData, isLoading: isWorkOrdersLoading, isError: isWorkOrdersError } = useQuery(
-    "workOrders",
-    fetchWorkOrders,
-    {
-      refetchInterval: 60000,
-      onSuccess: (data) => setWorkOrders(data),
-    }
-  );
-
-  if (isWorkflowLoading || isWorkOrdersLoading) return <LoadingState />;
-  if (isWorkflowError && isWorkOrdersError) return <EmptyState title="No workflow history" />;
-
-  const totalInstances = workflows.length + (workOrders || []).length;
-  const runningInstances = toArr(workOrders).filter((wo: any) => wo.status === "in_progress").length;
-  const completedInstances = workflows.length - runningInstances;
-  const failedInstances = 0; // No failure tracking
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/operations"); }, []);
   return (
-    <PageWrapper>
-      <PageHeader title="Workflow Execution History" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total Instances", value: totalInstances },
-            { label: "Running", value: runningInstances, badgeColor: "bg-green-500" },
-            { label: "Completed", value: completedInstances, badgeColor: "bg-blue-500" },
-            { label: "Failed", value: failedInstances, badgeColor: "bg-red-500" },
-          ]}
-        />
-      </SectionCard>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {toArr(workflows).map((wf: any) => (
-          <SectionCard key={wf.id}>
-            <h3>{wf.name}</h3>
-            <StatusBadge status={wf.status} />
-            <p>Started: {new Date(wf.created_at).toLocaleString()}</p>
-            {wf.completed_at && <p>Duration: {new Date(wf.completed_at - wf.created_at).toISOString().slice(14, 19)}</p>}
-          </SectionCard>
-        ))}
-        {toArr(workOrders).map((wo: any) => (
-          <SectionCard key={wo.id}>
-            <h3>{wo.title}</h3>
-            <StatusBadge status={wo.status} />
-            <p>Started: {new Date(wo.created_at).toLocaleString()}</p>
-          </SectionCard>
-        ))}
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /operations</p>
+        </div>
       </div>
-    </PageWrapper>
+    </div>
   );
-};
-
-export default WorkflowInstancesPage;
+}

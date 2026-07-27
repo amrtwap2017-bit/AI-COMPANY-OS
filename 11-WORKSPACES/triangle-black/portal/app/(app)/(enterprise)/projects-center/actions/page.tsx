@@ -1,91 +1,19 @@
 "use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-import Link from "next/link";
-
-
-// Safe date formatter
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); }
-  catch { return String(d).slice(0, 10); }
-};
-
-const workOrders: any[] = [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchProjects = async () => {
-  const response = await fetch(`${BACK}/api/v1/projects`, { credentials: "include" });
-  if (!response.ok) return [];
-  return response.json();
-};
-
-const fetchWorkOrders = async () => {
-  const response = await fetch(`${BACK}/api/v1/work-orders`, { credentials: "include" });
-  if (!response.ok) return [];
-  return response.json();
-};
-
-const fetchSignals = async () => {
-  const response = await fetch(`${BACK}/api/v1/ai/signals`, { credentials: "include" });
-  if (!response.ok) return [];
-  return response.json();
-};
-
-const ProjectsCenterPage = () => {
-  const projectsQuery = useQuery(["projects"], fetchProjects, { refetchInterval: 120000 });
-  const workOrdersQuery = useQuery(["work-orders"], fetchWorkOrders, { refetchInterval: 120000 });
-  const signalsQuery = useQuery(["signals"], fetchSignals, { refetchInterval: 120000 });
-
-  if (projectsQuery.isLoading || workOrdersQuery.isLoading || signalsQuery.isLoading) return <LoadingState />;
-  if (projectsQuery.isError || workOrdersQuery.isError || signalsQuery.isError) return <EmptyState />;
-
-  const projects = projectsQuery.data;
-  const workOrders = workOrdersQuery.data;
-  const signals = Array.isArray(signalsQuery.data) ? signalsQuery.data : (signalsQuery.data?.signals || []);
-
-  const atRiskProjects = (projects || []).filter(p => new Date(p.end_date).getTime() - new Date().getTime() <= 14 * 24 * 60 * 60 * 1000);
-  const openWOs = (workOrders || []).filter(w => !w.project_id);
-
-  const actionItems = [
-    ...atRiskProjects.map(p => ({ project: p, text: "Schedule closeout review", urgency: "high" })),
-    ...(projects || []).filter(p => openWOs.some(w => w.project_id === p.id)).map(p => ({ project: p, text: "No work orders assigned", urgency: "medium" })),
-    ...(signals || []).filter(s => s.category === "operations").map(s => ({ project: (projects || []).find(p => p.id === s.project_id), text: s.message, urgency: "low" }))
-  ];
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/projects-center"); }, []);
   return (
-    <PageWrapper>
-      <PageHeader title="Project Action Items" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricStrip label="Active Projects" value={(projects || []).length} />
-        <MetricStrip label="At Risk" value={atRiskProjects.length} />
-        <MetricStrip label="Open WOs" value={openWOs.length} />
-        <MetricStrip label="Actions Required" value={actionItems.length} />
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /projects-center</p>
+        </div>
       </div>
-      {actionItems.length > 0 ? (
-        <SectionCard title="Action Items">
-          {actionItems.map((item, index) => (
-            <Link key={index} href={`/projects/${item.project?.id}`}>
-              <div className="flex items-center justify-between p-4 border-b last:border-b-0">
-                <div>
-                  <h3 className="text-lg font-medium">{item.project.name}</h3>
-                  <p className="text-sm text-gray-500">{item.text}</p>
-                </div>
-                <StatusBadge urgency={item.urgency} />
-              </div>
-            </Link>
-          ))}
-        </SectionCard>
-      ) : (
-        <EmptyState title="No action items" description="All projects are up to date." />
-      )}
-      <SectionCard title="Completed Actions">
-        <EmptyState title="No completed actions tracked" />
-      </SectionCard>
-    </PageWrapper>
+    </div>
   );
-};
-
-export default ProjectsCenterPage;
+}

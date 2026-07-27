@@ -1,110 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  MetricStrip,
-  StatusBadge,
-  LoadingState,
-  EmptyState,
-} from "@/components/ui";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchContracts = async () => {
-  const res = await authFetch(`/api/v1/contracts`);
-  return res.json();
-};
-
-const fetchWorkOrdersByContractId = async (contract_id: string) => {
-  const res = await authFetch(`/api/v1/work-orders?contract_id=${contract_id}`);
-  return res.json();
-};
-
-const fetchInvoicesByContractId = async (contract_id: string) => {
-  const res = await authFetch(`/api/v1/invoices?contract_id=${contract_id}`);
-  return res.json();
-};
-
-const Contract360Page = () => {
-  const [searchText, setSearchText] = useState("");
-  const [selectedContract, setSelectedContract] = useState(null);
-
-  const { data: contracts, isLoading, isError } = useQuery(
-    ["contracts"],
-    fetchContracts,
-    {
-      refetchInterval: 300000,
-    }
-  );
-
-  if (isLoading) return <LoadingState />;
-  if (isError) return <EmptyState message="Failed to load contracts" />;
-
-  const filteredContracts = toArr(contracts).filter((contract: any) =>
-    contract.client_name.toLowerCase().includes(searchText.toLowerCase())
-  ).sort((a: any, b: any) => new Date(b.end_date) - new Date(a.end_date));
-
-  const handleContractClick = (contract) => {
-    setSelectedContract(contract);
-  };
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/commercial/contracts"); }, []);
   return (
-    <PageWrapper>
-      <PageHeader title="Contract 360" />
-      <input
-        type="text"
-        placeholder="Search by client name..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
-      />
-      {filteredContracts.length === 0 ? (
-        <EmptyState message="No contracts found" />
-      ) : (
-        toArr(filteredContracts).map((contract: any) => (
-          <SectionCard key={contract.id} onClick={() => handleContractClick(contract)}>
-            <h3 className="font-bold">{contract.client_name}</h3>
-            <StatusBadge status={contract.status} />
-            <p>Value: {contract.contract_value} EGP</p>
-            <p>Dates: {contract.start_date} - {contract.end_date}</p>
-          </SectionCard>
-        ))
-      )}
-      {selectedContract && (
-        <div className="mt-8">
-          <h2 className="font-bold">Selected Contract Details</h2>
-          <p>Client: {selectedContract.client_name}</p>
-          <p>Value: {selectedContract.contract_value} EGP</p>
-          <p>Dates: {selectedContract.start_date} - {selectedContract.end_date}</p>
-          <p>Status: {selectedContract.status}</p>
-          <h3>Linked WOs</h3>
-          <SectionCard>
-            <MetricStrip
-              title="WO Count"
-              value={fetchWorkOrdersByContractId(selectedContract.id).length}
-            />
-          </SectionCard>
-          <h3>Linked Invoices</h3>
-          <SectionCard>
-            <MetricStrip
-              title="Invoice Total"
-              value={fetchInvoicesByContractId(selectedContract.id).reduce(
-                (total, invoice) => total + invoice.amount,
-                0
-              )}
-            />
-          </SectionCard>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /commercial/contracts</p>
         </div>
-      )}
-    </PageWrapper>
+      </div>
+    </div>
   );
-};
-
-export default Contract360Page;
+}

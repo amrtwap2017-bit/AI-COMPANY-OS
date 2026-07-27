@@ -1,85 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
-import Link from "next/link";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchAssets = async () => {
-  const res = await authFetch(`/api/v1/assets`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchPMPlans = async () => {
-  const res = await authFetch(`/api/v1/maintenance/pm-plans`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchMaintenanceSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals?category=maintenance`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const MaintenanceReviewPage = () => {
-  const { data: assets, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, { refetchInterval: 120000 });
-  const signals: any[] = toArr(assets);
-const items: any[] = toArr(assets);
-  const { data: pmPlans, isLoading: isPMPlansLoading } = useQuery(["pm-plans"], fetchPMPlans, { refetchInterval: 120000 });
-  const { data: maintenanceSignals, isLoading: isMaintenanceSignalsLoading } = useQuery(
-    ["maintenance-signals"],
-    fetchMaintenanceSignals,
-    { refetchInterval: 120000 }
-  );
-
-  if (isAssetsLoading || isPMPlansLoading || isMaintenanceSignalsLoading) return <LoadingState />;
-
-  const totalAssets = (assets || []).length;
-  const activePMPlans = toArr(pmPlans).filter(plan => plan.status === "active").length;
-  const overduePMPlans = toArr(pmPlans).filter(plan => new Date(plan.dueDate) < new Date()).length;
-  const maintenanceSignalsCount = maintenanceSignals.length;
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/maintenance"); }, []);
   return (
-    <PageWrapper>
-      <PageHeader title="Maintenance Review Hub" />
-      <div className="grid grid-cols-3 gap-4">
-        <MetricStrip label="Total Assets" value={totalAssets} />
-        <MetricStrip label="PM Plans Active" value={activePMPlans} />
-        <MetricStrip label="Overdue PM Plans" value={overduePMPlans} />
-        <MetricStrip label="Maintenance Signals" value={maintenanceSignalsCount} />
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /maintenance</p>
+        </div>
       </div>
-      <div className="grid grid-cols-6 gap-4 mt-8">
-        <SectionCard title="Schedule">
-          <Link href="/maintenance/review/schedules">Go to Schedules</Link>
-        </SectionCard>
-        <SectionCard title="Costs">
-          <Link href="/maintenance/costs/review">Go to Costs Review</Link>
-        </SectionCard>
-        <SectionCard title="Downtime">
-          <Link href="/maintenance/downtime/review">Go to Downtime Review</Link>
-        </SectionCard>
-        <SectionCard title="Intelligence">
-          <Link href="/maintenance/intelligence">Go to Intelligence</Link>
-        </SectionCard>
-        <SectionCard title="Asset Tree">
-          <Link href="/maintenance/asset-tree">Go to Asset Tree</Link>
-        </SectionCard>
-        <SectionCard title="PM Plans">
-          <Link href="/maintenance/pm-plans">Go to PM Plans</Link>
-        </SectionCard>
-      </div>
-      <StatusBadge
-        label="Quick Status"
-        value={`${overduePMPlans} overdue PM plans + ${maintenanceSignalsCount} faulted assets`}
-      />
-    </PageWrapper>
+    </div>
   );
-};
-
-export default MaintenanceReviewPage;
+}

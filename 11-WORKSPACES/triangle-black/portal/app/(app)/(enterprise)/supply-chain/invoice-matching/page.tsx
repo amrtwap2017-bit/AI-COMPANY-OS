@@ -1,114 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState, EmptyState } from "@/components/ui";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchPurchaseOrders = async () => {
-  const res = await authFetch(`/api/v1/inventory/purchase-orders`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchSupplierInvoices = async () => {
-  try {
-    const response = await authFetch(`/api/v1/supply-chain/supplier-invoices`).then(r => r.json());
-    if (response.status === 404) throw new Error("Not Found");
-    if (!response.ok) return [];
-    return res.json();
-  } catch {
-    const res = await authFetch(`/api/v1/supplier-invoices`);
-  if (!res.ok) return [];
-  return res.json();
-  }
-};
-
-const InvoiceMatchingPage = () => {
-  const { data: purchaseOrders, isLoading, isError } = useQuery(["purchaseOrders"], fetchPurchaseOrders, { refetchInterval: 120000 });
-  const { data: supplierInvoices, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } = useQuery(
-    ["supplierInvoices"],
-    fetchSupplierInvoices,
-    { refetchInterval: 120000 }
-  );
-
-  if (isLoading || isFetching) return <LoadingState />;
-  if (isError) return <EmptyState title="Failed to load data" description="Please try reloading the page." />;
-
-  const matchedInvoices = toArr(purchaseOrders).filter(po => toArr(supplierInvoices).some(inv => inv.po_id === po.id));
-  const unmatchedPOs = toArr(purchaseOrders).filter(po => !toArr(supplierInvoices).some(inv => inv.po_id === po.id));
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/supply-chain"); }, []);
   return (
-    <PageWrapper>
-      <PageHeader title="Invoice Matching" />
-      <SectionCard>
-        <MetricStrip
-          metrics={[
-            { label: "Total POs", value: purchaseOrders.length },
-            { label: "Matched Invoices", value: matchedInvoices.length },
-            { label: "Unmatched POs", value: unmatchedPOs.length },
-            { label: "Total PO Value EGP", value: toArr(purchaseOrders).reduce((acc: any, po: any) => acc + po.total_amount, 0) }
-          ]}
-        />
-      </SectionCard>
-      <div className="grid grid-cols-2 gap-4">
-        <SectionCard title="Matching Table">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>PO Number</th>
-                <th>Vendor</th>
-                <th>Amount EGP</th>
-                <th>Status</th>
-                <th>Invoice</th>
-                <th>Match Indicator</th>
-              </tr>
-            </thead>
-            <tbody>
-              {toArr(purchaseOrders).map(po => (
-                <tr key={po.id}>
-                  <td>{po.po_number}</td>
-                  <td>{/* Fetch vendor name from API */}</td>
-                  <td>{po.total_amount}</td>
-                  <td><StatusBadge status={po.status} /></td>
-                  <td>
-                    {toArr(supplierInvoices).some(inv => inv.po_id === po.id) ? (
-                      <span className="text-green-500">Matched</span>
-                    ) : (
-                      <span className="text-red-500">No invoice</span>
-                    )}
-                  </td>
-                  <td>
-                    {toArr(supplierInvoices).some(inv => inv.po_id === po.id) ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="green">
-                        <path d="M5 13l4 4 6-6" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red">
-                        <path d="M18 6L6 18h12z" />
-                      </svg>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </SectionCard>
-        <SectionCard title="Unmatched POs">
-          <ul>
-            {toArr(unmatchedPOs).map(po => (
-              <li key={po.id}>
-                PO Number: {po.po_number}, Amount EGP: {po.total_amount}, Created At: {po.created_at}
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /supply-chain</p>
+        </div>
       </div>
-    </PageWrapper>
+    </div>
   );
-};
-
-export default InvoiceMatchingPage;
+}

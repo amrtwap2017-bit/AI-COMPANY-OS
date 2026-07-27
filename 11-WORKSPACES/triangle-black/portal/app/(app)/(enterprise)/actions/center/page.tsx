@@ -1,57 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  PageWrapper, PageHeader, SectionCard,
-  MetricStrip, StatusBadge, LoadingState, EmptyState
-} from "@/components/ui";
-import Link from "next/link";
-
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-async function fetchSignals() {
-  try {  
-    const r = await authFetch(`/api/v1/ai/signals`).then(r => r.json());
-    if (!r.ok) return { signals: [] };
-    return r.json();
-  } catch (error) {
-    console.error("Error fetching signals:", error);
-    return { signals: [] };
-  }
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/workspace"); }, []);
+  return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /workspace</p>
+        </div>
+      </div>
+    </div>
+  );
 }
-
-async function fetchPRs() {
-  try {  
-    const r = await authFetch(`/api/v1/purchase-requests/`).then(r => r.json());
-    if (!r.ok) return [];
-    const d = await r.json();
-    return Array.isArray(d) ? d : d.items ?? [];
-  } catch (error) {
-    console.error("Error fetching PRs:", error);
-    return [];
-  }
-}
-
-async function fetchWOs() {
-  try {  
-    const r = await authFetch(`/api/v1/work-orders`).then(r => r.json());
-    if (!r.ok) return [];
-    const d = await r.json();
-    return Array.isArray(d) ? d : d.items ?? [];
-  } catch (error) {
-    console.error("Error fetching WOs:", error);
-    return [];
-  }
-}
-
-const CATEGORY_LINKS = {
-  operations: "/operations/workbench",
-  maintenance: "/maintenance/intelligence",
-  inventory: "/supply-chain/workbench",
-  commercial: "/commercial/pipeline",
-  resources: "/operations/dispatch",
-};
-
-// Rest of the file content...

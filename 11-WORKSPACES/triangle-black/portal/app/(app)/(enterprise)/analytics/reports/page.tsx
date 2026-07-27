@@ -1,36 +1,18 @@
 "use client";
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-export default function AnalyticsReports() {
-  const { data, isLoading } = useQuery(
-    ["analytics-reports"],
-    () => authFetch("/api/v1/dashboard/summary").then(r => r.json())
-  );
-
-  if (isLoading) return <div className="p-6 text-gray-400">Loading reports...</div>;
-  if (!data || typeof data !== "object") return <div className="p-6 text-gray-400">No data available</div>;
-
-  const sections = Object.entries(data).filter(([, v]) => typeof v === "object" && v !== null);
-
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/executive/reports"); }, []);
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Platform Reports</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sections.map(([key, value]: [string, any]) => (
-          <div key={key} className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-gray-500 mb-3">
-              {key.replace(/_/g, " ")}
-            </h3>
-            {Object.entries(value).map(([k, v]: [string, any]) => (
-              <div key={k} className="flex justify-between py-1 text-sm border-b last:border-0">
-                <span className="text-gray-600">{k.replace(/_/g, " ")}</span>
-                <span className="font-mono font-medium">{typeof v === "number" ? v.toLocaleString() : String(v)}</span>
-              </div>
-            ))}
-          </div>
-        ))}
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /executive/reports</p>
+        </div>
       </div>
     </div>
   );

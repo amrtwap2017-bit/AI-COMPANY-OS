@@ -1,77 +1,19 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-import { useQuery } from "@tanstack/react-query";
-import { useParams, useSearchParams } from "next/navigation";
-import {
-  PageWrapper, PageHeader, SectionCard,
-  MetricStrip, StatusBadge, LoadingState, EmptyState
-} from "@/components/ui";
-import Link from "next/link";
-
-const workOrders: any[] = [];
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-async function fetchContracts() {
-  try {  
-    const r = await authFetch(`/api/v1/contracts`).then(r => r.json());
-    if (!r.ok) return [];
-    const d = await r.json();
-    return Array.isArray(d) ? d : d.items ?? [];
-  } catch (error) {
-    console.error("Error fetching contracts:", error);
-    return [];
-  }
-}
-
-async function fetchInvoices() {
-  try {  
-    const r = await authFetch(`/api/v1/invoices`).then(r => r.json());
-    if (!r.ok) return [];
-    const d = await r.json();
-    return Array.isArray(d) ? d : d.items ?? [];
-  } catch (error) {
-    console.error("Error fetching invoices:", error);
-    return [];
-  }
-}
-
-async function fetchWOs() {
-  try {  
-    const r = await authFetch(`/api/v1/work-orders`).then(r => r.json());
-    if (!r.ok) return [];
-    const d = await r.json();
-    return Array.isArray(d) ? d : d.items ?? [];
-  } catch (error) {
-    console.error("Error fetching work orders:", error);
-    return [];
-  }
-}
-
-export default function CustomerDetailPage() {
-  const params       = useParams();
-  const searchParams = useSearchParams();
-  const name         = searchParams.get("name") || decodeURIComponent(String(params?.id || ""));
-
-  const { data: contracts = [], isLoading: c1 } = useQuery({
-    queryKey: ["contracts"],
-    queryFn: fetchContracts,
-  });
-
-  const { data: invoices = [], isLoading: i1 } = useQuery({
-    queryKey: ["invoices"],
-    queryFn: fetchInvoices,
-  });
-
-  const { data: workOrders = [], isLoading: w1 } = useQuery({
-    queryKey: ["work-orders"],
-    queryFn: fetchWOs,
-  });
-
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/commercial"); }, []);
   return (
-    <PageWrapper>
-      {/* Render your page content here */}
-    </PageWrapper>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /commercial</p>
+        </div>
+      </div>
+    </div>
   );
 }

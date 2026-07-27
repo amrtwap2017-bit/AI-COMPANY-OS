@@ -1,39 +1,19 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { AlertBanner, Breadcrumb, DataTable, EmptyState, LoadingState, PageHeader, PageWrapper } from "@/components/ui";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import { useSearch } from "@/lib/hooks/useSearch";
-import { authFetch, authFetchJSON } from "@/lib/hooks/useAuthFetch";
-import { RefreshCw } from "lucide-react";
-
-export default function Page() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["supply-chain-vendors"],
-    queryFn:  () => authFetchJSON("/api/v1/inventory/vendors"),
-    staleTime: 30_000, retry: 2,
-  });
-  const items = Array.isArray(data)?data:data?.items||data?.data||data?.results||data?.queue||data?.records||data?.rfqs||data?.leads||data?.suppliers||data?.purchase_orders||data?.purchaseRequests||[];
-  const { query, setQuery, filtered } = useSearch(items, ["title","name","status","type","description"]);
-  const { page, totalPages, items: rows, goToPage } = usePagination(filtered, 20);
-  const columns = [
-    { key:"name", label:"Vendor", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["name"]??"—")}</span>) },
-    { key:"category", label:"Category", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["category"]??"—")}</span>) },
-    { key:"contact_email", label:"Email", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["contact_email"]??"—")}</span>) },
-    { key:"rating", label:"Rating", render:(r:any)=>(<span className="text-sm text-slate-700">{String(r["rating"]??"—")}</span>) },
-  ];
+// @ts-nocheck
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/supply-chain/suppliers"); }, []);
   return (
-    <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Vendor Directory" subtitle={`${(items || []).length} records`} badge="VDR"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-secondary hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
-      {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {isLoading?<LoadingState type="table" rows={8}/>:
-         rows.length===0?<EmptyState icon="🏢" title="No data" description="No records found"/>:
-         <DataTable columns={columns} data={rows}/>}
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
+        <div className="tb-hero-inner text-center">
+          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
+          <h1 className="tb-hero-title">Loading...</h1>
+          <p className="tb-hero-description">Taking you to /supply-chain/suppliers</p>
+        </div>
       </div>
-      <Pagination page={page} totalPages={totalPages} onPage={goToPage}/>
-    </PageWrapper>
+    </div>
   );
 }
