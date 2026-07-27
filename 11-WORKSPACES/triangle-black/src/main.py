@@ -1419,31 +1419,37 @@ def create_purchase_request(body: dict):
         now    = datetime.utcnow()
         pr_num = f"PR-{now.strftime('%Y%m%d')}-{pr_id[:6].upper()}"
         required = body.get("required_date") or (now + timedelta(days=7)).isoformat()
+        requester = (body.get("requester") or body.get("submitted_by") or body.get("name") or "Portal User")
+        title     = body.get("title") or f"Purchase Request {pr_num}"
+        dept      = body.get("department") or "Engineering"
+        urgency   = body.get("urgency") or "normal"
         db.execute(text("""
             INSERT INTO purchase_requests (id,hotel_id,pr_number,title,justification,urgency,
                 status,department,requester,lines,required_date,created_at,updated_at)
             VALUES (:id,:hotel,:pr_num,:title,:justification,:urgency,'pending',:dept,:requester,
                 :lines::json,:required,:now,:now)
         """),{
-            "id":pr_id, "hotel":body.get("hotel_id","tb-default-hotel-000000000001"),
+            "id":pr_id,
+            "hotel":body.get("hotel_id","tb-default-hotel-000000000001"),
             "pr_num":pr_num,
-            "title":body.get("title",f"Purchase Request {pr_num}"),
-            "justification":body.get("justification","") or "",
-            "urgency":body.get("urgency","normal"),
-            "dept":body.get("department","Engineering"),
-            "requester":body.get("requester","Portal User"),
-            "lines":body.get("lines","[]") or "[]",
-            "required":required, "now":now,
+            "title":title,
+            "justification":body.get("justification") or "",
+            "urgency":urgency,
+            "dept":dept,
+            "requester":requester,
+            "lines":body.get("lines") or "[]",
+            "required":required,
+            "now":now,
         })
         db.execute(text("""
             INSERT INTO notifications (id,hotel_id,title,message,type,entity_id,entity_type,recipient_role,is_read,created_at,updated_at)
             VALUES (:id,:hotel,:title,:msg,'purchase_request_created',:eid,'purchase_request','admin',false,:now,:now)
         """),{"id":str(uuid.uuid4()),"hotel":"tb-default-hotel-000000000001",
-              "title":f"New PR: {body.get('title',pr_num)}",
-              "msg":f"Dept: {body.get('department','Engineering')} · Urgency: {body.get('urgency','normal')}",
+              "title":f"New PR: {title}",
+              "msg":f"Dept: {dept} · Urgency: {urgency} · By: {requester}",
               "eid":pr_id,"now":now})
         db.commit()
-        return {"id":pr_id,"status":"pending","pr_number":pr_num,"title":body.get("title"),"created_at":now.isoformat()}
+        return {"id":pr_id,"status":"pending","pr_number":pr_num,"title":title,"requester":requester,"created_at":now.isoformat()}
 
 
 @app.post("/api/v1/work-orders/{wo_id}/status", tags=["work-orders"])
@@ -1540,4 +1546,67 @@ def approve_purchase_request(pr_id: str, body: dict):
         db.execute(text(f"UPDATE purchase_requests SET {', '.join(sets)} WHERE id=:pr_id"), params)
         db.commit()
         return {"id":pr_id,"status":new_status,"updated_at":now.isoformat()}
+
+
+
+# ── SPRINT 191: GLOBAL SEARCH ENDPOINT ──────────────────────────────────────
+
+@app.get("/api/v1/search", tags=["search"])
+def global_search(q: str = "", limit: int = 8):
+    """Search across all entities — WOs, assets, leads, contracts, technicians"""
+    if not q or len(q) < 2:
+        return {"results": [], "total": 0, "query": q}
+    
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    
+    results = []
+    q_like = f"%{q}%"
+    
+    with Session(eng) as db:
+        def safe_query(sql, params, entity_type, path_prefix):
+            try:
+                rows = db.execute(text(sql), params).fetchall()
+                for row in rows:
+                    r = dict(row._mapping)
+                    results.append({
+                        "type":  entity_type,
+                        "id":    r.get("id",""),
+                        "title": r.get("title") or r.get("name") or r.get("invoice_number") or r.get("pr_number") or r.get("id",""),
+                        "sub":   r.get("status") or r.get("category") or r.get("company") or "",
+                        "path":  f"{path_prefix}/{r.get('id','')}",
+                    })
+            except Exception as e:
+                db.rollback()
+        
+        safe_query(
+            "SELECT id,title,status,type FROM work_orders WHERE title ILIKE :q ORDER BY created_at DESC LIMIT :l",
+            {"q":q_like,"l":limit//4+2}, "Work Order", "/operations/work-orders")
+        
+        safe_query(
+            "SELECT id,name,status,company FROM leads WHERE name ILIKE :q OR company ILIKE :q ORDER BY updated_at DESC LIMIT :l",
+            {"q":q_like,"l":limit//4+2}, "Lead", "/commercial/leads")
+        
+        safe_query(
+            "SELECT id,name,category,status FROM assets WHERE name ILIKE :q OR serial_number ILIKE :q ORDER BY name LIMIT :l",
+            {"q":q_like,"l":limit//4+2}, "Asset", "/maintenance/assets")
+        
+        safe_query(
+            "SELECT id,title,status FROM contracts WHERE title ILIKE :q ORDER BY created_at DESC LIMIT :l",
+            {"q":q_like,"l":limit//4+2}, "Contract", "/commercial/contracts")
+        
+        safe_query(
+            "SELECT id,name,email FROM technicians WHERE name ILIKE :q OR email ILIKE :q ORDER BY name LIMIT :l",
+            {"q":q_like,"l":3}, "Technician", "/operations/technicians")
+        
+        safe_query(
+            "SELECT id,invoice_number as title,status FROM invoices WHERE invoice_number ILIKE :q ORDER BY created_at DESC LIMIT :l",
+            {"q":q_like,"l":3}, "Invoice", "/invoices")
+    
+    results = results[:limit]
+    return {"results": results, "total": len(results), "query": q}
 
