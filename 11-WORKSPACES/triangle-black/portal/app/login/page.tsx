@@ -20,33 +20,35 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Call backend directly — form-urlencoded with username field
-      const res = await fetch("http://localhost:8030/api/v1/auth/login", {
+      // Use Next.js API route — it calls backend AND sets the cookie
+      // that proxy.ts middleware requires for authentication
+      const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ username: email, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.detail || "Invalid credentials");
+        throw new Error(data.error || data.detail || "Invalid credentials");
       }
 
       const token = data.access_token;
-      if (!token) throw new Error("No token received from server");
+      if (!token) throw new Error("No token received");
 
-      // Store token in all locations for maximum compatibility
-      sessionStorage.setItem("tb_token", token);
-      sessionStorage.setItem("tb_access_token", token);
+      // Also store in localStorage for authFetch hook compatibility
       localStorage.setItem("tb_token", token);
       localStorage.setItem("tb_access_token", token);
+      sessionStorage.setItem("tb_token", token);
+      sessionStorage.setItem("tb_access_token", token);
 
-      // Redirect to original destination or workspace
+      // Cookie is already set by the Next.js API route
+      // Redirect to original destination
       const target = from === "/login" ? "/workspace" : from;
       router.replace(target);
     } catch (err: any) {
-      setError(err.message || "Login failed — check credentials");
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
