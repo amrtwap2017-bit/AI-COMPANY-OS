@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { AlertBanner, Breadcrumb, DataTable, EmptyState, LoadingState, PageHeader, PageWrapper } from "@/components/ui";
