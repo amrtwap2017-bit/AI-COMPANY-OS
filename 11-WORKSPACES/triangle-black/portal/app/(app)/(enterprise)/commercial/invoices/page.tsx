@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -135,7 +136,7 @@ export default function InvoicesPage() {
               <tbody className="divide-y divide-slate-50">
                 {filtered.map(i=>(
                   <tr key={i.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-3"><span className="font-mono text-xs font-semibold text-slate-700">{i.invoice_number||"—"}</span></td>
+                    <td className="py-3 px-3"><Link href={`/commercial/invoices/${i.id}`}><span className="font-mono text-xs font-semibold text-blue-700 hover:underline">{i.invoice_number||"—"}</span></Link></td>
                     <td className="py-3 px-3"><p className="font-medium text-slate-800 truncate max-w-[180px]">{i.title||"—"}</p></td>
                     <td className="py-3 px-3"><span className="font-semibold text-slate-800">EGP {fmtNum(i.amount)}</span></td>
                     <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[i.status]||"bg-slate-100 text-slate-600")}>{i.status||"—"}</span></td>
