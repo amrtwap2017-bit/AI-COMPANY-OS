@@ -44,7 +44,7 @@ const COLORS: Record<string, string> = {
   workspace:        "text-slate-300",
   executive:        "text-emerald-400",
   customers:        "text-blue-400",
-  commercial:       "text-amber-400",
+  commercial:       "text-brand-mid",
   operations:       "text-orange-400",
   "supply-chain":   "text-yellow-400",
   engineering:      "text-purple-400",
@@ -60,12 +60,12 @@ const COLORS: Record<string, string> = {
 
 // ── Badge styles ──────────────────────────────────────────────────
 function badgeClass(badge: string): string {
-  if (badge === "AI")    return "bg-amber-700/40 text-amber-300";
+  if (badge === "AI")    return "bg-brand/40 text-amber-300";
   if (badge === "New")   return "bg-blue-700/40 text-blue-300";
   if (badge === "Live")  return "bg-emerald-700/40 text-emerald-300";
   if (badge === "Inbox") return "bg-purple-700/40 text-purple-300";
   if (badge === "OPS")   return "bg-orange-700/40 text-orange-300";
-  if (badge === "CRM")   return "bg-amber-700/40 text-amber-300";
+  if (badge === "CRM")   return "bg-brand/40 text-amber-300";
   if (badge === "SCM")   return "bg-yellow-700/40 text-yellow-300";
   if (badge === "MNT")   return "bg-red-700/40 text-red-300";
   if (badge === "ENG")   return "bg-purple-700/40 text-purple-300";
@@ -97,16 +97,16 @@ function NavItem({
           "flex items-center gap-3 text-sm font-medium transition-all group relative",
           collapsed ? "px-0 py-2.5 justify-center rounded-xl" : "px-3 py-2 rounded-xl",
           isActive
-            ? "bg-slate-800/80 text-white"
-            : "text-slate-400 hover:text-white hover:bg-slate-800/50",
+            ? "bg-sidebar-active text-white"
+            : "text-sidebar-text hover:text-text-inverse hover:bg-sidebar-hover",
         ].join(" ")}
       >
         {isActive && !collapsed && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand rounded-r-full" />
         )}
         <Icon className={[
           "w-4 h-4 flex-shrink-0",
-          isActive ? "text-amber-400" : color + " group-hover:text-white",
+          isActive ? "text-brand-mid" : color + " group-hover:text-white",
         ].join(" ")} />
         {!collapsed && (
           <>
@@ -120,7 +120,7 @@ function NavItem({
           </>
         )}
         {collapsed && center.badge && isActive && (
-          <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full" />
+          <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-brand rounded-full" />
         )}
       </Link>
 
@@ -128,7 +128,7 @@ function NavItem({
       {collapsed && tooltip === center.key && (
         <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-lg shadow-xl border border-slate-700 whitespace-nowrap pointer-events-none">
           {center.label}
-          {center.badge && <span className="ml-1.5 text-amber-400">{center.badge}</span>}
+          {center.badge && <span className="ml-1.5 text-brand-mid">{center.badge}</span>}
         </div>
       )}
     </div>
@@ -169,18 +169,18 @@ function NavAccordion({
           href={center.href}
           className={[
             "flex items-center justify-center px-0 py-2.5 rounded-xl text-sm font-medium transition-all",
-            anyActive ? "bg-slate-800/80 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800/50",
+            anyActive ? "bg-sidebar-active text-white" : "text-sidebar-text hover:text-text-inverse hover:bg-sidebar-hover",
           ].join(" ")}
         >
-          <Icon className={["w-4 h-4", anyActive ? "text-amber-400" : color].join(" ")} />
+          <Icon className={["w-4 h-4", anyActive ? "text-brand-mid" : color].join(" ")} />
           {center.badge && anyActive && (
-            <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full" />
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-brand rounded-full" />
           )}
         </Link>
         {tooltip === center.key && (
           <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-lg shadow-xl border border-slate-700 whitespace-nowrap pointer-events-none">
             {center.label}
-            {center.badge && <span className="ml-1.5 text-amber-400">{center.badge}</span>}
+            {center.badge && <span className="ml-1.5 text-brand-mid">{center.badge}</span>}
           </div>
         )}
       </div>
@@ -194,13 +194,13 @@ function NavAccordion({
         onClick={() => setOpen(o => !o)}
         className={[
           "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group relative",
-          anyActive ? "text-white" : "text-slate-400 hover:text-white hover:bg-slate-800/50",
+          anyActive ? "text-white" : "text-sidebar-text hover:text-text-inverse hover:bg-sidebar-hover",
         ].join(" ")}
       >
         {anyActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand rounded-r-full" />
         )}
-        <Icon className={["w-4 h-4 flex-shrink-0", anyActive ? "text-amber-400" : color + " group-hover:text-white"].join(" ")} />
+        <Icon className={["w-4 h-4 flex-shrink-0", anyActive ? "text-brand-mid" : color + " group-hover:text-white"].join(" ")} />
         <span className="flex-1 text-left truncate">{center.shortLabel || center.label}</span>
         {center.badge && (
           <span className={"text-[10px] px-1.5 py-0.5 rounded-md font-bold flex-shrink-0 " + badgeClass(center.badge)}>
@@ -208,14 +208,14 @@ function NavAccordion({
           </span>
         )}
         {open
-          ? <ChevronDown className="w-3 h-3 text-slate-500 flex-shrink-0 ml-0.5" />
+          ? <ChevronDown className="w-3 h-3 text-sidebar-text flex-shrink-0 ml-0.5" />
           : <ChevronRight className="w-3 h-3 text-slate-600 flex-shrink-0 ml-0.5" />
         }
       </button>
 
       {/* Sub-items */}
       {open && center.children && (
-        <div className="ml-4 mt-0.5 mb-1 pl-3 border-l border-slate-800 space-y-0.5">
+        <div className="ml-4 mt-0.5 mb-1 pl-3 border-l border-sidebar-border space-y-0.5">
           {center.children.map(child => {
             const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
             return (
@@ -225,8 +225,8 @@ function NavAccordion({
                 className={[
                   "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all",
                   childActive
-                    ? "text-amber-400 bg-amber-500/10 font-semibold"
-                    : "text-slate-500 hover:text-white hover:bg-slate-800/40",
+                    ? "text-brand-mid bg-brand/10 font-semibold"
+                    : "text-sidebar-text hover:text-white hover:bg-slate-800/40",
                 ].join(" ")}
               >
                 <span className={"w-1 h-1 rounded-full flex-shrink-0 " + (childActive ? "bg-amber-400" : "bg-slate-600")} />
@@ -275,27 +275,27 @@ export function EnterpriseSidebar() {
 
   return (
     <aside className={[
-      "shrink-0 flex flex-col bg-slate-950 border-r border-slate-800 transition-all duration-200",
+      "shrink-0 flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-base",
       collapsed ? "w-16" : "w-60",
     ].join(" ")}>
 
       {/* Header / Logo */}
-      <div className="h-14 flex items-center border-b border-slate-800 flex-shrink-0 px-3 gap-2.5">
+      <div className="h-14 flex items-center border-b border-sidebar-border flex-shrink-0 px-3 gap-2.5">
         <Link href="/workspace" className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-brand flex items-center justify-center shadow-lg flex-shrink-0">
             <span className="text-white font-black text-sm">TB</span>
           </div>
           {!collapsed && (
             <div className="min-w-0">
               <div className="text-white font-bold text-sm leading-none truncate">Triangle Black</div>
-              <div className="text-slate-500 text-[10px] mt-0.5">Enterprise OS</div>
+              <div className="text-sidebar-text text-[10px] mt-0.5">Enterprise OS</div>
             </div>
           )}
         </Link>
         {!collapsed && (
           <button
             onClick={toggleCollapse}
-            className="ml-auto w-6 h-6 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-colors flex-shrink-0"
+            className="ml-auto w-6 h-6 flex items-center justify-center rounded-lg text-sidebar-text hover:text-text-inverse hover:bg-sidebar-hover transition-colors flex-shrink-0"
             title="Collapse sidebar"
           >
             <PanelLeftClose className="w-3.5 h-3.5" />
@@ -305,10 +305,10 @@ export function EnterpriseSidebar() {
 
       {/* Expand button when collapsed */}
       {collapsed && (
-        <div className="flex justify-center py-2 border-b border-slate-800">
+        <div className="flex justify-center py-2 border-b border-sidebar-border">
           <button
             onClick={toggleCollapse}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-sidebar-text hover:text-text-inverse hover:bg-sidebar-hover transition-colors"
             title="Expand sidebar"
           >
             <PanelLeftOpen className="w-3.5 h-3.5" />
@@ -327,13 +327,13 @@ export function EnterpriseSidebar() {
               {/* Group label */}
               {!collapsed && (
                 <div className="pb-1 px-3">
-                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-sidebar-text uppercase tracking-widest opacity-60">
                     {group.label}
                   </span>
                 </div>
               )}
               {collapsed && gi > 0 && (
-                <div className="border-t border-slate-800/60 mx-2 mb-2" />
+                <div className="border-t border-sidebar-border/60 mx-2 mb-2" />
               )}
 
               {/* Center items */}
@@ -374,21 +374,21 @@ export function EnterpriseSidebar() {
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-slate-800 flex-shrink-0 p-2">
+      <div className="border-t border-sidebar-border flex-shrink-0 p-2">
         {!collapsed ? (
           <div className="px-2 py-2">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-7 h-7 rounded-full bg-amber-700 flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 rounded-full bg-brand flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-xs font-black">{initials}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-white text-xs font-semibold truncate">{user?.name || "User"}</div>
-                <div className="text-slate-500 text-[10px] capitalize truncate">{user?.role || "admin"}</div>
+                <div className="text-sidebar-text text-[10px] capitalize truncate">{user?.role || "admin"}</div>
               </div>
             </div>
             <button
               onClick={logout}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-sidebar-text hover:text-red-400 hover:bg-red-500/10 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign out
@@ -402,7 +402,7 @@ export function EnterpriseSidebar() {
           >
             <button
               onClick={logout}
-              className="w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center hover:bg-red-600 transition-colors"
+              className="w-8 h-8 rounded-full bg-brand flex items-center justify-center hover:bg-red-600 transition-colors"
               title="Sign out"
             >
               <span className="text-white text-xs font-black">{initials}</span>

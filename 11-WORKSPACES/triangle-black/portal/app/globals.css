@@ -1,164 +1,388 @@
+/* Triangle Black — Global Styles */
+/* Version: 7.0 — Complete Design Token System */
 @import "tailwindcss";
 
-@theme {
-  --color-brand: var(--color-brand);
-  --color-brand-hover: var(--color-brand-hover);
-  --color-brand-light: var(--color-brand-light);
-  --color-brand-mid: var(--color-brand-mid);
-  --color-surface: var(--color-surface);
-  --color-bg: var(--color-bg);
-  --color-bg-alt: var(--color-bg-alt);
-  --color-sidebar: var(--color-sidebar);
-  --color-sidebar-hover: var(--color-sidebar-hover);
-  --color-text-1: var(--color-text-1);
-  --color-text-2: var(--color-text-2);
-  --color-text-3: var(--color-text-3);
-  --color-text-inv: var(--color-text-inv);
-  --color-border: var(--color-border);
-  --color-border-focus: var(--color-border-focus);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
-  --color-info: var(--color-info);
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --radius-full: var(--radius-full);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --duration-fast: var(--duration-fast);
-  --duration-base: var(--duration-base);
-  --duration-slow: var(--duration-slow);
-}
+/* ══════════════════════════════════════════════════════════════
+   TRIANGLE BLACK DESIGN TOKENS — TBEDS 7.0
+   Premium Enterprise Operations Platform
+   
+   Philosophy:
+   - Dark = Luxury Command Center (Linear / IBM Carbon Dark)
+   - Light = Premium Executive Workspace (Stripe / Apple)
+   - Amber is the ONE accent color — never add another
+   - Slate is the neutral foundation
+   - Every pixel communicates information
+════════════════════════════════════════════════════════════════ */
 
-
-/* ── TBEDS Design Tokens ─────────────────────────────────────── */
+/* ── LIGHT THEME (Default) ────────────────────────────────── */
 :root {
-  /* Brand */
+  /* Brand — Amber 700 / Premium amber accent */
   --color-brand:        #B45309;
   --color-brand-hover:  #92400E;
   --color-brand-light:  #FEF3C7;
-  --color-brand-mid:    #F59E0B;
+  --color-brand-mid:    #D97706;
+  --color-brand-muted:  #FDE68A;
 
-  /* Surface */
-  --color-surface:      #FFFFFF;
+  /* Backgrounds */
   --color-bg:           #F8FAFC;
   --color-bg-alt:       #F1F5F9;
-  --color-sidebar:      #0F172A;
-  --color-sidebar-hover:#1E293B;
+  --color-surface:      #FFFFFF;
+  --color-surface-alt:  #F8FAFC;
+  --color-surface-raised: #FFFFFF;
+  --color-overlay:      rgba(15, 23, 42, 0.5);
 
-  /* Text */
-  --color-text-1:       #0F172A;
-  --color-text-2:       #475569;
-  --color-text-3:       #94A3B8;
-  --color-text-inv:     #FFFFFF;
+  /* Sidebar — Always dark regardless of theme */
+  --color-sidebar:          #0F172A;
+  --color-sidebar-hover:    #1E293B;
+  --color-sidebar-active:   #1E293B;
+  --color-sidebar-border:   #1E293B;
+  --color-sidebar-text:     #94A3B8;
+  --color-sidebar-text-active: #FFFFFF;
 
-  /* Border */
+  /* Topbar */
+  --color-topbar:       #FFFFFF;
+  --color-topbar-border:#E2E8F0;
+
+  /* Text — 3-level hierarchy */
+  --color-text-1:       #0F172A;  /* Primary — headings, values */
+  --color-text-2:       #475569;  /* Secondary — descriptions, labels */
+  --color-text-3:       #94A3B8;  /* Tertiary — timestamps, placeholders */
+  --color-text-disabled:#CBD5E1;  /* Disabled */
+  --color-text-inv:     #FFFFFF;  /* On dark backgrounds */
+  --color-text-brand:   #B45309;  /* Brand text */
+
+  /* Borders */
   --color-border:       #E2E8F0;
   --color-border-hover: #CBD5E1;
-  --color-border-focus: #F59E0B;
+  --color-border-focus: #B45309;
+  --color-border-strong:#94A3B8;
+  --color-divider:      #F1F5F9;
 
-  /* Status */
-  --color-success:      #059669;
-  --color-warning:      #D97706;
-  --color-error:        #DC2626;
-  --color-info:         #2563EB;
+  /* Semantic Status Colors */
+  --color-success:      #10B981;
+  --color-success-bg:   #ECFDF5;
+  --color-success-border:#A7F3D0;
+  --color-success-text: #065F46;
 
-  /* Spacing */
-  --space-xs:  4px;
-  --space-sm:  8px;
-  --space-md:  16px;
-  --space-lg:  24px;
-  --space-xl:  32px;
-  --space-2xl: 48px;
+  --color-warning:      #F59E0B;
+  --color-warning-bg:   #FFFBEB;
+  --color-warning-border:#FDE68A;
+  --color-warning-text: #92400E;
 
-  /* Radius */
+  --color-danger:       #EF4444;
+  --color-danger-bg:    #FEF2F2;
+  --color-danger-border:#FECACA;
+  --color-danger-text:  #991B1B;
+
+  --color-info:         #3B82F6;
+  --color-info-bg:      #EFF6FF;
+  --color-info-border:  #BFDBFE;
+  --color-info-text:    #1E40AF;
+
+  /* Operational Status */
+  --color-status-operational: #10B981;
+  --color-status-fault:       #EF4444;
+  --color-status-maintenance: #F59E0B;
+  --color-status-offline:     #94A3B8;
+  --color-status-critical:    #DC2626;
+  --color-status-pending:     #F59E0B;
+  --color-status-completed:   #10B981;
+  --color-status-cancelled:   #94A3B8;
+  --color-status-overdue:     #EF4444;
+
+  /* Spacing System — 8px base */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Border Radius */
   --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
-  --radius-xl:   20px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  20px;
   --radius-full: 9999px;
 
-  /* Shadow */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  /* Elevation / Shadows */
+  --shadow-none: none;
+  --shadow-sm:   0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow-md:   0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg:   0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+  --shadow-xl:   0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.04);
 
-  /* Motion */
-  --duration-fast:   100ms;
-  --duration-base:   200ms;
-  --duration-slow:   350ms;
-  --ease-default:    cubic-bezier(0.4, 0, 0.2, 1);
+  /* Animation */
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter:    cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit:     cubic-bezier(0.4, 0, 1, 1);
+
+  /* Typography */
+  --font-sans: "Inter", "system-ui", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 64px;
+  --topbar-height: 56px;
+  --content-max: 1400px;
+  --page-padding: 24px;
 }
 
-/* ── Base Reset ──────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+/* ── DARK THEME — Luxury Command Center ───────────────────── */
+.dark {
+  /* Backgrounds — Deep charcoal, not pure black */
+  --color-bg:           #0A0F1A;
+  --color-bg-alt:       #0F172A;
+  --color-surface:      #111827;
+  --color-surface-alt:  #1E293B;
+  --color-surface-raised: #1E293B;
+  --color-overlay:      rgba(0, 0, 0, 0.7);
 
-html { font-family: Inter, system-ui, sans-serif; }
+  /* Topbar */
+  --color-topbar:       #0F172A;
+  --color-topbar-border:#1E293B;
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text-1);
+  /* Text */
+  --color-text-1:       #F1F5F9;
+  --color-text-2:       #94A3B8;
+  --color-text-3:       #475569;
+  --color-text-disabled:#334155;
+  --color-text-inv:     #0F172A;
+
+  /* Borders — Subtle, low contrast */
+  --color-border:       #1E293B;
+  --color-border-hover: #334155;
+  --color-border-strong:#475569;
+  --color-divider:      #0F172A;
+
+  /* Semantic Status — Muted for dark */
+  --color-success-bg:   rgba(16, 185, 129, 0.1);
+  --color-success-border:rgba(16, 185, 129, 0.2);
+  --color-success-text: #34D399;
+
+  --color-warning-bg:   rgba(245, 158, 11, 0.1);
+  --color-warning-border:rgba(245, 158, 11, 0.2);
+  --color-warning-text: #FCD34D;
+
+  --color-danger-bg:    rgba(239, 68, 68, 0.1);
+  --color-danger-border:rgba(239, 68, 68, 0.2);
+  --color-danger-text:  #F87171;
+
+  --color-info-bg:      rgba(59, 130, 246, 0.1);
+  --color-info-border:  rgba(59, 130, 246, 0.2);
+  --color-info-text:    #60A5FA;
+
+  /* Shadows — More pronounced on dark */
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.4);
+}
+
+/* ── BASE STYLES ──────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* ── Scrollbar ───────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text-1);
+  line-height: 1.5;
+}
 
-/* ── Focus ───────────────────────────────────────────────────── */
+/* ── TYPOGRAPHY SCALE ─────────────────────────────────────── */
+/* Display — Hero numbers on dashboards */
+.text-display-xl { font-size: 4.5rem; font-weight: 900; line-height: 1; letter-spacing: -0.025em; }
+.text-display-lg { font-size: 3rem;   font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; }
+
+/* Page titles */
+.text-page-title  { font-size: 1.875rem; font-weight: 900; line-height: 1.2; letter-spacing: -0.01em; }
+
+/* Section */
+.text-section     { font-size: 1rem;     font-weight: 700; line-height: 1.4; }
+
+/* Widget / Card */
+.text-widget      { font-size: 0.875rem; font-weight: 600; line-height: 1.4; }
+
+/* Body */
+.text-body        { font-size: 0.875rem; font-weight: 400; line-height: 1.5; }
+.text-body-sm     { font-size: 0.8125rem; font-weight: 400; line-height: 1.5; }
+
+/* Label */
+.text-label       { font-size: 0.75rem;  font-weight: 500; line-height: 1.4; }
+.text-label-upper { font-size: 0.6875rem; font-weight: 700; line-height: 1.4; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Caption */
+.text-caption     { font-size: 0.6875rem; font-weight: 400; line-height: 1.4; }
+
+/* Table */
+.text-table-header { font-size: 0.6875rem; font-weight: 600; line-height: 1.4; letter-spacing: 0.04em; text-transform: uppercase; }
+.text-table-cell   { font-size: 0.8125rem; font-weight: 400; line-height: 1.4; }
+
+/* Mono */
+.text-mono        { font-family: var(--font-mono); font-size: 0.8125rem; }
+
+/* ── SEMANTIC COLOR UTILITIES ─────────────────────────────── */
+/* Use these instead of hardcoded slate-900 */
+.text-primary     { color: var(--color-text-1); }
+.text-secondary   { color: var(--color-text-2); }
+.text-tertiary    { color: var(--color-text-3); }
+.text-brand       { color: var(--color-brand); }
+.text-inverse     { color: var(--color-text-inv); }
+
+.bg-surface       { background-color: var(--color-surface); }
+.bg-base          { background-color: var(--color-bg); }
+.bg-alt           { background-color: var(--color-bg-alt); }
+
+.border-default   { border-color: var(--color-border); }
+.border-focus     { border-color: var(--color-border-focus); }
+
+/* ── ENTERPRISE PAGE LAYOUT ───────────────────────────────── */
+/* Standard page wrapper — use this on every page */
+.tb-page {
+  padding: var(--page-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+/* ── FOCUS STYLES — Accessibility ─────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--color-border-focus);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
 
-/* ── Transitions ─────────────────────────────────────────────── */
-.transition-smooth {
-  transition: all var(--duration-base) var(--ease-default);
+/* ── SCROLLBAR — Minimal ──────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-3); }
+
+/* ── SELECTION ────────────────────────────────────────────── */
+::selection {
+  background-color: var(--color-brand-light);
+  color: var(--color-text-1);
 }
 
-/* ── Typography ──────────────────────────────────────────────── */
-.text-display  { font-size: 2rem;    font-weight: 700; line-height: 1.2; }
-.text-heading  { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
-.text-subhead  { font-size: 1rem;    font-weight: 600; line-height: 1.5; }
-.text-body     { font-size: 0.875rem;font-weight: 400; line-height: 1.5; }
-.text-caption  { font-size: 0.75rem; font-weight: 500; line-height: 1.4; }
-.text-label    { font-size: 0.6875rem;font-weight:600; line-height:1.3; text-transform: uppercase; letter-spacing: 0.06em; }
-
-/* ── Loading skeleton ─────────────────────────────────────────── */
-@keyframes shimmer {
-  0%   { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+/* ── ANIMATIONS ───────────────────────────────────────────── */
+@keyframes tb-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.skeleton {
-  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-  background-size: 1000px 100%;
-  animation: shimmer 1.5s infinite linear;
-  border-radius: var(--radius-md);
+@keyframes tb-slide-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes tb-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-/* ── Bounce dots ─────────────────────────────────────────────── */
-@keyframes bounce-dot {
-  0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
-  40%         { transform: scale(1);   opacity: 1; }
-}
-.bounce-dot { animation: bounce-dot 1.2s infinite ease-in-out; }
+.tb-fade-in   { animation: tb-fade-in var(--duration-base) var(--ease-enter); }
+.tb-slide-in  { animation: tb-slide-in var(--duration-base) var(--ease-enter); }
+.tb-skeleton  { animation: tb-pulse 1.5s ease-in-out infinite; }
 
-/* ── Interactive element focus rings ────────────────── */
-button:focus-visible, a:focus-visible, input:focus-visible,
-select:focus-visible, textarea:focus-visible {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* ── Print styles ──────────────────────────────────── */
-@media print {
-  .no-print { display: none !important; }
-  header, nav, aside { display: none !important; }
-  main { width: 100% !important; }
+/* ── STATUS DOT ───────────────────────────────────────────── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot.operational { background-color: var(--color-status-operational); }
+.status-dot.fault       { background-color: var(--color-status-fault); }
+.status-dot.maintenance { background-color: var(--color-status-maintenance); }
+.status-dot.offline     { background-color: var(--color-status-offline); }
+.status-dot.pending     { background-color: var(--color-status-pending); }
+
+/* ── CARD STANDARD ────────────────────────────────────────── */
+.tb-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  transition: border-color var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+}
+.tb-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-md);
+}
+.tb-card-interactive {
+  cursor: pointer;
+}
+.tb-card-interactive:hover {
+  border-color: var(--color-brand);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── KPI VALUE ────────────────────────────────────────────── */
+.tb-kpi-value {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.tb-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  margin-top: 2px;
+}
+.tb-kpi-sub {
+  font-size: 0.6875rem;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+/* ── ALERT BANNER ─────────────────────────────────────────── */
+.tb-alert { border-radius: var(--radius-xl); padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+.tb-alert-critical { background: var(--color-danger-bg); border: 1px solid var(--color-danger-border); }
+.tb-alert-warning  { background: var(--color-warning-bg); border: 1px solid var(--color-warning-border); }
+.tb-alert-info     { background: var(--color-info-bg); border: 1px solid var(--color-info-border); }
+.tb-alert-success  { background: var(--color-success-bg); border: 1px solid var(--color-success-border); }
+
+/* ── TABLE STANDARD ───────────────────────────────────────── */
+.tb-table-header {
+  background-color: var(--color-bg-alt);
+  color: var(--color-text-2);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px 20px;
+}
+.tb-table-row {
+  border-bottom: 1px solid var(--color-divider);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.tb-table-row:hover {
+  background-color: color-mix(in srgb, var(--color-brand-light) 30%, transparent);
 }

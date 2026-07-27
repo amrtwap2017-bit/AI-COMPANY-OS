@@ -98,7 +98,7 @@ export function EnterpriseTopbar() {
         </Link>
 
         {/* Breadcrumb */}
-        <div className="hidden md:flex items-center gap-1.5 text-sm text-slate-400 flex-shrink-0">
+        <div className="hidden md:flex items-center gap-1.5 text-sm text-tertiary flex-shrink-0">
           <Link href="/workspace" className="hover:text-slate-700 transition-colors">Home</Link>
           {activeCenter && (
             <>
@@ -111,13 +111,13 @@ export function EnterpriseTopbar() {
         {/* Command bar trigger */}
         <button
           onClick={() => setCmdOpen(true)}
-          className="flex-1 max-w-sm flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-400 transition-all group mx-2"
+          className="flex-1 max-w-sm flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-sm text-tertiary transition-all group mx-2"
         >
           <Search className="w-3.5 h-3.5 group-hover:text-amber-600 transition-colors" />
-          <span className="flex-1 text-left text-slate-400 text-sm">Search or run command...</span>
+          <span className="flex-1 text-left text-tertiary text-sm">Search or run command...</span>
           <div className="flex items-center gap-0.5">
-            <kbd className="text-xs bg-white border border-slate-200 text-slate-400 px-1.5 py-0.5 rounded-md shadow-sm">⌘</kbd>
-            <kbd className="text-xs bg-white border border-slate-200 text-slate-400 px-1.5 py-0.5 rounded-md shadow-sm">K</kbd>
+            <kbd className="text-xs bg-white border border-slate-200 text-tertiary px-1.5 py-0.5 rounded-md shadow-sm">⌘</kbd>
+            <kbd className="text-xs bg-white border border-slate-200 text-tertiary px-1.5 py-0.5 rounded-md shadow-sm">K</kbd>
           </div>
         </button>
 
@@ -160,14 +160,14 @@ export function EnterpriseTopbar() {
               <span className="text-sm font-medium text-slate-700 hidden md:block capitalize">
                 {user?.name?.split(" ")[0] || "User"}
               </span>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${userOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-tertiary transition-transform ${userOpen ? "rotate-180" : ""}`} />
             </button>
 
             {userOpen && (
               <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-slate-100">
                   <div className="text-sm font-bold text-slate-900">{user?.name || "User"}</div>
-                  <div className="text-xs text-slate-400">{user?.email || ""}</div>
+                  <div className="text-xs text-tertiary">{user?.email || ""}</div>
                   <span className="inline-flex mt-1.5 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-semibold capitalize">
                     {user?.role || "user"}
                   </span>
@@ -178,7 +178,7 @@ export function EnterpriseTopbar() {
                     onClick={() => { setUserOpen(false); router.push(item.label === "My Profile" ? "/profile" : "/settings"); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                   >
-                    <item.icon className="w-4 h-4 text-slate-400" />
+                    <item.icon className="w-4 h-4 text-tertiary" />
                     {item.label}
                   </button>
                 ))}
