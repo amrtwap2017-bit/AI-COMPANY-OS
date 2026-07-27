@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import Link from "next/link";
-import { RoleBadge } from "@/components/ui";
 import {
   PageWrapper, PageHeader, SectionCard,
   MetricStrip, StatusBadge, LoadingState, EmptyState
@@ -106,7 +105,6 @@ export default function WorkspacePage() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{greeting} 👋</h1>
-          <RoleBadge className="mt-1" /><h1 className="hidden"</h1>
           <p className="text-sm text-slate-500 mt-0.5">{dateStr}</p>
           <p className="text-sm text-slate-600 mt-1">Triangle Black Operations Platform</p>
         </div>
