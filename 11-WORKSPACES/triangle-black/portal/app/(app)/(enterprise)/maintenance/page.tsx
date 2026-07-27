@@ -3,129 +3,51 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-
-export default function MaintenanceHub() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function MaintenancePage() {
   const router = useRouter();
-  const { data: assetRaw } = useQuery(["mh-assets"], () => authFetch("/api/v1/assets/").then(r => r.json()));
-  const { data: pmRaw } = useQuery(["mh-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-  const { data: woRaw } = useQuery(["mh-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-
-  const assets = toArr(assetRaw);
-  const pms = toArr(pmRaw);
-  const wos = toArr(woRaw);
+  const { data: assetRaw } = useQuery(["maint-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: pmRaw }    = useQuery(["maint-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
+  const { data: woRaw }    = useQuery(["maint-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const assets = toArr(assetRaw); const pms = toArr(pmRaw); const wos = toArr(woRaw);
   const now = new Date();
-  const in7 = new Date(now.getTime() + 7 * 86400000);
-  const in30 = new Date(now.getTime() + 30 * 86400000);
-
-  const overduePMs = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < now);
-  const dueSoon = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in7);
-  const dueMonth = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in30);
-  const criticalAssets = assets.filter((a: any) => a.criticality === "critical");
-  const maintenanceWOs = wos.filter((w: any) => w.type === "preventive" || w.type === "maintenance");
-  const byCategory = assets.reduce((acc: any, a: any) => { acc[a.category || "Other"] = (acc[a.category || "Other"] || 0) + 1; return acc; }, {});
-
+  const faulted   = assets.filter(a=>a.status==="In Fault").length;
+  const overduePMs= pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
+  const activeWOs = wos.filter(w=>w.status!=="completed"&&w.status!=="cancelled").length;
+  const modules = [
+    {label:"Assets",        icon:"⚙️",  path:"/maintenance/assets",     count:assets.length,   color:"#60A5FA"},
+    {label:"Asset Tree",    icon:"🌳", path:"/maintenance/asset-tree",  count:null,            color:"#34D399"},
+    {label:"PM Plans",      icon:"📅", path:"/maintenance/pm-plans",    count:pms.length,      color:"#A78BFA"},
+    {label:"Work Orders",   icon:"🔧", path:"/operations/work-orders",  count:activeWOs,       color:"#FBBF24"},
+    {label:"Dispatch",      icon:"📋", path:"/operations/dispatch",     count:null,            color:"#FB923C"},
+    {label:"Technicians",   icon:"👷", path:"/operations/technicians",  count:null,            color:"#94A3B8"},
+  ];
   return (
-    <div className="tb-page">
-      <div>
-        <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Maintenance</div>
-        <h1 className="text-page-title text-primary">Maintenance Hub</h1>
-        <p className="text-secondary mt-1">Asset health, PM schedules, and maintenance workflow</p>
-      </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Total Assets", value: assets.length, sub: `${criticalAssets.length} critical`, color: "blue", path: "/maintenance/assets" },
-          { label: "Overdue PM Plans", value: overduePMs.length, sub: "require immediate action", color: overduePMs.length > 0 ? "red" : "emerald", path: "/maintenance/pm-plans" },
-          { label: "Due This Week", value: dueSoon.length, sub: "PM plans", color: "amber", path: "/maintenance/pm-plans" },
-          { label: "Due This Month", value: dueMonth.length, sub: "PM plans scheduled", color: "purple", path: "/schedule-review" },
-        ].map((k, i) => (
-          <button key={i} onClick={() => router.push(k.path)}
-            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
-            <div className="text-xs text-secondary mb-2">{k.label}</div>
-            <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Overdue PM */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-primary">Overdue PM Plans</h2>
-            <button onClick={() => router.push("/maintenance/pm-plans")} className="text-xs text-amber-500 hover:underline">All plans →</button>
-          </div>
-          {overduePMs.length === 0 ? (
-            <div className="text-center py-8 text-tertiary text-sm">✅ No overdue PM plans</div>
-          ) : overduePMs.map((p: any, i: number) => (
-            <div key={i} className="flex items-start gap-3 p-3 mb-2 bg-red-50 dark:bg-red-900/20 rounded-xl">
-              <div className="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">{p.title}</div>
-                <div className="text-xs text-red-500 mt-0.5">{p.frequency} · was due {fmtDate(p.next_due_ts)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Asset by category */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-primary">Assets by Category</h2>
-            <button onClick={() => router.push("/maintenance/assets")} className="text-xs text-amber-500 hover:underline">All assets →</button>
-          </div>
-          <div className="space-y-3">
-            {Object.entries(byCategory).sort(([,a]: any, [,b]: any) => b - a).map(([cat, count]: [string, any]) => (
-              <div key={cat}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-secondary">{cat}</span>
-                  <span className="font-bold text-primary">{count}</span>
-                </div>
-                <div className="w-full bg-base-alt rounded-full h-2">
-                  <div className="h-2 rounded-full bg-blue-500" style={{ width: `${(count / assets.length) * 100}%` }} />
-                </div>
-              </div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Platform</div>
+          <h1 className="tb-hero-title">Maintenance</h1>
+          <p className="tb-hero-description">{assets.length} assets · {pms.length} PM plans · {faulted} faulted</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Total Assets",value:assets.length,color:"#F1F5F9"},{label:"In Fault",value:faulted,color:faulted>0?"#F87171":"#34D399"},{label:"Overdue PMs",value:overduePMs,color:overduePMs>0?"#FBBF24":"#34D399"},{label:"Active WOs",value:activeWOs,color:activeWOs>0?"#60A5FA":"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Critical assets */}
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-primary">Critical Assets</h2>
-          <button onClick={() => router.push("/maintenance/assets")} className="text-xs text-amber-500 hover:underline">View all →</button>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Maintenance Modules</div>
+          <div className="tb-grid-3">
+            {modules.map((m,i)=>(
+              <button key={i} onClick={()=>router.push(m.path)} className="tb-section text-left hover:border-brand transition-colors">
+                <div className="flex items-center justify-between mb-3"><span style={{fontSize:"1.75rem"}}>{m.icon}</span>{m.count!==null&&<span className="text-2xl font-black" style={{color:m.color}}>{m.count}</span>}</div>
+                <div className="text-sm font-bold text-primary">{m.label}</div><div className="text-xs text-brand mt-2">View →</div>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {criticalAssets.slice(0, 6).map((a: any, i: number) => (
-            <button key={i} onClick={() => router.push(`/maintenance/assets/${a.id}`)}
-              className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-xl hover:shadow-md transition-all text-left">
-              <div className="text-sm font-bold text-red-900 dark:text-red-300 truncate">{a.name}</div>
-              <div className="text-xs text-red-500 mt-1">{a.category} · {a.location_description || "—"}</div>
-              <div className="text-xs text-tertiary mt-1">Last service: {fmtDate(a.last_maintenance_date)}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick nav */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Asset Tree", icon: "🌳", path: "/maintenance/asset-tree" },
-          { label: "PM Plans", icon: "📅", path: "/maintenance/pm-plans" },
-          { label: "Work History", icon: "📋", path: "/maintenance/work-history" },
-          { label: "QR Codes", icon: "📱", path: "/maintenance/qr-codes" },
-        ].map((a, i) => (
-          <button key={i} onClick={() => router.push(a.path)}
-            className="bg-surface border border-border rounded-2xl p-5 text-center hover:border-amber-400 hover:shadow-lg transition-all">
-            <div className="text-2xl mb-2">{a.icon}</div>
-            <div className="text-sm font-bold text-primary">{a.label}</div>
-          </button>
-        ))}
       </div>
     </div>
   );

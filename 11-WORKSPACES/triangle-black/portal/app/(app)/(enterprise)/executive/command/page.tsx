@@ -3,56 +3,50 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-export default function ExecutiveCommand() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function CommandPage() {
   const router = useRouter();
-  const { data: twin } = useQuery(["ec-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: dash } = useQuery(["ec-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
-  const { data: notifRaw } = useQuery(["ec-notifs"], () => authFetch("/api/v1/notifications/").then(r=>r.json()));
-  const notifs = toArr(notifRaw); const d = dash||{}; const score = twin?.health_score??0;
-  const unread = notifs.filter(n=>!n.is_read);
+  const { data: twin } = useQuery(["cmd-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: dash } = useQuery(["cmd-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()),{refetchInterval:30000});
+  const score = twin?.health_score||0;
+  const d = dash||{};
   const commands = [
-    {label:"Intelligence",icon:"🧠",path:"/executive/intelligence",desc:"Platform AI insights"},
-    {label:"Daily Review",icon:"☀️",path:"/executive/daily-review",desc:"Today's briefing"},
-    {label:"Portfolio",icon:"💼",path:"/executive/portfolio",desc:"Business portfolio"},
-    {label:"Risks",icon:"⚠️",path:"/executive/risks",desc:"Risk register"},
-    {label:"Exceptions",icon:"🚨",path:"/executive/exceptions",desc:"Items needing action"},
-    {label:"Reports",icon:"📊",path:"/executive/reports",desc:"Executive reports"},
-    {label:"Workbench",icon:"⚡",path:"/executive/workbench",desc:"Command workbench"},
+    {section:"Operations",items:[{label:"Dispatch Board",icon:"📋",path:"/operations/dispatch"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Service Requests",icon:"🎫",path:"/operations/service-requests"},{label:"Technicians",icon:"👷",path:"/operations/technicians"}]},
+    {section:"Maintenance",items:[{label:"Asset Tree",icon:"🌳",path:"/maintenance/asset-tree"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Assets",icon:"⚙️",path:"/maintenance/assets"},{label:"Inspection",icon:"🔍",path:"/maintenance"}]},
+    {section:"Commercial",items:[{label:"Pipeline",icon:"📊",path:"/commercial/pipeline"},{label:"Contracts",icon:"📄",path:"/commercial/contracts"},{label:"Leads",icon:"👤",path:"/commercial/leads"},{label:"Customers",icon:"🏢",path:"/customers"}]},
+    {section:"Supply Chain",items:[{label:"Purchase Orders",icon:"📦",path:"/supply-chain/purchase-orders"},{label:"Inventory",icon:"📦",path:"/supply-chain/inventory"},{label:"Suppliers",icon:"🏭",path:"/supply-chain/suppliers"},{label:"Warehouses",icon:"🏗️",path:"/supply-chain/warehouses"}]},
+    {section:"Finance",items:[{label:"Invoices",icon:"💰",path:"/invoices"},{label:"Cost Analysis",icon:"📈",path:"/analytics/costs"},{label:"Payment Track",icon:"✅",path:"/payment-tracking"},{label:"Contracts",icon:"📄",path:"/commercial/contracts"}]},
+    {section:"Intelligence",items:[{label:"Executive Hub",icon:"🧠",path:"/executive"},{label:"Scorecard",icon:"🏆",path:"/executive/scorecard"},{label:"Predictive",icon:"🔮",path:"/executive/predictive"},{label:"Exceptions",icon:"🚨",path:"/executive/exceptions"}]},
   ];
   return (
-    <div className="tb-page">
-      <div className="flex items-start justify-between">
-        <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Command</div>
-        <h1 className="text-page-title text-primary">Executive Command Center</h1>
-        <p className="text-secondary mt-1">Complete executive control and visibility</p></div>
-        <div className={`rounded-2xl border px-6 py-4 text-center ${score>=95?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
-          <div className={`text-4xl font-black ${score>=95?"text-emerald-500":"text-amber-500"}`}>{score}</div>
-          <div className="text-xs text-secondary mt-1">Twin Score</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-purple-400 mb-1.5">Executive</div>
+              <h1 className="tb-hero-title">Command Center</h1>
+              <p className="tb-hero-description">Quick access to all platform modules</p>
+            </div>
+            <div className={"tb-score-badge "+(score>=95?"tb-score-badge--success":"tb-score-badge--warning")}>
+              <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{score}</div>
+              <div className="tb-score-label">Twin Score</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-        {[
-          {label:"Open WOs",value:d.work_orders?.open??0,color:"blue"},
-          {label:"Active Contracts",value:d.commercial?.active_contracts??0,color:"emerald"},
-          {label:"Pending Invoices",value:d.finance?.pending??0,color:"amber"},
-          {label:"PM Overdue",value:d.maintenance?.overdue??0,color:"red"},
-          {label:"Unread Alerts",value:unread.length,color:"purple"},
-        ].map((k,i)=>(
-          <div key={i} className="bg-surface border border-border rounded-2xl p-4 text-center">
-            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-secondary mt-1">{k.label}</div>
+      <div className="tb-canvas">
+        {commands.map((section,i)=>(
+          <div key={i} className="tb-section">
+            <div className="text-label-upper text-tertiary mb-4">{section.section}</div>
+            <div className="tb-grid-4">
+              {section.items.map((item,j)=>(
+                <button key={j} onClick={()=>router.push(item.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                  <span className="text-xl">{item.icon}</span><span className="text-xs font-medium text-secondary">{item.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {commands.map((c,i)=>(
-          <button key={i} onClick={()=>router.push(c.path)}
-            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
-            <div className="text-3xl mb-2">{c.icon}</div>
-            <div className="font-bold text-primary group-hover:text-amber-600">{c.label}</div>
-            <div className="text-xs text-secondary mt-1">{c.desc}</div>
-          </button>
         ))}
       </div>
     </div>

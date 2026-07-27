@@ -3,137 +3,82 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmt = (n: any) => Number(n || 0).toLocaleString();
-const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-
-export default function ExecutiveIntelligence() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function IntelligencePage() {
   const router = useRouter();
-  const { data: dash } = useQuery(["ei-dash"], () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
-  const { data: twin } = useQuery(["ei-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()));
-  const { data: woRaw } = useQuery(["ei-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: notifRaw } = useQuery(["ei-notifs"], () => authFetch("/api/v1/notifications/").then(r => r.json()));
-
-  const wos = toArr(woRaw);
-  const notifs = toArr(notifRaw);
-  const d = dash || {};
-  const score = twin?.health_score ?? 0;
-
-  const critical = wos.filter((w: any) => w.priority === "critical" && w.status !== "completed");
-  const overdue = wos.filter((w: any) => w.due_date && new Date(w.due_date) < new Date() && w.status !== "completed");
-  const recentNotifs = notifs.filter((n: any) => !n.is_read).slice(0, 8);
-
-  const scoreColor = score >= 95 ? "text-emerald-400" : score >= 80 ? "text-amber-400" : "text-red-400";
-  const scoreBg = score >= 95 ? "bg-emerald-500/10 border-emerald-500/20" : score >= 80 ? "bg-amber-500/10 border-amber-500/20" : "bg-red-500/10 border-red-500/20";
-
+  const { data: twin }    = useQuery(["int-twin"],  () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: signals } = useQuery(["int-sig"],   () => authFetch("/api/v1/ai/signals").then(r=>r.json()));
+  const { data: actRaw }  = useQuery(["int-act"],   () => authFetch("/api/v1/activity-feed?limit=20").then(r=>r.json()));
+  const score = twin?.health_score||0;
+  const domains = twin?.operational_domains||[];
+  const activities = actRaw?.activities||[];
+  const sigs = toArr(signals?.signals||signals);
   return (
-    <div className="tb-page">
-      {/* Hero */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Intelligence</div>
-          <h1 className="text-page-title text-primary">Platform Command Center</h1>
-          <p className="text-secondary mt-1">Real-time operational intelligence across all domains</p>
-        </div>
-        <div className={`border rounded-2xl px-6 py-4 text-center ${scoreBg}`}>
-          <div className={`text-5xl font-black ${scoreColor}`}>{score}</div>
-          <div className="text-xs text-secondary mt-1">Digital Twin Score</div>
-          <div className={`text-xs font-bold mt-1 ${scoreColor}`}>{twin?.health_label || "—"}</div>
-        </div>
-      </div>
-
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Open Work Orders", value: d.work_orders?.open ?? "—", sub: `${d.work_orders?.in_progress ?? 0} in progress`, color: "blue", path: "/operations/work-orders" },
-          { label: "Critical Alerts", value: critical.length, sub: `${overdue.length} overdue`, color: "red", path: "/executive/exceptions" },
-          { label: "Active Contracts", value: d.commercial?.active_contracts ?? "—", sub: `${d.commercial?.expiring_30d ?? 0} expiring soon`, color: "amber", path: "/commercial/contracts" },
-          { label: "Revenue Collected", value: `${fmt(d.finance?.paid ?? 0)}`, sub: `${d.finance?.pending ?? 0} pending`, color: "emerald", path: "/invoices" },
-        ].map((k, i) => (
-          <button key={i} onClick={() => router.push(k.path)}
-            className={`bg-surface border border-border rounded-2xl p-5 text-left hover:border-${k.color}-400 hover:shadow-lg transition-all group`}>
-            <div className="text-xs text-secondary mb-2 font-medium">{k.label}</div>
-            <div className={`text-3xl font-black text-${k.color}-500 group-hover:scale-105 transition-transform`}>{k.value}</div>
-            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Domain Health */}
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <h2 className="font-bold text-primary mb-4">Domain Health Overview</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { domain: "Operations", value: `${d.work_orders?.completed ?? 0}/${d.work_orders?.total ?? 0}`, label: "WOs completed", health: (d.work_orders?.completed ?? 0) / Math.max(d.work_orders?.total ?? 1, 1) * 100 },
-            { domain: "Maintenance", value: `${d.maintenance?.pm_plans ?? 0} plans`, label: `${d.maintenance?.overdue ?? 0} overdue`, health: 100 - (d.maintenance?.overdue ?? 0) * 10 },
-            { domain: "Finance", value: `${d.finance?.paid ?? 0}/${d.finance?.total_invoices ?? 0}`, label: "invoices paid", health: (d.finance?.paid ?? 0) / Math.max(d.finance?.total_invoices ?? 1, 1) * 100 },
-            { domain: "Procurement", value: `${d.procurement?.purchase_requests ?? 0} PRs`, label: `${d.procurement?.pending_pos ?? 0} pending POs`, health: 80 },
-          ].map((item, i) => (
-            <div key={i} className="bg-base-alt dark:bg-surface-alt rounded-xl p-4">
-              <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2">{item.domain}</div>
-              <div className="text-xl font-black text-primary">{item.value}</div>
-              <div className="text-xs text-secondary mb-3">{item.label}</div>
-              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
-                <div className={`h-1.5 rounded-full ${item.health >= 80 ? "bg-emerald-500" : item.health >= 60 ? "bg-amber-500" : "bg-red-500"}`}
-                  style={{ width: `${Math.min(100, Math.max(0, item.health))}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Critical Issues + Recent Alerts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-primary">Critical Work Orders</h2>
-            <button onClick={() => router.push("/operations/work-orders")} className="text-xs text-amber-500 hover:underline">View all →</button>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-purple-400 mb-1.5">Executive · AI</div>
+          <h1 className="tb-hero-title">Intelligence Hub</h1>
+          <p className="tb-hero-description">Digital twin insights, AI signals, and platform intelligence</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Domains",value:domains.length,color:"#60A5FA"},{label:"Signals",value:sigs.length,color:"#A78BFA"},{label:"Activities",value:activities.length,color:"#F97316"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
           </div>
-          {critical.length === 0 ? (
-            <div className="text-center py-8 text-tertiary">
-              <div className="text-3xl mb-2">✅</div>
-              <div className="text-sm">No critical issues</div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {critical.slice(0, 6).map((w: any, i: number) => (
-                <button key={w.id || i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
-                  className="w-full flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 transition-colors text-left">
-                  <div>
-                    <div className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">{w.title}</div>
-                    <div className="text-xs text-red-500 mt-0.5">{w.status} · {fmtDate(w.due_date)}</div>
-                  </div>
-                  <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg font-bold">CRITICAL</span>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-primary">Unread Alerts</h2>
-            <button onClick={() => router.push("/inbox")} className="text-xs text-amber-500 hover:underline">View all →</button>
+      </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Domain Health</div>
+          <div className="tb-grid-4">
+            {domains.map((dom,i)=>{
+              const hasIssue=(dom.overdue||0)>0||(dom.critical_open||0)>0;
+              const c = hasIssue?"#FBBF24":"#34D399";
+              return (
+                <div key={i} className={"tb-domain-card "+(hasIssue?"tb-domain-card--warn":"tb-domain-card--ok")}>
+                  <div className="tb-flex-between mb-1"><div className="text-xs font-semibold text-primary">{dom.domain}</div><div className="text-xs font-black" style={{color:c}}>{hasIssue?"⚠":"✓"}</div></div>
+                  <div className="text-2xl font-black" style={{color:c}}>{dom.total||0}</div>
+                </div>
+              );
+            })}
           </div>
-          {recentNotifs.length === 0 ? (
-            <div className="text-center py-8 text-tertiary">
-              <div className="text-3xl mb-2">🔔</div>
-              <div className="text-sm">All caught up</div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {recentNotifs.map((n: any, i: number) => (
-                <div key={n.id || i} className="flex items-start gap-3 p-3 bg-base-alt dark:bg-surface-alt rounded-xl">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full mt-1.5 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium text-primary truncate">{n.title}</div>
-                    <div className="text-xs text-secondary truncate">{n.message}</div>
-                  </div>
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>AI Signals</div><button onClick={()=>router.push("/connect-signals")} className="tb-section-link">All →</button></div>
+            <div className="space-y-2 mt-3">
+              {sigs.slice(0,6).map((sig,i)=>(
+                <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-base-alt">
+                  <span style={{fontSize:"1rem"}}>🔮</span>
+                  <div className="flex-1 min-w-0"><div className="text-xs font-semibold text-primary truncate">{sig.title||sig.message||"AI Signal"}</div></div>
+                  <span className="tb-badge" style={{fontSize:"0.5625rem",color:"#A78BFA"}}>{sig.type||"info"}</span>
                 </div>
               ))}
+              {sigs.length===0 && <div className="text-xs text-tertiary text-center py-4">No active signals</div>}
             </div>
-          )}
+          </div>
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
+            <div className="space-y-2 mt-3">
+              {activities.slice(0,6).map((act,i)=>(
+                <div key={i} className="flex items-center gap-2">
+                  <span style={{fontSize:"0.875rem"}}>{act.icon}</span>
+                  <div className="flex-1 min-w-0"><div className="text-xs text-secondary truncate">{act.title}</div></div>
+                </div>
+              ))}
+              {activities.length===0 && <div className="text-xs text-tertiary text-center py-4">No recent activity</div>}
+            </div>
+          </div>
+        </div>
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Intelligence Tools</div>
+          <div className="tb-grid-4" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {[{label:"Digital Twin",icon:"🔷",path:"/executive"},{label:"Scorecard",icon:"🏆",path:"/executive/scorecard"},{label:"Predictive",icon:"🔮",path:"/executive/predictive"},{label:"AI Hub",icon:"🤖",path:"/hub"},{label:"Signals",icon:"📡",path:"/connect-signals"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -3,157 +3,82 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-
-export default function ExecutiveRisks() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+export default function RisksPage() {
   const router = useRouter();
-  const { data: woRaw } = useQuery(["er-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: contractRaw } = useQuery(["er-contracts"], () => authFetch("/api/v1/contracts/").then(r => r.json()));
-  const { data: pmRaw } = useQuery(["er-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-  const { data: invoiceRaw } = useQuery(["er-invoices"], () => authFetch("/api/v1/invoices/").then(r => r.json()));
-  const { data: srRaw } = useQuery(["er-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.json()));
-  const { data: notifRaw } = useQuery(["er-notifs"], () => authFetch("/api/v1/notifications/").then(r => r.json()));
-
-  const wos = toArr(woRaw);
-  const contracts = toArr(contractRaw);
-  const pms = toArr(pmRaw);
-  const invoices = toArr(invoiceRaw);
-  const srs = toArr(srRaw);
-  const notifs = toArr(notifRaw);
-
+  const { data: woRaw }   = useQuery(["rsk-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: contRaw } = useQuery(["rsk-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
+  const { data: invRaw }  = useQuery(["rsk-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: pmRaw }   = useQuery(["rsk-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
+  const wos = toArr(woRaw); const contracts = toArr(contRaw);
+  const inv = toArr(invRaw); const pms = toArr(pmRaw);
   const now = new Date();
-  const in30 = new Date(now.getTime() + 30 * 86400000);
-
+  const criticalWOs = wos.filter(w=>w.priority==="critical"&&w.status!=="completed").length;
+  const overdueWOs  = wos.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed").length;
+  const expiringCts = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000)).length;
+  const overduePMs  = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
+  const overdueInv  = inv.filter(i=>i.status==="overdue").length;
+  const riskScore   = criticalWOs*10+overdueWOs*3+expiringCts*5+overduePMs*2+overdueInv*4;
+  const riskLevel   = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
+  const riskColor   = riskScore===0?"#34D399":riskScore<15?"#60A5FA":riskScore<30?"#FBBF24":"#F87171";
   const risks = [
-    {
-      id: "R-OPS-001", category: "Operations", severity: "critical",
-      title: "Critical Open Work Orders",
-      count: wos.filter((w: any) => w.priority === "critical" && w.status !== "completed").length,
-      detail: `${wos.filter((w: any) => w.priority === "critical" && w.status !== "completed").length} critical WOs unresolved`,
-      action: "Assign technicians immediately",
-      path: "/operations/work-orders",
-    },
-    {
-      id: "R-OPS-002", category: "Operations", severity: "high",
-      title: "Overdue Work Orders",
-      count: wos.filter((w: any) => w.due_date && new Date(w.due_date) < now && w.status !== "completed").length,
-      detail: "Work orders past their due date",
-      action: "Review and reschedule",
-      path: "/operations/work-orders",
-    },
-    {
-      id: "R-COM-001", category: "Commercial", severity: "high",
-      title: "Contracts Expiring in 30 Days",
-      count: contracts.filter((c: any) => c.end_date && new Date(c.end_date) >= now && new Date(c.end_date) <= in30 && c.status === "active").length,
-      detail: "Active contracts approaching expiry",
-      action: "Initiate renewal process",
-      path: "/commercial/contracts",
-    },
-    {
-      id: "R-FIN-001", category: "Finance", severity: "medium",
-      title: "Overdue Invoices",
-      count: invoices.filter((i: any) => i.status === "overdue").length,
-      detail: "Invoices past payment due date",
-      action: "Contact clients for payment",
-      path: "/invoices",
-    },
-    {
-      id: "R-MNT-001", category: "Maintenance", severity: "medium",
-      title: "Overdue PM Plans",
-      count: pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < now).length,
-      detail: "Preventive maintenance plans past due",
-      action: "Schedule maintenance immediately",
-      path: "/maintenance/pm-plans",
-    },
-    {
-      id: "R-SRV-001", category: "Service", severity: "low",
-      title: "Open Service Requests",
-      count: srs.filter((s: any) => s.status === "open" || s.status === "new").length,
-      detail: "Unresolved customer service requests",
-      action: "Create work orders and dispatch",
-      path: "/operations/service-requests",
-    },
-  ].filter((r: any) => r.count > 0);
-
-  const totalRiskScore = risks.reduce((s: number, r: any) =>
-    s + (r.severity === "critical" ? r.count * 10 : r.severity === "high" ? r.count * 5 : r.count * 2), 0);
-
-  const severityConfig: any = {
-    critical: { bg: "bg-red-50 dark:bg-red-900/20", border: "border-red-200 dark:border-red-800", badge: "bg-red-500 text-white", text: "text-red-700 dark:text-red-400" },
-    high: { bg: "bg-orange-50 dark:bg-orange-900/20", border: "border-orange-200 dark:border-orange-800", badge: "bg-orange-500 text-white", text: "text-orange-700 dark:text-orange-400" },
-    medium: { bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-200 dark:border-amber-800", badge: "bg-amber-500 text-white", text: "text-amber-700 dark:text-amber-400" },
-    low: { bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-200 dark:border-blue-800", badge: "bg-blue-500 text-white", text: "text-blue-700 dark:text-blue-400" },
-  };
-
+    {label:"Critical Work Orders", value:criticalWOs, weight:10, color:"#F87171", path:"/operations/work-orders", desc:"Unresolved critical priority work orders"},
+    {label:"Overdue Work Orders",  value:overdueWOs,  weight:3,  color:"#FBBF24", path:"/analytics/sla",           desc:"Work orders past their due date"},
+    {label:"Expiring Contracts",   value:expiringCts, weight:5,  color:"#FBBF24", path:"/commercial/contracts",    desc:"Contracts expiring within 30 days"},
+    {label:"Overdue PM Plans",     value:overduePMs,  weight:2,  color:"#FB923C", path:"/maintenance/pm-plans",    desc:"Preventive maintenance past due"},
+    {label:"Overdue Invoices",     value:overdueInv,  weight:4,  color:"#F87171", path:"/invoices",                desc:"Unpaid invoices past due date"},
+  ];
   return (
-    <div className="tb-page">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Risk Management</div>
-          <h1 className="text-page-title text-primary">Risk Register</h1>
-          <p className="text-secondary mt-1">Live risk assessment across all operational domains</p>
-        </div>
-        <div className={`border rounded-2xl px-6 py-4 text-center ${totalRiskScore === 0 ? "bg-emerald-50 border-emerald-200" : totalRiskScore < 30 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"}`}>
-          <div className={`text-4xl font-black ${totalRiskScore === 0 ? "text-emerald-500" : totalRiskScore < 30 ? "text-amber-500" : "text-red-500"}`}>{totalRiskScore}</div>
-          <div className="text-xs text-secondary mt-1">Risk Score</div>
-          <div className="text-xs font-bold mt-1">{totalRiskScore === 0 ? "No Risks" : totalRiskScore < 30 ? "Moderate" : "Elevated"}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A0A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-red-400 mb-1.5">Executive · Risk</div>
+          <h1 className="tb-hero-title">Risk Register</h1>
+          <p className="tb-hero-description">Platform risk assessment and mitigation status</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Risk Score",value:riskScore,color:riskColor},{label:"Risk Level",value:riskLevel,color:riskColor},{label:"Risk Items",value:risks.filter(r=>r.value>0).length,color:risks.filter(r=>r.value>0).length>0?"#FBBF24":"#34D399"},{label:"Status",value:riskScore===0?"Clear":"Active",color:riskColor}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-4 gap-4">
-        {(["critical", "high", "medium", "low"] as const).map(sev => {
-          const count = risks.filter((r: any) => r.severity === sev).length;
-          const cfg = severityConfig[sev];
-          return (
-            <div key={sev} className={`${cfg.bg} border ${cfg.border} rounded-2xl p-4 text-center`}>
-              <div className={`text-3xl font-black ${cfg.text}`}>{count}</div>
-              <div className="text-xs font-bold text-secondary capitalize mt-1">{sev} Risk</div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Risk List */}
-      {risks.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 p-12 text-center">
-          <div className="text-5xl mb-4">✅</div>
-          <div className="text-xl font-bold text-emerald-600">No Active Risks</div>
-          <div className="text-secondary mt-2">All operational domains are within normal parameters</div>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {risks.map((risk: any) => {
-            const cfg = severityConfig[risk.severity];
-            return (
-              <div key={risk.id} className={`${cfg.bg} border ${cfg.border} rounded-2xl p-5`}>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${cfg.badge}`}>{risk.severity.toUpperCase()}</span>
-                      <span className="text-xs text-secondary font-mono">{risk.id}</span>
-                      <span className="text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{risk.category}</span>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Risk Breakdown</div>
+          <div className="space-y-3">
+            {risks.map((risk,i)=>{
+              const score = risk.value * risk.weight;
+              const pct   = Math.min((score/Math.max(riskScore,1))*100,100);
+              return (
+                <button key={i} onClick={()=>router.push(risk.path)} className="w-full text-left p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors border border-transparent hover:border-border">
+                  <div className="tb-flex-between mb-2">
+                    <div>
+                      <div className="text-sm font-semibold text-primary">{risk.label}</div>
+                      <div className="text-xs text-tertiary">{risk.desc}</div>
                     </div>
-                    <div className="font-bold text-primary text-lg">{risk.title}</div>
-                    <div className={`text-sm mt-1 ${cfg.text}`}>{risk.detail}</div>
-                    <div className="text-sm text-secondary mt-2">→ {risk.action}</div>
+                    <div className="text-right flex-shrink-0 ml-4">
+                      <div className="text-xl font-black" style={{color:risk.value>0?risk.color:"#34D399"}}>{risk.value}</div>
+                      <div className="text-xs text-tertiary">×{risk.weight} weight</div>
+                    </div>
                   </div>
-                  <div className="ml-6 text-right flex-shrink-0">
-                    <div className={`text-4xl font-black ${cfg.text}`}>{risk.count}</div>
-                    <div className="text-xs text-secondary mt-1">items</div>
-                    <button onClick={() => router.push(risk.path)}
-                      className="mt-3 text-xs bg-white dark:bg-slate-800 border px-3 py-1.5 rounded-lg hover:border-amber-400 transition-colors">
-                      Resolve →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                  {risk.value>0 && <div className="tb-progress"><div className="tb-progress-bar" style={{background:risk.color,width:pct+"%"}}/></div>}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Mitigation Actions</div>
+          <div className="tb-grid-3">
+            {[{label:"View Exceptions",icon:"🚨",path:"/executive/exceptions"},{label:"Dispatch WOs",icon:"📋",path:"/operations/dispatch"},{label:"Review Contracts",icon:"📄",path:"/commercial/contracts"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,130 +3,63 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-
-export default function ExecutiveWorkbench() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+export default function WorkbenchPage() {
   const router = useRouter();
-  const [running, setRunning] = useState(false);
-  const [autoResult, setAutoResult] = useState<any>(null);
-
-  const { data: dash } = useQuery(["ew-dash"], () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
-  const { data: twin } = useQuery(["ew-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()));
-  const { data: autoStatus, refetch } = useQuery(["ew-auto"], () => authFetch("/api/v1/automation/status").then(r => r.json()));
-
-  const d = dash || {};
-  const pending = autoStatus?.pending_actions || {};
-  const totalPending = Object.values(pending).reduce((s: number, v: any) => s + Number(v), 0);
-  const score = twin?.health_score ?? 0;
-
-  const runAutomation = async () => {
-    setRunning(true);
-    try {
-      const res = await authFetch("/api/v1/automation/run", { method: "POST" });
-      setAutoResult(await res.json());
-      refetch();
-    } finally { setRunning(false); }
-  };
-
-  const quickActions = [
-    { label: "Operations Center", desc: "Dispatch & work orders", icon: "⚙️", path: "/operations/workbench" },
-    { label: "Maintenance Hub", desc: "Assets & PM plans", icon: "🔧", path: "/maintenance" },
-    { label: "Commercial Pipeline", desc: "Leads & contracts", icon: "💼", path: "/commercial" },
-    { label: "Finance Overview", desc: "Invoices & payments", icon: "💰", path: "/invoices" },
-    { label: "Supply Chain", desc: "Inventory & procurement", icon: "📦", path: "/supply-chain" },
-    { label: "Analytics", desc: "Reports & scorecards", icon: "📊", path: "/analytics" },
-    { label: "Risk Register", desc: "Risks & exceptions", icon: "⚠️", path: "/executive/risks" },
-    { label: "Workflow Launcher", desc: "Run automations", icon: "⚡", path: "/workflows/launcher" },
+  const { data: twin }    = useQuery(["wb-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: dash }    = useQuery(["wb-dash"],   () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
+  const { data: actRaw }  = useQuery(["wb-act"],    () => authFetch("/api/v1/activity-feed?limit=10").then(r=>r.json()));
+  const score = twin?.health_score||0;
+  const d = dash||{};
+  const activities = actRaw?.activities||[];
+  const tools = [
+    {label:"Daily Review",    icon:"☀️",  path:"/executive/daily-review",   desc:"Today's priorities"},
+    {label:"Intelligence",    icon:"🧠", path:"/executive/intelligence",   desc:"AI insights"},
+    {label:"Exceptions",      icon:"🚨", path:"/executive/exceptions",     desc:"Issues requiring action"},
+    {label:"Scorecard",       icon:"🏆", path:"/executive/scorecard",      desc:"KPI performance"},
+    {label:"Portfolio",       icon:"💼", path:"/executive/portfolio",      desc:"Contracts & projects"},
+    {label:"Risks",           icon:"⚠️",  path:"/executive/risks",          desc:"Risk register"},
+    {label:"Predictive",      icon:"🔮", path:"/executive/predictive",     desc:"Upcoming events"},
+    {label:"Command",         icon:"⚡", path:"/executive/command",        desc:"Quick navigation"},
   ];
-
   return (
-    <div className="tb-page">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Workbench</div>
-          <h1 className="text-page-title text-primary">Command Workbench</h1>
-          <p className="text-secondary mt-1">Platform control center — monitor, decide, act</p>
-        </div>
-        <button onClick={runAutomation} disabled={running}
-          className={`px-6 py-3 rounded-xl font-bold text-white transition-all shadow-lg ${running ? "bg-slate-400" : "bg-amber-600 hover:bg-amber-700 hover:shadow-amber-500/25"}`}>
-          {running ? "⏳ Running..." : `⚡ Run Automation${totalPending > 0 ? ` (${totalPending})` : ""}`}
-        </button>
-      </div>
-
-      {/* Twin + Platform Health */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className={`col-span-1 rounded-2xl border p-5 text-center ${score >= 95 ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
-          <div className={`text-5xl font-black ${score >= 95 ? "text-emerald-500" : "text-amber-500"}`}>{score}</div>
-          <div className="text-xs text-secondary mt-1">Twin Score</div>
-          <div className="text-xs font-bold mt-0.5">{twin?.health_label ?? "—"}</div>
-        </div>
-        {[
-          { label: "Open WOs", value: d.work_orders?.open ?? "—", color: "blue" },
-          { label: "PM Overdue", value: d.maintenance?.overdue ?? "—", color: "red" },
-          { label: "Active Contracts", value: d.commercial?.active_contracts ?? "—", color: "emerald" },
-          { label: "Pending Invoices", value: d.finance?.pending ?? "—", color: "amber" },
-        ].map((k, i) => (
-          <div key={i} className="bg-surface border border-border rounded-2xl p-5 text-center">
-            <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-secondary mt-1">{k.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Automation result */}
-      {autoResult && (
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 rounded-2xl p-5">
-          <div className="font-bold text-emerald-700 mb-2">✅ Automation Complete — {autoResult.total_actions} actions taken</div>
-          <div className="grid grid-cols-5 gap-3 text-center text-sm">
-            {[
-              ["PM→WO", autoResult.wf01_pm_to_wo?.created?.length ?? 0],
-              ["Renewals", autoResult.wf02_contract_renewals?.notified?.length ?? 0],
-              ["Auto PRs", autoResult.wf03_stock_auto_pr?.created?.length ?? 0],
-              ["Synced", autoResult.wf04_wo_asset_sync?.synced ?? 0],
-              ["SR→WO", autoResult.wf05_sr_to_wo?.linked?.length ?? 0],
-            ].map(([label, val], i) => (
-              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-2">
-                <div className="text-xl font-black text-emerald-600">{val}</div>
-                <div className="text-xs text-secondary">{label}</div>
-              </div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-purple-400 mb-1.5">Executive</div>
+          <h1 className="tb-hero-title">Executive Workbench</h1>
+          <p className="tb-hero-description">Personal workspace for executive decision-making</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"WOs",value:d.work_orders?.total||0,color:"#60A5FA"},{label:"Contracts",value:d.commercial?.active_contracts||0,color:"#34D399"},{label:"Alerts",value:d.notifications?.unread||0,color:"#A78BFA"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
         </div>
-      )}
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="font-bold text-primary mb-4">Quick Navigation</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {quickActions.map((a, i) => (
-            <button key={i} onClick={() => router.push(a.path)}
-              className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
-              <div className="text-3xl mb-3">{a.icon}</div>
-              <div className="font-bold text-primary group-hover:text-amber-600 transition-colors">{a.label}</div>
-              <div className="text-xs text-secondary mt-1">{a.desc}</div>
-            </button>
-          ))}
-        </div>
       </div>
-
-      {/* Twin domains */}
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <h2 className="font-bold text-primary mb-4">Digital Twin — Domain Status</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {(twin?.operational_domains ?? []).map((domain: any, i: number) => {
-            const hasIssue = domain.overdue > 0 || domain.critical_open > 0 || domain.below_min > 0;
-            return (
-              <div key={i} className={`rounded-xl border p-4 ${hasIssue ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800" : "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"}`}>
-                <div className="font-semibold text-sm text-primary">{domain.domain}</div>
-                <div className="text-2xl font-black mt-1">{domain.total ?? "—"}</div>
-                <div className={`text-xs mt-1 ${hasIssue ? "text-amber-600" : "text-emerald-600"}`}>
-                  {hasIssue ? "⚠️ Needs attention" : "✅ Normal"}
-                </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Executive Tools</div>
+          <div className="tb-grid-4">
+            {tools.map((tool,i)=>(
+              <button key={i} onClick={()=>router.push(tool.path)} className="tb-section text-left hover:border-brand transition-colors">
+                <div style={{fontSize:"1.75rem",marginBottom:8}}>{tool.icon}</div>
+                <div className="text-sm font-bold text-primary mb-1">{tool.label}</div>
+                <div className="text-xs text-tertiary">{tool.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="tb-section">
+          <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
+          <div className="space-y-2 mt-3">
+            {activities.slice(0,5).map((act,i)=>(
+              <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-base-alt transition-colors">
+                <span>{act.icon}</span><div className="flex-1 min-w-0"><div className="text-xs text-secondary truncate">{act.title}</div></div>
               </div>
-            );
-          })}
+            ))}
+            {activities.length===0&&<div className="text-xs text-tertiary text-center py-4">No recent activity</div>}
+          </div>
         </div>
       </div>
     </div>
