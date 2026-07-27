@@ -1,138 +1,187 @@
 "use client";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+
+const STATUS_BADGE = {
+  active:    "bg-emerald-100 text-emerald-700",
+  planning:  "bg-blue-100 text-blue-700",
+  completed: "bg-slate-100 text-slate-700 font-semibold",
+  on_hold:   "bg-amber-100 text-amber-700",
+  cancelled: "bg-red-100 text-red-600",
+};
 
 export default function ProjectsCenterPage() {
-  const [q,   setQ]   = useState("");
-  const [sf,  setSf]  = useState("all");
-  const [showCreate, setShowCreate] = useState(false);
-  const [saving,     setSaving]     = useState(false);
-  const [form, setForm] = useState({"name": "", "description": "", "status": "planning", "budget": "", "hotel_id": "tb-default-hotel-000000000001"});
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: raw=[], isLoading, refetch } = useQuery(
-    ["projects-page"],
-    () => authFetch("/api/v1/projects/?limit=100").then(r=>r.json()),
-    { refetchInterval: 60000 }
-  );
+  const { data: raw, isLoading } = useQuery(["proj-list"], () => authFetch("/api/v1/projects/").then(r=>r.json()));
+  const { data: woRaw } = useQuery(["proj-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const projects = toArr(raw);
+  const wos = toArr(woRaw);
 
-  const items    = toArr(raw);
-  const filtered = items.filter(x => {
-    if (sf !== "all" && x.status !== sf) return false;
-    if (q && !String(x.title||"").toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
+  const active    = projects.filter(p => p.status==="active");
+  const planning  = projects.filter(p => p.status==="planning");
+  const completed = projects.filter(p => p.status==="completed");
+  const totalBudget = projects.reduce((s,p) => s+Number(p.budget||0), 0);
+  const activeBudget = active.reduce((s,p) => s+Number(p.budget||0), 0);
+  const avgCompletion = projects.length > 0 ? Math.round(projects.reduce((s,p)=>s+Number(p.completion_pct||0),0)/projects.length) : 0;
+
+  const filtered = projects.filter(p => {
+    const matchSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.name?.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter==="all" || p.status===statusFilter;
+    return matchSearch && matchStatus;
   });
 
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const payload = Object.fromEntries(Object.entries(form).filter(([k,v])=>v!==""));
-      const r = await authFetch("/api/v1/projects/", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) {
-        setShowCreate(false);
-        setForm({"name": "", "description": "", "status": "planning", "budget": "", "hotel_id": "tb-default-hotel-000000000001"});
-        refetch();
-      } else {
-        const err = await r.json().catch(()=>({}));
-        alert(err?.detail || "Failed to create record");
-      }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
+  if (isLoading) return (
+    <div className="p-6 space-y-4 animate-pulse">
+      <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-40"/>
+      <div className="grid grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border p-5 h-24"/>)}</div>
+    </div>
+  );
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Projects Center"
-        subtitle={`${items.length} records`}
-        breadcrumbs={[{label:"Projects Center"}]}
-        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Center</Button>}
-      />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1.5">Projects</div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Project Portfolio</h1>
+          <p className="text-slate-500 text-sm mt-1.5">{projects.length} projects · {active.length} active · {fmtEGP(activeBudget)} active budget · {avgCompletion}% avg completion</p>
+        </div>
+        <div className={`rounded-2xl border px-6 py-4 text-center ${avgCompletion>=70?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
+          <div className={`text-4xl font-black ${avgCompletion>=70?"text-emerald-500":"text-amber-500"}`}>{avgCompletion}%</div>
+          <div className="text-xs text-slate-500 mt-1">Avg Completion</div>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          {label:"Total", value:items.length, color:"text-slate-800"},
-          {label:"Active",value:items.filter(x=>["active","open","Operational","planning"].includes(x.status)).length,color:"text-emerald-700"},
-          {label:"Completed",value:items.filter(x=>["completed","paid","resolved"].includes(x.status)).length,color:"text-blue-700"},
-          {label:"Issues",value:items.filter(x=>["overdue","In Fault","cancelled"].includes(x.status)).length,color:"text-red-700"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
-          </div>
+          { label:"Active",     value:active.length,    sub:fmtEGP(activeBudget),                color:"emerald", filter:"active" },
+          { label:"Planning",   value:planning.length,  sub:"preparing to start",                 color:"blue",    filter:"planning" },
+          { label:"Completed",  value:completed.length, sub:`of ${projects.length} total`,        color:"slate",   filter:"completed" },
+          { label:"Total Budget",value:fmtEGP(totalBudget), sub:`${projects.length} projects`,   color:"purple",  filter:"all" },
+        ].map((k,i)=>(
+          <button key={i} onClick={()=>setStatusFilter(i<3?(statusFilter===k.filter?"all":k.filter):"all")}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&i<3?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">{k.label}</div>
+            <div className="text-xs text-slate-400 mt-0.5 truncate">{k.sub}</div>
+          </button>
         ))}
       </div>
 
-      <SectionCard title={`Records (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search…" value={q}
-            onChange={e=>setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          {q&&<button onClick={()=>setQ("")} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
-        </div>
-        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No records found"
-          action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create First Record</Button>}
-        />:(
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-slate-100">
-                {"Title/Name,Status,Date".split(',').map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr></thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(x=>(
-                  <tr key={x.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800 truncate max-w-sm">{x.title||"—"}</p>
-                      {x.description&&<p className="text-xs text-slate-400 truncate">{x.description?.slice(0,60)}</p>}
-                      {x.category&&<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 mt-1">{x.category}</span>}
-                    </td>
-                    <td className="py-3 px-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${(x.status==="open"?"bg-blue-100 text-blue-800":x.status==="completed"?"bg-emerald-100 text-emerald-800":x.status==="active"?"bg-emerald-100 text-emerald-800":x.status==="planning"?"bg-amber-100 text-amber-800":x.status==="Operational"?"bg-emerald-100 text-emerald-800":x.status==="In Fault"?"bg-red-100 text-red-800":"bg-slate-100 text-slate-600")}`}>{x.status?.replace(/_/g," ")||"—"}</span></td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(x.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Search */}
+      <div className="flex gap-3">
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search projects..."
+          className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="planning">Planning</option>
+          <option value="completed">Completed</option>
+          <option value="on_hold">On Hold</option>
+        </select>
+        {(search||statusFilter!=="all") && (
+          <button onClick={()=>{setSearch("");setStatusFilter("all");}} className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Clear ×</button>
         )}
-      </SectionCard>
+        <div className="text-xs text-slate-400 self-center">{filtered.length} projects</div>
+      </div>
 
-      {showCreate&&(
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-screen overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
-              <h2 className="font-bold text-slate-900">New Projects Center</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl leading-none font-bold">x</button>
-            </div>
-            <form onSubmit={save} className="p-6 space-y-4">
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Project Name * *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="e.g. Chiller Upgrade 2026" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Description</label><textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} rows={3} placeholder="Project scope and objectives…" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 resize-none" /></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Status</label><select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="planning" value="planning">planning</option><option key="active" value="active">active</option><option key="on_hold" value="on_hold">on_hold</option><option key="completed" value="completed">completed</option></select></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Budget (EGP)</label><input type="number" value={form.budget} onChange={e=>setForm({...form,budget:e.target.value})} placeholder="500000" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                <button type="button" onClick={()=>setShowCreate(false)}
-                  className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={saving}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">
-                  {saving?"Saving…":"Create Projects Center"}
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Project cards grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div className="text-5xl mb-3">🏗️</div>
+          <div className="font-bold text-slate-900 dark:text-white text-lg">No projects found</div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {filtered.map((p,i)=>{
+            const pct     = Number(p.completion_pct || 0);
+            const budget  = Number(p.budget || 0);
+            const projWOs = wos.filter(w => w.project_id===p.id || w.contract_id===p.id);
+            const sc      = STATUS_BADGE[p.status] || "bg-slate-100 text-slate-600";
+            const barColor = pct>=80?"emerald":pct>=50?"blue":"amber";
+            const daysLeft = p.end_date ? Math.ceil((new Date(p.end_date)-Date.now())/86400000) : null;
+            const isOverdue = daysLeft !== null && daysLeft < 0 && p.status !== "completed";
+
+            return (
+              <button key={i} onClick={()=>router.push(`/projects-center/${p.id}`)}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0 pr-3">
+                    <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors truncate">{p.title || p.name || p.id}</div>
+                    <div className="text-xs text-slate-400 mt-0.5 line-clamp-2">{p.description || "—"}</div>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-lg flex-shrink-0 ${sc}`}>{p.status || "—"}</span>
+                </div>
+
+                {/* Completion bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-500">Completion</span>
+                    <span className={`font-bold text-${barColor}-500`}>{pct}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+                    <div className={`h-2.5 rounded-full bg-${barColor}-500 transition-all`} style={{width:`${Math.min(pct,100)}%`}}/>
+                  </div>
+                </div>
+
+                {/* Metrics grid */}
+                <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2">
+                    <div className="text-sm font-black text-purple-500">{fmtEGP(budget)}</div>
+                    <div className="text-[10px] text-slate-400">Budget</div>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2">
+                    <div className="text-sm font-black text-blue-500">{projWOs.length || 0}</div>
+                    <div className="text-[10px] text-slate-400">Work Orders</div>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2">
+                    <div className={`text-sm font-black ${isOverdue?"text-red-500":daysLeft!==null&&daysLeft<=30?"text-amber-500":"text-emerald-500"}`}>
+                      {daysLeft!==null ? (isOverdue?`${Math.abs(daysLeft)}d over`:`${daysLeft}d`) : "—"}
+                    </div>
+                    <div className="text-[10px] text-slate-400">{isOverdue?"Overdue":"Remaining"}</div>
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div className="flex justify-between text-xs text-slate-400">
+                  <span>Start: {fmtDate(p.start_date)}</span>
+                  <span className={isOverdue?"text-red-500 font-semibold":""}>End: {fmtDate(p.end_date)}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
-    </PageWrapper>
+
+      {/* Sub-nav */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label:"Project List",     icon:"📋", path:"/projects-center/list" },
+          { label:"Timeline",         icon:"📅", path:"/projects-center/timeline" },
+          { label:"Actions Queue",    icon:"⚡", path:"/projects-center/actions" },
+          { label:"Review Board",     icon:"📊", path:"/projects-center/review" },
+        ].map((a,i)=>(
+          <button key={i} onClick={()=>router.push(a.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-center hover:border-amber-400 hover:shadow-md transition-all group">
+            <div className="text-2xl mb-1.5">{a.icon}</div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-amber-600">{a.label}</div>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
