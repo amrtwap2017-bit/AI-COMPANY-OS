@@ -4,138 +4,233 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { WorkspaceHeader } from "@/components/workspace/WorkspaceHeader";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const STATUS_BADGE = {
-  pending:   "bg-amber-100 text-amber-700",
-  submitted: "bg-blue-100 text-blue-700",
-  sent:      "bg-purple-100 text-purple-700",
-  delivered: "bg-emerald-100 text-emerald-700",
-  received:  "bg-emerald-100 text-emerald-700 font-semibold",
-  cancelled: "bg-slate-100 text-secondary",
+const STATUS_COLOR = {
+  draft:"#94A3B8", pending:"#60A5FA", approved:"#A78BFA",
+  ordered:"#FBBF24", received:"#34D399", cancelled:"#F87171"
 };
 
 export default function PurchaseOrdersPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
-  const { data: raw, isLoading } = useQuery(["po-list"], () => authFetch("/api/v1/purchase-orders/").then(r=>r.json()));
-  const { data: suppRaw } = useQuery(["po-suppliers"], () => authFetch("/api/v1/suppliers/").then(r=>r.json()));
-  const pos       = toArr(raw);
-  const suppliers = toArr(suppRaw);
+  const { data: poRaw, isLoading } = useQuery(
+    ["po-list"],
+    () => authFetch("/api/v1/purchase-orders/").then(r => r.json()),
+    { refetchInterval: 60000 }
+  );
+  const { data: suppRaw } = useQuery(["po-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.json()));
+  const { data: prRaw }   = useQuery(["po-prs"],   () => authFetch("/api/v1/purchase-requests/").then(r => r.json()));
 
-  const pending   = pos.filter(p => p.status==="pending"||p.status==="submitted");
-  const sent      = pos.filter(p => p.status==="sent");
-  const received  = pos.filter(p => p.status==="received"||p.status==="delivered");
-  const totalValue = pos.reduce((s,p) => s+Number(p.total_amount||p.amount||0), 0);
-  const pendingValue = pending.reduce((s,p) => s+Number(p.total_amount||p.amount||0), 0);
+  const pos   = toArr(poRaw);
+  const supps = toArr(suppRaw);
+  const prs   = toArr(prRaw);
+
+  const totalValue   = pos.reduce((s, p) => s + Number(p.total_amount || p.total_value || 0), 0);
+  const pending      = pos.filter(p => p.status === "pending").length;
+  const approved     = pos.filter(p => p.status === "approved").length;
+  const received     = pos.filter(p => p.status === "received").length;
+  const openPRs      = prs.filter(p => p.status === "pending" || p.status === "open").length;
 
   const filtered = pos.filter(p => {
-    const matchSearch = !search || p.po_number?.toLowerCase().includes(search.toLowerCase()) || p.id?.slice(0,8).includes(search);
-    const matchStatus = statusFilter==="all" || p.status===statusFilter;
+    const matchSearch = !search ||
+      (p.po_number||p.id||"").toLowerCase().includes(search.toLowerCase()) ||
+      (p.supplier_name||"").toLowerCase().includes(search.toLowerCase()) ||
+      (p.notes||p.description||"").toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterStatus === "all" || p.status === filterStatus;
     return matchSearch && matchStatus;
   });
 
-  if (isLoading) return (
-    <div className="p-6 space-y-4 animate-pulse">
-      <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-48"/>
-      <div className="grid grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border p-5 h-24"/>)}</div>
-    </div>
-  );
-
   return (
-    <div className="tb-page">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-label-upper text-yellow-500 mb-1.5">Supply Chain</div>
-          <h1 className="text-page-title text-primary">Purchase Orders</h1>
-          <p className="text-secondary text-sm mt-1.5">{pos.length} total · {fmtEGP(totalValue)} spend · {pending.length} pending approval</p>
-        </div>
-        <button onClick={()=>router.push("/supply-chain/purchase-requests")}
-          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm transition-all">
-          View PRs →
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label:"Pending",    value:pending.length,   color:pending.length>0?"amber":"slate", sub:fmtEGP(pendingValue), filter:"pending" },
-          { label:"Sent",       value:sent.length,      color:"blue",                            sub:"awaiting delivery",  filter:"sent" },
-          { label:"Received",   value:received.length,  color:"emerald",                         sub:"completed",          filter:"received" },
-          { label:"Total Spend",value:fmtEGP(totalValue),color:"purple",                         sub:`${pos.length} orders`,filter:"all" },
-        ].map((k,i)=>(
-          <button key={i} onClick={()=>setStatusFilter(i<3?(statusFilter===k.filter?"all":k.filter):"all")}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&i<3?`border-${k.color}-400 shadow-sm`:"border-border hover:border-amber-300"}`}>
-            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-sm font-medium text-secondary mt-0.5">{k.label}</div>
-            <div className="text-[10px] text-tertiary mt-0.5 truncate">{k.sub}</div>
-          </button>
-        ))}
-      </div>
-
-      <div className="flex gap-3 flex-wrap">
-        <input value={search} onChange={e=>setSearch(e.target.value)}
-          placeholder="Search by PO number or ID..."
-          className="flex-1 min-w-48 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus"/>
-        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
-          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="submitted">Submitted</option>
-          <option value="sent">Sent</option>
-          <option value="received">Received</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        {(search||statusFilter!=="all") && (
-          <button onClick={()=>{setSearch("");setStatusFilter("all");}} className="px-3 py-2 text-xs text-secondary bg-surface border border-border rounded-xl">Clear ×</button>
-        )}
-        <div className="text-xs text-tertiary self-center">{filtered.length} orders</div>
-      </div>
-
-      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-3">📦</div>
-            <div className="font-bold text-primary text-lg">No purchase orders found</div>
-            <button onClick={()=>router.push("/supply-chain/purchase-requests")} className="mt-4 px-5 py-2 bg-brand text-inverse rounded-xl text-sm font-bold hover:bg-amber-700">View PRs →</button>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-[1fr_120px_120px_120px_110px] bg-base-alt dark:bg-surface-alt px-5 py-3 text-xs font-semibold text-secondary uppercase tracking-wider">
-              <div>Purchase Order</div>
-              <div className="text-center">Status</div>
-              <div className="text-right">Amount</div>
-              <div>Supplier</div>
-              <div className="text-center">Created</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A1A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain</div>
+              <h1 className="tb-hero-title">Purchase Orders</h1>
+              <p className="tb-hero-description">{pos.length} orders · {fmtEGP(totalValue)} total value</p>
             </div>
-            <div className="divide-y divide-y-border">
-              {filtered.map((po,i)=>{
-                const supplier = suppliers.find(s=>s.id===po.supplier_id);
+            <button
+              onClick={() => router.push("/supply-chain/purchase-requests")}
+              className="tb-btn-primary"
+            >
+              + Purchase Request
+            </button>
+          </div>
+          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {[
+              { label:"Total POs",   value:pos.length,        color:"#F1F5F9" },
+              { label:"Pending",     value:pending,           color:"#60A5FA" },
+              { label:"Approved",    value:approved,          color:"#A78BFA" },
+              { label:"Received",    value:received,          color:"#34D399" },
+              { label:"Open PRs",    value:openPRs,           color:"#FBBF24" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="tb-canvas">
+        {/* Filters */}
+        <div className="tb-section">
+          <div className="tb-flex-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className="text-secondary text-sm">🔍</span>
+              <input
+                className="tb-search flex-1"
+                placeholder="Search by PO number, supplier..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {["all","pending","approved","ordered","received","cancelled"].map(s => (
+                <button
+                  key={s}
+                  onClick={() => setFilterStatus(s)}
+                  className={`tb-pill ${filterStatus === s ? "tb-pill--active" : ""}`}
+                >
+                  {s === "all" ? "All" : s}
+                  {s !== "all" && (
+                    <span className="ml-1 opacity-60">{pos.filter(p => p.status === s).length}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="tb-section">
+          <div className="tb-flex-between mb-4">
+            <div className="text-sm text-secondary">{filtered.length} orders</div>
+            <div className="text-sm font-bold text-emerald-400">
+              {fmtEGP(filtered.reduce((s,p)=>s+Number(p.total_amount||p.total_value||0),0))}
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="tb-empty">
+              <div className="tb-empty-icon">📦</div>
+              <div className="tb-empty-title">No purchase orders</div>
+              <div className="tb-empty-desc">
+                {search || filterStatus !== "all" ? "Try adjusting your filters" : "No purchase orders found"}
+              </div>
+            </div>
+          ) : (
+            <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
+              <div className="tb-table-head" style={{gridTemplateColumns:"1.5fr 120px 100px 130px 110px 110px"}}>
+                {["PO Number / Supplier","Status","Items","Total Value","Order Date","Expected"].map((h, i) => (
+                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                ))}
+              </div>
+              {filtered.map((po, i) => {
+                const sc = STATUS_COLOR[po.status] || "#94A3B8";
+                const supp = supps.find(s => s.id === po.supplier_id);
                 return (
-                  <button key={i} onClick={()=>router.push(`/supply-chain/purchase-orders/${po.id}`)}
-                    className="w-full grid grid-cols-[1fr_120px_120px_120px_110px] items-center px-5 py-4 text-left hover:bg-brand-light/20 transition-colors group">
-                    <div className="min-w-0 pr-4">
-                      <div className="font-semibold text-sm text-primary truncate group-hover:text-amber-600">{po.po_number||po.id?.slice(0,12)}</div>
-                      <div className="text-xs text-tertiary mt-0.5">{po.notes?.slice(0,50)||"—"}</div>
+                  <button
+                    key={i}
+                    onClick={() => router.push(`/supply-chain/purchase-orders/${po.id}`)}
+                    className="tb-table-row"
+                    style={{gridTemplateColumns:"1.5fr 120px 100px 130px 110px 110px"}}
+                  >
+                    <div className="flex items-center gap-3 pr-4 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-base-alt flex items-center justify-center text-xs flex-shrink-0">
+                        📦
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-primary truncate">
+                          {po.po_number || `PO-${po.id?.slice(0,8)}`}
+                        </div>
+                        <div className="text-xs text-tertiary truncate">
+                          {po.supplier_name || supp?.name || "—"}
+                        </div>
+                      </div>
                     </div>
                     <div className="text-center">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[po.status]||"bg-slate-100 text-secondary"}`}>{po.status||"—"}</span>
+                      <span className="tb-badge" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`,fontSize:"0.625rem"}}>
+                        {po.status||"—"}
+                      </span>
                     </div>
-                    <div className="text-right text-sm font-bold text-emerald-600">{fmtEGP(po.total_amount||po.amount)}</div>
-                    <div className="text-xs text-secondary truncate">{supplier?.company_name||po.supplier_id||"—"}</div>
-                    <div className="text-center text-xs text-tertiary">{fmtDate(po.created_at)}</div>
+                    <div className="text-center text-sm font-bold text-primary">
+                      {po.items_count || po.line_items?.length || "—"}
+                    </div>
+                    <div className="text-center text-sm font-bold text-emerald-400">
+                      {fmtEGP(po.total_amount || po.total_value || 0)}
+                    </div>
+                    <div className="text-center text-xs text-tertiary">{fmtDate(po.order_date || po.created_at)}</div>
+                    <div className="text-center text-xs text-secondary">{fmtDate(po.expected_delivery_date || po.delivery_date)}</div>
                   </button>
                 );
               })}
             </div>
-          </>
-        )}
+          )}
+        </div>
+
+        {/* Value breakdown + supplier top */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="tb-section">
+            <div className="tb-section-title">Order Value by Status</div>
+            <div className="space-y-3">
+              {Object.entries(STATUS_COLOR).map(([status, color]) => {
+                const statusPos = pos.filter(p => p.status === status);
+                const val = statusPos.reduce((s,p)=>s+Number(p.total_amount||p.total_value||0),0);
+                const pct = totalValue > 0 ? (val / totalValue) * 100 : 0;
+                return statusPos.length > 0 ? (
+                  <div key={status}>
+                    <div className="tb-flex-between mb-1">
+                      <span className="text-xs text-secondary capitalize">{status} ({statusPos.length})</span>
+                      <span className="text-xs font-bold text-primary">{fmtEGP(val)}</span>
+                    </div>
+                    <div className="tb-progress">
+                      <div className="tb-progress-bar" style={{background:color,width:`${pct}%`}}/>
+                    </div>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          </div>
+
+          <div className="tb-section">
+            <div className="tb-section-title">Quick Navigation</div>
+            <div className="space-y-2">
+              {[
+                { label:"Purchase Requests",   icon:"📋", path:"/supply-chain/purchase-requests",   count:prs.length },
+                { label:"Suppliers",           icon:"🏭", path:"/supply-chain/suppliers",            count:supps.length },
+                { label:"Inventory",           icon:"📦", path:"/supply-chain/inventory",            count:null },
+                { label:"Warehouses",          icon:"🏗️",  path:"/supply-chain/warehouses",          count:null },
+                { label:"Goods Receipts",      icon:"✅", path:"/supply-chain/goods-receipts",       count:null },
+              ].map((a, i) => (
+                <button key={i} onClick={() => router.push(a.path)}
+                  className="tb-action-item w-full justify-between">
+                  <div className="flex items-center gap-3">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </div>
+                  {a.count !== null && (
+                    <span className="tb-badge" style={{fontSize:"0.625rem"}}>{a.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
