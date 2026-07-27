@@ -4,6 +4,10 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import Link from "next/link";
 import { PageWrapper, SectionCard } from "@/components/ui";
 
+const fetchDashboard = async () => {
+  const r = await authFetch("/api/v1/dashboard/summary");
+  return r.json();
+};
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtNum = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
@@ -16,6 +20,7 @@ export default function ExecutivePage() {
   const { data: invRaw=[] }       = useQuery(["ex-inv"],      () => authFetch("/api/v1/invoices/?limit=200").then(r=>r.json()),         {refetchInterval:120000});
   const { data: leadsRaw=[] }     = useQuery(["ex-leads"],    () => authFetch("/api/v1/leads/?limit=200").then(r=>r.json()),            {refetchInterval:120000});
   const { data: contractsRaw=[] } = useQuery(["ex-contracts"],() => authFetch("/api/v1/contracts/?limit=200").then(r=>r.json()),        {refetchInterval:120000});
+  const { data: dashboard } = useQuery(["dashboard-summary"], fetchDashboard, { refetchInterval: 60000 });
   const { data: twin={} }         = useQuery(["ex-twin"],     () => authFetch("/api/v1/twin/state").then(r=>r.json()),                  {refetchInterval:60000});
   const { data: srRaw=[] }        = useQuery(["ex-sr"],       () => authFetch("/api/v1/service-requests/?limit=100").then(r=>r.json()), {refetchInterval:120000});
 
