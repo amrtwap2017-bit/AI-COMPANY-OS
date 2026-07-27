@@ -1102,7 +1102,7 @@ def run_automation_engine():
                     VALUES
                         (:id, :hotel_id, :pr_number, :title, :justification, 'urgent',
                          'pending', 'Engineering', 'Automation Engine',
-                         :lines::json, :now, :now)
+                         CAST(:lines AS json), :now, :now)
                 """), {
                     "id": pr_id,
                     "hotel_id": HOTEL,
@@ -1172,7 +1172,7 @@ def run_automation_engine():
         # ── WF-05: Open Service Requests → Link to Work Orders ─────────────────
         try:
             unlinked_srs = db.execute(text("""
-                SELECT sr.id, sr.title, sr.description, sr.priority
+                SELECT sr.id, sr.title, sr.description, 'medium' as priority
                 FROM service_requests sr
                 WHERE sr.status IN ('open', 'new')
                 AND (sr.work_order_id IS NULL OR sr.work_order_id = '')
