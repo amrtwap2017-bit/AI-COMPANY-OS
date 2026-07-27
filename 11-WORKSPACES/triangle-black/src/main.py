@@ -837,57 +837,90 @@ def create_wo_from_sr(sr_id: str, data: dict = {}):
             return {"error": str(e)}
 
 @app.get("/api/v1/dashboard/summary", tags=["dashboard"])
+@app.get("/api/v1/dashboard/summary/", tags=["dashboard"])
 def get_dashboard_summary():
-    from src.core.database import get_db
-    db = next(get_db())
-    from sqlalchemy import text
-    def c(q):
-        try:
-            result = db.execute(text(q)).scalar()
-            return result or 0
-        except Exception as e:
-            db.rollback()
-            return 0
-    try:
-        result = {
+    """Enhanced dashboard summary with all 8 domain sections."""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def c(q, params=None):
+            try:
+                result = db.execute(text(q), params or {}).scalar()
+                return result or 0
+            except Exception:
+                db.rollback()
+                return 0
+
+        return {
             "work_orders": {
-                "total": c("SELECT count(*) FROM work_orders"),
-                "open": c("SELECT count(*) FROM work_orders WHERE status='open'"),
+                "total":       c("SELECT count(*) FROM work_orders"),
+                "open":        c("SELECT count(*) FROM work_orders WHERE status='open'"),
                 "in_progress": c("SELECT count(*) FROM work_orders WHERE status='in_progress'"),
-                "completed": c("SELECT count(*) FROM work_orders WHERE status='completed'"),
-                "critical": c("SELECT count(*) FROM work_orders WHERE priority='critical' AND status NOT IN ('completed','cancelled')"),
+                "completed":   c("SELECT count(*) FROM work_orders WHERE status='completed'"),
+                "critical":    c("SELECT count(*) FROM work_orders WHERE priority='critical' AND status NOT IN ('completed','cancelled')"),
+                "cancelled":   c("SELECT count(*) FROM work_orders WHERE status='cancelled'"),
             },
             "assets": {
-                "total": c("SELECT count(*) FROM assets"),
-                "operational": c("SELECT count(*) FROM assets WHERE status='Operational'"),
-                "faulted": c("SELECT count(*) FROM assets WHERE status='In Fault'"),
+                "total":        c("SELECT count(*) FROM assets"),
+                "operational":  c("SELECT count(*) FROM assets WHERE status='Operational'"),
+                "faulted":      c("SELECT count(*) FROM assets WHERE status='In Fault'"),
+                "under_maintenance": c("SELECT count(*) FROM assets WHERE status='Under Maintenance'"),
                 "with_history": c("SELECT count(*) FROM assets WHERE last_maintenance_date IS NOT NULL"),
             },
             "maintenance": {
-                "pm_plans": c("SELECT count(*) FROM maintenance_plans"),
-                "overdue": c("SELECT count(*) FROM maintenance_plans WHERE next_due_ts < NOW()"),  # fixed type
+                "pm_plans":      c("SELECT count(*) FROM maintenance_plans"),
+                "overdue":       c("SELECT count(*) FROM maintenance_plans WHERE next_due_ts < NOW()"),
                 "due_this_week": c("SELECT count(*) FROM maintenance_plans WHERE next_due_ts BETWEEN NOW() AND NOW() + INTERVAL '7 days'"),
+                "due_this_month":c("SELECT count(*) FROM maintenance_plans WHERE next_due_ts BETWEEN NOW() AND NOW() + INTERVAL '30 days'"),
+                "active":        c("SELECT count(*) FROM maintenance_plans WHERE status='active'"),
             },
             "service_requests": {
-                "total": c("SELECT count(*) FROM service_requests"),
-                "open": c("SELECT count(*) FROM service_requests WHERE status IN ('open','Open')"),
-                "linked_to_wo": c("SELECT count(*) FROM service_requests WHERE work_order_id IS NOT NULL"),
+                "total":       c("SELECT count(*) FROM service_requests"),
+                "open":        c("SELECT count(*) FROM service_requests WHERE status IN ('open','new')"),
+                "in_progress": c("SELECT count(*) FROM service_requests WHERE status='in_progress'"),
+                "linked_to_wo":c("SELECT count(*) FROM service_requests WHERE work_order_id IS NOT NULL"),
             },
             "procurement": {
-                "purchase_orders": c("SELECT count(*) FROM purchase_orders"),
+                "purchase_orders":   c("SELECT count(*) FROM purchase_orders"),
                 "purchase_requests": c("SELECT count(*) FROM purchase_requests"),
-                "pending_pos": c("SELECT count(*) FROM purchase_orders WHERE status NOT IN ('delivered','received','cancelled')"),
+                "pending_pos":       c("SELECT count(*) FROM purchase_orders WHERE status IN ('pending','draft','submitted')"),
+                "approved_prs":      c("SELECT count(*) FROM purchase_requests WHERE status='approved'"),
+                "suppliers":         c("SELECT count(*) FROM suppliers"),
             },
             "commercial": {
-                "active_contracts": c("SELECT count(*) FROM contracts WHERE status IN ('active','Active')"),  # check actual values
-                "open_leads": c("SELECT count(*) FROM leads WHERE status NOT IN ('won','lost')"),
-                "unpaid_invoices": c("SELECT count(*) FROM invoices WHERE status IN ('sent','overdue')"),
+                "active_contracts":    c("SELECT count(*) FROM contracts WHERE status='active'"),
+                "expiring_30d":        c("SELECT count(*) FROM contracts WHERE status='active' AND end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'"),
+                "open_leads":          c("SELECT count(*) FROM leads WHERE status NOT IN ('won','lost','closed')"),
+                "total_leads":         c("SELECT count(*) FROM leads"),
+                "unpaid_invoices":     c("SELECT count(*) FROM invoices WHERE status IN ('pending','overdue')"),
+                "pending_signature":   c("SELECT count(*) FROM contracts WHERE status='pending_signature'"),
+            },
+            "finance": {
+                "total_invoices":   c("SELECT count(*) FROM invoices"),
+                "paid":             c("SELECT count(*) FROM invoices WHERE status='paid'"),
+                "pending":          c("SELECT count(*) FROM invoices WHERE status='pending'"),
+                "overdue":          c("SELECT count(*) FROM invoices WHERE status='overdue'"),
+                "cancelled":        c("SELECT count(*) FROM invoices WHERE status='cancelled'"),
+                "total_value":      c("SELECT COALESCE(SUM(amount),0) FROM invoices"),
+                "paid_value":       c("SELECT COALESCE(SUM(amount),0) FROM invoices WHERE status='paid'"),
+                "outstanding_value":c("SELECT COALESCE(SUM(amount),0) FROM invoices WHERE status IN ('pending','overdue')"),
+            },
+            "inventory": {
+                "total_items":       c("SELECT count(*) FROM inventory_items"),
+                "stock_records":     c("SELECT count(*) FROM stock_balances"),
+                "warehouses":        c("SELECT count(*) FROM warehouses"),
+                "low_stock_items":   c("SELECT count(*) FROM stock_balances WHERE qty_available < 10"),
+                "total_stock_value": c("SELECT COALESCE(SUM(total_value),0) FROM stock_balances"),
+            },
+            "platform": {
+                "technicians":    c("SELECT count(*) FROM technicians"),
+                "projects":       c("SELECT count(*) FROM projects"),
+                "notifications":  c("SELECT count(*) FROM notifications"),
+                "sites":          c("SELECT count(*) FROM sites"),
+                "hotels":         c("SELECT count(*) FROM hotels"),
             }
         }
-        return result
-    except Exception as e:
-        return {"error": str(e)}
-    finally:
-        db.close()
 
-# ── End Sprint 156 ────────────────────────────────────────────────────────────
