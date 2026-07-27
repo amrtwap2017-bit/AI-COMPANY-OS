@@ -109,7 +109,7 @@ export default function LeadsPage() {
             ))}
           </div>
           <span className="text-xs text-tertiary ml-auto">{filtered.length} leads</span>
-          <ExportButton data={toArr(leadRaw)} filename="leads" title="Leads"/>
+          <ExportButton data={toArr(raw)} filename="leads" title="Leads"/>
         </div>
 
         {/* Table */}

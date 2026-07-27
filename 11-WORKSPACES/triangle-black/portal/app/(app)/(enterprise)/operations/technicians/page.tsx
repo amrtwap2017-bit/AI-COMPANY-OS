@@ -48,7 +48,7 @@ export default function TechniciansPage() {
               <div className="text-label-upper text-orange-500 mb-1.5">Operations</div>
               <h1 className="tb-hero-title">Technicians</h1>
               <p className="tb-hero-description">{techs.length} total · {active.length} active · {available.length} available · {busy.length} on duty</p>
-              <ExportButton data={toArr(techRaw)} filename="technicians" title="Technicians"/>
+              <ExportButton data={toArr(raw)} filename="technicians" title="Technicians"/>
             </div>
             <button onClick={()=>router.push("/operations/dispatch")} className="tb-hero-btn tb-hero-btn--primary">👷 Dispatch Center</button>
           </div>

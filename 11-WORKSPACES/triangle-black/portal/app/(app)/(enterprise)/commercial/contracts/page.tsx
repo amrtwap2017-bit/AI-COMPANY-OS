@@ -109,7 +109,7 @@ export default function ContractsPage() {
           </div>
           {(search||statusF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");}} className="tb-pill">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} contracts</span>
-          <ExportButton data={toArr(contractRaw)} filename="contracts" title="Contracts"/>
+          <ExportButton data={toArr(raw)} filename="contracts" title="Contracts"/>
         </div>
 
         <div className="tb-table">

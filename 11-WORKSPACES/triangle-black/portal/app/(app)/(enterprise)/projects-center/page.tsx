@@ -90,7 +90,7 @@ export default function ProjectsCenterPage() {
             ))}
           </div>
           <span className="text-xs text-tertiary ml-auto">{filtered.length} projects</span>
-              <ExportButton data={toArr(projectRaw)} filename="projects" title="Projects"/>
+              <ExportButton data={toArr(raw)} filename="projects" title="Projects"/>
         </div>
 
         {/* Project cards */}

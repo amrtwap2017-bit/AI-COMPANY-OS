@@ -108,7 +108,7 @@ export default function AssetsPage() {
           </select>
           {(search||catF!=="all"||critF!=="all")&&<button onClick={()=>{setSearch("");setCatF("all");setCritF("all");}} className="tb-pill">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} assets</span>
-          <ExportButton data={toArr(assetRaw)} filename="assets" title="Assets"/>
+          <ExportButton data={toArr(raw)} filename="assets" title="Assets"/>
         </div>
 
         <div className="tb-table">

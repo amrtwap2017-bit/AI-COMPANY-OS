@@ -139,7 +139,7 @@ export default function InvoicesPage() {
           </div>
           {(search||statusF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");}} className="tb-pill">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} invoices</span>
-          <ExportButton data={toArr(invRaw)} filename="invoices" title="Invoices"/>
+          <ExportButton data={toArr(raw)} filename="invoices" title="Invoices"/>
         </div>
 
         <div className="tb-table">

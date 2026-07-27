@@ -109,7 +109,7 @@ export default function PMPlansPage() {
             <button onClick={()=>{setSearch("");setTypeFilter("all");setDueFilter("all");}} className="tb-pill">Clear ×</button>
           )}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} plans</span>
-          <ExportButton data={toArr(pmRaw)} filename="pm-plans" title="PM Plans"/>
+          <ExportButton data={toArr(raw)} filename="pm-plans" title="PM Plans"/>
         </div>
 
         {/* Table */}

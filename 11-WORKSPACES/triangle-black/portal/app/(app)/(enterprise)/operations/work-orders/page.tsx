@@ -147,7 +147,7 @@ export default function WorkOrdersPage() {
             <button onClick={()=>{setSearch("");setStatusF("all");setPriorityF("all");}} className="tb-pill">Clear ×</button>
           )}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} results</span>
-          <ExportButton data={toArr(woRaw)} filename="work-orders" title="Work Orders"/>
+          <ExportButton data={toArr(raw)} filename="work-orders" title="Work Orders"/>
         </div>
 
         {/* Table */}
