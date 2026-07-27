@@ -23,7 +23,7 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 @router.get("/")
 def list_notifications(
     unread_only: bool = False,
-    limit: int = 50,
+    limit: int = 500,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
