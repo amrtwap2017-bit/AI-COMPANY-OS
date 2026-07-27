@@ -924,3 +924,368 @@ def get_dashboard_summary():
             }
         }
 
+
+
+# ── PROGRAM 2: WORKFLOW AUTOMATION ENGINE (Sprint 169) ─────────────────────────
+
+@app.post("/api/v1/automation/run", tags=["automation"])
+@app.get("/api/v1/automation/run", tags=["automation"])
+def run_automation_engine():
+    """
+    Workflow Automation Engine — runs all 5 business workflows:
+    WF-01: Overdue PM Plans → auto-create Work Orders
+    WF-02: Contracts expiring in 30 days → create renewal notifications
+    WF-03: Stock below minimum → auto-create Purchase Requests
+    WF-04: Completed WOs → sync asset maintenance dates
+    WF-05: Open Service Requests → link or create Work Orders
+    Returns full report of all actions taken.
+    """
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, uuid
+    from datetime import datetime, timedelta
+
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+
+    HOTEL = "tb-default-hotel-000000000001"
+    now = datetime.utcnow()
+    report = {
+        "ran_at": now.isoformat(),
+        "wf01_pm_to_wo": {"created": [], "skipped": 0},
+        "wf02_contract_renewals": {"notified": [], "skipped": 0},
+        "wf03_stock_auto_pr": {"created": [], "skipped": 0},
+        "wf04_wo_asset_sync": {"synced": 0},
+        "wf05_sr_to_wo": {"linked": [], "skipped": 0},
+        "total_actions": 0,
+    }
+
+    with Session(eng) as db:
+
+        # ── WF-01: Overdue PM Plans → Work Orders ──────────────────────────────
+        try:
+            overdue_plans = db.execute(text("""
+                SELECT mp.id, mp.title, mp.asset_node_id, mp.plan_type, mp.frequency
+                FROM maintenance_plans mp
+                WHERE mp.next_due_ts < NOW()
+                AND mp.status = 'active'
+                AND NOT EXISTS (
+                    SELECT 1 FROM work_orders wo
+                    WHERE wo.title = 'PM: ' || mp.title
+                    AND wo.created_at > NOW() - INTERVAL '3 days'
+                    AND wo.status NOT IN ('cancelled')
+                )
+                LIMIT 20
+            """)).fetchall()
+
+            for plan in overdue_plans:
+                wo_id = str(uuid.uuid4())
+                db.execute(text("""
+                    INSERT INTO work_orders
+                        (id, hotel_id, title, description, priority, status, type,
+                         asset_id, due_date, created_at, updated_at)
+                    VALUES
+                        (:id, :hotel_id, :title, :desc, :priority, 'open', 'preventive',
+                         :asset_id, :due_date, :now, :now)
+                """), {
+                    "id": wo_id,
+                    "hotel_id": HOTEL,
+                    "title": f"PM: {plan.title}",
+                    "desc": f"Auto-created from overdue PM plan. Frequency: {plan.frequency}. Plan ID: {plan.id}",
+                    "priority": "high",
+                    "asset_id": plan.asset_node_id,
+                    "due_date": now + timedelta(days=3),
+                    "now": now,
+                })
+
+                # Create notification for the new WO
+                db.execute(text("""
+                    INSERT INTO notifications
+                        (id, hotel_id, title, message, type, entity_id, entity_type,
+                         recipient_role, is_read, created_at, updated_at)
+                    VALUES
+                        (:id, :hotel_id, :title, :msg, 'work_order_created', :entity_id,
+                         'work_order', 'admin', false, :now, :now)
+                """), {
+                    "id": str(uuid.uuid4()),
+                    "hotel_id": HOTEL,
+                    "title": f"PM Work Order Created: {plan.title}",
+                    "msg": f"Overdue PM plan '{plan.title}' has auto-generated a work order.",
+                    "entity_id": wo_id,
+                    "now": now,
+                })
+
+                report["wf01_pm_to_wo"]["created"].append({
+                    "wo_id": wo_id,
+                    "pm_plan": plan.title,
+                    "asset_id": plan.asset_node_id,
+                })
+
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            report["wf01_pm_to_wo"]["error"] = str(e)
+
+        # ── WF-02: Contracts Expiring → Renewal Notifications ──────────────────
+        try:
+            expiring = db.execute(text("""
+                SELECT c.id, c.end_date
+                FROM contracts c
+                WHERE c.status = 'active'
+                AND c.end_date BETWEEN NOW() AND NOW() + INTERVAL '30 days'
+                AND NOT EXISTS (
+                    SELECT 1 FROM notifications n
+                    WHERE n.entity_id = c.id
+                    AND n.type = 'contract_expiring'
+                    AND n.created_at > NOW() - INTERVAL '7 days'
+                )
+                LIMIT 20
+            """)).fetchall()
+
+            for contract in expiring:
+                days_left = (contract.end_date - now).days if contract.end_date else 0
+                notif_id = str(uuid.uuid4())
+                db.execute(text("""
+                    INSERT INTO notifications
+                        (id, hotel_id, title, message, type, entity_id, entity_type,
+                         recipient_role, is_read, created_at, updated_at)
+                    VALUES
+                        (:id, :hotel_id, :title, :msg, 'contract_expiring', :entity_id,
+                         'contract', 'admin', false, :now, :now)
+                """), {
+                    "id": notif_id,
+                    "hotel_id": HOTEL,
+                    "title": f"Contract Expiring in {days_left} Days",
+                    "msg": f"Contract {contract.id[:8]} expires on {str(contract.end_date)[:10]}. Initiate renewal immediately.",
+                    "entity_id": contract.id,
+                    "now": now,
+                })
+                report["wf02_contract_renewals"]["notified"].append({
+                    "contract_id": contract.id,
+                    "days_left": days_left,
+                    "notification_id": notif_id,
+                })
+
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            report["wf02_contract_renewals"]["error"] = str(e)
+
+        # ── WF-03: Stock Below Minimum → Purchase Requests ─────────────────────
+        try:
+            low_stock = db.execute(text("""
+                SELECT ii.id as item_id, ii.name as item_name,
+                       sb.qty_on_hand, ii.min_stock,
+                       (ii.min_stock - sb.qty_on_hand) as shortage
+                FROM inventory_items ii
+                JOIN stock_balances sb ON sb.item_id = ii.id
+                WHERE sb.qty_on_hand < ii.min_stock
+                AND ii.min_stock > 0
+                AND NOT EXISTS (
+                    SELECT 1 FROM purchase_requests pr
+                    WHERE pr.title LIKE '%' || ii.name || '%'
+                    AND pr.created_at > NOW() - INTERVAL '7 days'
+                    AND pr.status NOT IN ('cancelled', 'rejected')
+                )
+                LIMIT 10
+            """)).fetchall()
+
+            for item in low_stock:
+                pr_id = str(uuid.uuid4())
+                pr_number = f"PR-AUTO-{now.strftime('%Y%m%d')}-{pr_id[:6].upper()}"
+                shortage = max(1, int(item.shortage or item.min_stock))
+
+                db.execute(text("""
+                    INSERT INTO purchase_requests
+                        (id, hotel_id, pr_number, title, justification, urgency,
+                         status, department, requester, lines, created_at, updated_at)
+                    VALUES
+                        (:id, :hotel_id, :pr_number, :title, :justification, 'urgent',
+                         'pending', 'Engineering', 'Automation Engine',
+                         :lines::json, :now, :now)
+                """), {
+                    "id": pr_id,
+                    "hotel_id": HOTEL,
+                    "pr_number": pr_number,
+                    "title": f"Auto-PR: Restock {item.item_name}",
+                    "justification": f"Stock level {item.qty_on_hand} is below minimum {item.min_stock}. Shortage: {shortage} units.",
+                    "lines": f'[{{"item_id":"{item.item_id}","item_name":"{item.item_name}","qty":{shortage},"unit":"unit"}}]',
+                    "now": now,
+                })
+
+                # Notification for low stock PR
+                db.execute(text("""
+                    INSERT INTO notifications
+                        (id, hotel_id, title, message, type, entity_id, entity_type,
+                         recipient_role, is_read, created_at, updated_at)
+                    VALUES
+                        (:id, :hotel_id, :title, :msg, 'purchase_request_created',
+                         :entity_id, 'purchase_request', 'admin', false, :now, :now)
+                """), {
+                    "id": str(uuid.uuid4()),
+                    "hotel_id": HOTEL,
+                    "title": f"Auto-PR Created: {item.item_name}",
+                    "msg": f"Stock alert: {item.item_name} has {item.qty_on_hand} units (min: {item.min_stock}). Purchase request {pr_number} auto-created.",
+                    "entity_id": pr_id,
+                    "now": now,
+                })
+
+                report["wf03_stock_auto_pr"]["created"].append({
+                    "pr_id": pr_id,
+                    "pr_number": pr_number,
+                    "item": item.item_name,
+                    "qty_on_hand": float(item.qty_on_hand),
+                    "min_stock": float(item.min_stock),
+                    "shortage": shortage,
+                })
+
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            report["wf03_stock_auto_pr"]["error"] = str(e)
+
+        # ── WF-04: Completed WOs → Sync Asset Maintenance Dates ────────────────
+        try:
+            result = db.execute(text("""
+                UPDATE assets a
+                SET last_maintenance_date = wo.completed_at,
+                    next_maintenance_date = wo.completed_at + INTERVAL '90 days',
+                    updated_at = NOW()
+                FROM (
+                    SELECT DISTINCT ON (asset_id)
+                        asset_id, completed_at
+                    FROM work_orders
+                    WHERE status = 'completed'
+                    AND completed_at IS NOT NULL
+                    AND asset_id IS NOT NULL
+                    ORDER BY asset_id, completed_at DESC
+                ) wo
+                WHERE a.id = wo.asset_id
+                AND (a.last_maintenance_date IS NULL OR a.last_maintenance_date < wo.completed_at)
+            """))
+            db.commit()
+            report["wf04_wo_asset_sync"]["synced"] = result.rowcount
+        except Exception as e:
+            db.rollback()
+            report["wf04_wo_asset_sync"]["error"] = str(e)
+
+        # ── WF-05: Open Service Requests → Link to Work Orders ─────────────────
+        try:
+            unlinked_srs = db.execute(text("""
+                SELECT sr.id, sr.title, sr.description, sr.priority
+                FROM service_requests sr
+                WHERE sr.status IN ('open', 'new')
+                AND (sr.work_order_id IS NULL OR sr.work_order_id = '')
+                AND NOT EXISTS (
+                    SELECT 1 FROM work_orders wo
+                    WHERE wo.title = 'SR: ' || COALESCE(sr.title, sr.id)
+                    AND wo.created_at > NOW() - INTERVAL '3 days'
+                )
+                LIMIT 10
+            """)).fetchall()
+
+            for sr in unlinked_srs:
+                wo_id = str(uuid.uuid4())
+                db.execute(text("""
+                    INSERT INTO work_orders
+                        (id, hotel_id, title, description, priority, status, type,
+                         created_at, updated_at, due_date)
+                    VALUES
+                        (:id, :hotel_id, :title, :desc, :priority, 'open', 'corrective',
+                         :now, :now, :due_date)
+                """), {
+                    "id": wo_id,
+                    "hotel_id": HOTEL,
+                    "title": f"SR: {sr.title or sr.id}",
+                    "desc": sr.description or f"Auto-created from service request {sr.id}",
+                    "priority": sr.priority or "medium",
+                    "now": now,
+                    "due_date": now + timedelta(days=2),
+                })
+
+                # Link SR to WO
+                db.execute(text("""
+                    UPDATE service_requests
+                    SET work_order_id = :wo_id, updated_at = :now
+                    WHERE id = :sr_id
+                """), {"wo_id": wo_id, "sr_id": sr.id, "now": now})
+
+                report["wf05_sr_to_wo"]["linked"].append({
+                    "sr_id": sr.id,
+                    "wo_id": wo_id,
+                    "title": sr.title,
+                })
+
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            report["wf05_sr_to_wo"]["error"] = str(e)
+
+    # Total actions
+    report["total_actions"] = (
+        len(report["wf01_pm_to_wo"]["created"]) +
+        len(report["wf02_contract_renewals"]["notified"]) +
+        len(report["wf03_stock_auto_pr"]["created"]) +
+        report["wf04_wo_asset_sync"]["synced"] +
+        len(report["wf05_sr_to_wo"]["linked"])
+    )
+
+    return report
+
+
+@app.get("/api/v1/automation/status", tags=["automation"])
+def automation_status():
+    """Check what automation would do without running it."""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def c(q):
+            try: return db.execute(text(q)).scalar() or 0
+            except: db.rollback(); return 0
+        return {
+            "pending_actions": {
+                "wf01_overdue_pm_without_wo": c("""
+                    SELECT count(*) FROM maintenance_plans mp
+                    WHERE mp.next_due_ts < NOW() AND mp.status='active'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM work_orders wo
+                        WHERE wo.title = 'PM: ' || mp.title
+                        AND wo.created_at > NOW() - INTERVAL '3 days'
+                        AND wo.status NOT IN ('cancelled')
+                    )"""),
+                "wf02_contracts_expiring_30d": c("""
+                    SELECT count(*) FROM contracts
+                    WHERE status='active'
+                    AND end_date BETWEEN NOW() AND NOW()+INTERVAL '30 days'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM notifications n
+                        WHERE n.entity_id=contracts.id
+                        AND n.type='contract_expiring'
+                        AND n.created_at > NOW()-INTERVAL '7 days'
+                    )"""),
+                "wf03_stock_below_min": c("""
+                    SELECT count(*) FROM inventory_items ii
+                    JOIN stock_balances sb ON sb.item_id=ii.id
+                    WHERE sb.qty_on_hand < ii.min_stock AND ii.min_stock>0
+                    AND NOT EXISTS (
+                        SELECT 1 FROM purchase_requests pr
+                        WHERE pr.title LIKE '%'||ii.name||'%'
+                        AND pr.created_at > NOW()-INTERVAL '7 days'
+                        AND pr.status NOT IN ('cancelled','rejected')
+                    )"""),
+                "wf04_assets_needing_sync": c("""
+                    SELECT count(DISTINCT wo.asset_id) FROM work_orders wo
+                    JOIN assets a ON a.id=wo.asset_id
+                    WHERE wo.status='completed' AND wo.completed_at IS NOT NULL
+                    AND (a.last_maintenance_date IS NULL OR a.last_maintenance_date < wo.completed_at)"""),
+                "wf05_unlinked_service_requests": c("""
+                    SELECT count(*) FROM service_requests sr
+                    WHERE sr.status IN ('open','new')
+                    AND (sr.work_order_id IS NULL OR sr.work_order_id='')"""),
+            }
+        }
+
