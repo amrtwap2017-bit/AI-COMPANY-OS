@@ -693,47 +693,58 @@ except Exception as e:
 
 # ── Sprint 149b: PM Plans + Payment Tracking (Session+engine pattern) ──────
 
+
+# ── Sprint 149: Fixed PM Plans + Payment Tracking ────────────────────────────
 @app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
-def list_pm_plans(limit: int = 100, status: str = None):
-    from sqlalchemy import text as _t
-    from sqlalchemy.orm import Session as _S
-    from src.core.database import engine as _e
-    db = _S(_e)
+def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
+    """Get preventive maintenance plans"""
+    from src.core.database import SessionLocal
+    from sqlalchemy import text
+    db = SessionLocal()
     try:
+        q = """SELECT mp.id, mp.hotel_id, mp.name, mp.description,
+               mp.frequency, mp.frequency_unit, mp.status,
+               mp.next_due_date, mp.last_completed_date,
+               mp.estimated_duration_hours,
+               mp.created_at, mp.updated_at,
+               a.name as asset_name
+               FROM maintenance_plans mp
+               LEFT JOIN assets a ON mp.asset_id = a.id
+               WHERE 1=1"""
+        params = {"limit": limit}
+        if hotel_id:
+            q += " AND mp.hotel_id = :hotel_id"
+            params["hotel_id"] = hotel_id
         if status:
-            rows = db.execute(
-                _t("SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_node_id = a.id WHERE mp.status = :s ORDER BY mp.next_due_date ASC LIMIT :l"),
-                {"s": status, "l": limit}
-            ).fetchall()
-        else:
-            rows = db.execute(
-                _t("SELECT mp.*, a.name as asset_name FROM maintenance_plans mp LEFT JOIN assets a ON mp.asset_node_id = a.id ORDER BY mp.next_due_date ASC LIMIT :l"),
-                {"l": limit}
-            ).fetchall()
+            q += " AND mp.status = :status"
+            params["status"] = status
+        q += " ORDER BY mp.next_due_date ASC NULLS LAST LIMIT :limit"
+        rows = db.execute(text(q), params).fetchall()
         return [dict(r._mapping) for r in rows]
     except Exception as e:
-        print(f"PM plans error: {e}")
+        print(f"pm-plans error: {e}")
         return []
     finally:
         db.close()
 
-
 @app.get("/api/v1/payment-tracking/", tags=["finance"])
 @app.get("/api/v1/payment-tracking", tags=["finance"])
-def list_payment_tracking(limit: int = 100):
-    from sqlalchemy import text as _t
-    from sqlalchemy.orm import Session as _S
-    from src.core.database import engine as _e
-    db = _S(_e)
+def get_payment_tracking_v2(limit: int = 50):
+    """Get payment tracking from invoices"""
+    from src.core.database import SessionLocal
+    from sqlalchemy import text
+    db = SessionLocal()
     try:
-        rows = db.execute(
-            _t("SELECT id, invoice_number, amount, status, due_date, paid_date, created_at, updated_at, hotel_id FROM invoices ORDER BY created_at DESC LIMIT :l"),
-            {"l": limit}
-        ).fetchall()
+        rows = db.execute(text(
+            "SELECT id, invoice_number, amount, status, "
+            "created_at, updated_at "
+            "FROM invoices "
+            "ORDER BY created_at DESC LIMIT :l"
+        ), {"l": limit}).fetchall()
         return [dict(r._mapping) for r in rows]
     except Exception as e:
-        print(f"Payment tracking error: {e}")
+        print(f"payment-tracking error: {e}")
         return []
     finally:
         db.close()

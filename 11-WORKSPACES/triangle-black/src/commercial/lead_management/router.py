@@ -17,20 +17,5 @@ def create_lead(payload: LeadCreate, db: Session = Depends(get_db), hotel_id: st
 @router.get('/')
 def list_leads(name: str = None, status: str = None, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
     lead_repo = LeadRepository(db)
-    leads = lead_repo.list_leads(name=name, status=status)
-    return leads if isinstance(leads, list) else []
-
-@router.put('/{id}', response_model=LeadResponse)
-def update_lead(id: str, payload: LeadUpdate, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
-    lead_repo = LeadRepository(db)
-    updated_lead = lead_repo.update_lead(id, payload.dict())
-    if not updated_lead:
-        raise HTTPException(status_code=404, detail='Lead not found')
-    return {k: v for k, v in updated_lead.__dict__.items() if not k.startswith('_')}
-
-@router.delete('/{id}', status_code=204)
-def delete_lead(id: str, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
-    lead_repo = LeadRepository(db)
-    deleted_lead = lead_repo.delete_lead(id)
-    if not deleted_lead:
-        raise HTTPException(status_code=404, detail='Lead not found')
+    leads = lead_repo.list_leads(hotel_id=hotel_id, name=name, status=status)
+    return [lead.__dict__ for lead in leads] if hasattr(leads[0], '__dict__') else leads
