@@ -4,115 +4,111 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { WorkspaceHeader } from "@/components/workspace/WorkspaceHeader";
-import { ActionBar } from "@/components/ui/ActionBar";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const P_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"rgba(148,163,184,0.4)" };
+
+const STATUS_CONFIG = {
+  "Operational":       { color:"#34D399", bg:"rgba(16,185,129,0.1)",  border:"rgba(16,185,129,0.2)" },
+  "In Fault":          { color:"#F87171", bg:"rgba(239,68,68,0.1)",   border:"rgba(239,68,68,0.2)" },
+  "Under Maintenance": { color:"#FBBF24", bg:"rgba(245,158,11,0.1)",  border:"rgba(245,158,11,0.2)" },
+};
+const CRIT_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"rgba(148,163,184,0.4)" };
 
 export default function AssetsPage() {
   const router = useRouter();
-  const [search, setSearch]   = useState("");
-  const [catFilter, setCat]   = useState("all");
-  const [critFilter, setCrit] = useState("all");
+  const [search,   setSearch]   = useState("");
+  const [catF,     setCatF]     = useState("all");
+  const [critF,    setCritF]    = useState("all");
 
-  const { data: raw, isLoading } = useQuery(["assets-list"], () => authFetch("/api/v1/assets/").then(r=>r.json()), {refetchInterval:120000});
-  const { data: twin }           = useQuery(["assets-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: raw, isLoading } = useQuery(
+    ["assets-list"], () => authFetch("/api/v1/assets/").then(r=>r.json()), {refetchInterval:120000}
+  );
+  const { data: twin } = useQuery(["assets-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
 
   const assets = toArr(raw);
-  const cats   = [...new Set(assets.map(a => a.category || "Other"))].sort();
   const now    = new Date();
+  const cats   = [...new Set(assets.map(a=>a.category||"Other"))].sort();
 
-  const operational   = assets.filter(a => a.status==="Operational");
-  const faulted       = assets.filter(a => a.status==="In Fault");
-  const underMaint    = assets.filter(a => a.status==="Under Maintenance");
-  const critical      = assets.filter(a => a.criticality==="critical");
-  const overdueService= assets.filter(a => a.next_maintenance_date && new Date(a.next_maintenance_date) < now);
-  const uptimePct     = assets.length > 0 ? Math.round(operational.length/assets.length*100) : 100;
+  const operational   = assets.filter(a=>a.status==="Operational");
+  const faulted       = assets.filter(a=>a.status==="In Fault");
+  const underMaint    = assets.filter(a=>a.status==="Under Maintenance");
+  const critical      = assets.filter(a=>a.criticality==="critical");
+  const overdueService= assets.filter(a=>a.next_maintenance_date&&new Date(a.next_maintenance_date)<now);
+  const uptimePct     = assets.length>0?Math.round(operational.length/assets.length*100):100;
+  const score         = twin?.health_score??0;
 
   const filtered = assets.filter(a => {
-    const ms = !search || a.name?.toLowerCase().includes(search.toLowerCase()) || a.serial_number?.toLowerCase().includes(search.toLowerCase());
-    const mc = catFilter==="all" || (a.category||"Other")===catFilter;
-    const mk = critFilter==="all" || a.criticality===critFilter;
-    return ms && mc && mk;
+    const ms = !search||a.name?.toLowerCase().includes(search.toLowerCase())||a.serial_number?.toLowerCase().includes(search.toLowerCase());
+    return ms && (catF==="all"||(a.category||"Other")===catF) && (critF==="all"||a.criticality===critF);
   });
 
-  const hasFilters = search || catFilter!=="all" || critFilter!=="all";
+  if (isLoading) return <div className="tb-page"><div className="tb-section animate-pulse" style={{height:60}}/></div>;
 
   return (
-    <div className="min-h-screen" className="bg-base">
-
-      <WorkspaceHeader
-        domain="Maintenance"
-        domainColor="#EF4444"
-        title="Asset Registry"
-        description="MEP equipment health, criticality monitoring, and maintenance history"
-        health={{ score: twin?.health_score ?? 0, label: "Asset Health", sub: `${uptimePct}% uptime` }}
-        kpis={[
-          { label:"Total Assets",  value:assets.length,        color:"default" },
-          { label:"Operational",   value:operational.length,   color:"success" },
-          { label:"In Fault",      value:faulted.length,       color:faulted.length>0?"danger":"success" },
-          { label:"Maintenance",   value:underMaint.length,    color:underMaint.length>0?"warning":"success" },
-          { label:"Critical",      value:critical.length,      color:"danger" },
-          { label:"Overdue Svc",   value:overdueService.length,color:overdueService.length>0?"danger":"success" },
-          { label:"Uptime",        value:`${uptimePct}%`,      color:uptimePct>=95?"success":"warning" },
-          { label:"Categories",    value:cats.length,          color:"info" },
-        ]}
-        actions={[
-          { label:"Asset Tree",     icon:"🌳", href:"/maintenance/asset-tree", variant:"secondary" },
-          { label:"PM Plans",       icon:"📅", href:"/maintenance/pm-plans",   variant:"secondary" },
-          { label:"Work History",   icon:"📋", href:"/maintenance/work-history",variant:"secondary" },
-        ]}
-        aiInsight={faulted.length > 0 ? {
-          text: `${faulted.length} asset${faulted.length>1?"s are":" is"} currently in fault. Recommend immediate inspection and work order creation.`,
-          action: "Create WOs",
-          onAction: () => router.push("/engineering/new-work-order"),
-          type: "warning"
-        } : critical.length > 0 ? {
-          text: `${critical.length} critical assets detected. Ensure PM schedules are up to date for high-risk equipment.`,
-          action: "View PM Plans",
-          onAction: () => router.push("/maintenance/pm-plans"),
-          type: "recommendation"
-        } : undefined}
-        tabs={[
-          { label:"All Assets",   href:"/maintenance/assets",    active:true },
-          { label:"Asset Tree",   href:"/maintenance/asset-tree" },
-          { label:"PM Plans",     href:"/maintenance/pm-plans" },
-          { label:"Work History", href:"/maintenance/work-history" },
-          { label:"QR Codes",     href:"/maintenance/qr-codes" },
-          { label:"Intelligence", href:"/maintenance/intelligence" },
-        ]}
-      />
-
-      <ActionBar
-        search={{ value:search, onChange:setSearch, placeholder:"Search assets by name or serial number..." }}
-        filters={[
-          { label:"Category", value:catFilter, onChange:setCat, options:[{label:"All Categories",value:"all"},...cats.map(c=>({label:c,value:c}))] },
-          { label:"Criticality", value:critFilter, onChange:setCrit, options:[{label:"All Criticality",value:"all"},{label:"Critical",value:"critical"},{label:"High",value:"high"},{label:"Medium",value:"medium"},{label:"Low",value:"low"}] },
-        ]}
-        hasFilters={!!hasFilters}
-        onClear={() => { setSearch(""); setCat("all"); setCrit("all"); }}
-        count={{ total:assets.length, filtered:filtered.length }}
-      />
-
-      <div style={{ maxWidth:1400, margin:"0 auto", padding:"24px 32px" }}>
-
-        {/* Fault alert */}
-        {faulted.length > 0 && (
-          <div className="tb-alert tb-alert-critical" style={{borderRadius:14,marginBottom:20}}>
-            <span style={{fontSize:"1.25rem"}}>⚠️</span>
-            <div className="flex-1">
-              <div style={{fontWeight:700,color:"var(--color-danger-text)",fontSize:"0.875rem"}}>{faulted.length} Asset{faulted.length>1?"s":""} In Fault — Immediate Attention Required</div>
-              <div style={{fontSize:"0.75rem",color:"var(--color-danger-text)",opacity:0.75,marginTop:2}}>{faulted.slice(0,3).map(a=>a.name).join(" · ")}</div>
+    <div className="min-h-screen bg-base">
+      {/* HERO */}
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A0A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-red-500 mb-1.5">Maintenance</div>
+              <h1 className="tb-hero-title">Asset Registry</h1>
+              <p className="tb-hero-description">{assets.length} assets · {critical.length} critical · {uptimePct}% uptime</p>
             </div>
-            <button onClick={()=>router.push("/maintenance/actions")} style={{background:"var(--color-danger)",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:"0.75rem",fontWeight:700,cursor:"pointer"}}>
-              View Faults
+            <div className={`tb-score-badge ${score>=95?"tb-score-badge--success":"tb-score-badge--warning"}`}>
+              <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{uptimePct}%</div>
+              <div className="tb-score-label">Uptime</div>
+            </div>
+          </div>
+          <div className="tb-grid-6 mt-6">
+            {[
+              {label:"Total",      value:assets.length,         color:"rgba(148,163,184,0.9)"},
+              {label:"Operational",value:operational.length,    color:"#34D399"},
+              {label:"In Fault",   value:faulted.length,        color:faulted.length>0?"#F87171":"#34D399"},
+              {label:"Maintenance",value:underMaint.length,     color:"#FBBF24"},
+              {label:"Critical",   value:critical.length,       color:"#F87171"},
+              {label:"Overdue Svc",value:overdueService.length, color:overdueService.length>0?"#F87171":"#34D399"},
+            ].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="tb-canvas">
+        {faulted.length > 0 && (
+          <div className="tb-ai-insight" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
+            <div className="tb-ai-insight-icon" style={{background:"rgba(239,68,68,0.15)"}}>⚠️</div>
+            <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
+              {faulted.length} Asset{faulted.length>1?"s":""} In Fault — {faulted.slice(0,2).map(a=>a.name).join(" · ")}
+            </div>
+            <button onClick={()=>router.push("/maintenance/actions")} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
+              View Faults →
             </button>
           </div>
         )}
 
-        {/* Table */}
+        <div className="tb-flex-gap-3 flex-wrap">
+          <div className="tb-search" style={{maxWidth:320}}>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets by name or serial..."
+              style={{background:"transparent",border:"none",outline:"none",flex:1,fontSize:"0.8125rem",color:"var(--color-text-1)"}}/>
+          </div>
+          <select value={catF} onChange={e=>setCatF(e.target.value)} className="tb-pill" style={{cursor:"pointer"}}>
+            <option value="all">All Categories</option>
+            {cats.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={critF} onChange={e=>setCritF(e.target.value)} className="tb-pill" style={{cursor:"pointer"}}>
+            <option value="all">All Criticality</option>
+            {["critical","high","medium","low"].map(c=><option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+          </select>
+          {(search||catF!=="all"||critF!=="all")&&<button onClick={()=>{setSearch("");setCatF("all");setCritF("all");}} className="tb-pill">Clear ×</button>}
+          <span className="text-xs text-tertiary ml-auto">{filtered.length} assets</span>
+        </div>
+
         <div className="tb-table">
           {filtered.length === 0 ? (
             <div className="tb-empty">
@@ -122,50 +118,61 @@ export default function AssetsPage() {
             </div>
           ) : (
             <>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 110px 130px 100px 120px 120px",background:"var(--color-bg-alt)",padding:"10px 24px",borderBottom:"1px solid var(--color-divider)"}}>
+              <div className="tb-table-head" style={{gridTemplateColumns:"1fr 110px 120px 100px 120px 120px"}}>
                 {["Asset","Category","Status","Criticality","Last Service","Next Service"].map((h,i)=>(
-                  <div key={i} style={{fontSize:"0.5625rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.07em",textAlign:i>0?"center":"left"}}>{h}</div>
+                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
               {filtered.map((a,i)=>{
-                const isOverdue = a.next_maintenance_date && new Date(a.next_maintenance_date) < now;
-                const isFault   = a.status === "In Fault";
-                const statColor = a.status==="Operational"?"#34D399":a.status==="In Fault"?"#F87171":"#FBBF24";
-                const critColor = P_COLOR[a.criticality] || "rgba(148,163,184,0.4)";
+                const isOv = a.next_maintenance_date&&new Date(a.next_maintenance_date)<now;
+                const isFault = a.status==="In Fault";
+                const sc = STATUS_CONFIG[a.status]||STATUS_CONFIG["Operational"];
+                const cc = CRIT_COLOR[a.criticality]||"rgba(148,163,184,0.4)";
                 return (
                   <button key={i} onClick={()=>router.push(`/maintenance/assets/${a.id}`)}
-                    className="w-full text-left"
-                    style={{display:"grid",gridTemplateColumns:"1fr 110px 130px 100px 120px 120px",alignItems:"center",padding:"14px 24px",borderBottom:i<filtered.length-1?"1px solid var(--color-divider)":"none",transition:"background 100ms ease",cursor:"pointer",background:isFault?"rgba(239,68,68,0.03)":"transparent"}}
-                    onMouseEnter={e=>e.currentTarget.style.background=isFault?"rgba(239,68,68,0.06)":"rgba(180,83,9,0.04)"}
-                    onMouseLeave={e=>e.currentTarget.style.background=isFault?"rgba(239,68,68,0.03)":"transparent"}>
-                    <div style={{display:"flex",alignItems:"center",gap:10,paddingRight:16}}>
-                      <div style={{width:3,height:32,background:critColor,borderRadius:99,flexShrink:0}}/>
-                      <div>
-                        <div className="text-sm font-semibold text-primary" className="truncate">{a.name}</div>
+                    className={`tb-table-row ${isFault?"tb-table-row--danger":""}`}
+                    style={{gridTemplateColumns:"1fr 110px 120px 100px 120px 120px"}}>
+                    <div className="flex items-center gap-3 pr-4 min-w-0">
+                      <div className="tb-priority-bar" style={{background:cc}}/>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-primary truncate">{a.name}</div>
                         <div className="text-xs text-tertiary mt-0.5">{a.manufacturer} {a.model}</div>
                       </div>
                     </div>
-                    <div style={{textAlign:"center",fontSize:"0.75rem",color:"var(--color-text-2)"}}>{a.category||"—"}</div>
+                    <div className="text-center text-xs text-secondary">{a.category||"—"}</div>
                     <div className="text-center">
-                      <span style={{fontSize:"0.6875rem",fontWeight:600,padding:"3px 10px",borderRadius:6,background:`${statColor}18`,color:statColor}}>
+                      <span className="tb-badge" style={{background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`,fontSize:"0.625rem"}}>
                         {a.status||"—"}
                       </span>
                     </div>
                     <div className="text-center">
-                      <span style={{fontSize:"0.6875rem",fontWeight:600,padding:"3px 8px",borderRadius:6,background:`${critColor}18`,color:critColor}}>
+                      <span className="tb-badge" style={{background:`${cc}18`,color:cc,border:`1px solid ${cc}30`,fontSize:"0.625rem"}}>
                         {a.criticality||"—"}
                       </span>
                     </div>
-                    <div style={{textAlign:"center",fontSize:"0.6875rem",color:"var(--color-text-3)"}}>{fmtDate(a.last_maintenance_date)}</div>
-                    <div style={{textAlign:"center",fontSize:"0.6875rem",color:isOverdue?"#F87171":"var(--color-text-3)",fontWeight:isOverdue?700:400}}>
+                    <div className="text-center text-xs text-secondary">{fmtDate(a.last_maintenance_date)}</div>
+                    <div className={`text-center text-xs ${isOv?"text-red-400 font-bold":"text-secondary"}`}>
                       {fmtDate(a.next_maintenance_date)}
-                      {isOverdue&&<div style={{fontSize:"0.5rem",textTransform:"uppercase",letterSpacing:"0.05em",marginTop:1}}>OVERDUE</div>}
+                      {isOv&&<div style={{fontSize:"0.5rem",textTransform:"uppercase"}}>OVERDUE</div>}
                     </div>
                   </button>
                 );
               })}
             </>
           )}
+        </div>
+
+        {/* Quick nav */}
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Related Views</div>
+          <div className="tb-grid-4">
+            {[{label:"Asset Tree",icon:"🌳",path:"/maintenance/asset-tree"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Work History",icon:"📋",path:"/maintenance/work-history"},{label:"Intelligence",icon:"🧠",path:"/maintenance/intelligence"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span>
+                <span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
