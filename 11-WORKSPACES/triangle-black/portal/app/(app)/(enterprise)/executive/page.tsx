@@ -1,178 +1,253 @@
 "use client";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import Link from "next/link";
-import { PageWrapper, SectionCard } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
-const fetchDashboard = async () => {
-  const r = await authFetch("/api/v1/dashboard/summary");
-  return r.json();
-};
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtNum = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
+const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function ExecutivePage() {
-  const now = new Date();
-  const hour = now.getHours();
-  const greeting = hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
+  const router = useRouter();
+  const { data: twin }        = useQuery(["exe-twin"],     () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: dash }        = useQuery(["exe-dash"],     () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()), { refetchInterval: 30000 });
+  const { data: woRaw }       = useQuery(["exe-wos"],      () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: invRaw }      = useQuery(["exe-inv"],      () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: contractRaw } = useQuery(["exe-cont"],     () => authFetch("/api/v1/contracts/").then(r=>r.json()));
+  const { data: notifRaw }    = useQuery(["exe-notifs"],   () => authFetch("/api/v1/notifications/").then(r=>r.json()));
+  const { data: autoStatus }  = useQuery(["exe-auto"],     () => authFetch("/api/v1/automation/status").then(r=>r.json()));
 
-  const { data: woRaw=[] }        = useQuery(["ex-wo"],       () => authFetch("/api/v1/work-orders/?limit=200").then(r=>r.json()),      {refetchInterval:120000});
-  const { data: invRaw=[] }       = useQuery(["ex-inv"],      () => authFetch("/api/v1/invoices/?limit=200").then(r=>r.json()),         {refetchInterval:120000});
-  const { data: leadsRaw=[] }     = useQuery(["ex-leads"],    () => authFetch("/api/v1/leads/?limit=200").then(r=>r.json()),            {refetchInterval:120000});
-  const { data: contractsRaw=[] } = useQuery(["ex-contracts"],() => authFetch("/api/v1/contracts/?limit=200").then(r=>r.json()),        {refetchInterval:120000});
-  const { data: dashboard } = useQuery(["dashboard-summary"], fetchDashboard, { refetchInterval: 60000 });
-  const { data: twin={} }         = useQuery(["ex-twin"],     () => authFetch("/api/v1/twin/state").then(r=>r.json()),                  {refetchInterval:60000});
-  const { data: srRaw=[] }        = useQuery(["ex-sr"],       () => authFetch("/api/v1/service-requests/?limit=100").then(r=>r.json()), {refetchInterval:120000});
+  const wos       = toArr(woRaw);
+  const invoices  = toArr(invRaw);
+  const contracts = toArr(contractRaw);
+  const notifs    = toArr(notifRaw);
+  const d         = dash || {};
+  const now       = new Date();
+  const score     = twin?.health_score ?? 0;
 
-  const wos=toArr(woRaw); const invs=toArr(invRaw); const leads=toArr(leadsRaw);
-  const contracts=toArr(contractsRaw); const srs=toArr(srRaw);
+  const criticalWOs      = wos.filter(w => w.priority === "critical" && w.status !== "completed");
+  const overdueWOs       = wos.filter(w => w.due_date && new Date(w.due_date) < now && w.status !== "completed");
+  const expiringContracts = contracts.filter(c => c.end_date && new Date(c.end_date) >= now && new Date(c.end_date) <= new Date(now.getTime() + 30*86400000) && c.status === "active");
+  const totalRevenue     = invoices.filter(i => i.status === "paid").reduce((s,i) => s+Number(i.total_amount||0), 0);
+  const pendingRevenue   = invoices.filter(i => i.status === "pending").reduce((s,i) => s+Number(i.total_amount||0), 0);
+  const unreadNotifs     = notifs.filter(n => !n.is_read);
+  const pending          = autoStatus?.pending_actions || {};
+  const totalPending     = Object.values(pending).reduce((s,v) => s+Number(v), 0);
 
-  const woOpen      = wos.filter(w=>w.status==="open").length;
-  const woCritical  = wos.filter(w=>w.priority==="critical"&&!["completed","cancelled"].includes(w.status)).length;
-  const woComplete  = wos.filter(w=>w.status==="completed").length;
-  const woCompRate  = wos.length>0?Math.round((woComplete/wos.length)*100):0;
-  const totalRev    = invs.reduce((s,i)=>s+(i.amount||0),0);
-  const paidRev     = invs.filter(i=>i.status==="paid").reduce((s,i)=>s+(i.amount||0),0);
-  const overdueRev  = invs.filter(i=>i.status==="overdue").reduce((s,i)=>s+(i.amount||0),0);
-  const collRate    = totalRev>0?Math.round((paidRev/totalRev)*100):0;
-  const invOverdue  = invs.filter(i=>i.status==="overdue").length;
-  const leadsWon    = leads.filter(l=>["won","converted"].includes(l.status)).length;
-  const activeC     = contracts.filter(c=>c.status==="active").length;
-  const activeVal   = contracts.filter(c=>c.status==="active").reduce((s,c)=>s+(c.total_value||c.value||0),0);
-  const expiring30  = contracts.filter(c=>{if(!c.end_date||c.status!=="active")return false;try{return(new Date(c.end_date)-now)/(1000*60*60*24)<=30;}catch{return false;}}).length;
-  const srOpen      = srs.filter(s=>s.status==="open").length;
-  const srCritical  = srs.filter(s=>s.urgency==="critical"&&s.status!=="resolved").length;
-  const twinScore   = twin.health_score??0;
-  const twinLabel   = twin.health_label??"—";
-  const twinColor   = twinScore>=95?"text-emerald-600":twinScore>=80?"text-amber-600":"text-red-600";
-  const twinBg      = twinScore>=95?"bg-emerald-50 border-emerald-300":twinScore>=80?"bg-amber-50 border-amber-300":"bg-red-50 border-red-300";
-  const platScore   = Math.round((twinScore*0.3)+(Math.min(100,collRate)*0.25)+(Math.min(100,woCompRate)*0.25)+(woCritical===0?20:Math.max(0,20-woCritical*4)));
-  const platColor   = platScore>=85?"text-emerald-600":platScore>=70?"text-amber-600":"text-red-600";
-  const platBg      = platScore>=85?"bg-emerald-50 border-emerald-200":platScore>=70?"bg-amber-50 border-amber-200":"bg-red-50 border-red-200";
+  const completionRate   = wos.length > 0 ? Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100) : 0;
+  const collectionRate   = invoices.length > 0 ? Math.round(invoices.filter(i=>i.status==="paid").length/invoices.length*100) : 0;
 
-  const alerts = [];
-  if (woCritical>0)  alerts.push({icon:"🚨",text:`${woCritical} critical work orders open`,urgency:"critical",link:"/operations/work-orders"});
-  if (srCritical>0)  alerts.push({icon:"🎫",text:`${srCritical} critical service requests`,urgency:"critical",link:"/operations/service-requests"});
-  if (invOverdue>0)  alerts.push({icon:"💸",text:`${invOverdue} overdue invoices — EGP ${fmtNum(overdueRev)}`,urgency:"warning",link:"/commercial/invoices"});
-  if (expiring30>0)  alerts.push({icon:"📄",text:`${expiring30} contracts expiring in 30 days`,urgency:"warning",link:"/commercial/contracts"});
-  if (alerts.length===0) alerts.push({icon:"✅",text:"All systems operating normally",urgency:"success"});
+  const riskScore = criticalWOs.length * 10 + overdueWOs.length * 3 + expiringContracts.length * 5 + (d.maintenance?.overdue||0) * 2;
+  const riskLevel = riskScore === 0 ? "None" : riskScore < 15 ? "Low" : riskScore < 30 ? "Medium" : "High";
+  const riskColor = riskScore === 0 ? "emerald" : riskScore < 15 ? "blue" : riskScore < 30 ? "amber" : "red";
 
-  const aC = {critical:"bg-red-50 border-red-200 text-red-800",warning:"bg-amber-50 border-amber-200 text-amber-800",success:"bg-emerald-50 border-emerald-200 text-emerald-800"};
-  const LINKS=[
-    {label:"Work Orders",href:"/operations/work-orders",icon:"🔧",c:"bg-blue-600"},
-    {label:"Invoices",href:"/commercial/invoices",icon:"💰",c:"bg-emerald-600"},
-    {label:"Analytics",href:"/analytics",icon:"📊",c:"bg-purple-600"},
-    {label:"Contracts",href:"/commercial/contracts",icon:"📄",c:"bg-indigo-600"},
-    {label:"Assets",href:"/maintenance/assets",icon:"⚙️",c:"bg-slate-700"},
-    {label:"Leads",href:"/commercial/leads",icon:"🎯",c:"bg-amber-600"},
-    {label:"Projects",href:"/projects-center",icon:"🏗️",c:"bg-teal-600"},
-    {label:"Service Req",href:"/operations/service-requests",icon:"🎫",c:"bg-orange-600"},
+  const scoreColor = score >= 95 ? "text-emerald-400" : score >= 80 ? "text-amber-400" : "text-red-400";
+
+  const executiveNav = [
+    { label: "Intelligence",   icon: "🧠", path: "/executive/intelligence",  desc: "Platform AI overview" },
+    { label: "Daily Review",   icon: "☀️", path: "/executive/daily-review",  desc: "Today's briefing" },
+    { label: "Portfolio",      icon: "💼", path: "/executive/portfolio",      desc: "Revenue & contracts" },
+    { label: "Risks",          icon: "⚠️", path: "/executive/risks",          desc: "Risk register" },
+    { label: "Exceptions",     icon: "🚨", path: "/executive/exceptions",     desc: "Items needing action" },
+    { label: "Scorecard",      icon: "🏆", path: "/executive/scorecard",      desc: "KPI performance" },
+    { label: "Predictive",     icon: "🔮", path: "/executive/predictive",     desc: "Forward-looking insights" },
+    { label: "Reports",        icon: "📊", path: "/executive/reports",        desc: "Executive reports" },
+    { label: "Command",        icon: "⚡", path: "/executive/command",        desc: "Command center" },
+    { label: "Workbench",      icon: "🛠️", path: "/executive/workbench",      desc: "Full workbench" },
   ];
 
   return (
-    <PageWrapper>
-      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{greeting} 👔</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
-          </p>
-          <p className="text-sm text-slate-600 mt-1">Triangle Black — Executive Summary</p>
-        </div>
-        <div className={`flex items-center gap-4 px-5 py-3 rounded-xl border ${platBg}`}>
-          <div className="text-center">
-            <div className={`text-4xl font-black ${platColor}`}>{platScore}</div>
-            <div className="text-xs font-semibold text-slate-500 mt-0.5">Platform Score</div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Dark header */}
+      <div className="bg-slate-900 border-b border-slate-800 px-6 py-6">
+        <div className="max-w-7xl mx-auto flex items-start justify-between">
+          <div>
+            <div className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Executive Center</div>
+            <h1 className="text-3xl font-black text-white">Executive Dashboard</h1>
+            <p className="text-slate-400 mt-1 text-sm">Real-time business intelligence and decision support</p>
           </div>
-          <div className={`border-l border-slate-200 pl-4`}>
-            <div className={`text-2xl font-bold ${twinColor}`}>{twinScore}/100</div>
-            <div className="text-xs text-slate-500">Digital Twin</div>
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <div className={`text-5xl font-black ${scoreColor}`}>{score}</div>
+              <div className="text-xs text-slate-400 mt-1">Platform Health</div>
+              <div className={`text-xs font-bold mt-0.5 ${scoreColor}`}>{twin?.health_label ?? "—"}</div>
+            </div>
+            <div className={`border rounded-2xl px-5 py-4 text-center ${riskColor === "emerald" ? "border-emerald-500/30 bg-emerald-500/10" : riskColor === "amber" ? "border-amber-500/30 bg-amber-500/10" : "border-red-500/30 bg-red-500/10"}`}>
+              <div className={`text-2xl font-black text-${riskColor}-400`}>{riskScore}</div>
+              <div className="text-xs text-slate-400 mt-0.5">Risk Score</div>
+              <div className={`text-xs font-bold text-${riskColor}-400`}>{riskLevel}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <SectionCard title={`Action Items (${alerts.length})`}>
-        <div className="space-y-2">
-          {alerts.map((a,i)=>(
-            <div key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${aC[a.urgency]||"bg-blue-50 border-blue-200 text-blue-800"}`}>
-              <span className="text-lg shrink-0">{a.icon}</span>
-              <p className="text-sm font-semibold flex-1">{a.text}</p>
-              {a.link&&<Link href={a.link} className="text-xs font-bold underline shrink-0">Review →</Link>}
-            </div>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+
+        {/* Top KPIs — 6 boxes */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          {[
+            { label: "Active Contracts",  value: d.commercial?.active_contracts ?? 0, sub: `${expiringContracts.length} expiring soon`,    color: "emerald", path: "/commercial/contracts" },
+            { label: "Revenue Collected", value: fmtEGP(totalRevenue),                sub: `${collectionRate}% collection rate`,             color: "amber",   path: "/invoices" },
+            { label: "Pending Revenue",   value: fmtEGP(pendingRevenue),              sub: `${invoices.filter(i=>i.status==="pending").length} invoices`,        color: "blue",    path: "/invoices" },
+            { label: "Critical WOs",      value: criticalWOs.length,                  sub: `${overdueWOs.length} overdue`,                   color: criticalWOs.length > 0 ? "red" : "emerald", path: "/executive/exceptions" },
+            { label: "WO Completion",     value: `${completionRate}%`,                sub: `${wos.filter(w=>w.status==="completed").length} completed`,          color: completionRate >= 80 ? "emerald" : "amber",  path: "/analytics/scorecards" },
+            { label: "Unread Alerts",     value: unreadNotifs.length,                 sub: `${totalPending} auto pending`,                   color: "purple",  path: "/inbox" },
+          ].map((k,i) => (
+            <button key={i} onClick={() => router.push(k.path)}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+              <div className="text-xs text-slate-500 mb-2 font-medium">{k.label}</div>
+              <div className={`text-2xl font-black text-${k.color}-500 group-hover:scale-105 transition-transform origin-left`}>{k.value}</div>
+              <div className="text-xs text-slate-400 mt-1 truncate">{k.sub}</div>
+            </button>
           ))}
         </div>
-      </SectionCard>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
-        <SectionCard title="Financial Summary">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
-              <div className="text-xl font-bold text-emerald-800">EGP {fmtNum(paidRev)}</div>
-              <div className="text-xs text-emerald-700 mt-0.5">Revenue Collected</div>
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center">
-              <div className="text-xl font-bold text-blue-800">{collRate}%</div>
-              <div className="text-xs text-blue-700 mt-0.5">Collection Rate</div>
-            </div>
-          </div>
-          {[
-            {l:"Total Invoiced",     v:`EGP ${fmtNum(totalRev)}`},
-            {l:"Outstanding",        v:`EGP ${fmtNum(totalRev-paidRev)}`},
-            {l:"Active Contract Value", v:`EGP ${fmtNum(activeVal)}`},
-            {l:"Active Contracts",   v:activeC},
-          ].map(r=>(
-            <div key={r.l} className="flex justify-between py-2 border-b border-slate-50 text-sm last:border-0">
-              <span className="text-slate-500">{r.l}</span>
-              <span className="font-semibold text-slate-800">{r.v}</span>
-            </div>
-          ))}
-          {invOverdue>0&&(
-            <div className="flex justify-between py-2 text-sm text-red-600">
-              <span className="font-medium">Overdue ({invOverdue} invoices)</span>
-              <span className="font-bold">EGP {fmtNum(overdueRev)}</span>
-            </div>
-          )}
-        </SectionCard>
+        {/* Main content */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-        <SectionCard title="Operations Summary">
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              {l:"Open WOs",    v:woOpen,     c:"text-blue-700"},
-              {l:"Critical",    v:woCritical, c:woCritical>0?"text-red-700":"text-emerald-700"},
-              {l:"Completion",  v:`${woCompRate}%`, c:woCompRate>=80?"text-emerald-700":"text-amber-700"},
-            ].map(k=>(
-              <div key={k.l} className="text-center bg-slate-50 rounded-xl p-3">
-                <div className={`text-2xl font-bold ${k.c}`}>{k.v}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{k.l}</div>
+          {/* Left — Action items */}
+          <div className="space-y-4">
+            {/* Critical issues */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold text-slate-900 dark:text-white">🚨 Executive Alerts</h2>
+                <button onClick={() => router.push("/executive/exceptions")} className="text-xs text-amber-500">All →</button>
               </div>
-            ))}
-          </div>
-          {[
-            {l:"Open Service Requests", v:srOpen},
-            {l:"Leads Won",             v:leadsWon},
-            {l:"Total Leads",           v:leads.length},
-            {l:"Contracts Expiring (30d)", v:expiring30},
-          ].map(r=>(
-            <div key={r.l} className="flex justify-between py-2 border-b border-slate-50 text-sm last:border-0">
-              <span className="text-slate-500">{r.l}</span>
-              <span className="font-semibold text-slate-800">{r.v}</span>
+              {criticalWOs.length === 0 && expiringContracts.length === 0 ? (
+                <div className="text-center py-6">
+                  <div className="text-3xl mb-2">✅</div>
+                  <div className="text-sm text-slate-400">No executive alerts</div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {criticalWOs.slice(0,4).map((w,i) => (
+                    <button key={i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
+                      className="w-full flex items-start gap-2.5 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 text-left hover:bg-red-100 transition-colors">
+                      <span className="text-xs font-black px-1.5 py-0.5 bg-red-500 text-white rounded mt-0.5 flex-shrink-0">CRIT</span>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">{w.title}</div>
+                        <div className="text-xs text-red-500">Work Order · {w.status}</div>
+                      </div>
+                    </button>
+                  ))}
+                  {expiringContracts.slice(0,3).map((c,i) => {
+                    const days = Math.ceil((new Date(c.end_date)-Date.now())/86400000);
+                    return (
+                      <button key={i} onClick={() => router.push(`/commercial/contracts/${c.id}`)}
+                        className="w-full flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 text-left hover:bg-amber-100 transition-colors">
+                        <span className="text-xs font-black px-1.5 py-0.5 bg-amber-500 text-white rounded mt-0.5 flex-shrink-0">{days}d</span>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-amber-900 dark:text-amber-300 truncate">{c.title||`Contract ${c.id?.slice(0,8)}`}</div>
+                          <div className="text-xs text-amber-500">Contract expiring · {fmtDate(c.end_date)}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          ))}
-        </SectionCard>
+
+            {/* Domain summary */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+              <h2 className="font-bold text-slate-900 dark:text-white mb-4 text-sm">Business Summary</h2>
+              <div className="space-y-2">
+                {[
+                  { label: "Total WOs",         value: wos.length,                           icon: "⚙️" },
+                  { label: "PM Plans",           value: d.maintenance?.pm_plans ?? 0,         icon: "📅" },
+                  { label: "Open Leads",         value: d.commercial?.open_leads ?? 0,        icon: "👤" },
+                  { label: "Purchase Requests",  value: d.procurement?.purchase_requests ?? 0, icon: "🛒" },
+                  { label: "Technicians",        value: d.platform?.technicians ?? 0,         icon: "👷" },
+                  { label: "Projects",           value: d.platform?.projects ?? 0,            icon: "🏗️" },
+                ].map((item,i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{item.icon}</span>
+                      <span className="text-sm text-slate-600 dark:text-slate-400">{item.label}</span>
+                    </div>
+                    <span className="font-black text-slate-900 dark:text-white">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Center + Right — Main intelligence */}
+          <div className="xl:col-span-2 space-y-4">
+
+            {/* Twin domains */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold text-slate-900 dark:text-white">Digital Twin — {score}/100 {twin?.health_label}</h2>
+                <button onClick={() => router.push("/executive/intelligence")} className="text-xs text-amber-500">Intelligence →</button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {(twin?.operational_domains ?? []).map((dom,i) => {
+                  const hasIssue = (dom.overdue??0)>0 || (dom.critical_open??0)>0 || (dom.below_min??0)>0;
+                  const vals = Object.entries(dom).filter(([k])=>k!=="domain").map(([k,v])=>`${k}: ${v}`).join(" · ");
+                  return (
+                    <div key={i} className={`rounded-xl border p-4 ${hasIssue?"bg-amber-50 border-amber-200 dark:bg-amber-900/20":"bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20"}`}>
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{dom.domain}</div>
+                        <div className={`text-xs font-black ${hasIssue?"text-amber-600":"text-emerald-600"}`}>{hasIssue?"⚠":"✓"}</div>
+                      </div>
+                      <div className="text-2xl font-black">{dom.total ?? "—"}</div>
+                      <div className="text-[9px] text-slate-400 mt-1 leading-tight truncate">{vals}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Finance snapshot */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold text-slate-900 dark:text-white">Finance Snapshot</h2>
+                <button onClick={() => router.push("/invoices")} className="text-xs text-amber-500">Full report →</button>
+              </div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                {[
+                  { label: "Paid",       count: d.finance?.paid??0,      color: "emerald" },
+                  { label: "Pending",    count: d.finance?.pending??0,    color: "amber" },
+                  { label: "Overdue",    count: d.finance?.overdue??0,    color: "red" },
+                  { label: "Cancelled",  count: d.finance?.cancelled??0,  color: "slate" },
+                ].map((s,i) => (
+                  <div key={i} className="text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
+                    <div className={`text-2xl font-black text-${s.color}-500`}>{s.count}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+                <div className="flex h-3">
+                  <div className="bg-emerald-500 h-3" style={{width:`${(d.finance?.paid||0)/(d.finance?.total_invoices||1)*100}%`}}/>
+                  <div className="bg-amber-400 h-3" style={{width:`${(d.finance?.pending||0)/(d.finance?.total_invoices||1)*100}%`}}/>
+                  <div className="bg-red-500 h-3" style={{width:`${(d.finance?.overdue||0)/(d.finance?.total_invoices||1)*100}%`}}/>
+                </div>
+              </div>
+              <div className="flex gap-4 mt-2 text-xs text-slate-400">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>Paid</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/>Pending</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block"/>Overdue</span>
+              </div>
+            </div>
+
+            {/* Executive sub-pages */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+              <h2 className="font-bold text-slate-900 dark:text-white mb-4 text-sm">Executive Views</h2>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {executiveNav.map((nav,i) => (
+                  <button key={i} onClick={() => router.push(nav.path)}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/20 border border-transparent hover:border-amber-200 transition-all group">
+                    <span className="text-xl">{nav.icon}</span>
+                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400 text-center group-hover:text-amber-600">{nav.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <SectionCard title="Quick Access">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {LINKS.map(a=>(
-            <Link key={a.href} href={a.href}>
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 hover:shadow-sm transition-all">
-                <span className={`${a.c} text-white text-xs px-2 py-1 rounded-lg`}>{a.icon}</span>
-                <span className="text-xs font-semibold text-slate-700">{a.label}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </SectionCard>
-    </PageWrapper>
+    </div>
   );
 }
