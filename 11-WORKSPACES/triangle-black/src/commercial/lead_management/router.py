@@ -17,5 +17,5 @@ def create_lead(payload: LeadCreate, db: Session = Depends(get_db), hotel_id: st
 @router.get('/')
 def list_leads(name: str = None, status: str = None, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
     lead_repo = LeadRepository(db)
-    leads = lead_repo.list_leads(hotel_id=hotel_id, name=name, status=status)
+    leads = lead_repo.list_leads(name=name, status=status)
     return [lead.__dict__ for lead in leads] if hasattr(leads[0], '__dict__') else leads

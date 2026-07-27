@@ -699,9 +699,9 @@ except Exception as e:
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
 def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
     """Get preventive maintenance plans"""
-    from src.core.database import SessionLocal
+    from src.core.database import get_db as _get_db_factory
     from sqlalchemy import text
-    db = SessionLocal()
+    db = next(_get_db_factory())
     try:
         q = """SELECT mp.id, mp.hotel_id, mp.name, mp.description,
                mp.frequency, mp.frequency_unit, mp.status,
@@ -732,9 +732,9 @@ def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
 @app.get("/api/v1/payment-tracking", tags=["finance"])
 def get_payment_tracking_v2(limit: int = 50):
     """Get payment tracking from invoices"""
-    from src.core.database import SessionLocal
+    from src.core.database import get_db as _get_db_factory
     from sqlalchemy import text
-    db = SessionLocal()
+    db = next(_get_db_factory())
     try:
         rows = db.execute(text(
             "SELECT id, invoice_number, amount, status, "
