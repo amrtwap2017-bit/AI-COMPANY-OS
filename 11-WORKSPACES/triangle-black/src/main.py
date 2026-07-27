@@ -756,7 +756,7 @@ def complete_work_order(wo_id: str, data: dict = {}):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-@app.get("/api/v1/work-orders/wo_asset_sync", tags=["work-orders"])
+@app.get("/api/v1/work-orders-sync/assets", tags=["work-orders"])
 def sync_wo_to_assets():
     """Sync all completed WOs to asset maintenance dates"""
     from sqlalchemy import text, create_engine
