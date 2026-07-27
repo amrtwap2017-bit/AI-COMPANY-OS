@@ -4,194 +4,164 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-  const [showCreate, setShowCreate] = useState(false);
-import { WorkspaceHeader } from "@/components/workspace/WorkspaceHeader";
 import { CreateModal } from "@/components/ui/CreateModal";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const STATUS_BADGE = {
-  pending:   "bg-amber-100 text-amber-700",
-  submitted: "bg-blue-100 text-blue-700",
-  approved:  "bg-emerald-100 text-emerald-700",
-  rejected:  "bg-red-100 text-red-700",
-  cancelled: "bg-slate-100 text-secondary",
+const STATUS_COLOR = {
+  pending:"#FBBF24", submitted:"#60A5FA", approved:"#34D399", rejected:"#F87171", cancelled:"#94A3B8"
 };
-const URGENCY_BADGE = {
-  urgent:  "bg-red-100 text-red-700 font-bold",
-  high:    "bg-orange-100 text-orange-700",
-  normal:  "bg-slate-100 text-secondary",
-  low:     "bg-slate-50 text-tertiary",
-};
+const URGENCY_COLOR = { urgent:"#F87171", high:"#FB923C", normal:"#94A3B8", low:"rgba(148,163,184,0.4)" };
+
+const prFields = [
+  {key:"title",         label:"Title",         type:"text",     required:true,  placeholder:"e.g. HVAC Filters Restock"},
+  {key:"justification", label:"Justification", type:"textarea", required:false, placeholder:"Why is this purchase needed?"},
+  {key:"department",    label:"Department",    type:"select",   required:true,  defaultValue:"Engineering", options:[{label:"Engineering",value:"Engineering"},{label:"Operations",value:"Operations"},{label:"Maintenance",value:"Maintenance"},{label:"Administration",value:"Administration"}]},
+  {key:"urgency",       label:"Urgency",       type:"select",   required:true,  defaultValue:"normal", options:[{label:"Urgent",value:"urgent"},{label:"High",value:"high"},{label:"Normal",value:"normal"},{label:"Low",value:"low"}]},
+  {key:"required_date", label:"Required By",   type:"date",     required:false},
+];
 
 export default function PurchaseRequestsPage() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [urgencyFilter, setUrgencyFilter] = useState("all");
+  const [search,      setSearch]      = useState("");
+  const [statusF,     setStatusF]     = useState("all");
+  const [urgencyF,    setUrgencyF]    = useState("all");
+  const [showCreate,  setShowCreate]  = useState(false);
 
   const { data: raw, isLoading } = useQuery(
-    ["pr-list"],
-    () => authFetch("/api/v1/purchase-requests/").then(r => r.json())
+    ["pr-list"], () => authFetch("/api/v1/purchase-requests/").then(r=>r.json())
   );
   const prs = toArr(raw);
 
+  const pending   = prs.filter(p=>p.status==="pending"||p.status==="submitted");
+  const approved  = prs.filter(p=>p.status==="approved");
+  const urgent    = prs.filter(p=>p.urgency==="urgent");
+  const autoPRs   = prs.filter(p=>p.title?.startsWith("Auto-PR:"));
+
   const filtered = prs.filter(p => {
-    const matchSearch  = !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.pr_number?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus  = statusFilter === "all" || p.status === statusFilter;
-    const matchUrgency = urgencyFilter === "all" || p.urgency === urgencyFilter;
-    return matchSearch && matchStatus && matchUrgency;
+    const ms = !search||p.title?.toLowerCase().includes(search.toLowerCase())||p.pr_number?.toLowerCase().includes(search.toLowerCase());
+    return ms && (statusF==="all"||p.status===statusF) && (urgencyF==="all"||p.urgency===urgencyF);
   });
 
-  const pending   = prs.filter(p => p.status === "pending");
-  const submitted = prs.filter(p => p.status === "submitted");
-  const approved  = prs.filter(p => p.status === "approved");
-  const urgent    = prs.filter(p => p.urgency === "urgent");
-  const autoPRs   = prs.filter(p => p.title?.startsWith("Auto-PR:"));
-
-  if (isLoading) return (
-    <div className="p-6 space-y-4 animate-pulse">
-      <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-48"/>
-      <div className="grid grid-cols-4 gap-4">
-        {[1,2,3,4].map(i=><div key={i} className="bg-white rounded-2xl border p-5 h-24"/>)}
-      </div>
-    </div>
-  );
+  if (isLoading) return <div className="tb-page"><div className="tb-section animate-pulse" style={{height:60}}/></div>;
 
   return (
-    <div className="tb-page">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-label-upper text-yellow-500 mb-1.5">Supply Chain</div>
-          <h1 className="text-page-title text-primary">Purchase Requests</h1>
-          <p className="text-secondary text-sm mt-1.5">{prs.length} total · {pending.length} pending · {urgent.length} urgent · {autoPRs.length} auto-generated</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => router.push("/workflows/launcher")}
-            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-surface border border-border text-slate-700 dark:text-tertiary hover:border-amber-400 transition-all">
-            ⚡ Auto-PR
-          </button>
-          <button onClick={() => router.push("/supply-chain/purchase-orders")}
-            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm transition-all">
-            View POs →
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-base">
+      <CreateModal open={showCreate} onClose={()=>setShowCreate(false)} title="Purchase Request" icon="🛒"
+        endpoint="/api/v1/purchase-requests/" fields={prFields} invalidateKeys={["pr-list"]}
+        successPath="/supply-chain/purchase-requests/"/>
 
-      {/* KPI strip */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {[
-          { label:"Pending",    value:pending.length,   color:pending.length>0?"amber":"slate",   filter:"pending" },
-          { label:"Submitted",  value:submitted.length, color:"blue",                              filter:"submitted" },
-          { label:"Approved",   value:approved.length,  color:"emerald",                           filter:"approved" },
-          { label:"Urgent",     value:urgent.length,    color:urgent.length>0?"red":"slate",       filter:"all" },
-          { label:"Auto-PR",    value:autoPRs.length,   color:"purple",                            filter:"all" },
-        ].map((k,i)=>(
-          <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter?"all":k.filter)}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${
-              statusFilter===k.filter ? `border-${k.color}-400 shadow-sm` : "border-border hover:border-amber-300"
-            }`}>
-            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs font-medium text-secondary mt-0.5">{k.label}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Urgent alert */}
-      {urgent.length > 0 && (
-        <div className="tb-alert tb-alert-critical rounded-2xl">
-          <div className="text-2xl">🚨</div>
-          <div className="flex-1">
-            <div className="font-bold text-red-800 dark:text-red-300">{urgent.length} Urgent Purchase Requests Need Immediate Approval</div>
-            <div className="text-sm text-red-600 mt-0.5">{urgent.slice(0,2).map(p=>p.title).join(" · ")}</div>
+      {/* HERO */}
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #161208 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-yellow-500 mb-1.5">Supply Chain</div>
+              <h1 className="tb-hero-title">Purchase Requests</h1>
+              <p className="tb-hero-description">{prs.length} total · {pending.length} pending · {urgent.length} urgent · {autoPRs.length} auto-generated</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={()=>router.push("/workflows/launcher")} className="tb-hero-btn tb-hero-btn--glass">⚡ Auto-PR</button>
+              <button onClick={()=>setShowCreate(true)} className="tb-hero-btn tb-hero-btn--primary">+ New PR</button>
+            </div>
           </div>
-          <button onClick={()=>setUrgencyFilter("urgent")}
-            className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-bold hover:bg-red-600 flex-shrink-0">
-            Show Urgent
-          </button>
+          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {[
+              {label:"Pending",   value:pending.length,  color:pending.length>0?"#FBBF24":"#94A3B8", f:"pending",   sub:"awaiting"},
+              {label:"Approved",  value:approved.length, color:"#34D399",                             f:"approved",  sub:"approved"},
+              {label:"Urgent",    value:urgent.length,   color:urgent.length>0?"#F87171":"#94A3B8",  f:"all",       sub:"priority"},
+              {label:"Auto-PR",   value:autoPRs.length,  color:"#A78BFA",                             f:"all",       sub:"system"},
+              {label:"Total",     value:prs.length,      color:"rgba(148,163,184,0.9)",               f:"all",       sub:"all time"},
+            ].map((k,i)=>{
+              const act=statusF===k.f&&(i<2||(i>=2&&statusF==="all"));
+              return (
+                <button key={i} onClick={()=>setStatusF(act&&i<2?"all":k.f)}
+                  className="tb-hero-kpi"
+                  style={{background:act&&i<2?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                  <div className="tb-hero-kpi-label">{k.label}</div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
-
-      {/* Filters */}
-      <div className="flex gap-3 flex-wrap">
-        <input value={search} onChange={e=>setSearch(e.target.value)}
-          placeholder="Search purchase requests..."
-          className="flex-1 min-w-48 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus"/>
-        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
-          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="submitted">Submitted</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <select value={urgencyFilter} onChange={e=>setUrgencyFilter(e.target.value)}
-          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
-          <option value="all">All Urgency</option>
-          <option value="urgent">Urgent</option>
-          <option value="high">High</option>
-          <option value="normal">Normal</option>
-          <option value="low">Low</option>
-        </select>
-        {(search||statusFilter!=="all"||urgencyFilter!=="all") && (
-          <button onClick={()=>{setSearch("");setStatusFilter("all");setUrgencyFilter("all");}}
-            className="px-3 py-2 text-xs text-secondary bg-surface border border-border rounded-xl">
-            Clear ×
-          </button>
-        )}
-        <div className="text-xs text-tertiary self-center">{filtered.length} requests</div>
       </div>
 
-      {/* PR table */}
-      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-3">🛒</div>
-            <div className="font-bold text-primary text-lg">No purchase requests found</div>
-            <div className="text-tertiary text-sm mt-1">Run automation engine to auto-generate PRs for low stock</div>
-            <button onClick={()=>router.push("/workflows/launcher")}
-              className="mt-4 px-5 py-2 bg-brand text-inverse rounded-xl text-sm font-bold hover:bg-amber-700">
-              ⚡ Run Automation
+      <div className="tb-canvas">
+        {urgent.length > 0 && (
+          <div className="tb-ai-insight" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
+            <div className="tb-ai-insight-icon" style={{background:"rgba(239,68,68,0.15)"}}>🚨</div>
+            <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
+              {urgent.length} Urgent Purchase Request{urgent.length>1?"s":""} Need Immediate Approval — {urgent.slice(0,2).map(p=>p.title).join(" · ")}
+            </div>
+            <button onClick={()=>setUrgencyF("urgent")} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
+              Show Urgent
             </button>
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-[1fr_120px_100px_100px_110px_100px] bg-base-alt dark:bg-surface-alt px-5 py-3 text-xs font-semibold text-secondary uppercase tracking-wider">
-              <div>Request</div>
-              <div>PR Number</div>
-              <div className="text-center">Status</div>
-              <div className="text-center">Urgency</div>
-              <div>Department</div>
-              <div className="text-center">Required By</div>
-            </div>
-            <div className="divide-y divide-y-border">
-              {filtered.map((pr,i)=>(
-                <button key={i} onClick={()=>router.push(`/supply-chain/purchase-requests/${pr.id}`)}
-                  className="w-full grid grid-cols-[1fr_120px_100px_100px_110px_100px] items-center px-5 py-4 text-left hover:bg-brand-light/20 transition-colors group">
-                  <div className="min-w-0 pr-4">
-                    <div className="font-semibold text-sm text-primary truncate group-hover:text-amber-600">{pr.title || pr.pr_number}</div>
-                    <div className="text-xs text-tertiary mt-0.5">{pr.requester || "—"} · {pr.justification?.slice(0,50) || "—"}</div>
-                  </div>
-                  <div className="text-xs font-mono text-secondary truncate">{pr.pr_number || "—"}</div>
-                  <div className="text-center">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[pr.status]||"bg-slate-100 text-secondary"}`}>
-                      {pr.status || "—"}
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${URGENCY_BADGE[pr.urgency]||"bg-slate-100 text-secondary"}`}>
-                      {pr.urgency || "—"}
-                    </span>
-                  </div>
-                  <div className="text-xs text-secondary truncate">{pr.department || "—"}</div>
-                  <div className="text-center text-xs text-tertiary">{fmtDate(pr.required_date)}</div>
-                </button>
-              ))}
-            </div>
-          </>
         )}
+
+        <div className="tb-flex-gap-3 flex-wrap">
+          <div className="tb-search" style={{maxWidth:320}}>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search purchase requests..."
+              style={{background:"transparent",border:"none",outline:"none",flex:1,fontSize:"0.8125rem",color:"var(--color-text-1)"}}/>
+          </div>
+          <div className="tb-flex-gap-2">
+            {["all","pending","submitted","approved","rejected"].map(s=>(
+              <button key={s} onClick={()=>setStatusF(s)} className={`tb-pill ${statusF===s?"tb-pill--active":""}`}>
+                {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
+              </button>
+            ))}
+          </div>
+          <select value={urgencyF} onChange={e=>setUrgencyF(e.target.value)} className="tb-pill" style={{cursor:"pointer"}}>
+            <option value="all">All Urgency</option>
+            {["urgent","high","normal","low"].map(u=><option key={u} value={u}>{u.charAt(0).toUpperCase()+u.slice(1)}</option>)}
+          </select>
+          {(search||statusF!=="all"||urgencyF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");setUrgencyF("all");}} className="tb-pill">Clear ×</button>}
+          <span className="text-xs text-tertiary ml-auto">{filtered.length} requests</span>
+        </div>
+
+        <div className="tb-table">
+          {filtered.length === 0 ? (
+            <div className="tb-empty">
+              <div className="tb-empty-icon">🛒</div>
+              <div className="tb-empty-title">No purchase requests found</div>
+              <div className="tb-empty-desc">Run automation to auto-generate PRs for low stock</div>
+              <button onClick={()=>router.push("/workflows/launcher")} className="tb-hero-btn tb-hero-btn--primary mt-4">⚡ Run Automation</button>
+            </div>
+          ) : (
+            <>
+              <div className="tb-table-head" style={{gridTemplateColumns:"1fr 120px 100px 100px 110px 100px"}}>
+                {["Request","PR Number","Status","Urgency","Department","Required By"].map((h,i)=>(
+                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                ))}
+              </div>
+              {filtered.map((pr,i)=>{
+                const sc = STATUS_COLOR[pr.status]||"#94A3B8";
+                const uc = URGENCY_COLOR[pr.urgency]||"rgba(148,163,184,0.4)";
+                return (
+                  <button key={i} onClick={()=>router.push(`/supply-chain/purchase-requests/${pr.id}`)}
+                    className="tb-table-row"
+                    style={{gridTemplateColumns:"1fr 120px 100px 100px 110px 100px"}}>
+                    <div className="min-w-0 pr-4">
+                      <div className="text-sm font-semibold text-primary truncate">{pr.title||pr.pr_number}</div>
+                      <div className="text-xs text-tertiary mt-0.5">{pr.requester||"—"}</div>
+                    </div>
+                    <div className="text-center text-xs font-mono text-secondary">{pr.pr_number||"—"}</div>
+                    <div className="text-center">
+                      <span className="tb-badge" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`,fontSize:"0.625rem"}}>{pr.status||"—"}</span>
+                    </div>
+                    <div className="text-center">
+                      <span className="tb-badge" style={{background:`${uc}18`,color:uc,border:`1px solid ${uc}30`,fontSize:"0.625rem"}}>{pr.urgency||"—"}</span>
+                    </div>
+                    <div className="text-center text-xs text-secondary">{pr.department||"—"}</div>
+                    <div className="text-center text-xs text-secondary">{fmtDate(pr.required_date)}</div>
+                  </button>
+                );
+              })}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
