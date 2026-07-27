@@ -2,62 +2,67 @@
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || d?.signals || [];
-
-export default function ConnectSignals() {
-  const { data, isLoading } = useQuery(
-    ["connect-signals"],
-    () => authFetch("/api/v1/ai/signals").then(r => r.json())
-  );
-  const signals = toArr(data);
-
-  if (isLoading) return <div className="p-6 text-gray-400">Loading signals...</div>;
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function ConnectSignalsPage() {
+  const router = useRouter();
+  const { data: sigRaw }  = useQuery(["cs-signals"], () => authFetch("/api/v1/ai/signals").then(r=>r.json()));
+  const { data: twin }    = useQuery(["cs-twin"],    () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: actRaw }  = useQuery(["cs-act"],     () => authFetch("/api/v1/activity-feed?limit=20").then(r=>r.json()));
+  const signals = toArr(sigRaw?.signals||sigRaw);
+  const score = twin?.health_score||0;
+  const activities = actRaw?.activities||[];
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Connected Signals</h1>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Total Signals</div>
-          <div className="text-3xl font-bold">{signals.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-red-200">
-          <div className="text-sm text-red-500">Critical</div>
-          <div className="text-3xl font-bold text-red-600">{signals.filter((s: any) => s.severity === "critical" || s.priority === "critical").length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-amber-200">
-          <div className="text-sm text-amber-500">Warnings</div>
-          <div className="text-3xl font-bold text-amber-600">{signals.filter((s: any) => s.severity === "warning" || s.priority === "high").length}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">AI · Signals</div>
+          <h1 className="tb-hero-title">Connect Signals</h1>
+          <p className="tb-hero-description">Real-time AI signals, platform events, and operational intelligence</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Active Signals",value:signals.length,color:"#60A5FA"},{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Events",value:activities.length,color:"#A78BFA"},{label:"Status",value:"Live",color:"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="bg-white dark:bg-zinc-900 rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-zinc-800">
-            <tr>
-              <th className="text-left p-3">Signal</th>
-              <th className="text-left p-3">Type</th>
-              <th className="text-left p-3">Severity</th>
-              <th className="text-left p-3">Domain</th>
-            </tr>
-          </thead>
-          <tbody>
-            {signals.map((s: any, i: number) => (
-              <tr key={s.id || i} className="border-t hover:bg-gray-50 dark:hover:bg-zinc-800">
-                <td className="p-3 font-medium">{s.message || s.title || s.description || "—"}</td>
-                <td className="p-3 text-gray-500">{s.type || s.signal_type || "—"}</td>
-                <td className="p-3">
-                  <span className={`px-2 py-0.5 rounded text-xs ${
-                    (s.severity || s.priority) === "critical" ? "bg-red-100 text-red-700" :
-                    (s.severity || s.priority) === "high" || (s.severity || s.priority) === "warning" ? "bg-orange-100 text-orange-700" :
-                    "bg-gray-100 text-gray-600"
-                  }`}>{s.severity || s.priority || "info"}</span>
-                </td>
-                <td className="p-3 text-gray-500">{s.domain || s.category || "—"}</td>
-              </tr>
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>AI Signals</div></div>
+            <div className="space-y-2 mt-3">
+              {signals.length===0 ? <div className="tb-empty" style={{padding:"24px 0"}}><div className="tb-empty-icon" style={{fontSize:"2rem"}}>📡</div><div className="tb-empty-desc">No active signals</div></div>
+              : signals.slice(0,8).map((sig,i)=>(
+                <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-base-alt">
+                  <span style={{fontSize:"1rem"}}>🔮</span>
+                  <div className="flex-1 min-w-0"><div className="text-xs font-semibold text-primary truncate">{sig.title||sig.message||"Signal"}</div><div className="text-xs text-tertiary">{sig.type||"AI"}</div></div>
+                  <span className="tb-badge" style={{fontSize:"0.5rem",color:"#A78BFA"}}>{sig.severity||"info"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Events</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
+            <div className="space-y-2 mt-3">
+              {activities.slice(0,8).map((act,i)=>(
+                <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-base-alt transition-colors">
+                  <span>{act.icon}</span><div className="flex-1 min-w-0"><div className="text-xs text-secondary truncate">{act.title}</div></div>
+                </div>
+              ))}
+              {activities.length===0&&<div className="text-xs text-tertiary text-center py-4">No recent events</div>}
+            </div>
+          </div>
+        </div>
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">AI Platform</div>
+          <div className="tb-grid-4">
+            {[{label:"AI Hub",icon:"🤖",path:"/hub"},{label:"Knowledge Graph",icon:"🔷",path:"/graph"},{label:"Intelligence",icon:"🧠",path:"/executive/intelligence"},{label:"Digital Twin",icon:"🔷",path:"/executive"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     </div>
   );

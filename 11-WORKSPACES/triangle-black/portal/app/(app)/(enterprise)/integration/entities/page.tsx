@@ -2,70 +2,55 @@
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-
-export default function IntegrationEntities() {
-  const queries = [
-    { key: "ie-assets", api: "/api/v1/assets/", label: "Assets", domain: "Maintenance" },
-    { key: "ie-wos", api: "/api/v1/work-orders/", label: "Work Orders", domain: "Operations" },
-    { key: "ie-techs", api: "/api/v1/technicians/", label: "Technicians", domain: "Operations" },
-    { key: "ie-srs", api: "/api/v1/service-requests/", label: "Service Requests", domain: "Operations" },
-    { key: "ie-leads", api: "/api/v1/leads/", label: "Leads", domain: "Commercial" },
-    { key: "ie-contracts", api: "/api/v1/contracts/", label: "Contracts", domain: "Commercial" },
-    { key: "ie-invoices", api: "/api/v1/invoices/", label: "Invoices", domain: "Finance" },
-    { key: "ie-prs", api: "/api/v1/purchase-requests/", label: "Purchase Requests", domain: "Procurement" },
-    { key: "ie-pos", api: "/api/v1/purchase-orders/", label: "Purchase Orders", domain: "Procurement" },
-    { key: "ie-inv", api: "/api/v1/inventory-items/", label: "Inventory Items", domain: "Inventory" },
-    { key: "ie-pms", api: "/api/v1/maintenance/pm-plans/", label: "PM Plans", domain: "Maintenance" },
-    { key: "ie-projects", api: "/api/v1/projects/", label: "Projects", domain: "Projects" },
-    { key: "ie-suppliers", api: "/api/v1/suppliers/", label: "Suppliers", domain: "Procurement" },
-    { key: "ie-notifs", api: "/api/v1/notifications/", label: "Notifications", domain: "Platform" },
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function IntegrationEntitiesPage() {
+  const router = useRouter();
+  const { data: assetRaw } = useQuery(["ie-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: woRaw }    = useQuery(["ie-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: contRaw }  = useQuery(["ie-conts"],  () => authFetch("/api/v1/contracts/").then(r=>r.json()));
+  const assets = toArr(assetRaw); const wos = toArr(woRaw); const contracts = toArr(contRaw);
+  const entities = [
+    {name:"Assets",       count:assets.length,     api:"/api/v1/assets/",           icon:"⚙️",  path:"/maintenance/assets"},
+    {name:"Work Orders",  count:wos.length,         api:"/api/v1/work-orders/",      icon:"🔧", path:"/operations/work-orders"},
+    {name:"Contracts",    count:contracts.length,   api:"/api/v1/contracts/",        icon:"📄", path:"/commercial/contracts"},
+    {name:"Leads",        count:null,               api:"/api/v1/leads/",            icon:"👤", path:"/commercial/leads"},
+    {name:"Technicians",  count:null,               api:"/api/v1/technicians/",      icon:"👷", path:"/operations/technicians"},
+    {name:"PM Plans",     count:null,               api:"/api/v1/maintenance/pm-plans/",icon:"📅",path:"/maintenance/pm-plans"},
+    {name:"Suppliers",    count:null,               api:"/api/v1/suppliers/",        icon:"🏭", path:"/supply-chain/suppliers"},
+    {name:"Invoices",     count:null,               api:"/api/v1/invoices/",         icon:"💰", path:"/invoices"},
   ];
-
-  const results = queries.map(q => {
-    const { data, isLoading } = useQuery([q.key], () => authFetch(q.api).then(r => r.json()));
-    return { ...q, count: toArr(data).length, loading: isLoading };
-  });
-
-  const domains = [...new Set(results.map(r => r.domain))];
-
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Platform Entities</h1>
-      <p className="text-gray-500">All connected data entities across the platform</p>
-      <div className="grid grid-cols-4 gap-4 mb-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Entity Types</div>
-          <div className="text-3xl font-bold">{results.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Total Records</div>
-          <div className="text-3xl font-bold">{results.reduce((s, r) => s + r.count, 0).toLocaleString()}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Domains</div>
-          <div className="text-3xl font-bold">{domains.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Connected APIs</div>
-          <div className="text-3xl font-bold text-green-600">{results.filter(r => r.count > 0).length}</div>
-        </div>
-      </div>
-      {domains.map(domain => (
-        <div key={domain} className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wider text-gray-500 mb-3">{domain}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {results.filter(r => r.domain === domain).map(r => (
-              <div key={r.key} className="border rounded p-3">
-                <div className="text-sm font-medium">{r.label}</div>
-                <div className="text-2xl font-bold mt-1">{r.loading ? "..." : r.count}</div>
-                <div className="text-xs text-gray-400 mt-1 font-mono truncate">{r.api}</div>
-              </div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B2E 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Integration</div>
+          <h1 className="tb-hero-title">Entity Catalog</h1>
+          <p className="tb-hero-description">Platform entity registry and API documentation</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Entities",value:entities.length,color:"#F1F5F9"},{label:"Assets",value:assets.length,color:"#60A5FA"},{label:"Work Orders",value:wos.length,color:"#FBBF24"},{label:"Contracts",value:contracts.length,color:"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
         </div>
-      ))}
+      </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Entity Registry</div>
+          <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
+            <div className="tb-table-head" style={{gridTemplateColumns:"1fr 80px 1fr"}}>
+              {["Entity","Count","API Endpoint"].map((h,i)=><div key={i} className="tb-table-head-cell" style={{textAlign:i===1?"center":"left"}}>{h}</div>)}
+            </div>
+            {entities.map((e,i)=>(
+              <button key={i} onClick={()=>router.push(e.path)} className="tb-table-row" style={{gridTemplateColumns:"1fr 80px 1fr"}}>
+                <div className="flex items-center gap-2"><span>{e.icon}</span><span className="text-sm font-medium text-primary">{e.name}</span></div>
+                <div className="text-center text-sm font-bold" style={{color:"#60A5FA"}}>{e.count??"-"}</div>
+                <div className="text-xs text-tertiary font-mono">{e.api}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

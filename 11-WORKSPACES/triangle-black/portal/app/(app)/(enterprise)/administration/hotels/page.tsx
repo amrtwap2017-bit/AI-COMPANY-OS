@@ -1,64 +1,46 @@
 "use client";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { useState } from "react";
-
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-
-const AdministrationHotelsPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const { data: hotelsData, isLoading, isError } = useQuery(
-    ["hotels"],
-    () => authFetch("/api/v1/assets/?limit=100").then(r => r.json()),
-    { refetchInterval: 60000 }
-  );
-
-  const filteredHotels = toArr(hotelsData).filter((hotel) =>
-    hotel.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error fetching data</div>;
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function HotelsPage() {
+  const router = useRouter();
+  const { data: siteRaw, isLoading } = useQuery(["hotels-sites"], () => authFetch("/api/v1/sites/").then(r=>r.json()));
+  const { data: assetRaw } = useQuery(["hotels-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const sites = toArr(siteRaw); const assets = toArr(assetRaw);
   return (
-    <div>
-      <input
-        type="text"
-        placeholder="Search hotels..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
-        {/* KPI Grid */}
-        {filteredHotels.slice(0, 4).map((hotel) => (
-          <div key={hotel.id}>
-            <h3>{hotel.name}</h3>
-            <p>{hotel.address}</p>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B2E 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Administration</div>
+          <h1 className="tb-hero-title">Hotels & Sites</h1>
+          <p className="tb-hero-description">{sites.length} sites · {assets.length} assets registered</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Sites",value:sites.length,color:"#F1F5F9"},{label:"Assets",value:assets.length,color:"#60A5FA"},{label:"Active",value:sites.filter(s=>s.status==="active"||!s.status).length,color:"#34D399"},{label:"Categories",value:[...new Set(assets.map(a=>a.category).filter(Boolean))].length,color:"#A78BFA"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Capacity</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredHotels.map((hotel) => (
-            <tr key={hotel.id}>
-              <td>{hotel.name}</td>
-              <td>{hotel.address}</td>
-              <td>{hotel.capacity}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-flex-between mb-4"><div className="text-sm text-secondary">{sites.length} sites</div><button onClick={()=>router.push("/operations/sites")} className="tb-section-link">Sites →</button></div>
+          {isLoading ? <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          : sites.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">🏨</div><div className="tb-empty-title">No sites configured</div></div>
+          : <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            {sites.map((site,i)=>{
+              const siteAssets = assets.filter(a=>a.site_id===site.id);
+              return (
+                <button key={i} onClick={()=>router.push("/administration/hotels/"+site.id)} className="tb-section text-left hover:border-brand transition-colors">
+                  <div className="flex items-center gap-3 mb-2"><span style={{fontSize:"1.5rem"}}>🏨</span><div><div className="text-sm font-bold text-primary">{site.name||"—"}</div><div className="text-xs text-tertiary">{site.location||site.city||"Egypt"}</div></div></div>
+                  <div className="text-xs text-tertiary">{siteAssets.length} assets</div>
+                </button>
+              );
+            })}
+          </div>}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default AdministrationHotelsPage;
+}
