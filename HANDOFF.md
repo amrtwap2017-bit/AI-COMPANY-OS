@@ -151,3 +151,29 @@ for api in ["/api/v1/leads/","/api/v1/work-orders/","/api/v1/maintenance/pm-plan
     r = requests.get(f"http://localhost:8030{api}",headers=H,timeout=5)
     print(f"  {api}: {r.status_code}")
 EOF
+
+## SPRINT 176 STATE — 2026-07-27
+
+### Detail View Coverage Complete (Sprints 171-175)
+All 9 major entities now have: list page + detail page + edit + status actions + clickable rows
+
+| Entity | List | Create | Detail | Edit | Status Actions |
+|---|---|---|---|---|---|
+| Work Orders | YES | YES | YES | YES | Start/Complete/Cancel |
+| Service Requests | YES | YES | YES | YES | Start/Resolve/Close |
+| Leads | YES | YES | YES | YES | Pipeline stages |
+| Assets | YES | YES | YES | YES | Operational/Fault |
+| Contracts | YES | YES | YES | YES | Activate/Complete |
+| Invoices | YES | YES | YES | YES | Send/Pay/Overdue |
+| Purchase Requests | YES | YES | YES | YES | Submit/Approve/Reject |
+| PM Plans | YES | YES | YES | YES | Active/Complete |
+| Projects | YES | YES | YES | YES | Active/Planning |
+
+### Backend Architecture Gaps (per ETO Plan Phase 7)
+- main.py = 700+ lines, no service layer, no repository layer
+- All business logic inside router.py files directly
+- No automated tests
+- No RBAC implementation
+
+### Next: Sprint 177 — RBAC
+JWT tokens already work. Need to add roles to users and enforce permissions per endpoint.
