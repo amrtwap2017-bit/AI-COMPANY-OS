@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
 import { Button } from "@/components/ui/Button";
+import { useRole } from "@/lib/hooks/useCurrentUser";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -15,6 +16,7 @@ const S = {draft:"bg-slate-100 text-slate-600",sent:"bg-blue-100 text-blue-800",
 const STATUSES = ["all","draft","sent","paid","overdue","cancelled"];
 
 export default function InvoicesPage() {
+  const { canCreate, isAdmin } = useRole();
   const [q,  setQ]  = useState("");
   const [sf, setSf] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
@@ -80,7 +82,7 @@ export default function InvoicesPage() {
         title="Invoices"
         subtitle={`${total} invoices · EGP ${fmtNum(totalVal)} total · ${collRate}% collected`}
         breadcrumbs={[{label:"Commercial",href:"/commercial"},{label:"Invoices"}]}
-        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Invoice</Button>}
+        actions={canCreate ? <Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Invoice</Button> : undefined}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">

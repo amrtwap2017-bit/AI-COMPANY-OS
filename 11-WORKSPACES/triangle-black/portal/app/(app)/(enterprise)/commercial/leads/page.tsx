@@ -6,6 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState, Modal } from "@/components/ui";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useRole } from "@/lib/hooks/useCurrentUser";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0,10); } };
@@ -18,6 +19,7 @@ const PRIORITIES = ["all","critical","high","medium","low"];
 const SOURCES   = ["all","web","direct","referral","linkedin","cold_call","event"];
 
 export default function LeadsPage() {
+  const { canCreate } = useRole();
   const [sf, setSf] = useState("all");
   const [pf, setPf] = useState("all");
   const [src, setSrc] = useState("all");

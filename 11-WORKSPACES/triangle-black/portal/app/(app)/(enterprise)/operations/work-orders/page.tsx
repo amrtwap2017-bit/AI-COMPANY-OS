@@ -6,6 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useRole } from "@/lib/hooks/useCurrentUser";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -17,6 +18,7 @@ const PRIORITIES = ["all","critical","high","medium","low"];
 const TYPES      = ["corrective","preventive","inspection","emergency"];
 
 export default function WorkOrdersPage() {
+  const { canCreate, isAdmin } = useRole();
   const [q,  setQ]  = useState("");
   const [sf, setSf] = useState("all");
   const [pf, setPf] = useState("all");
@@ -74,7 +76,7 @@ export default function WorkOrdersPage() {
         title="Work Orders"
         subtitle={`${total} total · ${open} open · ${critical} critical`}
         breadcrumbs={[{label:"Operations",href:"/operations"},{label:"Work Orders"}]}
-        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Work Order</Button>}
+        actions={canCreate ? <Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Work Order</Button> : undefined}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-5">

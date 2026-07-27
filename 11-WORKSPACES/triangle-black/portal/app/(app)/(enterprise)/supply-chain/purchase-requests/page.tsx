@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
 import { Button } from "@/components/ui/Button";
+import { useRole } from "@/lib/hooks/useCurrentUser";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -17,6 +18,7 @@ const STATUSES   = ["all","draft","submitted","approved","rejected","ordered","c
 const PRIORITIES = ["all","critical","high","medium","low"];
 
 export default function PurchaseRequestsPage() {
+  const { canCreate, canApprove } = useRole();
   const [q,  setQ]  = useState("");
   const [sf, setSf] = useState("all");
   const [pf, setPf] = useState("all");
@@ -76,7 +78,7 @@ export default function PurchaseRequestsPage() {
         title="Purchase Requests"
         subtitle={`${total} total · ${pending} pending · ${approved} approved`}
         breadcrumbs={[{label:"Supply Chain",href:"/supply-chain"},{label:"Purchase Requests"}]}
-        actions={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Request</Button>}
+        actions={canCreate ? <Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>+ New Request</Button> : undefined}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
