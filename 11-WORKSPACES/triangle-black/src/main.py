@@ -727,3 +727,55 @@ def get_payment_tracking_v2(limit: int = 50):
             rows = db.execute(text("SELECT id,invoice_number,amount,status,created_at FROM invoices ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
             return [dict(r._mapping) for r in rows]
         except: return []
+
+
+# ── Sprint 150: WO Completion → Asset Sync ───────────────────────────────────
+@app.post("/api/v1/work-orders/{wo_id}/complete", tags=["work-orders"])
+def complete_work_order(wo_id: str, data: dict = {}):
+    """Mark WO complete and sync to asset last_maintenance_date"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            now = datetime.datetime.utcnow()
+            # Update WO status
+            db.execute(text("""
+                UPDATE work_orders SET status='completed', completed_at=:now,
+                notes=:notes, updated_at=:now WHERE id=:id
+            """), {"id": wo_id, "now": now, "notes": data.get("notes","Completed")})
+            # Sync to asset
+            db.execute(text("""
+                UPDATE assets SET last_maintenance_date=:now,
+                next_maintenance_date=:now + INTERVAL '90 days', updated_at=:now
+                WHERE id=(SELECT asset_id FROM work_orders WHERE id=:id AND asset_id IS NOT NULL LIMIT 1)
+            """), {"id": wo_id, "now": now})
+            db.commit()
+            return {"success": True, "wo_id": wo_id, "completed_at": now.isoformat()}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+@app.get("/api/v1/work-orders/wo_asset_sync", tags=["work-orders"])
+def sync_wo_to_assets():
+    """Sync all completed WOs to asset maintenance dates"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            result = db.execute(text("""
+                UPDATE assets a SET
+                    last_maintenance_date = wo.completed_at,
+                    next_maintenance_date = wo.completed_at + INTERVAL '90 days'
+                FROM (SELECT DISTINCT ON (asset_id) asset_id, completed_at
+                      FROM work_orders WHERE status='completed' AND completed_at IS NOT NULL
+                      ORDER BY asset_id, completed_at DESC) wo
+                WHERE a.id = wo.asset_id
+                RETURNING a.id
+            """))
+            db.commit()
+            return {"synced": result.rowcount}
+        except Exception as e:
+            return {"error": str(e)}
