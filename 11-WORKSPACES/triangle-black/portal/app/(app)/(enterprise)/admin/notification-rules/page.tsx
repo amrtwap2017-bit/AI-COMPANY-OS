@@ -14,7 +14,7 @@ const TYPE_META = {
 };
 export default function NotificationRulesPage() {
   const router = useRouter();
-  const { data: notifRaw } = useQuery(["nr-notifs"], () => authFetch("/api/v1/notifications/?limit=200").then(r=>r.json()));
+  const { data: notifRaw } = useQuery(["nr-notifs"], () => authFetch("/api/v1/notifications-portal?limit=200").then(r=>r.json()));
   const notifs = toArr(notifRaw);
   const types = [...new Set(notifs.map(n=>n.type).filter(Boolean))];
   return (

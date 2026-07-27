@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function InboxPresetsPage() {
   const router = useRouter();
-  const { data: notifRaw } = useQuery(["ip-notifs"], () => authFetch("/api/v1/notifications/?limit=100").then(r=>r.json()));
+  const { data: notifRaw } = useQuery(["ip-notifs"], () => authFetch("/api/v1/notifications-portal?limit=100").then(r=>r.json()));
   const notifs = toArr(notifRaw);
   const presets = [
     {label:"Critical Alerts",    filter:"critical",    icon:"🚨", color:"#F87171", desc:"Work orders and PM plans requiring immediate action"},

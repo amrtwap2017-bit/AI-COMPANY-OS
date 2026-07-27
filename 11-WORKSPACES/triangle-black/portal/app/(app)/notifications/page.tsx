@@ -35,7 +35,7 @@ export default function NotificationsPage() {
 
   const { data: notifRaw, isLoading } = useQuery(
     ["notif-list"],
-    () => authFetch("/api/v1/notifications/?limit=200").then(r => r.json()),
+    () => authFetch("/api/v1/notifications-portal?limit=200").then(r => r.json()),
     { refetchInterval: 30000 }
   );
 
