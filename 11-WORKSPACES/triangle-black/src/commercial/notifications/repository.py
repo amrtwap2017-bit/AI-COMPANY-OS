@@ -33,7 +33,7 @@ class NotificationRepository:
         self,
         role: str,
         unread_only: bool = False,
-        limit: int = 50,
+        limit: int = 500,
     ) -> list[Notification]:
         # admin sees all notifications regardless of recipient_role
         q = self.db.query(Notification)
