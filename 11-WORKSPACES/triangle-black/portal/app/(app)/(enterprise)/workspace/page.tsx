@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ActivityFeed } from "@/components/ui/ActivityFeed";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
