@@ -31,13 +31,13 @@ export default function LeadDetailPage() {
   const { data: allContractsRaw }= useQuery(["contracts-leads"],() => authFetch("/api/v1/contracts/").then(r=>r.json()));
 
   if (isLoading) return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
       <div style={{background:"#0F172A",height:240}} className="animate-pulse"/>
     </div>
   );
 
   if (isError || !leadData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen flex items-center justify-center" className="bg-base">
       <div style={{textAlign:"center"}}>
         <div className="tb-empty-icon">👤</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Lead Not Found</div>
@@ -67,7 +67,7 @@ export default function LeadDetailPage() {
   const stageIndex = PIPELINE_STAGES.indexOf(lead.status);
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       {/* DARK HEADER */}
       <div style={{background:`linear-gradient(135deg, #0F172A 0%, ${isWon?"#0A1F14":isHot?"#1A1208":"#0F172A"} 100%)`,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>

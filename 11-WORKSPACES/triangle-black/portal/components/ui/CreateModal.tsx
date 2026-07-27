@@ -124,7 +124,7 @@ export function CreateModal({
         {/* Success state */}
         {done && created ? (
           <div style={{padding:32,textAlign:"center"}}>
-            <div style={{fontSize:"3rem",marginBottom:16}}>✅</div>
+            <div className="tb-empty-icon">✅</div>
             <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:8}}>{title} Created!</div>
             <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginBottom:24}}>
               {created.title || created.name || created.invoice_number || created.pr_number || "Record"} has been created successfully.

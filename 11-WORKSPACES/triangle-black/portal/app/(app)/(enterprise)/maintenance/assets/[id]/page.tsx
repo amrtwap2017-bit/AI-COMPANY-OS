@@ -33,13 +33,13 @@ export default function AssetDetailPage() {
   const { data: allPMsRaw }    = useQuery(["all-pms-detail"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
 
   if (isLoading) return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
       <div style={{background:"#0F172A",height:240}} className="animate-pulse"/>
     </div>
   );
 
   if (isError || !assetData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen flex items-center justify-center" className="bg-base">
       <div style={{textAlign:"center"}}>
         <div className="tb-empty-icon">🏗️</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Asset Not Found</div>
@@ -71,7 +71,7 @@ export default function AssetDetailPage() {
   const overduePMs = assetPMs.filter(p => p.next_due_ts && new Date(p.next_due_ts) < now);
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       {/* DARK HEADER */}
       <div style={{background:`linear-gradient(135deg, #0F172A 0%, ${isFault?"#1A0A0A":"#0F1A16"} 100%)`,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>

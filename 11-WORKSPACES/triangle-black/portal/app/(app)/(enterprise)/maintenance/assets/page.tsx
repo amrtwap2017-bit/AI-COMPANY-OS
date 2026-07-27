@@ -41,7 +41,7 @@ export default function AssetsPage() {
   const hasFilters = search || catFilter!=="all" || critFilter!=="all";
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       <WorkspaceHeader
         domain="Maintenance"
@@ -118,7 +118,7 @@ export default function AssetsPage() {
             <div className="tb-empty">
               <div className="tb-empty-icon">🏗️</div>
               <div className="tb-empty-title">No assets found</div>
-              <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginTop:8}}>Try adjusting your filters</div>
+              <div className="tb-empty-desc">Try adjusting your filters</div>
             </div>
           ) : (
             <>

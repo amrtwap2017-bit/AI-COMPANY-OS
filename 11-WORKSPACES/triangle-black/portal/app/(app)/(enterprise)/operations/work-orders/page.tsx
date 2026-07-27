@@ -57,13 +57,13 @@ export default function WorkOrdersPage() {
   ];
 
   if (isLoading) return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
       <div style={{background:"#0F172A",height:200}} className="animate-pulse"/>
     </div>
   );
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       {/* Create Modal */}
       <CreateModal

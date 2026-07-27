@@ -100,7 +100,7 @@ export default function MyDayPage() {
         {/* Task queue */}
         <div className="xl:col-span-2 tb-table">
           <div className="tb-section-header" style={{padding:"16px 24px",borderBottom:"1px solid var(--color-divider)"}}>
-            <div className="tb-section-title" style={{marginBottom:0}}>Task Queue ({allTasks.length})</div>
+            <div className="font-bold text-primary" style={{marginBottom:0}}>Task Queue ({allTasks.length})</div>
             <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All WOs →</button>
           </div>
           {allTasks.length === 0 ? (
@@ -130,7 +130,7 @@ export default function MyDayPage() {
           {/* PM due this week */}
           <div className="tb-section">
             <div className="tb-section-header">
-              <div className="tb-section-title" style={{marginBottom:0}}>📅 PM This Week</div>
+              <div className="font-bold text-primary" style={{marginBottom:0}}>📅 PM This Week</div>
               <button onClick={() => router.push("/maintenance/pm-plans")} className="tb-section-link">All →</button>
             </div>
             {dueSoonPMs.length === 0 ? (
@@ -146,7 +146,7 @@ export default function MyDayPage() {
           {/* Unread alerts */}
           <div className="tb-section">
             <div className="tb-section-header">
-              <div className="tb-section-title" style={{marginBottom:0}}>🔔 Alerts ({unreadNotifs.length})</div>
+              <div className="font-bold text-primary" style={{marginBottom:0}}>🔔 Alerts ({unreadNotifs.length})</div>
               <button onClick={() => router.push("/inbox")} className="tb-section-link">Inbox →</button>
             </div>
             {unreadNotifs.length === 0 ? (

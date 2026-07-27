@@ -46,7 +46,7 @@ export default function ExecutivePage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       {/* ── DARK HERO ─────────────────────────────────────────── */}
       <div style={{background:"linear-gradient(135deg, #0F172A 0%, #1A2744 50%, #0F172A 100%)", borderBottom:"1px solid rgba(255,255,255,0.06)"}} className="px-8 py-8">

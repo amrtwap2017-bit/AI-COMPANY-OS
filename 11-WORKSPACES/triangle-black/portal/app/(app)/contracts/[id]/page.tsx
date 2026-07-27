@@ -17,10 +17,10 @@ export default function RedirectDetail() {
   }, [id, router]);
   
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen flex items-center justify-center" className="bg-base">
       <div style={{textAlign:"center"}}>
         <div style={{width:32,height:32,borderRadius:"50%",border:"3px solid var(--color-brand)",borderTopColor:"transparent",margin:"0 auto",animation:"spin 0.8s linear infinite"}}/>
-        <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginTop:12}}>Redirecting...</div>
+        <div className="tb-empty-desc">Redirecting...</div>
       </div>
     </div>
   );

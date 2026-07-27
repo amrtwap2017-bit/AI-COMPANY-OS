@@ -156,7 +156,7 @@ export default function WorkspacePage() {
               <div className="tb-section-header">
                 <div>
                   <div className="text-label-upper text-tertiary mb-1">Attention Required</div>
-                  <div className="tb-section-title" style={{marginBottom:0}}>Urgent Items</div>
+                  <div className="font-bold text-primary" style={{marginBottom:0}}>Urgent Items</div>
                 </div>
                 <button onClick={() => router.push("/executive/exceptions")} className="tb-section-link">All →</button>
               </div>
@@ -180,7 +180,7 @@ export default function WorkspacePage() {
             {/* Automation */}
             <div className="tb-section">
               <div className="tb-section-header">
-                <div className="tb-section-title" style={{marginBottom:0}}>⚡ Automation</div>
+                <div className="font-bold text-primary" style={{marginBottom:0}}>⚡ Automation</div>
                 <button onClick={() => router.push("/workflows/launcher")} className="tb-section-link">Manage →</button>
               </div>
               <div className="space-y-2">
@@ -204,7 +204,7 @@ export default function WorkspacePage() {
               <div className="tb-section-header">
                 <div>
                   <div className="text-label-upper text-tertiary mb-1">Digital Twin</div>
-                  <div className="tb-section-title" style={{marginBottom:0}}>Domain Health</div>
+                  <div className="font-bold text-primary" style={{marginBottom:0}}>Domain Health</div>
                 </div>
                 <button onClick={() => router.push("/executive/intelligence")} className="tb-section-link">Full view →</button>
               </div>
@@ -235,7 +235,7 @@ export default function WorkspacePage() {
               <div className="tb-section-header" style={{padding:"16px 24px",borderBottom:"1px solid var(--color-divider)"}}>
                 <div>
                   <div className="text-label-upper text-tertiary mb-1">Live Queue</div>
-                  <div className="tb-section-title" style={{marginBottom:0}}>Recent Work Orders</div>
+                  <div className="font-bold text-primary" style={{marginBottom:0}}>Recent Work Orders</div>
                 </div>
                 <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All {wos.length} →</button>
               </div>
@@ -261,7 +261,7 @@ export default function WorkspacePage() {
             {/* Twin domains */}
             <div className="tb-section">
               <div className="tb-section-header">
-                <div className="tb-section-title" style={{marginBottom:0}}>Digital Twin — All Domains</div>
+                <div className="font-bold text-primary" style={{marginBottom:0}}>Digital Twin — All Domains</div>
                 <button onClick={() => router.push("/executive/intelligence")} className="tb-section-link">Details →</button>
               </div>
               <div className="tb-grid-8">

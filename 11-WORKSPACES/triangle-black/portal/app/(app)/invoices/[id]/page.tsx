@@ -38,7 +38,7 @@ export default function InvoiceDetailPage() {
   );
 
   if (isLoading) return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
       <div style={{background:"#0F172A",height:200}} className="animate-pulse"/>
       <div className="max-w-content mx-auto px-8 py-6 space-y-4">
         {[1,2,3].map(i=><div key={i} style={{height:100,background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:16}} className="animate-pulse"/>)}
@@ -47,7 +47,7 @@ export default function InvoiceDetailPage() {
   );
 
   if (isError || !invData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen flex items-center justify-center" className="bg-base">
       <div style={{textAlign:"center",padding:48}}>
         <div className="tb-empty-icon">⚠️</div>
         <div style={{fontSize:"1.25rem",fontWeight:700,color:"var(--color-text-1)"}}>Invoice Not Found</div>
@@ -71,7 +71,7 @@ export default function InvoiceDetailPage() {
   const daysOverdue = isOverdue && inv.due_date ? Math.floor((Date.now() - new Date(inv.due_date).getTime()) / 86400000) : 0;
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       {/* DARK HEADER */}
       <div style={{background:"linear-gradient(135deg, #0F172A 0%, #111827 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>

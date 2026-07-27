@@ -35,13 +35,13 @@ export default function WorkOrderDetailPage() {
   const { data: allWOsRaw }= useQuery(["wo-all"],     () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
 
   if (isLoading) return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
       <div style={{background:"#0F172A",height:220}} className="animate-pulse"/>
     </div>
   );
 
   if (isError || !woData) return (
-    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen flex items-center justify-center" className="bg-base">
       <div style={{textAlign:"center"}}>
         <div className="tb-empty-icon">🔧</div>
         <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Work Order Not Found</div>
@@ -76,7 +76,7 @@ export default function WorkOrderDetailPage() {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+    <div className="min-h-screen" className="bg-base">
 
       {/* DARK HEADER */}
       <div style={{background:"linear-gradient(135deg, #0F172A 0%, #111827 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
