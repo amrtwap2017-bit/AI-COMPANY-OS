@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge } from "@/components/ui";

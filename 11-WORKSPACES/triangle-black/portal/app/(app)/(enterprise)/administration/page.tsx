@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
