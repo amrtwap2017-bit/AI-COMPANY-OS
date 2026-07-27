@@ -24,4 +24,4 @@ reports/*.md
 *.ts-fix.bak
 reports/daily/
 tasks/logs/
-**/*.log
+**/*.log/home/amr/AI-COMPANY-OS/tasks/
