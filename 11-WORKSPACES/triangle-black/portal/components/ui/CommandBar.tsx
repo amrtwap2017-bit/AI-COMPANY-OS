@@ -51,9 +51,20 @@ const TYPE_CONFIG: Record<string, {icon:string; color:string; bg:string}> = {
 };
 
 // ── CommandBar ────────────────────────────────────────────────
-export function CommandBar() {
+interface CommandBarProps {
+  open?:    boolean;
+  onClose?: () => void;
+}
+
+export function CommandBar({ open: externalOpen, onClose }: CommandBarProps = {}) {
   const router = useRouter();
-  const [open,       setOpen]       = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof v === "function" ? v(open) : v;
+    setInternalOpen(next);
+    if (!next && onClose) onClose();
+  };
   const [query,      setQuery]      = useState("");
   const [results,    setResults]    = useState<SearchResult[]>([]);
   const [loading,    setLoading]    = useState(false);
