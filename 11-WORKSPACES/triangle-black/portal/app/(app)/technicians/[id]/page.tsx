@@ -1,13 +1,8 @@
 "use client";
 import { useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-
-export default function LegacyRedirectPage() {
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
   const router = useRouter();
-  const params = useParams();
-  useEffect(() => {
-    const id = params?.id;
-    router.replace(id ? `/operations/technicians/${{id}}` : "/operations/technicians");
-  }, [router, params]);
-  return null;
+  useEffect(() => { router.replace("/operations/technicians"); }, [router]);
+  return <div className="flex items-center justify-center h-screen text-gray-400">Redirecting...</div>;
 }

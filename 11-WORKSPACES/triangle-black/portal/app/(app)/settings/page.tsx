@@ -1,66 +1,33 @@
-// @ts-nocheck
 "use client";
-import Link from "next/link";
-import { Breadcrumb, PageHeader, PageWrapper } from "@/components/ui";
-import { User, Bell, Shield, Globe, Database, Cpu, Users, Building2, ArrowRight, Settings } from "lucide-react";
-
-// Safe array extractor — handles all backend response shapes
-const toArr = (d: any): any[] => {
-  if (!d) return [];
-  if (Array.isArray(d)) return d;
-  if (Array.isArray(d?.items)) return d.items;
-  if (Array.isArray(d?.data)) return d.data;
-  if (Array.isArray(d?.results)) return d.results;
-  if (Array.isArray(d?.records)) return d.records;
-  return [];
-};
-
-
-const SECTIONS = [
-  { title:"Account",      items:[
-    { icon:User,     label:"My Profile",          desc:"Personal info, avatar, password",    href:"/profile" },
-    { icon:Bell,     label:"Notifications",        desc:"Alert preferences, email settings",  href:"/notifications" },
-    { icon:Shield,   label:"Security",             desc:"Password, 2FA, sessions",            href:"/profile" },
-  ]},
-  { title:"Organization", items:[
-    { icon:Building2,label:"Hotel Settings",       desc:"Hotel info, branding, contacts",     href:"/administration" },
-    { icon:Users,    label:"Team & Users",         desc:"Manage users, roles, permissions",   href:"/administration/users" },
-    { icon:Globe,    label:"Language & Region",    desc:"Egypt · Arabic/English · EGP",       href:"/profile" },
-  ]},
-  { title:"Platform",     items:[
-    { icon:Database, label:"Data & Backup",        desc:"Export data, backup settings",       href:"/reports" },
-    { icon:Cpu,      label:"AI & Integrations",    desc:"AI assistant, API keys, webhooks",   href:"/engineering/ai" },
-    { icon:Settings, label:"System Config",        desc:"Advanced platform configuration",    href:"/administration" },
-  ]},
-];
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
 export default function SettingsPage() {
+  const { data: profile } = useQuery(["settings-profile"], () => authFetch("/api/v1/auth/me").then(r => r.json()).catch(() => ({})));
+  const { data: twin } = useQuery(["settings-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()).catch(() => ({})));
+
   return (
-    <PageWrapper>
-      <Breadcrumb/>
-      <PageHeader title="Settings" subtitle="Platform configuration and preferences" badge="CFG"/>
-      <div className="space-y-6 max-w-3xl">
-        {toArr(SECTIONS).map(section=>(
-          <div key={section.title}>
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{section.title}</h2>
-            <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
-              {(Array.isArray(section.items) ? section.items : []).map(item=>(
-                <Link key={item.href} href={item.href}
-                  className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-amber-50 transition-colors flex-shrink-0">
-                    <item.icon className="w-5 h-5 text-slate-500 group-hover:text-amber-600"/>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors"/>
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
+    <div className="p-6 max-w-3xl space-y-6">
+      <h1 className="text-2xl font-bold">Settings</h1>
+      <div className="bg-white dark:bg-zinc-900 rounded-lg border p-6">
+        <h2 className="font-semibold mb-4">Account</h2>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Email</span><span>{profile?.email || "—"}</span></div>
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Role</span><span>{profile?.role || "admin"}</span></div>
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">User ID</span><span className="font-mono text-xs">{profile?.id || profile?.user_id || "—"}</span></div>
+        </div>
       </div>
-    </PageWrapper>
+      <div className="bg-white dark:bg-zinc-900 rounded-lg border p-6">
+        <h2 className="font-semibold mb-4">Platform</h2>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Digital Twin Score</span><span className="font-bold">{twin?.health_score ?? "—"}/100</span></div>
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Health</span><span>{twin?.health_label || "—"}</span></div>
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Backend</span><span>http://localhost:8030</span></div>
+          <div className="flex justify-between py-2 border-b"><span className="text-gray-500">Portal</span><span>http://localhost:3000</span></div>
+          <div className="flex justify-between py-2"><span className="text-gray-500">Version</span><span>2.0.1</span></div>
+        </div>
+      </div>
+    </div>
   );
 }

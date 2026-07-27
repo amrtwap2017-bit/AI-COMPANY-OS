@@ -1,89 +1,71 @@
 "use client";
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge } from "@/components/ui";
-import Link from "next/link";
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
-// Safe array extractor — handles all backend response shapes
-const toArr = (d: any): any[] => {
-  if (!d) return [];
-  if (Array.isArray(d)) return d;
-  if (Array.isArray(d?.items)) return d.items;
-  if (Array.isArray(d?.data)) return d.data;
-  if (Array.isArray(d?.results)) return d.results;
-  if (Array.isArray(d?.records)) return d.records;
-  return [];
-};
+export default function IntegrationEntities() {
+  const queries = [
+    { key: "ie-assets", api: "/api/v1/assets/", label: "Assets", domain: "Maintenance" },
+    { key: "ie-wos", api: "/api/v1/work-orders/", label: "Work Orders", domain: "Operations" },
+    { key: "ie-techs", api: "/api/v1/technicians/", label: "Technicians", domain: "Operations" },
+    { key: "ie-srs", api: "/api/v1/service-requests/", label: "Service Requests", domain: "Operations" },
+    { key: "ie-leads", api: "/api/v1/leads/", label: "Leads", domain: "Commercial" },
+    { key: "ie-contracts", api: "/api/v1/contracts/", label: "Contracts", domain: "Commercial" },
+    { key: "ie-invoices", api: "/api/v1/invoices/", label: "Invoices", domain: "Finance" },
+    { key: "ie-prs", api: "/api/v1/purchase-requests/", label: "Purchase Requests", domain: "Procurement" },
+    { key: "ie-pos", api: "/api/v1/purchase-orders/", label: "Purchase Orders", domain: "Procurement" },
+    { key: "ie-inv", api: "/api/v1/inventory-items/", label: "Inventory Items", domain: "Inventory" },
+    { key: "ie-pms", api: "/api/v1/maintenance/pm-plans/", label: "PM Plans", domain: "Maintenance" },
+    { key: "ie-projects", api: "/api/v1/projects/", label: "Projects", domain: "Projects" },
+    { key: "ie-suppliers", api: "/api/v1/suppliers/", label: "Suppliers", domain: "Procurement" },
+    { key: "ie-notifs", api: "/api/v1/notifications/", label: "Notifications", domain: "Platform" },
+  ];
 
+  const results = queries.map(q => {
+    const { data, isLoading } = useQuery([q.key], () => authFetch(q.api).then(r => r.json()));
+    return { ...q, count: toArr(data).length, loading: isLoading };
+  });
 
-const entities = [
-  { name: "Work Orders", records: 72, operations: ["Create", "Read", "Update"], link: "/operations/work-orders" },
-  { name: "Technicians", records: 25, operations: ["Read", "Assign"], link: "/operations/technicians" },
-  { name: "Assets", records: 46, operations: ["Read", "Monitor"], link: "/maintenance/assets" },
-  { name: "PM Plans", records: 30, operations: ["Create", "Schedule"], link: "/maintenance/pm-plans" },
-  { name: "Contracts", records: 72, operations: ["Read", "Renew"], link: "/customers/review" },
-  { name: "Invoices", records: 45, operations: ["Read"], link: "/customers/review" },
-  { name: "Purchase Orders", records: 21, operations: ["Create", "Receive"], link: "/supply-chain/purchase-orders" },
-  { name: "Purchase Requests", records: null, operations: ["Create", "Approve"], link: "/approvals" },
-  { name: "Vendors", records: 13, operations: ["Read", "Compare"], link: "/supply-chain/vendors" },
-  { name: "RFQs", records: 8, operations: ["Create", "Track"], link: "/supply-chain/rfqs" },
-  { name: "Leads", records: 110, operations: ["Create", "Track"], link: "/commercial/pipeline" },
-  { name: "Projects", records: 12, operations: ["Read", "Monitor"], link: "/projects-center" },
-];
+  const domains = [...new Set(results.map(r => r.domain))];
 
-const AI_SIGNAL_ENTITY = {
-  name: "signals_engine",
-  types: 9,
-};
-
-export default function Page() {
   return (
-    <PageWrapper>
-      <PageHeader title="Data Entities Overview" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricStrip label="Total Entities" value={12} />
-        <MetricStrip label="API Routes" value={115} />
-        <MetricStrip label="AI Endpoints" value={9} />
-        <MetricStrip label="Database Tables" value={126} />
-      </div>
-      <SectionCard title="Entity Registry">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="border px-4 py-2">Entity Name</th>
-              <th className="border px-4 py-2">Records</th>
-              <th className="border px-4 py-2">Primary Operations</th>
-              <th className="border px-4 py-2">Link</th>
-            </tr>
-          </thead>
-          <tbody>
-            {toArr(entities).map((entity, index) => (
-              <tr key={index}>
-                <td className="border px-4 py-2">{entity.name}</td>
-                <td className="border px-4 py-2">{entity.records !== null ? entity.records : "varies"}</td>
-                <td className="border px-4 py-2">
-                  {toArr(entity.operations).map((operation, opIndex) => (
-                    <span key={opIndex} className="mr-2">
-                      {operation}
-                    </span>
-                  ))}
-                </td>
-                <td className="border px-4 py-2">
-                  <Link href={entity.link}>
-                    <a className="text-blue-500 hover:underline">View</a>
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </SectionCard>
-      <SectionCard title="AI Signal Entity">
-        <div className="flex items-center space-x-4">
-          <span>{AI_SIGNAL_ENTITY.name}</span>
-          <StatusBadge status="active" />
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Platform Entities</h1>
+      <p className="text-gray-500">All connected data entities across the platform</p>
+      <div className="grid grid-cols-4 gap-4 mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">Entity Types</div>
+          <div className="text-3xl font-bold">{results.length}</div>
         </div>
-        <p>Signal Types: {AI_SIGNAL_ENTITY.types}</p>
-      </SectionCard>
-    </PageWrapper>
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">Total Records</div>
+          <div className="text-3xl font-bold">{results.reduce((s, r) => s + r.count, 0).toLocaleString()}</div>
+        </div>
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">Domains</div>
+          <div className="text-3xl font-bold">{domains.length}</div>
+        </div>
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">Connected APIs</div>
+          <div className="text-3xl font-bold text-green-600">{results.filter(r => r.count > 0).length}</div>
+        </div>
+      </div>
+      {domains.map(domain => (
+        <div key={domain} className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-gray-500 mb-3">{domain}</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {results.filter(r => r.domain === domain).map(r => (
+              <div key={r.key} className="border rounded p-3">
+                <div className="text-sm font-medium">{r.label}</div>
+                <div className="text-2xl font-bold mt-1">{r.loading ? "..." : r.count}</div>
+                <div className="text-xs text-gray-400 mt-1 font-mono truncate">{r.api}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

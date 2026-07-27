@@ -1,49 +1,38 @@
 "use client";
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  PageWrapper,
-  PageHeader,
-  SectionCard,
-  EmptyState,
-  Button,
-} from "@/components/ui";
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
-const presets = [
-  { name: "Critical Alerts", filter: "priority=critical&channel=Signal" },
-  { name: "Maintenance Signals", filter: "category=maintenance" },
-  { name: "Supply Chain Alerts", filter: "category=inventory" },
-  { name: "Commercial Updates", filter: "category=commercial" },
-  { name: "All Signals", filter: "" },
-];
+export default function InboxPresets() {
+  const { data, isLoading } = useQuery(["inbox-presets"], () => authFetch("/api/v1/notifications/").then(r => r.json()));
+  const notifications = toArr(data);
+  const unread = notifications.filter((n: any) => !n.read && !n.is_read);
+  const critical = notifications.filter((n: any) => n.priority === "critical" || n.severity === "critical");
 
-const InboxPresetsPage = () => {
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  if (isLoading) return <div className="p-6 text-gray-400">Loading...</div>;
+
+  const presets = [
+    { name: "All Notifications", count: notifications.length, filter: "all" },
+    { name: "Unread", count: unread.length, filter: "unread" },
+    { name: "Critical Alerts", count: critical.length, filter: "critical" },
+    { name: "Maintenance", count: notifications.filter((n: any) => (n.type || n.category || "").includes("maintenance")).length, filter: "maintenance" },
+    { name: "Operations", count: notifications.filter((n: any) => (n.type || n.category || "").includes("work_order") || (n.type || n.category || "").includes("operations")).length, filter: "operations" },
+    { name: "Commercial", count: notifications.filter((n: any) => (n.type || n.category || "").includes("contract") || (n.type || n.category || "").includes("lead")).length, filter: "commercial" },
+  ];
 
   return (
-    <PageWrapper>
-      <PageHeader title="Inbox Presets" description="Saved filters and views for inbox" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {presets.map((preset: any) => (
-          <SectionCard
-            key={preset.name}
-            title={preset.name}
-            selected={selectedPreset === preset.name}
-            onClick={() => setSelectedPreset(preset.name)}
-          >
-            <p className="text-sm text-gray-500">Filter: {preset.filter}</p>
-            <Link href={`/alerts?filter=${preset.filter}`}>
-              <Button size="sm" variant="outline">
-                View
-              </Button>
-            </Link>
-          </SectionCard>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Inbox Presets</h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {presets.map((p) => (
+          <div key={p.filter} className="bg-white dark:bg-zinc-900 rounded-lg border p-4 hover:border-blue-400 cursor-pointer transition-colors">
+            <div className="text-sm text-gray-500">{p.name}</div>
+            <div className="text-3xl font-bold">{p.count}</div>
+          </div>
         ))}
       </div>
-      <EmptyState title="Custom presets coming soon" />
-    </PageWrapper>
+    </div>
   );
-};
-
-export default InboxPresetsPage;
+}

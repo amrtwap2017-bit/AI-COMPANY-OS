@@ -1,13 +1,8 @@
 "use client";
 import { useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-
-export default function LegacyRedirectPage() {
+import { useRouter } from "next/navigation";
+export default function RedirectPage() {
   const router = useRouter();
-  const params = useParams();
-  useEffect(() => {
-    const id = params?.id;
-    router.replace(id ? `/maintenance/assets/360` : "/maintenance/assets/360");
-  }, [router, params]);
-  return null;
+  useEffect(() => { router.replace("/maintenance/assets"); }, [router]);
+  return <div className="flex items-center justify-center h-screen text-gray-400">Redirecting...</div>;
 }

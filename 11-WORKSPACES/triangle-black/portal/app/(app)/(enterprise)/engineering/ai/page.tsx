@@ -1,66 +1,51 @@
 "use client";
+// @ts-nocheck
+import { useQuery } from "@tanstack/react-query";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-import { useState } from "react";
-import { PageWrapper, PageHeader, SectionCard, EmptyState } from "@/components/ui";
+const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || d?.signals || [];
 
-const EngineeringAIPage = () => {
-  const [question, setQuestion] = useState("");
-  const [selectedExample, setSelectedExample] = useState<string | null>(null);
+export default function EngineeringAI() {
+  const { data: health } = useQuery(["eng-ai-health"], () => authFetch("/api/v1/ai/health").then(r => r.json()));
+  const { data: signalData } = useQuery(["eng-ai-signals"], () => authFetch("/api/v1/ai/signals").then(r => r.json()));
+  const { data: twinData } = useQuery(["eng-ai-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()));
+
+  const signals = toArr(signalData);
 
   return (
-    <PageWrapper>
-      <PageHeader title="Engineering AI Assistant" description="Ask questions about your engineering operations." />
-      <div className="flex flex-col gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Ask about your engineering operations..."
-            rows={4}
-            className="w-full border-gray-300 rounded-md px-4 py-2 focus:outline-none"
-          />
-          <button onClick={() => setSelectedExample(question)} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-            Ask
-          </button>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Engineering AI Hub</h1>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">AI Status</div>
+          <div className="text-xl font-bold text-green-600">{health?.status || health?.model || "Loading..."}</div>
         </div>
-        <SectionCard title="Example Questions">
-          <ul className="space-y-4">
-            {[
-              "Which assets have the most corrective work orders?",
-              "What is the current HVAC maintenance status?",
-              "Show me technicians with capacity available",
-              "Which PM plans are overdue?",
-            ].map((example, index) => (
-              <li
-                key={index}
-                onClick={() => {
-                  setQuestion(example);
-                  setSelectedExample(example);
-                }}
-                className={`cursor-pointer px-4 py-2 rounded-md hover:bg-gray-100 ${
-                  selectedExample === example ? "bg-blue-500 text-white" : ""
-                }`}
-              >
-                {example}
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
-        <SectionCard title="Example Responses">
-          <EmptyState
-            icon="/path/to/icon.svg"
-            title="Connect AI Engine to enable real-time responses"
-            description="Powered by Triangle Black AI Engine — /api/v1/ai/signals"
-          />
-        </SectionCard>
-        <div className="grid grid-cols-3 gap-4">
-          <SectionCard title="Asset Health" href="/maintenance/assets/360" />
-          <SectionCard title="PM Schedule" href="/maintenance/pm-plans" />
-          <SectionCard title="Engineering Actions" href="/engineering/actions" />
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">Digital Twin Score</div>
+          <div className="text-3xl font-bold">{twinData?.health_score ?? "—"}<span className="text-lg text-gray-400">/100</span></div>
+        </div>
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+          <div className="text-sm text-gray-500">Active Signals</div>
+          <div className="text-3xl font-bold">{signals.length}</div>
         </div>
       </div>
-    </PageWrapper>
+      <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
+        <h2 className="font-semibold mb-3">Latest AI Signals</h2>
+        {signals.length === 0 ? (
+          <p className="text-gray-400 text-sm">No signals detected</p>
+        ) : (
+          signals.slice(0, 20).map((s: any, i: number) => (
+            <div key={s.id || i} className="flex justify-between py-2 border-b last:border-0 text-sm">
+              <span>{s.message || s.title || s.description || "—"}</span>
+              <span className={`px-2 py-0.5 rounded text-xs ${
+                (s.severity || s.priority) === "critical" ? "bg-red-100 text-red-700" :
+                (s.severity || s.priority) === "warning" ? "bg-amber-100 text-amber-700" :
+                "bg-gray-100 text-gray-600"
+              }`}>{s.severity || s.priority || "info"}</span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   );
-};
-
-export default EngineeringAIPage;
+}

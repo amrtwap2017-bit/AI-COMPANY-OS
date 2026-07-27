@@ -1,36 +1,40 @@
 "use client";
-
+// @ts-nocheck
 import { useParams, useRouter } from "next/navigation";
-import { PageWrapper, LoadingState } from "@/components/ui";
 import { useEffect } from "react";
 
-const EngineeringSectionPage = () => {
-  const params = useParams();
-  const section = params?.section;
-  const router = useRouter();
-
-  useEffect(() => {
-    if (section) {
-      switch (section.toLowerCase()) {
-        case "intelligence":
-          router.replace("/engineering/intelligence");
-          break;
-        case "actions":
-          router.replace("/engineering/actions");
-          break;
-        case "review":
-          router.replace("/engineering/review");
-          break;
-        case "ai":
-          router.replace("/engineering/ai");
-          break;
-        default:
-          router.replace("/engineering");
-      }
-    }
-  }, [section, router]);
-
-  return <LoadingState />;
+const sectionMap: Record<string, string> = {
+  "pm-plans": "/engineering/pm-plans",
+  "new-work-order": "/engineering/new-work-order",
+  "maintenance-intelligence": "/engineering/maintenance-intelligence",
+  "ai": "/engineering/ai",
+  "actions": "/engineering/actions",
+  "review": "/engineering/review",
+  "intelligence": "/engineering/intelligence",
 };
 
-export default EngineeringSectionPage;
+export default function EngineeringSection() {
+  const params = useParams();
+  const router = useRouter();
+  const section = String(params?.section || "");
+
+  useEffect(() => {
+    const target = sectionMap[section];
+    if (target) router.replace(target);
+  }, [section, router]);
+
+  if (sectionMap[section]) return <div className="p-6 text-gray-400">Redirecting...</div>;
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Engineering — {section}</h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {Object.entries(sectionMap).map(([key, path]) => (
+          <button key={key} onClick={() => router.push(path)} className="bg-white dark:bg-zinc-900 rounded-lg border p-4 text-left hover:border-blue-400 transition-colors">
+            <div className="font-medium capitalize">{key.replace(/-/g, " ")}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -1,50 +1,47 @@
 "use client";
-
+// @ts-nocheck
 import { useParams, useRouter } from "next/navigation";
-import { PageWrapper, PageHeader, LoadingState } from "@/components/ui";
 import { useEffect } from "react";
 
-const MaintenancePage = () => {
+const sectionMap: Record<string, string> = {
+  "assets": "/maintenance/assets",
+  "pm-plans": "/maintenance/pm-plans",
+  "work-history": "/maintenance/work-history",
+  "inspection": "/maintenance/inspection-dashboard",
+  "intelligence": "/maintenance/intelligence",
+  "costs": "/maintenance/costs/review",
+  "downtime": "/maintenance/downtime/review",
+  "qr-codes": "/maintenance/qr-codes",
+  "asset-tree": "/maintenance/asset-tree",
+};
+
+export default function MaintenanceSection() {
   const params = useParams();
-  const section = params?.section;
   const router = useRouter();
+  const section = String(params?.section || "");
 
   useEffect(() => {
-    if (section) {
-      switch (section.toLowerCase()) {
-        case "assets":
-          router.replace("/maintenance/assets");
-          break;
-        case "pm-plans":
-          router.replace("/maintenance/pm-plans");
-          break;
-        case "schedule":
-          router.replace("/maintenance/schedule");
-          break;
-        case "intelligence":
-          router.replace("/maintenance/intelligence");
-          break;
-        case "review":
-          router.replace("/maintenance/review");
-          break;
-        case "actions":
-          router.replace("/maintenance/actions");
-          break;
-        case "asset-tree":
-          router.replace("/maintenance/asset-tree");
-          break;
-        default:
-          router.replace("/maintenance");
-      }
+    const target = sectionMap[section];
+    if (target) {
+      router.replace(target);
     }
   }, [section, router]);
 
-  return (
-    <PageWrapper>
-      <PageHeader title="Maintenance" />
-      <LoadingState message="Loading maintenance section..." />
-    </PageWrapper>
-  );
-};
+  if (sectionMap[section]) {
+    return <div className="p-6 text-gray-400">Redirecting to {section}...</div>;
+  }
 
-export default MaintenancePage;
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Maintenance — {section}</h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {Object.entries(sectionMap).map(([key, path]) => (
+          <button key={key} onClick={() => router.push(path)} className="bg-white dark:bg-zinc-900 rounded-lg border p-4 text-left hover:border-blue-400 transition-colors">
+            <div className="font-medium capitalize">{key.replace(/-/g, " ")}</div>
+            <div className="text-xs text-gray-400 mt-1">{path}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
