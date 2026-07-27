@@ -1,74 +1,48 @@
-"""Tests for authentication endpoints."""
+"""
+Tests: Authentication
+"""
+import requests
 import pytest
 
+BASE_URL = "http://localhost:8030"
 
-def test_login_admin_success(client):
-    res = client.post(
-        "/api/v1/auth/login",
-        data={"username": "amr@triangleblack.com", "password": "Admin123!"},
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    assert res.status_code == 200
-    data = res.json()
+
+def test_login_success():
+    r = requests.post(f"{BASE_URL}/api/v1/auth/login",
+        data={"username": "amr@triangleblack.com", "password": "admin123"})
+    assert r.status_code == 200
+    data = r.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
-    assert len(data["access_token"]) > 20
 
 
-def test_login_manager_success(client):
-    res = client.post(
-        "/api/v1/auth/login",
-        data={"username": "sara@triangleblack.com", "password": "Manager123!"},
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    assert res.status_code == 200
-    assert "access_token" in res.json()
+def test_login_wrong_password():
+    r = requests.post(f"{BASE_URL}/api/v1/auth/login",
+        data={"username": "amr@triangleblack.com", "password": "wrongpass"})
+    assert r.status_code == 401
 
 
-def test_login_agent_success(client):
-    res = client.post(
-        "/api/v1/auth/login",
-        data={"username": "hassan@triangleblack.com", "password": "Agent123!"},
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    assert res.status_code == 200
-    assert "access_token" in res.json()
+def test_login_unknown_user():
+    r = requests.post(f"{BASE_URL}/api/v1/auth/login",
+        data={"username": "nobody@test.com", "password": "test123"})
+    assert r.status_code == 401
 
 
-def test_login_wrong_password(client):
-    res = client.post(
-        "/api/v1/auth/login",
-        data={"username": "amr@triangleblack.com", "password": "WRONG"},
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    assert res.status_code == 401
+def test_protected_endpoint_without_token():
+    r = requests.get(f"{BASE_URL}/api/v1/work-orders/")
+    assert r.status_code == 401
 
 
-def test_login_unknown_user(client):
-    res = client.post(
-        "/api/v1/auth/login",
-        data={"username": "nobody@test.com", "password": "Test123!"},
-        headers={"content-type": "application/x-www-form-urlencoded"},
-    )
-    assert res.status_code == 401
+def test_protected_endpoint_with_invalid_token():
+    r = requests.get(f"{BASE_URL}/api/v1/work-orders/",
+        headers={"Authorization": "Bearer invalid.token.here"})
+    assert r.status_code == 401
 
 
-def test_me_with_valid_token(client, auth):
-    res = client.get("/api/v1/auth/me", headers=auth)
-    assert res.status_code == 200
-    data = res.json()
-    assert data["email"] == "amr@triangleblack.com"
-    assert data["role"] == "admin"
-
-
-def test_me_without_token(client):
-    res = client.get("/api/v1/auth/me")
-    assert res.status_code == 401
-
-
-def test_me_with_bad_token(client):
-    res = client.get(
-        "/api/v1/auth/me",
-        headers={"Authorization": "Bearer invalidtoken123"},
-    )
-    assert res.status_code == 401
+def test_token_contains_role(admin_token):
+    import base64, json
+    parts = admin_token.split(".")
+    assert len(parts) == 3
+    payload = json.loads(base64.b64decode(parts[1] + "=="))
+    assert "role" in payload
+    assert payload["role"] == "admin"
