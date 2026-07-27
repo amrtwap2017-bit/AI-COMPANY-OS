@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
@@ -123,9 +124,9 @@ export default function WorkOrdersPage() {
               </tr></thead>
               <tbody className="divide-y divide-slate-50">
                 {filtered.map(w=>(
-                  <tr key={w.id} className={`hover:bg-slate-50 transition-colors ${w.priority==="critical"?"bg-red-50/30":""}`}>
+                  <tr key={w.id} className={`hover:bg-slate-50 hover:cursor-pointer transition-colors ${w.priority==="critical"?"bg-red-50/30":""}`}>
                     <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800 truncate max-w-xs">{w.title}</p>
+                      <Link href={`/operations/work-orders/${w.id}`}><p className="font-medium text-blue-700 hover:underline truncate max-w-xs">{w.title}</p></Link>
                       {w.description&&<p className="text-xs text-slate-400 truncate">{w.description?.slice(0,55)}</p>}
                     </td>
                     <td className="py-3 px-3"><span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{w.type||"maintenance"}</span></td>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState, Modal } from "@/components/ui";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
@@ -136,7 +137,7 @@ export default function LeadsPage() {
                 {filtered.map(l => (
                   <tr key={l.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800">{l.name}</p>
+                      <Link href={`/commercial/leads/${l.id}`}><p className="font-medium text-blue-700 hover:underline">{l.name}</p></Link>
                       <p className="text-xs text-slate-400">{l.company || "—"}</p>
                     </td>
                     <td className="py-3 px-3">
