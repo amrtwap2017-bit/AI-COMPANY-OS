@@ -10,7 +10,7 @@ export default function StockLevelsPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
   const { data: stockRaw, isLoading } = useQuery(["sl-stock"], () => authFetch("/api/v1/stock-balances/").then(r=>r.json()));
-  const { data: itemRaw } = useQuery(["sl-items"], () => authFetch("/api/v1/inventory-items/").then(r=>r.json()));
+  const { data: itemRaw } = useQuery(["sl-items"], () => authFetch("/api/v1/inventory-items-portal").then(r=>r.json()));
   const stocks = toArr(stockRaw); const items = toArr(itemRaw);
   const enriched = stocks.map(s=>{
     const item=items.find(i=>i.id===s.item_id);

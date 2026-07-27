@@ -16,7 +16,7 @@ export default function InventoryPage() {
 
   const { data: itemRaw, isLoading } = useQuery(
     ["inv-items"],
-    () => authFetch("/api/v1/inventory-items/").then(r => r.json()),
+    () => authFetch("/api/v1/inventory-items-portal").then(r => r.json()),
     { refetchInterval: 60000 }
   );
   const { data: stockRaw } = useQuery(

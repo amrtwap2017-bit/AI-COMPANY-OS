@@ -11,7 +11,7 @@ export default function WarehouseDetailPage() {
   const id = params?.id as string;
   const { data: whRaw, isLoading } = useQuery(["wh-d", id], () => authFetch("/api/v1/warehouses/").then(r=>r.json()));
   const { data: stockRaw } = useQuery(["wh-d-stock"], () => authFetch("/api/v1/stock-balances/").then(r=>r.json()));
-  const { data: itemRaw } = useQuery(["wh-d-items"], () => authFetch("/api/v1/inventory-items/").then(r=>r.json()));
+  const { data: itemRaw } = useQuery(["wh-d-items"], () => authFetch("/api/v1/inventory-items-portal").then(r=>r.json()));
   const whs = toArr(whRaw); const stocks = toArr(stockRaw); const items = toArr(itemRaw);
   const wh = whs.find(w=>w.id===id)||whs[0];
   const whStocks = stocks.filter(s=>s.warehouse_id===(wh?.id||id));

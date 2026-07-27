@@ -2203,3 +2203,17 @@ def notifications_portal(limit: int = 100):
             db.rollback()
             return []
 
+@app.get("/api/v1/inventory-items-portal", tags=["portal"], include_in_schema=False)
+def inventory_items_portal(limit: int = 200):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM inventory_items ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception:
+            db.rollback()
+            return []
+

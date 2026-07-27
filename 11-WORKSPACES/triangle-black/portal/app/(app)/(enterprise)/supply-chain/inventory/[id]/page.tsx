@@ -15,7 +15,7 @@ export default function InventoryItemDetailPage() {
 
   const { data: item, isLoading } = useQuery(
     ["inv-detail", id],
-    () => authFetch("/api/v1/inventory-items/" + id).then(r => r.json()),
+    () => authFetch("/api/v1/inventory-items-portal" + id).then(r => r.json()),
     { enabled: !!id }
   );
   const { data: stockRaw } = useQuery(
