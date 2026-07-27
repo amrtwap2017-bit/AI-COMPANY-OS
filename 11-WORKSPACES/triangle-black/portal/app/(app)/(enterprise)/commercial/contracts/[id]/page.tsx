@@ -1,228 +1,301 @@
 "use client";
-import { useState } from "react";
+// @ts-nocheck
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
 
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB", {day:"numeric",month:"short",year:"numeric"}); } catch { return "—"; } };
+const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const S = {active:"bg-emerald-100 text-emerald-800",draft:"bg-slate-100 text-secondary",pending:"bg-amber-100 text-amber-800",expired:"bg-red-100 text-red-700",terminated:"bg-red-100 text-red-700",completed:"bg-blue-100 text-blue-800"};
-const STATUSES = ["active","draft","pending","expired","terminated","completed"];
-const TYPES    = ["maintenance","consulting","supply","installation","inspection","annual-service"];
+const STATUS_CONFIG = {
+  active:            { color:"#34D399", bg:"rgba(16,185,129,0.1)",  border:"rgba(16,185,129,0.25)",  label:"Active" },
+  pending_signature: { color:"#FCD34D", bg:"rgba(245,158,11,0.1)",  border:"rgba(245,158,11,0.25)",  label:"Pending Signature" },
+  expired:           { color:"#F87171", bg:"rgba(239,68,68,0.1)",   border:"rgba(239,68,68,0.25)",   label:"Expired" },
+  draft:             { color:"#94A3B8", bg:"rgba(148,163,184,0.1)", border:"rgba(148,163,184,0.2)",  label:"Draft" },
+};
 
 export default function ContractDetailPage() {
-  const { id }    = useParams();
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [form,    setForm]    = useState(null);
+  const { id } = useParams();
+  const router  = useRouter();
 
-  const { data: contract, isLoading, refetch } = useQuery(
+  const { data: contractData, isLoading, isError } = useQuery(
     ["contract-detail", id],
-    () => authFetch(`/api/v1/contracts/${id}`).then(r=>r.json()),
-    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+    () => authFetch(`/api/v1/contracts/${id}`).then(r => r.json()),
+    { enabled: !!id }
+  );
+  const { data: allInvRaw }  = useQuery(["contract-invoices"],  () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: allWOsRaw }  = useQuery(["contract-wos"],       () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: allSRsRaw }  = useQuery(["contract-srs"],       () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
+
+  if (isLoading) return (
+    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+      <div style={{background:"#0F172A",height:240}} className="animate-pulse"/>
+    </div>
   );
 
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
-
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const payload = {...form};
-      if (payload.total_value) payload.total_value = Number(payload.total_value);
-      const r = await authFetch(`/api/v1/contracts/${id}`, {
-        method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) { setEditing(false); refetch(); }
-      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  async function updateStatus(status) {
-    setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/contracts/${id}`, {
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({status})
-      });
-      if (r.ok) refetch();
-      else alert("Failed to update status");
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
-  if (!contract || contract.detail) return (
-    <PageWrapper>
-      <div className="text-center py-20">
-        <p className="text-secondary mb-4">Contract not found</p>
-        <Link href="/commercial/contracts" className="text-blue-600 underline text-sm">Back to Contracts</Link>
+  if (isError || !contractData) return (
+    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:"3rem",marginBottom:16}}>📄</div>
+        <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Contract Not Found</div>
+        <button onClick={()=>router.push("/commercial/contracts")} style={{marginTop:20,background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Contracts</button>
       </div>
-    </PageWrapper>
+    </div>
   );
 
-  const expiringSoon = contract.end_date && contract.status==="active" &&
-    (new Date(contract.end_date)-new Date())/(1000*60*60*24) <= 30;
+  const contract = Array.isArray(contractData) ? contractData[0] : contractData;
+  if (!contract) return null;
+
+  const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+  const allInvoices = toArr(allInvRaw);
+  const allWOs      = toArr(allWOsRaw);
+  const allSRs      = toArr(allSRsRaw);
+
+  const sc = STATUS_CONFIG[contract.status] || STATUS_CONFIG.draft;
+  const contractInvoices = allInvoices.filter(i => i.contract_id === contract.id);
+  const contractWOs      = allWOs.filter(w => w.contract_id === contract.id);
+  const contractSRs      = allSRs.filter(s => s.contract_id === contract.id);
+
+  const now     = new Date();
+  const in30    = new Date(now.getTime() + 30*86400000);
+  const daysLeft = contract.end_date ? Math.ceil((new Date(contract.end_date)-Date.now())/86400000) : null;
+  const isExpiring = contract.status==="active" && contract.end_date && new Date(contract.end_date)>=now && new Date(contract.end_date)<=in30;
+  const isExpired  = contract.status==="expired" || (contract.end_date && new Date(contract.end_date)<now);
+
+  const paidInvoices   = contractInvoices.filter(i=>i.status==="paid");
+  const pendingInvoices= contractInvoices.filter(i=>i.status==="pending");
+  const totalInvoiced  = contractInvoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const totalPaid      = paidInvoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={contract.title || contract.contract_number || "Contract"}
-        subtitle={contract.client_name ? `${contract.client_name} · ${contract.contract_type||""}` : contract.contract_number||""}
-        breadcrumbs={[{label:"Commercial",href:"/commercial"},{label:"Contracts",href:"/commercial/contracts"},{label:(contract.title||contract.contract_number||id)?.slice(0,30)}]}
-        actions={
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button variant="secondary" size="sm" onClick={()=>{setForm({...contract,total_value:contract.total_value||contract.value||""});setEditing(true)}}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
-                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
-              </>
-            )}
-          </div>
-        }
-      />
+    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
 
-      {expiringSoon && !editing && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-          <span className="text-amber-500 font-bold text-lg">!</span>
-          <p className="text-sm font-semibold text-amber-800">
-            This contract expires on {fmtDate(contract.end_date)} — renewal action required
-          </p>
-        </div>
-      )}
+      {/* DARK HEADER */}
+      <div style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1520 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
 
-      {!editing && (
-        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[contract.status]||"bg-slate-100 text-secondary")}>{contract.status||"—"}</span>
-          <div className="flex-1" />
-          {STATUSES.filter(s=>s!==contract.status).slice(0,3).map(s=>(
-            <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:border-blue-400 hover:text-blue-700 transition-colors disabled:opacity-50">
-              {s}
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-3 mb-6">
+            <button onClick={()=>router.push("/commercial/contracts")}
+              style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"rgba(248,250,252,0.8)",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",transition:"all 120ms"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.1)"}
+              onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}>
+              ← Contracts
             </button>
-          ))}
-        </div>
-      )}
+            <span style={{color:"rgba(255,255,255,0.15)"}}>/</span>
+            <span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}} className="truncate">{contract.title||contract.id?.slice(0,16)}</span>
+          </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <SectionCard title="Contract Details">
-            {editing ? (
-              <form onSubmit={save} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
-                    <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Client Name *</label>
-                    <input required value={form?.client_name||""} onChange={e=>setForm({...form,client_name:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Contract Number</label>
-                    <input value={form?.contract_number||""} onChange={e=>setForm({...form,contract_number:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Total Value (EGP)</label>
-                    <input type="number" value={form?.total_value||""} onChange={e=>setForm({...form,total_value:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Type</label>
-                    <select value={form?.contract_type||"maintenance"} onChange={e=>setForm({...form,contract_type:e.target.value})} className={inp}>
-                      {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Start Date</label>
-                    <input type="date" value={form?.start_date?.slice(0,10)||""} onChange={e=>setForm({...form,start_date:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">End Date</label>
-                    <input type="date" value={form?.end_date?.slice(0,10)||""} onChange={e=>setForm({...form,end_date:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
-                  <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
-                    rows={3} className={inp+" resize-none"} />
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Client</p>
-                    <p className="text-slate-800 font-medium">{contract.client_name||"—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Contract Number</p>
-                    <p className="text-slate-700 font-mono text-xs">{contract.contract_number||"—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Type</p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{contract.contract_type||"—"}</span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Total Value</p>
-                    <p className="text-slate-800 font-bold">EGP {fmtNum(contract.total_value||contract.value||0)}</p>
-                  </div>
-                </div>
-                {contract.description && (
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
-                    <p className="text-slate-700 text-sm">{contract.description}</p>
-                  </div>
-                )}
+          {/* Hero */}
+          <div className="flex items-start justify-between gap-6">
+            <div style={{flex:1,minWidth:0}}>
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <div style={{fontSize:"0.625rem",fontWeight:700,color:"#F59E0B",textTransform:"uppercase",letterSpacing:"0.1em"}}>Commercial · Contract</div>
+                <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span>
+                {contract.renewal_count > 0 && <span style={{fontSize:"0.6875rem",padding:"3px 10px",borderRadius:20,background:"rgba(255,255,255,0.06)",color:"rgba(148,163,184,0.7)"}}>Renewal #{contract.renewal_count}</span>}
               </div>
-            )}
-          </SectionCard>
-        </div>
-
-        <div className="space-y-4">
-          <SectionCard title="Contract Value">
-            <div className="text-center py-3">
-              <div className="text-3xl font-black text-blue-700 mb-1">EGP {fmtNum(contract.total_value||contract.value||0)}</div>
-              <p className="text-xs text-secondary">Total Contract Value</p>
+              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1,margin:0}} className="truncate">{contract.title||`Contract ${contract.id?.slice(0,8)}`}</h1>
+              {contract.description && <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:6,lineHeight:1.5}}>{contract.description}</p>}
             </div>
-          </SectionCard>
 
-          <SectionCard title="Timeline">
-            <dl className="space-y-3">
-              {[
-                {label:"Status",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[contract.status]||"bg-slate-100 text-secondary")}>{contract.status||"—"}</span>},
-                {label:"Start",    value:fmtDate(contract.start_date)},
-                {label:"End",      value:<span className={expiringSoon?"text-amber-600 font-semibold":""}>{fmtDate(contract.end_date)}{expiringSoon?" ⚠":"" }</span>},
-                {label:"Created",  value:fmtDate(contract.created_at)},
-              ].map(({label,value})=>(
-                <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-secondary">{label}</dt>
-                  <dd className="text-xs">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </SectionCard>
-
-          <SectionCard title="Quick Actions">
-            <div className="space-y-2">
-              {contract.status==="draft"&&<button onClick={()=>updateStatus("active")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Activate Contract</button>}
-              {contract.status==="active"&&<button onClick={()=>updateStatus("completed")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">Mark Completed</button>}
-              <Link href="/commercial/contracts" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Contracts</Link>
+            {/* Value badge */}
+            <div style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.22)",borderRadius:16,padding:"18px 24px",textAlign:"center",flexShrink:0}}>
+              <div style={{fontSize:"1.625rem",fontWeight:900,color:"#34D399",lineHeight:1}}>{fmtEGP(contract.total_value)}</div>
+              <div style={{fontSize:"0.5625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"}}>Contract Value</div>
+              {contract.monthly_value && <div style={{fontSize:"0.75rem",color:"rgba(52,211,153,0.7)",marginTop:4}}>{fmtEGP(contract.monthly_value)} / month</div>}
             </div>
-          </SectionCard>
+          </div>
+
+          {/* KPI strip */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mt-6">
+            {[
+              { label:"Total Value",  value:fmtEGP(contract.total_value),     color:"#34D399" },
+              { label:"Monthly",      value:fmtEGP(contract.monthly_value),    color:"rgba(148,163,184,0.8)" },
+              { label:"Start Date",   value:fmtDate(contract.start_date),      color:"rgba(148,163,184,0.8)" },
+              { label:"End Date",     value:fmtDate(contract.end_date),        color:isExpiring?"#FBBF24":isExpired?"#F87171":"rgba(148,163,184,0.8)" },
+              { label:"Duration",     value:contract.duration_months?`${contract.duration_months}mo`:"—", color:"rgba(148,163,184,0.8)" },
+              { label:"Days Left",    value:daysLeft!==null?(daysLeft>0?`${daysLeft}d`:"Expired"):"—", color:isExpiring?"#FBBF24":isExpired?"#F87171":"#34D399" },
+            ].map((k,i)=>(
+              <div key={i} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"11px 12px",backdropFilter:"blur(12px)"}}>
+                <div style={{fontSize:"0.5625rem",color:"rgba(148,163,184,0.5)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:5}}>{k.label}</div>
+                <div style={{fontSize:"0.8125rem",fontWeight:700,color:k.color,lineHeight:1.3}} className="truncate">{k.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Expiry alert */}
+          {isExpiring && (
+            <div style={{marginTop:12,background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
+              <span>⏰</span>
+              <div style={{flex:1,fontSize:"0.75rem",color:"#FCD34D",fontWeight:600}}>Contract expires in {daysLeft} day{daysLeft!==1?"s":""} — initiate renewal process immediately.</div>
+              <button onClick={()=>router.push("/customers/renewals")} style={{fontSize:"0.6875rem",fontWeight:700,color:"#FBBF24",background:"none",border:"1px solid rgba(245,158,11,0.3)",borderRadius:6,padding:"4px 10px",cursor:"pointer"}}>Renewals →</button>
+            </div>
+          )}
         </div>
       </div>
-    </PageWrapper>
+
+      {/* CONTENT */}
+      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+          {/* Main */}
+          <div className="xl:col-span-2 space-y-5">
+
+            {/* Contract details */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Contract Details</div>
+              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Terms & Conditions</div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ["Status",    <span style={{fontSize:"0.75rem",fontWeight:700,padding:"4px 12px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span>],
+                  ["Total Value",    fmtEGP(contract.total_value)],
+                  ["Monthly Value",  fmtEGP(contract.monthly_value)],
+                  ["Duration",       contract.duration_months?`${contract.duration_months} months`:"—"],
+                  ["Start Date",     fmtDate(contract.start_date)],
+                  ["End Date",       <span style={{color:isExpiring?"#F59E0B":isExpired?"#EF4444":"inherit",fontWeight:(isExpiring||isExpired)?700:400}}>{fmtDate(contract.end_date)}</span>],
+                  ["Renewal Count",  contract.renewal_count||0],
+                  ["Invoices",       contractInvoices.length],
+                  ["Work Orders",    contractWOs.length],
+                  ["Service Reqs",   contractSRs.length],
+                ].map(([l,v],i)=>(
+                  <div key={i} style={{background:"var(--color-bg-alt)",borderRadius:12,padding:"12px 14px"}}>
+                    <div style={{fontSize:"0.625rem",color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:5}}>{l}</div>
+                    <div style={{fontSize:"0.875rem",fontWeight:600,color:"var(--color-text-1)"}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              {contract.services && (
+                <div style={{marginTop:12,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
+                  <div style={{fontSize:"0.625rem",color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>Services</div>
+                  <div style={{fontSize:"0.875rem",color:"var(--color-text-1)",lineHeight:1.6}}>{contract.services}</div>
+                </div>
+              )}
+              {contract.notes && (
+                <div style={{marginTop:12,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
+                  <div style={{fontSize:"0.625rem",color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>Notes</div>
+                  <div style={{fontSize:"0.875rem",color:"var(--color-text-1)",lineHeight:1.6}}>{contract.notes}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Invoices */}
+            {contractInvoices.length > 0 && (
+              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+                <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Finance</div>
+                <div className="flex items-center justify-between" style={{marginBottom:12}}>
+                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>Invoices ({contractInvoices.length})</div>
+                  <div style={{fontSize:"0.75rem",color:"#34D399",fontWeight:700}}>{fmtEGP(totalPaid)} collected</div>
+                </div>
+                {/* Progress */}
+                <div style={{height:4,background:"var(--color-bg-alt)",borderRadius:99,overflow:"hidden",marginBottom:16}}>
+                  <div style={{height:4,background:"#34D399",borderRadius:99,width:`${totalInvoiced>0?totalPaid/totalInvoiced*100:0}%`,transition:"width 600ms ease"}}/>
+                </div>
+                <div className="space-y-2">
+                  {contractInvoices.slice(0,6).map((inv,i)=>{
+                    const ic = {paid:"#34D399",pending:"#FCD34D",overdue:"#F87171",cancelled:"#94A3B8"}[inv.status]||"#94A3B8";
+                    return (
+                      <button key={i} onClick={()=>router.push(`/invoices/${inv.id}`)} className="w-full text-left"
+                        style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:12,background:"var(--color-bg-alt)",border:"1px solid transparent",transition:"all 120ms",cursor:"pointer"}}
+                        onMouseEnter={e=>e.currentTarget.style.borderColor="var(--color-brand)"}
+                        onMouseLeave={e=>e.currentTarget.style.borderColor="transparent"}>
+                        <div style={{width:3,height:28,background:ic,borderRadius:99,flexShrink:0}}/>
+                        <div style={{flex:1}}>
+                          <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}}>{inv.invoice_number}</div>
+                          <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2}}>Due {fmtDate(inv.due_date)}</div>
+                        </div>
+                        <div style={{fontSize:"0.875rem",fontWeight:700,color:ic}}>{fmtEGP(inv.total_amount)}</div>
+                        <span style={{fontSize:"0.625rem",fontWeight:700,padding:"3px 8px",borderRadius:99,background:`${ic}18`,color:ic,flexShrink:0}}>{inv.status}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Work Orders */}
+            {contractWOs.length > 0 && (
+              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+                <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Operations</div>
+                <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Work Orders ({contractWOs.length})</div>
+                <div className="space-y-2">
+                  {contractWOs.slice(0,5).map((w,i)=>{
+                    const wc = {open:"#60A5FA",in_progress:"#FCD34D",completed:"#34D399"}[w.status]||"#94A3B8";
+                    const pc = {critical:"#F87171",high:"#FB923C",medium:"#FCD34D",low:"#94A3B8"}[w.priority]||"#94A3B8";
+                    return (
+                      <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)} className="w-full text-left"
+                        style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:12,background:"var(--color-bg-alt)",border:"1px solid transparent",transition:"all 120ms",cursor:"pointer"}}
+                        onMouseEnter={e=>e.currentTarget.style.borderColor="var(--color-brand)"}
+                        onMouseLeave={e=>e.currentTarget.style.borderColor="transparent"}>
+                        <div style={{width:3,height:28,background:pc,borderRadius:99,flexShrink:0}}/>
+                        <div style={{flex:1}}>
+                          <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{w.title}</div>
+                          <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2}}>{w.priority} · {fmtDate(w.created_at)}</div>
+                        </div>
+                        <span style={{fontSize:"0.625rem",fontWeight:700,padding:"3px 8px",borderRadius:99,background:`${wc}18`,color:wc,flexShrink:0}}>{w.status}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right sidebar */}
+          <div className="space-y-4">
+
+            {/* Actions */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"← All Contracts",     icon:"📄", path:"/commercial/contracts" },
+                  { label:"Renewal Pipeline",     icon:"🔄", path:"/customers/renewals" },
+                  { label:"Customer 360",         icon:"🔍", path:"/customers/360" },
+                  { label:"Invoice Management",   icon:"💰", path:"/invoices" },
+                  { label:"Commercial Overview",  icon:"💼", path:"/commercial" },
+                ].map((a,i)=>(
+                  <button key={i} onClick={()=>router.push(a.path)} className="w-full text-left flex items-center gap-3"
+                    style={{padding:"10px 12px",borderRadius:10,background:"transparent",border:"1px solid transparent",fontSize:"0.8125rem",fontWeight:i===0?600:500,color:"var(--color-text-2)",cursor:"pointer",transition:"all 120ms"}}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(180,83,9,0.06)";e.currentTarget.style.borderColor="rgba(180,83,9,0.2)";e.currentTarget.style.color="var(--color-brand)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="transparent";e.currentTarget.style.color="var(--color-text-2)";}}>
+                    <span>{a.icon}</span>{a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Financial summary */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Financial Summary</div>
+              <div className="space-y-3">
+                {[
+                  { label:"Contract Value",  value:fmtEGP(contract.total_value),              color:"#34D399" },
+                  { label:"Total Invoiced",  value:fmtEGP(totalInvoiced),                     color:"rgba(148,163,184,0.8)" },
+                  { label:"Collected",       value:fmtEGP(totalPaid),                          color:"#34D399" },
+                  { label:"Pending",         value:fmtEGP(pendingInvoices.reduce((s,i)=>s+Number(i.total_amount||0),0)), color:"#FCD34D" },
+                  { label:"Invoices",        value:contractInvoices.length,                    color:"rgba(148,163,184,0.8)" },
+                ].map(({label,value,color},i)=>(
+                  <div key={i} className="flex justify-between" style={{padding:"8px 0",borderBottom:i<4?"1px solid var(--color-divider)":"none"}}>
+                    <span style={{fontSize:"0.75rem",color:"var(--color-text-3)"}}>{label}</span>
+                    <span style={{fontSize:"0.875rem",fontWeight:700,color}}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Record meta */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              {[["ID",contract.id?.slice(0,14)+"..."],["Created",fmtDate(contract.created_at)],["Updated",fmtDate(contract.updated_at)]].map(([l,v],i)=>(
+                <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<2?"1px solid var(--color-divider)":"none"}}>
+                  <span style={{color:"var(--color-text-3)"}}>{l}</span>
+                  <span style={{color:"var(--color-text-2)",fontFamily:"monospace"}}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

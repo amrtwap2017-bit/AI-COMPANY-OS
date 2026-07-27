@@ -1,217 +1,309 @@
 "use client";
-import { useState } from "react";
+// @ts-nocheck
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
 
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtDateTime = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); } catch { return "—"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB", {day:"numeric",month:"short",year:"numeric"}); } catch { return "—"; } };
+const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
-const ST = {new:"bg-blue-100 text-blue-800",qualified:"bg-indigo-100 text-indigo-800",assigned:"bg-amber-100 text-amber-800",negotiation:"bg-orange-100 text-orange-800",converted:"bg-emerald-100 text-emerald-800",won:"bg-emerald-100 text-emerald-800",lost:"bg-red-100 text-red-700"};
-const STATUSES   = ["new","qualified","assigned","negotiation","converted","won","lost"];
-const PRIORITIES = ["critical","high","medium","low"];
-const SOURCES    = ["web","direct","referral","linkedin","cold_call","event"];
+const STATUS_CONFIG = {
+  new:         { color:"#60A5FA", bg:"rgba(96,165,250,0.1)",  border:"rgba(96,165,250,0.25)",   label:"New" },
+  qualified:   { color:"#A78BFA", bg:"rgba(167,139,250,0.1)", border:"rgba(167,139,250,0.25)",  label:"Qualified" },
+  proposal:    { color:"#818CF8", bg:"rgba(129,140,248,0.1)", border:"rgba(129,140,248,0.25)",  label:"Proposal" },
+  negotiation: { color:"#FCD34D", bg:"rgba(245,158,11,0.1)",  border:"rgba(245,158,11,0.25)",   label:"Negotiation" },
+  won:         { color:"#34D399", bg:"rgba(16,185,129,0.1)",  border:"rgba(16,185,129,0.25)",   label:"Won ✓" },
+  lost:        { color:"#F87171", bg:"rgba(239,68,68,0.1)",   border:"rgba(239,68,68,0.25)",    label:"Lost" },
+};
+
+const PIPELINE_STAGES = ["new","qualified","proposal","negotiation","won"];
 
 export default function LeadDetailPage() {
-  const { id }    = useParams();
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [form,    setForm]    = useState(null);
+  const { id } = useParams();
+  const router  = useRouter();
 
-  const { data: lead, isLoading, refetch } = useQuery(
+  const { data: leadData, isLoading, isError } = useQuery(
     ["lead-detail", id],
-    () => authFetch(`/api/v1/leads/${id}`).then(r=>r.json()),
-    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+    () => authFetch(`/api/v1/leads/${id}`).then(r => r.json()),
+    { enabled: !!id }
+  );
+  const { data: allLeadsRaw }    = useQuery(["leads-all-det"],  () => authFetch("/api/v1/leads/").then(r=>r.json()));
+  const { data: allContractsRaw }= useQuery(["contracts-leads"],() => authFetch("/api/v1/contracts/").then(r=>r.json()));
+
+  if (isLoading) return (
+    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
+      <div style={{background:"#0F172A",height:240}} className="animate-pulse"/>
+    </div>
   );
 
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
-
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/leads/${id}`, {
-        method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(form)
-      });
-      if (r.ok) { setEditing(false); refetch(); }
-      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  async function updateStatus(status) {
-    setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/leads/${id}`, {
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({status})
-      });
-      if (r.ok) refetch();
-      else alert("Failed to update status");
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
-  if (!lead || lead.detail) return (
-    <PageWrapper>
-      <div className="text-center py-20">
-        <p className="text-secondary mb-4">Lead not found</p>
-        <Link href="/commercial/leads" className="text-blue-600 underline text-sm">Back to Leads</Link>
+  if (isError || !leadData) return (
+    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--color-bg)"}}>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:"3rem",marginBottom:16}}>👤</div>
+        <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Lead Not Found</div>
+        <button onClick={()=>router.push("/commercial/leads")} style={{marginTop:20,background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Leads</button>
       </div>
-    </PageWrapper>
+    </div>
   );
+
+  const lead = Array.isArray(leadData) ? leadData[0] : leadData;
+  if (!lead) return null;
+
+  const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+  const allLeads     = toArr(allLeadsRaw);
+  const allContracts = toArr(allContractsRaw);
+
+  const sc    = STATUS_CONFIG[lead.status] || STATUS_CONFIG.new;
+  const score = Number(lead.score || 0);
+  const isHot = score >= 70 && lead.status !== "won" && lead.status !== "lost";
+  const isWon = lead.status === "won";
+
+  // Find linked contract (by lead_id)
+  const linkedContract = allContracts.find(c => c.lead_id === lead.id);
+  // Similar company leads
+  const similarLeads   = allLeads.filter(l => l.id !== lead.id && (l.company === lead.company || l.source === lead.source) && lead.company).slice(0, 4);
+
+  // Pipeline progress
+  const stageIndex = PIPELINE_STAGES.indexOf(lead.status);
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={lead.name || "Lead"}
-        subtitle={lead.company ? `${lead.company} · ${lead.source||""}` : lead.source||""}
-        breadcrumbs={[{label:"Commercial",href:"/commercial"},{label:"Leads",href:"/commercial/leads"},{label:lead.name?.slice(0,30)||id}]}
-        actions={
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button variant="secondary" size="sm" onClick={()=>{setForm({...lead});setEditing(true)}}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
-                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
-              </>
-            )}
-          </div>
-        }
-      />
+    <div className="min-h-screen" style={{background:"var(--color-bg)"}}>
 
-      {/* Pipeline status bar */}
-      {!editing && (
-        <div className="flex items-center gap-2 mb-5 p-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
-          <span className="text-xs font-semibold text-secondary mr-1 shrink-0">PIPELINE:</span>
-          {STATUSES.map(s=>(
-            <button key={s} onClick={()=>updateStatus(s)} disabled={saving||s===lead.status}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors shrink-0 ${s===lead.status?"bg-blue-600 text-white border-blue-600":"border-slate-200 bg-white text-secondary hover:border-blue-300 disabled:opacity-100"}`}>
-              {s}
+      {/* DARK HEADER */}
+      <div style={{background:`linear-gradient(135deg, #0F172A 0%, ${isWon?"#0A1F14":isHot?"#1A1208":"#0F172A"} 100%)`,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-3 mb-6">
+            <button onClick={()=>router.push("/commercial/leads")}
+              style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"rgba(248,250,252,0.8)",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",transition:"all 120ms"}}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.1)"}
+              onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}>
+              ← Leads
             </button>
-          ))}
-        </div>
-      )}
+            <span style={{color:"rgba(255,255,255,0.15)"}}>/</span>
+            {lead.company && <><span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}}>{lead.company}</span><span style={{color:"rgba(255,255,255,0.15)"}}>/</span></>}
+            <span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}} className="truncate">{lead.name}</span>
+          </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <SectionCard title="Lead Details">
-            {editing ? (
-              <form onSubmit={save} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Full Name *</label>
-                    <input required value={form?.name||""} onChange={e=>setForm({...form,name:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Company</label>
-                    <input value={form?.company||""} onChange={e=>setForm({...form,company:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Email *</label>
-                    <input type="email" required value={form?.email||""} onChange={e=>setForm({...form,email:e.target.value})} className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Phone</label>
-                    <input value={form?.phone||""} onChange={e=>setForm({...form,phone:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Source</label>
-                    <select value={form?.source||"web"} onChange={e=>setForm({...form,source:e.target.value})} className={inp}>
-                      {SOURCES.map(s=><option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Priority</label>
-                    <select value={form?.priority||"medium"} onChange={e=>setForm({...form,priority:e.target.value})} className={inp}>
-                      {PRIORITIES.map(p=><option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Status</label>
-                    <select value={form?.status||"new"} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
-                      {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Notes</label>
-                  <textarea value={form?.notes||""} onChange={e=>setForm({...form,notes:e.target.value})}
-                    rows={4} placeholder="Requirements, budget, property details…" className={inp+" resize-none"} />
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Contact</p>
-                    <p className="text-slate-800 font-medium">{lead.name}</p>
-                    <p className="text-xs text-secondary mt-0.5">{lead.email}</p>
-                    {lead.phone&&<p className="text-xs text-tertiary">{lead.phone}</p>}
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Company</p>
-                    <p className="text-slate-700">{lead.company||"—"}</p>
-                  </div>
-                </div>
-                {lead.notes && (
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Notes</p>
-                    <p className="text-slate-700 text-sm whitespace-pre-wrap">{lead.notes}</p>
-                  </div>
-                )}
+          {/* Hero */}
+          <div className="flex items-start justify-between gap-6">
+            <div style={{flex:1,minWidth:0}}>
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <div style={{fontSize:"0.625rem",fontWeight:700,color:"#F59E0B",textTransform:"uppercase",letterSpacing:"0.1em"}}>Commercial · Lead</div>
+                <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span>
+                {isHot && <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:"rgba(239,68,68,0.15)",color:"#F87171",border:"1px solid rgba(239,68,68,0.3)"}}>🔥 HOT</span>}
+                {isWon && <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:"rgba(16,185,129,0.15)",color:"#34D399",border:"1px solid rgba(16,185,129,0.3)"}}>✓ CONVERTED</span>}
               </div>
-            )}
-          </SectionCard>
-        </div>
+              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1,margin:0}}>{lead.name}</h1>
+              {lead.company && <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:6}}>{lead.company} · {lead.source||"Direct"}</p>}
+            </div>
 
-        <div className="space-y-4">
-          <SectionCard title="Lead Score">
-            <div className="text-center py-4">
-              <div className={`text-5xl font-black mb-1 ${(lead.score||0)>=80?"text-emerald-600":(lead.score||0)>=50?"text-amber-600":"text-tertiary"}`}>
-                {lead.score||0}
-              </div>
-              <p className="text-xs text-secondary">Lead Score</p>
-              <div className="mt-3 w-full bg-slate-100 rounded-full h-2">
-                <div className={`h-2 rounded-full ${(lead.score||0)>=80?"bg-emerald-500":(lead.score||0)>=50?"bg-amber-500":"bg-slate-400"}`}
-                  style={{width:`${Math.min(100,lead.score||0)}%`}} />
+            {/* Score badge */}
+            <div style={{background:score>=70?"rgba(16,185,129,0.08)":score>=50?"rgba(245,158,11,0.08)":"rgba(96,165,250,0.08)",border:`1px solid ${score>=70?"rgba(16,185,129,0.22)":score>=50?"rgba(245,158,11,0.22)":"rgba(96,165,250,0.22)"}`,borderRadius:16,padding:"16px 24px",textAlign:"center",flexShrink:0,boxShadow:score>=70?"0 0 20px rgba(16,185,129,0.12)":"none"}}>
+              <div style={{fontSize:"2.5rem",fontWeight:900,color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",lineHeight:1}}>{score}</div>
+              <div style={{fontSize:"0.5625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.07em"}}>Lead Score</div>
+              <div style={{fontSize:"0.625rem",fontWeight:700,color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",marginTop:4}}>
+                {score>=70?"High Intent":score>=50?"Moderate":"Early Stage"}
               </div>
             </div>
-          </SectionCard>
+          </div>
 
-          <SectionCard title="Properties">
-            <dl className="space-y-3">
-              {[
-                {label:"Status",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(ST[lead.status]||"bg-slate-100 text-secondary")}>{lead.status||"—"}</span>},
-                {label:"Priority", value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[lead.priority]||P.low)}>{lead.priority||"—"}</span>},
-                {label:"Source",   value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{lead.source||"—"}</span>},
-                {label:"Created",  value:fmtDate(lead.created_at)},
-                {label:"Updated",  value:fmtDate(lead.updated_at)},
-              ].map(({label,value})=>(
-                <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-secondary">{label}</dt>
-                  <dd className="text-xs">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </SectionCard>
+          {/* Pipeline progress bar */}
+          {stageIndex >= 0 && (
+            <div style={{marginTop:20}}>
+              <div className="flex items-center gap-1">
+                {PIPELINE_STAGES.map((stage,i)=>{
+                  const passed = i <= stageIndex;
+                  const current = i === stageIndex;
+                  const sc2 = STATUS_CONFIG[stage];
+                  return (
+                    <div key={stage} className="flex items-center gap-1" style={{flex:1}}>
+                      <div style={{
+                        flex:1,height:4,borderRadius:99,
+                        background:passed?(current?sc.color:"rgba(52,211,153,0.6)"):"rgba(255,255,255,0.08)",
+                        transition:"background 300ms ease",
+                        boxShadow:current?`0 0 8px ${sc.color}60`:"none"
+                      }}/>
+                      {i < PIPELINE_STAGES.length - 1 && <div style={{width:1,height:4,background:"transparent"}}/>}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between mt-2">
+                {PIPELINE_STAGES.map((stage,i)=>(
+                  <div key={stage} style={{fontSize:"0.5rem",color:i<=stageIndex?"rgba(148,163,184,0.7)":"rgba(148,163,184,0.3)",textTransform:"uppercase",letterSpacing:"0.05em",fontWeight:i===stageIndex?700:400}}>
+                    {stage}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <Link href="/commercial/leads"
-            className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center transition-colors">
-            Back to Leads
-          </Link>
+          {/* KPI strip */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+            {[
+              { label:"Score",    value:score,              color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA" },
+              { label:"Priority", value:lead.priority||"—", color:"rgba(148,163,184,0.8)" },
+              { label:"Source",   value:lead.source||"—",   color:"rgba(148,163,184,0.8)" },
+              { label:"Email",    value:lead.email||"—",    color:"rgba(148,163,184,0.8)" },
+              { label:"Phone",    value:lead.phone||"—",    color:"rgba(148,163,184,0.8)" },
+            ].map((k,i)=>(
+              <div key={i} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"11px 12px",backdropFilter:"blur(12px)"}}>
+                <div style={{fontSize:"0.5625rem",color:"rgba(148,163,184,0.5)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:5}}>{k.label}</div>
+                <div style={{fontSize:"0.8125rem",fontWeight:700,color:k.color,lineHeight:1.3}} className="truncate">{k.value}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </PageWrapper>
+
+      {/* CONTENT */}
+      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+          {/* Main */}
+          <div className="xl:col-span-2 space-y-5">
+
+            {/* Lead details */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Contact & Lead Info</div>
+              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Full Details</div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ["Name",      lead.name||"—"],
+                  ["Company",   lead.company||"—"],
+                  ["Email",     lead.email||"—"],
+                  ["Phone",     lead.phone||"—"],
+                  ["Source",    lead.source||"—"],
+                  ["Priority",  lead.priority||"—"],
+                  ["Score",     `${score}/100`],
+                  ["Status",    <span style={{fontSize:"0.75rem",fontWeight:700,padding:"4px 12px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span>],
+                  ["Created",   fmtDate(lead.created_at)],
+                  ["Updated",   fmtDate(lead.updated_at)],
+                ].map(([l,v],i)=>(
+                  <div key={i} style={{background:"var(--color-bg-alt)",borderRadius:12,padding:"12px 14px"}}>
+                    <div style={{fontSize:"0.625rem",color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:5}}>{l}</div>
+                    <div style={{fontSize:"0.875rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{v}</div>
+                  </div>
+                ))}
+              </div>
+              {lead.notes && (
+                <div style={{marginTop:12,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
+                  <div style={{fontSize:"0.625rem",color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>Notes</div>
+                  <div style={{fontSize:"0.875rem",color:"var(--color-text-1)",lineHeight:1.6}}>{lead.notes}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Linked contract (if won) */}
+            {linkedContract && (
+              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+                <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Converted</div>
+                <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Linked Contract</div>
+                <button onClick={()=>router.push(`/commercial/contracts/${linkedContract.id}`)} className="w-full text-left"
+                  style={{padding:20,borderRadius:16,background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.2)",transition:"all 120ms",cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor="var(--color-brand)"}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(16,185,129,0.2)"}>
+                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:10}}>{linkedContract.title||`Contract ${linkedContract.id?.slice(0,8)}`}</div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[["Value",fmtEGP(linkedContract.total_value)],["Status",linkedContract.status],["Expires",fmtDate(linkedContract.end_date)]].map(([l,v],i)=>(
+                      <div key={i} style={{background:"rgba(0,0,0,0.1)",borderRadius:8,padding:"8px 10px"}}>
+                        <div style={{fontSize:"0.5625rem",color:"rgba(148,163,184,0.6)",marginBottom:3,textTransform:"uppercase",letterSpacing:"0.05em"}}>{l}</div>
+                        <div style={{fontSize:"0.8125rem",fontWeight:700,color:"#34D399"}}>{v}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{fontSize:"0.75rem",color:"var(--color-brand)",marginTop:14,fontWeight:600}}>View full contract →</div>
+                </button>
+              </div>
+            )}
+
+            {/* Similar leads */}
+            {similarLeads.length > 0 && (
+              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+                <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Related</div>
+                <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Similar Leads</div>
+                <div className="space-y-2">
+                  {similarLeads.map((l,i)=>{
+                    const ls = STATUS_CONFIG[l.status]||STATUS_CONFIG.new;
+                    const ls_score = Number(l.score||0);
+                    return (
+                      <button key={i} onClick={()=>router.push(`/commercial/leads/${l.id}`)} className="w-full text-left"
+                        style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,background:"var(--color-bg-alt)",border:"1px solid transparent",transition:"all 120ms",cursor:"pointer"}}
+                        onMouseEnter={e=>e.currentTarget.style.borderColor="var(--color-brand)"}
+                        onMouseLeave={e=>e.currentTarget.style.borderColor="transparent"}>
+                        <div style={{width:36,height:36,borderRadius:10,background:`${ls.bg}`,border:`1px solid ${ls.border}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:"1rem",fontWeight:900,color:ls.color}}>
+                          {(l.name||"?")[0]}
+                        </div>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:"0.8125rem",fontWeight:600,color:"var(--color-text-1)"}} className="truncate">{l.name}</div>
+                          <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:2}}>{l.company||l.source||"—"}</div>
+                        </div>
+                        <div style={{textAlign:"right",flexShrink:0}}>
+                          <div style={{fontSize:"1rem",fontWeight:900,color:ls_score>=70?"#34D399":ls_score>=50?"#FCD34D":"#60A5FA"}}>{ls_score}</div>
+                          <span style={{fontSize:"0.5625rem",fontWeight:700,padding:"2px 6px",borderRadius:99,background:ls.bg,color:ls.color}}>{ls.label}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right sidebar */}
+          <div className="space-y-4">
+
+            {/* Score breakdown */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Lead Scoring</div>
+              <div style={{textAlign:"center",marginBottom:16}}>
+                <div style={{fontSize:"3rem",fontWeight:900,color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",lineHeight:1}}>{score}</div>
+                <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginTop:4}}>out of 100</div>
+              </div>
+              <div style={{height:8,background:"var(--color-bg-alt)",borderRadius:99,overflow:"hidden",marginBottom:12}}>
+                <div style={{height:8,borderRadius:99,background:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",width:`${score}%`,transition:"width 600ms ease"}}/>
+              </div>
+              <div style={{fontSize:"0.75rem",color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",fontWeight:700,textAlign:"center"}}>
+                {score>=70?"High Intent — Ready to close":score>=50?"Moderate — Nurture needed":"Early Stage — Needs qualification"}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"← All Leads",         icon:"👤", path:"/commercial/leads" },
+                  { label:"Edit Lead",            icon:"✏️", path:`/leads/${lead.id}/edit` },
+                  { label:"Sales Pipeline",        icon:"📊", path:"/commercial/pipeline" },
+                  { label:"Commercial Overview",  icon:"💼", path:"/commercial" },
+                  { label:"Customer 360",         icon:"🔍", path:"/customers/360" },
+                ].map((a,i)=>(
+                  <button key={i} onClick={()=>router.push(a.path)} className="w-full text-left flex items-center gap-3"
+                    style={{padding:"10px 12px",borderRadius:10,background:"transparent",border:"1px solid transparent",fontSize:"0.8125rem",fontWeight:i===0?600:500,color:"var(--color-text-2)",cursor:"pointer",transition:"all 120ms"}}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(180,83,9,0.06)";e.currentTarget.style.borderColor="rgba(180,83,9,0.2)";e.currentTarget.style.color="var(--color-brand)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="transparent";e.currentTarget.style.color="var(--color-text-2)";}}>
+                    <span>{a.icon}</span>{a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Record meta */}
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
+              {[["ID",lead.id?.slice(0,14)+"..."],["Agent",lead.agent_id?.slice(0,12)||"—"],["Created",fmtDate(lead.created_at)],["Updated",fmtDate(lead.updated_at)]].map(([l,v],i)=>(
+                <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<3?"1px solid var(--color-divider)":"none"}}>
+                  <span style={{color:"var(--color-text-3)"}}>{l}</span>
+                  <span style={{color:"var(--color-text-2)",fontFamily:"monospace"}}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
