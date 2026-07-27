@@ -2,73 +2,75 @@
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-
-export default function MaintenanceIntelligence() {
-  const { data: planData, isLoading: l1 } = useQuery(["mi-plans"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-  const { data: assetData, isLoading: l2 } = useQuery(["mi-assets"], () => authFetch("/api/v1/assets/").then(r => r.json()));
-  const { data: woData, isLoading: l3 } = useQuery(["mi-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-
-  const plans = toArr(planData);
-  const assets = toArr(assetData);
-  const wos = toArr(woData);
-
-  const overdue = plans.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < new Date());
-  const openWOs = wos.filter((w: any) => w.status === "open" || w.status === "in_progress");
-  const criticalWOs = wos.filter((w: any) => w.priority === "critical" && w.status !== "completed");
-  const completedThisMonth = wos.filter((w: any) => {
-    if (w.status !== "completed" || !w.completed_at) return false;
-    const d = new Date(w.completed_at);
-    const now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
-
-  if (l1 || l2 || l3) return <div className="p-6 text-gray-400">Loading intelligence...</div>;
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function MaintenanceIntelligencePage() {
+  const router = useRouter();
+  const { data: assetRaw } = useQuery(["mi-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: woRaw }    = useQuery(["mi-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: pmRaw }    = useQuery(["mi-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
+  const assets = toArr(assetRaw); const wos = toArr(woRaw); const pms = toArr(pmRaw);
+  const now = new Date();
+  const faulted    = assets.filter(a=>a.status==="In Fault");
+  const overduePMs = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);
+  const criticalWOs= wos.filter(w=>w.priority==="critical"&&w.status!=="completed");
+  const assetHealth  = assets.length>0?Math.round(assets.filter(a=>a.status==="Operational").length/assets.length*100):100;
+  const pmCompliance = pms.length>0?Math.round((pms.length-overduePMs.length)/pms.length*100):100;
+  const compRate     = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Maintenance Intelligence</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Total Assets</div>
-          <div className="text-3xl font-bold">{assets.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-red-200">
-          <div className="text-sm text-red-500">Overdue PM Plans</div>
-          <div className="text-3xl font-bold text-red-600">{overdue.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-amber-200">
-          <div className="text-sm text-amber-500">Open Work Orders</div>
-          <div className="text-3xl font-bold text-amber-600">{openWOs.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-green-200">
-          <div className="text-sm text-green-500">Completed This Month</div>
-          <div className="text-3xl font-bold text-green-600">{completedThisMonth.length}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance · AI</div>
+          <h1 className="tb-hero-title">Maintenance Intelligence</h1>
+          <p className="tb-hero-description">AI-powered maintenance insights and health analysis</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Asset Health",value:assetHealth+"%",color:assetHealth>=95?"#34D399":"#FBBF24"},{label:"PM Compliance",value:pmCompliance+"%",color:pmCompliance>=90?"#34D399":"#FBBF24"},{label:"Faulted",value:faulted.length,color:faulted.length>0?"#F87171":"#34D399"},{label:"Overdue PMs",value:overduePMs.length,color:overduePMs.length>0?"#FBBF24":"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
+          </div>
         </div>
       </div>
-      {criticalWOs.length > 0 && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg p-4">
-          <h2 className="font-semibold text-red-700 mb-2">⚠️ Critical Work Orders Requiring Attention</h2>
-          {criticalWOs.map((w: any, i: number) => (
-            <div key={w.id || i} className="flex justify-between py-1 text-sm">
-              <span>{w.title || w.description || w.id}</span>
-              <span className="text-red-600">{w.status}</span>
-            </div>
+      <div className="tb-canvas">
+        <div className="tb-grid-3">
+          {[{label:"Asset Health",value:assetHealth,color:"#34D399",path:"/maintenance/assets"},{label:"PM Compliance",value:pmCompliance,color:"#A78BFA",path:"/maintenance/pm-plans"},{label:"WO Completion",value:compRate,color:"#60A5FA",path:"/operations/work-orders"}].map((k,i)=>(
+            <button key={i} onClick={()=>router.push(k.path)} className="tb-section text-center hover:border-brand transition-colors">
+              <div className="text-3xl font-black mb-2" style={{color:k.value>=80?k.color:"#F87171"}}>{k.value}%</div>
+              <div className="text-xs text-secondary mb-2">{k.label}</div>
+              <div className="tb-progress"><div className="tb-progress-bar" style={{background:k.value>=80?k.color:"#F87171",width:k.value+"%"}}/></div>
+            </button>
           ))}
         </div>
-      )}
-      {overdue.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg p-4">
-          <h2 className="font-semibold text-amber-700 mb-2">🔧 Overdue Maintenance Plans</h2>
-          {overdue.map((p: any, i: number) => (
-            <div key={p.id || i} className="flex justify-between py-1 text-sm">
-              <span>{p.title}</span>
-              <span className="text-amber-600">{p.frequency} — was due {new Date(p.next_due_ts).toLocaleDateString("en-GB")}</span>
+        {(faulted.length>0||overduePMs.length>0||criticalWOs.length>0)&&(
+          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+            <div className="tb-section-title">Attention Required</div>
+            <div className="space-y-2">
+              {faulted.slice(0,3).map((a,i)=>(
+                <button key={i} onClick={()=>router.push("/maintenance/assets/"+a.id)} className="tb-action-item w-full justify-between">
+                  <div className="flex items-center gap-2"><span>⚙️</span><span className="text-sm text-secondary truncate">{a.name}</span></div>
+                  <span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem"}}>FAULT</span>
+                </button>
+              ))}
+              {overduePMs.slice(0,3).map((pm,i)=>(
+                <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
+                  <div className="flex items-center gap-2"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title}</span></div>
+                  <span className="tb-badge tb-badge--warning" style={{fontSize:"0.5rem"}}>OVERDUE</span>
+                </button>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Navigate</div>
+          <div className="tb-grid-4">
+            {[{label:"Assets",icon:"⚙️",path:"/maintenance/assets"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Asset Tree",icon:"🌳",path:"/maintenance/asset-tree"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

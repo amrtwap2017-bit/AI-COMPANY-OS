@@ -3,133 +3,58 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-
-export default function WorkflowLauncher() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function WorkflowLauncherPage() {
   const router = useRouter();
-  const [running, setRunning] = useState(false);
-  const [lastResult, setLastResult] = useState<any>(null);
-
-  const { data: woData } = useQuery(["wfl-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: srData } = useQuery(["wfl-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.json()));
-  const { data: prData } = useQuery(["wfl-prs"], () => authFetch("/api/v1/purchase-requests/").then(r => r.json()));
-  const { data: pmData } = useQuery(["wfl-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-  const { data: autoStatus, refetch: refetchStatus } = useQuery(
-    ["automation-status"],
-    () => authFetch("/api/v1/automation/status").then(r => r.json())
-  );
-
-  const wos = toArr(woData);
-  const srs = toArr(srData);
-  const prs = toArr(prData);
-  const pms = toArr(pmData);
-  const pending = autoStatus?.pending_actions || {};
-  const totalPending = Object.values(pending).reduce((s: number, v: any) => s + Number(v), 0);
-
-  const runAutomation = async () => {
-    setRunning(true);
-    try {
-      const res = await authFetch("/api/v1/automation/run", { method: "POST" });
-      const data = await res.json();
-      setLastResult(data);
-      refetchStatus();
-    } catch (e: any) {
-      setLastResult({ error: e.message });
-    } finally {
-      setRunning(false);
-    }
-  };
-
-  const launchers = [
-    { title: "Create Work Order", desc: "New corrective or reactive maintenance task", path: "/engineering/new-work-order", icon: "🔧", count: `${wos.filter((w: any) => w.status === "open").length} open` },
-    { title: "New Service Request", desc: "Log a new customer or internal service request", path: "/operations/service-requests", icon: "📋", count: `${srs.filter((s: any) => s.status === "open" || s.status === "new").length} pending` },
-    { title: "Create Purchase Request", desc: "Request materials or spare parts", path: "/supply-chain/purchase-requests", icon: "🛒", count: `${prs.filter((p: any) => p.status === "pending").length} pending` },
-    { title: "Schedule PM", desc: "Review and schedule preventive maintenance", path: "/engineering/pm-plans", icon: "📅", count: `${pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < new Date()).length} overdue` },
-    { title: "Dispatch Technician", desc: "Assign and dispatch field technicians", path: "/operations/dispatch", icon: "👷", count: `${wos.filter((w: any) => w.status === "in_progress").length} dispatched` },
-    { title: "Review Contracts", desc: "Check contract status and renewals", path: "/commercial/contracts", icon: "📄", count: "" },
+  const { data: autoRaw } = useQuery(["wl-auto"], () => authFetch("/api/v1/automation/status").then(r=>r.json()));
+  const pending = autoRaw?.pending_actions||{};
+  const total = Object.values(pending).reduce((s,v)=>s+Number(v),0);
+  const actions = [
+    {label:"Create Work Order",  icon:"🔧", desc:"New maintenance or repair task", path:"/operations/work-orders"},
+    {label:"New Service Request", icon:"🎫", desc:"Log a service request", path:"/operations/service-requests"},
+    {label:"Create Purchase Request",icon:"📋", desc:"Request materials or equipment", path:"/supply-chain/purchase-requests"},
+    {label:"Add Asset",          icon:"⚙️",  desc:"Register new equipment", path:"/maintenance/assets"},
+    {label:"New Lead",           icon:"👤", desc:"Add a sales lead", path:"/commercial/leads"},
+    {label:"New Contract",       icon:"📄", desc:"Create a contract", path:"/commercial/contracts"},
   ];
-
   return (
-    <div className="tb-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-page-title text-primary">Workflow Launcher</h1>
-          <p className="text-gray-500 text-sm mt-1">Quick access to platform workflows and automation</p>
-        </div>
-        <button
-          onClick={runAutomation}
-          disabled={running}
-          className={`px-6 py-3 rounded-lg font-semibold text-white transition-all ${
-            running ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
-          }`}
-        >
-          {running ? "⏳ Running..." : `⚡ Run Automation Engine${totalPending > 0 ? ` (${totalPending} pending)` : ""}`}
-        </button>
-      </div>
-
-      {/* Automation Status */}
-      {totalPending > 0 && !lastResult && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 rounded-lg p-4">
-          <h2 className="font-semibold text-amber-700 mb-2">⚠️ Pending Automation Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {Object.entries(pending).map(([key, val]: [string, any]) => val > 0 && (
-              <div key={key} className="text-center bg-white dark:bg-zinc-800 rounded p-2">
-                <div className="text-xl font-bold text-amber-600">{val}</div>
-                <div className="text-xs text-gray-500 capitalize">{key.replace(/wf\d+_/, "").replace(/_/g, " ")}</div>
-              </div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Platform · Workflows</div>
+          <h1 className="tb-hero-title">Workflow Launcher</h1>
+          <p className="tb-hero-description">Quick-start common platform workflows</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Quick Actions",value:actions.length,color:"#60A5FA"},{label:"Pending",value:total,color:total>0?"#FBBF24":"#34D399"},{label:"Automation",value:"Active",color:"#34D399"},{label:"Status",value:"Ready",color:"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
         </div>
-      )}
-
-      {/* Last Run Result */}
-      {lastResult && !lastResult.error && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 rounded-lg p-4">
-          <h2 className="font-semibold text-green-700 mb-3">✅ Automation Complete — {lastResult.total_actions} Actions Taken</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-            <div className="bg-white dark:bg-zinc-800 rounded p-2">
-              <div className="text-xl font-bold text-blue-600">{lastResult.wf01_pm_to_wo?.created?.length || 0}</div>
-              <div className="text-xs text-gray-500">PM → Work Orders</div>
-            </div>
-            <div className="bg-white dark:bg-zinc-800 rounded p-2">
-              <div className="text-xl font-bold text-purple-600">{lastResult.wf02_contract_renewals?.notified?.length || 0}</div>
-              <div className="text-xs text-gray-500">Renewal Alerts</div>
-            </div>
-            <div className="bg-white dark:bg-zinc-800 rounded p-2">
-              <div className="text-xl font-bold text-orange-600">{lastResult.wf03_stock_auto_pr?.created?.length || 0}</div>
-              <div className="text-xs text-gray-500">Auto PRs</div>
-            </div>
-            <div className="bg-white dark:bg-zinc-800 rounded p-2">
-              <div className="text-xl font-bold text-green-600">{lastResult.wf04_wo_asset_sync?.synced || 0}</div>
-              <div className="text-xs text-gray-500">Assets Synced</div>
-            </div>
-            <div className="bg-white dark:bg-zinc-800 rounded p-2">
-              <div className="text-xl font-bold text-teal-600">{lastResult.wf05_sr_to_wo?.linked?.length || 0}</div>
-              <div className="text-xs text-gray-500">SRs Linked</div>
-            </div>
+      </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Quick Start Actions</div>
+          <div className="tb-grid-3">
+            {actions.map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-section text-left hover:border-brand transition-colors">
+                <div style={{fontSize:"2rem",marginBottom:8}}>{a.icon}</div>
+                <div className="text-sm font-bold text-primary mb-1">{a.label}</div>
+                <div className="text-xs text-tertiary">{a.desc}</div>
+                <div className="text-xs text-brand mt-3">Start →</div>
+              </button>
+            ))}
           </div>
         </div>
-      )}
-
-      {lastResult?.error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          ❌ Error: {lastResult.error}
-        </div>
-      )}
-
-      {/* Manual Workflow Launchers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {launchers.map((l, i) => (
-          <button key={i} onClick={() => router.push(l.path)}
-            className="bg-white dark:bg-zinc-900 rounded-lg border p-6 text-left hover:border-blue-400 hover:shadow-md transition-all">
-            <div className="text-3xl mb-3">{l.icon}</div>
-            <div className="font-semibold text-lg">{l.title}</div>
-            <div className="text-sm text-gray-500 mt-1">{l.desc}</div>
-            {l.count && <div className="text-xs text-blue-600 mt-2 font-medium">{l.count}</div>}
-          </button>
-        ))}
+        {Object.keys(pending).length>0&&(
+          <div className="tb-section">
+            <div className="tb-section-title">Pending Automation Actions</div>
+            <div className="space-y-2">
+              {Object.entries(pending).map(([key,val],i)=>(
+                <div key={i} className="tb-info-row"><span className="tb-info-label capitalize">{key.replace(/_/g," ")}</span><span className="tb-badge" style={{color:"#FBBF24"}}>{String(val)}</span></div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

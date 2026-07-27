@@ -1,75 +1,70 @@
 "use client";
 // @ts-nocheck
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0, 10); }
-};
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const PC = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"};
+const SC = {open:"#60A5FA",in_progress:"#FBBF24",resolved:"#34D399",closed:"#94A3B8"};
 export default function TasksPage() {
-  const { data: woData, isLoading: l1 } = useQuery(["tasks-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: srData, isLoading: l2 } = useQuery(["tasks-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.json()));
-
-  const wos = toArr(woData).filter((w: any) => w.status === "open" || w.status === "in_progress");
-  const srs = toArr(srData).filter((s: any) => s.status === "open" || s.status === "new");
-
-  const allTasks = [
-    ...wos.map((w: any) => ({ ...w, _type: "Work Order" })),
-    ...srs.map((s: any) => ({ ...s, _type: "Service Request" })),
-  ].sort((a: any, b: any) => {
-    const prio: any = { critical: 0, high: 1, medium: 2, low: 3 };
-    return (prio[a.priority] ?? 2) - (prio[b.priority] ?? 2);
-  });
-
-  if (l1 || l2) return <div className="p-6 text-gray-400">Loading tasks...</div>;
-
+  const router = useRouter();
+  const [filter, setFilter] = useState("all");
+  const { data: srRaw, isLoading } = useQuery(["tasks-srs"], () => authFetch("/api/v1/service-requests/").then(r=>r.json()),{refetchInterval:30000});
+  const { data: woRaw } = useQuery(["tasks-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const srs = toArr(srRaw); const wos = toArr(woRaw);
+  const open = srs.filter(s=>s.status==="open").length;
+  const critical = srs.filter(s=>s.priority==="critical"&&s.status!=="resolved"&&s.status!=="closed").length;
+  const filtered = filter==="all" ? srs : srs.filter(s=>s.status===filter||s.priority===filter);
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Active Tasks</h1>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Total Active</div>
-          <div className="text-3xl font-bold">{allTasks.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-blue-500">Open Work Orders</div>
-          <div className="text-3xl font-bold text-blue-600">{wos.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-purple-500">Open Service Requests</div>
-          <div className="text-3xl font-bold text-purple-600">{srs.length}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Operations</div>
+          <h1 className="tb-hero-title">Tasks</h1>
+          <p className="tb-hero-description">{srs.length} tasks · {open} open · {critical} critical</p>
+          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {[{label:"Total",value:srs.length,color:"#F1F5F9"},{label:"Open",value:open,color:"#60A5FA"},{label:"In Progress",value:srs.filter(s=>s.status==="in_progress").length,color:"#FBBF24"},{label:"Critical",value:critical,color:critical>0?"#F87171":"#34D399"},{label:"Linked WOs",value:srs.filter(s=>s.work_order_id).length,color:"#A78BFA"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="bg-white dark:bg-zinc-900 rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-zinc-800">
-            <tr>
-              <th className="text-left p-3">Type</th>
-              <th className="text-left p-3">Title</th>
-              <th className="text-left p-3">Priority</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allTasks.map((t: any, i: number) => (
-              <tr key={t.id || i} className="border-t hover:bg-gray-50 dark:hover:bg-zinc-800">
-                <td className="p-3"><span className={`px-2 py-0.5 rounded text-xs ${t._type === "Work Order" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>{t._type}</span></td>
-                <td className="p-3 font-medium">{t.title || t.description || t.subject || t.id}</td>
-                <td className="p-3">
-                  <span className={`px-2 py-0.5 rounded text-xs ${t.priority === "critical" ? "bg-red-100 text-red-700" : t.priority === "high" ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-600"}`}>
-                    {t.priority || "medium"}
-                  </span>
-                </td>
-                <td className="p-3">{t.status}</td>
-                <td className="p-3 text-gray-400">{fmtDate(t.created_at)}</td>
-              </tr>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="flex gap-2 flex-wrap">
+            {["all","open","in_progress","resolved","critical","high"].map(f=>(
+              <button key={f} onClick={()=>setFilter(f)} className={"tb-pill "+(filter===f?"tb-pill--active":"")}>
+                {f==="all"?"All":f.replace("_"," ")}
+              </button>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
+        <div className="tb-section">
+          <div className="tb-flex-between mb-4"><div className="text-sm text-secondary">{filtered.length} tasks</div><button onClick={()=>router.push("/operations/service-requests")} className="tb-section-link">All SRs →</button></div>
+          {isLoading ? <div className="space-y-3">{[1,2,3,4].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          : filtered.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No tasks</div></div>
+          : <div className="space-y-2">
+            {filtered.map((sr,i)=>{
+              const pc=PC[sr.priority]||"#94A3B8"; const sc=SC[sr.status]||"#94A3B8";
+              const wo=wos.find(w=>w.id===sr.work_order_id);
+              return (
+                <button key={i} onClick={()=>router.push("/operations/service-requests/"+sr.id)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
+                  <div className="tb-priority-bar" style={{background:pc}}/>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-primary truncate">{sr.title||"—"}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="tb-badge" style={{background:sc+"18",color:sc,border:"1px solid "+sc+"30",fontSize:"0.5rem"}}>{sr.status?.replace("_"," ")||"—"}</span>
+                      <span className="text-xs text-tertiary">{fmtDate(sr.created_at)}</span>
+                    </div>
+                  </div>
+                  {wo&&<span className="tb-badge tb-badge--success" style={{fontSize:"0.5rem",flexShrink:0}}>WO</span>}
+                </button>
+              );
+            })}
+          </div>}
+        </div>
       </div>
     </div>
   );

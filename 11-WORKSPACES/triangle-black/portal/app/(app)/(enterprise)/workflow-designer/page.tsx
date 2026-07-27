@@ -2,51 +2,64 @@
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-
-export default function WorkflowDesigner() {
-  const { data: woData } = useQuery(["wfd-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: srData } = useQuery(["wfd-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.json()));
-  const { data: prData } = useQuery(["wfd-prs"], () => authFetch("/api/v1/purchase-requests/").then(r => r.json()));
-  const { data: pmData } = useQuery(["wfd-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-
-  const wos = toArr(woData);
-  const srs = toArr(srData);
-  const prs = toArr(prData);
-  const pms = toArr(pmData);
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+export default function WorkflowDesignerPage() {
+  const router = useRouter();
+  const { data: woRaw } = useQuery(["wd-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: srRaw } = useQuery(["wd-srs"], () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
+  const wos = toArr(woRaw); const srs = toArr(srRaw);
   const workflows = [
-    { name: "Service Request → Work Order", from: "Service Requests", to: "Work Orders", fromCount: srs.length, toCount: wos.length, active: srs.filter((s: any) => s.status === "open" || s.status === "new").length, color: "blue" },
-    { name: "PM Plan → Work Order", from: "PM Plans", to: "Work Orders", fromCount: pms.length, toCount: wos.length, active: pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < new Date()).length, color: "amber" },
-    { name: "Work Order → Purchase Request", from: "Work Orders", to: "Purchase Requests", fromCount: wos.length, toCount: prs.length, active: prs.filter((p: any) => p.status === "pending" || p.status === "open").length, color: "purple" },
-    { name: "Work Order → Completion → Invoice", from: "Work Orders", to: "Invoices", fromCount: wos.length, toCount: wos.filter((w: any) => w.status === "completed").length, active: wos.filter((w: any) => w.status === "in_progress").length, color: "green" },
+    {label:"SR → Work Order",    icon:"🎫→🔧", desc:"Service request creates work order automatically", active:srs.filter(s=>s.work_order_id).length, total:srs.length, color:"#60A5FA"},
+    {label:"PM → Work Order",    icon:"📅→🔧", desc:"Overdue PM plan triggers work order creation",     active:wos.filter(w=>w.title?.startsWith("PM:")).length, total:wos.length, color:"#A78BFA"},
+    {label:"WO → Invoice",       icon:"🔧→💰", desc:"Completed work order creates invoice draft",       active:wos.filter(w=>w.status==="completed").length, total:wos.length, color:"#34D399"},
+    {label:"Contract → Renewal", icon:"📄→🔄", desc:"Expiring contract triggers renewal notification",  active:0, total:0, color:"#FBBF24"},
+    {label:"Stock Alert → PR",   icon:"📦→📋", desc:"Low stock triggers purchase request",             active:0, total:0, color:"#F97316"},
+    {label:"WO → Notification",  icon:"🔧→🔔", desc:"Work order status change sends notification",     active:wos.filter(w=>w.status!=="completed").length, total:wos.length, color:"#F87171"},
   ];
-
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Workflow Designer</h1>
-      <p className="text-gray-500">Platform workflow connections and their current throughput</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {workflows.map((wf, i) => (
-          <div key={i} className="bg-white dark:bg-zinc-900 rounded-lg border p-6">
-            <h3 className="font-semibold text-lg mb-4">{wf.name}</h3>
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold">{wf.fromCount}</div>
-                <div className="text-xs text-gray-500">{wf.from}</div>
-              </div>
-              <div className="text-3xl text-gray-300">→</div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">{wf.toCount}</div>
-                <div className="text-xs text-gray-500">{wf.to}</div>
-              </div>
-            </div>
-            <div className={`text-center p-2 rounded bg-${wf.color}-50 dark:bg-${wf.color}-900/20`}>
-              <span className={`text-sm font-medium text-${wf.color}-700`}>{wf.active} currently active</span>
-            </div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Platform · Automation</div>
+          <h1 className="tb-hero-title">Workflow Designer</h1>
+          <p className="tb-hero-description">Automated workflow rules and business process automation</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Workflows",value:workflows.length,color:"#60A5FA"},{label:"Active WOs",value:wos.filter(w=>w.status!=="completed").length,color:"#FBBF24"},{label:"Linked SRs",value:srs.filter(s=>s.work_order_id).length,color:"#34D399"},{label:"Auto-created",value:wos.filter(w=>w.title?.startsWith("PM:")).length,color:"#A78BFA"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
           </div>
-        ))}
+        </div>
+      </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Workflow Rules</div>
+          <div className="tb-grid-3">
+            {workflows.map((wf,i)=>(
+              <div key={i} className="tb-section">
+                <div className="text-lg mb-2">{wf.icon}</div>
+                <div className="text-sm font-bold text-primary mb-1">{wf.label}</div>
+                <div className="text-xs text-tertiary mb-3">{wf.desc}</div>
+                {wf.total>0 && (
+                  <div>
+                    <div className="tb-flex-between mb-1"><span className="text-xs text-secondary">Active</span><span className="text-xs font-bold" style={{color:wf.color}}>{wf.active}/{wf.total}</span></div>
+                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:wf.color,width:(wf.active/Math.max(wf.total,1)*100)+"%"}}/></div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Navigate</div>
+          <div className="tb-grid-4">
+            {[{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Service Requests",icon:"🎫",path:"/operations/service-requests"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Automation",icon:"⚡",path:"/workspace"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

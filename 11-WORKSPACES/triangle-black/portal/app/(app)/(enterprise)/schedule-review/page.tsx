@@ -2,73 +2,88 @@
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d: any): string => {
-  if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0, 10); }
-};
-
-export default function ScheduleReview() {
-  const { data: woData, isLoading: l1 } = useQuery(["sched-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: pmData, isLoading: l2 } = useQuery(["sched-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-
-  const wos = toArr(woData);
-  const pms = toArr(pmData);
-
-  const openWOs = wos.filter((w: any) => w.status === "open" || w.status === "in_progress");
-  const overdueP = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < new Date());
-  const upcoming = pms.filter((p: any) => {
-    if (!p.next_due_ts) return false;
-    const d = new Date(p.next_due_ts);
-    const now = new Date();
-    return d >= now && d <= new Date(now.getTime() + 7 * 86400000);
-  });
-
-  if (l1 || l2) return <div className="p-6 text-gray-400">Loading schedule...</div>;
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+export default function ScheduleReviewPage() {
+  const router = useRouter();
+  const { data: pmRaw } = useQuery(["sr2-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
+  const { data: woRaw } = useQuery(["sr2-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const pms = toArr(pmRaw); const wos = toArr(woRaw);
+  const now = new Date();
+  const next7  = new Date(now.getTime()+7*86400000);
+  const next30 = new Date(now.getTime()+30*86400000);
+  const overdue   = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);
+  const dueWeek   = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=next7);
+  const dueMonth  = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>next7&&new Date(p.next_due_ts)<=next30);
+  const wosDue    = wos.filter(w=>w.due_date&&new Date(w.due_date)>=now&&new Date(w.due_date)<=next7&&w.status!=="completed");
   return (
-    <div className="tb-page">
-      <h1 className="text-page-title text-primary">Schedule Review</h1>
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">Open WOs</div>
-          <div className="text-3xl font-bold">{openWOs.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-red-200">
-          <div className="text-sm text-red-500">Overdue PM</div>
-          <div className="text-3xl font-bold text-red-600">{overdueP.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4 border-amber-200">
-          <div className="text-sm text-amber-500">Due This Week</div>
-          <div className="text-3xl font-bold text-amber-600">{upcoming.length}</div>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <div className="text-sm text-gray-500">In Progress</div>
-          <div className="text-3xl font-bold text-blue-600">{wos.filter((w: any) => w.status === "in_progress").length}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance · Schedule</div>
+          <h1 className="tb-hero-title">Schedule Review</h1>
+          <p className="tb-hero-description">Upcoming maintenance and work order schedule</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Overdue PMs",value:overdue.length,color:overdue.length>0?"#F87171":"#34D399"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#FBBF24":"#34D399"},{label:"Due This Month",value:dueMonth.length,color:"#60A5FA"},{label:"WOs Due Soon",value:wosDue.length,color:wosDue.length>0?"#FB923C":"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <h2 className="font-semibold mb-3">Open Work Orders</h2>
-          {openWOs.slice(0, 15).map((w: any, i: number) => (
-            <div key={w.id || i} className="flex justify-between py-1.5 border-b text-sm">
-              <span>{w.title || w.description || w.id}</span>
-              <span className={`text-xs px-1.5 py-0.5 rounded ${w.priority === "critical" ? "bg-red-100 text-red-700" : w.priority === "high" ? "bg-orange-100 text-orange-700" : "bg-gray-100"}`}>{w.priority || "medium"}</span>
+      <div className="tb-canvas">
+        {overdue.length>0&&(
+          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+            <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold text-red-400">{overdue.length} PM plan{overdue.length>1?"s":""} overdue</span><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link ml-auto">View →</button></div>
+          </div>
+        )}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Due This Week ({dueWeek.length})</div><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link">All →</button></div>
+            <div className="space-y-2 mt-3">
+              {dueWeek.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No PMs due this week</div></div>
+              : dueWeek.map((pm,i)=>{
+                const days=Math.ceil((new Date(pm.next_due_ts)-now)/86400000);
+                return (
+                  <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
+                    <div className="flex items-center gap-2 min-w-0"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title||"—"}</span></div>
+                    <span className="text-xs flex-shrink-0" style={{color:"#FBBF24"}}>in {days}d</span>
+                  </button>
+                );
+              })}
             </div>
-          ))}
+          </div>
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>WOs Due Soon ({wosDue.length})</div><button onClick={()=>router.push("/operations/work-orders")} className="tb-section-link">All →</button></div>
+            <div className="space-y-2 mt-3">
+              {wosDue.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No WOs due this week</div></div>
+              : wosDue.map((wo,i)=>{
+                const days=Math.ceil((new Date(wo.due_date)-now)/86400000);
+                const pc={critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[wo.priority]||"#94A3B8";
+                return (
+                  <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
+                    <div className="flex items-center gap-2 min-w-0"><div className="tb-priority-bar" style={{background:pc}}/><span className="text-sm text-secondary truncate">{wo.title||"—"}</span></div>
+                    <span className="text-xs flex-shrink-0" style={{color:pc}}>in {days}d</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
-          <h2 className="font-semibold mb-3">Upcoming PM Plans</h2>
-          {[...overdueP, ...upcoming].slice(0, 15).map((p: any, i: number) => {
-            const isOverdue = p.next_due_ts && new Date(p.next_due_ts) < new Date();
-            return (
-              <div key={p.id || i} className="flex justify-between py-1.5 border-b text-sm">
-                <span>{p.title}</span>
-                <span className={`text-xs ${isOverdue ? "text-red-600" : "text-amber-600"}`}>{fmtDate(p.next_due_ts)}</span>
-              </div>
-            );
-          })}
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-3">Due This Month ({dueMonth.length})</div>
+          <div className="space-y-2">
+            {dueMonth.slice(0,5).map((pm,i)=>{
+              const days=Math.ceil((new Date(pm.next_due_ts)-now)/86400000);
+              return (
+                <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
+                  <div className="flex items-center gap-2 min-w-0"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title||"—"}</span></div>
+                  <span className="text-xs text-tertiary flex-shrink-0">in {days}d — {fmtDate(pm.next_due_ts)}</span>
+                </button>
+              );
+            })}
+            {dueMonth.length===0&&<div className="text-xs text-tertiary text-center py-4">No PMs due this month</div>}
+          </div>
         </div>
       </div>
     </div>
