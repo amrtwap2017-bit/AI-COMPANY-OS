@@ -33,7 +33,7 @@ export default function InboxPage() {
   const { data: notifRaw, isLoading } = useQuery(
     ["inbox-notifs"],
     () => authFetch("/api/v1/notifications/?limit=100").then(r => r.json()),
-    { refetchInterval: 20000 }
+    { refetchInterval: 120000 }
   );
   const { data: actRaw } = useQuery(
     ["inbox-activity"],
