@@ -39,12 +39,12 @@ export default function InventoryPage() {
   });
   const totalValue = stocks.reduce((s, b) => {
     const item = items.find(i => i.id === b.item_id);
-    return s + (Number(b.quantity||0) * Number(item?.unit_price||item?.cost||0));
+    return s + (Number(b.qty_on_hand||0) * Number(item?.unit_price||item?.cost||0));
   }, 0);
 
   const enriched = items.map(item => {
     const bal = stocks.find(s => s.item_id === item.id);
-    const qty = Number(bal?.quantity || 0);
+    const qty = Number(bal?.qty_on_hand || 0);
     const min = Number(item.minimum_quantity || item.min_quantity || 5);
     return { ...item, current_qty: qty, min_qty: min, is_low: qty <= min };
   });

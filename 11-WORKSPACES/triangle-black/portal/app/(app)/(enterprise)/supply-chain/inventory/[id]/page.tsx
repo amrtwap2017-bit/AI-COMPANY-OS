@@ -41,7 +41,7 @@ export default function InventoryItemDetailPage() {
 
   const stocks = Array.isArray(stockRaw) ? stockRaw : [];
   const balance = stocks.find(s => s.item_id === id);
-  const qty     = Number(balance?.quantity || 0);
+  const qty     = Number(balance?.qty_on_hand || 0);
   const minQty  = Number(item.minimum_quantity || item.min_quantity || 5);
   const isLow   = qty <= minQty;
   const pct     = minQty > 0 ? Math.min((qty / minQty) * 100, 200) : 100;

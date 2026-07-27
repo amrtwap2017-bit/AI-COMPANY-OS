@@ -15,7 +15,7 @@ export default function StockLevelsPage() {
   const enriched = stocks.map(s=>{
     const item=items.find(i=>i.id===s.item_id);
     const min=Number(item?.minimum_quantity||item?.min_quantity||5);
-    const qty=Number(s.quantity||0);
+    const qty=Number(s.qty_on_hand||0);
     return {...s,item_name:item?.name||"—",category:item?.category||"—",min_qty:min,qty,is_low:qty<=min};
   });
   const lowStock = enriched.filter(s=>s.is_low);
