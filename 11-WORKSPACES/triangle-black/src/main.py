@@ -2039,3 +2039,94 @@ def get_lead_detail(lead_id: str):
             **str_l,
             "contracts": [{k: str(v) if v is not None else None for k, v in c.items()} for c in contracts],
         }
+
+
+# ── SPRINT 209: TECHNICIAN + SUPPLIER DETAIL ENDPOINTS ───────────────────────
+
+@app.get("/api/v1/technicians/{tech_id}", tags=["operations"])
+def get_technician_detail(tech_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else None
+            except Exception:
+                db.rollback()
+                return None
+        def safe_list(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception:
+                db.rollback()
+                return []
+        tech = safe("SELECT * FROM technicians WHERE id = :id", {"id": tech_id})
+        if not tech:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Technician not found")
+        wos = safe_list("""SELECT id, title, status, priority, created_at, completed_at
+            FROM work_orders WHERE technician_id = :id
+            ORDER BY created_at DESC LIMIT 15""", {"id": tech_id})
+        completed = [w for w in wos if w.get("status") == "completed"]
+        open_wos  = [w for w in wos if w.get("status") in ("open","in_progress")]
+        str_t = {k: str(v) if v is not None else None for k, v in tech.items()}
+        return {
+            **str_t,
+            "work_orders": [{k: str(v) if v is not None else None for k, v in w.items()} for w in wos],
+            "stats": {
+                "total_wos": len(wos),
+                "completed": len(completed),
+                "open": len(open_wos),
+                "completion_rate": round(len(completed)/max(len(wos),1)*100),
+            }
+        }
+
+@app.get("/api/v1/suppliers/{supplier_id}", tags=["supply-chain"])
+def get_supplier_detail(supplier_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else None
+            except Exception:
+                db.rollback()
+                return None
+        def safe_list(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception:
+                db.rollback()
+                return []
+        supplier = safe("SELECT * FROM suppliers WHERE id = :id", {"id": supplier_id})
+        if not supplier:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Supplier not found")
+        pos = safe_list("""SELECT id, po_number, status, total_amount, order_date, created_at
+            FROM purchase_orders WHERE supplier_id = :id
+            ORDER BY created_at DESC LIMIT 10""", {"id": supplier_id})
+        prs = safe_list("""SELECT id, title, status, total_amount, created_at
+            FROM purchase_requests WHERE supplier_id = :id
+            ORDER BY created_at DESC LIMIT 10""", {"id": supplier_id})
+        total_value = sum(float(p.get("total_amount") or 0) for p in pos)
+        str_s = {k: str(v) if v is not None else None for k, v in supplier.items()}
+        return {
+            **str_s,
+            "purchase_orders": [{k: str(v) if v is not None else None for k, v in po.items()} for po in pos],
+            "purchase_requests": [{k: str(v) if v is not None else None for k, v in pr.items()} for pr in prs],
+            "stats": {
+                "total_pos": len(pos),
+                "total_value": total_value,
+                "total_prs": len(prs),
+            }
+        }

@@ -1,79 +1,191 @@
 "use client";
 // @ts-nocheck
-import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+import { useRouter, useParams } from "next/navigation";
+
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-export default function TechnicianDetail() {
-  const params = useParams(); const id = params?.id; const router = useRouter();
-  const { data: techRaw } = useQuery(["td-tech",id], () => authFetch("/api/v1/technicians/").then(r=>r.json()));
-  const { data: woRaw } = useQuery(["td-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const techs=toArr(techRaw); const wos=toArr(woRaw);
-  const tech=techs.find(t=>t.id===id)||techs[0];
-  const techWOs=wos.filter(w=>w.technician_id===id);
-  const openWOs=techWOs.filter(w=>w.status==="open"||w.status==="in_progress");
-  const completedWOs=techWOs.filter(w=>w.status==="completed");
-  const criticalWOs=techWOs.filter(w=>w.priority==="critical"&&w.status!=="completed");
-  if(!tech)return(<div className="p-6 text-tertiary">Loading...</div>);
-  const load=Math.round((tech.current_work_orders||0)/Math.max(tech.max_work_orders||5,1)*100);
+
+const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
+const WO_STATUS_COLOR = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"#94A3B8" };
+
+export default function TechnicianDetailPage() {
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
+
+  const { data: tech, isLoading } = useQuery(
+    ["tech-detail", id],
+    () => authFetch(`/api/v1/technicians/${id}`).then(r => r.json()),
+    { enabled: !!id }
+  );
+
+  if (isLoading) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading technician...</div>
+    </div>
+  );
+
+  if (!tech || tech.detail) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">👷</div>
+        <div className="tb-empty-title">Technician not found</div>
+        <button onClick={() => router.push("/operations/technicians")} className="tb-btn-primary mt-4">Back</button>
+      </div>
+    </div>
+  );
+
+  const wos   = tech.work_orders || [];
+  const stats = tech.stats || {};
+  const openWOs = wos.filter(w => w.status === "open" || w.status === "in_progress");
+  const completedWOs = wos.filter(w => w.status === "completed");
+  const compRate = stats.completion_rate || 0;
+
   return (
-    <div className="tb-page">
-      <button onClick={()=>router.push("/operations/technicians")} className="text-sm text-amber-500 hover:underline">← All Technicians</button>
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <div className="flex items-start gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-amber-700 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-2xl font-black">{(tech.name||"?")[0]}</span>
-          </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-black text-primary">{tech.name}</h1>
-            <div className="text-secondary text-sm">{tech.email}</div>
-            <div className="flex gap-3 mt-2 flex-wrap">
-              {(tech.specializations||[]).map((s,i)=>(
-                <span key={i} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">{s}</span>
-              ))}
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-base-alt flex items-center justify-center text-2xl font-black text-secondary flex-shrink-0">
+                {(tech.name||"?").charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div className="text-label-upper text-cyan-400 mb-1">Operations · Field Team</div>
+                <h1 className="tb-hero-title">{tech.name||`Technician ${id?.slice(0,8)}`}</h1>
+                <p className="tb-hero-description">
+                  {tech.specialization && <span className="text-secondary mr-2">{tech.specialization}</span>}
+                  {tech.employee_id && <span className="text-tertiary">ID: {tech.employee_id}</span>}
+                </p>
+              </div>
             </div>
+            <button onClick={() => router.push("/operations/technicians")} className="tb-btn-secondary">← Back</button>
           </div>
-          <span className={`text-xs font-bold px-3 py-1.5 rounded-lg ${tech.is_active?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}`}>{tech.is_active?"Active":"Inactive"}</span>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          {label:"Total WOs",value:techWOs.length,color:"blue"},
-          {label:"Completed",value:completedWOs.length,color:"emerald"},
-          {label:"Open",value:openWOs.length,color:"amber"},
-          {label:"Critical",value:criticalWOs.length,color:criticalWOs.length>0?"red":"emerald"},
-        ].map((k,i)=>(
-          <div key={i} className="bg-surface border border-border rounded-2xl p-5 text-center">
-            <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-secondary mt-1">{k.label}</div>
-          </div>
-        ))}
-      </div>
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold">Capacity</h2>
-          <span className="text-sm font-bold">{tech.current_work_orders||0}/{tech.max_work_orders||5}</span>
-        </div>
-        <div className="w-full bg-base-alt rounded-full h-4">
-          <div className={`h-4 rounded-full ${load>=90?"bg-red-500":load>=70?"bg-amber-500":"bg-emerald-500"}`} style={{width:`${load}%`}}/>
-        </div>
-      </div>
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <h2 className="font-bold mb-4">Assigned Work Orders</h2>
-        {techWOs.length===0?(<div className="text-center py-6 text-tertiary">No work orders assigned</div>):(
-          <div className="space-y-2">
-            {techWOs.slice(0,10).map((w,i)=>(
-              <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
-                className="w-full flex items-center gap-3 p-3 bg-base-alt dark:bg-surface-alt rounded-xl hover:bg-amber-50 text-left">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded ${w.priority==="critical"?"bg-red-100 text-red-700":w.priority==="high"?"bg-orange-100 text-orange-700":"bg-slate-100 text-secondary"}`}>{w.priority}</span>
-                <div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{w.title}</div><div className="text-xs text-tertiary">{fmtDate(w.created_at)}</div></div>
-                <span className={`text-xs px-2 py-0.5 rounded ${w.status==="completed"?"bg-emerald-100 text-emerald-700":w.status==="in_progress"?"bg-amber-100 text-amber-700":"bg-slate-100 text-secondary"}`}>{w.status}</span>
-              </button>
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Total WOs",       value:stats.total_wos||0,    color:"#F1F5F9" },
+              { label:"Completed",       value:stats.completed||0,    color:"#34D399" },
+              { label:"Active",          value:openWOs.length,        color:openWOs.length>0?"#FBBF24":"#34D399" },
+              { label:"Completion Rate", value:`${compRate}%`,        color:compRate>=80?"#34D399":"#FBBF24" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
             ))}
           </div>
-        )}
+        </div>
+      </div>
+
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+
+            <div className="tb-section">
+              <div className="tb-section-title">Technician Details</div>
+              <div className="space-y-1">
+                {[
+                  ["Name",              tech.name || "—"],
+                  ["Employee ID",       tech.employee_id || "—"],
+                  ["Specialization",    tech.specialization || "—"],
+                  ["Status",            tech.status || "Active"],
+                  ["Phone",             tech.phone || "—"],
+                  ["Email",             tech.email || "—"],
+                  ["Certification",     tech.certification || "—"],
+                  ["Hire Date",         fmtDate(tech.hire_date)],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {wos.length > 0 && (
+              <div className="tb-section">
+                <div className="tb-section-header">
+                  <div className="tb-section-title" style={{marginBottom:0}}>Work Order History ({wos.length})</div>
+                  <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All WOs →</button>
+                </div>
+                <div className="tb-table" style={{borderRadius:12,overflow:"hidden",marginTop:12}}>
+                  <div className="tb-table-head" style={{gridTemplateColumns:"2fr 80px 90px 110px"}}>
+                    {["Work Order","Priority","Status","Date"].map((h, i) => (
+                      <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                    ))}
+                  </div>
+                  {wos.map((wo, i) => {
+                    const pc  = PRIORITY_COLOR[wo.priority] || "#94A3B8";
+                    const wsc = WO_STATUS_COLOR[wo.status]  || "#94A3B8";
+                    return (
+                      <button key={i}
+                        onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
+                        className="tb-table-row"
+                        style={{gridTemplateColumns:"2fr 80px 90px 110px"}}>
+                        <div className="flex items-center gap-2 pr-4 min-w-0">
+                          <div className="tb-priority-bar" style={{background:pc}}/>
+                          <div className="text-sm font-medium text-primary truncate">{wo.title||"—"}</div>
+                        </div>
+                        <div className="text-center">
+                          <span className="tb-badge" style={{background:`${pc}18`,color:pc,border:`1px solid ${pc}30`,fontSize:"0.5625rem"}}>{wo.priority||"—"}</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="tb-badge" style={{background:`${wsc}18`,color:wsc,border:`1px solid ${wsc}30`,fontSize:"0.5625rem"}}>{(wo.status||"—").replace("_"," ")}</span>
+                        </div>
+                        <div className="text-center text-xs text-tertiary">{fmtDate(wo.created_at)}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-title">Performance</div>
+              <div className="text-center py-3">
+                <div className="text-5xl font-black mb-1" style={{color:compRate>=80?"#34D399":"#FBBF24"}}>{compRate}%</div>
+                <div className="text-xs text-tertiary">completion rate</div>
+                <div className="tb-progress tb-progress--md mt-3">
+                  <div className="tb-progress-bar" style={{background:compRate>=80?"#34D399":"#FBBF24",width:`${compRate}%`}}/>
+                </div>
+              </div>
+              <div className="tb-grid-3 mt-3 text-center">
+                <div>
+                  <div className="text-lg font-black text-primary">{stats.total_wos||0}</div>
+                  <div className="text-xs text-tertiary">Total</div>
+                </div>
+                <div>
+                  <div className="text-lg font-black text-emerald-400">{stats.completed||0}</div>
+                  <div className="text-xs text-tertiary">Done</div>
+                </div>
+                <div>
+                  <div className="text-lg font-black" style={{color:openWOs.length>0?"#FBBF24":"#34D399"}}>{openWOs.length}</div>
+                  <div className="text-xs text-tertiary">Active</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="tb-section">
+              <div className="tb-section-title">Quick Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"All Technicians", icon:"👷", path:"/operations/technicians" },
+                  { label:"Dispatch Board",  icon:"📋", path:"/operations/dispatch" },
+                  { label:"Work Orders",     icon:"🔧", path:"/operations/work-orders" },
+                  { label:"Service Requests",icon:"🎫", path:"/operations/service-requests" },
+                ].map((a, i) => (
+                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
