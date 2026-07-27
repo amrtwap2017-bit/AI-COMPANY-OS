@@ -98,7 +98,7 @@ function NavItem({
           collapsed ? "px-0 py-2.5 justify-center rounded-xl" : "px-3 py-2 rounded-xl",
           isActive
             ? "bg-slate-800/80 text-white"
-            : "text-slate-400 hover:text-white hover:bg-slate-800/60",
+            : "text-tertiary hover:text-white hover:bg-slate-800/60",
         ].join(" ")}
       >
         {isActive && !collapsed && (
@@ -169,7 +169,7 @@ function NavAccordion({
           href={center.href}
           className={[
             "flex items-center justify-center px-0 py-2.5 rounded-xl text-sm font-medium transition-all",
-            anyActive ? "bg-slate-800/80 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800/60",
+            anyActive ? "bg-slate-800/80 text-white" : "text-tertiary hover:text-white hover:bg-slate-800/60",
           ].join(" ")}
         >
           <Icon className={["w-4 h-4", anyActive ? "text-amber-400" : color].join(" ")} />
@@ -194,7 +194,7 @@ function NavAccordion({
         onClick={() => setOpen(o => !o)}
         className={[
           "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group relative",
-          anyActive ? "text-white" : "text-slate-400 hover:text-white hover:bg-slate-800/60",
+          anyActive ? "text-white" : "text-tertiary hover:text-white hover:bg-slate-800/60",
         ].join(" ")}
       >
         {anyActive && (
@@ -208,7 +208,7 @@ function NavAccordion({
           </span>
         )}
         {open
-          ? <ChevronDown className="w-3 h-3 text-slate-400 flex-shrink-0 ml-0.5" />
+          ? <ChevronDown className="w-3 h-3 text-tertiary flex-shrink-0 ml-0.5" />
           : <ChevronRight className="w-3 h-3 text-slate-600 flex-shrink-0 ml-0.5" />
         }
       </button>
@@ -226,7 +226,7 @@ function NavAccordion({
                   "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all",
                   childActive
                     ? "text-amber-400 bg-amber-700/10 font-semibold"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/40",
+                    : "text-tertiary hover:text-white hover:bg-slate-800/40",
                 ].join(" ")}
               >
                 <span className={"w-1 h-1 rounded-full flex-shrink-0 " + (childActive ? "bg-amber-400" : "bg-slate-600")} />
@@ -288,14 +288,14 @@ export function EnterpriseSidebar() {
           {!collapsed && (
             <div className="min-w-0">
               <div className="text-white font-bold text-sm leading-none truncate">Triangle Black</div>
-              <div className="text-slate-400 text-[10px] mt-0.5">Enterprise OS</div>
+              <div className="text-tertiary text-[10px] mt-0.5">Enterprise OS</div>
             </div>
           )}
         </Link>
         {!collapsed && (
           <button
             onClick={toggleCollapse}
-            className="ml-auto w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors flex-shrink-0"
+            className="ml-auto w-6 h-6 flex items-center justify-center rounded-lg text-tertiary hover:text-white hover:bg-slate-800/60 transition-colors flex-shrink-0"
             title="Collapse sidebar"
           >
             <PanelLeftClose className="w-3.5 h-3.5" />
@@ -308,7 +308,7 @@ export function EnterpriseSidebar() {
         <div className="flex justify-center py-2 border-b border-slate-800/60">
           <button
             onClick={toggleCollapse}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-tertiary hover:text-white hover:bg-slate-800/60 transition-colors"
             title="Expand sidebar"
           >
             <PanelLeftOpen className="w-3.5 h-3.5" />
@@ -383,12 +383,12 @@ export function EnterpriseSidebar() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-white text-xs font-semibold truncate">{user?.name || "User"}</div>
-                <div className="text-slate-400 text-[10px] capitalize truncate">{user?.role || "admin"}</div>
+                <div className="text-tertiary text-[10px] capitalize truncate">{user?.role || "admin"}</div>
               </div>
             </div>
             <button
               onClick={logout}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-tertiary hover:text-red-400 hover:bg-red-500/10 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign out

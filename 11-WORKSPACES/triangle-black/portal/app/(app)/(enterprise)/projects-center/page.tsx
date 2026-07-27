@@ -53,8 +53,8 @@ export default function ProjectsCenterPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1.5">Projects</div>
-          <h1 className="text-3xl font-black text-primary">Project Portfolio</h1>
+          <div className="text-label-upper text-indigo-500 mb-1.5">Projects</div>
+          <h1 className="text-page-title text-primary">Project Portfolio</h1>
           <p className="text-secondary text-sm mt-1.5">{projects.length} projects · {active.length} active · {fmtEGP(activeBudget)} active budget · {avgCompletion}% avg completion</p>
         </div>
         <div className={`rounded-2xl border px-6 py-4 text-center ${avgCompletion>=70?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
@@ -72,7 +72,7 @@ export default function ProjectsCenterPage() {
           { label:"Total Budget",value:fmtEGP(totalBudget), sub:`${projects.length} projects`,   color:"purple",  filter:"all" },
         ].map((k,i)=>(
           <button key={i} onClick={()=>setStatusFilter(i<3?(statusFilter===k.filter?"all":k.filter):"all")}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&i<3?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&i<3?`border-${k.color}-400 shadow-sm`:"border-border hover:border-amber-300"}`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-sm font-medium text-slate-700 dark:text-tertiary mt-1">{k.label}</div>
             <div className="text-xs text-tertiary mt-0.5 truncate">{k.sub}</div>
@@ -134,7 +134,7 @@ export default function ProjectsCenterPage() {
                     <span className="text-secondary">Completion</span>
                     <span className={`font-bold text-${barColor}-500`}>{pct}%</span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+                  <div className="w-full bg-base-alt rounded-full h-2.5">
                     <div className={`h-2.5 rounded-full bg-${barColor}-500 transition-all`} style={{width:`${Math.min(pct,100)}%`}}/>
                   </div>
                 </div>

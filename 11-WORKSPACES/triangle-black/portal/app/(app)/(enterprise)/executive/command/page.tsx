@@ -24,7 +24,7 @@ export default function ExecutiveCommand() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Command</div>
-        <h1 className="text-3xl font-black text-primary">Executive Command Center</h1>
+        <h1 className="text-page-title text-primary">Executive Command Center</h1>
         <p className="text-secondary mt-1">Complete executive control and visibility</p></div>
         <div className={`rounded-2xl border px-6 py-4 text-center ${score>=95?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
           <div className={`text-4xl font-black ${score>=95?"text-emerald-500":"text-amber-500"}`}>{score}</div>

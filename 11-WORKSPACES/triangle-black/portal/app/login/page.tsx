@@ -61,7 +61,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-600 mb-4">
             <Building2 className="w-8 h-8 text-white"/>
           </div>
-          <h1 className="text-2xl font-bold text-white">Triangle Black</h1>
+          <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Triangle Black</h1>
           <p className="text-tertiary text-sm mt-1">Enterprise Operations Platform</p>
         </div>
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 id="email" name="email" type="email"
                 value={email} onChange={e => setEmail(e.target.value)}
                 autoComplete="email"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:border-border-focus focus:outline-none"
                 placeholder="your@email.com"
                 required
               />
@@ -100,7 +100,7 @@ export default function LoginPage() {
                 id="password" name="password" type="password"
                 value={password} onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:border-border-focus focus:outline-none"
                 placeholder="••••••••"
               />
             </div>

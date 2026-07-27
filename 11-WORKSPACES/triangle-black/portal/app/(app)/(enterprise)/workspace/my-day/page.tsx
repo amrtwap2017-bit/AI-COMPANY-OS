@@ -55,7 +55,7 @@ export default function MyDayPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Personal Dashboard</div>
-          <h1 className="text-3xl font-black text-primary">My Day</h1>
+          <h1 className="text-page-title text-primary">My Day</h1>
           <p className="text-secondary mt-1">{today}</p>
         </div>
         <div className="flex gap-3">

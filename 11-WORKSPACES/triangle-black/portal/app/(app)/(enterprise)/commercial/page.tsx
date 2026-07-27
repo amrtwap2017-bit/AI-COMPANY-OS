@@ -35,7 +35,7 @@ export default function CommercialHub() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Commercial Hub</div>
-        <h1 className="text-3xl font-black text-primary">Commercial Overview</h1>
+        <h1 className="text-page-title text-primary">Commercial Overview</h1>
         <p className="text-secondary mt-1">Pipeline, contracts, and revenue performance</p>
       </div>
 
@@ -74,7 +74,7 @@ export default function CommercialHub() {
             ].map((s, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="text-xs text-secondary w-28 flex-shrink-0">{s.stage}</div>
-                <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-5 relative">
+                <div className="flex-1 bg-base-alt rounded-full h-5 relative">
                   <div className={`h-5 rounded-full bg-${s.color}-500 flex items-center justify-end pr-2`}
                     style={{ width: `${Math.max(8, (s.count / Math.max(leads.length, 1)) * 100)}%` }}>
                     <span className="text-white text-xs font-bold">{s.count}</span>
@@ -121,7 +121,7 @@ export default function CommercialHub() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {hotLeads.slice(0, 6).map((l: any, i: number) => (
               <button key={i} onClick={() => router.push(`/commercial/leads/${l.id}`)}
-                className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-amber-400 hover:shadow-md transition-all text-left">
+                className="p-4 border border-border rounded-xl hover:border-amber-400 hover:shadow-md transition-all text-left">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-sm font-bold text-primary truncate">{l.name}</div>
                   <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold ml-2 flex-shrink-0">{l.score}</span>

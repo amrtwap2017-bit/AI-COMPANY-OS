@@ -92,7 +92,7 @@ export default function ExecutiveRisks() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Risk Management</div>
-          <h1 className="text-3xl font-black text-primary">Risk Register</h1>
+          <h1 className="text-page-title text-primary">Risk Register</h1>
           <p className="text-secondary mt-1">Live risk assessment across all operational domains</p>
         </div>
         <div className={`border rounded-2xl px-6 py-4 text-center ${totalRiskScore === 0 ? "bg-emerald-50 border-emerald-200" : totalRiskScore < 30 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"}`}>

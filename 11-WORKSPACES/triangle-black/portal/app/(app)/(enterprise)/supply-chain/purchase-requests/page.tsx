@@ -64,8 +64,8 @@ export default function PurchaseRequestsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-1.5">Supply Chain</div>
-          <h1 className="text-3xl font-black text-primary">Purchase Requests</h1>
+          <div className="text-label-upper text-yellow-500 mb-1.5">Supply Chain</div>
+          <h1 className="text-page-title text-primary">Purchase Requests</h1>
           <p className="text-secondary text-sm mt-1.5">{prs.length} total · {pending.length} pending · {urgent.length} urgent · {autoPRs.length} auto-generated</p>
         </div>
         <div className="flex gap-2">
@@ -91,7 +91,7 @@ export default function PurchaseRequestsPage() {
         ].map((k,i)=>(
           <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter?"all":k.filter)}
             className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${
-              statusFilter===k.filter ? `border-${k.color}-400 shadow-sm` : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
+              statusFilter===k.filter ? `border-${k.color}-400 shadow-sm` : "border-border hover:border-amber-300"
             }`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-xs font-medium text-secondary mt-0.5">{k.label}</div>

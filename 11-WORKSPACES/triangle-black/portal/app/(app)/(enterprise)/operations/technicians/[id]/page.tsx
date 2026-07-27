@@ -56,7 +56,7 @@ export default function TechnicianDetail() {
           <h2 className="font-bold">Capacity</h2>
           <span className="text-sm font-bold">{tech.current_work_orders||0}/{tech.max_work_orders||5}</span>
         </div>
-        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-4">
+        <div className="w-full bg-base-alt rounded-full h-4">
           <div className={`h-4 rounded-full ${load>=90?"bg-red-500":load>=70?"bg-amber-500":"bg-emerald-500"}`} style={{width:`${load}%`}}/>
         </div>
       </div>

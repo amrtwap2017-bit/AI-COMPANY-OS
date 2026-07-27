@@ -41,7 +41,7 @@ export default function ExecutiveExceptions() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Exception Management</div>
-        <h1 className="text-3xl font-black text-primary">Platform Exceptions</h1>
+        <h1 className="text-page-title text-primary">Platform Exceptions</h1>
         <p className="text-secondary mt-1">All items requiring immediate attention</p>
       </div>
 
@@ -67,10 +67,10 @@ export default function ExecutiveExceptions() {
         </div>
       ) : (
         <div className="bg-surface border border-border rounded-2xl">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="p-4 border-b border-divider">
             <span className="text-sm font-bold text-primary">{exceptions.length} exceptions requiring action</span>
           </div>
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="divide-y divide-divider">
             {exceptions.map((ex: any, i: number) => {
               const sev = ex._severity;
               const colors: any = { critical: "red", high: "orange", medium: "amber", low: "blue" };

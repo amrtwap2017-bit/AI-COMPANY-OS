@@ -27,7 +27,7 @@ export default function ExecutiveScorecard() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Scorecard</div>
-        <h1 className="text-3xl font-black text-primary">Executive Scorecard</h1>
+        <h1 className="text-page-title text-primary">Executive Scorecard</h1>
         <p className="text-secondary mt-1">Overall platform performance at a glance</p></div>
         <div className={`rounded-2xl border px-8 py-5 text-center ${overallScore>=80?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
           <div className={`text-5xl font-black ${overallScore>=80?"text-emerald-500":"text-amber-500"}`}>{overallScore}</div>
@@ -47,7 +47,7 @@ export default function ExecutiveScorecard() {
               <span className={`text-5xl font-black text-${k.color}-500`}>{k.value}</span>
               <span className="text-xl text-tertiary mb-1">{k.unit}</span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+            <div className="w-full bg-base-alt rounded-full h-2.5">
               <div className={`h-2.5 rounded-full bg-${k.color}-500`} style={{width:`${Math.min(k.value,100)}%`}}/>
             </div>
             <div className="text-xs text-tertiary mt-1">Target: {k.target}{k.unit}</div>

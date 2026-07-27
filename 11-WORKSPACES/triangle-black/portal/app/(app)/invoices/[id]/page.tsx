@@ -92,8 +92,8 @@ export default function InvoiceDetailPage() {
           {/* Hero row */}
           <div className="flex items-start justify-between gap-6">
             <div>
-              <div style={{fontSize:"0.625rem",fontWeight:700,color:"#10B981",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>Finance · Invoice</div>
-              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1,margin:0}}>
+              <div className="text-label-upper text-emerald-500 mb-1.5">Finance · Invoice</div>
+              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>
                 {inv.invoice_number || `INV-${inv.id?.slice(0,8)}`}
               </h1>
               {inv.title && <p style={{color:"rgba(148,163,184,0.65)",fontSize:"0.875rem",marginTop:6}}>{inv.title}</p>}

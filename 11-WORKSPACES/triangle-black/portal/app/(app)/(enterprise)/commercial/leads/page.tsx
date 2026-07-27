@@ -61,8 +61,8 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1.5">Commercial</div>
-          <h1 className="text-3xl font-black text-primary">Lead Pipeline</h1>
+          <div className="text-label-upper text-amber-500 mb-1.5">Commercial</div>
+          <h1 className="text-page-title text-primary">Lead Pipeline</h1>
           <p className="text-secondary text-sm mt-1.5">{leads.length} total · {activeLeads.length} active · {hotLeads.length} hot leads</p>
         </div>
         <button onClick={() => router.push("/leads/new")}
@@ -83,7 +83,7 @@ export default function LeadsPage() {
         ].map((k,i)=>(
           <button key={i} onClick={()=>setStatusFilter(statusFilter===k.status?"all":k.status)}
             className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${
-              statusFilter===k.status ? `border-${k.color}-400 shadow-sm` : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
+              statusFilter===k.status ? `border-${k.color}-400 shadow-sm` : "border-border hover:border-amber-300"
             }`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-xs font-medium text-secondary mt-0.5">{k.label}</div>
@@ -157,7 +157,7 @@ export default function LeadsPage() {
                     </div>
                     <div className="text-center">
                       <div className={`text-sm font-black ${score>=70?"text-emerald-500":score>=50?"text-amber-500":"text-secondary"}`}>{score}</div>
-                      <div className="w-12 mx-auto bg-slate-100 dark:bg-slate-800 rounded-full h-1 mt-1">
+                      <div className="w-12 mx-auto bg-base-alt rounded-full h-1 mt-1">
                         <div className={`h-1 rounded-full ${score>=70?"bg-emerald-500":score>=50?"bg-amber-500":"bg-slate-400"}`} style={{width:`${score}%`}}/>
                       </div>
                     </div>

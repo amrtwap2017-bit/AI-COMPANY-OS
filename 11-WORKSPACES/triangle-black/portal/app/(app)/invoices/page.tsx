@@ -56,8 +56,8 @@ export default function InvoicesPage() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1.5">Finance</div>
-          <h1 className="text-3xl font-black text-primary">Invoice Management</h1>
+          <div className="text-label-upper text-emerald-500 mb-1.5">Finance</div>
+          <h1 className="text-page-title text-primary">Invoice Management</h1>
           <p className="text-secondary text-sm mt-1.5">{invoices.length} invoices · {collectionRate}% collection rate · {fmtEGP(pendingValue+overdueValue)} outstanding</p>
         </div>
         <div className={`rounded-2xl border px-6 py-4 text-center ${collectionRate>=90?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
@@ -72,7 +72,7 @@ export default function InvoicesPage() {
           <span>Revenue Collection Progress</span>
           <span>{fmtEGP(paidValue)} of {fmtEGP(totalValue)}</span>
         </div>
-        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-5 overflow-hidden">
+        <div className="w-full bg-base-alt rounded-full h-5 overflow-hidden">
           <div className="flex h-5">
             <div className="bg-emerald-500 h-5 transition-all" style={{width:`${paidValue/Math.max(totalValue,1)*100}%`}}/>
             <div className="bg-amber-400 h-5 transition-all" style={{width:`${pendingValue/Math.max(totalValue,1)*100}%`}}/>
@@ -94,7 +94,7 @@ export default function InvoicesPage() {
           { label:"Cancelled",  value:cancelled.length, sub:"closed",             color:"slate",   filter:"cancelled" },
         ].map((k,i)=>(
           <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter?"all":k.filter)}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter?`border-${k.color}-400 shadow-sm`:"border-border hover:border-amber-300"}`}>
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-sm font-medium text-slate-700 dark:text-tertiary mt-1">{k.label}</div>
             <div className="text-xs text-tertiary mt-0.5 truncate">{k.sub}</div>

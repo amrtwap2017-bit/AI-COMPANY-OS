@@ -15,8 +15,8 @@ export default function AnalyticsReports() {
   const sections = Object.entries(data).filter(([, v]) => typeof v === "object" && v !== null);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Platform Reports</h1>
+    <div className="tb-page">
+      <h1 className="text-page-title text-primary">Platform Reports</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map(([key, value]: [string, any]) => (
           <div key={key} className="bg-white dark:bg-zinc-900 rounded-lg border p-4">

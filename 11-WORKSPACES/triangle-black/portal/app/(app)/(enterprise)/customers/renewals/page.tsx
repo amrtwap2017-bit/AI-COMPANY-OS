@@ -18,7 +18,7 @@ export default function CustomerRenewals() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Renewals</div>
-      <h1 className="text-3xl font-black text-primary">Contract Renewals</h1>
+      <h1 className="text-page-title text-primary">Contract Renewals</h1>
       <p className="text-secondary mt-1">Contracts requiring renewal action</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

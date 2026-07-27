@@ -13,8 +13,8 @@ export default function EngineeringAI() {
   const signals = toArr(signalData);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Engineering AI Hub</h1>
+    <div className="tb-page">
+      <h1 className="text-page-title text-primary">Engineering AI Hub</h1>
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
           <div className="text-sm text-gray-500">AI Status</div>

@@ -52,10 +52,10 @@ export default function WorkflowLauncher() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="tb-page">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Workflow Launcher</h1>
+          <h1 className="text-page-title text-primary">Workflow Launcher</h1>
           <p className="text-gray-500 text-sm mt-1">Quick access to platform workflows and automation</p>
         </div>
         <button

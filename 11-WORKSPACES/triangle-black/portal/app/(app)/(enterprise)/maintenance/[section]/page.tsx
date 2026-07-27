@@ -32,8 +32,8 @@ export default function MaintenanceSection() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Maintenance — {section}</h1>
+    <div className="tb-page">
+      <h1 className="text-page-title text-primary">Maintenance — {section}</h1>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {Object.entries(sectionMap).map(([key, path]) => (
           <button key={key} onClick={() => router.push(path)} className="bg-white dark:bg-zinc-900 rounded-lg border p-4 text-left hover:border-blue-400 transition-colors">

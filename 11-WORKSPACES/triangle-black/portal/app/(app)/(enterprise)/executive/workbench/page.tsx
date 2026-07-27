@@ -46,7 +46,7 @@ export default function ExecutiveWorkbench() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Workbench</div>
-          <h1 className="text-3xl font-black text-primary">Command Workbench</h1>
+          <h1 className="text-page-title text-primary">Command Workbench</h1>
           <p className="text-secondary mt-1">Platform control center — monitor, decide, act</p>
         </div>
         <button onClick={runAutomation} disabled={running}

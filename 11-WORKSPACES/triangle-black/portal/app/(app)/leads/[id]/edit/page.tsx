@@ -53,7 +53,7 @@ export default function EditLeadPage() {
     <div>
       <label className="text-xs font-medium text-secondary block mb-1.5">{label}</label>
       <input type={type} value={form[key]||""} onChange={e=>setForm((f:any)=>({...f,[key]:e.target.value}))}
-        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
+        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none"/>
     </div>
   );
 
@@ -77,14 +77,14 @@ export default function EditLeadPage() {
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Status</label>
               <select value={form.status||"new"} onChange={e=>setForm((f:any)=>({...f,status:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["new","qualified","negotiation","won","lost"].map(s=><option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Source</label>
               <select value={form.source||"direct"} onChange={e=>setForm((f:any)=>({...f,source:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["direct","referral","website","cold_call","exhibition"].map(s=><option key={s}>{s}</option>)}
               </select>
             </div>
@@ -92,7 +92,7 @@ export default function EditLeadPage() {
           <div>
             <label className="text-xs font-medium text-secondary block mb-1.5">Notes</label>
             <textarea rows={3} value={form.notes||""} onChange={e=>setForm((f:any)=>({...f,notes:e.target.value}))}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none resize-none"/>
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none resize-none"/>
           </div>
         </div>
         <div className="flex gap-3 mt-4">

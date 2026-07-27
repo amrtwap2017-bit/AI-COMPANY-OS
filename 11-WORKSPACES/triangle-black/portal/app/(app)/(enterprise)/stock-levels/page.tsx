@@ -16,8 +16,8 @@ export default function StockLevels() {
   if (isLoading) return <div className="p-6 text-gray-400">Loading stock levels...</div>;
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Stock Levels</h1>
+    <div className="tb-page">
+      <h1 className="text-page-title text-primary">Stock Levels</h1>
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white dark:bg-zinc-900 rounded-lg border p-4">
           <div className="text-sm text-gray-500">Total Items</div>

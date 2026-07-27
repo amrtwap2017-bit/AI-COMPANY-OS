@@ -22,7 +22,7 @@ export default function OperationsCommand() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Operations Command</div>
-      <h1 className="text-3xl font-black text-primary">Operations Command Center</h1>
+      <h1 className="text-page-title text-primary">Operations Command Center</h1>
       <p className="text-secondary mt-1">Real-time operations control and dispatch</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

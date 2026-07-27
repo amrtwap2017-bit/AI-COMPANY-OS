@@ -31,7 +31,7 @@ export default function MaintenanceHub() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Maintenance</div>
-        <h1 className="text-3xl font-black text-primary">Maintenance Hub</h1>
+        <h1 className="text-page-title text-primary">Maintenance Hub</h1>
         <p className="text-secondary mt-1">Asset health, PM schedules, and maintenance workflow</p>
       </div>
 
@@ -85,7 +85,7 @@ export default function MaintenanceHub() {
                   <span className="text-secondary">{cat}</span>
                   <span className="font-bold text-primary">{count}</span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                <div className="w-full bg-base-alt rounded-full h-2">
                   <div className="h-2 rounded-full bg-blue-500" style={{ width: `${(count / assets.length) * 100}%` }} />
                 </div>
               </div>

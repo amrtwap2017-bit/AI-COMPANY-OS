@@ -38,7 +38,7 @@ export default function PlatformGraph() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Knowledge Graph</div>
-        <h1 className="text-3xl font-black text-primary">Platform Entity Map</h1>
+        <h1 className="text-page-title text-primary">Platform Entity Map</h1>
         <p className="text-secondary mt-1">All connected entities across the Triangle Black ecosystem</p>
       </div>
 
@@ -64,7 +64,7 @@ export default function PlatformGraph() {
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
             {entities.filter(e => e.domain === domain).map((entity, i) => (
               <button key={i} onClick={() => router.push(entity.path)}
-                className="border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-left hover:border-amber-400 hover:shadow-md transition-all group">
+                className="border border-border rounded-xl p-4 text-left hover:border-amber-400 hover:shadow-md transition-all group">
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-2xl">{entity.icon}</span>
                   <span className={`text-lg font-black text-${entity.color}-500`}>{entity.count}</span>

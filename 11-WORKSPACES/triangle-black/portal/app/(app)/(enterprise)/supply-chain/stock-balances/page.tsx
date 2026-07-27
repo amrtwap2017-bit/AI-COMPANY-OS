@@ -38,7 +38,7 @@ export default function StockBalancesPage() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain</div>
-        <h1 className="text-3xl font-black text-primary">Stock Balances</h1>
+        <h1 className="text-page-title text-primary">Stock Balances</h1>
         <p className="text-secondary mt-1">Real-time inventory levels across all warehouses</p>
       </div>
 

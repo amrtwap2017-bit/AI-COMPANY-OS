@@ -23,7 +23,7 @@ export default function ProcurementDashboard() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Procurement</div>
-      <h1 className="text-3xl font-black text-primary">Procurement Dashboard</h1>
+      <h1 className="text-page-title text-primary">Procurement Dashboard</h1>
       <p className="text-secondary mt-1">Purchase requests, orders, and supplier management</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

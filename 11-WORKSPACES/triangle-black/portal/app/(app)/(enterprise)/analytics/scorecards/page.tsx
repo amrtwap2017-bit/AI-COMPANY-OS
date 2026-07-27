@@ -42,7 +42,7 @@ export default function AnalyticsScorecards() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Analytics</div>
-        <h1 className="text-3xl font-black text-primary">Performance Scorecards</h1>
+        <h1 className="text-page-title text-primary">Performance Scorecards</h1>
         <p className="text-secondary mt-1">KPI performance across all operational domains</p>
       </div>
 
@@ -67,7 +67,7 @@ export default function AnalyticsScorecards() {
                 <span className="text-xl text-tertiary mb-1">{sc.unit}</span>
                 <span className="text-sm text-tertiary mb-1 ml-auto">target: {sc.target}{sc.unit}</span>
               </div>
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+              <div className="w-full bg-base-alt rounded-full h-3">
                 <div className={`h-3 rounded-full bg-${sc.color}-500 transition-all`} style={{ width: `${pct}%` }} />
               </div>
             </button>
@@ -80,7 +80,7 @@ export default function AnalyticsScorecards() {
         <h2 className="font-bold text-primary mb-4">Domain Scorecard Summary</h2>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 dark:border-slate-800">
+            <tr className="border-b border-divider">
               <th className="text-left pb-3 text-secondary font-medium">Domain</th>
               <th className="text-right pb-3 text-secondary font-medium">Total</th>
               <th className="text-right pb-3 text-secondary font-medium">Active</th>

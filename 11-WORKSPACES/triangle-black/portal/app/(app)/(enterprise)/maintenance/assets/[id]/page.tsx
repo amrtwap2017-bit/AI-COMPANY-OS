@@ -100,7 +100,7 @@ export default function AssetDetailPage() {
                 <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:cc.bg,color:cc.color,border:`1px solid ${cc.border}`}}>{cc.label}</span>
                 <span style={{fontSize:"0.6875rem",padding:"3px 10px",borderRadius:20,background:"rgba(255,255,255,0.06)",color:"rgba(148,163,184,0.7)"}}>{asset.category}</span>
               </div>
-              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1,margin:0}}>{asset.name}</h1>
+              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>{asset.name}</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:6}}>{asset.manufacturer} {asset.model} · {asset.serial_number}</p>
             </div>
 

@@ -32,7 +32,7 @@ export default function BulkOperations() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Operations</div>
-        <h1 className="text-3xl font-black text-primary">Bulk Operations</h1>
+        <h1 className="text-page-title text-primary">Bulk Operations</h1>
         <p className="text-secondary mt-1">Mass assign, approve, and update multiple records at once</p>
       </div>
 
@@ -73,9 +73,9 @@ export default function BulkOperations() {
             ))}
           </div>
           {selectedWOs.length > 0 && (
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+            <div className="border-t border-divider pt-4">
               <div className="text-xs text-secondary mb-2">{selectedWOs.length} selected — Assign to:</div>
-              <select className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-800 mb-2 focus:outline-none focus:border-border-focus">
+              <select className="w-full border border-border rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-800 mb-2 focus:outline-none focus:border-border-focus">
                 <option value="">— Select Technician —</option>
                 {activeTechs.map(t=><option key={t.id} value={t.id}>{t.name} ({t.current_work_orders||0}/{t.max_work_orders||5})</option>)}
               </select>
@@ -104,7 +104,7 @@ export default function BulkOperations() {
             ))}
           </div>
           {selectedPRs.length > 0 && (
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-2">
+            <div className="border-t border-divider pt-4 space-y-2">
               <button className="w-full bg-emerald-600 text-white rounded-xl py-2 text-sm font-bold hover:bg-emerald-700 transition-colors">
                 ✅ Approve {selectedPRs.length} Requests
               </button>

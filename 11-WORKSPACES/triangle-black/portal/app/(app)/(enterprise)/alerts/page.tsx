@@ -45,7 +45,7 @@ export default function AlertsPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Platform Alerts</div>
-          <h1 className="text-3xl font-black text-primary">Alert Center</h1>
+          <h1 className="text-page-title text-primary">Alert Center</h1>
           <p className="text-secondary mt-1">All platform notifications and system alerts</p>
         </div>
         <div className="flex gap-3">

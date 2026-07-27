@@ -79,7 +79,7 @@ export default function AnalyticsHub() {
           <div className="flex items-start justify-between">
             <div>
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"#22D3EE",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:6}}>Analytics</div>
-              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1}}>Analytics Hub</h1>
+              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Analytics Hub</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:5}}>Live KPIs, performance metrics, and business intelligence</p>
             </div>
             <div style={{background:score>=95?"rgba(16,185,129,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${score>=95?"rgba(16,185,129,0.25)":"rgba(245,158,11,0.25)"}`,borderRadius:14,padding:"14px 22px",textAlign:"center"}}>

@@ -32,7 +32,7 @@ export default function CustomersReview() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Review</div>
-        <h1 className="text-3xl font-black text-primary">Customer Review Board</h1>
+        <h1 className="text-page-title text-primary">Customer Review Board</h1>
         <p className="text-secondary mt-1">Account health, billing status, and service delivery review</p>
       </div>
 

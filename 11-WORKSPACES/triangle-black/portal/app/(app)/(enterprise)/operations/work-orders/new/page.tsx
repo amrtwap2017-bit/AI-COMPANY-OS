@@ -70,32 +70,32 @@ export default function NewWorkOrderPage() {
           <div>
             <label className="text-xs font-medium text-secondary block mb-1.5">Title <span className="text-red-500">*</span></label>
             <input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" required/>
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none" required/>
           </div>
           <div>
             <label className="text-xs font-medium text-secondary block mb-1.5">Description</label>
             <textarea rows={3} value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none resize-none"/>
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none resize-none"/>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Priority</label>
               <select value={form.priority} onChange={e=>setForm(f=>({...f,priority:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["low","medium","high","critical","emergency"].map(p=><option key={p}>{p}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Type</label>
               <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["maintenance","repair","inspection","installation","emergency"].map(t=><option key={t}>{t}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Due Date</label>
               <input type="date" value={form.due_date} onChange={e=>setForm(f=>({...f,due_date:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none"/>
             </div>
           </div>
         </div>

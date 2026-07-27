@@ -9,7 +9,7 @@ export default function SettingsPage() {
 
   return (
     <div className="p-6 max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-page-title text-primary">Settings</h1>
       <div className="bg-white dark:bg-zinc-900 rounded-lg border p-6">
         <h2 className="font-semibold mb-4">Account</h2>
         <div className="space-y-2 text-sm">

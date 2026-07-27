@@ -44,18 +44,18 @@ export default function NewQuotePage() {
           <div>
             <label className="text-xs font-medium text-secondary block mb-1.5">Title <span className="text-red-500">*</span></label>
             <input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" required/>
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none" required/>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Total Value</label>
               <input type="number" value={form.total_value} onChange={e=>setForm(f=>({...f,total_value:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none"/>
             </div>
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Currency</label>
               <select value={form.currency} onChange={e=>setForm(f=>({...f,currency:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["EGP","USD","EUR"].map(c=><option key={c}>{c}</option>)}
               </select>
             </div>
@@ -63,12 +63,12 @@ export default function NewQuotePage() {
           <div>
             <label className="text-xs font-medium text-secondary block mb-1.5">Valid Until</label>
             <input type="date" value={form.valid_until} onChange={e=>setForm(f=>({...f,valid_until:e.target.value}))}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none"/>
           </div>
           <div>
             <label className="text-xs font-medium text-secondary block mb-1.5">Notes</label>
             <textarea rows={3} value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none resize-none"/>
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none resize-none"/>
           </div>
         </div>
         <div className="flex gap-3 mt-4">

@@ -24,8 +24,8 @@ export default function WorkflowDesigner() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Workflow Designer</h1>
+    <div className="tb-page">
+      <h1 className="text-page-title text-primary">Workflow Designer</h1>
       <p className="text-gray-500">Platform workflow connections and their current throughput</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {workflows.map((wf, i) => (

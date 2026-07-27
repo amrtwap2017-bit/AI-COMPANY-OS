@@ -20,7 +20,7 @@ export default function EngineeringIntelligence() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Engineering Intelligence</div>
-      <h1 className="text-3xl font-black text-primary">Engineering Intelligence</h1>
+      <h1 className="text-page-title text-primary">Engineering Intelligence</h1>
       <p className="text-secondary mt-1">Asset health analysis and engineering insights</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
@@ -42,7 +42,7 @@ export default function EngineeringIntelligence() {
             <div key={i} className="flex items-center justify-between py-2 border-b border-divider last:border-0">
               <span className="text-sm text-secondary">{cat}</span>
               <div className="flex items-center gap-3">
-                <div className="w-24 bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                <div className="w-24 bg-base-alt rounded-full h-2">
                   <div className="h-2 rounded-full bg-blue-500" style={{width:`${(count/assets.length)*100}%`}}/>
                 </div>
                 <span className="font-bold text-primary w-6 text-right">{count}</span>

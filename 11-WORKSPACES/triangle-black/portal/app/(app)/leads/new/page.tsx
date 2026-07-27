@@ -37,7 +37,7 @@ export default function NewLeadPage() {
     <div>
       <label className="text-xs font-medium text-secondary block mb-1.5">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
       <input type={type} value={(form as any)[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))}
-        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none"
         required={required}/>
     </div>
   );
@@ -63,14 +63,14 @@ export default function NewLeadPage() {
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Status</label>
               <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["new","qualified","negotiation","won","lost"].map(s=><option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs font-medium text-secondary block mb-1.5">Source</label>
               <select value={form.source} onChange={e=>setForm(f=>({...f,source:e.target.value}))}
-                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-border-focus focus:outline-none">
                 {["direct","referral","website","cold_call","exhibition"].map(s=><option key={s} value={s}>{s}</option>)}
               </select>
             </div>

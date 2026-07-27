@@ -14,7 +14,7 @@ export default function SupplyChainComparison() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain</div>
-      <h1 className="text-3xl font-black text-primary">Supplier Comparison</h1>
+      <h1 className="text-page-title text-primary">Supplier Comparison</h1>
       <p className="text-secondary mt-1">Compare supplier performance, risk, and terms</p></div>
       <div className="grid grid-cols-3 gap-4">
         {[

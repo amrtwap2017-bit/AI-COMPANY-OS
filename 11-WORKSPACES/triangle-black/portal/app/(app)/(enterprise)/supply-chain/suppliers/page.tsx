@@ -137,7 +137,7 @@ export default function SuppliersPage() {
               <h2 className="font-bold text-slate-900">New Supplier</h2>
               <button onClick={()=>setShowCreate(false)} className="text-tertiary hover:text-secondary text-xl font-bold leading-none">x</button>
             </div>
-            <form onSubmit={save} className="p-6 space-y-4">
+            <form onSubmit={save} className="tb-page">
               <div>
                 <label className="block text-xs font-semibold text-secondary mb-1">Company Name *</label>
                 <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}

@@ -27,7 +27,7 @@ export default function SLAReview() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">SLA Management</div>
-        <h1 className="text-3xl font-black text-primary">SLA Review</h1>
+        <h1 className="text-page-title text-primary">SLA Review</h1>
         <p className="text-secondary mt-1">Service level compliance by priority</p></div>
         <div className={`rounded-2xl border px-6 py-4 text-center ${overall>=90?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
           <div className={`text-4xl font-black ${overall>=90?"text-emerald-500":"text-amber-500"}`}>{overall}%</div>
@@ -39,7 +39,7 @@ export default function SLAReview() {
           <div key={i} className="bg-surface border border-border rounded-2xl p-5">
             <div className={`text-xs font-black uppercase mb-2 ${s.priority==="critical"?"text-red-500":s.priority==="high"?"text-orange-500":s.priority==="medium"?"text-amber-500":"text-secondary"}`}>{s.priority}</div>
             <div className={`text-4xl font-black text-${c}-500`}>{s.compliance}%</div>
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-2 mb-1"><div className={`h-2 rounded-full bg-${c}-500`} style={{width:`${s.compliance}%`}}/></div>
+            <div className="w-full bg-base-alt rounded-full h-2 mt-2 mb-1"><div className={`h-2 rounded-full bg-${c}-500`} style={{width:`${s.compliance}%`}}/></div>
             <div className="grid grid-cols-3 gap-1 text-xs text-center mt-2">
               <div><div className="font-bold">{s.total}</div><div className="text-tertiary">Total</div></div>
               <div><div className="font-bold text-emerald-600">{s.completed}</div><div className="text-tertiary">Done</div></div>

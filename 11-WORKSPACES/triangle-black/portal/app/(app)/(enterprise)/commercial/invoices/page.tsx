@@ -159,7 +159,7 @@ export default function InvoicesPage() {
               <h2 className="font-bold text-slate-900">New Invoice</h2>
               <button onClick={()=>setShowCreate(false)} className="text-tertiary hover:text-secondary text-xl font-bold leading-none">x</button>
             </div>
-            <form onSubmit={save} className="p-6 space-y-4">
+            <form onSubmit={save} className="tb-page">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>

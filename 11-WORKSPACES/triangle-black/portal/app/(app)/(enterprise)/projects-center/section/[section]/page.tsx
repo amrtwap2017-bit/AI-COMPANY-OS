@@ -15,7 +15,7 @@ export default function ProjectSection() {
   const projects = toArr(data);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="tb-page">
       <div className="flex items-center gap-2">
         <button onClick={() => router.push("/projects-center")} className="text-blue-600 hover:underline text-sm">← Projects</button>
         <h1 className="text-2xl font-bold capitalize">{section.replace(/-/g, " ")}</h1>

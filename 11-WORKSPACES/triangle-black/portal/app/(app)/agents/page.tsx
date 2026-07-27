@@ -112,7 +112,7 @@ export default function AgentsPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">AI Platform</div>
-          <h1 className="text-3xl font-black text-primary">AI Agents</h1>
+          <h1 className="text-page-title text-primary">AI Agents</h1>
           <p className="text-secondary mt-1">Autonomous agents monitoring and automating platform operations</p>
         </div>
         <div className="flex gap-3">

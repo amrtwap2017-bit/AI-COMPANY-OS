@@ -40,7 +40,7 @@ export default function SupplyChainHub() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain</div>
-        <h1 className="text-3xl font-black text-primary">Supply Chain Hub</h1>
+        <h1 className="text-page-title text-primary">Supply Chain Hub</h1>
         <p className="text-secondary mt-1">Procurement, inventory, suppliers, and warehouses</p>
       </div>
 
@@ -128,7 +128,7 @@ export default function SupplyChainHub() {
             const whStock = stock.filter((s: any) => s.warehouse_id === wh.id);
             const whValue = whStock.reduce((s: number, i: any) => s + Number(i.total_value || 0), 0);
             return (
-              <div key={wh.id} className="border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <div key={wh.id} className="border border-border rounded-xl p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="font-bold text-primary">{wh.name}</div>

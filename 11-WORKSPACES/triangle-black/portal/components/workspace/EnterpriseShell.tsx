@@ -8,7 +8,7 @@ import { EnterpriseSidebar }   from "./EnterpriseSidebar";
 import { EnterpriseTopbar }    from "./EnterpriseTopbar";
 import { CenterSubNav }        from "./CenterSubNav";
 import { MobileBottomBar }     from "./MobileBottomBar";
-import { CommandPalette }      from "./CommandPalette";
+import { CommandPalette }      from "@/components/ui/CommandPalette";
 import { EntityContextDrawer } from "./EntityContextDrawer";
 import { CENTER_SUB_NAV }      from "./center-nav";
 import { ClientKeyboardHandler } from "@/components/ui/ClientKeyboardHandler";

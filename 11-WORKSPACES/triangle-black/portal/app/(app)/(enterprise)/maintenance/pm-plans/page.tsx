@@ -55,8 +55,8 @@ export default function PMPlansPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-red-500 uppercase tracking-widest mb-1.5">Maintenance</div>
-          <h1 className="text-3xl font-black text-primary">PM Plans</h1>
+          <div className="text-label-upper text-red-500 mb-1.5">Maintenance</div>
+          <h1 className="text-page-title text-primary">PM Plans</h1>
           <p className="text-secondary text-sm mt-1.5">{plans.length} plans · {overdue.length} overdue · {dueWeek.length} due this week</p>
         </div>
         <button onClick={() => router.push("/workflows/launcher")}
@@ -75,7 +75,7 @@ export default function PMPlansPage() {
         ].map((k,i)=>(
           <button key={i} onClick={()=>setDueFilter(duneFilter===k.filter?"all":k.filter)}
             className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${
-              duneFilter===k.filter ? `border-${k.color}-400 shadow-sm bg-${k.color}-50/30` : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
+              duneFilter===k.filter ? `border-${k.color}-400 shadow-sm bg-${k.color}-50/30` : "border-border hover:border-amber-300"
             }`}>
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-sm font-semibold text-slate-700 dark:text-tertiary mt-1">{k.label}</div>

@@ -39,7 +39,7 @@ export default function ExecutivePortfolio() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Portfolio</div>
-        <h1 className="text-3xl font-black text-primary">Business Portfolio</h1>
+        <h1 className="text-page-title text-primary">Business Portfolio</h1>
         <p className="text-secondary mt-1">Revenue, contracts, and commercial performance</p>
       </div>
 
@@ -78,7 +78,7 @@ export default function ExecutivePortfolio() {
                   <span className="text-secondary">{s.label}</span>
                   <span className="font-bold text-primary">{s.count}</span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                <div className="w-full bg-base-alt rounded-full h-2">
                   <div className={`h-2 rounded-full bg-${s.color}-500`} style={{ width: `${(s.count / Math.max(s.total, 1)) * 100}%` }} />
                 </div>
               </div>

@@ -25,7 +25,7 @@ export default function ExecutivePredictive() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Predictive Intelligence</div>
-      <h1 className="text-3xl font-black text-primary">Predictive Insights</h1>
+      <h1 className="text-page-title text-primary">Predictive Insights</h1>
       <p className="text-secondary mt-1">Forward-looking analysis based on current platform data</p></div>
       <div className="space-y-4">
         {predictions.map((p,i)=>{const rc=riskColors[p.risk];return(

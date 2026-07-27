@@ -33,7 +33,7 @@ export default function ExecutiveIntelligence() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Intelligence</div>
-          <h1 className="text-3xl font-black text-primary">Platform Command Center</h1>
+          <h1 className="text-page-title text-primary">Platform Command Center</h1>
           <p className="text-secondary mt-1">Real-time operational intelligence across all domains</p>
         </div>
         <div className={`border rounded-2xl px-6 py-4 text-center ${scoreBg}`}>

@@ -19,7 +19,7 @@ export default function SupplyChainIntelligence() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain Intelligence</div>
-      <h1 className="text-3xl font-black text-primary">Supply Chain Intelligence</h1>
+      <h1 className="text-page-title text-primary">Supply Chain Intelligence</h1>
       <p className="text-secondary mt-1">Inventory insights, supplier performance, and procurement analytics</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

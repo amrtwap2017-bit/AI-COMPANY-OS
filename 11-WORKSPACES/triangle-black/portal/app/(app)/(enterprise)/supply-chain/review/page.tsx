@@ -19,7 +19,7 @@ export default function SupplyChainReview() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain Review</div>
-      <h1 className="text-3xl font-black text-primary">Supply Chain Review</h1>
+      <h1 className="text-page-title text-primary">Supply Chain Review</h1>
       <p className="text-secondary mt-1">Procurement performance and inventory health</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

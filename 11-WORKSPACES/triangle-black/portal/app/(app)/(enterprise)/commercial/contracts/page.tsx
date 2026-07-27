@@ -57,8 +57,8 @@ export default function ContractsPage() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1.5">Commercial</div>
-          <h1 className="text-3xl font-black text-primary">Contracts</h1>
+          <div className="text-label-upper text-amber-500 mb-1.5">Commercial</div>
+          <h1 className="text-page-title text-primary">Contracts</h1>
           <p className="text-secondary text-sm mt-1.5">{contracts.length} total · {active.length} active · {fmtEGP(totalValue)} portfolio value</p>
         </div>
         <div className="flex gap-2">
@@ -82,7 +82,7 @@ export default function ContractsPage() {
           { label:"Expired",        value:expired.length,   color:"slate",   filter:"expired",   sub:"closed" },
         ].map((k,i)=>(
           <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter?"all":k.filter)}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${statusFilter===k.filter?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${statusFilter===k.filter?`border-${k.color}-400 shadow-sm`:"border-border hover:border-amber-300"}`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-xs font-medium text-slate-700 dark:text-tertiary mt-0.5">{k.label}</div>
             <div className="text-[10px] text-tertiary mt-0.5 truncate">{k.sub}</div>

@@ -95,7 +95,7 @@ export default function LeadDetailPage() {
                 {isHot && <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:"rgba(239,68,68,0.15)",color:"#F87171",border:"1px solid rgba(239,68,68,0.3)"}}>🔥 HOT</span>}
                 {isWon && <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:"rgba(16,185,129,0.15)",color:"#34D399",border:"1px solid rgba(16,185,129,0.3)"}}>✓ CONVERTED</span>}
               </div>
-              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1,margin:0}}>{lead.name}</h1>
+              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>{lead.name}</h1>
               {lead.company && <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:6}}>{lead.company} · {lead.source||"Direct"}</p>}
             </div>
 

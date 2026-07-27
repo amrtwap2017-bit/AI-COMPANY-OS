@@ -44,8 +44,8 @@ export default function TechniciansPage() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
-          <h1 className="text-3xl font-black text-primary">Technicians</h1>
+          <div className="text-label-upper text-orange-500 mb-1.5">Operations</div>
+          <h1 className="text-page-title text-primary">Technicians</h1>
           <p className="text-secondary text-sm mt-1.5">{techs.length} total · {active.length} active · {available.length} available · {busy.length} on duty</p>
         </div>
         <button onClick={()=>router.push("/operations/dispatch")}
@@ -62,7 +62,7 @@ export default function TechniciansPage() {
           { label:"At Capacity", value:atCap.length,    color:atCap.length>0?"red":"emerald", filter:"capacity" },
         ].map((k,i)=>(
           <button key={i} onClick={()=>setFilter(filter===k.filter?"all":k.filter)}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${filter===k.filter?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${filter===k.filter?`border-${k.color}-400 shadow-sm`:"border-border hover:border-amber-300"}`}>
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-sm font-medium text-secondary mt-1">{k.label}</div>
           </button>
@@ -111,7 +111,7 @@ export default function TechniciansPage() {
                   <span className="text-secondary">Capacity</span>
                   <span className={`font-bold text-${loadColor}-500`}>{t.current_work_orders||0} / {t.max_work_orders||5} WOs</span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+                <div className="w-full bg-base-alt rounded-full h-2.5">
                   <div className={`h-2.5 rounded-full bg-${loadColor}-500 transition-all`} style={{width:`${load}%`}}/>
                 </div>
               </div>

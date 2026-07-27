@@ -31,7 +31,7 @@ export default function CustomersHub() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Management</div>
-        <h1 className="text-3xl font-black text-primary">Customer Hub</h1>
+        <h1 className="text-page-title text-primary">Customer Hub</h1>
         <p className="text-secondary mt-1">Customer health, contracts, and service history</p>
       </div>
 

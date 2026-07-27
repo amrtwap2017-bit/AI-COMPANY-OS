@@ -134,7 +134,7 @@ export default function RecommendationsPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">AI Recommendations</div>
-          <h1 className="text-3xl font-black text-primary">Actionable Insights</h1>
+          <h1 className="text-page-title text-primary">Actionable Insights</h1>
           <p className="text-secondary mt-1">Data-driven recommendations from live platform analysis</p>
         </div>
         <div className="bg-surface border border-border rounded-2xl px-6 py-4 text-center">

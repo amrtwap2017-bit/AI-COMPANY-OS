@@ -38,7 +38,7 @@ export default function NewWorkOrder() {
 
   return (
     <div className="p-6 max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Create Work Order</h1>
+      <h1 className="text-page-title text-primary">Create Work Order</h1>
       {status && <div className={`p-3 rounded text-sm ${status.includes("✅") ? "bg-green-50 text-green-700" : status.includes("❌") ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"}`}>{status}</div>}
       <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-zinc-900 p-6 rounded-lg border">
         <div>

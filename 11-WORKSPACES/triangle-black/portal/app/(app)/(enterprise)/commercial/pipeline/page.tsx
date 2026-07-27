@@ -116,7 +116,7 @@ export default function PipelinePage() {
               <h2 className="font-bold text-slate-900">New Pipeline</h2>
               <button onClick={()=>setShowCreate(false)} className="text-tertiary hover:text-secondary text-xl leading-none font-bold">x</button>
             </div>
-            <form onSubmit={save} className="p-6 space-y-4">
+            <form onSubmit={save} className="tb-page">
               <div><label className="block text-xs font-semibold text-secondary mb-1">Contact Name * *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full name" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
               <div><label className="block text-xs font-semibold text-secondary mb-1">Email * *</label><input required type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@hotel.com" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
               <div><label className="block text-xs font-semibold text-secondary mb-1">Company</label><input type="text" value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="Hotel or company" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>

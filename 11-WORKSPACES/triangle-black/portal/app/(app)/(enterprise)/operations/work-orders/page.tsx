@@ -82,8 +82,8 @@ export default function WorkOrdersPage() {
         <div className="max-w-content mx-auto">
           <div className="flex items-start justify-between">
             <div>
-              <div style={{fontSize:"0.625rem",fontWeight:700,color:"#F97316",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:6}}>Operations</div>
-              <h1 style={{fontSize:"2rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.02em",lineHeight:1.1}}>Work Orders</h1>
+              <div className="text-label-upper text-orange-500 mb-1.5">Operations</div>
+              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Work Orders</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.8125rem",marginTop:5}}>{wos.length} total · {open.length} open · {overdue.length} overdue · {compRate}% completion</p>
             </div>
             <button onClick={() => setShowCreate(true)}

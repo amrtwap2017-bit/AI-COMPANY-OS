@@ -25,7 +25,7 @@ export default function AnalyticsTrends() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Analytics</div>
-      <h1 className="text-3xl font-black text-primary">Performance Trends</h1>
+      <h1 className="text-page-title text-primary">Performance Trends</h1>
       <p className="text-secondary mt-1">Key performance indicators and operational trends</p></div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {trends.map((t,i)=>(
@@ -39,7 +39,7 @@ export default function AnalyticsTrends() {
               <span className="text-xl text-tertiary mb-1">{t.unit}</span>
               <span className="text-sm text-tertiary mb-1 ml-auto">target: {t.target}{t.unit}</span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 mb-2">
+            <div className="w-full bg-base-alt rounded-full h-3 mb-2">
               <div className={`h-3 rounded-full bg-${t.color}-500`} style={{width:`${Math.min(t.value,100)}%`}}/>
             </div>
             <div className="text-xs text-secondary">{t.detail}</div>

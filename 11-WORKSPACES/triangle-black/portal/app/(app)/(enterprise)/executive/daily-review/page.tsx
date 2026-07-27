@@ -34,7 +34,7 @@ export default function ExecutiveDailyReview() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Daily Executive Review</div>
-        <h1 className="text-3xl font-black text-primary">Good Morning</h1>
+        <h1 className="text-page-title text-primary">Good Morning</h1>
         <p className="text-secondary mt-1">{today_str}</p>
       </div>
 

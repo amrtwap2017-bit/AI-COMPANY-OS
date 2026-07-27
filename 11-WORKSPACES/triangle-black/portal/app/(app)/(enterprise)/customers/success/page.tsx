@@ -28,7 +28,7 @@ export default function CustomerSuccess() {
   return (
     <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Success</div>
-      <h1 className="text-3xl font-black text-primary">Customer Success</h1>
+      <h1 className="text-page-title text-primary">Customer Success</h1>
       <p className="text-secondary mt-1">Client health, satisfaction, and retention metrics</p></div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {healthMetrics.map((m,i)=>(

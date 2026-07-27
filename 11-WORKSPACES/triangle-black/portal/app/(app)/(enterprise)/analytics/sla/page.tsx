@@ -43,7 +43,7 @@ export default function AnalyticsSLA() {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Analytics</div>
-          <h1 className="text-3xl font-black text-primary">SLA Performance</h1>
+          <h1 className="text-page-title text-primary">SLA Performance</h1>
           <p className="text-secondary mt-1">Service level agreement compliance by priority</p>
         </div>
         <div className={`rounded-2xl border px-8 py-4 text-center ${overallCompliance >= 90 ? "bg-emerald-50 border-emerald-200" : overallCompliance >= 75 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"}`}>
@@ -66,7 +66,7 @@ export default function AnalyticsSLA() {
               </div>
               <div className={`text-4xl font-black text-${c}-500`}>{row.compliance}%</div>
               <div className="text-xs text-secondary mt-1">SLA compliance</div>
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-3">
+              <div className="w-full bg-base-alt rounded-full h-2 mt-3">
                 <div className={`h-2 rounded-full bg-${c}-500`} style={{ width: `${row.compliance}%` }} />
               </div>
               <div className="grid grid-cols-3 gap-1 mt-3 text-center text-xs">
@@ -90,7 +90,7 @@ export default function AnalyticsSLA() {
           if (breached.length === 0) return <div className="text-center py-8 text-tertiary text-sm">✅ No SLA breaches</div>;
           return (
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-slate-100 dark:border-slate-800">
+              <thead><tr className="border-b border-divider">
                 <th className="text-left pb-2 text-secondary font-medium">Work Order</th>
                 <th className="text-left pb-2 text-secondary font-medium">Priority</th>
                 <th className="text-left pb-2 text-secondary font-medium">Status</th>

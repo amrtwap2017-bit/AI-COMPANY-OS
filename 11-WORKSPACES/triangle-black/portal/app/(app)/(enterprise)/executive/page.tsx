@@ -57,7 +57,7 @@ export default function ExecutivePage() {
                 <div style={{width:6,height:6,borderRadius:"50%",background:"#34D399"}} className="animate-pulse"/>
                 <span style={{color:"rgba(148,163,184,0.7)",fontSize:"0.6875rem",fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Executive Center</span>
               </div>
-              <h1 style={{fontSize:"2.25rem",fontWeight:900,color:"#F1F5F9",letterSpacing:"-0.025em",lineHeight:1.1}}>Executive Dashboard</h1>
+              <h1 className="text-page-title" style={{color:"#F1F5F9"}}>Executive Dashboard</h1>
               <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.875rem",marginTop:6}}>Real-time business intelligence and decision support</p>
             </div>
             <div className="flex items-center gap-4">

@@ -56,8 +56,8 @@ export default function ServiceRequestsPage() {
     <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
-          <h1 className="text-3xl font-black text-primary">Service Requests</h1>
+          <div className="text-label-upper text-orange-500 mb-1.5">Operations</div>
+          <h1 className="text-page-title text-primary">Service Requests</h1>
           <p className="text-secondary text-sm mt-1.5">{srs.length} total · {open.length} open · {unlinked.length} need work order · {linked.length} linked</p>
         </div>
         <button onClick={()=>setShowCreate(true)}
@@ -75,7 +75,7 @@ export default function ServiceRequestsPage() {
           { label:"Urgent",      value:urgent.length,     color:urgent.length>0?"red":"slate",   filter:"all" },
         ].map((k,i)=>(
           <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter&&k.filter!=="all"?"all":k.filter)}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&k.filter!=="all"?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
+            className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&k.filter!=="all"?`border-${k.color}-400 shadow-sm`:"border-border hover:border-amber-300"}`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
             <div className="text-xs font-medium text-secondary mt-0.5">{k.label}</div>
           </button>

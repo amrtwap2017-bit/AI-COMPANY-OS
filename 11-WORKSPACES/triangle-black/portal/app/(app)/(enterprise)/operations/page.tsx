@@ -35,7 +35,7 @@ export default function OperationsHub() {
     <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Operations Center</div>
-        <h1 className="text-3xl font-black text-primary">Operations Dashboard</h1>
+        <h1 className="text-page-title text-primary">Operations Dashboard</h1>
         <p className="text-secondary mt-1">Work orders, technicians, and service delivery</p>
       </div>
 
@@ -75,7 +75,7 @@ export default function OperationsHub() {
                   <span className="text-secondary">{p.label}</span>
                   <span className="font-bold"><span className={`text-${p.color}-500`}>{p.open} open</span> / {p.count} total</span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
+                <div className="w-full bg-base-alt rounded-full h-2.5">
                   <div className={`h-2.5 rounded-full bg-${p.color}-500`} style={{ width: `${(p.count / Math.max(wos.length, 1)) * 100}%` }} />
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function OperationsHub() {
                       <span className="font-medium text-slate-700 dark:text-tertiary truncate">{t.name}</span>
                       <span className="text-tertiary ml-2 flex-shrink-0">{t.current_work_orders ?? 0}/{t.max_work_orders ?? 5}</span>
                     </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
+                    <div className="w-full bg-base-alt rounded-full h-1.5">
                       <div className={`h-1.5 rounded-full ${load >= 90 ? "bg-red-500" : load >= 70 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${load}%` }} />
                     </div>
                   </div>
@@ -126,7 +126,7 @@ export default function OperationsHub() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {openSRs.slice(0, 6).map((sr: any, i: number) => (
               <button key={i} onClick={() => router.push(`/operations/service-requests/${sr.id}`)}
-                className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-400 hover:shadow-md transition-all text-left">
+                className="p-4 border border-border rounded-xl hover:border-blue-400 hover:shadow-md transition-all text-left">
                 <div className="text-sm font-semibold text-primary truncate">{sr.title}</div>
                 <div className="text-xs text-secondary mt-1">{sr.status} · {sr.urgency || "normal"}</div>
                 <div className="text-xs text-tertiary mt-1">{fmtDate(sr.created_at)}</div>
