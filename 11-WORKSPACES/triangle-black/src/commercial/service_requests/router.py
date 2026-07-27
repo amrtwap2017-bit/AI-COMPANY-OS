@@ -45,17 +45,20 @@ def create_service_request(data: dict, db: Session = Depends(get_db)):
     sr_id = str(uuid.uuid4())
     now   = datetime.datetime.utcnow()
     db.execute(text(
-        "INSERT INTO service_requests (id, hotel_id, title, description, priority, status, created_at, updated_at)"
-        " VALUES (:id, :hotel_id, :title, :description, :priority, :status, :created_at, :updated_at)"
+        "INSERT INTO service_requests (id, hotel_id, title, description, category, urgency, status, submitted_by, contact_phone, created_at, updated_at)"
+        " VALUES (:id, :hotel_id, :title, :description, :category, :urgency, :status, :submitted_by, :contact_phone, :created_at, :updated_at)"
     ), {
-        "id":          sr_id,
-        "hotel_id":    data.get("hotel_id", "tb-default-hotel-000000000001"),
-        "title":       data.get("title", "New Service Request"),
-        "description": data.get("description", ""),
-        "priority":    data.get("priority", "medium"),
-        "status":      data.get("status", "open"),
-        "created_at":  now,
-        "updated_at":  now,
+        "id":           sr_id,
+        "hotel_id":     data.get("hotel_id", "tb-default-hotel-000000000001"),
+        "title":        data.get("title", "New Service Request"),
+        "description":  data.get("description", ""),
+        "category":     data.get("category", "General"),
+        "urgency":      data.get("urgency", "medium"),
+        "status":       data.get("status", "open"),
+        "submitted_by": data.get("submitted_by", ""),
+        "contact_phone":data.get("contact_phone", ""),
+        "created_at":   now,
+        "updated_at":   now,
     })
     db.commit()
     return get_service_request(sr_id, db)
