@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";

@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -125,8 +126,8 @@ export default function ContractsPage() {
                   return (
                     <tr key={c.id} className={`hover:bg-slate-50 transition-colors ${expiringSoon?"bg-amber-50/30":""}`}>
                       <td className="py-3 px-3">
-                        <p className="font-medium text-slate-800 truncate max-w-[180px]">{c.title||c.contract_number||"—"}</p>
-                        <p className="text-xs text-slate-400">{c.contract_number||c.reference||""}</p>
+                        <Link href={`/commercial/contracts/${c.id}`}><p className="font-medium text-blue-700 hover:underline truncate max-w-[180px]">{c.title||c.contract_number||"—"}</p>
+                        <p className="text-xs text-slate-400">{c.contract_number||c.reference||""}</p></Link>
                       </td>
                       <td className="py-3 px-3 text-xs text-slate-600">{c.client_name||"—"}</td>
                       <td className="py-3 px-3"><span className="font-semibold text-slate-800">EGP {fmtNum(c.total_value||c.value||0)}</span></td>
