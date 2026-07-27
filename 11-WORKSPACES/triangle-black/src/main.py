@@ -842,8 +842,12 @@ def get_dashboard_summary():
     db = next(get_db())
     from sqlalchemy import text
     def c(q):
-        try: return db.execute(text(q)).scalar() or 0
-        except: return 0
+        try:
+            result = db.execute(text(q)).scalar()
+            return result or 0
+        except Exception as e:
+            db.rollback()
+            return 0
     try:
         result = {
             "work_orders": {
