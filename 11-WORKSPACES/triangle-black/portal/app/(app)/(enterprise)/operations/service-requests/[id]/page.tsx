@@ -1,185 +1,209 @@
 // @ts-nocheck
 "use client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useState } from "react";
-import { Wrench, User, Clock, AlertTriangle, ChevronRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
+import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
-// Safe array extractor — handles all backend response shapes
-const toArr = (d: any): any[] => {
-  if (!d) return [];
-  if (Array.isArray(d)) return d;
-  if (Array.isArray(d?.items)) return d.items;
-  if (Array.isArray(d?.data)) return d.data;
-  if (Array.isArray(d?.results)) return d.results;
-  if (Array.isArray(d?.records)) return d.records;
-  return [];
-};
+const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-
-const STATUS_COLORS: Record<string, string> = {
-  open:          "bg-slate-100 text-slate-600",
-  assigned:      "bg-blue-100 text-blue-700",
-  in_progress:   "bg-amber-100 text-amber-700",
-  resolved:      "bg-emerald-100 text-emerald-700",
-  closed:        "bg-slate-200 text-slate-500",
-  cancelled:     "bg-red-100 text-red-700",
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  critical: "text-red-600 bg-red-50 border-red-200",
-  high:     "text-amber-600 bg-amber-50 border-amber-200",
-  medium:   "text-blue-600 bg-blue-50 border-blue-200",
-  low:      "text-slate-600 bg-slate-50 border-slate-200",
-};
+const U = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
+const S = {open:"bg-blue-100 text-blue-800",in_progress:"bg-indigo-100 text-indigo-800",resolved:"bg-emerald-100 text-emerald-800",closed:"bg-slate-100 text-slate-500"};
+const STATUSES   = ["open","in_progress","resolved","closed"];
+const URGENCIES  = ["critical","high","medium","low"];
+const CATEGORIES = ["HVAC","Electrical","Plumbing","Elevator","Fire Safety","BMS","Power","Mechanical","IT"];
 
 export default function ServiceRequestDetailPage() {
-  const { id } = useParams();
-  const qc = useQueryClient();
-  const [escalateResult, setEscalateResult] = useState<any>(null);
+  const { id }    = useParams();
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [form,    setForm]    = useState(null);
 
-  const { data: sr, isLoading } = useQuery({
-    queryKey: ["sr", id],
-    queryFn: () => authFetch(`/api/v1/service-requests//${id}`).then(r => r.json()),
-    enabled: !!id,
-  });
+  const { data: sr, isLoading, refetch } = useQuery(
+    ["sr-detail", id],
+    () => authFetch(`/api/v1/service-requests/${id}`).then(r=>r.json()),
+    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+  );
 
-  const { data: linkedWOs = {} } = useQuery({
-    queryKey: ["sr-wos", id],
-    queryFn: () => authFetch(`/api/v1/work-orders/?service_request_id=${id}&limit=10`).then(r => r.json()),
-    enabled: !!id,
-  });
+  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
 
-  const escalate = useMutation({
-    mutationFn: () => authFetch(`/api/v1/service-requests//${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ priority: "critical", status: "assigned" }),
-    }).then(r => r.json()),
-    onSuccess: (data) => {
-      setEscalateResult(data);
-      qc.invalidateQueries({ queryKey: ["sr", id] });
-    },
-  });
+  async function save(e) {
+    e.preventDefault(); setSaving(true);
+    try {
+      const r = await authFetch(`/api/v1/service-requests/${id}`, {
+        method:"PUT", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(form)
+      });
+      if (r.ok) { setEditing(false); refetch(); }
+      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
+    } catch { alert("Network error"); }
+    finally { setSaving(false); }
+  }
 
-  if (isLoading) return <PageWrapper><LoadingState title="Loading service request..." /></PageWrapper>;
-  if (!sr || sr.detail) return <PageWrapper><p className="p-8 text-slate-400">Service request not found</p></PageWrapper>;
+  async function updateStatus(status) {
+    setSaving(true);
+    try {
+      const r = await authFetch(`/api/v1/service-requests/${id}`, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({status})
+      });
+      if (r.ok) refetch();
+      else alert("Failed to update status");
+    } catch { alert("Network error"); }
+    finally { setSaving(false); }
+  }
 
-  const wos = Array.isArray(linkedWOs) ? linkedWOs : linkedWOs?.data ?? linkedWOs?.items ?? [];
-  const priorityStyle = PRIORITY_COLORS[sr.priority] ?? PRIORITY_COLORS.medium;
+  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
+  if (!sr || sr.detail) return (
+    <PageWrapper>
+      <div className="text-center py-20">
+        <p className="text-slate-500 mb-4">Service request not found</p>
+        <Link href="/operations/service-requests" className="text-blue-600 underline text-sm">Back to Service Requests</Link>
+      </div>
+    </PageWrapper>
+  );
 
   return (
     <PageWrapper>
       <PageHeader
-        title={sr.title || sr.subject || "Service Request"}
-        subtitle={`${sr.request_type ?? sr.type ?? "Service"} · ${String(sr.created_at ?? "").slice(0,10)}`}
-        badge={
-          <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[sr.status] ?? ""}`}>
-            {sr.status}
-          </span>
+        title={sr.title || "Service Request"}
+        subtitle={`${sr.category||"General"} · Submitted ${fmtDate(sr.created_at)}`}
+        breadcrumbs={[{label:"Operations",href:"/operations"},{label:"Service Requests",href:"/operations/service-requests"},{label:sr.title?.slice(0,30)||id}]}
+        actions={
+          <div className="flex items-center gap-2">
+            {!editing ? (
+              <Button variant="secondary" size="sm" onClick={()=>{setForm({...sr});setEditing(true)}}>Edit</Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
+                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
+              </>
+            )}
+          </div>
         }
       />
 
-      {escalateResult && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-          ⚠️ Service request escalated to critical priority
+      {!editing && (
+        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
+          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[sr.status]||"bg-slate-100 text-slate-600")}>{sr.status?.replace(/_/g," ")||"—"}</span>
+          <div className="flex-1" />
+          <span className="text-xs text-slate-400 mr-1">Move to:</span>
+          {STATUSES.filter(s=>s!==sr.status).map(s=>(
+            <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:border-blue-400 hover:text-blue-700 transition-colors disabled:opacity-50">
+              {s.replace(/_/g," ")}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Priority banner */}
-      {sr.priority === "critical" && (
-        <div className={`mb-4 p-4 rounded-xl border flex items-center gap-3 ${priorityStyle}`}>
-          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-          <div className="font-semibold">Critical Priority — Requires Immediate Attention</div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* SR details */}
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2 space-y-4">
           <SectionCard title="Request Details">
-            <div className="space-y-2 text-sm">
-              {[
-                ["Status",       sr.status],
-                ["Priority",     sr.priority],
-                ["Type",         sr.request_type ?? sr.type],
-                ["Reporter",     sr.reporter_name ?? sr.created_by],
-                ["Hotel",        sr.hotel_id],
-                ["Location",     sr.location ?? sr.room_number],
-                ["Created",      String(sr.created_at ?? "").slice(0,10)],
-                ["Due By",       String(sr.due_date ?? "—").slice(0,10)],
-              ].filter(([, v]) => v && v !== "—").map(([k, v]) => (
-                <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
-                  <span className="text-slate-800 font-medium text-right max-w-32 truncate">{v}</span>
+            {editing ? (
+              <form onSubmit={save} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+                  <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
                 </div>
-              ))}
-            </div>
-            {sr.description && (
-              <div className="mt-3 p-3 bg-slate-50 rounded-lg">
-                <div className="text-xs text-slate-500 uppercase font-semibold mb-1">Description</div>
-                <div className="text-sm text-slate-700">{sr.description}</div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                  <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
+                    rows={4} className={inp+" resize-none"} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                    <select value={form?.category||"HVAC"} onChange={e=>setForm({...form,category:e.target.value})} className={inp}>
+                      {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Urgency</label>
+                    <select value={form?.urgency||"medium"} onChange={e=>setForm({...form,urgency:e.target.value})} className={inp}>
+                      {URGENCIES.map(u=><option key={u} value={u}>{u}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Submitted By</label>
+                    <input value={form?.submitted_by||""} onChange={e=>setForm({...form,submitted_by:e.target.value})} className={inp} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Contact Phone</label>
+                    <input value={form?.contact_phone||""} onChange={e=>setForm({...form,contact_phone:e.target.value})} className={inp} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Resolution Notes</label>
+                  <textarea value={form?.resolution_notes||""} onChange={e=>setForm({...form,resolution_notes:e.target.value})}
+                    rows={3} placeholder="How was this resolved?" className={inp+" resize-none"} />
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Title</p>
+                  <p className="text-slate-800 font-medium">{sr.title}</p>
+                </div>
+                {sr.description && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Description</p>
+                    <p className="text-slate-700 text-sm whitespace-pre-wrap">{sr.description}</p>
+                  </div>
+                )}
+                {sr.resolution_notes && (
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1">Resolution Notes</p>
+                    <p className="text-emerald-800 text-sm">{sr.resolution_notes}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Submitted By</p>
+                    <p className="text-slate-700">{sr.submitted_by||"—"}</p>
+                    {sr.contact_phone&&<p className="text-xs text-slate-400 mt-0.5">{sr.contact_phone}</p>}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Location</p>
+                    <p className="text-slate-700">{sr.location||sr.site_id||"—"}</p>
+                  </div>
+                </div>
               </div>
             )}
           </SectionCard>
-
-          {/* Escalation action */}
-          {sr.priority !== "critical" && sr.status !== "resolved" && sr.status !== "closed" && (
-            <SectionCard title="Actions">
-              <button
-                onClick={() => escalate.mutate()}
-                disabled={escalate.isPending}
-                className="w-full h-10 flex items-center justify-center gap-2 text-sm font-medium
-                           bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-              >
-                {escalate.isPending
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <AlertTriangle className="w-4 h-4" />}
-                Escalate to Critical
-              </button>
-              <p className="text-xs text-slate-400 text-center mt-2">
-                Use for urgent issues requiring immediate dispatch
-              </p>
-            </SectionCard>
-          )}
         </div>
 
-        {/* Linked Work Orders */}
-        <div className="lg:col-span-2">
-          <SectionCard title={`Linked Work Orders (${(wos || []).length})`}>
-            {(wos || []).length > 0 ? (
-              <div className="space-y-3">
-                {toArr(wos).map((wo: any) => (
-                  <div key={wo.id}
-                       className="flex items-center justify-between p-3
-                                  bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                      <div>
-                        <div className="text-sm font-medium text-slate-800">{wo.title}</div>
-                        <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
-                      </div>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium flex-shrink-0
-                      ${wo.status === "completed" ? "bg-emerald-100 text-emerald-700" :
-                        wo.status === "in_progress" ? "bg-blue-100 text-blue-700" :
-                        "bg-slate-100 text-slate-600"}`}>
-                      {wo.status?.replace(/_/g, " ")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Wrench className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm text-slate-400">No work orders linked to this request</p>
-                <p className="text-xs text-slate-300 mt-1">
-                  A work order will appear here when dispatched
-                </p>
-              </div>
-            )}
+        <div className="space-y-4">
+          <SectionCard title="Properties">
+            <dl className="space-y-3">
+              {[
+                {label:"Urgency",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(U[sr.urgency?.toLowerCase()]||U.low)}>{sr.urgency||"—"}</span>},
+                {label:"Category",  value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{sr.category||"—"}</span>},
+                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[sr.status]||"bg-slate-100 text-slate-600")}>{sr.status?.replace(/_/g," ")||"—"}</span>},
+                {label:"Created",   value:fmtDate(sr.created_at)},
+                {label:"Resolved",  value:fmtDate(sr.resolved_at)},
+              ].map(({label,value})=>(
+                <div key={label} className="flex justify-between items-center">
+                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dd className="text-xs">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </SectionCard>
+
+          <SectionCard title="Quick Actions">
+            <div className="space-y-2">
+              {sr.status==="open"&&<button onClick={()=>updateStatus("in_progress")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50">Assign & Start</button>}
+              {sr.status==="in_progress"&&<button onClick={()=>updateStatus("resolved")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Mark Resolved</button>}
+              {sr.status==="resolved"&&<button onClick={()=>updateStatus("closed")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 disabled:opacity-50">Close Request</button>}
+              <Link href="/operations/service-requests" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to List</Link>
+            </div>
           </SectionCard>
         </div>
       </div>

@@ -1,210 +1,219 @@
 // @ts-nocheck
 "use client";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, StatusBadge } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { Activity, Wrench, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
+import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
-// Safe array extractor — handles all backend response shapes
-const toArr = (d: any): any[] => {
-  if (!d) return [];
-  if (Array.isArray(d)) return d;
-  if (Array.isArray(d?.items)) return d.items;
-  if (Array.isArray(d?.data)) return d.data;
-  if (Array.isArray(d?.results)) return d.results;
-  if (Array.isArray(d?.records)) return d.records;
-  return [];
-};
+const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
+const STATUSES     = ["Operational","Under Maintenance","In Fault","Decommissioned"];
+const CRITICALITY  = ["critical","high","medium","low"];
+const CATEGORIES   = ["HVAC","Electrical","Plumbing","Elevator","Fire Safety","BMS","Mechanical","Other"];
 
-function HealthBar({ score }: { score: number }) {
-  const color = score < 20 ? "bg-red-500" : score < 40 ? "bg-orange-500" :
-                score < 60 ? "bg-amber-500" : score < 80 ? "bg-blue-500" : "bg-emerald-500";
-  const label = score < 20 ? "Critical" : score < 40 ? "High Risk" :
-                score < 60 ? "At Risk" : score < 80 ? "Good" : "Healthy";
-  return (
-    <div className="mb-4">
-      <div className="flex justify-between mb-1">
-        <span className="text-sm font-medium text-slate-600">Health Score</span>
-        <span className="text-sm font-semibold">{score}/100 — {label}</span>
-      </div>
-      <div className="w-full bg-slate-100 rounded-full h-3">
-        <div className={`${color} h-3 rounded-full transition-all`} style={{width:`${score}%`}} />
-      </div>
-    </div>
-  );
-}
+const S = {Operational:"bg-emerald-100 text-emerald-800","Under Maintenance":"bg-amber-100 text-amber-800","In Fault":"bg-red-100 text-red-800",Decommissioned:"bg-slate-100 text-slate-500"};
+const C = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
 
 export default function AssetDetailPage() {
-  const { id } = useParams();
+  const { id }    = useParams();
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [form,    setForm]    = useState(null);
 
-  const { data: asset, isLoading: al } = useQuery({
-    queryKey: ["asset", id],
-    queryFn: () => authFetch(`/api/v1/assets/${id}`).then(r => r.json()),
-    enabled: !!id,
-  });
-  const assets: any[] = toArr(asset);
-const maintenance: any[] = toArr(asset);
-const items: any[] = toArr(asset);
+  const { data: asset, isLoading, refetch } = useQuery(
+    ["asset-detail", id],
+    () => authFetch(`/api/v1/assets/${id}`).then(r=>r.json()),
+    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+  );
 
-  const { data: relationships = [] } = useQuery({
-    queryKey: ["asset-graph", id],
-    queryFn: () => authFetch(`/api/v1/knowledge-graph/entity/asset/${id}`).then(r => r.json()),
-    enabled: !!id,
-  });
+  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
 
-  const { data: healthData = [] } = useQuery({
-    queryKey: ["asset-health", id],
-    queryFn: () => authFetch(`/api/v1/predictive-maintenance/health-scores`)
-      .then(r => r.json())
-      .then(d => (d.assets ?? []).find((a: any) => a.asset_id === id)),
-    enabled: !!id,
-  });
+  async function save(e) {
+    e.preventDefault(); setSaving(true);
+    try {
+      const r = await authFetch(`/api/v1/assets/${id}`, {
+        method:"PUT", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(form)
+      });
+      if (r.ok) { setEditing(false); refetch(); }
+      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
+    } catch { alert("Network error"); }
+    finally { setSaving(false); }
+  }
 
-  const { data: warranties = [] } = useQuery({
-    queryKey: ["asset-warranty", id],
-    queryFn: () => authFetch(`/api/v1/warranty/asset/${id}`).then(r => r.json()),
-    enabled: !!id,
-  });
+  async function updateStatus(status) {
+    setSaving(true);
+    try {
+      const r = await authFetch(`/api/v1/assets/${id}`, {
+        method:"PATCH", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({status})
+      });
+      if (r.ok) refetch();
+      else alert("Failed to update status");
+    } catch { alert("Network error"); }
+    finally { setSaving(false); }
+  }
 
-  if (al) return <PageWrapper><LoadingState title="Loading asset..." /></PageWrapper>;
-  if (!asset) return <PageWrapper><p className="p-8 text-slate-400">Asset not found</p></PageWrapper>;
-
-  const wos  = relationships?.relationships?.work_orders ?? [];
-  const pms  = relationships?.relationships?.maintenance_plans ?? [];
-  const warr = warranties?.warranties ?? [];
-  const health = healthData ?? {};
-
-  const STATUS_COLOR: Record<string, string> = {
-    active: "text-emerald-600", inactive: "text-slate-400",
-    maintenance: "text-amber-600", retired: "text-red-600",
-  };
+  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
+  if (!asset || asset.detail) return (
+    <PageWrapper>
+      <div className="text-center py-20">
+        <p className="text-slate-500 mb-4">Asset not found</p>
+        <Link href="/maintenance/assets" className="text-blue-600 underline text-sm">Back to Assets</Link>
+      </div>
+    </PageWrapper>
+  );
 
   return (
     <PageWrapper>
       <PageHeader
-        title={asset.name || "Asset Detail"}
-        subtitle={`${asset.category} · ${asset.criticality} criticality`}
-        badge={<span className={STATUS_COLOR[asset.status] ?? "text-slate-600"}>{asset.status}</span>}
+        title={asset.name || "Asset"}
+        subtitle={`${asset.category||"Equipment"} · ${asset.location||"No location"}`}
+        breadcrumbs={[{label:"Maintenance",href:"/maintenance"},{label:"Assets",href:"/maintenance/assets"},{label:asset.name?.slice(0,30)||id}]}
+        actions={
+          <div className="flex items-center gap-2">
+            {!editing ? (
+              <Button variant="secondary" size="sm" onClick={()=>{setForm({...asset});setEditing(true)}}>Edit</Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
+                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
+              </>
+            )}
+          </div>
+        }
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left: Health + Info */}
-        <div className="space-y-6">
-          {health.health_score !== undefined && (
-            <SectionCard title="AI Health Score">
-              <HealthBar score={health.health_score} />
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Risk Level</span>
-                  <span className="font-medium capitalize">{health.risk_level}</span>
+      {!editing && (
+        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
+          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[asset.status]||"bg-slate-100 text-slate-600")}>{asset.status||"—"}</span>
+          <div className="flex-1" />
+          <span className="text-xs text-slate-400 mr-1">Change to:</span>
+          {STATUSES.filter(s=>s!==asset.status).map(s=>(
+            <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:border-blue-400 hover:text-blue-700 transition-colors disabled:opacity-50">
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2 space-y-4">
+          <SectionCard title="Asset Details">
+            {editing ? (
+              <form onSubmit={save} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Asset Name *</label>
+                    <input required value={form?.name||""} onChange={e=>setForm({...form,name:e.target.value})} className={inp} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                    <select value={form?.category||"HVAC"} onChange={e=>setForm({...form,category:e.target.value})} className={inp}>
+                      {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Predicted Failure</span>
-                  <span className="font-medium">{health.predicted_failure_date}</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                    <select value={form?.status||"Operational"} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
+                      {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Criticality</label>
+                    <select value={form?.criticality||"medium"} onChange={e=>setForm({...form,criticality:e.target.value})} className={inp}>
+                      {CRITICALITY.map(c=><option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Days Since PM</span>
-                  <span className="font-medium">{health.days_since_maintenance}d</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Location</label>
+                    <input value={form?.location||""} onChange={e=>setForm({...form,location:e.target.value})} placeholder="e.g. B2 Plant Room" className={inp} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Model / Manufacturer</label>
+                    <input value={form?.model||""} onChange={e=>setForm({...form,model:e.target.value})} placeholder="Carrier 30XA" className={inp} />
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Corrective WOs (90d)</span>
-                  <span className="font-medium">{health.corrective_wos_90d}</span>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+                  <textarea value={form?.notes||form?.description||""} onChange={e=>setForm({...form,notes:e.target.value})}
+                    rows={3} className={inp+" resize-none"} />
                 </div>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Category</p>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{asset.category||"—"}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Location</p>
+                    <p className="text-slate-700">{asset.location||"—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Model</p>
+                    <p className="text-slate-700">{asset.model||asset.manufacturer||"—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Serial Number</p>
+                    <p className="text-slate-700 font-mono text-xs">{asset.serial_number||"—"}</p>
+                  </div>
+                </div>
+                {(asset.notes||asset.description) && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
+                    <p className="text-slate-700 text-sm">{asset.notes||asset.description}</p>
+                  </div>
+                )}
               </div>
-              {health.recommended_action && (
-                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-700">{health.recommended_action}</p>
-                </div>
-              )}
-            </SectionCard>
-          )}
-
-          <SectionCard title="Asset Information">
-            <div className="space-y-2 text-sm">
-              {[
-                ["Category",     asset.category],
-                ["Criticality",  asset.criticality],
-                ["Manufacturer", asset.manufacturer],
-                ["Model",        asset.model],
-                ["Serial No",    asset.serial_number],
-                ["Location",     asset.location_description],
-                ["Status",       asset.status],
-              ].map(([k, v]) => v && (
-                <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
-                  <span className="text-slate-800 font-medium text-right max-w-32 truncate">{v}</span>
-                </div>
-              ))}
-            </div>
+            )}
           </SectionCard>
-
-          {warr.length > 0 && (
-            <SectionCard title="Warranties">
-              {warr.map((w: any) => (
-                <div key={w.id} className="p-3 bg-slate-50 rounded-lg mb-2">
-                  <div className="text-xs font-medium text-slate-700">{w.warranty_type}</div>
-                  <div className="text-xs text-slate-500">Expires: {String(w.end_date).slice(0,10)}</div>
-                  <div className="text-xs text-slate-500">{w.provider}</div>
-                </div>
-              ))}
-            </SectionCard>
-          )}
         </div>
 
-        {/* Right: WO History + PM Plans */}
-        <div className="lg:col-span-2 space-y-6">
-          <SectionCard title={`Work Order History (${(wos || []).length})`}>
-            {(wos || []).length > 0 ? (
-              <div className="space-y-2">
-                {toArr(wos).map((wo: any) => (
-                  <div key={wo.id} className="flex items-center justify-between p-3
-                                               bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                      <div>
-                        <div className="text-sm font-medium text-slate-800">{wo.title}</div>
-                        <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
-                      </div>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium
-                      ${wo.status === "completed" ? "bg-emerald-100 text-emerald-700" :
-                        wo.status === "in_progress" ? "bg-blue-100 text-blue-700" :
-                        "bg-slate-100 text-slate-600"}`}>
-                      {wo.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-6">No work order history</p>
-            )}
+        <div className="space-y-4">
+          <SectionCard title="Properties">
+            <dl className="space-y-3">
+              {[
+                {label:"Status",      value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[asset.status]||"bg-slate-100 text-slate-600")}>{asset.status||"—"}</span>},
+                {label:"Criticality", value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(C[asset.criticality]||C.low)}>{asset.criticality||"—"}</span>},
+                {label:"Installed",   value:fmtDate(asset.installation_date||asset.created_at)},
+                {label:"Last Maint.", value:fmtDate(asset.last_maintenance_date)},
+                {label:"Next Maint.", value:fmtDate(asset.next_maintenance_date)},
+              ].map(({label,value})=>(
+                <div key={label} className="flex justify-between items-center">
+                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dd className="text-xs">{value}</dd>
+                </div>
+              ))}
+            </dl>
           </SectionCard>
 
-          <SectionCard title={`Maintenance Plans (${pms.length})`}>
-            {pms.length > 0 ? (
-              <div className="space-y-2">
-                {toArr(pms).map((pm: any) => (
-                  <div key={pm.id} className="flex items-center justify-between p-3
-                                               bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <Activity className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                      <div>
-                        <div className="text-sm font-medium text-slate-800">{pm.title}</div>
-                        <div className="text-xs text-slate-400">{pm.plan_type}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-slate-500">Next due</div>
-                      <div className="text-xs font-medium">{String(pm.next_due_date).slice(0,10)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-6">No maintenance plans</p>
-            )}
+          <SectionCard title="Quick Actions">
+            <div className="space-y-2">
+              {asset.status==="In Fault"&&(
+                <button onClick={()=>updateStatus("Under Maintenance")} disabled={saving}
+                  className="w-full px-3 py-2 text-sm font-semibold text-white bg-amber-600 rounded-xl hover:bg-amber-700 disabled:opacity-50">
+                  Start Maintenance
+                </button>
+              )}
+              {asset.status==="Under Maintenance"&&(
+                <button onClick={()=>updateStatus("Operational")} disabled={saving}
+                  className="w-full px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">
+                  Mark Operational
+                </button>
+              )}
+              <Link href="/maintenance/assets" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Assets</Link>
+            </div>
           </SectionCard>
         </div>
       </div>

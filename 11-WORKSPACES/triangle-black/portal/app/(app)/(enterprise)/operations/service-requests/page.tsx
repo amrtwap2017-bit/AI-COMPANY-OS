@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -126,7 +127,7 @@ export default function ServiceRequestsPage() {
                 {filtered.map(sr=>(
                   <tr key={sr.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800 truncate max-w-xs">{sr.title}</p>
+                      <Link href={`/operations/service-requests/${sr.id}`}><p className="font-medium text-blue-700 hover:underline truncate max-w-xs">{sr.title}</p></Link>
                       <p className="text-xs text-slate-400 truncate">{sr.description?.slice(0,50)||""}</p>
                     </td>
                     <td className="py-3 px-3">
