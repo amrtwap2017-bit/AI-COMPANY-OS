@@ -1,11 +1,13 @@
 "use client";
 // @ts-nocheck
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function ExecutivePage() {
   const router = useRouter();
@@ -15,24 +17,32 @@ export default function ExecutivePage() {
   const { data: invRaw }      = useQuery(["exe-inv"],    () => authFetch("/api/v1/invoices/").then(r=>r.json()));
   const { data: contractRaw } = useQuery(["exe-cont"],   () => authFetch("/api/v1/contracts/").then(r=>r.json()));
   const { data: notifRaw }    = useQuery(["exe-notifs"], () => authFetch("/api/v1/notifications/").then(r=>r.json()));
+  const { data: autoStatus }  = useQuery(["exe-auto"],   () => authFetch("/api/v1/automation/status").then(r=>r.json()));
 
-  const wos = toArr(woRaw); const invoices = toArr(invRaw);
-  const contracts = toArr(contractRaw); const notifs = toArr(notifRaw);
-  const d = dash || {}; const now = new Date(); const score = twin?.health_score ?? 0;
+  const wos       = toArr(woRaw);
+  const invoices  = toArr(invRaw);
+  const contracts = toArr(contractRaw);
+  const notifs    = toArr(notifRaw);
+  const d         = dash||{};
+  const now       = new Date();
+  const in30      = new Date(now.getTime()+30*86400000);
+  const score     = twin?.health_score??0;
 
-  const criticalWOs = wos.filter(w => w.priority==="critical" && w.status!=="completed");
-  const overdueWOs  = wos.filter(w => w.due_date && new Date(w.due_date)<now && w.status!=="completed");
-  const expiring30  = contracts.filter(c => c.status==="active" && c.end_date && new Date(c.end_date)>=now && new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
-  const totalRevenue = invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const pendingRev   = invoices.filter(i=>i.status==="pending").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const collRate     = invoices.length>0?Math.round(invoices.filter(i=>i.status==="paid").length/invoices.length*100):0;
-  const compRate     = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
-  const unread       = notifs.filter(n=>!n.is_read);
-  const riskScore    = criticalWOs.length*10 + overdueWOs.length*3 + expiring30.length*5 + (d.maintenance?.overdue||0)*2;
-  const riskLevel    = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
-  const riskColor    = riskScore===0?"#34D399":riskScore<15?"#60A5FA":riskScore<30?"#FBBF24":"#F87171";
+  const criticalWOs     = wos.filter(w=>w.priority==="critical"&&w.status!=="completed");
+  const overdueWOs      = wos.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
+  const expiringContracts = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in30);
+  const totalRevenue    = invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const pendingRevenue  = invoices.filter(i=>i.status==="pending").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const unreadNotifs    = notifs.filter(n=>!n.is_read);
+  const pending         = autoStatus?.pending_actions||{};
+  const totalPending    = Object.values(pending).reduce((s,v)=>s+Number(v),0);
+  const collRate        = invoices.length>0?Math.round(invoices.filter(i=>i.status==="paid").length/invoices.length*100):0;
+  const compRate        = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
+  const riskScore       = criticalWOs.length*10+overdueWOs.length*3+expiringContracts.length*5+(d.maintenance?.overdue||0)*2;
+  const riskLevel       = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
+  const riskColor       = riskScore===0?"#34D399":riskScore<15?"#60A5FA":riskScore<30?"#FBBF24":"#F87171";
 
-  const subPages = [
+  const executiveNav = [
     {label:"Intelligence",  icon:"🧠", path:"/executive/intelligence"},
     {label:"Daily Review",  icon:"☀️", path:"/executive/daily-review"},
     {label:"Portfolio",     icon:"💼", path:"/executive/portfolio"},
@@ -46,71 +56,63 @@ export default function ExecutivePage() {
   ];
 
   return (
-    <div className="min-h-screen" className="bg-base">
-
-      {/* ── DARK HERO ─────────────────────────────────────────── */}
-      <div style={{background:"linear-gradient(135deg, #0F172A 0%, #1A2744 50%, #0F172A 100%)", borderBottom:"1px solid rgba(255,255,255,0.06)"}} className="px-8 py-8">
-        <div className="max-w-content mx-auto">
-          <div className="flex items-start justify-between">
+    <div className="min-h-screen bg-base">
+      {/* HERO */}
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div style={{width:6,height:6,borderRadius:"50%",background:"#34D399"}} className="animate-pulse"/>
-                <span style={{color:"rgba(148,163,184,0.7)",fontSize:"0.6875rem",fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}}>Executive Center</span>
-              </div>
-              <h1 className="text-page-title" className="text-slate-100">Executive Dashboard</h1>
-              <p style={{color:"rgba(148,163,184,0.6)",fontSize:"0.875rem",marginTop:6}}>Real-time business intelligence and decision support</p>
+              <div className="text-label-upper text-purple-400 mb-1.5">Executive Center</div>
+              <h1 className="tb-hero-title">Executive Dashboard</h1>
+              <p className="tb-hero-description">Real-time business intelligence and decision support</p>
             </div>
             <div className="flex items-center gap-4">
               {/* Twin score */}
-              <div style={{background:score>=95?"rgba(16,185,129,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${score>=95?"rgba(16,185,129,0.25)":"rgba(245,158,11,0.25)"}`,borderRadius:16,padding:"16px 24px",textAlign:"center",boxShadow:score>=95?"0 0 24px rgba(16,185,129,0.12)":"0 0 24px rgba(245,158,11,0.12)"}}>
-                <div style={{fontSize:"2.5rem",fontWeight:900,lineHeight:1,color:score>=95?"#34D399":"#FCD34D"}}>{score}</div>
-                <div style={{fontSize:"0.625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"}}>Platform Health</div>
-                <div style={{fontSize:"0.6875rem",fontWeight:700,color:score>=95?"#34D399":"#FCD34D",marginTop:2}}>{twin?.health_label||"—"}</div>
+              <div className={`tb-score-badge ${score>=95?"tb-score-badge--success":"tb-score-badge--warning"}`}>
+                <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{score}</div>
+                <div className="tb-score-label">Platform Health</div>
+                <div className="tb-score-sub" style={{color:score>=95?"#34D399":"#FBBF24"}}>{twin?.health_label||"—"}</div>
               </div>
               {/* Risk score */}
-              <div style={{background:`${riskColor}14`,border:`1px solid ${riskColor}40`,borderRadius:16,padding:"16px 24px",textAlign:"center"}}>
-                <div style={{fontSize:"2rem",fontWeight:900,lineHeight:1,color:riskColor}}>{riskScore}</div>
-                <div style={{fontSize:"0.625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"}}>Risk Score</div>
-                <div style={{fontSize:"0.6875rem",fontWeight:700,color:riskColor,marginTop:2}}>{riskLevel}</div>
+              <div className={`tb-score-badge ${riskScore===0?"tb-score-badge--success":riskScore<15?"":"tb-score-badge--danger"}`}
+                style={riskScore>=15?{background:`${riskColor}14`,border:`1px solid ${riskColor}40`}:{}}>
+                <div className="tb-score-value" style={{color:riskColor}}>{riskScore}</div>
+                <div className="tb-score-label">Risk Score</div>
+                <div className="tb-score-sub" style={{color:riskColor}}>{riskLevel}</div>
               </div>
             </div>
           </div>
 
           {/* KPI strip */}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-8">
+          <div className="tb-grid-6 mt-6">
             {[
-              {label:"Active Contracts", value:d.commercial?.active_contracts??0, color:"#34D399", path:"/commercial/contracts"},
-              {label:"Revenue",          value:fmtEGP(totalRevenue),              color:"#FBBF24", path:"/invoices"},
-              {label:"Pending",          value:fmtEGP(pendingRev),                color:"#60A5FA", path:"/invoices"},
-              {label:"Critical WOs",     value:criticalWOs.length,                color:criticalWOs.length>0?"#F87171":"#34D399", path:"/executive/exceptions"},
-              {label:"WO Completion",    value:`${compRate}%`,                    color:compRate>=80?"#34D399":"#FBBF24", path:"/analytics/scorecards"},
-              {label:"Unread Alerts",    value:unread.length,                     color:"#A78BFA", path:"/inbox"},
+              {label:"Active Contracts", value:d.commercial?.active_contracts??0,  color:"#34D399", path:"/commercial/contracts"},
+              {label:"Revenue",          value:fmtEGP(totalRevenue),               color:"#FBBF24", path:"/invoices"},
+              {label:"Pending",          value:fmtEGP(pendingRevenue),             color:"#60A5FA", path:"/invoices"},
+              {label:"Critical WOs",     value:criticalWOs.length,                 color:criticalWOs.length>0?"#F87171":"#34D399", path:"/executive/exceptions"},
+              {label:"WO Completion",    value:`${compRate}%`,                     color:compRate>=80?"#34D399":"#FBBF24", path:"/analytics/scorecards"},
+              {label:"Unread Alerts",    value:unreadNotifs.length,               color:"#A78BFA", path:"/inbox"},
             ].map((k,i)=>(
-              <button key={i} onClick={()=>router.push(k.path)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"14px 8px",textAlign:"center",cursor:"pointer",transition:"all 150ms ease"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.08)";e.currentTarget.style.borderColor="rgba(255,255,255,0.15)"}}
-                onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.04)";e.currentTarget.style.borderColor="rgba(255,255,255,0.08)"}}>
-                <div style={{fontSize:"1.25rem",fontWeight:900,color:k.color,lineHeight:1}}>{k.value}</div>
-                <div style={{fontSize:"0.625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.05em"}}>{k.label}</div>
+              <button key={i} onClick={()=>router.push(k.path)} className="tb-hero-kpi text-left">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── CONTENT ───────────────────────────────────────────── */}
-      <div className="max-w-content mx-auto px-8 py-8 space-y-6">
+      {/* CONTENT */}
+      <div className="tb-canvas">
 
         {/* Executive nav */}
         <div className="tb-section">
-          <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:16}}>Executive Views</div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            {subPages.map((nav,i)=>(
-              <button key={i} onClick={()=>router.push(nav.path)} className="flex flex-col items-center gap-1.5"
-                style={{padding:"14px 8px",borderRadius:12,background:"transparent",border:"1px solid transparent",transition:"all 150ms ease",cursor:"pointer"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(180,83,9,0.06)";e.currentTarget.style.borderColor="rgba(180,83,9,0.2)"}}
-                onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="transparent"}}>
-                <span style={{fontSize:"1.25rem"}}>{nav.icon}</span>
-                <span style={{fontSize:"0.625rem",fontWeight:600,color:"var(--color-text-2)",textAlign:"center"}}>{nav.label}</span>
+          <div className="text-label-upper text-tertiary mb-4">Executive Views</div>
+          <div className="tb-grid-4" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {executiveNav.map((nav,i)=>(
+              <button key={i} onClick={()=>router.push(nav.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{nav.icon}</span>
+                <span className="text-xs font-medium text-secondary">{nav.label}</span>
               </button>
             ))}
           </div>
@@ -118,57 +120,87 @@ export default function ExecutivePage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left — alerts */}
-          <div className="tb-section">
-            <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Attention Required</div>
-            <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Executive Alerts</div>
-            {criticalWOs.length===0 && expiring30.length===0 ? (
-              <div style={{textAlign:"center",padding:"32px 0"}}>
-                <div style={{fontSize:"2.5rem",marginBottom:12}}>✅</div>
-                <div style={{fontSize:"0.875rem",color:"var(--color-text-2)"}}>No executive alerts</div>
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-header">
+                <div>
+                  <div className="text-label-upper text-tertiary mb-1">Attention Required</div>
+                  <div className="tb-section-title" style={{marginBottom:0}}>Executive Alerts</div>
+                </div>
+                <button onClick={()=>router.push("/executive/exceptions")} className="tb-section-link">All →</button>
               </div>
-            ) : (
-              <div className="space-y-2">
-                {criticalWOs.slice(0,4).map((w,i)=>(
-                  <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)} className="w-full text-left"
-                    style={{background:"rgba(239,68,68,0.06)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:12,padding:"12px 14px",transition:"all 150ms ease",cursor:"pointer"}}>
-                    <div style={{fontSize:"0.625rem",fontWeight:700,color:"#F87171",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:3}}>Critical WO</div>
-                    <div className="text-sm font-semibold text-primary" className="truncate">{w.title}</div>
-                  </button>
-                ))}
-                {expiring30.slice(0,3).map((c,i)=>{
-                  const days=Math.ceil((new Date(c.end_date)-Date.now())/86400000);
-                  return (
-                    <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)} className="w-full text-left"
-                      style={{background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.2)",borderRadius:12,padding:"12px 14px",transition:"all 150ms ease",cursor:"pointer"}}>
-                      <div style={{fontSize:"0.625rem",fontWeight:700,color:"#FBBF24",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:3}}>Contract Expiring · {days}d</div>
-                      <div className="text-sm font-semibold text-primary" className="truncate">{c.title||c.id?.slice(0,16)}</div>
+              {criticalWOs.length===0&&expiringContracts.length===0 ? (
+                <div className="tb-empty" style={{padding:"24px 0"}}>
+                  <div className="tb-empty-icon" style={{fontSize:"2.5rem"}}>✅</div>
+                  <div className="tb-empty-desc">No executive alerts</div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {criticalWOs.slice(0,3).map((w,i)=>(
+                    <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
+                      className="tb-domain-card tb-domain-card--danger w-full text-left">
+                      <div className="text-label-upper mb-1" style={{color:"#F87171"}}>Critical WO</div>
+                      <div className="text-sm font-semibold text-primary truncate">{w.title}</div>
                     </button>
-                  );
-                })}
+                  ))}
+                  {expiringContracts.slice(0,2).map((c,i)=>{
+                    const days=Math.ceil((new Date(c.end_date)-Date.now())/86400000);
+                    return (
+                      <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)}
+                        className="tb-domain-card tb-domain-card--warn w-full text-left">
+                        <div className="text-label-upper mb-1" style={{color:"#FBBF24"}}>Contract · {days}d left</div>
+                        <div className="text-sm font-semibold text-primary truncate">{c.title||c.id?.slice(0,16)}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Business summary */}
+            <div className="tb-section">
+              <div className="tb-section-title">Business Summary</div>
+              <div className="space-y-1">
+                {[
+                  ["WO Total",        wos.length],
+                  ["PM Plans",        d.maintenance?.pm_plans??0],
+                  ["Open Leads",      d.commercial?.open_leads??0],
+                  ["Purchase Reqs",   d.procurement?.purchase_requests??0],
+                  ["Technicians",     d.platform?.technicians??0],
+                  ["Projects",        d.platform?.projects??0],
+                ].map(([l,v],i)=>(
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Right — twin domains + finance */}
+          {/* Right — twin + finance */}
           <div className="xl:col-span-2 space-y-5">
+
             {/* Twin domains */}
             <div className="tb-section">
-              <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Digital Twin</div>
-              <div className="flex items-center justify-between" className="mb-5">
-                <div className="tb-empty-title">Domain Health — {score}/100</div>
-                <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Full →</button>
+              <div className="tb-section-header">
+                <div>
+                  <div className="text-label-upper text-tertiary mb-1">Digital Twin</div>
+                  <div className="tb-section-title" style={{marginBottom:0}}>Domain Health — {score}/100</div>
+                </div>
+                <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Intelligence →</button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="tb-grid-4">
                 {(twin?.operational_domains??[]).map((dom,i)=>{
                   const hasIssue=(dom.overdue??0)>0||(dom.critical_open??0)>0||(dom.below_min??0)>0;
                   const c=hasIssue?"#FBBF24":"#34D399";
                   return (
-                    <div key={i} style={{background:hasIssue?"rgba(245,158,11,0.06)":"rgba(16,185,129,0.06)",border:`1px solid ${hasIssue?"rgba(245,158,11,0.2)":"rgba(16,185,129,0.2)"}`,borderRadius:12,padding:14}}>
-                      <div className="flex justify-between" style={{marginBottom:6}}>
-                        <div style={{fontSize:"0.6875rem",fontWeight:600,color:"var(--color-text-1)"}}>{dom.domain}</div>
-                        <div style={{fontSize:"0.75rem",fontWeight:900,color:c}}>{hasIssue?"⚠":"✓"}</div>
+                    <div key={i} className={`tb-domain-card ${hasIssue?"tb-domain-card--warn":"tb-domain-card--ok"}`}>
+                      <div className="tb-flex-between mb-1">
+                        <div className="text-xs font-semibold text-primary">{dom.domain}</div>
+                        <div className="text-xs font-black" style={{color:c}}>{hasIssue?"⚠":"✓"}</div>
                       </div>
-                      <div style={{fontSize:"1.5rem",fontWeight:900,color:c,lineHeight:1}}>{dom.total??0}</div>
+                      <div className="text-2xl font-black" style={{color:c}}>{dom.total??0}</div>
                     </div>
                   );
                 })}
@@ -177,37 +209,40 @@ export default function ExecutivePage() {
 
             {/* Finance snapshot */}
             <div className="tb-section">
-              <div className="flex items-center justify-between" className="mb-5">
+              <div className="tb-section-header">
                 <div>
-                  <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Finance</div>
-                  <div className="tb-empty-title">Revenue Snapshot</div>
+                  <div className="text-label-upper text-tertiary mb-1">Finance</div>
+                  <div className="tb-section-title" style={{marginBottom:0}}>Revenue Snapshot</div>
                 </div>
                 <button onClick={()=>router.push("/invoices")} className="tb-section-link">Full report →</button>
               </div>
-              <div className="grid grid-cols-4 gap-3" className="mb-4">
+              <div className="tb-grid-4 mb-4">
                 {[
-                  {label:"Paid",      count:d.finance?.paid??0,     color:"#34D399"},
-                  {label:"Pending",   count:d.finance?.pending??0,   color:"#FBBF24"},
-                  {label:"Overdue",   count:d.finance?.overdue??0,   color:"#F87171"},
-                  {label:"Cancelled", count:d.finance?.cancelled??0, color:"rgba(148,163,184,0.5)"},
+                  {label:"Paid",      count:d.finance?.paid??0,      color:"#34D399"},
+                  {label:"Pending",   count:d.finance?.pending??0,    color:"#FBBF24"},
+                  {label:"Overdue",   count:d.finance?.overdue??0,    color:"#F87171"},
+                  {label:"Cancelled", count:d.finance?.cancelled??0,  color:"#94A3B8"},
                 ].map((s,i)=>(
-                  <div key={i} style={{background:"var(--color-bg-alt)",borderRadius:12,padding:"12px 8px",textAlign:"center"}}>
-                    <div style={{fontSize:"1.5rem",fontWeight:900,color:s.color,lineHeight:1}}>{s.count}</div>
-                    <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:4}}>{s.label}</div>
+                  <div key={i} className="bg-base-alt rounded-xl p-3 text-center">
+                    <div className="text-2xl font-black" style={{color:s.color}}>{s.count}</div>
+                    <div className="text-xs text-tertiary mt-0.5">{s.label}</div>
                   </div>
                 ))}
               </div>
-              {/* Progress bar */}
-              <div style={{height:6,background:"var(--color-bg-alt)",borderRadius:99,overflow:"hidden"}}>
+              <div className="tb-progress tb-progress--md">
                 <div style={{display:"flex",height:"100%"}}>
-                  <div style={{background:"#34D399",height:"100%",width:`${(d.finance?.paid||0)/(d.finance?.total_invoices||1)*100}%`,transition:"width 600ms ease"}}/>
-                  <div style={{background:"#FBBF24",height:"100%",width:`${(d.finance?.pending||0)/(d.finance?.total_invoices||1)*100}%`}}/>
-                  <div style={{background:"#F87171",height:"100%",width:`${(d.finance?.overdue||0)/(d.finance?.total_invoices||1)*100}%`}}/>
+                  <div className="tb-progress-bar tb-progress-bar--success" style={{width:`${(d.finance?.paid||0)/(d.finance?.total_invoices||1)*100}%`}}/>
+                  <div className="tb-progress-bar tb-progress-bar--warning" style={{width:`${(d.finance?.pending||0)/(d.finance?.total_invoices||1)*100}%`}}/>
+                  <div className="tb-progress-bar tb-progress-bar--danger"  style={{width:`${(d.finance?.overdue||0)/(d.finance?.total_invoices||1)*100}%`}}/>
                 </div>
               </div>
-              <div className="flex gap-4 mt-3" style={{fontSize:"0.6875rem",color:"var(--color-text-3)"}}>
-                <span className="flex items-center gap-1.5"><span style={{width:8,height:8,borderRadius:"50%",background:"#34D399",display:"inline-block"}}/>{fmtEGP(d.finance?.paid_value||0)} Paid</span>
-                <span className="flex items-center gap-1.5"><span style={{width:8,height:8,borderRadius:"50%",background:"#FBBF24",display:"inline-block"}}/>{fmtEGP(d.finance?.outstanding_value||0)} Outstanding</span>
+              <div className="flex gap-5 mt-2">
+                {[{label:"Paid",color:"#34D399"},{label:"Pending",color:"#FBBF24"},{label:"Overdue",color:"#F87171"}].map((s,i)=>(
+                  <div key={i} className="flex items-center gap-1.5">
+                    <div style={{width:7,height:7,borderRadius:"50%",background:s.color}}/>
+                    <span className="text-xs text-tertiary">{s.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
