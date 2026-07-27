@@ -81,6 +81,7 @@ class TestPurchaseRequestCRUD:
             "category": "HVAC",
             "priority": "medium",
             "hotel_id": HOTEL_ID,
+            "requester": "Test User",
         }
         r = requests.post(f"{BASE_URL}/api/v1/purchase-requests/",
             json=payload, headers=auth_headers)
