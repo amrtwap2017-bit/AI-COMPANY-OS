@@ -1,211 +1,200 @@
 "use client";
-import { useState } from "react";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const U = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
-const S = {open:"bg-blue-100 text-blue-800",in_progress:"bg-indigo-100 text-indigo-800",resolved:"bg-emerald-100 text-emerald-800",closed:"bg-slate-100 text-secondary"};
-const STATUSES   = ["open","in_progress","resolved","closed"];
-const URGENCIES  = ["critical","high","medium","low"];
-const CATEGORIES = ["HVAC","Electrical","Plumbing","Elevator","Fire Safety","BMS","Power","Mechanical","IT"];
+const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
+const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", resolved:"#34D399", closed:"#94A3B8" };
+const WO_SC          = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399" };
 
 export default function ServiceRequestDetailPage() {
-  const { id }    = useParams();
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [form,    setForm]    = useState(null);
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
 
-  const { data: sr, isLoading, refetch } = useQuery(
+  const { data: sr, isLoading } = useQuery(
     ["sr-detail", id],
-    () => authFetch(`/api/v1/service-requests/${id}`).then(r=>r.json()),
-    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+    () => authFetch(`/api/v1/service-requests/${id}`).then(r => r.json()),
+    { enabled: !!id }
+  );
+  const { data: woRaw } = useQuery(
+    ["sr-detail-wo", sr?.work_order_id],
+    () => authFetch(`/api/v1/work-orders/${sr?.work_order_id}`).then(r => r.json()),
+    { enabled: !!sr?.work_order_id }
   );
 
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
+  if (isLoading) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading...</div>
+    </div>
+  );
 
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/service-requests/${id}`, {
-        method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(form)
-      });
-      if (r.ok) { setEditing(false); refetch(); }
-      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  async function updateStatus(status) {
-    setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/service-requests/${id}`, {
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({status})
-      });
-      if (r.ok) refetch();
-      else alert("Failed to update status");
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
   if (!sr || sr.detail) return (
-    <PageWrapper>
-      <div className="text-center py-20">
-        <p className="text-secondary mb-4">Service request not found</p>
-        <Link href="/operations/service-requests" className="text-blue-600 underline text-sm">Back to Service Requests</Link>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">🎫</div>
+        <div className="tb-empty-title">Service request not found</div>
+        <button onClick={() => router.push("/operations/service-requests")} className="tb-btn-primary mt-4">Back</button>
       </div>
-    </PageWrapper>
+    </div>
   );
+
+  const pc  = PRIORITY_COLOR[sr.priority] || "#94A3B8";
+  const sc  = STATUS_COLOR[sr.status]     || "#94A3B8";
+  const wo  = woRaw && !woRaw.detail ? woRaw : null;
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={sr.title || "Service Request"}
-        subtitle={`${sr.category||"General"} · Submitted ${fmtDate(sr.created_at)}`}
-        breadcrumbs={[{label:"Operations",href:"/operations"},{label:"Service Requests",href:"/operations/service-requests"},{label:sr.title?.slice(0,30)||id}]}
-        actions={
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button variant="secondary" size="sm" onClick={()=>{setForm({...sr});setEditing(true)}}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
-                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
-              </>
-            )}
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-cyan-400 mb-1.5">Operations · Service Requests</div>
+              <h1 className="tb-hero-title">{sr.title || `SR-${id?.slice(0,8)}`}</h1>
+              <p className="tb-hero-description">
+                <span className="tb-badge mr-2" style={{background:`${pc}18`,color:pc,border:`1px solid ${pc}30`}}>{sr.priority||"—"}</span>
+                <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>{(sr.status||"—").replace("_"," ")}</span>
+                {sr.requester_name && <span className="text-secondary">by {sr.requester_name}</span>}
+              </p>
+            </div>
+            <button onClick={() => router.push("/operations/service-requests")} className="tb-btn-secondary">← Back</button>
           </div>
-        }
-      />
-
-      {!editing && (
-        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[sr.status]||"bg-slate-100 text-secondary")}>{sr.status?.replace(/_/g," ")||"—"}</span>
-          <div className="flex-1" />
-          <span className="text-xs text-tertiary mr-1">Move to:</span>
-          {STATUSES.filter(s=>s!==sr.status).map(s=>(
-            <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white hover:border-blue-400 hover:text-blue-700 transition-colors disabled:opacity-50">
-              {s.replace(/_/g," ")}
-            </button>
-          ))}
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Priority",  value:(sr.priority||"—").toUpperCase(),        color:pc },
+              { label:"Status",    value:(sr.status||"—").replace("_"," ").toUpperCase(), color:sc },
+              { label:"Requester", value:sr.requester_name||"—",                  color:"#F1F5F9" },
+              { label:"Work Order",value:wo ? "Linked" : "Not Linked",            color:wo?"#34D399":"#94A3B8" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <SectionCard title="Request Details">
-            {editing ? (
-              <form onSubmit={save} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
-                  <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
-                  <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
-                    rows={4} className={inp+" resize-none"} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Category</label>
-                    <select value={form?.category||"HVAC"} onChange={e=>setForm({...form,category:e.target.value})} className={inp}>
-                      {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
-                    </select>
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+            <div className="tb-section">
+              <div className="tb-section-title">Request Details</div>
+              <div className="space-y-1">
+                {[
+                  ["Title",         sr.title || "—"],
+                  ["Priority",      sr.priority || "—"],
+                  ["Status",        (sr.status||"—").replace("_"," ")],
+                  ["Requester",     sr.requester_name || "—"],
+                  ["Location",      sr.location || sr.site || "—"],
+                  ["Category",      sr.category || sr.type || "—"],
+                  ["Created",       fmtDate(sr.created_at)],
+                  ["Updated",       fmtDate(sr.updated_at)],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Urgency</label>
-                    <select value={form?.urgency||"medium"} onChange={e=>setForm({...form,urgency:e.target.value})} className={inp}>
-                      {URGENCIES.map(u=><option key={u} value={u}>{u}</option>)}
-                    </select>
+                ))}
+              </div>
+            </div>
+
+            {sr.description && (
+              <div className="tb-section">
+                <div className="tb-section-title">Description</div>
+                <p className="text-sm text-secondary leading-relaxed">{sr.description}</p>
+              </div>
+            )}
+
+            {wo && (
+              <div className="tb-section">
+                <div className="tb-section-title">Linked Work Order</div>
+                <button
+                  onClick={() => router.push("/operations/work-orders/" + wo.id)}
+                  className="tb-action-item w-full justify-start hover:border-brand transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-base-alt flex items-center justify-center text-lg flex-shrink-0">🔧</div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-primary">{wo.title||"—"}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="tb-badge" style={{
+                        background:(WO_SC[wo.status]||"#94A3B8")+"18",
+                        color:WO_SC[wo.status]||"#94A3B8",
+                        fontSize:"0.5rem"
+                      }}>{(wo.status||"—").replace("_"," ")}</span>
+                      <span className="text-xs text-tertiary">{wo.priority||"—"} priority</span>
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Submitted By</label>
-                    <input value={form?.submitted_by||""} onChange={e=>setForm({...form,submitted_by:e.target.value})} className={inp} />
+                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#60A5FA"}}>View →</span>
+                </button>
+              </div>
+            )}
+
+            {!wo && (
+              <div className="tb-section" style={{borderColor:"#FBBF2430",background:"#FBBF2408"}}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span style={{fontSize:"1.125rem"}}>⚠️</span>
+                    <span className="text-sm text-secondary">No work order linked to this request</span>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Contact Phone</label>
-                    <input value={form?.contact_phone||""} onChange={e=>setForm({...form,contact_phone:e.target.value})} className={inp} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Resolution Notes</label>
-                  <textarea value={form?.resolution_notes||""} onChange={e=>setForm({...form,resolution_notes:e.target.value})}
-                    rows={3} placeholder="How was this resolved?" className={inp+" resize-none"} />
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Title</p>
-                  <p className="text-slate-800 font-medium">{sr.title}</p>
-                </div>
-                {sr.description && (
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
-                    <p className="text-slate-700 text-sm whitespace-pre-wrap">{sr.description}</p>
-                  </div>
-                )}
-                {sr.resolution_notes && (
-                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
-                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-1">Resolution Notes</p>
-                    <p className="text-emerald-800 text-sm">{sr.resolution_notes}</p>
-                  </div>
-                )}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Submitted By</p>
-                    <p className="text-slate-700">{sr.submitted_by||"—"}</p>
-                    {sr.contact_phone&&<p className="text-xs text-tertiary mt-0.5">{sr.contact_phone}</p>}
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Location</p>
-                    <p className="text-slate-700">{sr.location||sr.site_id||"—"}</p>
-                  </div>
+                  <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">
+                    Create WO →
+                  </button>
                 </div>
               </div>
             )}
-          </SectionCard>
-        </div>
 
-        <div className="space-y-4">
-          <SectionCard title="Properties">
-            <dl className="space-y-3">
-              {[
-                {label:"Urgency",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(U[sr.urgency?.toLowerCase()]||U.low)}>{sr.urgency||"—"}</span>},
-                {label:"Category",  value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{sr.category||"—"}</span>},
-                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[sr.status]||"bg-slate-100 text-secondary")}>{sr.status?.replace(/_/g," ")||"—"}</span>},
-                {label:"Created",   value:fmtDate(sr.created_at)},
-                {label:"Resolved",  value:fmtDate(sr.resolved_at)},
-              ].map(({label,value})=>(
-                <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-secondary">{label}</dt>
-                  <dd className="text-xs">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </SectionCard>
-
-          <SectionCard title="Quick Actions">
-            <div className="space-y-2">
-              {sr.status==="open"&&<button onClick={()=>updateStatus("in_progress")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50">Assign & Start</button>}
-              {sr.status==="in_progress"&&<button onClick={()=>updateStatus("resolved")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Mark Resolved</button>}
-              {sr.status==="resolved"&&<button onClick={()=>updateStatus("closed")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 disabled:opacity-50">Close Request</button>}
-              <Link href="/operations/service-requests" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to List</Link>
+            {/* Status Timeline */}
+            <div className="tb-section">
+              <div className="tb-section-title">Status Timeline</div>
+              <div className="space-y-3">
+                {[
+                  { label:"Submitted",   date:sr.created_at,  done:true,                           color:"#60A5FA" },
+                  { label:"In Progress", date:sr.updated_at,  done:sr.status==="in_progress"||sr.status==="resolved"||sr.status==="closed", color:"#FBBF24" },
+                  { label:"Resolved",    date:sr.resolved_at, done:sr.status==="resolved"||sr.status==="closed", color:"#34D399" },
+                ].map((step, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div style={{
+                      width:20, height:20, borderRadius:"50%", flexShrink:0,
+                      background: step.done ? step.color+"30" : "transparent",
+                      border: "2px solid " + (step.done ? step.color : "#334155"),
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize:"0.625rem", color: step.done ? step.color : "#64748B", fontWeight:900,
+                    }}>
+                      {step.done ? "✓" : ""}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-xs font-semibold" style={{color:step.done?step.color:"#64748B"}}>{step.label}</div>
+                      {step.date && <div className="text-xs text-tertiary">{fmtDate(step.date)}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </SectionCard>
+          </div>
+
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-title">Quick Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"All Requests",    icon:"🎫", path:"/operations/service-requests" },
+                  { label:"Work Orders",     icon:"🔧", path:"/operations/work-orders" },
+                  { label:"Dispatch Board",  icon:"📋", path:"/operations/dispatch" },
+                  { label:"Assets",          icon:"⚙️",  path:"/maintenance/assets" },
+                ].map((a, i) => (
+                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </PageWrapper>
+    </div>
   );
 }

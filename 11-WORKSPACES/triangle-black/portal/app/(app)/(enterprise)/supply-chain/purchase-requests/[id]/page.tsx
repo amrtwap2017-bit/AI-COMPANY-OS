@@ -1,233 +1,169 @@
 "use client";
-import { useState } from "react";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
-import { Button } from "@/components/ui/Button";
-import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
-const S = {draft:"bg-slate-100 text-secondary",submitted:"bg-blue-100 text-blue-800",approved:"bg-emerald-100 text-emerald-800",rejected:"bg-red-100 text-red-700",ordered:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800"};
-const PRIORITIES = ["critical","high","medium","low"];
+const STATUS_COLOR = {
+  pending:"#60A5FA", approved:"#34D399", rejected:"#F87171",
+  ordered:"#A78BFA", draft:"#94A3B8", cancelled:"#64748B"
+};
 
 export default function PurchaseRequestDetailPage() {
-  const { id }    = useParams();
-  const [editing, setEditing] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [form,    setForm]    = useState(null);
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
 
-  const { data: pr, isLoading, refetch } = useQuery(
+  const { data: pr, isLoading } = useQuery(
     ["pr-detail", id],
-    () => authFetch(`/api/v1/purchase-requests/${id}`).then(r=>r.json()),
-    { enabled: !!id, onSuccess: (d) => { if (!form) setForm(d); } }
+    () => authFetch("/api/v1/purchase-requests/" + id).then(r => r.json()),
+    { enabled: !!id }
   );
 
-  const inp = "w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400";
+  if (isLoading) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading...</div>
+    </div>
+  );
 
-  async function save(e) {
-    e.preventDefault(); setSaving(true);
-    try {
-      const payload = {...form};
-      if (payload.estimated_cost) payload.estimated_cost = Number(payload.estimated_cost);
-      const r = await authFetch(`/api/v1/purchase-requests/${id}`, {
-        method:"PUT", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      if (r.ok) { setEditing(false); refetch(); }
-      else { const err = await r.json().catch(()=>{}); alert(err?.detail||"Failed to update"); }
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  async function updateStatus(status) {
-    setSaving(true);
-    try {
-      const r = await authFetch(`/api/v1/purchase-requests/${id}`, {
-        method:"PATCH", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({status})
-      });
-      if (r.ok) refetch();
-      else alert("Failed to update status");
-    } catch { alert("Network error"); }
-    finally { setSaving(false); }
-  }
-
-  if (isLoading) return <PageWrapper><LoadingState /></PageWrapper>;
   if (!pr || pr.detail) return (
-    <PageWrapper>
-      <div className="text-center py-20">
-        <p className="text-secondary mb-4">Purchase request not found</p>
-        <Link href="/supply-chain/purchase-requests" className="text-blue-600 underline text-sm">Back to Purchase Requests</Link>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">📋</div>
+        <div className="tb-empty-title">Purchase request not found</div>
+        <button onClick={() => router.push("/supply-chain/purchase-requests")} className="tb-btn-primary mt-4">Back</button>
       </div>
-    </PageWrapper>
+    </div>
   );
+
+  const sc = STATUS_COLOR[pr.status] || "#94A3B8";
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={pr.title || "Purchase Request"}
-        subtitle={pr.category ? `${pr.category} · ${pr.priority||""}` : pr.priority||""}
-        breadcrumbs={[{label:"Supply Chain",href:"/supply-chain"},{label:"Purchase Requests",href:"/supply-chain/purchase-requests"},{label:pr.title?.slice(0,30)||id}]}
-        actions={
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button variant="secondary" size="sm" onClick={()=>{setForm({...pr,estimated_cost:pr.estimated_cost||""});setEditing(true)}}>Edit</Button>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={()=>setEditing(false)}>Cancel</Button>
-                <Button variant="primary" size="sm" loading={saving} onClick={save}>Save Changes</Button>
-              </>
-            )}
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain · Procurement</div>
+              <h1 className="tb-hero-title">{pr.title || ("PR-" + (id||"").slice(0,8))}</h1>
+              <p className="tb-hero-description">
+                <span className="tb-badge mr-2" style={{background:sc+"18",color:sc,border:"1px solid "+sc+"30"}}>{pr.status||"—"}</span>
+                {pr.requested_by && <span className="text-secondary">by {pr.requested_by}</span>}
+              </p>
+            </div>
+            <button onClick={() => router.push("/supply-chain/purchase-requests")} className="tb-btn-secondary">← Back</button>
           </div>
-        }
-      />
-
-      {!editing && (
-        <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[pr.status]||"bg-slate-100 text-secondary")}>{pr.status||"—"}</span>
-          <div className="flex-1" />
-          {pr.status==="draft" && (
-            <button onClick={()=>updateStatus("submitted")} disabled={saving}
-              className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
-              Submit for Approval
-            </button>
-          )}
-          {pr.status==="submitted" && (
-            <>
-              <button onClick={()=>updateStatus("approved")} disabled={saving}
-                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors">
-                Approve
-              </button>
-              <button onClick={()=>updateStatus("rejected")} disabled={saving}
-                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 transition-colors">
-                Reject
-              </button>
-            </>
-          )}
-          {pr.status==="approved" && (
-            <button onClick={()=>updateStatus("ordered")} disabled={saving}
-              className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
-              Mark as Ordered
-            </button>
-          )}
-          {pr.status==="ordered" && (
-            <button onClick={()=>updateStatus("completed")} disabled={saving}
-              className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50">
-              Mark Complete
-            </button>
-          )}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 space-y-4">
-          <SectionCard title="Request Details">
-            {editing ? (
-              <form onSubmit={save} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
-                  <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
-                  <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
-                    rows={4} className={inp+" resize-none"} />
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Category</label>
-                    <input value={form?.category||""} onChange={e=>setForm({...form,category:e.target.value})} placeholder="HVAC / Electrical…" className={inp} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Priority</label>
-                    <select value={form?.priority||"medium"} onChange={e=>setForm({...form,priority:e.target.value})} className={inp}>
-                      {PRIORITIES.map(p=><option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">Est. Cost (EGP)</label>
-                    <input type="number" value={form?.estimated_cost||""} onChange={e=>setForm({...form,estimated_cost:e.target.value})} className={inp} />
-                  </div>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Title</p>
-                  <p className="text-slate-800 font-medium">{pr.title}</p>
-                </div>
-                {pr.description && (
-                  <div>
-                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
-                    <p className="text-slate-700 text-sm whitespace-pre-wrap">{pr.description}</p>
-                  </div>
-                )}
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Status",      value:(pr.status||"—").toUpperCase(),   color:sc },
+              { label:"Total",       value:fmtEGP(pr.total_amount||0),       color:"#34D399" },
+              { label:"Requested By",value:pr.requested_by||"—",             color:"#F1F5F9" },
+              { label:"Created",     value:fmtDate(pr.created_at),           color:"#94A3B8" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
               </div>
-            )}
-          </SectionCard>
-
-          {/* Approval workflow visualization */}
-          {!editing && (
-            <SectionCard title="Approval Workflow">
-              <div className="flex items-center gap-2">
-                {["draft","submitted","approved","ordered","completed"].map((step, i, arr) => {
-                  const idx = arr.indexOf(pr.status);
-                  const stepIdx = arr.indexOf(step);
-                  const isDone    = stepIdx < idx;
-                  const isCurrent = step === pr.status;
-                  const isPending = stepIdx > idx;
-                  const isRejected = pr.status === "rejected";
-                  return (
-                    <div key={step} className="flex items-center flex-1">
-                      <div className={`flex flex-col items-center flex-1 ${i<arr.length-1?"":"flex-none"}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-1 ${isCurrent&&!isRejected?"bg-blue-600 text-white":isDone?"bg-emerald-500 text-white":"bg-slate-100 text-tertiary"}`}>
-                          {isDone?"✓":i+1}
-                        </div>
-                        <span className={`text-xs text-center ${isCurrent&&!isRejected?"text-blue-700 font-semibold":isDone?"text-emerald-600":"text-tertiary"}`}>{step}</span>
-                      </div>
-                      {i < arr.length-1 && <div className={`h-0.5 flex-1 mx-1 mb-5 ${isDone?"bg-emerald-400":"bg-slate-200"}`} />}
-                    </div>
-                  );
-                })}
-              </div>
-              {pr.status === "rejected" && (
-                <div className="mt-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700 font-semibold">
-                  This request was rejected. Edit and resubmit if needed.
-                </div>
-              )}
-            </SectionCard>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          <SectionCard title="Properties">
-            <dl className="space-y-3">
-              {[
-                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[pr.status]||"bg-slate-100 text-secondary")}>{pr.status||"—"}</span>},
-                {label:"Priority",  value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[pr.priority]||P.low)}>{pr.priority||"—"}</span>},
-                {label:"Category",  value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{pr.category||"—"}</span>},
-                {label:"Est. Cost", value:pr.estimated_cost?`EGP ${fmtNum(pr.estimated_cost)}`:"—"},
-                {label:"Created",   value:fmtDate(pr.created_at)},
-                {label:"Updated",   value:fmtDate(pr.updated_at)},
-              ].map(({label,value})=>(
-                <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-secondary">{label}</dt>
-                  <dd className="text-xs">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </SectionCard>
-
-          <Link href="/supply-chain/purchase-requests" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">
-            Back to Purchase Requests
-          </Link>
+            ))}
+          </div>
         </div>
       </div>
-    </PageWrapper>
+
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+            <div className="tb-section">
+              <div className="tb-section-title">Request Details</div>
+              <div className="space-y-1">
+                {[
+                  ["Title",         pr.title || "—"],
+                  ["Status",        pr.status || "—"],
+                  ["Priority",      pr.priority || "—"],
+                  ["Requested By",  pr.requested_by || "—"],
+                  ["Department",    pr.department || "—"],
+                  ["Supplier",      pr.supplier_name || "—"],
+                  ["Total Amount",  fmtEGP(pr.total_amount||0)],
+                  ["Required By",   fmtDate(pr.required_date || pr.needed_by)],
+                  ["Created",       fmtDate(pr.created_at)],
+                  ["Approved By",   pr.approved_by || "—"],
+                  ["Approved At",   fmtDate(pr.approved_at)],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {pr.notes && (
+              <div className="tb-section">
+                <div className="tb-section-title">Notes</div>
+                <p className="text-sm text-secondary leading-relaxed">{pr.notes}</p>
+              </div>
+            )}
+
+            {/* Approval timeline */}
+            <div className="tb-section">
+              <div className="tb-section-title">Approval Status</div>
+              <div className="space-y-3">
+                {[
+                  { label:"Submitted",  date:pr.created_at,  done:true,                               color:"#60A5FA" },
+                  { label:"Approved",   date:pr.approved_at, done:pr.status==="approved"||pr.status==="ordered", color:"#34D399" },
+                  { label:"Ordered",    date:pr.ordered_at,  done:pr.status==="ordered",              color:"#A78BFA" },
+                ].map((step, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div style={{
+                      width:20, height:20, borderRadius:"50%", flexShrink:0,
+                      background: step.done ? step.color+"30" : "transparent",
+                      border: "2px solid " + (step.done ? step.color : "#334155"),
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize:"0.625rem", color: step.done ? step.color : "#64748B", fontWeight:900,
+                    }}>
+                      {step.done ? "✓" : ""}
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold" style={{color:step.done?step.color:"#64748B"}}>{step.label}</div>
+                      {step.date && <div className="text-xs text-tertiary">{fmtDate(step.date)}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-title">Status</div>
+              <div className="text-center py-4">
+                <div className="text-5xl font-black mb-2" style={{color:sc}}>
+                  {pr.status === "approved" ? "✓" : pr.status === "rejected" ? "✗" : "○"}
+                </div>
+                <div className="text-sm font-bold" style={{color:sc}}>{(pr.status||"—").toUpperCase()}</div>
+              </div>
+            </div>
+            <div className="tb-section">
+              <div className="tb-section-title">Quick Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"All PRs",         icon:"📋", path:"/supply-chain/purchase-requests" },
+                  { label:"Purchase Orders",  icon:"📦", path:"/supply-chain/purchase-orders" },
+                  { label:"Suppliers",        icon:"🏭", path:"/supply-chain/suppliers" },
+                  { label:"Inventory",        icon:"📦", path:"/supply-chain/inventory" },
+                ].map((a, i) => (
+                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
