@@ -789,3 +789,98 @@ def sync_wo_to_assets():
             return {"synced": result.rowcount}
         except Exception as e:
             return {"error": str(e)}
+
+
+# ── Sprint 156: Workflow Endpoints ───────────────────────────────────────────
+@app.get("/api/v1/service-requests/{sr_id}/work-order", tags=["service-requests"])
+def get_sr_work_order(sr_id: str):
+    """Get work order linked to a service request"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session as _S
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with _S(eng) as db:
+        try:
+            row = db.execute(text("""
+                SELECT wo.* FROM work_orders wo
+                JOIN service_requests sr ON sr.work_order_id = wo.id
+                WHERE sr.id = :id
+            """), {"id": sr_id}).fetchone()
+            return dict(row._mapping) if row else {}
+        except: return {}
+
+@app.post("/api/v1/service-requests/{sr_id}/create-work-order", tags=["service-requests"])
+def create_wo_from_sr(sr_id: str, data: dict = {}):
+    """Create a work order from a service request"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session as _S
+    import os, uuid
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with _S(eng) as db:
+        try:
+            sr = db.execute(text("SELECT * FROM service_requests WHERE id=:id"), {"id": sr_id}).fetchone()
+            if not sr: return {"error": "SR not found"}
+            sr_dict = dict(sr._mapping)
+            wo_id = str(uuid.uuid4())
+            db.execute(text("""
+                INSERT INTO work_orders(id,hotel_id,title,description,type,priority,status,created_at,updated_at)
+                VALUES(:id,:hotel_id,:title,:desc,'corrective',:priority,'open',NOW(),NOW())
+            """), {"id": wo_id, "hotel_id": sr_dict.get("hotel_id"),
+                   "title": "WO: " + (sr_dict.get("title","")[:80]),
+                   "desc": sr_dict.get("description","") or "",
+                   "priority": sr_dict.get("priority","medium")})
+            db.execute(text("UPDATE service_requests SET work_order_id=:wo WHERE id=:id"),
+                      {"wo": wo_id, "id": sr_id})
+            db.commit()
+            return {"success": True, "work_order_id": wo_id}
+        except Exception as e:
+            return {"error": str(e)}
+
+@app.get("/api/v1/dashboard/summary", tags=["dashboard"])
+def get_dashboard_summary():
+    """Unified dashboard summary for all workflows"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session as _S
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with _S(eng) as db:
+        try:
+            def count(q): return db.execute(text(q)).scalar() or 0
+            return {
+                "work_orders": {
+                    "total": count("SELECT count(*) FROM work_orders"),
+                    "open": count("SELECT count(*) FROM work_orders WHERE status='open'"),
+                    "in_progress": count("SELECT count(*) FROM work_orders WHERE status='in_progress'"),
+                    "completed": count("SELECT count(*) FROM work_orders WHERE status='completed'"),
+                    "critical": count("SELECT count(*) FROM work_orders WHERE priority='critical' AND status NOT IN ('completed','cancelled')"),
+                },
+                "assets": {
+                    "total": count("SELECT count(*) FROM assets"),
+                    "operational": count("SELECT count(*) FROM assets WHERE status='Operational'"),
+                    "faulted": count("SELECT count(*) FROM assets WHERE status='In Fault'"),
+                    "with_history": count("SELECT count(*) FROM assets WHERE last_maintenance_date IS NOT NULL"),
+                },
+                "maintenance": {
+                    "pm_plans": count("SELECT count(*) FROM maintenance_plans"),
+                    "overdue": count("SELECT count(*) FROM maintenance_plans WHERE next_due_date < NOW()"),
+                    "due_this_week": count("SELECT count(*) FROM maintenance_plans WHERE next_due_date BETWEEN NOW() AND NOW() + INTERVAL '7 days'"),
+                },
+                "service_requests": {
+                    "total": count("SELECT count(*) FROM service_requests"),
+                    "open": count("SELECT count(*) FROM service_requests WHERE status='open'"),
+                    "linked_to_wo": count("SELECT count(*) FROM service_requests WHERE work_order_id IS NOT NULL"),
+                },
+                "procurement": {
+                    "purchase_orders": count("SELECT count(*) FROM purchase_orders"),
+                    "purchase_requests": count("SELECT count(*) FROM purchase_requests"),
+                    "pending_pos": count("SELECT count(*) FROM purchase_orders WHERE status IN ('approved','sent')"),
+                },
+                "commercial": {
+                    "active_contracts": count("SELECT count(*) FROM contracts WHERE status='active'"),
+                    "open_leads": count("SELECT count(*) FROM leads WHERE status NOT IN ('won','lost')"),
+                    "unpaid_invoices": count("SELECT count(*) FROM invoices WHERE status IN ('sent','overdue')"),
+                }
+            }
+        except Exception as e:
+            return {"error": str(e)}
+# ── End Sprint 156 ────────────────────────────────────────────────────────────
