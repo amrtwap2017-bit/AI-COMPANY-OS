@@ -3,65 +3,64 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 export default function AnalyticsCosts() {
   const router = useRouter();
-  const { data: invRaw } = useQuery(["ac-inv"], () => authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: poRaw } = useQuery(["ac-pos"], () => authFetch("/api/v1/purchase-orders/").then(r=>r.json()));
-  const { data: prRaw } = useQuery(["ac-prs"], () => authFetch("/api/v1/purchase-requests/").then(r=>r.json()));
-  const { data: dash } = useQuery(["ac-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
-  const invoices = toArr(invRaw); const pos = toArr(poRaw); const prs = toArr(prRaw); const d = dash||{};
-  const totalRevenue = invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const totalProcurement = pos.reduce((s,p)=>s+Number(p.total_amount||p.amount||0),0);
-  const pendingPayments = invoices.filter(i=>i.status==="pending").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const { data: invRaw }  = useQuery(["ac-inv"],  () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: poRaw }   = useQuery(["ac-pos"],  () => authFetch("/api/v1/purchase-orders/").then(r=>r.json()));
+  const { data: prRaw }   = useQuery(["ac-prs"],  () => authFetch("/api/v1/purchase-requests/").then(r=>r.json()));
+  const { data: contRaw } = useQuery(["ac-cont"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
+  const inv = toArr(invRaw); const pos = toArr(poRaw);
+  const prs = toArr(prRaw); const contracts = toArr(contRaw);
+  const totalRevenue  = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const totalPending  = inv.filter(i=>i.status==="pending").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const totalSpend    = pos.reduce((s,p)=>s+Number(p.total_amount||p.total_value||0),0);
+  const contractValue = contracts.filter(c=>c.status==="active").reduce((s,c)=>s+Number(c.total_value||c.value||0),0);
+  const kpis = [
+    { label:"Revenue Collected",  value:fmtEGP(totalRevenue),  color:"#34D399",  icon:"💰" },
+    { label:"Pending Revenue",     value:fmtEGP(totalPending),  color:"#FBBF24",  icon:"⏰" },
+    { label:"Procurement Spend",   value:fmtEGP(totalSpend),    color:"#F87171",  icon:"🛒" },
+    { label:"Active Contracts",    value:fmtEGP(contractValue), color:"#A78BFA",  icon:"📄" },
+    { label:"Net Position",        value:fmtEGP(totalRevenue-totalSpend), color:totalRevenue>totalSpend?"#34D399":"#F87171", icon:"📊" },
+    { label:"Invoice Count",       value:inv.length,             color:"#60A5FA",  icon:"📋" },
+  ];
   return (
-    <div className="tb-page">
-      <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Analytics</div>
-      <h1 className="text-page-title text-primary">Cost Analysis</h1>
-      <p className="text-secondary mt-1">Revenue, procurement spend, and financial performance</p></div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          {label:"Total Revenue",value:fmtEGP(totalRevenue),sub:`${invoices.filter(i=>i.status==="paid").length} paid invoices`,color:"emerald",path:"/invoices"},
-          {label:"Pending Collection",value:fmtEGP(pendingPayments),sub:`${invoices.filter(i=>i.status==="pending").length} pending`,color:"amber",path:"/invoices"},
-          {label:"Procurement Spend",value:fmtEGP(totalProcurement),sub:`${pos.length} purchase orders`,color:"blue",path:"/supply-chain/purchase-orders"},
-          {label:"Pending Requests",value:prs.filter(p=>p.status==="pending").length,sub:"awaiting approval",color:"purple",path:"/supply-chain/purchase-requests"},
-        ].map((k,i)=>(
-          <button key={i} onClick={()=>router.push(k.path)} className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
-            <div className="text-xs text-secondary mb-2">{k.label}</div>
-            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
-          </button>
-        ))}
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B30 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-cyan-400 mb-1.5">Analytics</div>
+          <h1 className="tb-hero-title">Cost Analysis</h1>
+          <p className="tb-hero-description">Revenue, expenditure and financial position</p>
+          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(3,1fr)"}}>
+            {kpis.slice(0,3).map((k,i)=>(
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <h2 className="font-bold text-primary mb-4">Invoice Revenue Breakdown</h2>
-          {[
-            {label:"Paid",count:invoices.filter(i=>i.status==="paid").length,value:totalRevenue,color:"emerald"},
-            {label:"Pending",count:invoices.filter(i=>i.status==="pending").length,value:pendingPayments,color:"amber"},
-            {label:"Overdue",count:invoices.filter(i=>i.status==="overdue").length,value:invoices.filter(i=>i.status==="overdue").reduce((s,i)=>s+Number(i.total_amount||0),0),color:"red"},
-            {label:"Cancelled",count:invoices.filter(i=>i.status==="cancelled").length,value:0,color:"slate"},
-          ].map((s,i)=>(
-            <div key={i} className="flex justify-between items-center py-3 border-b border-divider last:border-0">
-              <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${s.color}-500`}/><span className="text-sm text-slate-700 dark:text-tertiary">{s.label}</span></div>
-              <div className="text-right"><div className={`font-black text-${s.color}-500`}>{s.count}</div><div className="text-xs text-tertiary">{fmtEGP(s.value)}</div></div>
+      <div className="tb-canvas">
+        <div className="tb-grid-3">
+          {kpis.map((k,i)=>(
+            <div key={i} className="tb-section text-center">
+              <div style={{fontSize:"1.75rem",marginBottom:8}}>{k.icon}</div>
+              <div className="text-2xl font-black" style={{color:k.color}}>{k.value}</div>
+              <div className="text-xs text-tertiary mt-1">{k.label}</div>
             </div>
           ))}
         </div>
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <h2 className="font-bold text-primary mb-4">Procurement Summary</h2>
-          {[
-            {label:"Purchase Orders",count:pos.length,color:"blue"},
-            {label:"Purchase Requests",count:prs.length,color:"purple"},
-            {label:"Pending PRs",count:prs.filter(p=>p.status==="pending").length,color:"amber"},
-            {label:"Approved PRs",count:prs.filter(p=>p.status==="approved").length,color:"emerald"},
-          ].map((s,i)=>(
-            <div key={i} className="flex justify-between items-center py-3 border-b border-divider last:border-0">
-              <span className="text-sm text-slate-700 dark:text-tertiary">{s.label}</span>
-              <span className={`font-black text-${s.color}-500 text-lg`}>{s.count}</span>
-            </div>
-          ))}
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Navigate to</div>
+          <div className="tb-grid-4">
+            {[{label:"Invoices",icon:"💰",path:"/invoices"},{label:"Contracts",icon:"📄",path:"/commercial/contracts"},{label:"Purchase Orders",icon:"📦",path:"/supply-chain/purchase-orders"},{label:"Scorecards",icon:"📊",path:"/analytics/scorecards"}].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

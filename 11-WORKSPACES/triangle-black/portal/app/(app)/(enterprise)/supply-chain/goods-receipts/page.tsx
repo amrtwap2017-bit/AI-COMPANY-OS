@@ -1,108 +1,52 @@
 "use client";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
-
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return String(d).slice(0,10); } };
-
-const STATUSES = ["all","complete","partial","pending","rejected"];
-const S = {complete:"bg-emerald-100 text-emerald-800",partial:"bg-amber-100 text-amber-800",pending:"bg-blue-100 text-blue-700",rejected:"bg-red-100 text-red-700"};
-
+import { useRouter } from "next/navigation";
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 export default function GoodsReceiptsPage() {
-  const [sf, setSf] = useState("all");
-  const [q,  setQ]  = useState("");
-
-  const { data: raw = [], isLoading } = useQuery(
-    ["goods-receipts-page"],
-    () => authFetch("/api/v1/goods-receipts/?limit=200").then(r => r.json()),
-    { refetchInterval: 120000 }
-  );
-
-  const receipts = toArr(raw);
-  const filtered = receipts.filter(r => {
-    if (sf !== "all" && r.status !== sf) return false;
-    if (q && !(r.grn_number?.toLowerCase().includes(q.toLowerCase()) ||
-               r.received_by?.toLowerCase().includes(q.toLowerCase()))) return false;
-    return true;
-  });
-
-  const total    = receipts.length;
-  const complete = receipts.filter(r => r.status === "complete").length;
-  const partial  = receipts.filter(r => r.status === "partial").length;
-  const pending  = receipts.filter(r => r.status === "pending").length;
-
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const { data: grRaw, isLoading } = useQuery(["gr-list"], () => authFetch("/api/v1/goods-receipts/").then(r=>r.json()));
+  const grs = toArr(grRaw);
+  const filtered = grs.filter(g => !search || (g.receipt_number||g.id||"").toLowerCase().includes(search.toLowerCase()));
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Goods Receipts"
-        subtitle={`${total} receipts · ${complete} complete · ${partial} partial`}
-        breadcrumbs={[{label:"Supply Chain",href:"/supply-chain"},{label:"Goods Receipts"}]}
-      />
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        {[
-          {label:"Total",    value:total,    color:"text-slate-800"},
-          {label:"Complete", value:complete, color:"text-emerald-700"},
-          {label:"Partial",  value:partial,  color:"text-amber-700"},
-          {label:"Pending",  value:pending,  color:"text-blue-700"},
-        ].map(k => (
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
-            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain</div>
+          <h1 className="tb-hero-title">Goods Receipts</h1>
+          <p className="tb-hero-description">{grs.length} receipts recorded</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Total",value:grs.length,color:"#F1F5F9"},{label:"This Month",value:grs.filter(g=>g.created_at&&new Date(g.created_at)>new Date(Date.now()-30*86400000)).length,color:"#34D399"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <SectionCard title={`Goods Receipts (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search GRN number or received by…" value={q}
-            onChange={e => setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" />
-          <select value={sf} onChange={e => setSf(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {STATUSES.map(s => <option key={s} value={s}>{s === "all" ? "All Status" : s}</option>)}
-          </select>
-          {(sf !== "all" || q) && (
-            <button onClick={() => { setSf("all"); setQ(""); }}
-              className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>
-          )}
         </div>
-
-        {isLoading ? <LoadingState /> : filtered.length === 0 ? (
-          <EmptyState title="No goods receipts found" subtitle="Receipts appear here when purchase orders are received" />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  {["GRN Number","Status","Received Date","Received By","Notes"].map(h => (
-                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(r => (
-                  <tr key={r.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-3">
-                      <span className="font-mono text-xs font-semibold text-slate-700">{r.grn_number || "—"}</span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold " + (S[r.status] || "bg-slate-100 text-secondary")}>
-                        {r.status || "—"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-xs text-secondary">{fmtDate(r.received_date || r.receipt_date || r.created_at)}</td>
-                    <td className="py-3 px-3 text-xs text-secondary">{r.received_by || "—"}</td>
-                    <td className="py-3 px-3 text-xs text-tertiary max-w-xs truncate">{r.notes || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </SectionCard>
-    </PageWrapper>
+      </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="flex items-center gap-2 mb-4"><span className="text-secondary text-sm">🔍</span><input className="tb-search flex-1" placeholder="Search receipts..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
+          {isLoading ? <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          : filtered.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No goods receipts</div></div>
+          : <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
+            <div className="tb-table-head" style={{gridTemplateColumns:"1fr 120px 120px 110px"}}>
+              {["Receipt","PO Reference","Value","Date"].map((h,i)=><div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>)}
+            </div>
+            {filtered.map((gr,i)=>(
+              <button key={i} onClick={()=>router.push("/supply-chain/goods-receipts/"+gr.id)} className="tb-table-row" style={{gridTemplateColumns:"1fr 120px 120px 110px"}}>
+                <div className="text-sm font-medium text-primary truncate pr-4">{gr.receipt_number||gr.id?.slice(0,16)}</div>
+                <div className="text-center text-xs text-secondary">{gr.purchase_order_id?.slice(0,12)||"—"}</div>
+                <div className="text-center text-sm font-bold text-emerald-400">{fmtEGP(gr.total_amount||0)}</div>
+                <div className="text-center text-xs text-tertiary">{fmtDate(gr.created_at)}</div>
+              </button>
+            ))}
+          </div>}
+        </div>
+      </div>
+    </div>
   );
 }

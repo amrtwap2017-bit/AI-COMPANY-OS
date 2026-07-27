@@ -3,147 +3,68 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-
-const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmt = (n: any) => Number(n || 0).toLocaleString();
-const fmtEGP = (n: any) => `EGP ${Number(n || 0).toLocaleString()}`;
-const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-
-export default function ExecutivePortfolio() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+export default function PortfolioPage() {
   const router = useRouter();
-  const { data: dash } = useQuery(["ep-dash"], () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
-  const { data: contractRaw } = useQuery(["ep-contracts"], () => authFetch("/api/v1/contracts/").then(r => r.json()));
-  const { data: invoiceRaw } = useQuery(["ep-invoices"], () => authFetch("/api/v1/invoices/").then(r => r.json()));
-  const { data: leadRaw } = useQuery(["ep-leads"], () => authFetch("/api/v1/leads/").then(r => r.json()));
-  const { data: projectRaw } = useQuery(["ep-projects"], () => authFetch("/api/v1/projects/").then(r => r.json()));
-
-  const contracts = toArr(contractRaw);
-  const invoices = toArr(invoiceRaw);
-  const leads = toArr(leadRaw);
-  const projects = toArr(projectRaw);
-  const d = dash || {};
-
-  const totalContractValue = contracts.filter((c: any) => c.status === "active").reduce((s: number, c: any) => s + Number(c.total_value || 0), 0);
-  const totalInvoiceValue = invoices.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
-  const paidValue = invoices.filter((i: any) => i.status === "paid").reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
-  const pendingValue = invoices.filter((i: any) => i.status === "pending").reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
-  const expiring = contracts.filter((c: any) => {
-    if (!c.end_date || c.status !== "active") return false;
-    const d = new Date(c.end_date);
-    const now = new Date();
-    return d >= now && d <= new Date(now.getTime() + 30 * 86400000);
-  });
-  const wonLeads = leads.filter((l: any) => l.status === "won");
-
+  const { data: contRaw } = useQuery(["pf-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
+  const { data: projRaw } = useQuery(["pf-projs"], () => authFetch("/api/v1/projects/").then(r=>r.json()));
+  const { data: invRaw }  = useQuery(["pf-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const contracts = toArr(contRaw); const projects = toArr(projRaw); const inv = toArr(invRaw);
+  const activeContracts = contracts.filter(c=>c.status==="active");
+  const contractValue   = activeContracts.reduce((s,c)=>s+Number(c.total_value||c.value||0),0);
+  const revenue         = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const now = new Date();
+  const expiringSoon = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
   return (
-    <div className="tb-page">
-      <div>
-        <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Portfolio</div>
-        <h1 className="text-page-title text-primary">Business Portfolio</h1>
-        <p className="text-secondary mt-1">Revenue, contracts, and commercial performance</p>
-      </div>
-
-      {/* Revenue Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Active Contract Value", value: fmtEGP(totalContractValue), sub: `${contracts.filter((c: any) => c.status === "active").length} contracts`, color: "emerald" },
-          { label: "Total Invoiced", value: fmtEGP(totalInvoiceValue), sub: `${invoices.length} invoices`, color: "blue" },
-          { label: "Collected", value: fmtEGP(paidValue), sub: `${Math.round(paidValue / Math.max(totalInvoiceValue, 1) * 100)}% collection rate`, color: "amber" },
-          { label: "Pending Collection", value: fmtEGP(pendingValue), sub: `${d.finance?.overdue ?? 0} overdue`, color: "red" },
-        ].map((k, i) => (
-          <div key={i} className="bg-surface border border-border rounded-2xl p-5">
-            <div className="text-xs text-secondary mb-2 font-medium">{k.label}</div>
-            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Portfolio Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Contracts by Status */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-primary">Contract Portfolio</h2>
-            <button onClick={() => router.push("/commercial/contracts")} className="text-xs text-amber-500 hover:underline">Manage →</button>
-          </div>
-          <div className="space-y-3">
-            {[
-              { label: "Active", count: contracts.filter((c: any) => c.status === "active").length, color: "emerald", total: contracts.length },
-              { label: "Pending Signature", count: contracts.filter((c: any) => c.status === "pending_signature").length, color: "amber", total: contracts.length },
-              { label: "Expired", count: contracts.filter((c: any) => c.status === "expired").length, color: "red", total: contracts.length },
-            ].map((s, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-secondary">{s.label}</span>
-                  <span className="font-bold text-primary">{s.count}</span>
-                </div>
-                <div className="w-full bg-base-alt rounded-full h-2">
-                  <div className={`h-2 rounded-full bg-${s.color}-500`} style={{ width: `${(s.count / Math.max(s.total, 1)) * 100}%` }} />
-                </div>
-              </div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-purple-400 mb-1.5">Executive</div>
+          <h1 className="tb-hero-title">Portfolio</h1>
+          <p className="tb-hero-description">Active contracts, projects and revenue overview</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Active Contracts",value:activeContracts.length,color:"#34D399"},{label:"Portfolio Value",value:fmtEGP(contractValue),color:"#FBBF24"},{label:"Active Projects",value:projects.filter(p=>p.status==="active").length,color:"#60A5FA"},{label:"Revenue",value:fmtEGP(revenue),color:"#A78BFA"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
-          {expiring.length > 0 && (
-            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
-              <div className="text-xs font-bold text-amber-700 dark:text-amber-400">⚠️ {expiring.length} contracts expiring within 30 days</div>
-              {expiring.slice(0, 2).map((c: any, i: number) => (
-                <div key={i} className="text-xs text-amber-600 mt-1">{c.title || c.id?.slice(0, 8)} — expires {fmtDate(c.end_date)}</div>
+        </div>
+      </div>
+      <div className="tb-canvas">
+        {expiringSoon.length>0 && (
+          <div className="tb-section" style={{borderColor:"#FBBF2440",background:"#FBBF2408"}}>
+            <div className="flex items-center gap-2"><span>⏰</span><span className="text-sm font-semibold" style={{color:"#FBBF24"}}>{expiringSoon.length} contract{expiringSoon.length>1?"s":""} expiring within 30 days</span><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link ml-auto">View →</button></div>
+          </div>
+        )}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Contracts</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
+            <div className="space-y-2 mt-3">
+              {activeContracts.slice(0,5).map((c,i)=>{
+                const days = c.end_date?Math.ceil((new Date(c.end_date)-now)/86400000):null;
+                return (
+                  <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)} className="tb-action-item w-full justify-between">
+                    <div className="min-w-0 flex items-center gap-2"><span className="text-base">📄</span><span className="text-sm text-secondary truncate">{c.title||c.id?.slice(0,20)}</span></div>
+                    <div className="flex items-center gap-2 flex-shrink-0"><span className="text-xs text-tertiary">{fmtEGP(c.total_value||0)}</span>{days!==null&&days<=30&&<span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem"}}>{days}d</span>}</div>
+                  </button>
+                );
+              })}
+              {activeContracts.length===0 && <div className="text-xs text-tertiary py-4 text-center">No active contracts</div>}
+            </div>
+          </div>
+          <div className="tb-section">
+            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Projects</div><button onClick={()=>router.push("/projects-center")} className="tb-section-link">All →</button></div>
+            <div className="space-y-2 mt-3">
+              {projects.filter(p=>p.status==="active").slice(0,5).map((proj,i)=>(
+                <button key={i} onClick={()=>router.push("/projects-center/"+proj.id)} className="tb-action-item w-full justify-between">
+                  <div className="min-w-0 flex items-center gap-2"><span className="text-base">🏗️</span><span className="text-sm text-secondary truncate">{proj.name||proj.title||"—"}</span></div>
+                  <span className="text-xs text-tertiary flex-shrink-0">{proj.end_date?fmtDate(proj.end_date):"—"}</span>
+                </button>
               ))}
+              {projects.filter(p=>p.status==="active").length===0 && <div className="text-xs text-tertiary py-4 text-center">No active projects</div>}
             </div>
-          )}
-        </div>
-
-        {/* Projects */}
-        <div className="bg-surface border border-border rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-primary">Active Projects</h2>
-            <button onClick={() => router.push("/projects-center")} className="text-xs text-amber-500 hover:underline">View all →</button>
           </div>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              { label: "Total", value: projects.length, color: "blue" },
-              { label: "Active", value: projects.filter((p: any) => p.status === "active").length, color: "emerald" },
-              { label: "Leads Won", value: wonLeads.length, color: "amber" },
-            ].map((s, i) => (
-              <div key={i} className="bg-base-alt dark:bg-surface-alt rounded-xl p-3 text-center">
-                <div className={`text-2xl font-black text-${s.color}-500`}>{s.value}</div>
-                <div className="text-xs text-secondary mt-0.5">{s.label}</div>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2">
-            {projects.slice(0, 5).map((p: any, i: number) => (
-              <button key={p.id || i} onClick={() => router.push(`/projects-center/${p.id}`)}
-                className="w-full flex items-center justify-between p-3 bg-base-alt dark:bg-surface-alt rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-left">
-                <div className="text-sm font-medium text-primary truncate">{p.name || p.title || p.id}</div>
-                <span className={`text-xs px-2 py-0.5 rounded-lg font-medium ${p.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-secondary"}`}>{p.status || "—"}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Pipeline */}
-      <div className="bg-surface border border-border rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-primary">Sales Pipeline</h2>
-          <button onClick={() => router.push("/commercial/pipeline")} className="text-xs text-amber-500 hover:underline">Full pipeline →</button>
-        </div>
-        <div className="flex gap-2">
-          {[
-            { label: "New", count: leads.filter((l: any) => l.status === "new").length, color: "slate" },
-            { label: "Qualified", count: leads.filter((l: any) => l.status === "qualified").length, color: "blue" },
-            { label: "Proposal", count: leads.filter((l: any) => l.status === "proposal").length, color: "purple" },
-            { label: "Negotiation", count: leads.filter((l: any) => l.status === "negotiation").length, color: "amber" },
-            { label: "Won", count: wonLeads.length, color: "emerald" },
-            { label: "Lost", count: leads.filter((l: any) => l.status === "lost").length, color: "red" },
-          ].map((stage, i) => (
-            <div key={i} className="flex-1 text-center">
-              <div className={`text-2xl font-black text-${stage.color}-500`}>{stage.count}</div>
-              <div className="text-xs text-secondary mt-1">{stage.label}</div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

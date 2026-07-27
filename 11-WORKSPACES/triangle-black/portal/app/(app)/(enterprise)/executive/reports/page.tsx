@@ -3,45 +3,55 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
-export default function ExecutiveReports() {
+const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+export default function ExecutiveReportsPage() {
   const router = useRouter();
-  const { data: dash } = useQuery(["er2-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
-  const { data: twin } = useQuery(["er2-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: invRaw } = useQuery(["er2-inv"], () => authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: woRaw } = useQuery(["er2-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const invoices=toArr(invRaw); const wos=toArr(woRaw); const d=dash||{};
-  const totalRevenue=invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const completionRate=wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
-  const collectionRate=invoices.length>0?Math.round(invoices.filter(i=>i.status==="paid").length/invoices.length*100):0;
+  const { data: twin }   = useQuery(["er-twin"],  () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: dash }   = useQuery(["er-dash"],  () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()));
+  const { data: invRaw } = useQuery(["er-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: woRaw }  = useQuery(["er-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const inv = toArr(invRaw); const wos = toArr(woRaw);
+  const score = twin?.health_score||0;
+  const d = dash||{};
+  const totalRev = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const compRate = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
   const reports = [
-    {title:"Operations Report",desc:`${d.work_orders?.total||0} WOs tracked · ${completionRate}% completion rate`,icon:"⚙️",path:"/operations/work-orders",metrics:[`Open: ${d.work_orders?.open||0}`,`Completed: ${d.work_orders?.completed||0}`,`Critical: ${d.work_orders?.critical||0}`]},
-    {title:"Financial Report",desc:`${fmtEGP(totalRevenue)} collected · ${collectionRate}% collection rate`,icon:"💰",path:"/invoices",metrics:[`Paid: ${d.finance?.paid||0}`,`Pending: ${d.finance?.pending||0}`,`Overdue: ${d.finance?.overdue||0}`]},
-    {title:"Maintenance Report",desc:`${d.maintenance?.pm_plans||0} PM plans · ${d.maintenance?.overdue||0} overdue`,icon:"🔧",path:"/maintenance/pm-plans",metrics:[`Due week: ${d.maintenance?.due_this_week||0}`,`Assets: ${d.assets?.total||0}`,`Operational: ${d.assets?.operational||0}`]},
-    {title:"Commercial Report",desc:`${d.commercial?.active_contracts||0} active contracts`,icon:"💼",path:"/commercial",metrics:[`Open leads: ${d.commercial?.open_leads||0}`,`Expiring: ${d.commercial?.expiring_30d||0}`,`Unpaid: ${d.commercial?.unpaid_invoices||0}`]},
-    {title:"Platform Health",desc:`Digital Twin: ${twin?.health_score||0}/100 · ${twin?.health_label||""}`,icon:"🔮",path:"/executive/intelligence",metrics:[`Technicians: ${d.platform?.technicians||0}`,`Projects: ${d.platform?.projects||0}`,`Notifications: ${d.platform?.notifications||0}`]},
-    {title:"Procurement Report",desc:`${d.procurement?.purchase_requests||0} PRs · ${d.procurement?.purchase_orders||0} POs`,icon:"📦",path:"/supply-chain",metrics:[`Pending POs: ${d.procurement?.pending_pos||0}`,`Approved PRs: ${d.procurement?.approved_prs||0}`,`Suppliers: ${d.procurement?.suppliers||0}`]},
+    {label:"Operations Report",    icon:"🔧", desc:"WO completion, SLA, technician performance", path:"/analytics/sla"},
+    {label:"Financial Report",     icon:"💰", desc:"Revenue, invoices, collections", path:"/analytics/costs"},
+    {label:"Maintenance Report",   icon:"📅", desc:"PM compliance, asset health, overdue plans", path:"/analytics/scorecards"},
+    {label:"Commercial Report",    icon:"📊", desc:"Pipeline, contracts, lead conversion", path:"/analytics/trends"},
+    {label:"Platform Scorecard",   icon:"🏆", desc:"Twin score, domain health, KPIs", path:"/analytics/scorecards"},
+    {label:"Executive Summary",    icon:"🧠", desc:"All domains, risks, opportunities", path:"/executive"},
   ];
   return (
-    <div className="tb-page">
-      <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Reports</div>
-      <h1 className="text-page-title text-primary">Executive Reports</h1>
-      <p className="text-secondary mt-1">Comprehensive platform performance reports</p></div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {reports.map((r,i)=>(
-          <button key={i} onClick={()=>router.push(r.path)}
-            className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
-            <div className="text-3xl mb-3">{r.icon}</div>
-            <div className="font-bold text-primary text-lg group-hover:text-amber-600 mb-1">{r.title}</div>
-            <div className="text-xs text-secondary mb-4">{r.desc}</div>
-            <div className="space-y-1">
-              {r.metrics.map((m,j)=>(
-                <div key={j} className="text-xs text-tertiary flex items-center gap-1"><span className="text-amber-500">·</span>{m}</div>
-              ))}
-            </div>
-          </button>
-        ))}
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="text-label-upper text-purple-400 mb-1.5">Executive</div>
+          <h1 className="tb-hero-title">Reports</h1>
+          <p className="tb-hero-description">Platform intelligence reports and analytics</p>
+          <div className="tb-grid-4 mt-6">
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Revenue",value:fmtEGP(totalRev),color:"#34D399"},{label:"WO Completion",value:compRate+"%",color:compRate>=80?"#34D399":"#FBBF24"},{label:"Reports",value:reports.length,color:"#A78BFA"}].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="tb-canvas">
+        <div className="tb-section">
+          <div className="tb-section-title">Available Reports</div>
+          <div className="tb-grid-3">
+            {reports.map((r,i)=>(
+              <button key={i} onClick={()=>router.push(r.path)} className="tb-section text-left hover:border-brand transition-colors">
+                <div style={{fontSize:"1.75rem",marginBottom:8}}>{r.icon}</div>
+                <div className="text-sm font-bold text-primary mb-1">{r.label}</div>
+                <div className="text-xs text-tertiary">{r.desc}</div>
+                <div className="text-xs text-brand mt-3">View →</div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
