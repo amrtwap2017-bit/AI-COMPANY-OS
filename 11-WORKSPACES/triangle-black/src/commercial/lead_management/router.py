@@ -7,12 +7,12 @@ from .schemas import LeadCreate, LeadUpdate, LeadResponse
 
 router = APIRouter()
 
-@router.post('/', response_model=LeadResponse, status_code=201)
+@router.post('/', status_code=201)
 def create_lead(payload: LeadCreate, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
     payload.hotel_id = hotel_id
     lead_repo = LeadRepository(db)
     new_lead = lead_repo.create_lead(payload.dict())
-    return {'data': new_lead}
+    return new_lead.__dict__ if hasattr(new_lead, '__dict__') else new_lead
 
 @router.get('/')
 def list_leads(name: str = None, status: str = None, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
@@ -26,7 +26,7 @@ def update_lead(id: str, payload: LeadUpdate, db: Session = Depends(get_db), hot
     updated_lead = lead_repo.update_lead(id, payload.dict())
     if not updated_lead:
         raise HTTPException(status_code=404, detail='Lead not found')
-    return {'data': updated_lead}
+    return {k: v for k, v in updated_lead.__dict__.items() if not k.startswith('_')}
 
 @router.delete('/{id}', status_code=204)
 def delete_lead(id: str, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
