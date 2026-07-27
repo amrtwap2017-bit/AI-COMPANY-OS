@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -107,6 +108,7 @@ export default function AssetsPage() {
           </select>
           {(search||catF!=="all"||critF!=="all")&&<button onClick={()=>{setSearch("");setCatF("all");setCritF("all");}} className="tb-pill">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} assets</span>
+          <ExportButton data={toArr(assetRaw)} filename="assets" title="Assets"/>
         </div>
 
         <div className="tb-table">

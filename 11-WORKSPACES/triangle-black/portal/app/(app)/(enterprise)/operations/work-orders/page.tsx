@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -146,6 +147,7 @@ export default function WorkOrdersPage() {
             <button onClick={()=>{setSearch("");setStatusF("all");setPriorityF("all");}} className="tb-pill">Clear ×</button>
           )}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} results</span>
+          <ExportButton data={toArr(woRaw)} filename="work-orders" title="Work Orders"/>
         </div>
 
         {/* Table */}

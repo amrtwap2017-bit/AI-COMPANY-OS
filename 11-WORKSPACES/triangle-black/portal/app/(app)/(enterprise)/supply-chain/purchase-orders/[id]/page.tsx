@@ -1,180 +1,172 @@
 "use client";
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { PageWrapper, PageHeader, SectionCard, LoadingState } from "@/components/ui";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { Package, FileText, Building, CreditCard, Truck } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 
-// Safe array extractor — handles all backend response shapes
-const toArr = (d: any): any[] => {
-  if (!d) return [];
-  if (Array.isArray(d)) return d;
-  if (Array.isArray(d?.items)) return d.items;
-  if (Array.isArray(d?.data)) return d.data;
-  if (Array.isArray(d?.results)) return d.results;
-  if (Array.isArray(d?.records)) return d.records;
-  return [];
-};
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-
-const STATUS_COLORS: Record<string, string> = {
-  draft:     "bg-slate-100 text-secondary",
-  submitted: "bg-blue-100 text-blue-700",
-  approved:  "bg-emerald-100 text-emerald-700",
-  sent:      "bg-purple-100 text-purple-700",
-  received:  "bg-emerald-200 text-emerald-800",
-  cancelled: "bg-red-100 text-red-700",
-  closed:    "bg-slate-200 text-secondary",
+const STATUS_COLOR = {
+  draft:"#94A3B8", pending:"#60A5FA", approved:"#A78BFA",
+  ordered:"#FBBF24", received:"#34D399", cancelled:"#F87171"
 };
 
 export default function PurchaseOrderDetailPage() {
-  const { id } = useParams();
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
 
-  const { data: po, isLoading } = useQuery({
-    queryKey: ["po", id],
-    queryFn: () => authFetch(`/api/v1/purchase-orders/${id}`).then(r => r.json()),
-    enabled: !!id,
-  });
+  const { data: po, isLoading } = useQuery(
+    ["po-detail", id],
+    () => authFetch("/api/v1/purchase-orders/" + id).then(r => r.json()),
+    { enabled: !!id }
+  );
 
-  const { data: vendor = {} } = useQuery({
-    queryKey: ["po-vendor", po?.vendor_id],
-    queryFn: () => authFetch(`/api/v1/inventory-vendors/${po?.vendor_id}`).then(r => r.json()),
-    enabled: !!po?.vendor_id,
-  });
+  if (isLoading) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading...</div>
+    </div>
+  );
 
-  const { data: items = {} } = useQuery({
-    queryKey: ["po-items", id],
-    queryFn: () => authFetch(`/api/v1/purchase-orders/${id}/items`).then(r => r.json()).catch(() => ({})),
-    enabled: !!id,
-  });
+  if (!po || po.detail) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">📦</div>
+        <div className="tb-empty-title">Purchase order not found</div>
+        <button onClick={() => router.push("/supply-chain/purchase-orders")} className="tb-btn-primary mt-4">Back</button>
+      </div>
+    </div>
+  );
 
-  if (isLoading) return <PageWrapper><LoadingState title="Loading purchase order..." /></PageWrapper>;
-  if (!po || po.detail) return <PageWrapper><p className="p-8 text-tertiary">Purchase order not found</p></PageWrapper>;
-
-  const lineItems = Array.isArray(items) ? items : items?.data ?? items?.items ?? [];
-  const totalValue = Number(po.total_amount || po.total_value || 0);
+  const sc = STATUS_COLOR[po.status] || "#94A3B8";
+  const amount = Number(po.total_amount || po.total_value || 0);
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title={po.po_number ?? po.title ?? `PO ${String(po.id).slice(0,8)}`}
-        subtitle={vendor?.name ?? po.vendor_id ?? "Vendor"}
-        badge={
-          <span className={`px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[po.status] ?? ""}`}>
-            {po.status}
-          </span>
-        }
-      />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* PO Summary */}
-        <div className="space-y-6">
-          <SectionCard title="Order Summary">
-            <div className="text-center p-4 bg-slate-50 rounded-xl mb-4">
-              <CreditCard className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-slate-800">
-                {totalValue.toLocaleString()}
-              </div>
-              <div className="text-xs text-secondary mt-1">Total Value (EGP)</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A1A 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain · Purchase Orders</div>
+              <h1 className="tb-hero-title">{po.po_number || ("PO-" + (id||"").slice(0,8).toUpperCase())}</h1>
+              <p className="tb-hero-description">
+                <span className="tb-badge mr-2" style={{background:sc+"18",color:sc,border:"1px solid "+sc+"30"}}>{po.status||"—"}</span>
+                {po.supplier_name && <span className="text-secondary">{po.supplier_name}</span>}
+              </p>
             </div>
-            <div className="space-y-2 text-sm">
-              {[
-                ["Status",        po.status],
-                ["Currency",      po.currency ?? "EGP"],
-                ["Payment Terms", po.payment_terms],
-                ["Order Date",    String(po.created_at ?? "").slice(0,10)],
-                ["Expected",      String(po.expected_delivery_date ?? po.required_date ?? "—").slice(0,10)],
-                ["Hotel",         po.hotel_id],
-              ].filter(([, v]) => v && v !== "—").map(([k, v]) => (
-                <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-secondary">{k}</span>
-                  <span className="text-slate-800 font-medium text-right max-w-32 truncate">{v}</span>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-
-          {/* Vendor info */}
-          {vendor?.name && (
-            <SectionCard title="Vendor">
-              <div className="flex items-center gap-3 mb-3">
-                <Building className="w-5 h-5 text-tertiary" />
-                <div>
-                  <div className="font-medium text-slate-800">{vendor.name}</div>
-                  <div className="text-xs text-secondary">{vendor.category}</div>
-                </div>
+            <button onClick={() => router.push("/supply-chain/purchase-orders")} className="tb-btn-secondary">← Back</button>
+          </div>
+          <div className="tb-grid-4 mt-6">
+            {[
+              { label:"Status",     value:(po.status||"—").toUpperCase(), color:sc },
+              { label:"Total",      value:fmtEGP(amount),                 color:"#34D399" },
+              { label:"Supplier",   value:po.supplier_name||"—",          color:"#60A5FA" },
+              { label:"Order Date", value:fmtDate(po.order_date||po.created_at), color:"#94A3B8" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
               </div>
-              <div className="space-y-1 text-xs text-secondary">
-                {vendor.phone && <div>📞 {vendor.phone}</div>}
-                {vendor.email && <div>✉️ {vendor.email}</div>}
-                {vendor.lead_time_days && <div>🚚 Lead time: {vendor.lead_time_days} days</div>}
-              </div>
-            </SectionCard>
-          )}
-
-          {/* PDF Export */}
-          <SectionCard title="Documents">
-            <a
-              href={`http://localhost:8030/api/v1/pdf-export/preview/monthly-report`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 border border-slate-200
-                         rounded-lg text-sm hover:bg-slate-50 text-slate-700"
-            >
-              <FileText className="w-4 h-4" /> Monthly Report (PDF)
-            </a>
-          </SectionCard>
-        </div>
-
-        {/* Line items */}
-        <div className="lg:col-span-2">
-          <SectionCard title={`Line Items (${lineItems.length})`}>
-            {lineItems.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-xs text-secondary border-b border-slate-100">
-                      <th className="text-left py-2 font-medium">Item</th>
-                      <th className="text-right py-2 font-medium">Qty</th>
-                      <th className="text-right py-2 font-medium">Unit Price</th>
-                      <th className="text-right py-2 font-medium">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {toArr(lineItems).map((item: any) => (
-                      <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50">
-                        <td className="py-2">
-                          <div className="font-medium text-slate-800">{item.name ?? item.description}</div>
-                          <div className="text-xs text-tertiary">{item.item_code ?? ""}</div>
-                        </td>
-                        <td className="py-2 text-right text-slate-700">{item.quantity} {item.unit}</td>
-                        <td className="py-2 text-right text-slate-700">
-                          {Number(item.unit_price || 0).toLocaleString()}
-                        </td>
-                        <td className="py-2 text-right font-semibold text-slate-800">
-                          {Number(item.total_price || (item.quantity * item.unit_price) || 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="border-t-2 border-slate-200 bg-slate-50">
-                      <td colSpan={3} className="py-2 text-right font-semibold text-slate-700">Total</td>
-                      <td className="py-2 text-right font-bold text-slate-800">
-                        {totalValue.toLocaleString()} EGP
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Package className="w-10 h-10 text-tertiary mx-auto mb-3" />
-                <p className="text-sm text-tertiary">No line items available</p>
-                <p className="text-xs text-tertiary mt-1">Total order value: {totalValue.toLocaleString()} EGP</p>
-              </div>
-            )}
-          </SectionCard>
+            ))}
+          </div>
         </div>
       </div>
-    </PageWrapper>
+
+      <div className="tb-canvas">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+            <div className="tb-section">
+              <div className="tb-section-title">Order Details</div>
+              <div className="space-y-1">
+                {[
+                  ["PO Number",         po.po_number || ("PO-" + id?.slice(0,8)?.toUpperCase())],
+                  ["Status",            po.status || "—"],
+                  ["Supplier",          po.supplier_name || "—"],
+                  ["Total Amount",      fmtEGP(amount)],
+                  ["Order Date",        fmtDate(po.order_date || po.created_at)],
+                  ["Expected Delivery", fmtDate(po.expected_delivery_date || po.delivery_date)],
+                  ["Received Date",     fmtDate(po.received_date)],
+                  ["Payment Terms",     po.payment_terms || "—"],
+                  ["Created By",        po.created_by || "—"],
+                  ["Notes",             po.notes || "—"],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Order lifecycle */}
+            <div className="tb-section">
+              <div className="tb-section-title">Order Lifecycle</div>
+              <div className="space-y-3">
+                {[
+                  { label:"Created",   date:po.created_at,          done:true,                         color:"#60A5FA" },
+                  { label:"Approved",  date:po.approved_at,         done:["approved","ordered","received"].includes(po.status), color:"#A78BFA" },
+                  { label:"Ordered",   date:po.order_date,          done:["ordered","received"].includes(po.status), color:"#FBBF24" },
+                  { label:"Received",  date:po.received_date,       done:po.status==="received",       color:"#34D399" },
+                ].map((step, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div style={{
+                      width:20, height:20, borderRadius:"50%", flexShrink:0,
+                      background: step.done ? step.color+"30" : "transparent",
+                      border: "2px solid " + (step.done ? step.color : "#334155"),
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize:"0.625rem", color: step.done ? step.color : "#64748B", fontWeight:900,
+                    }}>
+                      {step.done ? "✓" : ""}
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold" style={{color:step.done?step.color:"#64748B"}}>{step.label}</div>
+                      {step.date && <div className="text-xs text-tertiary">{fmtDate(step.date)}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="tb-section">
+              <div className="tb-section-title">Order Status</div>
+              <div className="text-center py-4">
+                <div className="text-5xl font-black mb-2" style={{color:sc}}>
+                  {po.status==="received"?"✓":po.status==="cancelled"?"✗":"○"}
+                </div>
+                <div className="text-sm font-bold" style={{color:sc}}>{(po.status||"—").toUpperCase()}</div>
+                <div className="text-lg font-black text-emerald-400 mt-2">{fmtEGP(amount)}</div>
+              </div>
+            </div>
+            {po.supplier_id && (
+              <button onClick={() => router.push("/supply-chain/suppliers/" + po.supplier_id)}
+                className="tb-section w-full text-left hover:border-brand transition-colors">
+                <div className="text-xs text-tertiary mb-1">Supplier</div>
+                <div className="text-sm font-semibold text-primary">{po.supplier_name||"—"}</div>
+                <div className="text-xs text-brand mt-1">View supplier →</div>
+              </button>
+            )}
+            <div className="tb-section">
+              <div className="tb-section-title">Quick Actions</div>
+              <div className="space-y-2">
+                {[
+                  { label:"All POs",          icon:"📦", path:"/supply-chain/purchase-orders" },
+                  { label:"Purchase Requests", icon:"📋", path:"/supply-chain/purchase-requests" },
+                  { label:"Suppliers",         icon:"🏭", path:"/supply-chain/suppliers" },
+                  { label:"Inventory",         icon:"📦", path:"/supply-chain/inventory" },
+                ].map((a, i) => (
+                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                    <span>{a.icon}</span>
+                    <span className="text-sm text-secondary">{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

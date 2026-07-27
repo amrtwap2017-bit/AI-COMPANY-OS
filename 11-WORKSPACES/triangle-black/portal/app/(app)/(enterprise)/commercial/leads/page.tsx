@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -108,6 +109,7 @@ export default function LeadsPage() {
             ))}
           </div>
           <span className="text-xs text-tertiary ml-auto">{filtered.length} leads</span>
+          <ExportButton data={toArr(leadRaw)} filename="leads" title="Leads"/>
         </div>
 
         {/* Table */}

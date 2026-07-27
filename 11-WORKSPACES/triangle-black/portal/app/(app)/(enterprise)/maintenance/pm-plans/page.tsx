@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -108,6 +109,7 @@ export default function PMPlansPage() {
             <button onClick={()=>{setSearch("");setTypeFilter("all");setDueFilter("all");}} className="tb-pill">Clear ×</button>
           )}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} plans</span>
+          <ExportButton data={toArr(pmRaw)} filename="pm-plans" title="PM Plans"/>
         </div>
 
         {/* Table */}

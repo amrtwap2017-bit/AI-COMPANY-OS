@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -138,6 +139,7 @@ export default function InvoicesPage() {
           </div>
           {(search||statusF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");}} className="tb-pill">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} invoices</span>
+          <ExportButton data={toArr(invRaw)} filename="invoices" title="Invoices"/>
         </div>
 
         <div className="tb-table">
