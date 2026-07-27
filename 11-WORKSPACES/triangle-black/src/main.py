@@ -865,8 +865,8 @@ def get_dashboard_summary():
             },
             "maintenance": {
                 "pm_plans": c("SELECT count(*) FROM maintenance_plans"),
-                "overdue": c("SELECT count(*) FROM maintenance_plans WHERE next_due_date < NOW()"),
-                "due_this_week": c("SELECT count(*) FROM maintenance_plans WHERE next_due_date BETWEEN NOW() AND NOW() + INTERVAL '7 days'"),
+                "overdue": c("SELECT count(*) FROM maintenance_plans WHERE next_due_ts < NOW()"),  # fixed type
+                "due_this_week": c("SELECT count(*) FROM maintenance_plans WHERE next_due_ts BETWEEN NOW() AND NOW() + INTERVAL '7 days'"),
             },
             "service_requests": {
                 "total": c("SELECT count(*) FROM service_requests"),
