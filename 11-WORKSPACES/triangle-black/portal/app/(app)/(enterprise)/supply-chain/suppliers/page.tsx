@@ -71,12 +71,12 @@ export default function SuppliersPage() {
         {[
           {label:"Total",      value:total,                          color:"text-slate-800"},
           {label:"Active",     value:active,                         color:"text-emerald-700"},
-          {label:"Inactive",   value:total-active,                   color:"text-slate-500"},
+          {label:"Inactive",   value:total-active,                   color:"text-secondary"},
           {label:"Categories", value:Object.keys(catCounts).length,  color:"text-blue-700"},
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -85,9 +85,9 @@ export default function SuppliersPage() {
         <div className="flex flex-wrap gap-2 mb-4">
           {["all",...Object.keys(catCounts)].map(cat=>(
             <button key={cat} onClick={()=>setCatFilter(catFilter===cat?"all":cat)}
-              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${catFilter===cat?"bg-blue-600 text-white border-blue-600":"bg-white text-slate-600 border-slate-200 hover:border-blue-300"}`}>
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${catFilter===cat?"bg-blue-600 text-white border-blue-600":"bg-white text-secondary border-slate-200 hover:border-blue-300"}`}>
               {cat==="all"?"All":cat}
-              {cat!=="all" && <span className={catFilter===cat?"text-blue-200":"text-slate-400"}>({catCounts[cat]})</span>}
+              {cat!=="all" && <span className={catFilter===cat?"text-blue-200":"text-tertiary"}>({catCounts[cat]})</span>}
             </button>
           ))}
         </div>
@@ -113,15 +113,15 @@ export default function SuppliersPage() {
                       <p className="font-semibold text-slate-800 truncate">{s.name}</p>
                       {s.category && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 mt-1">{s.category}</span>}
                     </div>
-                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>
+                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-secondary"}`}>
                       {isActive?"Active":"Inactive"}
                     </span>
                   </div>
-                  <div className="space-y-1 mt-2 text-xs text-slate-500">
+                  <div className="space-y-1 mt-2 text-xs text-secondary">
                     {s.contact_email && <p className="truncate">{s.contact_email}</p>}
                     {s.contact_phone && <p>{s.contact_phone}</p>}
-                    {s.city          && <p className="text-slate-400">{s.city}</p>}
-                    {s.payment_terms && <p className="text-slate-400">Terms: {s.payment_terms}</p>}
+                    {s.city          && <p className="text-tertiary">{s.city}</p>}
+                    {s.payment_terms && <p className="text-tertiary">Terms: {s.payment_terms}</p>}
                   </div>
                 </div>
               );
@@ -135,23 +135,23 @@ export default function SuppliersPage() {
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
               <h2 className="font-bold text-slate-900">New Supplier</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">x</button>
+              <button onClick={()=>setShowCreate(false)} className="text-tertiary hover:text-secondary text-xl font-bold leading-none">x</button>
             </div>
             <form onSubmit={save} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Company Name *</label>
+                <label className="block text-xs font-semibold text-secondary mb-1">Company Name *</label>
                 <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}
                   placeholder="e.g. Al-Masry HVAC Supplies" className={inp} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Category</label>
                   <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className={inp}>
                     {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Payment Terms</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Payment Terms</label>
                   <select value={form.payment_terms} onChange={e=>setForm({...form,payment_terms:e.target.value})} className={inp}>
                     {TERMS.map(t=><option key={t} value={t}>{t}</option>)}
                   </select>
@@ -159,24 +159,24 @@ export default function SuppliersPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Contact Email</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Contact Email</label>
                   <input type="email" value={form.contact_email} onChange={e=>setForm({...form,contact_email:e.target.value})}
                     placeholder="info@supplier.com" className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Contact Phone</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Contact Phone</label>
                   <input value={form.contact_phone} onChange={e=>setForm({...form,contact_phone:e.target.value})}
                     placeholder="+20 2 0000 0000" className={inp} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">City</label>
+                <label className="block text-xs font-semibold text-secondary mb-1">City</label>
                 <input value={form.city} onChange={e=>setForm({...form,city:e.target.value})}
                   placeholder="Cairo / Alexandria…" className={inp} />
               </div>
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button type="button" onClick={()=>setShowCreate(false)}
-                  className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                  className="px-4 py-2 text-sm text-secondary border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
                 <button type="submit" disabled={saving}
                   className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">
                   {saving?"Saving…":"Add Supplier"}

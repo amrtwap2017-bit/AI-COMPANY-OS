@@ -24,33 +24,33 @@ export default function ExecutiveScorecard() {
   ];
   const overallScore=Math.round(kpis.reduce((s,k)=>s+Math.min(100,k.value),0)/kpis.length);
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Scorecard</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Executive Scorecard</h1>
-        <p className="text-slate-500 mt-1">Overall platform performance at a glance</p></div>
+        <h1 className="text-3xl font-black text-primary">Executive Scorecard</h1>
+        <p className="text-secondary mt-1">Overall platform performance at a glance</p></div>
         <div className={`rounded-2xl border px-8 py-5 text-center ${overallScore>=80?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
           <div className={`text-5xl font-black ${overallScore>=80?"text-emerald-500":"text-amber-500"}`}>{overallScore}</div>
-          <div className="text-xs text-slate-500 mt-1">Overall Score</div>
+          <div className="text-xs text-secondary mt-1">Overall Score</div>
           <div className="text-xs font-bold mt-0.5">{overallScore>=90?"Excellent":overallScore>=80?"Good":"Needs Attention"}</div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {kpis.map((k,i)=>(
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div key={i} className="bg-surface border border-border rounded-2xl p-6">
             <div className="flex items-start justify-between mb-3">
-              <div><div className="font-bold text-slate-900 dark:text-white">{k.label}</div>
-              <div className="text-xs text-slate-400 mt-0.5">{k.category}</div></div>
+              <div><div className="font-bold text-primary">{k.label}</div>
+              <div className="text-xs text-tertiary mt-0.5">{k.category}</div></div>
               <span className={`text-xs font-bold px-2 py-0.5 rounded ${k.value>=k.target?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}`}>{k.value>=k.target?"✓ On Target":"↓ Below"}</span>
             </div>
             <div className="flex items-end gap-1 mb-3">
               <span className={`text-5xl font-black text-${k.color}-500`}>{k.value}</span>
-              <span className="text-xl text-slate-400 mb-1">{k.unit}</span>
+              <span className="text-xl text-tertiary mb-1">{k.unit}</span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
               <div className={`h-2.5 rounded-full bg-${k.color}-500`} style={{width:`${Math.min(k.value,100)}%`}}/>
             </div>
-            <div className="text-xs text-slate-400 mt-1">Target: {k.target}{k.unit}</div>
+            <div className="text-xs text-tertiary mt-1">Target: {k.target}{k.unit}</div>
           </div>
         ))}
       </div>

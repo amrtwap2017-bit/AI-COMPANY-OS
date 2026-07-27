@@ -6,7 +6,7 @@ export function BrandMark() {
         TB
       </div>
       <div className="min-w-0">
-        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Triangle Black</div>
+        <div className="text-[10px] font-bold uppercase tracking-widest text-tertiary">Triangle Black</div>
         <div className="text-sm font-bold text-white truncate">Enterprise OS</div>
       </div>
     </div>

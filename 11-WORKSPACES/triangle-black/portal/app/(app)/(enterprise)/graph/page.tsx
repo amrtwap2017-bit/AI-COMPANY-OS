@@ -35,11 +35,11 @@ export default function PlatformGraph() {
   const totalConnections = entities.reduce((s, e) => s + e.connections.length, 0);
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Knowledge Graph</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Platform Entity Map</h1>
-        <p className="text-slate-500 mt-1">All connected entities across the Triangle Black ecosystem</p>
+        <h1 className="text-3xl font-black text-primary">Platform Entity Map</h1>
+        <p className="text-secondary mt-1">All connected entities across the Triangle Black ecosystem</p>
       </div>
 
       {/* Platform stats */}
@@ -50,17 +50,17 @@ export default function PlatformGraph() {
           { label: "Connections", value: totalConnections, color: "amber" },
           { label: "Domains", value: domains.length, color: "purple" },
         ].map((k, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5 text-center">
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+            <div className="text-xs text-secondary mt-1">{k.label}</div>
           </div>
         ))}
       </div>
 
       {/* Entity grid by domain */}
       {domains.map(domain => (
-        <div key={domain} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-          <h2 className="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4">{domain}</h2>
+        <div key={domain} className="bg-surface border border-border rounded-2xl p-6">
+          <h2 className="font-bold text-sm uppercase tracking-wider text-tertiary mb-4">{domain}</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
             {entities.filter(e => e.domain === domain).map((entity, i) => (
               <button key={i} onClick={() => router.push(entity.path)}
@@ -69,8 +69,8 @@ export default function PlatformGraph() {
                   <span className="text-2xl">{entity.icon}</span>
                   <span className={`text-lg font-black text-${entity.color}-500`}>{entity.count}</span>
                 </div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">{entity.name}</div>
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="font-bold text-sm text-primary group-hover:text-amber-600 transition-colors">{entity.name}</div>
+                <div className="text-xs text-tertiary mt-1">
                   Links to: {entity.connections.slice(0, 2).join(", ")}{entity.connections.length > 2 ? "..." : ""}
                 </div>
               </button>
@@ -80,8 +80,8 @@ export default function PlatformGraph() {
       ))}
 
       {/* Workflow connections */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Core Workflow Chains</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6">
+        <h2 className="font-bold text-primary mb-4">Core Workflow Chains</h2>
         <div className="space-y-3">
           {[
             { chain: ["Lead", "→", "Contract", "→", "Project", "→", "Work Order", "→", "Invoice"], color: "amber", label: "Revenue Lifecycle" },
@@ -89,11 +89,11 @@ export default function PlatformGraph() {
             { chain: ["Service Request", "→", "Work Order", "→", "Dispatch", "→", "Completion"], color: "purple", label: "Service Lifecycle" },
             { chain: ["Stock Alert", "→", "Purchase Request", "→", "Purchase Order", "→", "Goods Receipt"], color: "emerald", label: "Procurement Lifecycle" },
           ].map((wf, i) => (
-            <div key={i} className="flex items-center gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+            <div key={i} className="flex items-center gap-2 p-3 bg-base-alt dark:bg-surface-alt rounded-xl">
               <span className={`text-xs font-bold text-${wf.color}-500 w-36 flex-shrink-0`}>{wf.label}</span>
               <div className="flex items-center gap-1 flex-wrap">
                 {wf.chain.map((step, j) => (
-                  <span key={j} className={step === "→" ? "text-slate-300" : `text-xs font-semibold px-2 py-0.5 rounded bg-${wf.color}-100 text-${wf.color}-700`}>
+                  <span key={j} className={step === "→" ? "text-tertiary" : `text-xs font-semibold px-2 py-0.5 rounded bg-${wf.color}-100 text-${wf.color}-700`}>
                     {step}
                   </span>
                 ))}

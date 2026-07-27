@@ -5,7 +5,7 @@ export function SLARiskBoard({ title, subtitle, items=[] }:any) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
       <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {items.map((item:any,i:number)=>(
           <div key={i} className={"rounded-xl border p-3 "+(colors[item.severity]||colors.neutral)}>

@@ -76,7 +76,7 @@ export default function ProjectsReviewPage() {
         <div className="flex gap-2 mb-4 flex-wrap">
           {["all","active","completed","on_hold"].map((t) => (
             <button key={t} onClick={() => setFilter(t)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${filter===t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${filter===t ? "bg-slate-900 text-white" : "bg-slate-100 text-secondary hover:bg-slate-200"}`}>
               {t.replace("_"," ")}
             </button>
           ))}
@@ -93,9 +93,9 @@ export default function ProjectsReviewPage() {
                         <p className="text-sm font-bold text-slate-800">{p.name}</p>
                         {isAtRisk && <span className="text-xs font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded">AT RISK</span>}
                       </div>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-secondary">
                         {p.start_date?.slice(0,10)} → {p.end_date?.slice(0,10)}
-                        {p.daysLeft !== null && <span className={`ml-2 font-medium ${isAtRisk ? "text-red-600" : "text-slate-400"}`}>{p.daysLeft > 0 ? `${p.daysLeft}d left` : `${Math.abs(p.daysLeft)}d overdue`}</span>}
+                        {p.daysLeft !== null && <span className={`ml-2 font-medium ${isAtRisk ? "text-red-600" : "text-tertiary"}`}>{p.daysLeft > 0 ? `${p.daysLeft}d left` : `${Math.abs(p.daysLeft)}d overdue`}</span>}
                       </p>
                     </div>
                     <StatusBadge status={p.status || "active"} />

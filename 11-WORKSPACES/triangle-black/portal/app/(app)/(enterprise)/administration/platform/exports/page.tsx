@@ -111,7 +111,7 @@ function ExportCard({ exp }: { exp: any }) {
         </div>
         <div className="flex-1">
           <div className="font-semibold text-slate-800">{exp.label}</div>
-          <div className="text-sm text-slate-500 mt-0.5">{exp.description}</div>
+          <div className="text-sm text-secondary mt-0.5">{exp.description}</div>
 
           {exp.filters.length > 0 && (
             <div className="flex gap-2 mt-3 flex-wrap">

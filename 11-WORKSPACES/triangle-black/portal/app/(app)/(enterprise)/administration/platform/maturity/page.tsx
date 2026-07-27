@@ -123,7 +123,7 @@ export default function PlatformMaturityPage() {
         <div className="lg:col-span-1 bg-white border-2 border-slate-200 rounded-2xl p-6 text-center">
           <Award className="w-10 h-10 text-amber-500 mx-auto mb-3" />
           <div className="text-5xl font-bold text-slate-800">{maturityPct}</div>
-          <div className="text-slate-500 text-sm mt-1">/ 100 Maturity Score</div>
+          <div className="text-secondary text-sm mt-1">/ 100 Maturity Score</div>
           <div className="mt-3 w-full bg-slate-100 rounded-full h-3">
             <div
               className={`h-3 rounded-full ${maturityPct >= 80 ? "bg-emerald-500" : maturityPct >= 60 ? "bg-amber-500" : "bg-red-500"}`}
@@ -143,7 +143,7 @@ export default function PlatformMaturityPage() {
             <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
               <s.icon className={`w-4 h-4 ${s.color} mb-2`} />
               <div className={`text-xl font-bold ${s.color}`}>{s.value}</div>
-              <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+              <div className="text-xs text-secondary mt-1">{s.label}</div>
             </div>
           ))}
         </div>
@@ -166,7 +166,7 @@ export default function PlatformMaturityPage() {
             </div>
           ))}
         </div>
-        <p className="text-xs text-slate-400 mt-4">
+        <p className="text-xs text-tertiary mt-4">
           * Triangle Black score based on feature completeness across 35 enterprise capabilities.
           Enterprise scores are estimated public benchmarks.
         </p>
@@ -195,7 +195,7 @@ export default function PlatformMaturityPage() {
                         : <AlertCircle className="w-3 h-3 text-amber-500 flex-shrink-0" />}
                       <span className="text-xs text-slate-700">{item.name}</span>
                     </div>
-                    <span className="text-xs font-semibold text-slate-600">{item.score}/10</span>
+                    <span className="text-xs font-semibold text-secondary">{item.score}/10</span>
                   </div>
                 ))}
               </div>

@@ -17,10 +17,10 @@ export default function SupplyChainReview() {
   const prByStatus=prs.reduce((acc,p)=>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{});
   const poByStatus=pos.reduce((acc,p)=>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{});
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain Review</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Supply Chain Review</h1>
-      <p className="text-slate-500 mt-1">Procurement performance and inventory health</p></div>
+      <h1 className="text-3xl font-black text-primary">Supply Chain Review</h1>
+      <p className="text-secondary mt-1">Procurement performance and inventory health</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {label:"Total PRs",value:prs.length,color:"blue"},
@@ -28,8 +28,8 @@ export default function SupplyChainReview() {
           {label:"Stock Value",value:fmtEGP(totalStockValue),color:"emerald"},
           {label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"red":"emerald"},
         ].map((k,i)=>(
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="text-xs text-secondary mb-2">{k.label}</div>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
           </div>
         ))}
@@ -38,18 +38,18 @@ export default function SupplyChainReview() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border p-6">
           <h2 className="font-bold mb-4">Purchase Requests by Status</h2>
           {Object.entries(prByStatus).map(([status,count],i)=>(
-            <div key={i} className="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
-              <span className="text-sm capitalize text-slate-600">{status}</span>
-              <span className="font-black text-slate-900 dark:text-white">{count}</span>
+            <div key={i} className="flex justify-between py-2 border-b border-divider last:border-0">
+              <span className="text-sm capitalize text-secondary">{status}</span>
+              <span className="font-black text-primary">{count}</span>
             </div>
           ))}
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-2xl border p-6">
           <h2 className="font-bold mb-4">Purchase Orders by Status</h2>
           {Object.entries(poByStatus).map(([status,count],i)=>(
-            <div key={i} className="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
-              <span className="text-sm capitalize text-slate-600">{status}</span>
-              <span className="font-black text-slate-900 dark:text-white">{count}</span>
+            <div key={i} className="flex justify-between py-2 border-b border-divider last:border-0">
+              <span className="text-sm capitalize text-secondary">{status}</span>
+              <span className="font-black text-primary">{count}</span>
             </div>
           ))}
         </div>
@@ -64,9 +64,9 @@ export default function SupplyChainReview() {
             {label:"Suppliers",icon:"🏢",path:"/supply-chain/suppliers"},
           ].map((a,i)=>(
             <button key={i} onClick={()=>router.push(a.path)}
-              className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 text-center hover:bg-amber-50 transition-colors">
+              className="bg-base-alt dark:bg-surface-alt rounded-xl p-4 text-center hover:bg-amber-50 transition-colors">
               <div className="text-2xl mb-1">{a.icon}</div>
-              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{a.label}</div>
+              <div className="text-xs font-bold text-slate-700 dark:text-tertiary">{a.label}</div>
             </button>
           ))}
         </div>

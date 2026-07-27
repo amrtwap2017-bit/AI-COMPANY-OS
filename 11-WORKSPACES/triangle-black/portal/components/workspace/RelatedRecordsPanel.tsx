@@ -33,11 +33,11 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
           <div key={group.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold text-slate-950">{group.title}</div>
-              <div className="text-xs uppercase tracking-wide text-slate-500">{group.countLabel}</div>
+              <div className="text-xs uppercase tracking-wide text-secondary">{group.countLabel}</div>
             </div>
 
             {group.records.length === 0 ? (
-              <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">
+              <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-sm text-secondary">
                 {group.emptyMessage}
               </div>
             ) : (
@@ -47,7 +47,7 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div className="text-sm font-semibold text-slate-900">{record.title}</div>
                       {record.meta ? (
-                        <div className="text-xs uppercase tracking-wide text-slate-500">{record.meta}</div>
+                        <div className="text-xs uppercase tracking-wide text-secondary">{record.meta}</div>
                       ) : null}
                     </div>
 

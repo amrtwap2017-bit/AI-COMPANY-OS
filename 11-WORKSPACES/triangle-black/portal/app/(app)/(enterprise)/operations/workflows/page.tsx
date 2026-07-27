@@ -20,19 +20,19 @@ export default function OperationsWorkflows() {
     {name:"Stock Alert → Purchase Request",from:"Low Stock",to:"Purchase Requests",fromCount:pending.wf03_stock_below_min||0,toCount:prs.filter(p=>p.title?.startsWith("Auto-PR:")).length,active:prs.filter(p=>p.status==="pending").length,color:"purple",path:"/supply-chain/purchase-requests"},
   ];
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Operations</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Operations Workflows</h1>
-      <p className="text-slate-500 mt-1">Automated workflow status and throughput</p></div>
+      <h1 className="text-3xl font-black text-primary">Operations Workflows</h1>
+      <p className="text-secondary mt-1">Automated workflow status and throughput</p></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {workflows.map((wf,i)=>(
           <button key={i} onClick={()=>router.push(wf.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all">
-            <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-4">{wf.name}</h3>
+            className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all">
+            <h3 className="font-bold text-primary text-lg mb-4">{wf.name}</h3>
             <div className="flex items-center justify-between mb-4">
-              <div className="text-center"><div className="text-2xl font-black">{wf.fromCount}</div><div className="text-xs text-slate-500">{wf.from}</div></div>
-              <div className="text-2xl text-slate-300">→</div>
-              <div className="text-center"><div className="text-2xl font-black">{wf.toCount}</div><div className="text-xs text-slate-500">{wf.to}</div></div>
+              <div className="text-center"><div className="text-2xl font-black">{wf.fromCount}</div><div className="text-xs text-secondary">{wf.from}</div></div>
+              <div className="text-2xl text-tertiary">→</div>
+              <div className="text-center"><div className="text-2xl font-black">{wf.toCount}</div><div className="text-xs text-secondary">{wf.to}</div></div>
             </div>
             <div className={`text-center p-2 rounded-xl bg-${wf.color}-50 dark:bg-${wf.color}-900/20`}>
               <span className={`text-sm font-bold text-${wf.color}-600`}>{wf.active} currently active</span>
@@ -40,7 +40,7 @@ export default function OperationsWorkflows() {
           </button>
         ))}
       </div>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+      <div className="bg-surface border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold">Workflow Approvals</h2>
           <button onClick={()=>router.push("/operations/workflows/approvals")} className="text-xs text-amber-500">View approvals →</button>
@@ -53,9 +53,9 @@ export default function OperationsWorkflows() {
             {label:"Open WOs",value:wos.filter(w=>w.status==="open").length,path:"/operations/work-orders"},
           ].map((item,i)=>(
             <button key={i} onClick={()=>router.push(item.path)}
-              className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 text-center hover:bg-amber-50 transition-colors">
+              className="bg-base-alt dark:bg-surface-alt rounded-xl p-3 text-center hover:bg-amber-50 transition-colors">
               <div className="text-2xl font-black text-amber-500">{item.value}</div>
-              <div className="text-xs text-slate-500 mt-1">{item.label}</div>
+              <div className="text-xs text-secondary mt-1">{item.label}</div>
             </button>
           ))}
         </div>

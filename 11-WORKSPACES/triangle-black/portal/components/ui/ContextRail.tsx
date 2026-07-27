@@ -46,8 +46,8 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
         title={open ? "Close panel" : "Open context panel"}
       >
         {open
-          ? <ChevronRight className="w-3 h-3 text-slate-400" />
-          : <ChevronLeft className="w-3 h-3 text-slate-400" />
+          ? <ChevronRight className="w-3 h-3 text-tertiary" />
+          : <ChevronLeft className="w-3 h-3 text-tertiary" />
         }
       </button>
 
@@ -72,7 +72,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                     className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors flex-shrink-0 ${
                       activeTab === tab.key
                         ? "border-amber-600 text-amber-700"
-                        : "border-transparent text-slate-500 hover:text-slate-700"
+                        : "border-transparent text-secondary hover:text-slate-700"
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -93,7 +93,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                   {aiInsights.length === 0 ? (
                     <div className="text-center py-8">
                       <Zap className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-                      <div className="text-xs text-slate-400">No AI insights yet</div>
+                      <div className="text-xs text-tertiary">No AI insights yet</div>
                     </div>
                   ) : aiInsights.map((item, i) => (
                     <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl p-3">
@@ -109,7 +109,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                   {activities.length === 0 ? (
                     <div className="text-center py-8">
                       <Activity className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-                      <div className="text-xs text-slate-400">No recent activity</div>
+                      <div className="text-xs text-tertiary">No recent activity</div>
                     </div>
                   ) : activities.map((act, i) => (
                     <div key={i} className="px-3 py-2.5">
@@ -119,8 +119,8 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium text-slate-800">{act.actor}</div>
-                          <div className="text-xs text-slate-500 truncate">{act.action}</div>
-                          <div className="text-xs text-slate-400 mt-0.5">{act.time}</div>
+                          <div className="text-xs text-secondary truncate">{act.action}</div>
+                          <div className="text-xs text-tertiary mt-0.5">{act.time}</div>
                         </div>
                       </div>
                     </div>
@@ -133,7 +133,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                   {alerts.length === 0 ? (
                     <div className="text-center py-8">
                       <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-                      <div className="text-xs text-slate-400">No alerts</div>
+                      <div className="text-xs text-tertiary">No alerts</div>
                     </div>
                   ) : alerts.map((alert, i) => {
                     const styles = alert.level === "critical"
@@ -150,7 +150,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
 
               {(activeTab === "related" || activeTab === "files") && (
                 <div className="text-center py-8">
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-tertiary">
                     {activeTab === "related" ? `${relatedCount} related records` : `${filesCount} attached files`}
                   </div>
                 </div>

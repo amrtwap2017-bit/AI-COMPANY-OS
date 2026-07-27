@@ -20,10 +20,10 @@ export default function OperationsCommand() {
     {label:"Workbench",icon:"⚡",path:"/operations/workbench",count:0,sub:"full view"},
   ];
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Operations Command</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Operations Command Center</h1>
-      <p className="text-slate-500 mt-1">Real-time operations control and dispatch</p></div>
+      <h1 className="text-3xl font-black text-primary">Operations Command Center</h1>
+      <p className="text-secondary mt-1">Real-time operations control and dispatch</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {label:"Open WOs",value:wos.filter(w=>w.status==="open").length,color:"blue"},
@@ -31,22 +31,22 @@ export default function OperationsCommand() {
           {label:"Active Techs",value:techs.filter(t=>t.is_active).length,color:"emerald"},
           {label:"Open SRs",value:srs.filter(s=>s.status==="open"||s.status==="new").length,color:"purple"},
         ].map((k,i)=>(
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5 text-center">
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+            <div className="text-xs text-secondary mt-1">{k.label}</div>
           </div>
         ))}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {commands.map((c,i)=>(
           <button key={i} onClick={()=>router.push(c.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
             <div className="flex items-center justify-between mb-2">
               <div className="text-2xl">{c.icon}</div>
               {c.count>0&&<span className="text-lg font-black text-amber-500">{c.count}</span>}
             </div>
-            <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600">{c.label}</div>
-            <div className="text-xs text-slate-400 mt-0.5">{c.sub}</div>
+            <div className="font-bold text-primary group-hover:text-amber-600">{c.label}</div>
+            <div className="text-xs text-tertiary mt-0.5">{c.sub}</div>
           </button>
         ))}
       </div>

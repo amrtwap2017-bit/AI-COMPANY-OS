@@ -19,7 +19,7 @@ export function AIInsightPanel({ title, subtitle, insights }: AIInsightPanelProp
         </div>
         <div>
           <h2 className="text-sm font-bold text-slate-900">{title}</h2>
-          <p className="text-xs text-slate-500">{subtitle}</p>
+          <p className="text-xs text-secondary">{subtitle}</p>
         </div>
       </div>
       <div className="space-y-2.5">

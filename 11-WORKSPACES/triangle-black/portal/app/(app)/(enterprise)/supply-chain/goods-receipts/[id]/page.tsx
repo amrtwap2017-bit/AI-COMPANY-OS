@@ -33,7 +33,7 @@ export default function GoodsReceiptDetailPage() {
   });
 
   if (isLoading) return <PageWrapper><LoadingState title="Loading goods receipt..." /></PageWrapper>;
-  if (!gr || gr.detail) return <PageWrapper><p className="p-8 text-slate-400">Receipt not found</p></PageWrapper>;
+  if (!gr || gr.detail) return <PageWrapper><p className="p-8 text-tertiary">Receipt not found</p></PageWrapper>;
 
   const po = poData;
   const items = Array.isArray(gr.items) ? gr.items : gr.line_items ?? [];
@@ -69,7 +69,7 @@ export default function GoodsReceiptDetailPage() {
                 ["Notes",         gr.notes ?? "—"],
               ].filter(([, v]) => v && v !== "—").map(([k, v]) => (
                 <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
+                  <span className="text-secondary">{k}</span>
                   <span className="text-slate-800 font-medium text-right max-w-40 truncate">{v}</span>
                 </div>
               ))}
@@ -96,7 +96,7 @@ export default function GoodsReceiptDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-xs text-slate-500 border-b border-slate-100">
+                    <tr className="text-xs text-secondary border-b border-slate-100">
                       <th className="text-left py-2 font-medium">Item</th>
                       <th className="text-right py-2 font-medium">Ordered</th>
                       <th className="text-right py-2 font-medium">Received</th>
@@ -110,9 +110,9 @@ export default function GoodsReceiptDetailPage() {
                           <div className="font-medium text-slate-800">
                             {item.item_name ?? item.name ?? item.description}
                           </div>
-                          <div className="text-xs text-slate-400">{item.unit_of_measure}</div>
+                          <div className="text-xs text-tertiary">{item.unit_of_measure}</div>
                         </td>
-                        <td className="py-2 text-right text-slate-600">{item.ordered_quantity ?? item.quantity}</td>
+                        <td className="py-2 text-right text-secondary">{item.ordered_quantity ?? item.quantity}</td>
                         <td className="py-2 text-right">
                           <span className={`font-semibold ${
                             (item.received_quantity ?? item.quantity) >= (item.ordered_quantity ?? item.quantity)
@@ -136,9 +136,9 @@ export default function GoodsReceiptDetailPage() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <ClipboardList className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm text-slate-400">No line items recorded</p>
-                <p className="text-xs text-slate-300 mt-1">
+                <ClipboardList className="w-10 h-10 text-tertiary mx-auto mb-3" />
+                <p className="text-sm text-tertiary">No line items recorded</p>
+                <p className="text-xs text-tertiary mt-1">
                   This receipt was recorded without individual item breakdown
                 </p>
               </div>

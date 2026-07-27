@@ -29,11 +29,11 @@ export default function CustomersReview() {
   const completedWOs = wos.filter((w: any) => w.status === "completed");
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Review</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Customer Review Board</h1>
-        <p className="text-slate-500 mt-1">Account health, billing status, and service delivery review</p>
+        <h1 className="text-3xl font-black text-primary">Customer Review Board</h1>
+        <p className="text-secondary mt-1">Account health, billing status, and service delivery review</p>
       </div>
 
       {/* Health indicators */}
@@ -46,7 +46,7 @@ export default function CustomersReview() {
         ].map((k, i) => (
           <div key={i} className={`rounded-2xl border p-5 ${k.status === "bad" ? "bg-red-50 border-red-200" : k.status === "warn" ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}`}>
             <div className="text-2xl mb-2">{k.icon}</div>
-            <div className="text-xs text-slate-500 mb-1">{k.label}</div>
+            <div className="text-xs text-secondary mb-1">{k.label}</div>
             <div className={`text-3xl font-black ${k.status === "bad" ? "text-red-500" : k.status === "warn" ? "text-amber-500" : "text-emerald-500"}`}>{k.value}</div>
           </div>
         ))}
@@ -54,13 +54,13 @@ export default function CustomersReview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Expiring contracts requiring action */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Contracts Requiring Renewal</h2>
+            <h2 className="font-bold text-primary">Contracts Requiring Renewal</h2>
             <button onClick={() => router.push("/customers/renewals")} className="text-xs text-amber-500 hover:underline">Renewals →</button>
           </div>
           {expiring.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-sm">✅ No urgent renewals</div>
+            <div className="text-center py-8 text-tertiary text-sm">✅ No urgent renewals</div>
           ) : expiring.map((c: any, i: number) => {
             const daysLeft = Math.ceil((new Date(c.end_date).getTime() - Date.now()) / 86400000);
             return (
@@ -77,9 +77,9 @@ export default function CustomersReview() {
         </div>
 
         {/* Billing status */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Billing Review</h2>
+            <h2 className="font-bold text-primary">Billing Review</h2>
             <button onClick={() => router.push("/invoices")} className="text-xs text-amber-500 hover:underline">All invoices →</button>
           </div>
           <div className="space-y-3">
@@ -89,14 +89,14 @@ export default function CustomersReview() {
               { label: "Overdue", count: overdueInvoices.length, value: overdueInvoices.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0), color: "red" },
               { label: "Cancelled", count: invoices.filter((i: any) => i.status === "cancelled").length, value: 0, color: "slate" },
             ].map((s, i) => (
-              <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+              <div key={i} className="flex items-center justify-between p-3 bg-base-alt dark:bg-surface-alt rounded-xl">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full bg-${s.color}-500`} />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{s.label}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-tertiary">{s.label}</span>
                 </div>
                 <div className="text-right">
                   <div className={`text-sm font-black text-${s.color}-500`}>{s.count}</div>
-                  {s.value > 0 && <div className="text-xs text-slate-400">{fmtEGP(s.value)}</div>}
+                  {s.value > 0 && <div className="text-xs text-tertiary">{fmtEGP(s.value)}</div>}
                 </div>
               </div>
             ))}
@@ -105,8 +105,8 @@ export default function CustomersReview() {
       </div>
 
       {/* Service delivery */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Service Delivery Summary</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6">
+        <h2 className="font-bold text-primary mb-4">Service Delivery Summary</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           {[
             { label: "WOs Completed", value: completedWOs.length, color: "emerald" },
@@ -114,9 +114,9 @@ export default function CustomersReview() {
             { label: "WOs In Progress", value: wos.filter((w: any) => w.status === "in_progress").length, color: "amber" },
             { label: "SRs Open", value: srs.filter((s: any) => s.status === "open" || s.status === "new").length, color: "red" },
           ].map((k, i) => (
-            <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+            <div key={i} className="bg-base-alt dark:bg-surface-alt rounded-xl p-4">
               <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-              <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+              <div className="text-xs text-secondary mt-1">{k.label}</div>
             </div>
           ))}
         </div>

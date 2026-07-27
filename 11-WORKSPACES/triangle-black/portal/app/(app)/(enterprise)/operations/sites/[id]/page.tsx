@@ -45,7 +45,7 @@ export default function SiteDetailPage() {
   });
 
   if (isLoading) return <PageWrapper><LoadingState title="Loading site..." /></PageWrapper>;
-  if (!site || site.detail) return <PageWrapper><p className="p-8 text-slate-400">Site not found</p></PageWrapper>;
+  if (!site || site.detail) return <PageWrapper><p className="p-8 text-tertiary">Site not found</p></PageWrapper>;
 
   const assets = Array.isArray(assetsData) ? assetsData : assetsData?.data ?? assetsData?.items ?? [];
   const techs  = Array.isArray(techsData)  ? techsData  : techsData?.data  ?? techsData?.items  ?? [];
@@ -73,7 +73,7 @@ export default function SiteDetailPage() {
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
             <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+            <div className="text-xs text-secondary mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -86,7 +86,7 @@ export default function SiteDetailPage() {
               <MapPin className="w-8 h-8 text-blue-400" />
               <div>
                 <div className="font-semibold text-slate-800">{site.name}</div>
-                <div className="text-sm text-slate-500">{site.address}</div>
+                <div className="text-sm text-secondary">{site.address}</div>
               </div>
             </div>
             <div className="space-y-2 text-sm">
@@ -98,7 +98,7 @@ export default function SiteDetailPage() {
                 ["Manager",  site.manager ?? "—"],
               ].filter(([, v]) => v && v !== "—").map(([k, v]) => (
                 <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
+                  <span className="text-secondary">{k}</span>
                   <span className="text-slate-800 font-medium">{v}</span>
                 </div>
               ))}
@@ -111,7 +111,7 @@ export default function SiteDetailPage() {
               {toArr(wos).slice(0, 5).map((wo: any) => (
                 <div key={wo.id} className="p-2 mb-2 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="text-xs font-medium text-slate-700 truncate">{wo.title}</div>
-                  <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
+                  <div className="text-xs text-tertiary">{wo.type} · {wo.priority}</div>
                 </div>
               ))}
             </SectionCard>
@@ -126,22 +126,22 @@ export default function SiteDetailPage() {
                 {toArr(assets).map((asset: any) => (
                   <div key={asset.id}
                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <Wrench className="w-4 h-4 text-tertiary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-slate-800 truncate">{asset.name}</div>
-                      <div className="text-xs text-slate-400">{asset.category}</div>
+                      <div className="text-xs text-tertiary">{asset.category}</div>
                     </div>
                     <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0
                       ${asset.criticality === "critical" ? "bg-red-100 text-red-600" :
                         asset.criticality === "high" ? "bg-amber-100 text-amber-600" :
-                        "bg-slate-100 text-slate-500"}`}>
+                        "bg-slate-100 text-secondary"}`}>
                       {asset.criticality}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-slate-400 text-center py-6">No assets at this site</p>
+              <p className="text-sm text-tertiary text-center py-6">No assets at this site</p>
             )}
           </SectionCard>
 
@@ -155,7 +155,7 @@ export default function SiteDetailPage() {
                   return (
                     <div key={tech.id}
                          className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <Users className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                      <Users className="w-4 h-4 text-tertiary flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-slate-800">{tech.name}</div>
                         <div className="w-full bg-slate-200 rounded h-1.5 mt-1">
@@ -165,13 +165,13 @@ export default function SiteDetailPage() {
                           />
                         </div>
                       </div>
-                      <span className="text-xs text-slate-500 flex-shrink-0">{util}%</span>
+                      <span className="text-xs text-secondary flex-shrink-0">{util}%</span>
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <p className="text-sm text-slate-400 text-center py-6">No technicians at this site</p>
+              <p className="text-sm text-tertiary text-center py-6">No technicians at this site</p>
             )}
           </SectionCard>
         </div>

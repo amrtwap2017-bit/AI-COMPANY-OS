@@ -30,7 +30,7 @@ export function CenterSubNav({ items }: CenterSubNavProps) {
                 "whitespace-nowrap px-3.5 py-3 text-sm font-medium border-b-2 transition-all " +
                 (active
                   ? "border-amber-600 text-amber-700"
-                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300")
+                  : "border-transparent text-secondary hover:text-slate-700 hover:border-slate-300")
               }
             >
               {item.label}

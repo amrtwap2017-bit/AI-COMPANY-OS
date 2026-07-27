@@ -42,12 +42,12 @@ export default function ExecutiveWorkbench() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Workbench</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Command Workbench</h1>
-          <p className="text-slate-500 mt-1">Platform control center — monitor, decide, act</p>
+          <h1 className="text-3xl font-black text-primary">Command Workbench</h1>
+          <p className="text-secondary mt-1">Platform control center — monitor, decide, act</p>
         </div>
         <button onClick={runAutomation} disabled={running}
           className={`px-6 py-3 rounded-xl font-bold text-white transition-all shadow-lg ${running ? "bg-slate-400" : "bg-amber-600 hover:bg-amber-700 hover:shadow-amber-500/25"}`}>
@@ -59,7 +59,7 @@ export default function ExecutiveWorkbench() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className={`col-span-1 rounded-2xl border p-5 text-center ${score >= 95 ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
           <div className={`text-5xl font-black ${score >= 95 ? "text-emerald-500" : "text-amber-500"}`}>{score}</div>
-          <div className="text-xs text-slate-500 mt-1">Twin Score</div>
+          <div className="text-xs text-secondary mt-1">Twin Score</div>
           <div className="text-xs font-bold mt-0.5">{twin?.health_label ?? "—"}</div>
         </div>
         {[
@@ -68,9 +68,9 @@ export default function ExecutiveWorkbench() {
           { label: "Active Contracts", value: d.commercial?.active_contracts ?? "—", color: "emerald" },
           { label: "Pending Invoices", value: d.finance?.pending ?? "—", color: "amber" },
         ].map((k, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5 text-center">
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+            <div className="text-xs text-secondary mt-1">{k.label}</div>
           </div>
         ))}
       </div>
@@ -89,7 +89,7 @@ export default function ExecutiveWorkbench() {
             ].map(([label, val], i) => (
               <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-2">
                 <div className="text-xl font-black text-emerald-600">{val}</div>
-                <div className="text-xs text-slate-500">{label}</div>
+                <div className="text-xs text-secondary">{label}</div>
               </div>
             ))}
           </div>
@@ -98,28 +98,28 @@ export default function ExecutiveWorkbench() {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Quick Navigation</h2>
+        <h2 className="font-bold text-primary mb-4">Quick Navigation</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickActions.map((a, i) => (
             <button key={i} onClick={() => router.push(a.path)}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+              className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
               <div className="text-3xl mb-3">{a.icon}</div>
-              <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">{a.label}</div>
-              <div className="text-xs text-slate-500 mt-1">{a.desc}</div>
+              <div className="font-bold text-primary group-hover:text-amber-600 transition-colors">{a.label}</div>
+              <div className="text-xs text-secondary mt-1">{a.desc}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Twin domains */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Digital Twin — Domain Status</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6">
+        <h2 className="font-bold text-primary mb-4">Digital Twin — Domain Status</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {(twin?.operational_domains ?? []).map((domain: any, i: number) => {
             const hasIssue = domain.overdue > 0 || domain.critical_open > 0 || domain.below_min > 0;
             return (
               <div key={i} className={`rounded-xl border p-4 ${hasIssue ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800" : "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"}`}>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">{domain.domain}</div>
+                <div className="font-semibold text-sm text-primary">{domain.domain}</div>
                 <div className="text-2xl font-black mt-1">{domain.total ?? "—"}</div>
                 <div className={`text-xs mt-1 ${hasIssue ? "text-amber-600" : "text-emerald-600"}`}>
                   {hasIssue ? "⚠️ Needs attention" : "✅ Normal"}

@@ -7,8 +7,8 @@ import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
-const S = {open:"bg-blue-100 text-blue-800",in_progress:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-slate-100 text-slate-500"};
+const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
+const S = {open:"bg-blue-100 text-blue-800",in_progress:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-slate-100 text-secondary"};
 
 const STATUSES  = ["all","open","in_progress","completed","cancelled"];
 const PRIORITIES = ["all","critical","high","medium","low"];
@@ -67,7 +67,7 @@ export default function DispatchPage() {
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -94,7 +94,7 @@ export default function DispatchPage() {
           </select>
           {(sf!=="all"||pf!=="all"||q)&&(
             <button onClick={()=>{setSf("all");setPf("all");setQ("");}}
-              className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>
+              className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>
           )}
         </div>
 
@@ -103,7 +103,7 @@ export default function DispatchPage() {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-slate-100">
                 {["Work Order","Type","Priority","Status","Technician","Date"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
               <tbody className="divide-y divide-slate-50">
@@ -111,16 +111,16 @@ export default function DispatchPage() {
                   <tr key={w.id} className={`hover:bg-slate-50 transition-colors ${w.priority==="critical"?"bg-red-50/30":""}`}>
                     <td className="py-3 px-3">
                       <p className="font-medium text-slate-800 truncate max-w-xs">{w.title}</p>
-                      {w.description&&<p className="text-xs text-slate-400 truncate">{w.description?.slice(0,50)}</p>}
+                      {w.description&&<p className="text-xs text-tertiary truncate">{w.description?.slice(0,50)}</p>}
                     </td>
                     <td className="py-3 px-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{w.type||"maintenance"}</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{w.type||"maintenance"}</span>
                     </td>
                     <td className="py-3 px-3">
                       <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[w.priority]||P.low)}>{w.priority||"—"}</span>
                     </td>
                     <td className="py-3 px-3">
-                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[w.status]||"bg-slate-100 text-slate-600")}>{w.status?.replace(/_/g," ")||"—"}</span>
+                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[w.status]||"bg-slate-100 text-secondary")}>{w.status?.replace(/_/g," ")||"—"}</span>
                     </td>
                     <td className="py-3 px-3 text-xs">
                       {w.technician_id
@@ -128,7 +128,7 @@ export default function DispatchPage() {
                         : <span className="text-amber-600 font-semibold">Unassigned</span>
                       }
                     </td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(w.created_at)}</td>
+                    <td className="py-3 px-3 text-xs text-tertiary">{fmtDate(w.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

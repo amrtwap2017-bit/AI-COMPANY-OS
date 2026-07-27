@@ -161,7 +161,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           ].join(" ")}
         >
           <div className="border-b border-slate-100 px-5 py-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               Command Palette
             </div>
             <input
@@ -169,16 +169,16 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search centers, legacy pages, and commands..."
-              className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+              className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-tertiary focus:border-slate-400"
             />
-            <div className="mt-2 text-xs text-slate-500">
+            <div className="mt-2 text-xs text-secondary">
               Tip: use Ctrl+K or Cmd+K to launch search
             </div>
           </div>
 
           <div className="max-h-[65vh] overflow-y-auto p-3">
             {results.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
                 No results found for this query.
               </div>
             ) : (
@@ -195,11 +195,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         <div className="text-sm font-semibold text-slate-950">{item.title}</div>
                         <div className="mt-1 text-sm text-slate-600">{item.subtitle}</div>
                       </div>
-                      <div className="text-xs uppercase tracking-wide text-slate-500">
+                      <div className="text-xs uppercase tracking-wide text-secondary">
                         {item.category}
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-slate-500">{item.href}</div>
+                    <div className="mt-2 text-xs text-secondary">{item.href}</div>
                   </Link>
                 ))}
               </div>

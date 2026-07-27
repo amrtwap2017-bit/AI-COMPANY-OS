@@ -61,14 +61,14 @@ export function NotificationBell() {
             <div className="font-medium text-sm text-slate-800">
               Notifications {badge > 0 && <span className="text-red-600">({badge})</span>}
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
+            <button onClick={() => setIsOpen(false)} className="text-tertiary hover:text-slate-600">
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <div className="max-h-80 overflow-y-auto">
             {list.length === 0 ? (
-              <div className="p-6 text-center text-sm text-slate-400">
+              <div className="p-6 text-center text-sm text-tertiary">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 All clear — no active alerts
               </div>
@@ -88,7 +88,7 @@ export function NotificationBell() {
             })}
           </div>
 
-          <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 text-xs text-slate-400 text-center">
+          <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 text-xs text-tertiary text-center">
             Refreshes every 30s · {list.length} active alerts
           </div>
         </div>

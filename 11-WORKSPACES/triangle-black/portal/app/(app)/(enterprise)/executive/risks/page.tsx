@@ -88,16 +88,16 @@ export default function ExecutiveRisks() {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Risk Management</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Risk Register</h1>
-          <p className="text-slate-500 mt-1">Live risk assessment across all operational domains</p>
+          <h1 className="text-3xl font-black text-primary">Risk Register</h1>
+          <p className="text-secondary mt-1">Live risk assessment across all operational domains</p>
         </div>
         <div className={`border rounded-2xl px-6 py-4 text-center ${totalRiskScore === 0 ? "bg-emerald-50 border-emerald-200" : totalRiskScore < 30 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"}`}>
           <div className={`text-4xl font-black ${totalRiskScore === 0 ? "text-emerald-500" : totalRiskScore < 30 ? "text-amber-500" : "text-red-500"}`}>{totalRiskScore}</div>
-          <div className="text-xs text-slate-500 mt-1">Risk Score</div>
+          <div className="text-xs text-secondary mt-1">Risk Score</div>
           <div className="text-xs font-bold mt-1">{totalRiskScore === 0 ? "No Risks" : totalRiskScore < 30 ? "Moderate" : "Elevated"}</div>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function ExecutiveRisks() {
           return (
             <div key={sev} className={`${cfg.bg} border ${cfg.border} rounded-2xl p-4 text-center`}>
               <div className={`text-3xl font-black ${cfg.text}`}>{count}</div>
-              <div className="text-xs font-bold text-slate-500 capitalize mt-1">{sev} Risk</div>
+              <div className="text-xs font-bold text-secondary capitalize mt-1">{sev} Risk</div>
             </div>
           );
         })}
@@ -121,7 +121,7 @@ export default function ExecutiveRisks() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 p-12 text-center">
           <div className="text-5xl mb-4">✅</div>
           <div className="text-xl font-bold text-emerald-600">No Active Risks</div>
-          <div className="text-slate-500 mt-2">All operational domains are within normal parameters</div>
+          <div className="text-secondary mt-2">All operational domains are within normal parameters</div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -133,16 +133,16 @@ export default function ExecutiveRisks() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${cfg.badge}`}>{risk.severity.toUpperCase()}</span>
-                      <span className="text-xs text-slate-500 font-mono">{risk.id}</span>
+                      <span className="text-xs text-secondary font-mono">{risk.id}</span>
                       <span className="text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{risk.category}</span>
                     </div>
-                    <div className="font-bold text-slate-900 dark:text-white text-lg">{risk.title}</div>
+                    <div className="font-bold text-primary text-lg">{risk.title}</div>
                     <div className={`text-sm mt-1 ${cfg.text}`}>{risk.detail}</div>
-                    <div className="text-sm text-slate-500 mt-2">→ {risk.action}</div>
+                    <div className="text-sm text-secondary mt-2">→ {risk.action}</div>
                   </div>
                   <div className="ml-6 text-right flex-shrink-0">
                     <div className={`text-4xl font-black ${cfg.text}`}>{risk.count}</div>
-                    <div className="text-xs text-slate-500 mt-1">items</div>
+                    <div className="text-xs text-secondary mt-1">items</div>
                     <button onClick={() => router.push(risk.path)}
                       className="mt-3 text-xs bg-white dark:bg-slate-800 border px-3 py-1.5 rounded-lg hover:border-amber-400 transition-colors">
                       Resolve →

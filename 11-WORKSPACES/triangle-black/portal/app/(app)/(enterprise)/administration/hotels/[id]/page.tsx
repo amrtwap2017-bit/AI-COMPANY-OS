@@ -52,7 +52,7 @@ export default function HotelDetailPage() {
 
   if (isLoading) return <PageWrapper><LoadingState title="Loading hotel..." /></PageWrapper>;
   if (!hotel || hotel.detail) return (
-    <PageWrapper><p className="p-8 text-slate-400">Hotel not found</p></PageWrapper>
+    <PageWrapper><p className="p-8 text-tertiary">Hotel not found</p></PageWrapper>
   );
 
   const assets    = Array.isArray(assetsData)    ? assetsData    : assetsData?.data    ?? assetsData?.items    ?? [];
@@ -83,7 +83,7 @@ export default function HotelDetailPage() {
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
             <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+            <div className="text-xs text-secondary mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -117,7 +117,7 @@ export default function HotelDetailPage() {
                 ["Rooms",       hotel.room_count],
               ].filter(([, v]) => v).map(([k, v]) => (
                 <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
+                  <span className="text-secondary">{k}</span>
                   <span className="text-slate-800 font-medium text-right max-w-36 truncate">{v}</span>
                 </div>
               ))}
@@ -131,13 +131,13 @@ export default function HotelDetailPage() {
                 <div className="text-2xl font-bold text-emerald-600">
                   {totalContractValue.toLocaleString()}
                 </div>
-                <div className="text-xs text-slate-500 mt-1">Annual Contract Value (EGP)</div>
+                <div className="text-xs text-secondary mt-1">Annual Contract Value (EGP)</div>
               </div>
               <div className="space-y-2">
                 {(activeContracts || []).slice(0, 3).map((c: any) => (
                   <div key={c.id} className="p-2 bg-slate-50 rounded border border-slate-100">
                     <div className="text-xs font-medium text-slate-700 truncate">{c.title}</div>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-tertiary">
                       {Number(c.total_value||0).toLocaleString()} EGP
                       · expires {String(c.end_date||"").slice(0,10)}
                     </div>
@@ -175,22 +175,22 @@ export default function HotelDetailPage() {
                 {toArr(assets).map((asset: any) => (
                   <div key={asset.id}
                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <Wrench className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <Wrench className="w-4 h-4 text-tertiary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-slate-800 truncate">{asset.name}</div>
-                      <div className="text-xs text-slate-400">{asset.category}</div>
+                      <div className="text-xs text-tertiary">{asset.category}</div>
                     </div>
                     <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0
                       ${asset.criticality === "critical" ? "bg-red-100 text-red-600" :
                         asset.criticality === "high" ? "bg-amber-100 text-amber-600" :
-                        "bg-slate-100 text-slate-500"}`}>
+                        "bg-slate-100 text-secondary"}`}>
                       {asset.criticality ?? "medium"}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-slate-400 text-center py-6">No assets registered</p>
+              <p className="text-sm text-tertiary text-center py-6">No assets registered</p>
             )}
           </SectionCard>
 
@@ -203,12 +203,12 @@ export default function HotelDetailPage() {
                          ${wo.priority === "critical" ? "bg-red-50 border-red-200" : "bg-slate-50 border-slate-100"}`}>
                     <div>
                       <div className="text-sm font-medium text-slate-800">{wo.title}</div>
-                      <div className="text-xs text-slate-400">{wo.type}</div>
+                      <div className="text-xs text-tertiary">{wo.type}</div>
                     </div>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium flex-shrink-0
                       ${wo.priority === "critical" ? "bg-red-100 text-red-700" :
                         wo.priority === "high" ? "bg-amber-100 text-amber-700" :
-                        "bg-slate-100 text-slate-600"}`}>
+                        "bg-slate-100 text-secondary"}`}>
                       {wo.priority}
                     </span>
                   </div>

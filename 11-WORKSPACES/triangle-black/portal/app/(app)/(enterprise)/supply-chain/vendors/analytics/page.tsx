@@ -80,11 +80,11 @@ export default function VendorAnalyticsPage() {
                     <p className="text-sm font-bold text-slate-800">{v.name}</p>
                     {i === 0 && <StatusBadge status="recommended" label="Top Vendor" />}
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{v.category} · Lead: {v.lead_time_days || "?"}d · {v.poCount} POs</p>
+                  <p className="text-xs text-secondary mt-0.5">{v.category} · Lead: {v.lead_time_days || "?"}d · {v.poCount} POs</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-slate-700">{v.score}/100</p>
-                  <p className="text-xs text-slate-400">{v.totalSpend.toLocaleString()} EGP</p>
+                  <p className="text-xs text-tertiary">{v.totalSpend.toLocaleString()} EGP</p>
                 </div>
                 <div className="w-20 bg-slate-200 rounded-full h-2 overflow-hidden">
                   <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${v.score}%` }} />
@@ -103,7 +103,7 @@ export default function VendorAnalyticsPage() {
               <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
                 <div className="h-3 bg-blue-500 rounded-full" style={{ width: `${(maxSpend ? (v.totalSpend / maxSpend) * 100 : 0)}%` }} />
               </div>
-              <div className="w-36 text-xs text-slate-500 text-right">{v.totalSpend.toLocaleString()} EGP</div>
+              <div className="w-36 text-xs text-secondary text-right">{v.totalSpend.toLocaleString()} EGP</div>
             </div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export default function VendorAnalyticsPage() {
           {[{label:"Total RFQs", val:rfqs.length, bg:"bg-slate-50"},{label:"Responded", val:rfqResponded, bg:"bg-green-50"},{label:"Response Rate", val:`${rfqs.length>0?Math.round(rfqResponded/rfqs.length*100):0}%`, bg:"bg-blue-50"}].map((item) => (
             <div key={item.label} className={`text-center px-4 py-3 ${item.bg} rounded-lg`}>
               <p className="text-2xl font-bold text-slate-800">{item.val}</p>
-              <p className="text-xs text-slate-500">{item.label}</p>
+              <p className="text-xs text-secondary">{item.label}</p>
             </div>
           ))}
         </div>

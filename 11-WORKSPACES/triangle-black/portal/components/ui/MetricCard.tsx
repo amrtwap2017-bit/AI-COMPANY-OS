@@ -55,7 +55,7 @@ export function MetricCard({
       <div className={"h-0.5 w-full " + c.bar + " opacity-60"} />
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest leading-none">
+          <span className="text-[11px] font-semibold text-tertiary uppercase tracking-widest leading-none">
             {label}
           </span>
           {icon && (
@@ -80,7 +80,7 @@ export function MetricCard({
             </span>
           )}
           {trend === "stable" && (
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md text-slate-500 bg-slate-50">
+            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md text-secondary bg-slate-50">
               <Minus className="w-3 h-3" /> Stable
             </span>
           )}
@@ -89,7 +89,7 @@ export function MetricCard({
               {highlight}
             </span>
           )}
-          {sub && <span className="text-[11px] text-slate-400 truncate">{sub}</span>}
+          {sub && <span className="text-[11px] text-tertiary truncate">{sub}</span>}
         </div>
       </div>
     </div>

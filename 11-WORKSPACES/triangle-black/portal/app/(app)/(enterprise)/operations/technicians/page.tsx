@@ -40,15 +40,15 @@ export default function TechniciansPage() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Technicians</h1>
-          <p className="text-slate-500 text-sm mt-1.5">{techs.length} total · {active.length} active · {available.length} available · {busy.length} on duty</p>
+          <h1 className="text-3xl font-black text-primary">Technicians</h1>
+          <p className="text-secondary text-sm mt-1.5">{techs.length} total · {active.length} active · {available.length} available · {busy.length} on duty</p>
         </div>
         <button onClick={()=>router.push("/operations/dispatch")}
-          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all">
+          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm transition-all">
           👷 Dispatch Center
         </button>
       </div>
@@ -63,7 +63,7 @@ export default function TechniciansPage() {
           <button key={i} onClick={()=>setFilter(filter===k.filter?"all":k.filter)}
             className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${filter===k.filter?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">{k.label}</div>
+            <div className="text-sm font-medium text-secondary mt-1">{k.label}</div>
           </button>
         ))}
       </div>
@@ -71,9 +71,9 @@ export default function TechniciansPage() {
       <div className="flex gap-3">
         <input value={search} onChange={e=>setSearch(e.target.value)}
           placeholder="Search technicians..."
-          className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
-        {search && <button onClick={()=>setSearch("")} className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Clear ×</button>}
-        <div className="text-xs text-slate-400 self-center">{filtered.length} technicians</div>
+          className="flex-1 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus"/>
+        {search && <button onClick={()=>setSearch("")} className="px-3 py-2 text-xs text-secondary bg-surface border border-border rounded-xl">Clear ×</button>}
+        <div className="text-xs text-tertiary self-center">{filtered.length} technicians</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -84,30 +84,30 @@ export default function TechniciansPage() {
           const loadColor = load>=90?"red":load>=70?"amber":"emerald";
           return (
             <button key={i} onClick={()=>router.push(`/operations/technicians/${t.id}`)}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+              className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-amber-700 flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-lg font-black">{(t.name||"?")[0]}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <div className="font-bold text-slate-900 dark:text-white truncate group-hover:text-amber-600">{t.name}</div>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>{isActive?"Active":"Inactive"}</span>
+                    <div className="font-bold text-primary truncate group-hover:text-amber-600">{t.name}</div>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-secondary"}`}>{isActive?"Active":"Inactive"}</span>
                   </div>
-                  <div className="text-xs text-slate-400 truncate">{t.email}</div>
+                  <div className="text-xs text-tertiary truncate">{t.email}</div>
                   {t.specializations && t.specializations.length > 0 && (
                     <div className="flex gap-1 mt-1.5 flex-wrap">
                       {t.specializations.slice(0,2).map((s,j)=>(
                         <span key={j} className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">{s}</span>
                       ))}
-                      {t.specializations.length>2 && <span className="text-[10px] text-slate-400">+{t.specializations.length-2}</span>}
+                      {t.specializations.length>2 && <span className="text-[10px] text-tertiary">+{t.specializations.length-2}</span>}
                     </div>
                   )}
                 </div>
               </div>
               <div className="mt-4">
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-slate-500">Capacity</span>
+                  <span className="text-secondary">Capacity</span>
                   <span className={`font-bold text-${loadColor}-500`}>{t.current_work_orders||0} / {t.max_work_orders||5} WOs</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
@@ -120,9 +120,9 @@ export default function TechniciansPage() {
                   { label:"Done",  value:techWOs.filter(w=>w.status==="completed").length, color:"emerald" },
                   { label:"Open",  value:techWOs.filter(w=>w.status==="open"||w.status==="in_progress").length, color:"amber" },
                 ].map((s,j)=>(
-                  <div key={j} className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-1.5">
+                  <div key={j} className="bg-base-alt dark:bg-surface-alt rounded-lg p-1.5">
                     <div className={`text-base font-black text-${s.color}-500`}>{s.value}</div>
-                    <div className="text-[10px] text-slate-400">{s.label}</div>
+                    <div className="text-[10px] text-tertiary">{s.label}</div>
                   </div>
                 ))}
               </div>

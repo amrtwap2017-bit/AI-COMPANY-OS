@@ -76,7 +76,7 @@ export default function InventoryPage() {
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -89,7 +89,7 @@ export default function InventoryPage() {
             <p className="text-xs text-amber-600">{zeroStock} items completely out of stock — review reorder requirements</p>
           </div>
           <button onClick={() => setLowOnly(!lowOnly)}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${lowOnly ? "bg-amber-600 text-white border-amber-600" : "bg-white text-amber-700 border-amber-300 hover:bg-amber-50"}`}>
+            className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${lowOnly ? "bg-brand text-inverse border-amber-600" : "bg-white text-amber-700 border-amber-300 hover:bg-amber-50"}`}>
             {lowOnly ? "Show all" : "Show low stock only"}
           </button>
         </div>
@@ -100,12 +100,12 @@ export default function InventoryPage() {
           {Object.entries(catCounts).sort((a,b) => b[1]-a[1]).map(([cat, count]) => (
             <button key={cat}
               onClick={() => setCatFilter(catFilter === cat ? "all" : cat)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${catFilter === cat ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-200 hover:border-blue-300"}`}>
-              {cat} <span className={catFilter === cat ? "text-blue-200" : "text-slate-400"}>({count})</span>
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${catFilter === cat ? "bg-blue-600 text-white border-blue-600" : "bg-white text-secondary border-slate-200 hover:border-blue-300"}`}>
+              {cat} <span className={catFilter === cat ? "text-blue-200" : "text-tertiary"}>({count})</span>
             </button>
           ))}
           {catFilter !== "all" && (
-            <button onClick={() => setCatFilter("all")} className="text-xs text-slate-400 hover:text-red-500 underline px-1">Clear</button>
+            <button onClick={() => setCatFilter("all")} className="text-xs text-tertiary hover:text-red-500 underline px-1">Clear</button>
           )}
         </div>
       )}
@@ -117,7 +117,7 @@ export default function InventoryPage() {
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" />
           {(catFilter !== "all" || lowOnly || q) && (
             <button onClick={() => { setCatFilter("all"); setLowOnly(false); setQ(""); }}
-              className="text-xs text-slate-400 hover:text-red-500 underline">Clear all</button>
+              className="text-xs text-tertiary hover:text-red-500 underline">Clear all</button>
           )}
         </div>
 
@@ -129,7 +129,7 @@ export default function InventoryPage() {
               <thead>
                 <tr className="border-b border-slate-100">
                   {["Item Name","SKU","Category","Unit","On Hand","Reserved","Min Stock","Status"].map(h => (
-                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -138,20 +138,20 @@ export default function InventoryPage() {
                   <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${item.is_zero ? "bg-red-50/40" : item.is_low ? "bg-amber-50/30" : ""}`}>
                     <td className="py-3 px-3">
                       <p className="font-medium text-slate-800">{item.name}</p>
-                      <p className="text-xs text-slate-400">{item.description?.slice(0,50) || ""}</p>
+                      <p className="text-xs text-tertiary">{item.description?.slice(0,50) || ""}</p>
                     </td>
-                    <td className="py-3 px-3 font-mono text-xs text-slate-500">{item.sku || "—"}</td>
+                    <td className="py-3 px-3 font-mono text-xs text-secondary">{item.sku || "—"}</td>
                     <td className="py-3 px-3">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{item.category || "—"}</span>
                     </td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{item.unit || "—"}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{item.unit || "—"}</td>
                     <td className="py-3 px-3">
                       <span className={`text-sm font-bold ${item.is_zero ? "text-red-600" : item.is_low ? "text-amber-600" : "text-slate-800"}`}>
                         {fmtNum(item.qty_on_hand)}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{fmtNum(item.qty_reserved)}</td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{item.min_stock ? fmtNum(item.min_stock) : "—"}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{fmtNum(item.qty_reserved)}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{item.min_stock ? fmtNum(item.min_stock) : "—"}</td>
                     <td className="py-3 px-3">
                       {item.is_zero
                         ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">Out of Stock</span>

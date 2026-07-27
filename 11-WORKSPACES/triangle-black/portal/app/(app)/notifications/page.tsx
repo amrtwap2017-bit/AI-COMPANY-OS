@@ -70,7 +70,7 @@ export default function NotificationsPage() {
                 Mark all read
               </button>
             )}
-            <button onClick={()=>refetch()} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <button onClick={()=>refetch()} className="p-2 text-secondary hover:bg-slate-100 rounded-lg">
               <RefreshCw className="h-4 w-4"/>
             </button>
           </div>
@@ -79,7 +79,7 @@ export default function NotificationsPage() {
       <div className="flex gap-2">
         {(["all","unread"] as const).map(f=>(
           <button key={f} onClick={()=>setFilter(f)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filter===f?"bg-amber-600 text-white":"text-slate-500 hover:bg-slate-100"}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filter===f?"bg-brand text-inverse":"text-secondary hover:bg-slate-100"}`}>
             {f==="all"?"All ("+notifs.length+")":"Unread ("+unreadCount+")"}
           </button>
         ))}
@@ -103,12 +103,12 @@ export default function NotificationsPage() {
                  className={"border-l-4 rounded-2xl border border-slate-200 p-4 flex items-start gap-3 transition-all "+(TYPE_COLORS[type]||TYPE_COLORS.system)+(isRead?" opacity-60":"")}>
                  <span className="text-lg flex-shrink-0">{TYPE_ICONS[type]||"🔔"}</span>
                  <div className="flex-1 min-w-0">
-                   <p className={"text-sm font-semibold "+(isRead?"text-slate-600":"text-slate-900")}>{n.title||n.subject||"Notification"}</p>
-                   {n.body&&<p className="text-xs text-slate-500 mt-0.5">{n.body}</p>}
-                   <p className="text-[10px] text-slate-400 mt-1">{n.created_at?new Date(n.created_at).toLocaleString():"—"}</p>
+                   <p className={"text-sm font-semibold "+(isRead?"text-secondary":"text-slate-900")}>{n.title||n.subject||"Notification"}</p>
+                   {n.body&&<p className="text-xs text-secondary mt-0.5">{n.body}</p>}
+                   <p className="text-[10px] text-tertiary mt-1">{n.created_at?new Date(n.created_at).toLocaleString():"—"}</p>
                  </div>
                  {!isRead&&(
-                   <button onClick={()=>markRead(n.id)} className="text-slate-300 hover:text-amber-500 flex-shrink-0" title="Mark read">
+                   <button onClick={()=>markRead(n.id)} className="text-tertiary hover:text-amber-500 flex-shrink-0" title="Mark read">
                      <CheckCircle2 className="w-4 h-4"/>
                    </button>
                  )}

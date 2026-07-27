@@ -26,7 +26,7 @@ export default function Page() {
     <PageWrapper>
       <Breadcrumb/>
       <PageHeader title="Vendor Directory" subtitle={`${(items || []).length} records`} badge="VDR"
-        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
+        actions={<button onClick={()=>refetch()} disabled={isFetching} className="p-2 text-secondary hover:bg-slate-100 rounded-lg"><RefreshCw className={`h-4 w-4 ${isFetching?"animate-spin":""}`}/></button>}/>
       {isError&&<AlertBanner type="error" title={error instanceof Error?error.message:"Failed to load"}/>}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         {isLoading?<LoadingState type="table" rows={8}/>:

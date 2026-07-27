@@ -38,11 +38,11 @@ export default function AdminTechniciansPage() {
           {label:"Total",      value:techs.length, color:"text-slate-800"},
           {label:"Active",     value:active,       color:"text-emerald-700"},
           {label:"Available",  value:avail,        color:"text-blue-700"},
-          {label:"At Capacity",value:atCap,        color:atCap>0?"text-red-700":"text-slate-500"},
+          {label:"At Capacity",value:atCap,        color:atCap>0?"text-red-700":"text-secondary"},
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -65,15 +65,15 @@ export default function AdminTechniciansPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="font-semibold text-slate-800 truncate">{t.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{t.specialization||t.trade||"General"}</p>
+                      <p className="text-xs text-secondary mt-0.5">{t.specialization||t.trade||"General"}</p>
                     </div>
-                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-slate-500"}`}>
+                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isActive?"bg-emerald-100 text-emerald-700":"bg-slate-100 text-secondary"}`}>
                       {isActive?"Active":"Inactive"}
                     </span>
                   </div>
-                  {t.phone&&<p className="text-xs text-slate-400 mb-2">{t.phone}</p>}
+                  {t.phone&&<p className="text-xs text-tertiary mb-2">{t.phone}</p>}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-slate-500">
+                    <div className="flex justify-between text-xs text-secondary">
                       <span>Workload</span>
                       <span className="font-semibold">{wos}/{max} WOs</span>
                     </div>

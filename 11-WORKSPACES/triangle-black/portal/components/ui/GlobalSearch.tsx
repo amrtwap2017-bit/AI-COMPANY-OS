@@ -75,7 +75,7 @@ export function GlobalSearch() {
 
   if (!open) return (
     <button onClick={()=>setOpen(true)}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+      className="flex items-center gap-2 px-3 py-1.5 text-sm text-tertiary bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
       <Search className="w-4 h-4"/>
       <span className="hidden sm:inline">Search...</span>
       <kbd className="hidden sm:inline text-[10px] bg-slate-200 px-1.5 py-0.5 rounded">⌘K</kbd>
@@ -88,11 +88,11 @@ export function GlobalSearch() {
       <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
         onClick={e=>e.stopPropagation()}>
         <div className="flex items-center gap-3 p-4 border-b border-slate-100">
-          {loading ? <Loader2 className="w-5 h-5 text-slate-400 animate-spin flex-shrink-0"/> : <Search className="w-5 h-5 text-slate-400 flex-shrink-0"/>}
+          {loading ? <Loader2 className="w-5 h-5 text-tertiary animate-spin flex-shrink-0"/> : <Search className="w-5 h-5 text-tertiary flex-shrink-0"/>}
           <input autoFocus value={query} onChange={e=>setQuery(e.target.value)}
             placeholder="Search leads, work orders, assets..."
             className="flex-1 text-sm outline-none text-slate-900 placeholder-slate-400"/>
-          <button onClick={()=>setOpen(false)} className="text-slate-400 hover:text-slate-600">
+          <button onClick={()=>setOpen(false)} className="text-tertiary hover:text-slate-600">
             <X className="w-4 h-4"/>
           </button>
         </div>
@@ -104,7 +104,7 @@ export function GlobalSearch() {
                 <span className="text-lg">{TYPE_ICONS[r.type]||"📋"}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-900 truncate">{r.title}</p>
-                  <p className="text-xs text-slate-500">{r.type} · {r.subtitle}</p>
+                  <p className="text-xs text-secondary">{r.type} · {r.subtitle}</p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors"/>
               </button>
@@ -112,12 +112,12 @@ export function GlobalSearch() {
           </div>
         )}
         {query.length >= 2 && results.length === 0 && !loading && (
-          <div className="py-8 text-center text-sm text-slate-400">
+          <div className="py-8 text-center text-sm text-tertiary">
             No results for "{query}"
           </div>
         )}
         {!query && (
-          <div className="p-4 text-xs text-slate-400 text-center">
+          <div className="p-4 text-xs text-tertiary text-center">
             Type to search leads, work orders, assets...
           </div>
         )}

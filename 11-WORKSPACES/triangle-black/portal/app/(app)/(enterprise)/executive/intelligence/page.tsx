@@ -28,17 +28,17 @@ export default function ExecutiveIntelligence() {
   const scoreBg = score >= 95 ? "bg-emerald-500/10 border-emerald-500/20" : score >= 80 ? "bg-amber-500/10 border-amber-500/20" : "bg-red-500/10 border-red-500/20";
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       {/* Hero */}
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Intelligence</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Platform Command Center</h1>
-          <p className="text-slate-500 mt-1">Real-time operational intelligence across all domains</p>
+          <h1 className="text-3xl font-black text-primary">Platform Command Center</h1>
+          <p className="text-secondary mt-1">Real-time operational intelligence across all domains</p>
         </div>
         <div className={`border rounded-2xl px-6 py-4 text-center ${scoreBg}`}>
           <div className={`text-5xl font-black ${scoreColor}`}>{score}</div>
-          <div className="text-xs text-slate-500 mt-1">Digital Twin Score</div>
+          <div className="text-xs text-secondary mt-1">Digital Twin Score</div>
           <div className={`text-xs font-bold mt-1 ${scoreColor}`}>{twin?.health_label || "—"}</div>
         </div>
       </div>
@@ -52,17 +52,17 @@ export default function ExecutiveIntelligence() {
           { label: "Revenue Collected", value: `${fmt(d.finance?.paid ?? 0)}`, sub: `${d.finance?.pending ?? 0} pending`, color: "emerald", path: "/invoices" },
         ].map((k, i) => (
           <button key={i} onClick={() => router.push(k.path)}
-            className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-${k.color}-400 hover:shadow-lg transition-all group`}>
-            <div className="text-xs text-slate-500 mb-2 font-medium">{k.label}</div>
+            className={`bg-surface border border-border rounded-2xl p-5 text-left hover:border-${k.color}-400 hover:shadow-lg transition-all group`}>
+            <div className="text-xs text-secondary mb-2 font-medium">{k.label}</div>
             <div className={`text-3xl font-black text-${k.color}-500 group-hover:scale-105 transition-transform`}>{k.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
           </button>
         ))}
       </div>
 
       {/* Domain Health */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Domain Health Overview</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6">
+        <h2 className="font-bold text-primary mb-4">Domain Health Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { domain: "Operations", value: `${d.work_orders?.completed ?? 0}/${d.work_orders?.total ?? 0}`, label: "WOs completed", health: (d.work_orders?.completed ?? 0) / Math.max(d.work_orders?.total ?? 1, 1) * 100 },
@@ -70,10 +70,10 @@ export default function ExecutiveIntelligence() {
             { domain: "Finance", value: `${d.finance?.paid ?? 0}/${d.finance?.total_invoices ?? 0}`, label: "invoices paid", health: (d.finance?.paid ?? 0) / Math.max(d.finance?.total_invoices ?? 1, 1) * 100 },
             { domain: "Procurement", value: `${d.procurement?.purchase_requests ?? 0} PRs`, label: `${d.procurement?.pending_pos ?? 0} pending POs`, health: 80 },
           ].map((item, i) => (
-            <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{item.domain}</div>
-              <div className="text-xl font-black text-slate-900 dark:text-white">{item.value}</div>
-              <div className="text-xs text-slate-500 mb-3">{item.label}</div>
+            <div key={i} className="bg-base-alt dark:bg-surface-alt rounded-xl p-4">
+              <div className="text-xs font-bold text-secondary uppercase tracking-wider mb-2">{item.domain}</div>
+              <div className="text-xl font-black text-primary">{item.value}</div>
+              <div className="text-xs text-secondary mb-3">{item.label}</div>
               <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
                 <div className={`h-1.5 rounded-full ${item.health >= 80 ? "bg-emerald-500" : item.health >= 60 ? "bg-amber-500" : "bg-red-500"}`}
                   style={{ width: `${Math.min(100, Math.max(0, item.health))}%` }} />
@@ -85,13 +85,13 @@ export default function ExecutiveIntelligence() {
 
       {/* Critical Issues + Recent Alerts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Critical Work Orders</h2>
+            <h2 className="font-bold text-primary">Critical Work Orders</h2>
             <button onClick={() => router.push("/operations/work-orders")} className="text-xs text-amber-500 hover:underline">View all →</button>
           </div>
           {critical.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-8 text-tertiary">
               <div className="text-3xl mb-2">✅</div>
               <div className="text-sm">No critical issues</div>
             </div>
@@ -111,24 +111,24 @@ export default function ExecutiveIntelligence() {
           )}
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Unread Alerts</h2>
+            <h2 className="font-bold text-primary">Unread Alerts</h2>
             <button onClick={() => router.push("/inbox")} className="text-xs text-amber-500 hover:underline">View all →</button>
           </div>
           {recentNotifs.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-8 text-tertiary">
               <div className="text-3xl mb-2">🔔</div>
               <div className="text-sm">All caught up</div>
             </div>
           ) : (
             <div className="space-y-2">
               {recentNotifs.map((n: any, i: number) => (
-                <div key={n.id || i} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div key={n.id || i} className="flex items-start gap-3 p-3 bg-base-alt dark:bg-surface-alt rounded-xl">
                   <div className="w-2 h-2 bg-amber-500 rounded-full mt-1.5 flex-shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-slate-900 dark:text-white truncate">{n.title}</div>
-                    <div className="text-xs text-slate-500 truncate">{n.message}</div>
+                    <div className="text-sm font-medium text-primary truncate">{n.title}</div>
+                    <div className="text-xs text-secondary truncate">{n.message}</div>
                   </div>
                 </div>
               ))}

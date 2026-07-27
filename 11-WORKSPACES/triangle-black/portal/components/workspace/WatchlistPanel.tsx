@@ -5,9 +5,9 @@ export function WatchlistPanel({ title, subtitle, items=[] }:any) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
       <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       {items.length===0 ? (
-        <p className="text-sm text-slate-400 italic py-4 text-center">No watch items</p>
+        <p className="text-sm text-tertiary italic py-4 text-center">No watch items</p>
       ) : (
         <div className="space-y-2">
           {items.slice(0,6).map((item:any,i:number)=>(

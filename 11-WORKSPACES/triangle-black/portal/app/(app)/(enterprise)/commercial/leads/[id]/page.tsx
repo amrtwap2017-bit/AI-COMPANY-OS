@@ -10,7 +10,7 @@ import Link from "next/link";
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtDateTime = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); } catch { return "—"; } };
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
+const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
 const ST = {new:"bg-blue-100 text-blue-800",qualified:"bg-indigo-100 text-indigo-800",assigned:"bg-amber-100 text-amber-800",negotiation:"bg-orange-100 text-orange-800",converted:"bg-emerald-100 text-emerald-800",won:"bg-emerald-100 text-emerald-800",lost:"bg-red-100 text-red-700"};
 const STATUSES   = ["new","qualified","assigned","negotiation","converted","won","lost"];
 const PRIORITIES = ["critical","high","medium","low"];
@@ -60,7 +60,7 @@ export default function LeadDetailPage() {
   if (!lead || lead.detail) return (
     <PageWrapper>
       <div className="text-center py-20">
-        <p className="text-slate-500 mb-4">Lead not found</p>
+        <p className="text-secondary mb-4">Lead not found</p>
         <Link href="/commercial/leads" className="text-blue-600 underline text-sm">Back to Leads</Link>
       </div>
     </PageWrapper>
@@ -89,10 +89,10 @@ export default function LeadDetailPage() {
       {/* Pipeline status bar */}
       {!editing && (
         <div className="flex items-center gap-2 mb-5 p-4 bg-white border border-slate-200 rounded-xl overflow-x-auto">
-          <span className="text-xs font-semibold text-slate-500 mr-1 shrink-0">PIPELINE:</span>
+          <span className="text-xs font-semibold text-secondary mr-1 shrink-0">PIPELINE:</span>
           {STATUSES.map(s=>(
             <button key={s} onClick={()=>updateStatus(s)} disabled={saving||s===lead.status}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors shrink-0 ${s===lead.status?"bg-blue-600 text-white border-blue-600":"border-slate-200 bg-white text-slate-600 hover:border-blue-300 disabled:opacity-100"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors shrink-0 ${s===lead.status?"bg-blue-600 text-white border-blue-600":"border-slate-200 bg-white text-secondary hover:border-blue-300 disabled:opacity-100"}`}>
               {s}
             </button>
           ))}
@@ -106,46 +106,46 @@ export default function LeadDetailPage() {
               <form onSubmit={save} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name *</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Full Name *</label>
                     <input required value={form?.name||""} onChange={e=>setForm({...form,name:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Company</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Company</label>
                     <input value={form?.company||""} onChange={e=>setForm({...form,company:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Email *</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Email *</label>
                     <input type="email" required value={form?.email||""} onChange={e=>setForm({...form,email:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Phone</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Phone</label>
                     <input value={form?.phone||""} onChange={e=>setForm({...form,phone:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Source</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Source</label>
                     <select value={form?.source||"web"} onChange={e=>setForm({...form,source:e.target.value})} className={inp}>
                       {SOURCES.map(s=><option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Priority</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Priority</label>
                     <select value={form?.priority||"medium"} onChange={e=>setForm({...form,priority:e.target.value})} className={inp}>
                       {PRIORITIES.map(p=><option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Status</label>
                     <select value={form?.status||"new"} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
                       {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Notes</label>
                   <textarea value={form?.notes||""} onChange={e=>setForm({...form,notes:e.target.value})}
                     rows={4} placeholder="Requirements, budget, property details…" className={inp+" resize-none"} />
                 </div>
@@ -154,19 +154,19 @@ export default function LeadDetailPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Contact</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Contact</p>
                     <p className="text-slate-800 font-medium">{lead.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{lead.email}</p>
-                    {lead.phone&&<p className="text-xs text-slate-400">{lead.phone}</p>}
+                    <p className="text-xs text-secondary mt-0.5">{lead.email}</p>
+                    {lead.phone&&<p className="text-xs text-tertiary">{lead.phone}</p>}
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Company</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Company</p>
                     <p className="text-slate-700">{lead.company||"—"}</p>
                   </div>
                 </div>
                 {lead.notes && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Notes</p>
                     <p className="text-slate-700 text-sm whitespace-pre-wrap">{lead.notes}</p>
                   </div>
                 )}
@@ -178,10 +178,10 @@ export default function LeadDetailPage() {
         <div className="space-y-4">
           <SectionCard title="Lead Score">
             <div className="text-center py-4">
-              <div className={`text-5xl font-black mb-1 ${(lead.score||0)>=80?"text-emerald-600":(lead.score||0)>=50?"text-amber-600":"text-slate-400"}`}>
+              <div className={`text-5xl font-black mb-1 ${(lead.score||0)>=80?"text-emerald-600":(lead.score||0)>=50?"text-amber-600":"text-tertiary"}`}>
                 {lead.score||0}
               </div>
-              <p className="text-xs text-slate-500">Lead Score</p>
+              <p className="text-xs text-secondary">Lead Score</p>
               <div className="mt-3 w-full bg-slate-100 rounded-full h-2">
                 <div className={`h-2 rounded-full ${(lead.score||0)>=80?"bg-emerald-500":(lead.score||0)>=50?"bg-amber-500":"bg-slate-400"}`}
                   style={{width:`${Math.min(100,lead.score||0)}%`}} />
@@ -192,14 +192,14 @@ export default function LeadDetailPage() {
           <SectionCard title="Properties">
             <dl className="space-y-3">
               {[
-                {label:"Status",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(ST[lead.status]||"bg-slate-100 text-slate-600")}>{lead.status||"—"}</span>},
+                {label:"Status",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(ST[lead.status]||"bg-slate-100 text-secondary")}>{lead.status||"—"}</span>},
                 {label:"Priority", value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[lead.priority]||P.low)}>{lead.priority||"—"}</span>},
-                {label:"Source",   value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{lead.source||"—"}</span>},
+                {label:"Source",   value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{lead.source||"—"}</span>},
                 {label:"Created",  value:fmtDate(lead.created_at)},
                 {label:"Updated",  value:fmtDate(lead.updated_at)},
               ].map(({label,value})=>(
                 <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dt className="text-xs text-secondary">{label}</dt>
                   <dd className="text-xs">{value}</dd>
                 </div>
               ))}
@@ -207,7 +207,7 @@ export default function LeadDetailPage() {
           </SectionCard>
 
           <Link href="/commercial/leads"
-            className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center transition-colors">
+            className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center transition-colors">
             Back to Leads
           </Link>
         </div>

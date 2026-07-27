@@ -21,7 +21,7 @@ export function RecentEntitiesPanel() {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Workspace Memory
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">Recent Entities</h2>
@@ -31,7 +31,7 @@ export function RecentEntitiesPanel() {
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-500">
+        <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
           No recent entities yet. Open entity context drawers to build your workspace memory.
         </div>
       ) : (
@@ -44,10 +44,10 @@ export function RecentEntitiesPanel() {
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-sm font-semibold text-slate-900">{item.entityName || item.entityType}</div>
-                <div className="text-xs uppercase tracking-wide text-slate-500">{item.entityType}</div>
+                <div className="text-xs uppercase tracking-wide text-secondary">{item.entityType}</div>
               </div>
               <div className="mt-2 text-sm text-slate-600">Target: {item.href}</div>
-              <div className="mt-1 text-xs text-slate-500">Context: {item.contextPath || "—"}</div>
+              <div className="mt-1 text-xs text-secondary">Context: {item.contextPath || "—"}</div>
             </Link>
           ))}
         </div>

@@ -27,9 +27,9 @@ const TYPE_ICONS: Record<string, any> = {
 const STATUS_COLORS: Record<string, string> = {
   submitted: "bg-blue-100 text-blue-700",
   pending:   "bg-amber-100 text-amber-700",
-  draft:     "bg-slate-100 text-slate-600",
+  draft:     "bg-slate-100 text-secondary",
   planning:  "bg-indigo-100 text-indigo-700",
-  open:      "bg-slate-100 text-slate-600",
+  open:      "bg-slate-100 text-secondary",
 };
 
 export default function ApprovalsPage() {
@@ -94,7 +94,7 @@ export default function ApprovalsPage() {
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
             <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+            <div className="text-xs text-secondary mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -111,7 +111,7 @@ export default function ApprovalsPage() {
                   <ShoppingCart className="w-5 h-5 text-amber-500 flex-shrink-0" />
                   <div>
                     <div className="text-sm font-semibold text-slate-800">{pr.title}</div>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-tertiary">
                       {Number(pr.total_amount || 0).toLocaleString()} EGP
                       {pr.requested_by ? ` · by ${pr.requested_by}` : ""}
                     </div>
@@ -148,7 +148,7 @@ export default function ApprovalsPage() {
                     <div className="text-sm font-semibold text-slate-800">
                       {proj.name ?? proj.title}
                     </div>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-tertiary">
                       {proj.status} · {String(proj.created_at ?? "").slice(0,10)}
                     </div>
                   </div>
@@ -177,7 +177,7 @@ export default function ApprovalsPage() {
                   <Wrench className="w-5 h-5 text-red-500 flex-shrink-0" />
                   <div>
                     <div className="text-sm font-semibold text-slate-800">{wo.title}</div>
-                    <div className="text-xs text-slate-400">{wo.type} · {wo.priority}</div>
+                    <div className="text-xs text-tertiary">{wo.type} · {wo.priority}</div>
                   </div>
                 </div>
                 <button
@@ -196,7 +196,7 @@ export default function ApprovalsPage() {
         <div className="text-center py-16">
           <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-700">All Clear</h3>
-          <p className="text-sm text-slate-400 mt-2">No items pending approval</p>
+          <p className="text-sm text-tertiary mt-2">No items pending approval</p>
         </div>
       )}
 

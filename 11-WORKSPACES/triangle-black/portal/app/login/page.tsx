@@ -62,7 +62,7 @@ export default function LoginPage() {
             <Building2 className="w-8 h-8 text-white"/>
           </div>
           <h1 className="text-2xl font-bold text-white">Triangle Black</h1>
-          <p className="text-slate-400 text-sm mt-1">Enterprise Operations Platform</p>
+          <p className="text-tertiary text-sm mt-1">Enterprise Operations Platform</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-slate-900 rounded-2xl border border-slate-800 p-6 space-y-4">
@@ -74,11 +74,11 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="text-xs font-medium text-slate-400 mb-1.5 block">
+            <label htmlFor="email" className="text-xs font-medium text-tertiary mb-1.5 block">
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"/>
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary"/>
               <input
                 id="email" name="email" type="email"
                 value={email} onChange={e => setEmail(e.target.value)}
@@ -91,11 +91,11 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="text-xs font-medium text-slate-400 mb-1.5 block">
+            <label htmlFor="password" className="text-xs font-medium text-tertiary mb-1.5 block">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"/>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary"/>
               <input
                 id="password" name="password" type="password"
                 value={password} onChange={e => setPassword(e.target.value)}
@@ -106,7 +106,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="text-xs text-slate-500 bg-slate-800/50 rounded-lg p-2 text-center">
+          <div className="text-xs text-secondary bg-slate-800/50 rounded-lg p-2 text-center">
             amr@triangleblack.com / admin123
           </div>
 
@@ -118,7 +118,7 @@ export default function LoginPage() {
             }
           </button>
 
-          <p className="text-center text-xs text-slate-500">Triangle Black © 2026</p>
+          <p className="text-center text-xs text-secondary">Triangle Black © 2026</p>
         </form>
       </div>
     </div>

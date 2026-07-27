@@ -128,7 +128,7 @@ export function EnterpriseTopbar() {
             className="relative w-8 h-8 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-colors"
             aria-label="Notifications"
           >
-            <Bell className="w-4 h-4 text-slate-500" />
+            <Bell className="w-4 h-4 text-secondary" />
             {signalSummary.critical > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {signalSummary.critical > 9 ? "9+" : signalSummary.critical}

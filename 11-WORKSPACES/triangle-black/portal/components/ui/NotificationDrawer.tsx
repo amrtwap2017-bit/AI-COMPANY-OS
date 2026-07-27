@@ -38,7 +38,7 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
               </div>
               <div className="flex items-center gap-2">
                 {unread > 0 && <button className="text-xs text-amber-700 hover:text-amber-800 font-medium flex items-center gap-1"><Check className="w-3 h-3"/>Mark all read</button>}
-                <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 transition-colors"><X className="w-4 h-4 text-slate-500"/></button>
+                <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 transition-colors"><X className="w-4 h-4 text-secondary"/></button>
               </div>
             </div>
             <div className="max-h-96 overflow-y-auto divide-y divide-slate-50">
@@ -46,7 +46,7 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
                 <div className="py-12 text-center">
                   <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2"/>
                   <div className="text-sm font-medium text-slate-700">All caught up!</div>
-                  <div className="text-xs text-slate-400 mt-1">No new notifications</div>
+                  <div className="text-xs text-tertiary mt-1">No new notifications</div>
                 </div>
               ) : notifications.map(n => {
                 const Icon = typeIcon[n.type];
@@ -60,8 +60,8 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
                         {n.title}
                         {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"/>}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">{n.message}</div>
-                      <div className="text-xs text-slate-400 mt-1">{n.time}</div>
+                      <div className="text-xs text-secondary mt-0.5 leading-relaxed">{n.message}</div>
+                      <div className="text-xs text-tertiary mt-1">{n.time}</div>
                     </div>
                   </div>
                 );

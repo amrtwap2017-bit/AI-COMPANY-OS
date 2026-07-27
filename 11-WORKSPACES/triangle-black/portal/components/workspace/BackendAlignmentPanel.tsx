@@ -18,7 +18,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
             Backend Alignment
           </div>
           <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
@@ -26,7 +26,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
             Feed Readiness
           </div>
           <div className="mt-2 text-lg font-semibold text-slate-950">

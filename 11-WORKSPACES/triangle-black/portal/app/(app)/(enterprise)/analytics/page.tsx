@@ -88,16 +88,16 @@ export default function AnalyticsHub() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Analytics</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Analytics Hub</h1>
-          <p className="text-slate-500 mt-1">Live KPIs, performance metrics, and business intelligence</p>
+          <h1 className="text-3xl font-black text-primary">Analytics Hub</h1>
+          <p className="text-secondary mt-1">Live KPIs, performance metrics, and business intelligence</p>
         </div>
         <div className={`rounded-2xl border px-6 py-4 text-center ${score>=95?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
           <div className={`text-4xl font-black ${score>=95?"text-emerald-500":"text-amber-500"}`}>{score}</div>
-          <div className="text-xs text-slate-500 mt-1">Platform Twin</div>
+          <div className="text-xs text-secondary mt-1">Platform Twin</div>
         </div>
       </div>
 
@@ -105,10 +105,10 @@ export default function AnalyticsHub() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {subPages.map((s, i) => (
           <button key={i} onClick={() => router.push(s.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
             <div className="text-2xl mb-2">{s.icon}</div>
-            <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">{s.title}</div>
-            <div className="text-xs text-slate-500 mt-1">{s.desc}</div>
+            <div className="font-bold text-primary group-hover:text-amber-600 transition-colors">{s.title}</div>
+            <div className="text-xs text-secondary mt-1">{s.desc}</div>
           </button>
         ))}
       </div>
@@ -116,11 +116,11 @@ export default function AnalyticsHub() {
       {/* KPI Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {kpiSections.map((section, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div key={i} className="bg-surface border border-border rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-xl">{section.icon}</span>
-                <h2 className="font-bold text-slate-900 dark:text-white">{section.title}</h2>
+                <h2 className="font-bold text-primary">{section.title}</h2>
               </div>
               <button onClick={() => router.push(section.path)} className="text-xs text-amber-500 hover:underline">View →</button>
             </div>
@@ -129,9 +129,9 @@ export default function AnalyticsHub() {
                 const isGood = kpi.target === null ? true : kpi.target === 0 ? Number(kpi.value) === 0 : Number(kpi.value) >= kpi.target;
                 const showBar = kpi.unit === "%";
                 return (
-                  <div key={j} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
-                    <div className="text-xs text-slate-500 mb-1">{kpi.label}</div>
-                    <div className={`text-xl font-black ${kpi.target !== null ? (isGood ? "text-emerald-500" : "text-red-500") : "text-slate-900 dark:text-white"}`}>
+                  <div key={j} className="bg-base-alt dark:bg-surface-alt rounded-xl p-3">
+                    <div className="text-xs text-secondary mb-1">{kpi.label}</div>
+                    <div className={`text-xl font-black ${kpi.target !== null ? (isGood ? "text-emerald-500" : "text-red-500") : "text-primary"}`}>
                       {kpi.value}{kpi.unit}
                     </div>
                     {showBar && (
@@ -140,7 +140,7 @@ export default function AnalyticsHub() {
                           style={{ width: `${Math.min(Number(kpi.value) || 0, 100)}%` }} />
                       </div>
                     )}
-                    {kpi.target !== null && <div className="text-[10px] text-slate-400 mt-0.5">Target: {kpi.target}{kpi.unit}</div>}
+                    {kpi.target !== null && <div className="text-[10px] text-tertiary mt-0.5">Target: {kpi.target}{kpi.unit}</div>}
                   </div>
                 );
               })}
@@ -150,9 +150,9 @@ export default function AnalyticsHub() {
       </div>
 
       {/* Twin domain matrix */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+      <div className="bg-surface border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-slate-900 dark:text-white">Digital Twin — All 8 Domains</h2>
+          <h2 className="font-bold text-primary">Digital Twin — All 8 Domains</h2>
           <button onClick={() => router.push("/executive/intelligence")} className="text-xs text-amber-500 hover:underline">Full report →</button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
@@ -162,7 +162,7 @@ export default function AnalyticsHub() {
               <div key={i} className={`rounded-xl border p-3 text-center ${hasIssue ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800" : "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"}`}>
                 <div className="text-2xl font-black">{dom.total ?? "—"}</div>
                 <div className={`text-[10px] font-semibold mt-0.5 ${hasIssue ? "text-amber-600" : "text-emerald-600"}`}>{dom.domain}</div>
-                <div className="text-[9px] text-slate-400 mt-0.5">{hasIssue ? "⚠ Action" : "✓ OK"}</div>
+                <div className="text-[9px] text-tertiary mt-0.5">{hasIssue ? "⚠ Action" : "✓ OK"}</div>
               </div>
             );
           })}

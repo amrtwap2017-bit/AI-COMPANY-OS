@@ -31,7 +31,7 @@ export function Pagination({
     <div className={"flex items-center justify-between flex-wrap gap-3 " + className}>
       <div className="flex items-center gap-2">
         {total !== undefined && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-secondary">
             {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
           </span>
         )}

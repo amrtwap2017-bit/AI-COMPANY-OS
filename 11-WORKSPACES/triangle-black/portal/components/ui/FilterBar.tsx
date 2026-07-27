@@ -25,7 +25,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
     <div className="flex items-center gap-2.5 flex-wrap">
       {search && (
         <div className="relative flex-1 min-w-48 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-tertiary pointer-events-none" />
           <input
             value={search.value}
             onChange={e => search.onChange(e.target.value)}
@@ -39,7 +39,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
 
       {filters && filters.length > 0 && (
         <div className="flex items-center gap-1.5">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+          <SlidersHorizontal className="w-3.5 h-3.5 text-tertiary flex-shrink-0" />
           {filters.map(f => (
             <select
               key={f.label}
@@ -59,7 +59,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
       )}
 
       {count !== undefined && (
-        <span className="text-xs text-slate-400 tabular-nums">
+        <span className="text-xs text-tertiary tabular-nums">
           {count.toLocaleString()} result{count !== 1 ? "s" : ""}
         </span>
       )}

@@ -69,7 +69,7 @@ export default function PipelinePage() {
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -79,7 +79,7 @@ export default function PipelinePage() {
           <input type="text" placeholder="Search…" value={q}
             onChange={e=>setQ(e.target.value)}
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          {q&&<button onClick={()=>setQ("")} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
+          {q&&<button onClick={()=>setQ("")} className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>}
         </div>
         {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No records found"
           action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create First Record</Button>}
@@ -88,7 +88,7 @@ export default function PipelinePage() {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-slate-100">
                 {"Title/Name,Status,Date".split(',').map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
               <tbody className="divide-y divide-slate-50">
@@ -96,11 +96,11 @@ export default function PipelinePage() {
                   <tr key={x.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-3">
                       <p className="font-medium text-slate-800 truncate max-w-sm">{x.name||"—"}</p>
-                      {x.description&&<p className="text-xs text-slate-400 truncate">{x.description?.slice(0,60)}</p>}
+                      {x.description&&<p className="text-xs text-tertiary truncate">{x.description?.slice(0,60)}</p>}
                       {x.category&&<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 mt-1">{x.category}</span>}
                     </td>
-                    <td className="py-3 px-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${(x.status==="open"?"bg-blue-100 text-blue-800":x.status==="completed"?"bg-emerald-100 text-emerald-800":x.status==="active"?"bg-emerald-100 text-emerald-800":x.status==="planning"?"bg-amber-100 text-amber-800":x.status==="Operational"?"bg-emerald-100 text-emerald-800":x.status==="In Fault"?"bg-red-100 text-red-800":"bg-slate-100 text-slate-600")}`}>{x.status?.replace(/_/g," ")||"—"}</span></td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(x.created_at)}</td>
+                    <td className="py-3 px-3"><span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${(x.status==="open"?"bg-blue-100 text-blue-800":x.status==="completed"?"bg-emerald-100 text-emerald-800":x.status==="active"?"bg-emerald-100 text-emerald-800":x.status==="planning"?"bg-amber-100 text-amber-800":x.status==="Operational"?"bg-emerald-100 text-emerald-800":x.status==="In Fault"?"bg-red-100 text-red-800":"bg-slate-100 text-secondary")}`}>{x.status?.replace(/_/g," ")||"—"}</span></td>
+                    <td className="py-3 px-3 text-xs text-tertiary">{fmtDate(x.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -114,18 +114,18 @@ export default function PipelinePage() {
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-screen overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
               <h2 className="font-bold text-slate-900">New Pipeline</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl leading-none font-bold">x</button>
+              <button onClick={()=>setShowCreate(false)} className="text-tertiary hover:text-secondary text-xl leading-none font-bold">x</button>
             </div>
             <form onSubmit={save} className="p-6 space-y-4">
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Contact Name * *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full name" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Email * *</label><input required type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@hotel.com" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Company</label><input type="text" value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="Hotel or company" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Phone</label><input type="text" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+20 10 0000 0000" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Source</label><select value={form.source} onChange={e=>setForm({...form,source:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="web" value="web">web</option><option key="direct" value="direct">direct</option><option key="referral" value="referral">referral</option><option key="linkedin" value="linkedin">linkedin</option><option key="cold_call" value="cold_call">cold_call</option><option key="event" value="event">event</option></select></div>
-              <div><label className="block text-xs font-semibold text-slate-600 mb-1">Priority</label><select value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="critical" value="critical">critical</option><option key="high" value="high">high</option><option key="medium" value="medium">medium</option><option key="low" value="low">low</option></select></div>
+              <div><label className="block text-xs font-semibold text-secondary mb-1">Contact Name * *</label><input required type="text" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full name" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-secondary mb-1">Email * *</label><input required type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@hotel.com" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-secondary mb-1">Company</label><input type="text" value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="Hotel or company" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-secondary mb-1">Phone</label><input type="text" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+20 10 0000 0000" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" /></div>
+              <div><label className="block text-xs font-semibold text-secondary mb-1">Source</label><select value={form.source} onChange={e=>setForm({...form,source:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="web" value="web">web</option><option key="direct" value="direct">direct</option><option key="referral" value="referral">referral</option><option key="linkedin" value="linkedin">linkedin</option><option key="cold_call" value="cold_call">cold_call</option><option key="event" value="event">event</option></select></div>
+              <div><label className="block text-xs font-semibold text-secondary mb-1">Priority</label><select value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"><option key="critical" value="critical">critical</option><option key="high" value="high">high</option><option key="medium" value="medium">medium</option><option key="low" value="low">low</option></select></div>
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button type="button" onClick={()=>setShowCreate(false)}
-                  className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                  className="px-4 py-2 text-sm text-secondary border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
                 <button type="submit" disabled={saving}
                   className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">
                   {saving?"Saving…":"Create Pipeline"}

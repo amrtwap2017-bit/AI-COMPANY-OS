@@ -26,7 +26,7 @@ export function PinnedEntitiesPanel() {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Workspace Favorites
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">Pinned Entities</h2>
@@ -36,7 +36,7 @@ export function PinnedEntitiesPanel() {
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-500">
+        <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
           No pinned entities yet. Use the context drawer to pin important records.
         </div>
       ) : (
@@ -49,7 +49,7 @@ export function PinnedEntitiesPanel() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-slate-900">{item.entityName || item.entityType}</div>
-                  <div className="mt-1 text-xs uppercase tracking-wide text-slate-500">{item.entityType}</div>
+                  <div className="mt-1 text-xs uppercase tracking-wide text-secondary">{item.entityType}</div>
                   <div className="mt-2 text-sm text-slate-600">{item.href}</div>
                 </div>
 

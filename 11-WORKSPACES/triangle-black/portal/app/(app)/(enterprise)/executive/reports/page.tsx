@@ -24,20 +24,20 @@ export default function ExecutiveReports() {
     {title:"Procurement Report",desc:`${d.procurement?.purchase_requests||0} PRs · ${d.procurement?.purchase_orders||0} POs`,icon:"📦",path:"/supply-chain",metrics:[`Pending POs: ${d.procurement?.pending_pos||0}`,`Approved PRs: ${d.procurement?.approved_prs||0}`,`Suppliers: ${d.procurement?.suppliers||0}`]},
   ];
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Executive Reports</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Executive Reports</h1>
-      <p className="text-slate-500 mt-1">Comprehensive platform performance reports</p></div>
+      <h1 className="text-3xl font-black text-primary">Executive Reports</h1>
+      <p className="text-secondary mt-1">Comprehensive platform performance reports</p></div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {reports.map((r,i)=>(
           <button key={i} onClick={()=>router.push(r.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
             <div className="text-3xl mb-3">{r.icon}</div>
-            <div className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-amber-600 mb-1">{r.title}</div>
-            <div className="text-xs text-slate-500 mb-4">{r.desc}</div>
+            <div className="font-bold text-primary text-lg group-hover:text-amber-600 mb-1">{r.title}</div>
+            <div className="text-xs text-secondary mb-4">{r.desc}</div>
             <div className="space-y-1">
               {r.metrics.map((m,j)=>(
-                <div key={j} className="text-xs text-slate-400 flex items-center gap-1"><span className="text-amber-500">·</span>{m}</div>
+                <div key={j} className="text-xs text-tertiary flex items-center gap-1"><span className="text-amber-500">·</span>{m}</div>
               ))}
             </div>
           </button>

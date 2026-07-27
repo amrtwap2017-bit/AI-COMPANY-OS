@@ -23,7 +23,7 @@ const STATUS_STYLES: Record<string, string> = {
   partially_paid: "bg-blue-100 text-blue-700",
   unpaid:         "bg-amber-100 text-amber-700",
   overdue:        "bg-red-100 text-red-700",
-  cancelled:      "bg-slate-100 text-slate-500",
+  cancelled:      "bg-slate-100 text-secondary",
 };
 
 export default function InvoiceDetailPage() {
@@ -67,7 +67,7 @@ export default function InvoiceDetailPage() {
   });
 
   if (isLoading) return <PageWrapper><LoadingState title="Loading invoice..." /></PageWrapper>;
-  if (!invoice || invoice.detail) return <PageWrapper><p className="p-8 text-slate-400">Invoice not found</p></PageWrapper>;
+  if (!invoice || invoice.detail) return <PageWrapper><p className="p-8 text-tertiary">Invoice not found</p></PageWrapper>;
 
   const total     = Number(invoice.total_amount || 0);
   const paid      = Number(paymentsData?.total_paid || 0);
@@ -104,13 +104,13 @@ export default function InvoiceDetailPage() {
             <div className="text-center p-4 bg-slate-50 rounded-xl mb-4">
               <DollarSign className="w-8 h-8 text-blue-500 mx-auto mb-2" />
               <div className="text-3xl font-bold text-slate-800">{total.toLocaleString()}</div>
-              <div className="text-xs text-slate-500 mt-1">Total Amount (EGP)</div>
+              <div className="text-xs text-secondary mt-1">Total Amount (EGP)</div>
             </div>
 
             {/* Payment progress */}
             <div className="mb-4">
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-500">Payment Progress</span>
+                <span className="text-secondary">Payment Progress</span>
                 <span className="font-semibold">{paidPct}%</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2.5">
@@ -119,7 +119,7 @@ export default function InvoiceDetailPage() {
                   style={{ width: `${paidPct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-slate-400 mt-1">
+              <div className="flex justify-between text-xs text-tertiary mt-1">
                 <span>Paid: {paid.toLocaleString()} EGP</span>
                 <span>Outstanding: {outstanding.toLocaleString()} EGP</span>
               </div>
@@ -135,7 +135,7 @@ export default function InvoiceDetailPage() {
                 ["Currency",  "EGP"],
               ].filter(([, v]) => v).map(([k, v]) => (
                 <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
+                  <span className="text-secondary">{k}</span>
                   <span className="text-slate-800 font-medium">{v}</span>
                 </div>
               ))}
@@ -147,7 +147,7 @@ export default function InvoiceDetailPage() {
             <SectionCard title="Record Payment">
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-slate-500 font-medium block mb-1">Amount (EGP)</label>
+                  <label className="text-xs text-secondary font-medium block mb-1">Amount (EGP)</label>
                   <input
                     type="number"
                     value={payAmount}
@@ -158,7 +158,7 @@ export default function InvoiceDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-500 font-medium block mb-1">Method</label>
+                  <label className="text-xs text-secondary font-medium block mb-1">Method</label>
                   <select
                     value={payMethod}
                     onChange={e => setPayMethod(e.target.value)}
@@ -172,7 +172,7 @@ export default function InvoiceDetailPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-500 font-medium block mb-1">Reference No.</label>
+                  <label className="text-xs text-secondary font-medium block mb-1">Reference No.</label>
                   <input
                     type="text"
                     value={payRef}
@@ -226,25 +226,25 @@ export default function InvoiceDetailPage() {
                         <div className="text-sm font-semibold text-slate-800">
                           {Number(p.amount || 0).toLocaleString()} EGP
                         </div>
-                        <div className="text-xs text-slate-500 mt-0.5">
+                        <div className="text-xs text-secondary mt-0.5">
                           {p.payment_method?.replace(/_/g, " ")}
                           {p.reference_no && ` · Ref: ${p.reference_no}`}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-tertiary">
                           {String(p.payment_date ?? p.created_at ?? "").slice(0, 16)}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-500">EGP</div>
+                      <div className="text-xs text-secondary">EGP</div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
-                <Clock className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm text-slate-400">No payments recorded yet</p>
+                <Clock className="w-10 h-10 text-tertiary mx-auto mb-3" />
+                <p className="text-sm text-tertiary">No payments recorded yet</p>
                 {outstanding > 0 && (
                   <p className="text-xs text-amber-600 mt-2">
                     Outstanding: {outstanding.toLocaleString()} EGP

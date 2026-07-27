@@ -17,7 +17,7 @@ export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsP
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Inbox Presets
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
@@ -36,7 +36,7 @@ export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsP
 
             <div className="mt-3 text-sm leading-6 text-slate-700">{preset.detail}</div>
 
-            <div className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               Default View
             </div>
             <div className="mt-2 text-sm text-slate-800">{preset.defaultView}</div>

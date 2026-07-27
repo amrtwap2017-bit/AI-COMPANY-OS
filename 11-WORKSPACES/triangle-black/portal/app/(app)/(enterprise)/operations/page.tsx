@@ -32,11 +32,11 @@ export default function OperationsHub() {
   const completionRate = wos.length > 0 ? Math.round(completedWOs.length / wos.length * 100) : 0;
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Operations Center</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Operations Dashboard</h1>
-        <p className="text-slate-500 mt-1">Work orders, technicians, and service delivery</p>
+        <h1 className="text-3xl font-black text-primary">Operations Dashboard</h1>
+        <p className="text-secondary mt-1">Work orders, technicians, and service delivery</p>
       </div>
 
       {/* KPIs */}
@@ -48,19 +48,19 @@ export default function OperationsHub() {
           { label: "Completion Rate", value: `${completionRate}%`, sub: `${completedWOs.length} of ${wos.length} done`, color: completionRate >= 80 ? "emerald" : "amber", path: "/analytics/scorecards" },
         ].map((k, i) => (
           <button key={i} onClick={() => router.push(k.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
-            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
+            <div className="text-xs text-secondary mb-2">{k.label}</div>
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Priority breakdown */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Work Orders by Priority</h2>
+            <h2 className="font-bold text-primary">Work Orders by Priority</h2>
             <button onClick={() => router.push("/operations/work-orders")} className="text-xs text-amber-500 hover:underline">All WOs →</button>
           </div>
           <div className="space-y-3">
@@ -72,7 +72,7 @@ export default function OperationsHub() {
             ].map((p, i) => (
               <div key={i}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-slate-600 dark:text-slate-400">{p.label}</span>
+                  <span className="text-secondary">{p.label}</span>
                   <span className="font-bold"><span className={`text-${p.color}-500`}>{p.open} open</span> / {p.count} total</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
@@ -84,9 +84,9 @@ export default function OperationsHub() {
         </div>
 
         {/* Technician utilization */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Technician Status</h2>
+            <h2 className="font-bold text-primary">Technician Status</h2>
             <button onClick={() => router.push("/operations/dispatch")} className="text-xs text-amber-500 hover:underline">Dispatch →</button>
           </div>
           <div className="space-y-2">
@@ -99,8 +99,8 @@ export default function OperationsHub() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between text-xs mb-0.5">
-                      <span className="font-medium text-slate-700 dark:text-slate-300 truncate">{t.name}</span>
-                      <span className="text-slate-400 ml-2 flex-shrink-0">{t.current_work_orders ?? 0}/{t.max_work_orders ?? 5}</span>
+                      <span className="font-medium text-slate-700 dark:text-tertiary truncate">{t.name}</span>
+                      <span className="text-tertiary ml-2 flex-shrink-0">{t.current_work_orders ?? 0}/{t.max_work_orders ?? 5}</span>
                     </div>
                     <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
                       <div className={`h-1.5 rounded-full ${load >= 90 ? "bg-red-500" : load >= 70 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${load}%` }} />
@@ -109,27 +109,27 @@ export default function OperationsHub() {
                 </div>
               );
             })}
-            {techs.length > 8 && <div className="text-xs text-slate-400 text-center pt-1">+{techs.length - 8} more technicians</div>}
+            {techs.length > 8 && <div className="text-xs text-tertiary text-center pt-1">+{techs.length - 8} more technicians</div>}
           </div>
         </div>
       </div>
 
       {/* Open SRs */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+      <div className="bg-surface border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-slate-900 dark:text-white">Open Service Requests</h2>
+          <h2 className="font-bold text-primary">Open Service Requests</h2>
           <button onClick={() => router.push("/operations/service-requests")} className="text-xs text-amber-500 hover:underline">All SRs →</button>
         </div>
         {openSRs.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-sm">✅ No open service requests</div>
+          <div className="text-center py-8 text-tertiary text-sm">✅ No open service requests</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {openSRs.slice(0, 6).map((sr: any, i: number) => (
               <button key={i} onClick={() => router.push(`/operations/service-requests/${sr.id}`)}
                 className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-400 hover:shadow-md transition-all text-left">
-                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{sr.title}</div>
-                <div className="text-xs text-slate-500 mt-1">{sr.status} · {sr.urgency || "normal"}</div>
-                <div className="text-xs text-slate-400 mt-1">{fmtDate(sr.created_at)}</div>
+                <div className="text-sm font-semibold text-primary truncate">{sr.title}</div>
+                <div className="text-xs text-secondary mt-1">{sr.status} · {sr.urgency || "normal"}</div>
+                <div className="text-xs text-tertiary mt-1">{fmtDate(sr.created_at)}</div>
               </button>
             ))}
           </div>
@@ -145,9 +145,9 @@ export default function OperationsHub() {
           { label: "SLA Review", icon: "⏱️", path: "/analytics/sla" },
         ].map((a, i) => (
           <button key={i} onClick={() => router.push(a.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center hover:border-amber-400 hover:shadow-lg transition-all">
+            className="bg-surface border border-border rounded-2xl p-5 text-center hover:border-amber-400 hover:shadow-lg transition-all">
             <div className="text-2xl mb-2">{a.icon}</div>
-            <div className="text-sm font-bold text-slate-900 dark:text-white">{a.label}</div>
+            <div className="text-sm font-bold text-primary">{a.label}</div>
           </button>
         ))}
       </div>

@@ -72,7 +72,7 @@ export default function WorkspacePage() {
           <div>
             <div className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-1">Triangle Black Operations Platform</div>
             <h1 className="text-2xl font-black text-white">Platform Command Center</h1>
-            <p className="text-slate-400 text-sm mt-0.5">{today}</p>
+            <p className="text-tertiary text-sm mt-0.5">{today}</p>
           </div>
           <div className="flex items-center gap-4">
             {totalPending > 0 && (
@@ -83,7 +83,7 @@ export default function WorkspacePage() {
             )}
             <div className={`border rounded-2xl px-5 py-3 text-center ${scoreBorder}`}>
               <div className={`text-3xl font-black ${scoreColor}`}>{score}</div>
-              <div className="text-xs text-slate-500 mt-0.5">Twin Score</div>
+              <div className="text-xs text-secondary mt-0.5">Twin Score</div>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function WorkspacePage() {
 
         {/* Automation result */}
         {autoResult && (
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 rounded-2xl p-4 flex items-center gap-4">
+          <div className="tb-alert tb-alert-success rounded-2xl flex items-center gap-4">
             <div className="text-2xl">✅</div>
             <div>
               <div className="font-bold text-emerald-800 dark:text-emerald-300">Automation Complete — {autoResult.total_actions} actions taken</div>
@@ -117,9 +117,9 @@ export default function WorkspacePage() {
             { label: "Collection Rate", value: `${collRate}%`,            color: collRate >= 85 ? "emerald" : "amber", path: "/invoices" },
           ].map((k, i) => (
             <button key={i} onClick={() => router.push(k.path)}
-              className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-3 text-center hover:border-amber-400 hover:shadow-md transition-all group">
+              className="bg-surface border border-border rounded-xl p-3 text-center hover:border-amber-400 hover:shadow-md transition-all group">
               <div className={`text-2xl font-black text-${k.color}-500 group-hover:scale-110 transition-transform`}>{k.value}</div>
-              <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">{k.label}</div>
+              <div className="text-[10px] text-secondary mt-0.5 leading-tight">{k.label}</div>
             </button>
           ))}
         </div>
@@ -129,15 +129,15 @@ export default function WorkspacePage() {
 
           {/* Urgent items — left column */}
           <div className="xl:col-span-1 space-y-4">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-slate-900 dark:text-white">🚨 Urgent Items</h2>
+                <h2 className="font-bold text-primary">🚨 Urgent Items</h2>
                 <button onClick={() => router.push("/executive/exceptions")} className="text-xs text-amber-500 hover:underline">All →</button>
               </div>
               {urgentItems.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">✅</div>
-                  <div className="text-sm text-slate-400">All clear — no urgent items</div>
+                  <div className="text-sm text-tertiary">All clear — no urgent items</div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -149,8 +149,8 @@ export default function WorkspacePage() {
                         className={`w-full flex items-start gap-2.5 p-3 rounded-xl text-left hover:shadow-sm transition-all bg-${c}-50 dark:bg-${c}-900/20 border border-${c}-100`}>
                         <div className={`w-1.5 h-1.5 rounded-full bg-${c}-500 mt-1.5 flex-shrink-0`} />
                         <div className="min-w-0">
-                          <div className="text-xs font-bold text-slate-500 uppercase">{item.type}</div>
-                          <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{item.title}</div>
+                          <div className="text-xs font-bold text-secondary uppercase">{item.type}</div>
+                          <div className="text-sm font-semibold text-primary truncate">{item.title}</div>
                         </div>
                       </button>
                     );
@@ -160,15 +160,15 @@ export default function WorkspacePage() {
             </div>
 
             {/* Automation status */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-bold text-slate-900 dark:text-white text-sm">⚡ Automation Status</h2>
+                <h2 className="font-bold text-primary text-sm">⚡ Automation Status</h2>
                 <button onClick={() => router.push("/workflows/launcher")} className="text-xs text-amber-500 hover:underline">Manage →</button>
               </div>
               <div className="space-y-2">
                 {Object.entries(pending).map(([key, val]) => (
                   <div key={key} className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500 capitalize">{key.replace(/wf\d+_/, "").replace(/_/g, " ")}</span>
+                    <span className="text-xs text-secondary capitalize">{key.replace(/wf\d+_/, "").replace(/_/g, " ")}</span>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded ${val === 0 ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                       {val === 0 ? "✓ OK" : `${val} pending`}
                     </span>
@@ -182,8 +182,8 @@ export default function WorkspacePage() {
           <div className="xl:col-span-2 space-y-4">
 
             {/* Domain health grid */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-              <h2 className="font-bold text-slate-900 dark:text-white mb-4">Domain Health</h2>
+            <div className="bg-surface border border-border rounded-2xl p-5">
+              <h2 className="font-bold text-primary mb-4">Domain Health</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   { domain: "Operations",   icon: "⚙️",  metric: `${openWOs.length} open WOs`,          health: compRate,    path: "/operations" },
@@ -201,8 +201,8 @@ export default function WorkspacePage() {
                         {item.health >= 80 ? "✓" : item.health >= 60 ? "!" : "✗"}
                       </span>
                     </div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">{item.domain}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{item.metric}</div>
+                    <div className="text-sm font-bold text-primary group-hover:text-amber-600 transition-colors">{item.domain}</div>
+                    <div className="text-xs text-secondary mt-0.5">{item.metric}</div>
                     <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-2">
                       <div className={`h-1.5 rounded-full ${item.health >= 80 ? "bg-emerald-500" : item.health >= 60 ? "bg-amber-500" : "bg-red-500"}`}
                         style={{ width: `${Math.min(100, item.health)}%` }} />
@@ -213,22 +213,22 @@ export default function WorkspacePage() {
             </div>
 
             {/* Recent work orders */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-slate-900 dark:text-white">Recent Work Orders</h2>
+                <h2 className="font-bold text-primary">Recent Work Orders</h2>
                 <button onClick={() => router.push("/operations/work-orders")} className="text-xs text-amber-500 hover:underline">All {wos.length} →</button>
               </div>
               <div className="space-y-1.5">
                 {wos.slice(0, 6).map((w, i) => (
                   <button key={i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group">
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-base-alt transition-colors text-left group">
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${w.status === "completed" ? "bg-emerald-500" : w.status === "in_progress" ? "bg-amber-500" : w.priority === "critical" ? "bg-red-500" : "bg-blue-500"}`} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-600">{w.title}</div>
-                      <div className="text-xs text-slate-400">{fmtDate(w.created_at)}</div>
+                      <div className="text-sm font-medium text-primary truncate group-hover:text-amber-600">{w.title}</div>
+                      <div className="text-xs text-tertiary">{fmtDate(w.created_at)}</div>
                     </div>
                     <div className="flex gap-1.5 flex-shrink-0">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${w.priority === "critical" ? "bg-red-100 text-red-700" : w.priority === "high" ? "bg-orange-100 text-orange-700" : "bg-slate-100 text-slate-600"}`}>{w.priority}</span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${w.priority === "critical" ? "bg-red-100 text-red-700" : w.priority === "high" ? "bg-orange-100 text-orange-700" : "bg-slate-100 text-secondary"}`}>{w.priority}</span>
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${w.status === "completed" ? "bg-emerald-100 text-emerald-700" : w.status === "in_progress" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>{w.status}</span>
                     </div>
                   </button>
@@ -237,9 +237,9 @@ export default function WorkspacePage() {
             </div>
 
             {/* Twin domain strip */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-bold text-slate-900 dark:text-white text-sm">Digital Twin — Live Domains</h2>
+                <h2 className="font-bold text-primary text-sm">Digital Twin — Live Domains</h2>
                 <button onClick={() => router.push("/executive/intelligence")} className="text-xs text-amber-500 hover:underline">Details →</button>
               </div>
               <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
@@ -258,8 +258,8 @@ export default function WorkspacePage() {
         </div>
 
         {/* Quick access nav */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-          <h2 className="font-bold text-slate-900 dark:text-white mb-4 text-sm">Quick Access</h2>
+        <div className="bg-surface border border-border rounded-2xl p-5">
+          <h2 className="font-bold text-primary mb-4 text-sm">Quick Access</h2>
           <div className="grid grid-cols-3 md:grid-cols-6 xl:grid-cols-10 gap-2">
             {[
               { label: "My Day",          icon: "☀️",  path: "/workspace/my-day" },
@@ -274,9 +274,9 @@ export default function WorkspacePage() {
               { label: "Automation",      icon: "⚡",  path: "/workflows/launcher" },
             ].map((a, i) => (
               <button key={i} onClick={() => router.push(a.path)}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:border-amber-200 border border-transparent transition-all">
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-base-alt dark:bg-surface-alt hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:border-amber-200 border border-transparent transition-all">
                 <span className="text-xl">{a.icon}</span>
-                <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">{a.label}</span>
+                <span className="text-[10px] font-medium text-secondary text-center leading-tight">{a.label}</span>
               </button>
             ))}
           </div>

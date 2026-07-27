@@ -35,7 +35,7 @@ export function ExportButton({ data, filename, title }: ExportButtonProps) {
               className="flex items-center gap-2 w-full px-3 py-2 text-sm
                 text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              <Download className="w-4 h-4 text-slate-400" />
+              <Download className="w-4 h-4 text-tertiary" />
               Download CSV
             </button>
             <button
@@ -43,7 +43,7 @@ export function ExportButton({ data, filename, title }: ExportButtonProps) {
               className="flex items-center gap-2 w-full px-3 py-2 text-sm
                 text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              <Printer className="w-4 h-4 text-slate-400" />
+              <Printer className="w-4 h-4 text-tertiary" />
               Print
             </button>
           </div>

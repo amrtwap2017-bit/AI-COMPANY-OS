@@ -26,15 +26,15 @@ export default function CustomerSuccess() {
     {label:"Renewal Risk",value:contracts.filter(c=>{if(!c.end_date||c.status!=="active")return false;return new Date(c.end_date)<=new Date(Date.now()+30*86400000);}).length,target:0,color:"red",icon:"⚠️"},
   ];
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Customer Success</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Customer Success</h1>
-      <p className="text-slate-500 mt-1">Client health, satisfaction, and retention metrics</p></div>
+      <h1 className="text-3xl font-black text-primary">Customer Success</h1>
+      <p className="text-secondary mt-1">Client health, satisfaction, and retention metrics</p></div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {healthMetrics.map((m,i)=>(
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5">
             <div className="text-2xl mb-2">{m.icon}</div>
-            <div className="text-xs text-slate-500 mb-1">{m.label}</div>
+            <div className="text-xs text-secondary mb-1">{m.label}</div>
             <div className={`text-2xl font-black text-${m.color}-500`}>{m.value}</div>
           </div>
         ))}
@@ -44,7 +44,7 @@ export default function CustomerSuccess() {
           <h2 className="font-bold mb-4">Top Active Clients</h2>
           {activeContracts.slice(0,6).map((c,i)=>(
             <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)}
-              className="w-full flex justify-between p-3 mb-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-emerald-50 text-left transition-colors">
+              className="w-full flex justify-between p-3 mb-1 bg-base-alt dark:bg-surface-alt rounded-xl hover:bg-emerald-50 text-left transition-colors">
               <span className="text-sm font-medium truncate">{c.title||c.id?.slice(0,16)}</span>
               <span className="text-sm font-black text-emerald-600 ml-2">{fmtEGP(c.total_value)}</span>
             </button>
@@ -59,7 +59,7 @@ export default function CustomerSuccess() {
             {label:"All Contracts",icon:"📄",path:"/commercial/contracts"},
           ].map((a,i)=>(
             <button key={i} onClick={()=>router.push(a.path)}
-              className="w-full flex items-center gap-3 p-3 mb-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-amber-50 text-left transition-colors">
+              className="w-full flex items-center gap-3 p-3 mb-1 bg-base-alt dark:bg-surface-alt rounded-xl hover:bg-amber-50 text-left transition-colors">
               <span className="text-xl">{a.icon}</span>
               <span className="text-sm font-semibold">{a.label}</span>
             </button>

@@ -12,13 +12,13 @@ const PRIORITY_BADGE = {
   critical: "bg-red-500 text-white",
   high:     "bg-orange-100 text-orange-700",
   medium:   "bg-amber-100 text-amber-700",
-  low:      "bg-slate-100 text-slate-600",
+  low:      "bg-slate-100 text-secondary",
 };
 const STATUS_BADGE = {
   open:        "bg-blue-100 text-blue-700",
   in_progress: "bg-amber-100 text-amber-700",
   completed:   "bg-emerald-100 text-emerald-700",
-  cancelled:   "bg-slate-100 text-slate-500",
+  cancelled:   "bg-slate-100 text-secondary",
 };
 
 export default function WorkOrdersPage() {
@@ -63,18 +63,18 @@ export default function WorkOrdersPage() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       {/* Page header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Work Orders</h1>
-          <p className="text-slate-500 text-sm mt-1.5">
+          <h1 className="text-3xl font-black text-primary">Work Orders</h1>
+          <p className="text-secondary text-sm mt-1.5">
             {wos.length} total · {open.length} open · {overdue.length} overdue
           </p>
         </div>
         <button onClick={() => router.push("/engineering/new-work-order")}
-          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm hover:shadow-md transition-all">
+          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm hover:shadow-md transition-all">
           + New Work Order
         </button>
       </div>
@@ -97,14 +97,14 @@ export default function WorkOrdersPage() {
                 : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
             }`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </button>
         ))}
       </div>
 
       {/* Critical alert banner */}
       {critical.length > 0 && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+        <div className="tb-alert tb-alert-critical rounded-2xl">
           <div className="text-2xl flex-shrink-0">🚨</div>
           <div className="flex-1">
             <div className="font-bold text-red-800 dark:text-red-300">{critical.length} Critical Work Orders Require Immediate Attention</div>
@@ -122,10 +122,10 @@ export default function WorkOrdersPage() {
         <input
           value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search work orders..."
-          className="flex-1 min-w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400 transition-colors"
+          className="flex-1 min-w-48 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus transition-colors"
         />
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
           <option value="all">All Status</option>
           <option value="open">Open</option>
           <option value="in_progress">In Progress</option>
@@ -133,7 +133,7 @@ export default function WorkOrdersPage() {
           <option value="cancelled">Cancelled</option>
         </select>
         <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
           <option value="all">All Priority</option>
           <option value="critical">Critical</option>
           <option value="high">High</option>
@@ -142,65 +142,65 @@ export default function WorkOrdersPage() {
         </select>
         {(search || statusFilter !== "all" || priorityFilter !== "all") && (
           <button onClick={() => { setSearch(""); setStatusFilter("all"); setPriorityFilter("all"); }}
-            className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors">
+            className="px-3 py-2 text-xs text-secondary hover:text-slate-700 bg-surface border border-border rounded-xl transition-colors">
             Clear ×
           </button>
         )}
-        <div className="text-xs text-slate-400 self-center">{filtered.length} results</div>
+        <div className="text-xs text-tertiary self-center">{filtered.length} results</div>
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-3">🔍</div>
-            <div className="font-bold text-slate-900 dark:text-white text-lg">No work orders found</div>
-            <div className="text-slate-400 text-sm mt-1">Try adjusting your filters</div>
+            <div className="font-bold text-primary text-lg">No work orders found</div>
+            <div className="text-tertiary text-sm mt-1">Try adjusting your filters</div>
             <button onClick={() => router.push("/engineering/new-work-order")}
-              className="mt-4 px-5 py-2 bg-amber-600 text-white rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors">
+              className="mt-4 px-5 py-2 bg-brand text-inverse rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors">
               + Create Work Order
             </button>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[1fr_100px_90px_100px_100px] bg-slate-50 dark:bg-slate-800/50 px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="grid grid-cols-[1fr_100px_90px_100px_100px] bg-base-alt dark:bg-surface-alt px-5 py-3 text-xs font-semibold text-secondary uppercase tracking-wider">
               <div>Work Order</div>
               <div className="text-center">Priority</div>
               <div className="text-center">Status</div>
               <div className="text-center">Due Date</div>
               <div className="text-center">Created</div>
             </div>
-            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+            <div className="divide-y divide-y-border">
               {filtered.slice(0, 50).map((w, i) => {
                 const isOverdue = w.due_date && new Date(w.due_date) < now && w.status !== "completed";
                 return (
                   <button key={i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
-                    className={`w-full grid grid-cols-[1fr_100px_90px_100px_100px] items-center px-5 py-4 text-left transition-colors hover:bg-amber-50/50 dark:hover:bg-amber-900/10 ${isOverdue && w.status !== "completed" ? "bg-red-50/30 dark:bg-red-900/5" : ""}`}>
+                    className={`w-full grid grid-cols-[1fr_100px_90px_100px_100px] items-center px-5 py-4 text-left transition-colors hover:bg-brand-light/20 ${isOverdue && w.status !== "completed" ? "bg-red-50/30 dark:bg-red-900/5" : ""}`}>
                     <div className="min-w-0 pr-4">
-                      <div className="font-semibold text-sm text-slate-900 dark:text-white truncate">{w.title}</div>
-                      {w.type && <div className="text-xs text-slate-400 mt-0.5 capitalize">{w.type}</div>}
+                      <div className="font-semibold text-sm text-primary truncate">{w.title}</div>
+                      {w.type && <div className="text-xs text-tertiary mt-0.5 capitalize">{w.type}</div>}
                     </div>
                     <div className="text-center">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${PRIORITY_BADGE[w.priority] || "bg-slate-100 text-slate-600"}`}>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${PRIORITY_BADGE[w.priority] || "bg-slate-100 text-secondary"}`}>
                         {w.priority || "—"}
                       </span>
                     </div>
                     <div className="text-center">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[w.status] || "bg-slate-100 text-slate-600"}`}>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[w.status] || "bg-slate-100 text-secondary"}`}>
                         {w.status || "—"}
                       </span>
                     </div>
-                    <div className={`text-center text-xs ${isOverdue ? "text-red-500 font-semibold" : "text-slate-500"}`}>
+                    <div className={`text-center text-xs ${isOverdue ? "text-red-500 font-semibold" : "text-secondary"}`}>
                       {fmtDate(w.due_date)}
                       {isOverdue && <div className="text-[10px] text-red-400">OVERDUE</div>}
                     </div>
-                    <div className="text-center text-xs text-slate-400">{fmtDate(w.created_at)}</div>
+                    <div className="text-center text-xs text-tertiary">{fmtDate(w.created_at)}</div>
                   </button>
                 );
               })}
             </div>
             {filtered.length > 50 && (
-              <div className="text-center py-4 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/30">
+              <div className="text-center py-4 text-xs text-tertiary bg-base-alt/30">
                 Showing 50 of {filtered.length} · <button onClick={() => router.push("/operations/dispatch")} className="text-amber-500 hover:underline">View Dispatch →</button>
               </div>
             )}

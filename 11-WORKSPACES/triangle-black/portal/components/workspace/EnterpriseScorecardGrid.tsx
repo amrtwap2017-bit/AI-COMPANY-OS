@@ -24,7 +24,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Enterprise Scorecards
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
@@ -39,7 +39,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
               <div className="text-3xl font-semibold tracking-tight text-slate-950">{item.score}</div>
             </div>
 
-            <div className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.status}
             </div>
 

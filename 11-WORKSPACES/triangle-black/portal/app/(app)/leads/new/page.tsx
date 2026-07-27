@@ -35,7 +35,7 @@ export default function NewLeadPage() {
 
   const field = (label: string, key: string, type = "text", required = false) => (
     <div>
-      <label className="text-xs font-medium text-slate-600 block mb-1.5">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
+      <label className="text-xs font-medium text-secondary block mb-1.5">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
       <input type={type} value={(form as any)[key]} onChange={e=>setForm(f=>({...f,[key]:e.target.value}))}
         className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
         required={required}/>
@@ -46,7 +46,7 @@ export default function NewLeadPage() {
     <PageWrapper>
       <Breadcrumb/>
       <PageHeader title="New Lead" subtitle="Add a new lead to the pipeline" badge="NEW"
-        actions={<Link href="/leads" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
+        actions={<Link href="/leads" className="flex items-center gap-1.5 px-3 py-2 text-sm text-secondary hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
       {error && <AlertBanner type="error" title={error}/>}
       <form onSubmit={handleSubmit} className="max-w-2xl">
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
@@ -61,14 +61,14 @@ export default function NewLeadPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Status</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Status</label>
               <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
                 {["new","qualified","negotiation","won","lost"].map(s=><option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Source</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Source</label>
               <select value={form.source} onChange={e=>setForm(f=>({...f,source:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
                 {["direct","referral","website","cold_call","exhibition"].map(s=><option key={s} value={s}>{s}</option>)}
@@ -81,7 +81,7 @@ export default function NewLeadPage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors">
             {loading ? <><Loader2 className="w-4 h-4 animate-spin"/> Saving...</> : <><Save className="w-4 h-4"/> Create Lead</>}
           </button>
-          <Link href="/leads" className="px-5 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50">Cancel</Link>
+          <Link href="/leads" className="px-5 py-2.5 border border-slate-200 text-secondary text-sm font-medium rounded-xl hover:bg-slate-50">Cancel</Link>
         </div>
       </form>
     </PageWrapper>

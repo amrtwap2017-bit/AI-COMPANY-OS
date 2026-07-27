@@ -31,11 +31,11 @@ const WO_STATE_MACHINE = [
   { from: "open",          to: "assigned",      label: "Assign Technician",  color: "bg-purple-100 text-purple-700" },
   { from: "open",          to: "cancelled",     label: "Cancel",             color: "bg-red-100 text-red-700" },
   { from: "assigned",      to: "in_progress",   label: "Start Work",         color: "bg-blue-100 text-blue-700" },
-  { from: "assigned",      to: "open",          label: "Unassign",           color: "bg-slate-100 text-slate-600" },
+  { from: "assigned",      to: "open",          label: "Unassign",           color: "bg-slate-100 text-secondary" },
   { from: "in_progress",   to: "waiting_parts", label: "Need Parts",         color: "bg-orange-100 text-orange-700" },
   { from: "in_progress",   to: "completed",     label: "Mark Complete",      color: "bg-emerald-100 text-emerald-700" },
   { from: "waiting_parts", to: "in_progress",   label: "Parts Arrived",      color: "bg-blue-100 text-blue-700" },
-  { from: "completed",     to: "closed",        label: "Close & Archive",    color: "bg-slate-100 text-slate-600" },
+  { from: "completed",     to: "closed",        label: "Close & Archive",    color: "bg-slate-100 text-secondary" },
   { from: "completed",     to: "in_progress",   label: "Reopen",             color: "bg-amber-100 text-amber-700" },
 ];
 
@@ -98,7 +98,7 @@ const STATE_COLORS: Record<string, string> = {
   in_progress:   "bg-blue-200 text-blue-800",
   waiting_parts: "bg-orange-100 text-orange-700",
   completed:     "bg-emerald-100 text-emerald-700",
-  closed:        "bg-slate-100 text-slate-600",
+  closed:        "bg-slate-100 text-secondary",
   cancelled:     "bg-red-100 text-red-500",
 };
 
@@ -133,7 +133,7 @@ export default function WorkflowDesignerPage() {
 
       {/* Work Order State Machine */}
       <SectionCard title="Work Order State Machine" className="mb-6">
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-secondary mb-4">
           Visual representation of valid state transitions.
           Every transition is validated server-side by the backend engine.
         </p>
@@ -160,11 +160,11 @@ export default function WorkflowDesignerPage() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="text-left px-4 py-2 font-medium text-slate-600">From</th>
-                <th className="text-left px-4 py-2 font-medium text-slate-600"></th>
-                <th className="text-left px-4 py-2 font-medium text-slate-600">To</th>
-                <th className="text-left px-4 py-2 font-medium text-slate-600">Action Label</th>
-                <th className="text-left px-4 py-2 font-medium text-slate-600">Validated</th>
+                <th className="text-left px-4 py-2 font-medium text-secondary">From</th>
+                <th className="text-left px-4 py-2 font-medium text-secondary"></th>
+                <th className="text-left px-4 py-2 font-medium text-secondary">To</th>
+                <th className="text-left px-4 py-2 font-medium text-secondary">Action Label</th>
+                <th className="text-left px-4 py-2 font-medium text-secondary">Validated</th>
               </tr>
             </thead>
             <tbody>
@@ -176,15 +176,15 @@ export default function WorkflowDesignerPage() {
                       ? "bg-blue-50" : "hover:bg-slate-50"}`}
                 >
                   <td className="px-4 py-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATE_COLORS[t.from] || "bg-slate-100 text-slate-600"}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATE_COLORS[t.from] || "bg-slate-100 text-secondary"}`}>
                       {t.from.replace(/_/g, " ")}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-slate-400">
+                  <td className="px-4 py-2 text-tertiary">
                     <ArrowRight className="w-4 h-4" />
                   </td>
                   <td className="px-4 py-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATE_COLORS[t.to] || "bg-slate-100 text-slate-600"}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATE_COLORS[t.to] || "bg-slate-100 text-secondary"}`}>
                       {t.to.replace(/_/g, " ")}
                     </span>
                   </td>
@@ -198,14 +198,14 @@ export default function WorkflowDesignerPage() {
           </table>
         </div>
 
-        <p className="text-xs text-slate-400 mt-3">
+        <p className="text-xs text-tertiary mt-3">
           Endpoint: POST /api/v1/work-orders/&#123;id&#125;/transition — validated by WO_TRANSITIONS state machine
         </p>
       </SectionCard>
 
       {/* Automation Templates */}
       <SectionCard title="Automation Workflows" className="mb-6">
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-secondary mb-4">
           AI-triggered workflows that run automatically based on operational events.
         </p>
         <div className="space-y-3">
@@ -218,7 +218,7 @@ export default function WorkflowDesignerPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-sm text-slate-800">{template.name}</span>
-                    <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-slate-100 text-secondary rounded-full">
                       {template.category}
                     </span>
                     {template.status === "active" ? (
@@ -231,7 +231,7 @@ export default function WorkflowDesignerPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-slate-500 flex items-center gap-2">
+                  <div className="text-xs text-secondary flex items-center gap-2">
                     <span className="flex items-center gap-1">
                       <Zap className="w-3 h-3" /> {template.trigger}
                     </span>
@@ -240,11 +240,11 @@ export default function WorkflowDesignerPage() {
                       <Play className="w-3 h-3" /> {template.action}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-400 mt-1 font-mono">{template.endpoint}</div>
+                  <div className="text-xs text-tertiary mt-1 font-mono">{template.endpoint}</div>
                 </div>
                 <div className="text-right ml-4">
                   <div className="text-lg font-semibold text-slate-800">{template.runs}</div>
-                  <div className="text-xs text-slate-400">executions</div>
+                  <div className="text-xs text-tertiary">executions</div>
                 </div>
               </div>
             </div>
@@ -270,7 +270,7 @@ export default function WorkflowDesignerPage() {
                 {method}
               </span>
               <span className="text-slate-700 flex-1">{path}</span>
-              <span className="text-slate-400">{desc}</span>
+              <span className="text-tertiary">{desc}</span>
             </div>
           ))}
         </div>

@@ -57,7 +57,7 @@ export function Drawer({
             <button
               onClick={onClose}
               aria-label="Close drawer"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-lg text-tertiary hover:text-slate-600 hover:bg-slate-100 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>

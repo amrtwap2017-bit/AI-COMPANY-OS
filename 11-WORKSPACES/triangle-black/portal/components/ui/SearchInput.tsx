@@ -15,7 +15,7 @@ export function SearchInput({ label, className = "", onClear, value, showHint, o
   const hasValue = String(value || "").length > 0;
   return (
     <div className={"relative " + className}>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary pointer-events-none" />
       <input
         type="search"
         value={value}
@@ -29,7 +29,7 @@ export function SearchInput({ label, className = "", onClear, value, showHint, o
           type="button"
           onClick={onClear}
           aria-label="Clear search"
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-tertiary hover:text-slate-600 hover:bg-slate-100 transition-colors"
         >
           <X className="w-3 h-3" />
         </button>

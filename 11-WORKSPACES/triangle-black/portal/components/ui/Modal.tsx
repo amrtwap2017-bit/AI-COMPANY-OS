@@ -65,14 +65,14 @@ export function Modal({
                 <h2 id="modal-title" className="text-base font-semibold text-slate-900">{title}</h2>
               )}
               {description && (
-                <p className="text-sm text-slate-500 mt-0.5">{description}</p>
+                <p className="text-sm text-secondary mt-0.5">{description}</p>
               )}
             </div>
             <button
               ref={firstFocusRef}
               onClick={onClose}
               aria-label="Close modal"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0 ml-4"
+              className="p-1.5 rounded-lg text-tertiary hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0 ml-4"
             >
               <X className="w-4 h-4" />
             </button>

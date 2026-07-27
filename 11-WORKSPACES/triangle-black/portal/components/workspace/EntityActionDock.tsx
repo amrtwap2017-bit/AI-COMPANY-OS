@@ -24,7 +24,7 @@ export function EntityActionDock({ title, subtitle, actions }: EntityActionDockP
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Action Dock
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>

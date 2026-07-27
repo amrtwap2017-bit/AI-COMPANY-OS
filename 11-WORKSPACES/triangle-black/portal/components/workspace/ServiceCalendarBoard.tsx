@@ -5,7 +5,7 @@ export function ServiceCalendarBoard({ title, subtitle, buckets=[] }:any) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
       <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {buckets.map((b:any,i:number)=>(
           <div key={i} className={"rounded-xl border p-4 "+(tones[b.tone]||tones.neutral)}>

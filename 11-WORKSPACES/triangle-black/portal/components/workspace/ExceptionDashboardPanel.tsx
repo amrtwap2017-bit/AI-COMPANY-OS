@@ -25,7 +25,7 @@ export function ExceptionDashboardPanel({ title, subtitle, items }: ExceptionDas
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Exception Dashboard
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
@@ -34,7 +34,7 @@ export function ExceptionDashboardPanel({ title, subtitle, items }: ExceptionDas
 
       <div className="mt-5 space-y-3">
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-slate-500">
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
             No exceptions are currently visible.
           </div>
         ) : (

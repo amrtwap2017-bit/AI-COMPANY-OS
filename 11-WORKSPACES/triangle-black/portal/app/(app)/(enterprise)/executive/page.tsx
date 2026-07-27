@@ -65,17 +65,17 @@ export default function ExecutivePage() {
           <div>
             <div className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Executive Center</div>
             <h1 className="text-3xl font-black text-white">Executive Dashboard</h1>
-            <p className="text-slate-400 mt-1 text-sm">Real-time business intelligence and decision support</p>
+            <p className="text-tertiary mt-1 text-sm">Real-time business intelligence and decision support</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-center">
               <div className={`text-5xl font-black ${scoreColor}`}>{score}</div>
-              <div className="text-xs text-slate-400 mt-1">Platform Health</div>
+              <div className="text-xs text-tertiary mt-1">Platform Health</div>
               <div className={`text-xs font-bold mt-0.5 ${scoreColor}`}>{twin?.health_label ?? "—"}</div>
             </div>
             <div className={`border rounded-2xl px-5 py-4 text-center ${riskColor === "emerald" ? "border-emerald-500/30 bg-emerald-500/10" : riskColor === "amber" ? "border-amber-500/30 bg-amber-500/10" : "border-red-500/30 bg-red-500/10"}`}>
               <div className={`text-2xl font-black text-${riskColor}-400`}>{riskScore}</div>
-              <div className="text-xs text-slate-400 mt-0.5">Risk Score</div>
+              <div className="text-xs text-tertiary mt-0.5">Risk Score</div>
               <div className={`text-xs font-bold text-${riskColor}-400`}>{riskLevel}</div>
             </div>
           </div>
@@ -95,10 +95,10 @@ export default function ExecutivePage() {
             { label: "Unread Alerts",     value: unreadNotifs.length,                 sub: `${totalPending} auto pending`,                   color: "purple",  path: "/inbox" },
           ].map((k,i) => (
             <button key={i} onClick={() => router.push(k.path)}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
-              <div className="text-xs text-slate-500 mb-2 font-medium">{k.label}</div>
+              className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+              <div className="text-xs text-secondary mb-2 font-medium">{k.label}</div>
               <div className={`text-2xl font-black text-${k.color}-500 group-hover:scale-105 transition-transform origin-left`}>{k.value}</div>
-              <div className="text-xs text-slate-400 mt-1 truncate">{k.sub}</div>
+              <div className="text-xs text-tertiary mt-1 truncate">{k.sub}</div>
             </button>
           ))}
         </div>
@@ -109,15 +109,15 @@ export default function ExecutivePage() {
           {/* Left — Action items */}
           <div className="space-y-4">
             {/* Critical issues */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-slate-900 dark:text-white">🚨 Executive Alerts</h2>
+                <h2 className="font-bold text-primary">🚨 Executive Alerts</h2>
                 <button onClick={() => router.push("/executive/exceptions")} className="text-xs text-amber-500">All →</button>
               </div>
               {criticalWOs.length === 0 && expiringContracts.length === 0 ? (
                 <div className="text-center py-6">
                   <div className="text-3xl mb-2">✅</div>
-                  <div className="text-sm text-slate-400">No executive alerts</div>
+                  <div className="text-sm text-tertiary">No executive alerts</div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -149,8 +149,8 @@ export default function ExecutivePage() {
             </div>
 
             {/* Domain summary */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-              <h2 className="font-bold text-slate-900 dark:text-white mb-4 text-sm">Business Summary</h2>
+            <div className="bg-surface border border-border rounded-2xl p-5">
+              <h2 className="font-bold text-primary mb-4 text-sm">Business Summary</h2>
               <div className="space-y-2">
                 {[
                   { label: "Total WOs",         value: wos.length,                           icon: "⚙️" },
@@ -163,9 +163,9 @@ export default function ExecutivePage() {
                   <div key={i} className="flex items-center justify-between py-1.5">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{item.icon}</span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400">{item.label}</span>
+                      <span className="text-sm text-secondary">{item.label}</span>
                     </div>
-                    <span className="font-black text-slate-900 dark:text-white">{item.value}</span>
+                    <span className="font-black text-primary">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -176,9 +176,9 @@ export default function ExecutivePage() {
           <div className="xl:col-span-2 space-y-4">
 
             {/* Twin domains */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-slate-900 dark:text-white">Digital Twin — {score}/100 {twin?.health_label}</h2>
+                <h2 className="font-bold text-primary">Digital Twin — {score}/100 {twin?.health_label}</h2>
                 <button onClick={() => router.push("/executive/intelligence")} className="text-xs text-amber-500">Intelligence →</button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -188,11 +188,11 @@ export default function ExecutivePage() {
                   return (
                     <div key={i} className={`rounded-xl border p-4 ${hasIssue?"bg-amber-50 border-amber-200 dark:bg-amber-900/20":"bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20"}`}>
                       <div className="flex justify-between items-start mb-1">
-                        <div className="text-xs font-bold text-slate-700 dark:text-slate-300">{dom.domain}</div>
+                        <div className="text-xs font-bold text-slate-700 dark:text-tertiary">{dom.domain}</div>
                         <div className={`text-xs font-black ${hasIssue?"text-amber-600":"text-emerald-600"}`}>{hasIssue?"⚠":"✓"}</div>
                       </div>
                       <div className="text-2xl font-black">{dom.total ?? "—"}</div>
-                      <div className="text-[9px] text-slate-400 mt-1 leading-tight truncate">{vals}</div>
+                      <div className="text-[9px] text-tertiary mt-1 leading-tight truncate">{vals}</div>
                     </div>
                   );
                 })}
@@ -200,9 +200,9 @@ export default function ExecutivePage() {
             </div>
 
             {/* Finance snapshot */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="bg-surface border border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-slate-900 dark:text-white">Finance Snapshot</h2>
+                <h2 className="font-bold text-primary">Finance Snapshot</h2>
                 <button onClick={() => router.push("/invoices")} className="text-xs text-amber-500">Full report →</button>
               </div>
               <div className="grid grid-cols-4 gap-3 mb-4">
@@ -212,9 +212,9 @@ export default function ExecutivePage() {
                   { label: "Overdue",    count: d.finance?.overdue??0,    color: "red" },
                   { label: "Cancelled",  count: d.finance?.cancelled??0,  color: "slate" },
                 ].map((s,i) => (
-                  <div key={i} className="text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
+                  <div key={i} className="text-center bg-base-alt dark:bg-surface-alt rounded-xl p-3">
                     <div className={`text-2xl font-black text-${s.color}-500`}>{s.count}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+                    <div className="text-xs text-secondary mt-0.5">{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -225,7 +225,7 @@ export default function ExecutivePage() {
                   <div className="bg-red-500 h-3" style={{width:`${(d.finance?.overdue||0)/(d.finance?.total_invoices||1)*100}%`}}/>
                 </div>
               </div>
-              <div className="flex gap-4 mt-2 text-xs text-slate-400">
+              <div className="flex gap-4 mt-2 text-xs text-tertiary">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>Paid</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/>Pending</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block"/>Overdue</span>
@@ -233,14 +233,14 @@ export default function ExecutivePage() {
             </div>
 
             {/* Executive sub-pages */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-              <h2 className="font-bold text-slate-900 dark:text-white mb-4 text-sm">Executive Views</h2>
+            <div className="bg-surface border border-border rounded-2xl p-5">
+              <h2 className="font-bold text-primary mb-4 text-sm">Executive Views</h2>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {executiveNav.map((nav,i) => (
                   <button key={i} onClick={() => router.push(nav.path)}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/20 border border-transparent hover:border-amber-200 transition-all group">
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-base-alt dark:bg-surface-alt hover:bg-amber-50 dark:hover:bg-amber-900/20 border border-transparent hover:border-amber-200 transition-all group">
                     <span className="text-xl">{nav.icon}</span>
-                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400 text-center group-hover:text-amber-600">{nav.label}</span>
+                    <span className="text-[10px] font-medium text-secondary text-center group-hover:text-amber-600">{nav.label}</span>
                   </button>
                 ))}
               </div>

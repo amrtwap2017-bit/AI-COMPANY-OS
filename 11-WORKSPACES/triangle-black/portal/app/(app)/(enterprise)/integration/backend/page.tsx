@@ -27,7 +27,7 @@ const METHOD_COLORS: Record<string, string> = {
 
 function EndpointRow({ path, method, summary, tag }: any) {
   const [expanded, setExpanded] = useState(false);
-  const color = METHOD_COLORS[method] ?? "bg-slate-100 text-slate-600";
+  const color = METHOD_COLORS[method] ?? "bg-slate-100 text-secondary";
 
   return (
     <div className="border border-slate-200 rounded-lg mb-2">
@@ -40,15 +40,15 @@ function EndpointRow({ path, method, summary, tag }: any) {
         </span>
         <span className="font-mono text-sm text-slate-700 flex-1 truncate">{path}</span>
         {summary && (
-          <span className="text-xs text-slate-400 hidden sm:block truncate max-w-48">{summary}</span>
+          <span className="text-xs text-tertiary hidden sm:block truncate max-w-48">{summary}</span>
         )}
-        {expanded ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
+        {expanded ? <ChevronDown className="w-4 h-4 text-tertiary flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-tertiary flex-shrink-0" />}
       </button>
       {expanded && (
         <div className="px-4 pb-3 border-t border-slate-100">
-          <div className="text-sm text-slate-600 mt-2">{summary || "No description"}</div>
+          <div className="text-sm text-secondary mt-2">{summary || "No description"}</div>
           <div className="mt-2 flex gap-2">
-            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">Tag: {tag}</span>
+            <span className="text-xs bg-slate-100 text-secondary px-2 py-0.5 rounded">Tag: {tag}</span>
             <a
               href={`http://localhost:8030/docs#/${tag}/${method}_${path.replace(/\//g,"_").replace(/[{}]/g,"")}`}
               target="_blank"
@@ -146,7 +146,7 @@ export default function APIDocsPage() {
         ].map(s => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
             <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+            <div className="text-xs text-secondary mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -182,7 +182,7 @@ export default function APIDocsPage() {
       {/* Filters */}
       <div className="flex gap-3 mb-4 flex-wrap">
         <div className="flex items-center gap-2 flex-1 min-w-48 border border-slate-200 rounded-lg px-3 py-2">
-          <Search className="w-4 h-4 text-slate-400" />
+          <Search className="w-4 h-4 text-tertiary" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -220,7 +220,7 @@ export default function APIDocsPage() {
           </SectionCard>
         ))}
         {Object.keys(byTag).length === 0 && (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-tertiary">
             <Code className="w-10 h-10 mx-auto mb-3 opacity-30" />
             <p className="text-sm">No endpoints match your filters</p>
           </div>

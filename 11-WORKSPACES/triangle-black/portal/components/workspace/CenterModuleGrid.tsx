@@ -16,7 +16,7 @@ export function CenterModuleGrid({ title, subtitle, items }: CenterModuleGridPro
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-5 py-4">
         <h2 className="text-sm font-bold text-slate-900">{title}</h2>
-        <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
+        <p className="mt-0.5 text-xs text-secondary">{subtitle}</p>
       </div>
       <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => {
@@ -28,7 +28,7 @@ export function CenterModuleGrid({ title, subtitle, items }: CenterModuleGridPro
                   <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide flex-shrink-0 ${statusMap[item.status]}`}>{item.status}</span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed">{item.description}</p>
+              <p className="text-xs text-secondary leading-relaxed">{item.description}</p>
               {item.href && (
                 <div className="mt-3 flex items-center gap-1 text-xs font-medium text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">
                   Open <ArrowRight className="w-3 h-3" />

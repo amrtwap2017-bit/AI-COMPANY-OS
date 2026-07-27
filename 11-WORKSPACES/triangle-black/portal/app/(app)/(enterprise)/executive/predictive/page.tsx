@@ -23,10 +23,10 @@ export default function ExecutivePredictive() {
   ];
   const riskColors = {high:"red",medium:"amber",low:"emerald"};
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Predictive Intelligence</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Predictive Insights</h1>
-      <p className="text-slate-500 mt-1">Forward-looking analysis based on current platform data</p></div>
+      <h1 className="text-3xl font-black text-primary">Predictive Insights</h1>
+      <p className="text-secondary mt-1">Forward-looking analysis based on current platform data</p></div>
       <div className="space-y-4">
         {predictions.map((p,i)=>{const rc=riskColors[p.risk];return(
           <div key={i} className={`bg-${rc}-50 dark:bg-${rc}-900/20 border border-${rc}-200 rounded-2xl p-6`}>
@@ -36,8 +36,8 @@ export default function ExecutivePredictive() {
                   <span className={`text-xs font-black px-2.5 py-1 rounded-lg bg-${rc}-500 text-white`}>{p.risk.toUpperCase()} RISK</span>
                   <span className="text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">{p.category}</span>
                 </div>
-                <div className="font-bold text-slate-900 dark:text-white text-lg mb-1">{p.prediction}</div>
-                <div className="text-sm text-slate-600">→ {p.action}</div>
+                <div className="font-bold text-primary text-lg mb-1">{p.prediction}</div>
+                <div className="text-sm text-secondary">→ {p.action}</div>
               </div>
               <button onClick={()=>router.push(p.path)}
                 className="ml-4 px-4 py-2 bg-white dark:bg-slate-800 border rounded-xl text-sm font-bold hover:border-amber-400 transition-colors">

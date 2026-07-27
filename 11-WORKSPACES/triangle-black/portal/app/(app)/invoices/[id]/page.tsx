@@ -34,7 +34,7 @@ export default function InvoiceDetailPage() {
         ["Contract",     inv?.contract_id||"—"],
       ].map(([label, value]: any) => (
         <div key={String(label)} className="bg-slate-50 rounded-xl p-3">
-          <p className="text-xs text-slate-500 mb-1">{label}</p>
+          <p className="text-xs text-secondary mb-1">{label}</p>
           <div className="text-sm font-medium text-slate-900">{value}</div>
         </div>
       ))}
@@ -45,7 +45,7 @@ export default function InvoiceDetailPage() {
     <PageWrapper>
       <Breadcrumb/>
       <PageHeader title={inv?.invoice_number||"Invoice"} subtitle={"EGP "+(inv?.total_amount||0)} badge="INV"
-        actions={<Link href="/invoices" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
+        actions={<Link href="/invoices" className="flex items-center gap-1.5 px-3 py-2 text-sm text-secondary hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
       <EntityTabs tabs={[{ id:"overview", label:"Overview", icon:"📋", content: overview }]}/>
     </PageWrapper>
   );

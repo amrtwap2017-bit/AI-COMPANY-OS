@@ -82,7 +82,7 @@ export default function PlatformStatusPage() {
               {s.ok ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-red-500" />}
             </div>
             <div className="text-sm font-semibold text-slate-800">{s.label}</div>
-            <div className="text-xs text-slate-400 mt-1">{s.detail}</div>
+            <div className="text-xs text-tertiary mt-1">{s.detail}</div>
           </div>
         ))}
       </div>
@@ -93,7 +93,7 @@ export default function PlatformStatusPage() {
               <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">{p.id}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-slate-800">{p.name}</div>
-                <div className="text-xs text-slate-400 truncate">{p.desc}</div>
+                <div className="text-xs text-tertiary truncate">{p.desc}</div>
               </div>
               <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
             </div>
@@ -110,7 +110,7 @@ export default function PlatformStatusPage() {
           ].map(v => (
             <div key={v.label}>
               <div className="text-lg font-bold text-slate-800">{v.value}</div>
-              <div className="text-xs text-slate-400 mt-1">{v.label}</div>
+              <div className="text-xs text-tertiary mt-1">{v.label}</div>
             </div>
           ))}
         </div>

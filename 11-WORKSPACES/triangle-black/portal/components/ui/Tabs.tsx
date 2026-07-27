@@ -37,7 +37,7 @@ export function Tabs({ tabs, active, onChange, variant = "underline", size = "md
             className={["inline-flex items-center rounded-xl font-semibold transition-all", sizeClass,
               active === tab.key
                 ? "bg-amber-600 text-white shadow-sm"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-100",
+                : "text-secondary hover:text-slate-700 hover:bg-slate-100",
               tab.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
             ].join(" ")}
           >
@@ -67,14 +67,14 @@ export function Tabs({ tabs, active, onChange, variant = "underline", size = "md
             className={["inline-flex items-center border-b-2 font-medium transition-all whitespace-nowrap", sizeClass,
               active === tab.key
                 ? "border-amber-600 text-amber-700"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300",
+                : "border-transparent text-secondary hover:text-slate-700 hover:border-slate-300",
               tab.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
             ].join(" ")}
           >
             {tab.icon && <span className="flex-shrink-0">{tab.icon}</span>}
             {tab.label}
             {tab.count !== undefined && (
-              <span className={"ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold " + (active === tab.key ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-500")}>
+              <span className={"ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold " + (active === tab.key ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-secondary")}>
                 {tab.count}
               </span>
             )}

@@ -40,7 +40,7 @@ export default function WarehouseDetailPage() {
 
   if (wl) return <PageWrapper><LoadingState title="Loading warehouse..." /></PageWrapper>;
   if (!warehouse || warehouse.detail) return (
-    <PageWrapper><p className="p-8 text-slate-400">Warehouse not found</p></PageWrapper>
+    <PageWrapper><p className="p-8 text-tertiary">Warehouse not found</p></PageWrapper>
   );
 
   const stocks    = Array.isArray(stockData)    ? stockData    : stockData?.data    ?? stockData?.items    ?? [];
@@ -74,7 +74,7 @@ export default function WarehouseDetailPage() {
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
             <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+            <div className="text-xs text-secondary mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -97,7 +97,7 @@ export default function WarehouseDetailPage() {
                       <div className="text-sm font-medium text-slate-800 truncate">
                         {s.item_name ?? s.name ?? s.item_id}
                       </div>
-                      <div className="text-xs text-slate-400">{s.item_code ?? ""}</div>
+                      <div className="text-xs text-tertiary">{s.item_code ?? ""}</div>
                     </div>
                     <span className={`text-sm font-bold ml-2 flex-shrink-0 ${isLow ? "text-amber-600" : "text-emerald-600"}`}>
                       {qty} {s.unit_of_measure ?? ""}
@@ -113,7 +113,7 @@ export default function WarehouseDetailPage() {
               );
             })}
             {stocks.length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-6">No stock in this warehouse</p>
+              <p className="text-sm text-tertiary text-center py-6">No stock in this warehouse</p>
             )}
           </div>
         </SectionCard>
@@ -134,7 +134,7 @@ export default function WarehouseDetailPage() {
                       <div className="text-sm font-medium text-slate-700">
                         {m.item_name ?? m.reference ?? (isIn ? "Stock In" : "Stock Out")}
                       </div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-tertiary">
                         {String(m.created_at ?? "").slice(0,10)}
                         {m.reference ? ` · ${m.reference}` : ""}
                       </div>
@@ -147,7 +147,7 @@ export default function WarehouseDetailPage() {
               );
             })}
             {movements.length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-6">No recent movements</p>
+              <p className="text-sm text-tertiary text-center py-6">No recent movements</p>
             )}
           </div>
         </SectionCard>

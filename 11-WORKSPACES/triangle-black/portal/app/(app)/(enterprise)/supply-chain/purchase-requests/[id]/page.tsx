@@ -10,8 +10,8 @@ import Link from "next/link";
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
-const S = {draft:"bg-slate-100 text-slate-600",submitted:"bg-blue-100 text-blue-800",approved:"bg-emerald-100 text-emerald-800",rejected:"bg-red-100 text-red-700",ordered:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800"};
+const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
+const S = {draft:"bg-slate-100 text-secondary",submitted:"bg-blue-100 text-blue-800",approved:"bg-emerald-100 text-emerald-800",rejected:"bg-red-100 text-red-700",ordered:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800"};
 const PRIORITIES = ["critical","high","medium","low"];
 
 export default function PurchaseRequestDetailPage() {
@@ -60,7 +60,7 @@ export default function PurchaseRequestDetailPage() {
   if (!pr || pr.detail) return (
     <PageWrapper>
       <div className="text-center py-20">
-        <p className="text-slate-500 mb-4">Purchase request not found</p>
+        <p className="text-secondary mb-4">Purchase request not found</p>
         <Link href="/supply-chain/purchase-requests" className="text-blue-600 underline text-sm">Back to Purchase Requests</Link>
       </div>
     </PageWrapper>
@@ -88,8 +88,8 @@ export default function PurchaseRequestDetailPage() {
 
       {!editing && (
         <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[pr.status]||"bg-slate-100 text-slate-600")}>{pr.status||"—"}</span>
+          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[pr.status]||"bg-slate-100 text-secondary")}>{pr.status||"—"}</span>
           <div className="flex-1" />
           {pr.status==="draft" && (
             <button onClick={()=>updateStatus("submitted")} disabled={saving}
@@ -130,27 +130,27 @@ export default function PurchaseRequestDetailPage() {
             {editing ? (
               <form onSubmit={save} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
                   <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
                   <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
                     rows={4} className={inp+" resize-none"} />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Category</label>
                     <input value={form?.category||""} onChange={e=>setForm({...form,category:e.target.value})} placeholder="HVAC / Electrical…" className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Priority</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Priority</label>
                     <select value={form?.priority||"medium"} onChange={e=>setForm({...form,priority:e.target.value})} className={inp}>
                       {PRIORITIES.map(p=><option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Est. Cost (EGP)</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Est. Cost (EGP)</label>
                     <input type="number" value={form?.estimated_cost||""} onChange={e=>setForm({...form,estimated_cost:e.target.value})} className={inp} />
                   </div>
                 </div>
@@ -158,12 +158,12 @@ export default function PurchaseRequestDetailPage() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Title</p>
+                  <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Title</p>
                   <p className="text-slate-800 font-medium">{pr.title}</p>
                 </div>
                 {pr.description && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Description</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
                     <p className="text-slate-700 text-sm whitespace-pre-wrap">{pr.description}</p>
                   </div>
                 )}
@@ -185,10 +185,10 @@ export default function PurchaseRequestDetailPage() {
                   return (
                     <div key={step} className="flex items-center flex-1">
                       <div className={`flex flex-col items-center flex-1 ${i<arr.length-1?"":"flex-none"}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-1 ${isCurrent&&!isRejected?"bg-blue-600 text-white":isDone?"bg-emerald-500 text-white":"bg-slate-100 text-slate-400"}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-1 ${isCurrent&&!isRejected?"bg-blue-600 text-white":isDone?"bg-emerald-500 text-white":"bg-slate-100 text-tertiary"}`}>
                           {isDone?"✓":i+1}
                         </div>
-                        <span className={`text-xs text-center ${isCurrent&&!isRejected?"text-blue-700 font-semibold":isDone?"text-emerald-600":"text-slate-400"}`}>{step}</span>
+                        <span className={`text-xs text-center ${isCurrent&&!isRejected?"text-blue-700 font-semibold":isDone?"text-emerald-600":"text-tertiary"}`}>{step}</span>
                       </div>
                       {i < arr.length-1 && <div className={`h-0.5 flex-1 mx-1 mb-5 ${isDone?"bg-emerald-400":"bg-slate-200"}`} />}
                     </div>
@@ -208,22 +208,22 @@ export default function PurchaseRequestDetailPage() {
           <SectionCard title="Properties">
             <dl className="space-y-3">
               {[
-                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[pr.status]||"bg-slate-100 text-slate-600")}>{pr.status||"—"}</span>},
+                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[pr.status]||"bg-slate-100 text-secondary")}>{pr.status||"—"}</span>},
                 {label:"Priority",  value:<span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[pr.priority]||P.low)}>{pr.priority||"—"}</span>},
-                {label:"Category",  value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{pr.category||"—"}</span>},
+                {label:"Category",  value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{pr.category||"—"}</span>},
                 {label:"Est. Cost", value:pr.estimated_cost?`EGP ${fmtNum(pr.estimated_cost)}`:"—"},
                 {label:"Created",   value:fmtDate(pr.created_at)},
                 {label:"Updated",   value:fmtDate(pr.updated_at)},
               ].map(({label,value})=>(
                 <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dt className="text-xs text-secondary">{label}</dt>
                   <dd className="text-xs">{value}</dd>
                 </div>
               ))}
             </dl>
           </SectionCard>
 
-          <Link href="/supply-chain/purchase-requests" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">
+          <Link href="/supply-chain/purchase-requests" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">
             Back to Purchase Requests
           </Link>
         </div>

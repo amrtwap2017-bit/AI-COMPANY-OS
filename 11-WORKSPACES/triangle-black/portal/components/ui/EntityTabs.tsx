@@ -15,7 +15,7 @@ export function EntityTabs({ tabs }: { tabs: Tab[] }) {
             className={"flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors " + (
               active === tab.id
                 ? "border-amber-600 text-amber-700 bg-amber-50/50"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                : "border-transparent text-secondary hover:text-slate-700 hover:bg-slate-50"
             )}>
             {tab.icon && <span>{tab.icon}</span>}
             {tab.label}

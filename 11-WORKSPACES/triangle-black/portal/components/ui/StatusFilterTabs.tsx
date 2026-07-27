@@ -29,7 +29,7 @@ export function StatusFilterTabs({ tabs, active, onChange, className = "" }: Sta
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all " +
             (active === tab.value
               ? "bg-amber-600 text-white shadow-sm"
-              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100")
+              : "text-secondary hover:text-slate-700 hover:bg-slate-100")
           }
         >
           {tab.label}

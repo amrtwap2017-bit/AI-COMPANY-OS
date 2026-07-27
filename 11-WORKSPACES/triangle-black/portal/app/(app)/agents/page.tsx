@@ -108,42 +108,42 @@ export default function AgentsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">AI Platform</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">AI Agents</h1>
-          <p className="text-slate-500 mt-1">Autonomous agents monitoring and automating platform operations</p>
+          <h1 className="text-3xl font-black text-primary">AI Agents</h1>
+          <p className="text-secondary mt-1">Autonomous agents monitoring and automating platform operations</p>
         </div>
         <div className="flex gap-3">
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-3 text-center">
             <div className="text-2xl font-black text-emerald-500">{agents.length}</div>
-            <div className="text-xs text-slate-500">Active Agents</div>
+            <div className="text-xs text-secondary">Active Agents</div>
           </div>
           <div className={`rounded-2xl border px-5 py-3 text-center ${totalPending > 0 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}`}>
             <div className={`text-2xl font-black ${totalPending > 0 ? "text-amber-500" : "text-emerald-500"}`}>{totalPending}</div>
-            <div className="text-xs text-slate-500">Pending Actions</div>
+            <div className="text-xs text-secondary">Pending Actions</div>
           </div>
         </div>
       </div>
 
       {/* AI system health */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+      <div className="bg-surface border border-border rounded-2xl p-5">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">AI Engine: {aiHealth?.status || "online"}</span>
+            <span className="text-sm font-semibold text-slate-700 dark:text-tertiary">AI Engine: {aiHealth?.status || "online"}</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Digital Twin: {score}/100</span>
+            <span className="text-sm font-semibold text-slate-700 dark:text-tertiary">Digital Twin: {score}/100</span>
           </div>
           <div className="flex items-center gap-3">
             <div className={`w-3 h-3 rounded-full ${totalPending > 0 ? "bg-amber-500" : "bg-emerald-500"} animate-pulse`} />
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Automation: {totalPending > 0 ? `${totalPending} pending` : "all clear"}</span>
+            <span className="text-sm font-semibold text-slate-700 dark:text-tertiary">Automation: {totalPending > 0 ? `${totalPending} pending` : "all clear"}</span>
           </div>
           <button onClick={() => router.push("/workflows/launcher")}
-            className="ml-auto px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors">
+            className="ml-auto px-4 py-2 bg-brand text-inverse rounded-xl text-sm font-bold hover:bg-amber-700 transition-colors">
             ⚡ Run All Agents
           </button>
         </div>
@@ -153,25 +153,25 @@ export default function AgentsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {agents.map((agent, i) => (
           <button key={i} onClick={() => router.push(agent.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
             <div className="flex items-start justify-between mb-3">
               <div className="text-3xl">{agent.icon}</div>
               <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-700">ACTIVE</span>
             </div>
-            <div className="font-black text-lg text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">{agent.name}</div>
+            <div className="font-black text-lg text-primary group-hover:text-amber-600 transition-colors">{agent.name}</div>
             <div className="text-xs text-amber-500 font-semibold mb-2">{agent.role}</div>
-            <div className="text-xs text-slate-500 mb-4">{agent.description}</div>
+            <div className="text-xs text-secondary mb-4">{agent.description}</div>
             <div className="grid grid-cols-3 gap-2 mb-4">
               {agent.metrics.map((m, j) => (
-                <div key={j} className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 text-center">
-                  <div className="text-sm font-black text-slate-900 dark:text-white">{m.value}</div>
-                  <div className="text-[10px] text-slate-400 leading-tight mt-0.5">{m.label}</div>
+                <div key={j} className="bg-base-alt dark:bg-surface-alt rounded-lg p-2 text-center">
+                  <div className="text-sm font-black text-primary">{m.value}</div>
+                  <div className="text-[10px] text-tertiary leading-tight mt-0.5">{m.label}</div>
                 </div>
               ))}
             </div>
             <div className="space-y-1">
               {agent.actions.map((action, j) => (
-                <div key={j} className="text-xs text-slate-400 flex items-center gap-1">
+                <div key={j} className="text-xs text-tertiary flex items-center gap-1">
                   <span className="text-emerald-500">✓</span> {action}
                 </div>
               ))}

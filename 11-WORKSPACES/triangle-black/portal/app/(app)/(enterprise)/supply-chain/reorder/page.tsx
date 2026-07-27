@@ -72,20 +72,20 @@ export default function ReorderPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
           <AlertTriangle className="w-5 h-5 text-amber-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-amber-600">{(alerts || []).length}</div>
-          <div className="text-xs text-slate-500">Items Below Min Stock</div>
+          <div className="text-xs text-secondary">Items Below Min Stock</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
           <ShoppingCart className="w-5 h-5 text-blue-500 mx-auto mb-2" />
           <div className="text-2xl font-bold text-blue-600">
             {toArr(alerts).filter((a: any) => a.current_stock === 0).length}
           </div>
-          <div className="text-xs text-slate-500">Completely Out of Stock</div>
+          <div className="text-xs text-secondary">Completely Out of Stock</div>
         </div>
         <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl p-4">
           <button
             onClick={() => autoReorder.mutate()}
             disabled={autoReorder.isPending || (alerts || []).length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm
+            className="flex items-center gap-2 px-4 py-2 bg-brand text-inverse text-sm
                        font-semibold rounded-lg hover:bg-amber-700 disabled:opacity-50"
           >
             {autoReorder.isPending ? (
@@ -95,7 +95,7 @@ export default function ReorderPage() {
             )}
             Auto-Create PRs ({(alerts || []).length})
           </button>
-          <div className="text-xs text-slate-400 mt-2">Creates purchase requests for all</div>
+          <div className="text-xs text-tertiary mt-2">Creates purchase requests for all</div>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export default function ReorderPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-slate-500 border-b border-slate-100">
+              <tr className="text-xs text-secondary border-b border-slate-100">
                 <th className="text-left py-2 font-medium">Item</th>
                 <th className="text-left py-2 font-medium">Category</th>
                 <th className="text-right py-2 font-medium">Current</th>
@@ -117,20 +117,20 @@ export default function ReorderPage() {
                 <tr key={alert.id} className="border-b border-slate-50 hover:bg-slate-50">
                   <td className="py-2">
                     <div className="font-medium text-slate-800">{alert.name}</div>
-                    <div className="text-xs text-slate-400 font-mono">{alert.item_code}</div>
+                    <div className="text-xs text-tertiary font-mono">{alert.item_code}</div>
                   </td>
-                  <td className="py-2 text-slate-600">{alert.category}</td>
+                  <td className="py-2 text-secondary">{alert.category}</td>
                   <td className={`py-2 text-right font-semibold
                     ${alert.current_stock === 0 ? "text-red-600" : "text-amber-600"}`}>
                     {alert.current_stock} {alert.unit_of_measure}
                   </td>
-                  <td className="py-2 text-right text-slate-500">{alert.min_stock}</td>
+                  <td className="py-2 text-right text-secondary">{alert.min_stock}</td>
                   <td className="py-2 text-right text-red-600 font-semibold">
                     -{Math.abs(Number(alert.shortage || 0))}
                   </td>
                   <td className="py-2">
                     {(alert.suggested_vendors || []).slice(0, 2).map((v: any) => (
-                      <span key={v.id} className="text-xs bg-slate-100 text-slate-600
+                      <span key={v.id} className="text-xs bg-slate-100 text-secondary
                                                    px-2 py-0.5 rounded mr-1">{v.name}</span>
                     ))}
                   </td>
@@ -138,7 +138,7 @@ export default function ReorderPage() {
               ))}
               {(alerts || []).length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 text-sm">
+                  <td colSpan={6} className="py-8 text-center text-tertiary text-sm">
                     ✅ All items are above minimum stock levels
                   </td>
                 </tr>

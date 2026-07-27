@@ -107,7 +107,7 @@ export function EntityContextDrawer() {
         <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
                 Entity Context
               </div>
               <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
@@ -151,7 +151,7 @@ export function EntityContextDrawer() {
 
         <div className="space-y-6 p-6">
           <section className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               Why this matters
             </div>
             <div className="mt-3 text-sm leading-7 text-slate-700">
@@ -169,7 +169,7 @@ export function EntityContextDrawer() {
                   className="block rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 transition hover:border-slate-200 hover:bg-white"
                 >
                   <div className="text-sm font-semibold text-slate-900">{item.label}</div>
-                  <div className="mt-2 text-xs text-slate-500">{item.href}</div>
+                  <div className="mt-2 text-xs text-secondary">{item.href}</div>
                 </Link>
               ))}
             </div>
@@ -179,13 +179,13 @@ export function EntityContextDrawer() {
             <div className="text-lg font-semibold text-slate-950">Context Clues</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
                   Current Path
                 </div>
                 <div className="mt-2 text-sm text-slate-800">{pathname}</div>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
                   Context Payload
                 </div>
                 <div className="mt-2 text-sm text-slate-800">

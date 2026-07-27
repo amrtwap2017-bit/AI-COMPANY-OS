@@ -51,7 +51,7 @@ export default function CustomersPage() {
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -65,25 +65,25 @@ export default function CustomersPage() {
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
             {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s}</option>)}
           </select>
-          {(sf!=="all"||q)&&<button onClick={()=>{setSf("all");setQ("");}} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
+          {(sf!=="all"||q)&&<button onClick={()=>{setSf("all");setQ("");}} className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>}
         </div>
         {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No customers found"/>:(
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-slate-100">
                 {["Name","Company","Email","Status","Score","Date"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
               <tbody className="divide-y divide-slate-50">
                 {filtered.map(l=>(
                   <tr key={l.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-3 font-medium text-slate-800">{l.name}</td>
-                    <td className="py-3 px-3 text-xs text-slate-600">{l.company||"—"}</td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{l.email||"—"}</td>
-                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[l.status]||"bg-slate-100 text-slate-600")}>{l.status||"—"}</span></td>
-                    <td className="py-3 px-3"><span className={`text-sm font-bold ${(l.score||0)>=80?"text-emerald-600":(l.score||0)>=50?"text-amber-600":"text-slate-500"}`}>{l.score||0}</span></td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(l.created_at)}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{l.company||"—"}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{l.email||"—"}</td>
+                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[l.status]||"bg-slate-100 text-secondary")}>{l.status||"—"}</span></td>
+                    <td className="py-3 px-3"><span className={`text-sm font-bold ${(l.score||0)>=80?"text-emerald-600":(l.score||0)>=50?"text-amber-600":"text-secondary"}`}>{l.score||0}</span></td>
+                    <td className="py-3 px-3 text-xs text-tertiary">{fmtDate(l.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

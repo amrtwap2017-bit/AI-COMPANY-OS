@@ -13,13 +13,13 @@ const STATUS_BADGE = {
   submitted: "bg-blue-100 text-blue-700",
   approved:  "bg-emerald-100 text-emerald-700",
   rejected:  "bg-red-100 text-red-700",
-  cancelled: "bg-slate-100 text-slate-500",
+  cancelled: "bg-slate-100 text-secondary",
 };
 const URGENCY_BADGE = {
   urgent:  "bg-red-100 text-red-700 font-bold",
   high:    "bg-orange-100 text-orange-700",
-  normal:  "bg-slate-100 text-slate-600",
-  low:     "bg-slate-50 text-slate-400",
+  normal:  "bg-slate-100 text-secondary",
+  low:     "bg-slate-50 text-tertiary",
 };
 
 export default function PurchaseRequestsPage() {
@@ -57,21 +57,21 @@ export default function PurchaseRequestsPage() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-1.5">Supply Chain</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Purchase Requests</h1>
-          <p className="text-slate-500 text-sm mt-1.5">{prs.length} total · {pending.length} pending · {urgent.length} urgent · {autoPRs.length} auto-generated</p>
+          <h1 className="text-3xl font-black text-primary">Purchase Requests</h1>
+          <p className="text-secondary text-sm mt-1.5">{prs.length} total · {pending.length} pending · {urgent.length} urgent · {autoPRs.length} auto-generated</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => router.push("/workflows/launcher")}
-            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-400 transition-all">
+            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-surface border border-border text-slate-700 dark:text-tertiary hover:border-amber-400 transition-all">
             ⚡ Auto-PR
           </button>
           <button onClick={() => router.push("/supply-chain/purchase-orders")}
-            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all">
+            className="px-4 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm transition-all">
             View POs →
           </button>
         </div>
@@ -91,14 +91,14 @@ export default function PurchaseRequestsPage() {
               statusFilter===k.filter ? `border-${k.color}-400 shadow-sm` : "border-slate-200 dark:border-slate-800 hover:border-amber-300"
             }`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{k.label}</div>
+            <div className="text-xs font-medium text-secondary mt-0.5">{k.label}</div>
           </button>
         ))}
       </div>
 
       {/* Urgent alert */}
       {urgent.length > 0 && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+        <div className="tb-alert tb-alert-critical rounded-2xl">
           <div className="text-2xl">🚨</div>
           <div className="flex-1">
             <div className="font-bold text-red-800 dark:text-red-300">{urgent.length} Urgent Purchase Requests Need Immediate Approval</div>
@@ -115,9 +115,9 @@ export default function PurchaseRequestsPage() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e=>setSearch(e.target.value)}
           placeholder="Search purchase requests..."
-          className="flex-1 min-w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+          className="flex-1 min-w-48 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus"/>
         <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="submitted">Submitted</option>
@@ -125,7 +125,7 @@ export default function PurchaseRequestsPage() {
           <option value="rejected">Rejected</option>
         </select>
         <select value={urgencyFilter} onChange={e=>setUrgencyFilter(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
           <option value="all">All Urgency</option>
           <option value="urgent">Urgent</option>
           <option value="high">High</option>
@@ -134,28 +134,28 @@ export default function PurchaseRequestsPage() {
         </select>
         {(search||statusFilter!=="all"||urgencyFilter!=="all") && (
           <button onClick={()=>{setSearch("");setStatusFilter("all");setUrgencyFilter("all");}}
-            className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+            className="px-3 py-2 text-xs text-secondary bg-surface border border-border rounded-xl">
             Clear ×
           </button>
         )}
-        <div className="text-xs text-slate-400 self-center">{filtered.length} requests</div>
+        <div className="text-xs text-tertiary self-center">{filtered.length} requests</div>
       </div>
 
       {/* PR table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-3">🛒</div>
-            <div className="font-bold text-slate-900 dark:text-white text-lg">No purchase requests found</div>
-            <div className="text-slate-400 text-sm mt-1">Run automation engine to auto-generate PRs for low stock</div>
+            <div className="font-bold text-primary text-lg">No purchase requests found</div>
+            <div className="text-tertiary text-sm mt-1">Run automation engine to auto-generate PRs for low stock</div>
             <button onClick={()=>router.push("/workflows/launcher")}
-              className="mt-4 px-5 py-2 bg-amber-600 text-white rounded-xl text-sm font-bold hover:bg-amber-700">
+              className="mt-4 px-5 py-2 bg-brand text-inverse rounded-xl text-sm font-bold hover:bg-amber-700">
               ⚡ Run Automation
             </button>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[1fr_120px_100px_100px_110px_100px] bg-slate-50 dark:bg-slate-800/50 px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="grid grid-cols-[1fr_120px_100px_100px_110px_100px] bg-base-alt dark:bg-surface-alt px-5 py-3 text-xs font-semibold text-secondary uppercase tracking-wider">
               <div>Request</div>
               <div>PR Number</div>
               <div className="text-center">Status</div>
@@ -163,27 +163,27 @@ export default function PurchaseRequestsPage() {
               <div>Department</div>
               <div className="text-center">Required By</div>
             </div>
-            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+            <div className="divide-y divide-y-border">
               {filtered.map((pr,i)=>(
                 <button key={i} onClick={()=>router.push(`/supply-chain/purchase-requests/${pr.id}`)}
-                  className="w-full grid grid-cols-[1fr_120px_100px_100px_110px_100px] items-center px-5 py-4 text-left hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors group">
+                  className="w-full grid grid-cols-[1fr_120px_100px_100px_110px_100px] items-center px-5 py-4 text-left hover:bg-brand-light/20 transition-colors group">
                   <div className="min-w-0 pr-4">
-                    <div className="font-semibold text-sm text-slate-900 dark:text-white truncate group-hover:text-amber-600">{pr.title || pr.pr_number}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{pr.requester || "—"} · {pr.justification?.slice(0,50) || "—"}</div>
+                    <div className="font-semibold text-sm text-primary truncate group-hover:text-amber-600">{pr.title || pr.pr_number}</div>
+                    <div className="text-xs text-tertiary mt-0.5">{pr.requester || "—"} · {pr.justification?.slice(0,50) || "—"}</div>
                   </div>
-                  <div className="text-xs font-mono text-slate-500 truncate">{pr.pr_number || "—"}</div>
+                  <div className="text-xs font-mono text-secondary truncate">{pr.pr_number || "—"}</div>
                   <div className="text-center">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[pr.status]||"bg-slate-100 text-slate-600"}`}>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[pr.status]||"bg-slate-100 text-secondary"}`}>
                       {pr.status || "—"}
                     </span>
                   </div>
                   <div className="text-center">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${URGENCY_BADGE[pr.urgency]||"bg-slate-100 text-slate-600"}`}>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${URGENCY_BADGE[pr.urgency]||"bg-slate-100 text-secondary"}`}>
                       {pr.urgency || "—"}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-500 truncate">{pr.department || "—"}</div>
-                  <div className="text-center text-xs text-slate-400">{fmtDate(pr.required_date)}</div>
+                  <div className="text-xs text-secondary truncate">{pr.department || "—"}</div>
+                  <div className="text-center text-xs text-tertiary">{fmtDate(pr.required_date)}</div>
                 </button>
               ))}
             </div>

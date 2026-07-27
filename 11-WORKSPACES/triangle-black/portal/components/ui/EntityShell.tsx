@@ -42,13 +42,13 @@ export function EntityShell({
         {backHref && (
           <div className="flex items-center gap-2 mb-4">
             <Link href={backHref}
-              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-700 transition-colors">
+              className="flex items-center gap-1.5 text-sm text-secondary hover:text-amber-700 transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" />
               {backLabel || "Back"}
             </Link>
             <span className="text-slate-300">/</span>
-            <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md font-medium">{entityType}</span>
-            {entityCode && <span className="text-xs text-slate-400">{entityCode}</span>}
+            <span className="text-xs text-tertiary bg-slate-100 px-2 py-0.5 rounded-md font-medium">{entityType}</span>
+            {entityCode && <span className="text-xs text-tertiary">{entityCode}</span>}
           </div>
         )}
 
@@ -64,7 +64,7 @@ export function EntityShell({
                 </span>
               )}
             </div>
-            {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+            {subtitle && <p className="text-sm text-secondary">{subtitle}</p>}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {onRefresh && (
@@ -86,7 +86,7 @@ export function EntityShell({
             {heroMetrics.map((m, i) => (
               <div key={i} className="flex items-center gap-2">
                 <div>
-                  <div className="text-xs text-slate-400 font-medium">{m.label}</div>
+                  <div className="text-xs text-tertiary font-medium">{m.label}</div>
                   <div className={`text-lg font-bold ${m.color ? `text-${m.color}-600` : "text-slate-900"}`}>{m.value}</div>
                 </div>
                 {i < heroMetrics.length - 1 && <div className="w-px h-8 bg-slate-200 ml-2" />}
@@ -102,7 +102,7 @@ export function EntityShell({
               className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? "border-amber-600 text-amber-700"
-                  : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                  : "border-transparent text-secondary hover:text-slate-800 hover:border-slate-300"
               }`}>
               {tab.icon && <span>{tab.icon}</span>}
               {tab.label}

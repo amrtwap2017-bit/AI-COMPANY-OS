@@ -24,7 +24,7 @@ export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelPr
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Trend Layer
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
@@ -39,7 +39,7 @@ export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelPr
               <div className="text-sm font-semibold text-slate-900">{s.label}</div>
 
               {s.points.length === 0 ? (
-                <div className="mt-3 text-sm text-slate-500">No trend points available.</div>
+                <div className="mt-3 text-sm text-secondary">No trend points available.</div>
               ) : (
                 <div className="mt-4 space-y-3">
                   {s.points.map((point, pointIdx) => (

@@ -48,17 +48,17 @@ export default function ProjectsCenterPage() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1.5">Projects</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Project Portfolio</h1>
-          <p className="text-slate-500 text-sm mt-1.5">{projects.length} projects · {active.length} active · {fmtEGP(activeBudget)} active budget · {avgCompletion}% avg completion</p>
+          <h1 className="text-3xl font-black text-primary">Project Portfolio</h1>
+          <p className="text-secondary text-sm mt-1.5">{projects.length} projects · {active.length} active · {fmtEGP(activeBudget)} active budget · {avgCompletion}% avg completion</p>
         </div>
         <div className={`rounded-2xl border px-6 py-4 text-center ${avgCompletion>=70?"bg-emerald-50 border-emerald-200":"bg-amber-50 border-amber-200"}`}>
           <div className={`text-4xl font-black ${avgCompletion>=70?"text-emerald-500":"text-amber-500"}`}>{avgCompletion}%</div>
-          <div className="text-xs text-slate-500 mt-1">Avg Completion</div>
+          <div className="text-xs text-secondary mt-1">Avg Completion</div>
         </div>
       </div>
 
@@ -73,8 +73,8 @@ export default function ProjectsCenterPage() {
           <button key={i} onClick={()=>setStatusFilter(i<3?(statusFilter===k.filter?"all":k.filter):"all")}
             className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&i<3?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1">{k.label}</div>
-            <div className="text-xs text-slate-400 mt-0.5 truncate">{k.sub}</div>
+            <div className="text-sm font-medium text-slate-700 dark:text-tertiary mt-1">{k.label}</div>
+            <div className="text-xs text-tertiary mt-0.5 truncate">{k.sub}</div>
           </button>
         ))}
       </div>
@@ -83,9 +83,9 @@ export default function ProjectsCenterPage() {
       <div className="flex gap-3">
         <input value={search} onChange={e=>setSearch(e.target.value)}
           placeholder="Search projects..."
-          className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+          className="flex-1 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus"/>
         <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
           <option value="all">All Status</option>
           <option value="active">Active</option>
           <option value="planning">Planning</option>
@@ -93,16 +93,16 @@ export default function ProjectsCenterPage() {
           <option value="on_hold">On Hold</option>
         </select>
         {(search||statusFilter!=="all") && (
-          <button onClick={()=>{setSearch("");setStatusFilter("all");}} className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Clear ×</button>
+          <button onClick={()=>{setSearch("");setStatusFilter("all");}} className="px-3 py-2 text-xs text-secondary bg-surface border border-border rounded-xl">Clear ×</button>
         )}
-        <div className="text-xs text-slate-400 self-center">{filtered.length} projects</div>
+        <div className="text-xs text-tertiary self-center">{filtered.length} projects</div>
       </div>
 
       {/* Project cards grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <div className="text-center py-16 bg-surface border border-border rounded-2xl">
           <div className="text-5xl mb-3">🏗️</div>
-          <div className="font-bold text-slate-900 dark:text-white text-lg">No projects found</div>
+          <div className="font-bold text-primary text-lg">No projects found</div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -110,19 +110,19 @@ export default function ProjectsCenterPage() {
             const pct     = Number(p.completion_pct || 0);
             const budget  = Number(p.budget || 0);
             const projWOs = wos.filter(w => w.project_id===p.id || w.contract_id===p.id);
-            const sc      = STATUS_BADGE[p.status] || "bg-slate-100 text-slate-600";
+            const sc      = STATUS_BADGE[p.status] || "bg-slate-100 text-secondary";
             const barColor = pct>=80?"emerald":pct>=50?"blue":"amber";
             const daysLeft = p.end_date ? Math.ceil((new Date(p.end_date)-Date.now())/86400000) : null;
             const isOverdue = daysLeft !== null && daysLeft < 0 && p.status !== "completed";
 
             return (
               <button key={i} onClick={()=>router.push(`/projects-center/${p.id}`)}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+                className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1 min-w-0 pr-3">
-                    <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors truncate">{p.title || p.name || p.id}</div>
-                    <div className="text-xs text-slate-400 mt-0.5 line-clamp-2">{p.description || "—"}</div>
+                    <div className="font-bold text-primary group-hover:text-amber-600 transition-colors truncate">{p.title || p.name || p.id}</div>
+                    <div className="text-xs text-tertiary mt-0.5 line-clamp-2">{p.description || "—"}</div>
                   </div>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-lg flex-shrink-0 ${sc}`}>{p.status || "—"}</span>
                 </div>
@@ -130,7 +130,7 @@ export default function ProjectsCenterPage() {
                 {/* Completion bar */}
                 <div className="mb-4">
                   <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-500">Completion</span>
+                    <span className="text-secondary">Completion</span>
                     <span className={`font-bold text-${barColor}-500`}>{pct}%</span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
@@ -140,24 +140,24 @@ export default function ProjectsCenterPage() {
 
                 {/* Metrics grid */}
                 <div className="grid grid-cols-3 gap-2 text-center mb-4">
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2">
+                  <div className="bg-base-alt dark:bg-surface-alt rounded-xl p-2">
                     <div className="text-sm font-black text-purple-500">{fmtEGP(budget)}</div>
-                    <div className="text-[10px] text-slate-400">Budget</div>
+                    <div className="text-[10px] text-tertiary">Budget</div>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2">
+                  <div className="bg-base-alt dark:bg-surface-alt rounded-xl p-2">
                     <div className="text-sm font-black text-blue-500">{projWOs.length || 0}</div>
-                    <div className="text-[10px] text-slate-400">Work Orders</div>
+                    <div className="text-[10px] text-tertiary">Work Orders</div>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2">
+                  <div className="bg-base-alt dark:bg-surface-alt rounded-xl p-2">
                     <div className={`text-sm font-black ${isOverdue?"text-red-500":daysLeft!==null&&daysLeft<=30?"text-amber-500":"text-emerald-500"}`}>
                       {daysLeft!==null ? (isOverdue?`${Math.abs(daysLeft)}d over`:`${daysLeft}d`) : "—"}
                     </div>
-                    <div className="text-[10px] text-slate-400">{isOverdue?"Overdue":"Remaining"}</div>
+                    <div className="text-[10px] text-tertiary">{isOverdue?"Overdue":"Remaining"}</div>
                   </div>
                 </div>
 
                 {/* Dates */}
-                <div className="flex justify-between text-xs text-slate-400">
+                <div className="flex justify-between text-xs text-tertiary">
                   <span>Start: {fmtDate(p.start_date)}</span>
                   <span className={isOverdue?"text-red-500 font-semibold":""}>End: {fmtDate(p.end_date)}</span>
                 </div>
@@ -176,9 +176,9 @@ export default function ProjectsCenterPage() {
           { label:"Review Board",     icon:"📊", path:"/projects-center/review" },
         ].map((a,i)=>(
           <button key={i} onClick={()=>router.push(a.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-center hover:border-amber-400 hover:shadow-md transition-all group">
+            className="bg-surface border border-border rounded-2xl p-4 text-center hover:border-amber-400 hover:shadow-md transition-all group">
             <div className="text-2xl mb-1.5">{a.icon}</div>
-            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-amber-600">{a.label}</div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-tertiary group-hover:text-amber-600">{a.label}</div>
           </button>
         ))}
       </div>

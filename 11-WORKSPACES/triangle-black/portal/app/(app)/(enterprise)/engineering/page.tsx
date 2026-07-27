@@ -25,10 +25,10 @@ export default function EngineeringHub() {
     {label:"Review Board",desc:"Engineering review and analysis",icon:"📊",path:"/engineering/review"},
   ];
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Engineering</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Engineering Hub</h1>
-      <p className="text-slate-500 mt-1">MEP engineering operations, assets, and technical management</p></div>
+      <h1 className="text-3xl font-black text-primary">Engineering Hub</h1>
+      <p className="text-secondary mt-1">MEP engineering operations, assets, and technical management</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {label:"Total Assets",value:assets.length,sub:`${criticalAssets.length} critical`,color:"blue"},
@@ -36,20 +36,20 @@ export default function EngineeringHub() {
           {label:"Overdue PM",value:overduePMs.length,sub:"require scheduling",color:overduePMs.length>0?"red":"emerald"},
           {label:"Twin Score",value:`${score}/100`,sub:twin?.health_label||"—",color:score>=95?"emerald":"amber"},
         ].map((k,i)=>(
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="text-xs text-secondary mb-2">{k.label}</div>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
           </div>
         ))}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {sections.map((s,i)=>(
           <button key={i} onClick={()=>router.push(s.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
             <div className="text-3xl mb-3">{s.icon}</div>
-            <div className="font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition-colors">{s.label}</div>
-            <div className="text-sm text-slate-500 mt-1">{s.desc}</div>
+            <div className="font-bold text-primary group-hover:text-amber-600 transition-colors">{s.label}</div>
+            <div className="text-sm text-secondary mt-1">{s.desc}</div>
           </button>
         ))}
       </div>

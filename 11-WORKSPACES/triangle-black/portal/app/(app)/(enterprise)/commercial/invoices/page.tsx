@@ -11,7 +11,7 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
-const S = {draft:"bg-slate-100 text-slate-600",sent:"bg-blue-100 text-blue-800",paid:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",cancelled:"bg-slate-100 text-slate-400"};
+const S = {draft:"bg-slate-100 text-secondary",sent:"bg-blue-100 text-blue-800",paid:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",cancelled:"bg-slate-100 text-tertiary"};
 const STATUSES = ["all","draft","sent","paid","overdue","cancelled"];
 
 export default function InvoicesPage() {
@@ -89,11 +89,11 @@ export default function InvoicesPage() {
           {label:"Total",        value:total,   color:"text-slate-800"},
           {label:"Paid",         value:paid,    color:"text-emerald-700"},
           {label:"Sent/Pending", value:sent,    color:"text-blue-700"},
-          {label:"Overdue",      value:overdue, color:overdue>0?"text-red-700":"text-slate-500"},
+          {label:"Overdue",      value:overdue, color:overdue>0?"text-red-700":"text-secondary"},
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -122,7 +122,7 @@ export default function InvoicesPage() {
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
             {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s}</option>)}
           </select>
-          {(sf!=="all"||q)&&<button onClick={()=>{setSf("all");setQ("");}} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
+          {(sf!=="all"||q)&&<button onClick={()=>{setSf("all");setQ("");}} className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>}
         </div>
         {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No invoices found"
           action={<Button variant="primary" size="sm" onClick={()=>setShowCreate(true)}>Create Invoice</Button>}
@@ -131,7 +131,7 @@ export default function InvoicesPage() {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-slate-100">
                 {["Invoice #","Title","Amount","Status","Issue Date","Due Date","Paid"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
               <tbody className="divide-y divide-slate-50">
@@ -140,10 +140,10 @@ export default function InvoicesPage() {
                     <td className="py-3 px-3"><Link href={`/commercial/invoices/${i.id}`}><span className="font-mono text-xs font-semibold text-blue-700 hover:underline">{i.invoice_number||"—"}</span></Link></td>
                     <td className="py-3 px-3"><p className="font-medium text-slate-800 truncate max-w-[180px]">{i.title||"—"}</p></td>
                     <td className="py-3 px-3"><span className="font-semibold text-slate-800">EGP {fmtNum(i.amount)}</span></td>
-                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[i.status]||"bg-slate-100 text-slate-600")}>{i.status||"—"}</span></td>
-                    <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(i.issue_date||i.created_at)}</td>
-                    <td className={`py-3 px-3 text-xs font-medium ${i.status==="overdue"?"text-red-600":"text-slate-400"}`}>{fmtDate(i.due_date)}</td>
-                    <td className="py-3 px-3 text-xs text-emerald-600">{i.paid_date?fmtDate(i.paid_date):<span className="text-slate-300">—</span>}</td>
+                    <td className="py-3 px-3"><span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[i.status]||"bg-slate-100 text-secondary")}>{i.status||"—"}</span></td>
+                    <td className="py-3 px-3 text-xs text-tertiary">{fmtDate(i.issue_date||i.created_at)}</td>
+                    <td className={`py-3 px-3 text-xs font-medium ${i.status==="overdue"?"text-red-600":"text-tertiary"}`}>{fmtDate(i.due_date)}</td>
+                    <td className="py-3 px-3 text-xs text-emerald-600">{i.paid_date?fmtDate(i.paid_date):<span className="text-tertiary">—</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -157,56 +157,56 @@ export default function InvoicesPage() {
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-screen overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
               <h2 className="font-bold text-slate-900">New Invoice</h2>
-              <button onClick={()=>setShowCreate(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">x</button>
+              <button onClick={()=>setShowCreate(false)} className="text-tertiary hover:text-secondary text-xl font-bold leading-none">x</button>
             </div>
             <form onSubmit={save} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
                   <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})}
                     placeholder="e.g. HVAC Maintenance Q3" className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Invoice Number</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Invoice Number</label>
                   <input value={form.invoice_number} onChange={e=>setForm({...form,invoice_number:e.target.value})}
                     placeholder="INV-2026-0001" className={inp} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Amount (EGP) *</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Amount (EGP) *</label>
                   <input required type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})}
                     placeholder="50000" className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Tax Amount (EGP)</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Tax Amount (EGP)</label>
                   <input type="number" value={form.tax_amount} onChange={e=>setForm({...form,tax_amount:e.target.value})}
                     placeholder="7500" className={inp} />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Status</label>
                   <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
                     {STATUSES.filter(s=>s!=="all").map(s=><option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Issue Date</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Issue Date</label>
                   <input type="date" value={form.issue_date} onChange={e=>setForm({...form,issue_date:e.target.value})} className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Due Date</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Due Date</label>
                   <input type="date" value={form.due_date} onChange={e=>setForm({...form,due_date:e.target.value})} className={inp} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+                <label className="block text-xs font-semibold text-secondary mb-1">Notes</label>
                 <textarea value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}
                   rows={2} placeholder="Payment terms, reference numbers…" className={inp+" resize-none"} />
               </div>
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                <button type="button" onClick={()=>setShowCreate(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                <button type="button" onClick={()=>setShowCreate(false)} className="px-4 py-2 text-sm text-secondary border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
                 <button type="submit" disabled={saving} className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">{saving?"Saving…":"Create Invoice"}</button>
               </div>
             </form>

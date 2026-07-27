@@ -13,7 +13,7 @@ const STATUSES    = ["active","overdue","inactive","completed"];
 const FREQ_OPTS   = ["daily","weekly","monthly","quarterly","biannual","yearly"];
 const TYPES       = ["preventive","inspection","corrective","calibration","lubrication"];
 
-const S = {active:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",inactive:"bg-slate-100 text-slate-500",completed:"bg-blue-100 text-blue-800"};
+const S = {active:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",inactive:"bg-slate-100 text-secondary",completed:"bg-blue-100 text-blue-800"};
 
 export default function PMPlanDetailPage() {
   const { id }    = useParams();
@@ -59,7 +59,7 @@ export default function PMPlanDetailPage() {
   if (!plan || plan.detail) return (
     <PageWrapper>
       <div className="text-center py-20">
-        <p className="text-slate-500 mb-4">PM Plan not found</p>
+        <p className="text-secondary mb-4">PM Plan not found</p>
         <Link href="/maintenance/pm-plans" className="text-blue-600 underline text-sm">Back to PM Plans</Link>
       </div>
     </PageWrapper>
@@ -108,8 +108,8 @@ export default function PMPlanDetailPage() {
 
       {!editing && (
         <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[plan.status]||"bg-slate-100 text-slate-600")}>{plan.status||"—"}</span>
+          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[plan.status]||"bg-slate-100 text-secondary")}>{plan.status||"—"}</span>
           <div className="flex-1" />
           {STATUSES.filter(s=>s!==plan.status).map(s=>(
             <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
@@ -126,18 +126,18 @@ export default function PMPlanDetailPage() {
             {editing ? (
               <form onSubmit={save} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
                   <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Type</label>
                     <select value={form?.plan_type||"preventive"} onChange={e=>setForm({...form,plan_type:e.target.value})} className={inp}>
                       {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Frequency</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Frequency</label>
                     <select value={form?.frequency||"monthly"} onChange={e=>setForm({...form,frequency:e.target.value})} className={inp}>
                       {FREQ_OPTS.map(f=><option key={f} value={f}>{f}</option>)}
                     </select>
@@ -145,16 +145,16 @@ export default function PMPlanDetailPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Next Due Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Next Due Date</label>
                     <input type="date" value={form?.next_due_date?.slice(0,10)||""} onChange={e=>setForm({...form,next_due_date:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Owner</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Owner</label>
                     <input value={form?.owner||""} onChange={e=>setForm({...form,owner:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Checklist / Notes</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Checklist / Notes</label>
                   <textarea value={form?.notes||""} onChange={e=>setForm({...form,notes:e.target.value})}
                     rows={5} placeholder="Step 1: Check refrigerant pressure&#10;Step 2: Inspect belts and bearings&#10;Step 3: Clean filters…" className={inp+" resize-none"} />
                 </div>
@@ -163,17 +163,17 @@ export default function PMPlanDetailPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Type</p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{plan.plan_type||"preventive"}</span>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Type</p>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{plan.plan_type||"preventive"}</span>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Owner</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Owner</p>
                     <p className="text-slate-700">{plan.owner||"—"}</p>
                   </div>
                 </div>
                 {plan.notes && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Checklist / Notes</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-2">Checklist / Notes</p>
                     <div className="bg-slate-50 rounded-xl p-3">
                       <p className="text-slate-700 text-sm whitespace-pre-wrap font-mono leading-relaxed">{plan.notes}</p>
                     </div>
@@ -188,14 +188,14 @@ export default function PMPlanDetailPage() {
           <SectionCard title="Schedule">
             <dl className="space-y-3">
               {[
-                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[plan.status]||"bg-slate-100 text-slate-600")}>{plan.status||"—"}</span>},
+                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[plan.status]||"bg-slate-100 text-secondary")}>{plan.status||"—"}</span>},
                 {label:"Frequency", value:<span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{plan.frequency||"—"}</span>},
                 {label:"Next Due",  value:<span className={`font-medium ${isOverdue?"text-red-600":isSoon?"text-amber-600":"text-slate-700"}`}>{fmtDate(plan.next_due_date)}{isOverdue?" (OVERDUE)":isSoon?" (SOON)":""}</span>},
                 {label:"Last Done", value:fmtDate(plan.last_completed_date)},
                 {label:"Created",   value:fmtDate(plan.created_at)},
               ].map(({label,value})=>(
                 <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dt className="text-xs text-secondary">{label}</dt>
                   <dd className="text-xs">{value}</dd>
                 </div>
               ))}
@@ -216,7 +216,7 @@ export default function PMPlanDetailPage() {
                   Activate Plan
                 </button>
               )}
-              <Link href="/maintenance/pm-plans" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to PM Plans</Link>
+              <Link href="/maintenance/pm-plans" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to PM Plans</Link>
             </div>
           </SectionCard>
         </div>

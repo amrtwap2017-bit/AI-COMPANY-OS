@@ -14,7 +14,7 @@ const severityMap = {
   critical: { card: "border-red-300 bg-red-50",     icon: XCircle,       iconColor: "text-red-500",    badge: "bg-red-100 text-red-700 border-red-200" },
   high:     { card: "border-amber-300 bg-amber-50", icon: AlertTriangle, iconColor: "text-amber-500",  badge: "bg-amber-100 text-amber-700 border-amber-200" },
   medium:   { card: "border-blue-200 bg-blue-50",   icon: Info,          iconColor: "text-blue-500",   badge: "bg-blue-100 text-blue-700 border-blue-200" },
-  low:      { card: "border-slate-200 bg-slate-50", icon: CheckCircle,   iconColor: "text-slate-400",  badge: "bg-slate-100 text-slate-600 border-slate-200" },
+  low:      { card: "border-slate-200 bg-slate-50", icon: CheckCircle,   iconColor: "text-tertiary",  badge: "bg-slate-100 text-slate-600 border-slate-200" },
 };
 
 export function AlertCenterPanel({ title, subtitle, alerts }: AlertCenterPanelProps) {
@@ -23,7 +23,7 @@ export function AlertCenterPanel({ title, subtitle, alerts }: AlertCenterPanelPr
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-bold text-slate-900">{title}</h2>
-          <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-secondary">{subtitle}</p>
         </div>
         {alerts.length > 0 && (
           <span className="rounded-full bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1">{alerts.length}</span>
@@ -41,7 +41,7 @@ export function AlertCenterPanel({ title, subtitle, alerts }: AlertCenterPanelPr
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-slate-900">{alert.title}</span>
                     <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${s.badge}`}>{alert.severity}</span>
-                    <span className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-500">{alert.domain}</span>
+                    <span className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-secondary">{alert.domain}</span>
                   </div>
                   <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">{alert.detail}</p>
                   <div className="mt-2 text-xs font-medium text-amber-700">→ {alert.action}</div>
@@ -51,7 +51,7 @@ export function AlertCenterPanel({ title, subtitle, alerts }: AlertCenterPanelPr
           );
         })}
         {alerts.length === 0 && (
-          <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-400">
+          <div className="flex items-center justify-center gap-2 py-8 text-sm text-tertiary">
             <CheckCircle className="w-4 h-4 text-emerald-500" /> All clear — no active alerts
           </div>
         )}

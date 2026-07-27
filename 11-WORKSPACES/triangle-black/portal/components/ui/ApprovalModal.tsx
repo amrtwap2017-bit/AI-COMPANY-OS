@@ -95,16 +95,16 @@ export function ApprovalModal({
            onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="font-semibold text-slate-800">Review & Approve</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-tertiary hover:text-slate-600">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="px-6 py-4">
           <div className="bg-slate-50 rounded-lg p-3 mb-4">
-            <p className="text-xs text-slate-500 uppercase font-semibold mb-1">{entityType.replace(/_/g," ")}</p>
+            <p className="text-xs text-secondary uppercase font-semibold mb-1">{entityType.replace(/_/g," ")}</p>
             <p className="text-sm font-medium text-slate-800">{entityTitle}</p>
-            <p className="text-xs text-slate-400 mt-1">Current: {currentStatus}</p>
+            <p className="text-xs text-tertiary mt-1">Current: {currentStatus}</p>
           </div>
 
           <label className="block text-xs font-medium text-slate-600 mb-1">

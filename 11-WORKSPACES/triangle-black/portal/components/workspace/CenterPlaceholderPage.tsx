@@ -14,7 +14,7 @@ export function CenterPlaceholderPage({ eyebrow, title, subtitle, bullets, actio
         <div className="h-0.5 w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500" />
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{eyebrow}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-tertiary">{eyebrow}</span>
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
               <Clock className="w-2.5 h-2.5" /> Coming Soon
             </span>
@@ -44,7 +44,7 @@ export function CenterPlaceholderPage({ eyebrow, title, subtitle, bullets, actio
                   <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
                   <span className="text-sm font-semibold text-slate-900">{item.label}</span>
                 </div>
-                <p className="mt-1 ml-7 text-xs text-slate-500 leading-relaxed">{item.detail}</p>
+                <p className="mt-1 ml-7 text-xs text-secondary leading-relaxed">{item.detail}</p>
               </div>
             ))}
           </div>

@@ -39,7 +39,7 @@ export default function InventoryItemDetailPage() {
   });
 
   if (isLoading) return <PageWrapper><LoadingState title="Loading item..." /></PageWrapper>;
-  if (!item || item.detail) return <PageWrapper><p className="p-8 text-slate-400">Item not found</p></PageWrapper>;
+  if (!item || item.detail) return <PageWrapper><p className="p-8 text-tertiary">Item not found</p></PageWrapper>;
 
   const moves = Array.isArray(movements) ? movements : movements?.data ?? movements?.items ?? [];
   const stocks = Array.isArray(stockData) ? stockData : stockData?.data ?? stockData?.items ?? [];
@@ -79,7 +79,7 @@ export default function InventoryItemDetailPage() {
                 ["Reorder Qty", item.reorder_qty],
               ].map(([k, v]) => v !== undefined && v !== null && (
                 <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
+                  <span className="text-secondary">{k}</span>
                   <span className="text-slate-800 font-medium">{v}</span>
                 </div>
               ))}
@@ -103,10 +103,10 @@ export default function InventoryItemDetailPage() {
                 </div>
               </div>
             )) : (
-              <p className="text-sm text-slate-400 text-center py-4">No stock balance data</p>
+              <p className="text-sm text-tertiary text-center py-4">No stock balance data</p>
             )}
             <div className="mt-3 p-3 bg-slate-100 rounded-lg flex justify-between">
-              <span className="text-sm text-slate-600">Total Stock</span>
+              <span className="text-sm text-secondary">Total Stock</span>
               <span className={`text-sm font-bold ${belowMin ? "text-amber-600" : "text-emerald-600"}`}>
                 {totalStock} {item.unit_of_measure}
               </span>
@@ -128,19 +128,19 @@ export default function InventoryItemDetailPage() {
                       <div className="text-sm font-medium text-slate-800 capitalize">
                         {m.movement_type ?? (m.quantity > 0 ? "IN" : "OUT")}
                       </div>
-                      <div className="text-xs text-slate-400">{m.reference ?? m.notes ?? "—"}</div>
+                      <div className="text-xs text-tertiary">{m.reference ?? m.notes ?? "—"}</div>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className={`text-sm font-bold ${m.quantity > 0 ? "text-emerald-600" : "text-red-600"}`}>
                       {m.quantity > 0 ? "+" : ""}{m.quantity} {item.unit_of_measure}
                     </div>
-                    <div className="text-xs text-slate-400">{String(m.created_at ?? "").slice(0,10)}</div>
+                    <div className="text-xs text-tertiary">{String(m.created_at ?? "").slice(0,10)}</div>
                   </div>
                 </div>
               ))}
               {moves.length === 0 && (
-                <p className="text-sm text-slate-400 text-center py-8">No movement history</p>
+                <p className="text-sm text-tertiary text-center py-8">No movement history</p>
               )}
             </div>
           </SectionCard>

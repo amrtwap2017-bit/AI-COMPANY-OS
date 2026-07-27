@@ -69,7 +69,7 @@ function QRCodeBox({ assetId, assetName }: { assetId: string; assetName: string 
       <canvas ref={canvasRef} width={120} height={120} className="border border-slate-100 rounded" />
       <div className="text-center">
         <p className="text-sm font-semibold text-slate-800 truncate max-w-32">{assetName}</p>
-        <p className="text-xs text-slate-400 font-mono">{(assetId || []).slice(0,8)}</p>
+        <p className="text-xs text-tertiary font-mono">{(assetId || []).slice(0,8)}</p>
       </div>
       <button
         onClick={handlePrint}
@@ -109,7 +109,7 @@ export default function QRCodesPage() {
             />
           ))}
           {(assets || []).length === 0 && (
-            <div className="col-span-4 py-12 text-center text-slate-400">
+            <div className="col-span-4 py-12 text-center text-tertiary">
               <QrCode className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="text-sm">No assets found</p>
             </div>

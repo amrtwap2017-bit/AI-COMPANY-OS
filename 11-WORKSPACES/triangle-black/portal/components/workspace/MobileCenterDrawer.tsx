@@ -52,7 +52,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
         </div>
 
         <div className="h-[calc(100%-88px)] overflow-y-auto px-4 py-4">
-          <div className="mb-3 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="mb-3 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
             Business Centers
           </div>
 
@@ -72,14 +72,14 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
                   ].join(" ")}
                 >
                   <div className="text-base font-semibold">{item.label}</div>
-                  <div className="mt-2 text-sm text-slate-400">{item.subtitle}</div>
+                  <div className="mt-2 text-sm text-tertiary">{item.subtitle}</div>
                 </Link>
               );
             })}
           </div>
 
           <div className="mt-8">
-            <div className="mb-3 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="mb-3 px-2 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               Legacy Navigation
             </div>
             <div className="space-y-1">

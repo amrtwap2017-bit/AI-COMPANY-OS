@@ -131,7 +131,7 @@ export function CommandBar({ open, onClose }: Props) {
   }, [open, all, selected, execute, onClose]);
 
   const typeColor: Record<string,string> = {
-    navigate: "text-slate-400",
+    navigate: "text-tertiary",
     create:   "text-emerald-600",
     ai:       "text-amber-600",
     result:   "text-blue-600",
@@ -163,7 +163,7 @@ export function CommandBar({ open, onClose }: Props) {
           >
             {/* Input */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-              <Search className={`w-4 h-4 flex-shrink-0 transition-colors ${searching ? "text-amber-500 animate-pulse" : "text-slate-400"}`} />
+              <Search className={`w-4 h-4 flex-shrink-0 transition-colors ${searching ? "text-amber-500 animate-pulse" : "text-tertiary"}`} />
               <input
                 ref={inputRef}
                 value={query}
@@ -172,28 +172,28 @@ export function CommandBar({ open, onClose }: Props) {
                 className="flex-1 text-sm text-slate-900 placeholder-slate-400 bg-transparent outline-none"
               />
               {query && (
-                <button onClick={() => { setQuery(""); setResults([]); }} className="text-slate-400 hover:text-slate-600">
+                <button onClick={() => { setQuery(""); setResults([]); }} className="text-tertiary hover:text-slate-600">
                   <X className="w-4 h-4" />
                 </button>
               )}
-              <kbd className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg">ESC</kbd>
+              <kbd className="text-xs bg-slate-100 text-secondary px-2 py-1 rounded-lg">ESC</kbd>
             </div>
 
             {/* Results */}
             <div className="max-h-80 overflow-y-auto py-2">
               {/* Section label */}
               {query.trim().length >= 2 && searchResults.length > 0 && (
-                <div className="px-4 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                <div className="px-4 py-1.5 text-xs font-semibold text-tertiary uppercase tracking-wide">
                   Search Results
                 </div>
               )}
               {searching && query.trim().length >= 2 && searchResults.length === 0 && (
-                <div className="px-4 py-3 text-sm text-slate-400 flex items-center gap-2">
+                <div className="px-4 py-3 text-sm text-tertiary flex items-center gap-2">
                   <Search className="w-3.5 h-3.5 animate-pulse" /> Searching...
                 </div>
               )}
               {query.trim().length >= 2 && !searching && searchResults.length === 0 && (
-                <div className="px-4 py-2 text-xs text-slate-400">No matching records found</div>
+                <div className="px-4 py-2 text-xs text-tertiary">No matching records found</div>
               )}
 
               {/* Search result items */}
@@ -212,7 +212,7 @@ export function CommandBar({ open, onClose }: Props) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-slate-900 truncate">{cmd.label}</div>
-                      {cmd.description && <div className="text-xs text-slate-400 truncate">{cmd.description}</div>}
+                      {cmd.description && <div className="text-xs text-tertiary truncate">{cmd.description}</div>}
                     </div>
                     {cmd.badge && (
                       <span className={"text-xs px-2 py-0.5 rounded border font-medium flex-shrink-0 " + (badgeColor[cmd.badge] ?? "bg-slate-100 text-slate-600")}>
@@ -227,7 +227,7 @@ export function CommandBar({ open, onClose }: Props) {
               {/* Nav commands section */}
               {(navFiltered.length > 0 || !query) && (
                 <div className="px-4 pt-2 pb-1">
-                  <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                  <div className="text-xs font-semibold text-tertiary uppercase tracking-wide">
                     {query.trim().length >= 2 ? "Commands" : "Quick Navigation"}
                   </div>
                 </div>
@@ -251,9 +251,9 @@ export function CommandBar({ open, onClose }: Props) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-slate-900 truncate">{cmd.label}</div>
-                      {cmd.description && <div className="text-xs text-slate-400 truncate">{cmd.description}</div>}
+                      {cmd.description && <div className="text-xs text-tertiary truncate">{cmd.description}</div>}
                     </div>
-                    {cmd.shortcut && <span className="text-xs text-slate-400 flex-shrink-0">{cmd.shortcut}</span>}
+                    {cmd.shortcut && <span className="text-xs text-tertiary flex-shrink-0">{cmd.shortcut}</span>}
                     <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
                   </button>
                 );
@@ -262,12 +262,12 @@ export function CommandBar({ open, onClose }: Props) {
               {all.length === 0 && !searching && query && (
                 <div className="py-10 text-center">
                   <Search className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-                  <div className="text-sm text-slate-400">No results for <strong>{query}</strong></div>
+                  <div className="text-sm text-tertiary">No results for <strong>{query}</strong></div>
                 </div>
               )}
             </div>
 
-            <div className="px-4 py-2.5 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-400">
+            <div className="px-4 py-2.5 border-t border-slate-100 flex items-center gap-4 text-xs text-tertiary">
               <span>↑↓ navigate</span>
               <span>↵ open</span>
               <span>esc close</span>

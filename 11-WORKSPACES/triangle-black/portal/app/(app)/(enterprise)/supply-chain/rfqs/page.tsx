@@ -8,7 +8,7 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUSES = ["all","open","closed","awarded","cancelled"];
-const S = {open:"bg-blue-100 text-blue-800",closed:"bg-slate-100 text-slate-600",awarded:"bg-emerald-100 text-emerald-800",cancelled:"bg-red-100 text-red-600"};
+const S = {open:"bg-blue-100 text-blue-800",closed:"bg-slate-100 text-secondary",awarded:"bg-emerald-100 text-emerald-800",cancelled:"bg-red-100 text-red-600"};
 
 export default function RFQsPage() {
   const [sf, setSf] = useState("all");
@@ -51,11 +51,11 @@ export default function RFQsPage() {
           {label:"Total",   value:total,   color:"text-slate-800"},
           {label:"Open",    value:open,    color:"text-blue-700"},
           {label:"Awarded", value:awarded, color:"text-emerald-700"},
-          {label:"Overdue", value:overdue, color:overdue>0?"text-red-700":"text-slate-500"},
+          {label:"Overdue", value:overdue, color:overdue>0?"text-red-700":"text-secondary"},
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -69,7 +69,7 @@ export default function RFQsPage() {
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
             {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s}</option>)}
           </select>
-          {(sf!=="all"||q)&&<button onClick={()=>{setSf("all");setQ("");}} className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>}
+          {(sf!=="all"||q)&&<button onClick={()=>{setSf("all");setQ("");}} className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>}
         </div>
 
         {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No RFQs found"/>:(
@@ -78,7 +78,7 @@ export default function RFQsPage() {
               <thead>
                 <tr className="border-b border-slate-100">
                   {["RFQ Number","Title","Status","Deadline","Created"].map(h=>(
-                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -91,21 +91,21 @@ export default function RFQsPage() {
                       <td className="py-3 px-3"><span className="font-mono text-xs font-semibold text-slate-700">{r.rfq_number||"—"}</span></td>
                       <td className="py-3 px-3">
                         <p className="font-medium text-slate-800 truncate max-w-[220px]">{r.title||"—"}</p>
-                        <p className="text-xs text-slate-400">{r.description?.slice(0,60)||""}</p>
+                        <p className="text-xs text-tertiary">{r.description?.slice(0,60)||""}</p>
                       </td>
                       <td className="py-3 px-3">
-                        <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[r.status]||"bg-slate-100 text-slate-600")}>
+                        <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[r.status]||"bg-slate-100 text-secondary")}>
                           {r.status||"—"}
                         </span>
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`text-xs font-medium ${isOver?"text-red-600":isSoon?"text-amber-600":"text-slate-500"}`}>
+                        <span className={`text-xs font-medium ${isOver?"text-red-600":isSoon?"text-amber-600":"text-secondary"}`}>
                           {fmtDate(r.deadline)}
                         </span>
                         {isOver&&<span className="ml-1 text-xs bg-red-100 text-red-700 px-1 rounded font-semibold">OVERDUE</span>}
                         {isSoon&&<span className="ml-1 text-xs bg-amber-100 text-amber-700 px-1 rounded font-semibold">SOON</span>}
                       </td>
-                      <td className="py-3 px-3 text-xs text-slate-400">{fmtDate(r.created_at)}</td>
+                      <td className="py-3 px-3 text-xs text-tertiary">{fmtDate(r.created_at)}</td>
                     </tr>
                   );
                 })}

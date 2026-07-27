@@ -11,7 +11,7 @@ export function Entity360Hero({ eyebrow, title, subtitle, badges }: Entity360Her
     <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500" />
       <div className="p-8">
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           {eyebrow}
         </div>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">

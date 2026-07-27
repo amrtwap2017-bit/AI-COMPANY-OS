@@ -39,11 +39,11 @@ export default function AnalyticsScorecards() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Analytics</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Performance Scorecards</h1>
-        <p className="text-slate-500 mt-1">KPI performance across all operational domains</p>
+        <h1 className="text-3xl font-black text-primary">Performance Scorecards</h1>
+        <p className="text-secondary mt-1">KPI performance across all operational domains</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -52,11 +52,11 @@ export default function AnalyticsScorecards() {
           const vs = sc.score >= sc.target;
           return (
             <button key={i} onClick={() => router.push(sc.path)}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+              className="bg-surface border border-border rounded-2xl p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <div className="font-bold text-slate-900 dark:text-white">{sc.name}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{sc.desc}</div>
+                  <div className="font-bold text-primary">{sc.name}</div>
+                  <div className="text-xs text-secondary mt-0.5">{sc.desc}</div>
                 </div>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${vs ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
                   {vs ? "ON TARGET" : "BELOW"}
@@ -64,8 +64,8 @@ export default function AnalyticsScorecards() {
               </div>
               <div className="flex items-end gap-2 mb-3">
                 <span className={`text-5xl font-black text-${sc.color}-500`}>{sc.score}</span>
-                <span className="text-xl text-slate-400 mb-1">{sc.unit}</span>
-                <span className="text-sm text-slate-400 mb-1 ml-auto">target: {sc.target}{sc.unit}</span>
+                <span className="text-xl text-tertiary mb-1">{sc.unit}</span>
+                <span className="text-sm text-tertiary mb-1 ml-auto">target: {sc.target}{sc.unit}</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
                 <div className={`h-3 rounded-full bg-${sc.color}-500 transition-all`} style={{ width: `${pct}%` }} />
@@ -76,19 +76,19 @@ export default function AnalyticsScorecards() {
       </div>
 
       {/* Domain breakdown table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Domain Scorecard Summary</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6">
+        <h2 className="font-bold text-primary mb-4">Domain Scorecard Summary</h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800">
-              <th className="text-left pb-3 text-slate-500 font-medium">Domain</th>
-              <th className="text-right pb-3 text-slate-500 font-medium">Total</th>
-              <th className="text-right pb-3 text-slate-500 font-medium">Active</th>
-              <th className="text-right pb-3 text-slate-500 font-medium">Issues</th>
-              <th className="text-right pb-3 text-slate-500 font-medium">Status</th>
+              <th className="text-left pb-3 text-secondary font-medium">Domain</th>
+              <th className="text-right pb-3 text-secondary font-medium">Total</th>
+              <th className="text-right pb-3 text-secondary font-medium">Active</th>
+              <th className="text-right pb-3 text-secondary font-medium">Issues</th>
+              <th className="text-right pb-3 text-secondary font-medium">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+          <tbody className="divide-y divide-y-border">
             {[
               { domain: "Work Orders", total: d.work_orders?.total, active: d.work_orders?.in_progress, issues: d.work_orders?.open },
               { domain: "PM Plans", total: d.maintenance?.pm_plans, active: d.maintenance?.active, issues: d.maintenance?.overdue },
@@ -96,8 +96,8 @@ export default function AnalyticsScorecards() {
               { domain: "Invoices", total: d.finance?.total_invoices, active: d.finance?.paid, issues: d.finance?.overdue },
               { domain: "Procurement", total: d.procurement?.purchase_requests, active: d.procurement?.approved_prs, issues: d.procurement?.pending_pos },
             ].map((row, i) => (
-              <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <td className="py-3 font-medium text-slate-900 dark:text-white">{row.domain}</td>
+              <tr key={i} className="hover:bg-base-alt">
+                <td className="py-3 font-medium text-primary">{row.domain}</td>
                 <td className="py-3 text-right">{row.total ?? "—"}</td>
                 <td className="py-3 text-right text-emerald-600">{row.active ?? "—"}</td>
                 <td className="py-3 text-right text-red-500">{row.issues ?? 0}</td>

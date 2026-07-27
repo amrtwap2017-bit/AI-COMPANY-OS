@@ -69,7 +69,7 @@ export default function AIAssistantPage() {
     critical: "bg-red-100 text-red-700",
     high:     "bg-orange-100 text-orange-700",
     medium:   "bg-blue-100 text-blue-700",
-    low:      "bg-slate-100 text-slate-600",
+    low:      "bg-slate-100 text-secondary",
   };
 
   return (
@@ -107,11 +107,11 @@ export default function AIAssistantPage() {
               Parse with AI
             </Button>
             <div>
-              <p className="text-xs font-semibold text-slate-500 mb-2">QUICK EXAMPLES:</p>
+              <p className="text-xs font-semibold text-secondary mb-2">QUICK EXAMPLES:</p>
               <div className="space-y-1">
                 {EXAMPLES.map((ex, i) => (
                   <button key={i} onClick={() => { setText(ex); setParsed(null); }}
-                    className="w-full text-left text-xs text-slate-500 hover:text-amber-700 px-2 py-1 rounded hover:bg-amber-50 transition-colors truncate">
+                    className="w-full text-left text-xs text-secondary hover:text-amber-700 px-2 py-1 rounded hover:bg-amber-50 transition-colors truncate">
                     {ex}
                   </button>
                 ))}
@@ -122,7 +122,7 @@ export default function AIAssistantPage() {
 
         <SectionCard title="Parsed Result" subtitle="AI-extracted work order fields">
           {!parsed ? (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-tertiary">
               <Wrench className="w-10 h-10 mx-auto mb-3 opacity-30" />
               <p className="text-sm">Paste a request and click Parse with AI</p>
             </div>
@@ -136,7 +136,7 @@ export default function AIAssistantPage() {
                   { label: "Priority", value: parsed.parsed?.priority },
                 ].map(f => (
                   <div key={f.label} className="p-3 bg-slate-50 rounded-xl">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">{f.label}</p>
+                    <p className="text-[10px] text-tertiary uppercase tracking-wider">{f.label}</p>
                     <p className={"text-sm font-semibold mt-0.5 capitalize " + (f.label === "Priority" ? (PRIORITY_COLOR[f.value] || "") + " px-2 py-0.5 rounded-full inline-block" : "text-slate-900")}>
                       {f.value || "—"}
                     </p>

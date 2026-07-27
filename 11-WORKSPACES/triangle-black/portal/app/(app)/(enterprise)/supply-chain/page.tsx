@@ -37,11 +37,11 @@ export default function SupplyChainHub() {
   const preferredSuppliers = suppliers.filter((s: any) => s.preferred_flag);
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Supply Chain</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Supply Chain Hub</h1>
-        <p className="text-slate-500 mt-1">Procurement, inventory, suppliers, and warehouses</p>
+        <h1 className="text-3xl font-black text-primary">Supply Chain Hub</h1>
+        <p className="text-secondary mt-1">Procurement, inventory, suppliers, and warehouses</p>
       </div>
 
       {/* KPIs */}
@@ -53,23 +53,23 @@ export default function SupplyChainHub() {
           { label: "Low Stock Alerts", value: lowStockItems.length, sub: "below minimum level", color: lowStockItems.length > 0 ? "red" : "emerald", path: "/supply-chain/reorder" },
         ].map((k, i) => (
           <button key={i} onClick={() => router.push(k.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
-            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
+            <div className="text-xs text-secondary mb-2">{k.label}</div>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Pending PRs */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Pending Purchase Requests</h2>
+            <h2 className="font-bold text-primary">Pending Purchase Requests</h2>
             <button onClick={() => router.push("/supply-chain/purchase-requests")} className="text-xs text-amber-500 hover:underline">All PRs →</button>
           </div>
           {pendingPRs.length === 0 ? (
-            <div className="text-center py-6 text-slate-400 text-sm">✅ No pending PRs</div>
+            <div className="text-center py-6 text-tertiary text-sm">✅ No pending PRs</div>
           ) : pendingPRs.slice(0, 6).map((pr: any, i: number) => (
             <button key={i} onClick={() => router.push(`/supply-chain/purchase-requests/${pr.id}`)}
               className="w-full flex items-center justify-between p-3 mb-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl hover:bg-amber-100 text-left">
@@ -83,9 +83,9 @@ export default function SupplyChainHub() {
         </div>
 
         {/* Suppliers */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Suppliers</h2>
+            <h2 className="font-bold text-primary">Suppliers</h2>
             <button onClick={() => router.push("/supply-chain/suppliers")} className="text-xs text-amber-500 hover:underline">All →</button>
           </div>
           <div className="grid grid-cols-3 gap-3 mb-4 text-center">
@@ -94,18 +94,18 @@ export default function SupplyChainHub() {
               { label: "Preferred", value: preferredSuppliers.length, color: "emerald" },
               { label: "Active", value: suppliers.filter((s: any) => s.status === "active").length, color: "amber" },
             ].map((s, i) => (
-              <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
+              <div key={i} className="bg-base-alt dark:bg-surface-alt rounded-xl p-3">
                 <div className={`text-2xl font-black text-${s.color}-500`}>{s.value}</div>
-                <div className="text-xs text-slate-500">{s.label}</div>
+                <div className="text-xs text-secondary">{s.label}</div>
               </div>
             ))}
           </div>
           <div className="space-y-2">
             {suppliers.slice(0, 5).map((s: any, i: number) => (
-              <div key={i} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <div key={i} className="flex items-center justify-between p-2 bg-base-alt dark:bg-surface-alt rounded-lg">
                 <div>
-                  <div className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{s.company_name}</div>
-                  <div className="text-xs text-slate-400">{s.supplier_type} · {s.payment_terms}</div>
+                  <div className="text-sm font-medium text-primary truncate">{s.company_name}</div>
+                  <div className="text-xs text-tertiary">{s.supplier_type} · {s.payment_terms}</div>
                 </div>
                 <div className="flex gap-1 flex-shrink-0 ml-2">
                   {s.preferred_flag && <span className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">★ Preferred</span>}
@@ -118,9 +118,9 @@ export default function SupplyChainHub() {
       </div>
 
       {/* Warehouses */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+      <div className="bg-surface border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-slate-900 dark:text-white">Warehouses</h2>
+          <h2 className="font-bold text-primary">Warehouses</h2>
           <button onClick={() => router.push("/supply-chain/stock-balances")} className="text-xs text-amber-500 hover:underline">Stock levels →</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,21 +131,21 @@ export default function SupplyChainHub() {
               <div key={wh.id} className="border border-slate-200 dark:border-slate-700 rounded-xl p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <div className="font-bold text-slate-900 dark:text-white">{wh.name}</div>
-                    <div className="text-xs text-slate-500">{wh.type} · Manager: {wh.manager_name || "—"}</div>
+                    <div className="font-bold text-primary">{wh.name}</div>
+                    <div className="text-xs text-secondary">{wh.type} · Manager: {wh.manager_name || "—"}</div>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${wh.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${wh.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-secondary"}`}>
                     {wh.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 text-center">
+                  <div className="bg-base-alt dark:bg-surface-alt rounded-lg p-2 text-center">
                     <div className="text-lg font-black text-blue-500">{whStock.length}</div>
-                    <div className="text-xs text-slate-400">Items</div>
+                    <div className="text-xs text-tertiary">Items</div>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 text-center">
+                  <div className="bg-base-alt dark:bg-surface-alt rounded-lg p-2 text-center">
                     <div className="text-sm font-black text-emerald-500">{fmtEGP(whValue)}</div>
-                    <div className="text-xs text-slate-400">Total Value</div>
+                    <div className="text-xs text-tertiary">Total Value</div>
                   </div>
                 </div>
               </div>
@@ -163,9 +163,9 @@ export default function SupplyChainHub() {
           { label: "Suppliers", icon: "🏢", path: "/supply-chain/suppliers" },
         ].map((a, i) => (
           <button key={i} onClick={() => router.push(a.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center hover:border-amber-400 hover:shadow-lg transition-all">
+            className="bg-surface border border-border rounded-2xl p-5 text-center hover:border-amber-400 hover:shadow-lg transition-all">
             <div className="text-2xl mb-2">{a.icon}</div>
-            <div className="text-sm font-bold text-slate-900 dark:text-white">{a.label}</div>
+            <div className="text-sm font-bold text-primary">{a.label}</div>
           </button>
         ))}
       </div>

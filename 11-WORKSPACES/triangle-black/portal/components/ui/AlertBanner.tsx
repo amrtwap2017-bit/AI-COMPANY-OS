@@ -17,7 +17,7 @@ const config = {
   success: { icon: CheckCircle,   bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-800", icon_color: "text-emerald-500" },
   warning: { icon: AlertTriangle, bg: "bg-amber-50",   border: "border-amber-200",   text: "text-amber-800",   icon_color: "text-amber-500"   },
   error:   { icon: XCircle,       bg: "bg-red-50",     border: "border-red-200",     text: "text-red-800",     icon_color: "text-red-500"     },
-  neutral: { icon: Lightbulb,     bg: "bg-slate-50",   border: "border-slate-200",   text: "text-slate-700",   icon_color: "text-slate-400"   },
+  neutral: { icon: Lightbulb,     bg: "bg-slate-50",   border: "border-slate-200",   text: "text-slate-700",   icon_color: "text-tertiary"   },
 };
 
 export function AlertBanner({

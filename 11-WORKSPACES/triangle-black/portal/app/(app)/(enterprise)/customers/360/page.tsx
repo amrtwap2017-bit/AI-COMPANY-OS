@@ -54,8 +54,8 @@ const Customer360Page = () => {
                 >
                   <p className="font-medium text-sm text-slate-800">{c.company}</p>
                   <div className="flex gap-2 mt-1">
-                    <span className="text-xs text-slate-500">{c.total_contracts} contracts</span>
-                    <span className="text-xs text-slate-500">{fmtEGP(c.total_value)}</span>
+                    <span className="text-xs text-secondary">{c.total_contracts} contracts</span>
+                    <span className="text-xs text-secondary">{fmtEGP(c.total_value)}</span>
                   </div>
                 </div>
               ))}
@@ -88,7 +88,7 @@ const Customer360Page = () => {
                     <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{c.title || c.contract_number}</p>
-                        <p className="text-xs text-slate-500">{fmtDate(c.start_date)} → {fmtDate(c.end_date)}</p>
+                        <p className="text-xs text-secondary">{fmtDate(c.start_date)} → {fmtDate(c.end_date)}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-amber-700">{fmtEGP(c.total_value)}</span>
@@ -107,12 +107,12 @@ const Customer360Page = () => {
                     <div key={w.id} className="flex items-center justify-between p-3 bg-slate-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{w.title}</p>
-                        <p className="text-xs text-slate-500">{fmtDate(w.created_at)}</p>
+                        <p className="text-xs text-secondary">{fmtDate(w.created_at)}</p>
                       </div>
                       <StatusBadge status={w.status} />
                     </div>
                   ))}
-                  {toArr(detail?.work_orders).length === 0 && <p className="text-sm text-slate-400">No work orders linked</p>}
+                  {toArr(detail?.work_orders).length === 0 && <p className="text-sm text-tertiary">No work orders linked</p>}
                 </div>
               </SectionCard>
 
@@ -123,7 +123,7 @@ const Customer360Page = () => {
                     <div key={inv.id} className="flex items-center justify-between p-3 bg-slate-50 rounded">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{inv.invoice_number}</p>
-                        <p className="text-xs text-slate-500">{fmtDate(inv.created_at)}</p>
+                        <p className="text-xs text-secondary">{fmtDate(inv.created_at)}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{fmtEGP(inv.amount)}</span>
@@ -131,7 +131,7 @@ const Customer360Page = () => {
                       </div>
                     </div>
                   ))}
-                  {toArr(detail?.invoices).length === 0 && <p className="text-sm text-slate-400">No invoices found</p>}
+                  {toArr(detail?.invoices).length === 0 && <p className="text-sm text-tertiary">No invoices found</p>}
                 </div>
               </SectionCard>
             </div>

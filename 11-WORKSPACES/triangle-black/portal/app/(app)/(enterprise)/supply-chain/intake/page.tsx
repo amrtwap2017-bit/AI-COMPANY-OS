@@ -87,7 +87,7 @@ export default function ProcurementIntakePage() {
       {!result && (
         <div className="space-y-6">
           <SectionCard title="Step 1 - Describe What You Need">
-            <p className="text-sm text-slate-500 mb-4">
+            <p className="text-sm text-secondary mb-4">
               Write naturally in Arabic or English. Examples: "Need 5 AC filters for room 204",
               "مكيف الغرفة 204 لا يبرد", "Electrical panel MCB tripped - need replacement"
             </p>
@@ -105,7 +105,7 @@ export default function ProcurementIntakePage() {
             <SectionCard title="Step 2 - Channel & Details">
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Request Channel</label>
+                  <label className="text-xs font-semibold text-secondary uppercase block mb-2">Request Channel</label>
                   <div className="flex flex-wrap gap-2">
                     {toArr(CHANNELS).map(c => (
                       <button key={c.key}
@@ -118,7 +118,7 @@ export default function ProcurementIntakePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Urgency</label>
+                  <label className="text-xs font-semibold text-secondary uppercase block mb-2">Urgency</label>
                   <div className="space-y-2">
                     {toArr(URGENCY).map(u => (
                       <label key={u.key}
@@ -132,7 +132,7 @@ export default function ProcurementIntakePage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase block mb-2">Requested By</label>
+                  <label className="text-xs font-semibold text-secondary uppercase block mb-2">Requested By</label>
                   <input value={requester} onChange={e => setRequester(e.target.value)}
                     placeholder="Your name or employee ID"
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -156,7 +156,7 @@ export default function ProcurementIntakePage() {
                                     flex items-center justify-center flex-shrink-0">{s.step}</div>
                     <div>
                       <span className="text-sm font-semibold text-slate-800">{s.label}</span>
-                      <span className="text-xs text-slate-500 ml-2">{s.desc}</span>
+                      <span className="text-xs text-secondary ml-2">{s.desc}</span>
                     </div>
                   </div>
                 ))}
@@ -191,7 +191,7 @@ export default function ProcurementIntakePage() {
                   <Lightbulb className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
                   <div>
                     <div className="font-semibold text-sm text-slate-800">{g.message}</div>
-                    <div className="text-xs text-slate-600 mt-1">{g.action}</div>
+                    <div className="text-xs text-secondary mt-1">{g.action}</div>
                   </div>
                 </div>
               ))}
@@ -208,7 +208,7 @@ export default function ProcurementIntakePage() {
               <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-4 text-center">
                 <s.icon className={`w-5 h-5 mx-auto mb-2 ${s.color}`} />
                 <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-                <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+                <div className="text-xs text-secondary mt-1">{s.label}</div>
               </div>
             ))}
           </div>
@@ -223,16 +223,16 @@ export default function ProcurementIntakePage() {
                       <div className="text-sm font-semibold text-slate-800 truncate">
                         {r.item?.name}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">
+                      <div className="text-xs text-secondary mt-0.5">
                         Qty needed: {r.needed} · Available: {r.available}
                       </div>
                     </div>
                     <span classNam={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0
-                      ${STATUS_COLORS[r.stock_status] ?? "bg-slate-100 text-slate-600"}`}>
+                      ${STATUS_COLORS[r.stock_status] ?? "bg-slate-100 text-secondary"}`}>
                       {r.stock_status?.replace(/_/g," ")}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-600 mt-2">{r.stock_message}</div>
+                  <div className="text-xs text-secondary mt-2">{r.stock_message}</div>
                 </div>
               ))}
             </div>
@@ -248,13 +248,13 @@ export default function ProcurementIntakePage() {
                       <div className="text-xs font-bold text-blue-600 mb-2">★ TOP RECOMMDATION</div>
                     )}
                     <div className="font-semibold text-sm text-slate-800">{v.vendor_name}</div>
-                    <div className="text-xs text-slate-500 mt-1">{v.category}</div>
-                    <div className="flex gap-3 mt-2 text-xs text-slate-600">
+                    <div className="text-xs text-secondary mt-1">{v.category}</div>
+                    <div className="flex gap-3 mt-2 text-xs text-secondary">
                       <span>⭐ {v.rating?.toFixed(1)}/5</span>
                       <span>🚚 {v.lead_time_days}d</span>
                     </div>
                     {v.email && <div className="text-xs text-blue-60t-1 truncate">📧 {v.email}</div>}
-                    <div className="text-xs text-slate-400 mt-2 italic">{v.ai_note}</div>
+                    <div className="text-xs text-tertiary mt-2 italic">{v.ai_note}</div>
                   </div>
                 ))}
               </div>
@@ -296,7 +296,7 @@ export default function ProcurementIntakePage() {
         <div className="text-center py-12">
           <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Purchase Request Created!</h2>
-          <p className="text-slate-600 mb-6">{prCreated.message}</p>
+          <p className="text-secondary mb-6">{prCreated.message}</p>
 
           <div className="max-w-md mx-auto space-y-3 text-left">
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -304,17 +304,17 @@ export default function ProcurementIntakePage() {
               {prCreated.approval_chain?.map((step: any) => (
                 <div key={step.step} className="flex items-center gap-3 py-1">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-                    ${step.status === "pending" ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-500"}`}>
+                    ${step.status === "pending" ? "bg-blue-600 text-white" : "bg-slate-200 text-secondary"}`}>
                     {step.step}
                   </div>
                   <span className="text-sm text-slate-700">{step.role}</span>
-                  <span className={`text-xs ml-auto capitalize ${step.status === "pending" ? "text-blue-600 font-semibold" : "text-slate-400"}`}>
+                  <span className={`text-xs ml-auto capitalize ${step.status === "pending" ? "text-blue-600 font-semibold" : "text-tertiary"}`}>
                     {step.status}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="text-xs text-slate-500 text-center">
+            <div className="text-xs text-secondary text-center">
               PR ID: {prCreated.pr_id?.slice(0,8)} · Required by: {prCreated.required_date?.slice(0,10)}
            </div>
           </div>

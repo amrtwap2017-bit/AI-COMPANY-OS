@@ -52,7 +52,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-slate-900">{user?.name || "Loading..."}</h2>
-              <p className="text-sm text-slate-500">{user?.email}</p>
+              <p className="text-sm text-secondary">{user?.email}</p>
               <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full mt-1.5 inline-block capitalize">
                 {user?.role || "—"}
               </span>
@@ -66,8 +66,8 @@ export default function ProfilePage() {
               { icon: Clock,     label: "Session", value: "Active" },
             ].map(item => (
               <div key={item.label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                <item.icon className="w-4 h-4 text-slate-400 flex-shrink-0"/>
-                <span className="text-sm text-slate-500 w-20">{item.label}</span>
+                <item.icon className="w-4 h-4 text-tertiary flex-shrink-0"/>
+                <span className="text-sm text-secondary w-20">{item.label}</span>
                 <span className="text-sm font-medium text-slate-900">{item.value}</span>
               </div>
             ))}
@@ -78,8 +78,8 @@ export default function ProfilePage() {
           <h3 className="font-semibold text-slate-900 mb-4">Account Actions</h3>
           <div className="space-y-2">
             <button className="flex items-center gap-3 w-full p-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-sm text-slate-700 transition-colors">
-              <Key className="w-4 h-4 text-slate-400"/> Change Password
-              <span className="ml-auto text-xs text-slate-400">Coming soon</span>
+              <Key className="w-4 h-4 text-tertiary"/> Change Password
+              <span className="ml-auto text-xs text-tertiary">Coming soon</span>
             </button>
             <button onClick={handleLogout}
               className="flex items-center gap-3 w-full p-3 rounded-xl border border-red-200 hover:bg-red-50 text-sm text-red-600 transition-colors">

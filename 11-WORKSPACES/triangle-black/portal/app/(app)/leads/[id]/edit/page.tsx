@@ -51,7 +51,7 @@ export default function EditLeadPage() {
 
   const field = (label: string, key: string, type="text") => (
     <div>
-      <label className="text-xs font-medium text-slate-600 block mb-1.5">{label}</label>
+      <label className="text-xs font-medium text-secondary block mb-1.5">{label}</label>
       <input type={type} value={form[key]||""} onChange={e=>setForm((f:any)=>({...f,[key]:e.target.value}))}
         className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
     </div>
@@ -61,7 +61,7 @@ export default function EditLeadPage() {
     <PageWrapper>
       <Breadcrumb/>
       <PageHeader title={"Edit: "+(form.company_name||"Lead")} subtitle="Update lead information" badge="EDIT"
-        actions={<Link href={"/leads/"+id} className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
+        actions={<Link href={"/leads/"+id} className="flex items-center gap-1.5 px-3 py-2 text-sm text-secondary hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
       {error&&<AlertBanner type="error" title={error}/>}
       <form onSubmit={handleSubmit} className="max-w-2xl">
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
@@ -75,14 +75,14 @@ export default function EditLeadPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Status</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Status</label>
               <select value={form.status||"new"} onChange={e=>setForm((f:any)=>({...f,status:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
                 {["new","qualified","negotiation","won","lost"].map(s=><option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Source</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Source</label>
               <select value={form.source||"direct"} onChange={e=>setForm((f:any)=>({...f,source:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
                 {["direct","referral","website","cold_call","exhibition"].map(s=><option key={s}>{s}</option>)}
@@ -90,7 +90,7 @@ export default function EditLeadPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600 block mb-1.5">Notes</label>
+            <label className="text-xs font-medium text-secondary block mb-1.5">Notes</label>
             <textarea rows={3} value={form.notes||""} onChange={e=>setForm((f:any)=>({...f,notes:e.target.value}))}
               className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none resize-none"/>
           </div>
@@ -100,7 +100,7 @@ export default function EditLeadPage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl">
             {loading?<><Loader2 className="w-4 h-4 animate-spin"/>Saving...</>:<><Save className="w-4 h-4"/>Save Changes</>}
           </button>
-          <Link href={"/leads/"+id} className="px-5 py-2.5 border border-slate-200 text-slate-600 text-sm rounded-xl hover:bg-slate-50">Cancel</Link>
+          <Link href={"/leads/"+id} className="px-5 py-2.5 border border-slate-200 text-secondary text-sm rounded-xl hover:bg-slate-50">Cancel</Link>
         </div>
       </form>
     </PageWrapper>

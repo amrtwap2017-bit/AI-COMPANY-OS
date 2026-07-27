@@ -38,11 +38,11 @@ export default function ExecutiveExceptions() {
   const unread = notifs.filter((n: any) => !n.is_read);
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Exception Management</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Platform Exceptions</h1>
-        <p className="text-slate-500 mt-1">All items requiring immediate attention</p>
+        <h1 className="text-3xl font-black text-primary">Platform Exceptions</h1>
+        <p className="text-secondary mt-1">All items requiring immediate attention</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
@@ -52,8 +52,8 @@ export default function ExecutiveExceptions() {
           { label: "High Priority", value: exceptions.filter((e: any) => e._severity === "high").length, color: "orange" },
           { label: "Unread Alerts", value: unread.length, color: "amber" },
         ].map((k, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-            <div className="text-xs text-slate-500 mb-1">{k.label}</div>
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="text-xs text-secondary mb-1">{k.label}</div>
             <div className={`text-4xl font-black text-${k.color}-500`}>{k.value}</div>
           </div>
         ))}
@@ -63,12 +63,12 @@ export default function ExecutiveExceptions() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 p-16 text-center">
           <div className="text-5xl mb-4">✅</div>
           <div className="text-2xl font-bold text-emerald-600">Zero Exceptions</div>
-          <div className="text-slate-500 mt-2">Platform is operating normally</div>
+          <div className="text-secondary mt-2">Platform is operating normally</div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <div className="bg-surface border border-border rounded-2xl">
           <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-            <span className="text-sm font-bold text-slate-900 dark:text-white">{exceptions.length} exceptions requiring action</span>
+            <span className="text-sm font-bold text-primary">{exceptions.length} exceptions requiring action</span>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {exceptions.map((ex: any, i: number) => {
@@ -77,14 +77,14 @@ export default function ExecutiveExceptions() {
               const c = colors[sev] || "slate";
               return (
                 <button key={i} onClick={() => router.push(ex._path)}
-                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left">
+                  className="w-full flex items-center gap-4 px-5 py-4 hover:bg-base-alt transition-colors text-left">
                   <span className={`w-2.5 h-2.5 rounded-full bg-${c}-500 flex-shrink-0`} />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-900 dark:text-white truncate">{ex._msg}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{ex._cat}</div>
+                    <div className="font-medium text-primary truncate">{ex._msg}</div>
+                    <div className="text-xs text-secondary mt-0.5">{ex._cat}</div>
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-lg bg-${c}-100 text-${c}-700 flex-shrink-0`}>{sev.toUpperCase()}</span>
-                  <span className="text-xs text-slate-400 flex-shrink-0">→</span>
+                  <span className="text-xs text-tertiary flex-shrink-0">→</span>
                 </button>
               );
             })}

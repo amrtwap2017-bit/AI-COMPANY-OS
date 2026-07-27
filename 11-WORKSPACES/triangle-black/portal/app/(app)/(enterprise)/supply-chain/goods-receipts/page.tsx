@@ -50,7 +50,7 @@ export default function GoodsReceiptsPage() {
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -66,7 +66,7 @@ export default function GoodsReceiptsPage() {
           </select>
           {(sf !== "all" || q) && (
             <button onClick={() => { setSf("all"); setQ(""); }}
-              className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>
+              className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>
           )}
         </div>
 
@@ -78,7 +78,7 @@ export default function GoodsReceiptsPage() {
               <thead>
                 <tr className="border-b border-slate-100">
                   {["GRN Number","Status","Received Date","Received By","Notes"].map(h => (
-                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -89,13 +89,13 @@ export default function GoodsReceiptsPage() {
                       <span className="font-mono text-xs font-semibold text-slate-700">{r.grn_number || "—"}</span>
                     </td>
                     <td className="py-3 px-3">
-                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold " + (S[r.status] || "bg-slate-100 text-slate-600")}>
+                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold " + (S[r.status] || "bg-slate-100 text-secondary")}>
                         {r.status || "—"}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-xs text-slate-500">{fmtDate(r.received_date || r.receipt_date || r.created_at)}</td>
-                    <td className="py-3 px-3 text-xs text-slate-600">{r.received_by || "—"}</td>
-                    <td className="py-3 px-3 text-xs text-slate-400 max-w-xs truncate">{r.notes || "—"}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{fmtDate(r.received_date || r.receipt_date || r.created_at)}</td>
+                    <td className="py-3 px-3 text-xs text-secondary">{r.received_by || "—"}</td>
+                    <td className="py-3 px-3 text-xs text-tertiary max-w-xs truncate">{r.notes || "—"}</td>
                   </tr>
                 ))}
               </tbody>

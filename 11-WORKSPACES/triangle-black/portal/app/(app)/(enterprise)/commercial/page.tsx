@@ -32,11 +32,11 @@ export default function CommercialHub() {
   const hotLeads = leads.filter((l: any) => (l.score ?? 0) >= 70 && l.status !== "won" && l.status !== "lost");
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div>
         <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Commercial Hub</div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Commercial Overview</h1>
-        <p className="text-slate-500 mt-1">Pipeline, contracts, and revenue performance</p>
+        <h1 className="text-3xl font-black text-primary">Commercial Overview</h1>
+        <p className="text-secondary mt-1">Pipeline, contracts, and revenue performance</p>
       </div>
 
       {/* Top metrics */}
@@ -48,19 +48,19 @@ export default function CommercialHub() {
           { label: "Expiring Soon", value: expiring.length, sub: "contracts in 30 days", color: expiring.length > 0 ? "red" : "emerald", path: "/commercial/contracts" },
         ].map((k, i) => (
           <button key={i} onClick={() => router.push(k.path)}
-            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
-            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+            className="bg-surface border border-border rounded-2xl p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
+            <div className="text-xs text-secondary mb-2">{k.label}</div>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Pipeline stages */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Sales Pipeline</h2>
+            <h2 className="font-bold text-primary">Sales Pipeline</h2>
             <button onClick={() => router.push("/commercial/pipeline")} className="text-xs text-amber-500 hover:underline">Full view →</button>
           </div>
           <div className="space-y-3">
@@ -73,7 +73,7 @@ export default function CommercialHub() {
               { stage: "Lost", count: leads.filter((l: any) => l.status === "lost").length, color: "red" },
             ].map((s, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="text-xs text-slate-500 w-28 flex-shrink-0">{s.stage}</div>
+                <div className="text-xs text-secondary w-28 flex-shrink-0">{s.stage}</div>
                 <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-5 relative">
                   <div className={`h-5 rounded-full bg-${s.color}-500 flex items-center justify-end pr-2`}
                     style={{ width: `${Math.max(8, (s.count / Math.max(leads.length, 1)) * 100)}%` }}>
@@ -86,13 +86,13 @@ export default function CommercialHub() {
         </div>
 
         {/* Expiring contracts */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="bg-surface border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-slate-900 dark:text-white">Contracts Expiring Soon</h2>
+            <h2 className="font-bold text-primary">Contracts Expiring Soon</h2>
             <button onClick={() => router.push("/commercial/contracts")} className="text-xs text-amber-500 hover:underline">All contracts →</button>
           </div>
           {expiring.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-sm">✅ No contracts expiring in 30 days</div>
+            <div className="text-center py-8 text-tertiary text-sm">✅ No contracts expiring in 30 days</div>
           ) : expiring.slice(0, 6).map((c: any, i: number) => {
             const daysLeft = Math.ceil((new Date(c.end_date).getTime() - Date.now()) / 86400000);
             return (
@@ -110,24 +110,24 @@ export default function CommercialHub() {
       </div>
 
       {/* Hot leads */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+      <div className="bg-surface border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-slate-900 dark:text-white">Hot Leads (Score ≥ 70)</h2>
+          <h2 className="font-bold text-primary">Hot Leads (Score ≥ 70)</h2>
           <button onClick={() => router.push("/commercial/leads")} className="text-xs text-amber-500 hover:underline">All leads →</button>
         </div>
         {hotLeads.length === 0 ? (
-          <div className="text-slate-400 text-sm text-center py-6">No hot leads at this time</div>
+          <div className="text-tertiary text-sm text-center py-6">No hot leads at this time</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {hotLeads.slice(0, 6).map((l: any, i: number) => (
               <button key={i} onClick={() => router.push(`/commercial/leads/${l.id}`)}
                 className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-amber-400 hover:shadow-md transition-all text-left">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-sm font-bold text-slate-900 dark:text-white truncate">{l.name}</div>
+                  <div className="text-sm font-bold text-primary truncate">{l.name}</div>
                   <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold ml-2 flex-shrink-0">{l.score}</span>
                 </div>
-                <div className="text-xs text-slate-500">{l.company}</div>
-                <div className="text-xs text-slate-400 mt-1">{l.status} · {l.source}</div>
+                <div className="text-xs text-secondary">{l.company}</div>
+                <div className="text-xs text-tertiary mt-1">{l.status} · {l.source}</div>
               </button>
             ))}
           </div>

@@ -63,7 +63,7 @@ export function CommandPalette({ isOpen, onClose }: Props) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
            onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
-          <Search className="w-5 h-5 text-slate-400 flex-shrink-0" />
+          <Search className="w-5 h-5 text-tertiary flex-shrink-0" />
           <input
             ref={inputRef}
             value={query}
@@ -71,8 +71,8 @@ export function CommandPalette({ isOpen, onClose }: Props) {
             placeholder="Search work orders, assets, leads, contracts..."
             className="flex-1 outline-none text-sm text-slate-800 placeholder-slate-400"
           />
-          {isFetching && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          {isFetching && <Loader2 className="w-4 h-4 text-tertiary animate-spin" />}
+          <button onClick={onClose} className="text-tertiary hover:text-slate-600">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -91,21 +91,21 @@ export function CommandPalette({ isOpen, onClose }: Props) {
               </span>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-slate-800 truncate">{r.label}</div>
-                {r.meta && <div className="text-xs text-slate-400 truncate">{r.meta}</div>}
+                {r.meta && <div className="text-xs text-tertiary truncate">{r.meta}</div>}
               </div>
             </div>
           )) : query.length >= 2 && !isFetching ? (
-            <div className="px-4 py-8 text-center text-sm text-slate-400">
+            <div className="px-4 py-8 text-center text-sm text-tertiary">
               No results for "{query}"
             </div>
           ) : query.length < 2 ? (
-            <div className="px-4 py-6 text-center text-xs text-slate-400">
+            <div className="px-4 py-6 text-center text-xs text-tertiary">
               Type at least 2 characters to search across all entities
             </div>
           ) : null}
         </div>
 
-        <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 flex gap-4 text-xs text-slate-400">
+        <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 flex gap-4 text-xs text-tertiary">
           <span>↑↓ navigate</span>
           <span>↵ open</span>
           <span>esc close</span>

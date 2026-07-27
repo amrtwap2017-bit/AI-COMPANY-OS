@@ -22,7 +22,7 @@ export function ActivityGraphSummary({ title, subtitle, nodes }: ActivityGraphSu
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {nodes.map((node) => (
           <div key={node.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {node.label}
             </div>
             <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">

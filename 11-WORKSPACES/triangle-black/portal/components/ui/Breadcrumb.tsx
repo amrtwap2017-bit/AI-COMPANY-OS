@@ -126,7 +126,7 @@ export function Breadcrumb({ className = "" }: { className?: string }) {
 
   return (
     <nav
-      className={"flex items-center gap-1 text-xs text-slate-400 " + className}
+      className={"flex items-center gap-1 text-xs text-tertiary " + className}
       aria-label="Breadcrumb"
     >
       <Link

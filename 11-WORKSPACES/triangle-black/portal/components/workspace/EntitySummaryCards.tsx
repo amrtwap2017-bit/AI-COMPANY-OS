@@ -15,7 +15,7 @@ export function EntitySummaryCards({ title, subtitle, items }: EntitySummaryCard
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Entity Summary
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
@@ -28,7 +28,7 @@ export function EntitySummaryCards({ title, subtitle, items }: EntitySummaryCard
             key={`${item.label}-${index}`}
             className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
           >
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.label}
             </div>
             <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">

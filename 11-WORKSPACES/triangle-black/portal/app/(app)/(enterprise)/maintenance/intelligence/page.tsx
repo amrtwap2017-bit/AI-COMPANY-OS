@@ -21,10 +21,10 @@ export default function MaintenanceIntelligencePage() {
       const days=(now-new Date(a.last_maintenance_date))/(86400000);return s+days;
     },0)/assets.filter(a=>a.last_maintenance_date).length):0;
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div><div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Maintenance Intelligence</div>
-      <h1 className="text-3xl font-black text-slate-900 dark:text-white">Maintenance Intelligence</h1>
-      <p className="text-slate-500 mt-1">Predictive insights and asset health analysis</p></div>
+      <h1 className="text-3xl font-black text-primary">Maintenance Intelligence</h1>
+      <p className="text-secondary mt-1">Predictive insights and asset health analysis</p></div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {label:"Critical Assets",value:criticalAssets.length,color:"red",sub:"requiring priority maintenance"},
@@ -32,10 +32,10 @@ export default function MaintenanceIntelligencePage() {
           {label:"Overdue PM Plans",value:overduePMs.length,color:overduePMs.length>0?"red":"emerald",sub:"require immediate action"},
           {label:"Avg Days Since Service",value:avgDaysToService,color:"blue",sub:"across all assets"},
         ].map((k,i)=>(
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+          <div key={i} className="bg-surface border border-border rounded-2xl p-5">
+            <div className="text-xs text-secondary mb-2">{k.label}</div>
             <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+            <div className="text-xs text-tertiary mt-1">{k.sub}</div>
           </div>
         ))}
       </div>
@@ -49,7 +49,7 @@ export default function MaintenanceIntelligencePage() {
             <button key={i} onClick={()=>router.push(`/maintenance/assets/${a.id}`)}
               className="w-full flex items-center justify-between p-3 mb-1 bg-amber-50 dark:bg-amber-900/20 rounded-xl hover:bg-amber-100 text-left">
               <div><div className="text-sm font-medium truncate">{a.name}</div><div className="text-xs text-amber-600">{a.category}</div></div>
-              <div className="text-xs text-slate-400">{fmtDate(a.next_maintenance_date)}</div>
+              <div className="text-xs text-tertiary">{fmtDate(a.next_maintenance_date)}</div>
             </button>
           ))}
         </div>
@@ -64,9 +64,9 @@ export default function MaintenanceIntelligencePage() {
               {label:"Completed",value:maintenanceWOs.filter(w=>w.status==="completed").length,color:"emerald"},
               {label:"Open",value:maintenanceWOs.filter(w=>w.status==="open").length,color:"amber"},
             ].map((s,i)=>(
-              <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3">
+              <div key={i} className="bg-base-alt dark:bg-surface-alt rounded-xl p-3">
                 <div className={`text-2xl font-black text-${s.color}-500`}>{s.value}</div>
-                <div className="text-xs text-slate-500">{s.label}</div>
+                <div className="text-xs text-secondary">{s.label}</div>
               </div>
             ))}
           </div>

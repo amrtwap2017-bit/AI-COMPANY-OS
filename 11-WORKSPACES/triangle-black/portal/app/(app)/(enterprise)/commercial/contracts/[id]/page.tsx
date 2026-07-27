@@ -10,7 +10,7 @@ import Link from "next/link";
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
-const S = {active:"bg-emerald-100 text-emerald-800",draft:"bg-slate-100 text-slate-600",pending:"bg-amber-100 text-amber-800",expired:"bg-red-100 text-red-700",terminated:"bg-red-100 text-red-700",completed:"bg-blue-100 text-blue-800"};
+const S = {active:"bg-emerald-100 text-emerald-800",draft:"bg-slate-100 text-secondary",pending:"bg-amber-100 text-amber-800",expired:"bg-red-100 text-red-700",terminated:"bg-red-100 text-red-700",completed:"bg-blue-100 text-blue-800"};
 const STATUSES = ["active","draft","pending","expired","terminated","completed"];
 const TYPES    = ["maintenance","consulting","supply","installation","inspection","annual-service"];
 
@@ -60,7 +60,7 @@ export default function ContractDetailPage() {
   if (!contract || contract.detail) return (
     <PageWrapper>
       <div className="text-center py-20">
-        <p className="text-slate-500 mb-4">Contract not found</p>
+        <p className="text-secondary mb-4">Contract not found</p>
         <Link href="/commercial/contracts" className="text-blue-600 underline text-sm">Back to Contracts</Link>
       </div>
     </PageWrapper>
@@ -100,8 +100,8 @@ export default function ContractDetailPage() {
 
       {!editing && (
         <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[contract.status]||"bg-slate-100 text-slate-600")}>{contract.status||"—"}</span>
+          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[contract.status]||"bg-slate-100 text-secondary")}>{contract.status||"—"}</span>
           <div className="flex-1" />
           {STATUSES.filter(s=>s!==contract.status).slice(0,3).map(s=>(
             <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
@@ -119,42 +119,42 @@ export default function ContractDetailPage() {
               <form onSubmit={save} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
                     <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Client Name *</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Client Name *</label>
                     <input required value={form?.client_name||""} onChange={e=>setForm({...form,client_name:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Contract Number</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Contract Number</label>
                     <input value={form?.contract_number||""} onChange={e=>setForm({...form,contract_number:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Total Value (EGP)</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Total Value (EGP)</label>
                     <input type="number" value={form?.total_value||""} onChange={e=>setForm({...form,total_value:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Type</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Type</label>
                     <select value={form?.contract_type||"maintenance"} onChange={e=>setForm({...form,contract_type:e.target.value})} className={inp}>
                       {TYPES.map(t=><option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Start Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Start Date</label>
                     <input type="date" value={form?.start_date?.slice(0,10)||""} onChange={e=>setForm({...form,start_date:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">End Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">End Date</label>
                     <input type="date" value={form?.end_date?.slice(0,10)||""} onChange={e=>setForm({...form,end_date:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
                   <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
                     rows={3} className={inp+" resize-none"} />
                 </div>
@@ -163,25 +163,25 @@ export default function ContractDetailPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Client</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Client</p>
                     <p className="text-slate-800 font-medium">{contract.client_name||"—"}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Contract Number</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Contract Number</p>
                     <p className="text-slate-700 font-mono text-xs">{contract.contract_number||"—"}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Type</p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{contract.contract_type||"—"}</span>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Type</p>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{contract.contract_type||"—"}</span>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Total Value</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Total Value</p>
                     <p className="text-slate-800 font-bold">EGP {fmtNum(contract.total_value||contract.value||0)}</p>
                   </div>
                 </div>
                 {contract.description && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Description</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
                     <p className="text-slate-700 text-sm">{contract.description}</p>
                   </div>
                 )}
@@ -194,20 +194,20 @@ export default function ContractDetailPage() {
           <SectionCard title="Contract Value">
             <div className="text-center py-3">
               <div className="text-3xl font-black text-blue-700 mb-1">EGP {fmtNum(contract.total_value||contract.value||0)}</div>
-              <p className="text-xs text-slate-500">Total Contract Value</p>
+              <p className="text-xs text-secondary">Total Contract Value</p>
             </div>
           </SectionCard>
 
           <SectionCard title="Timeline">
             <dl className="space-y-3">
               {[
-                {label:"Status",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[contract.status]||"bg-slate-100 text-slate-600")}>{contract.status||"—"}</span>},
+                {label:"Status",   value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[contract.status]||"bg-slate-100 text-secondary")}>{contract.status||"—"}</span>},
                 {label:"Start",    value:fmtDate(contract.start_date)},
                 {label:"End",      value:<span className={expiringSoon?"text-amber-600 font-semibold":""}>{fmtDate(contract.end_date)}{expiringSoon?" ⚠":"" }</span>},
                 {label:"Created",  value:fmtDate(contract.created_at)},
               ].map(({label,value})=>(
                 <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dt className="text-xs text-secondary">{label}</dt>
                   <dd className="text-xs">{value}</dd>
                 </div>
               ))}
@@ -218,7 +218,7 @@ export default function ContractDetailPage() {
             <div className="space-y-2">
               {contract.status==="draft"&&<button onClick={()=>updateStatus("active")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50">Activate Contract</button>}
               {contract.status==="active"&&<button onClick={()=>updateStatus("completed")} disabled={saving} className="w-full px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:opacity-50">Mark Completed</button>}
-              <Link href="/commercial/contracts" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Contracts</Link>
+              <Link href="/commercial/contracts" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Contracts</Link>
             </div>
           </SectionCard>
         </div>

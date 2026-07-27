@@ -52,10 +52,10 @@ const COLORS: Record<string, string> = {
   ai:               "text-amber-300",
   analytics:        "text-cyan-400",
   "projects-center":"text-indigo-400",
-  administration:   "text-slate-400",
+  administration:   "text-tertiary",
   approvals:        "text-emerald-400",
   agents:           "text-amber-300",
-  reports:          "text-slate-400",
+  reports:          "text-tertiary",
 };
 
 // ── Badge styles ──────────────────────────────────────────────────
@@ -83,7 +83,7 @@ function NavItem({
   setTooltip: (k: string | null) => void;
 }) {
   const Icon  = ICONS[center.key]  || LayoutDashboard;
-  const color = COLORS[center.key] || "text-slate-400";
+  const color = COLORS[center.key] || "text-tertiary";
 
   return (
     <div
@@ -149,7 +149,7 @@ function NavAccordion({
   const pathname = usePathname();
   const [open, setOpen] = useState(isActive || isChildActive);
   const Icon   = ICONS[center.key]  || LayoutDashboard;
-  const color  = COLORS[center.key] || "text-slate-400";
+  const color  = COLORS[center.key] || "text-tertiary";
   const anyActive = isActive || isChildActive;
 
   // Auto-open when navigating to a child

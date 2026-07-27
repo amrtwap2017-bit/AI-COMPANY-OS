@@ -33,7 +33,7 @@ export function RelationshipTimeline({ title, subtitle, events }: RelationshipTi
             <div className="min-w-0 flex-1 rounded-2xl border border-slate-100 bg-slate-50 p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-sm font-semibold text-slate-900">{event.title}</div>
-                <div className="text-xs uppercase tracking-wide text-slate-500">{event.time}</div>
+                <div className="text-xs uppercase tracking-wide text-secondary">{event.time}</div>
               </div>
               <div className="mt-2 text-sm leading-6 text-slate-600">{event.detail}</div>
             </div>

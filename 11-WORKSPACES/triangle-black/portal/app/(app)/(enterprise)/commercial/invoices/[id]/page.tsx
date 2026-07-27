@@ -10,7 +10,7 @@ import Link from "next/link";
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
-const S = {draft:"bg-slate-100 text-slate-600",sent:"bg-blue-100 text-blue-800",paid:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",cancelled:"bg-slate-100 text-slate-400"};
+const S = {draft:"bg-slate-100 text-secondary",sent:"bg-blue-100 text-blue-800",paid:"bg-emerald-100 text-emerald-800",overdue:"bg-red-100 text-red-800",cancelled:"bg-slate-100 text-tertiary"};
 const STATUSES = ["draft","sent","paid","overdue","cancelled"];
 
 export default function InvoiceDetailPage() {
@@ -64,7 +64,7 @@ export default function InvoiceDetailPage() {
   if (!invoice || invoice.detail) return (
     <PageWrapper>
       <div className="text-center py-20">
-        <p className="text-slate-500 mb-4">Invoice not found</p>
+        <p className="text-secondary mb-4">Invoice not found</p>
         <Link href="/commercial/invoices" className="text-blue-600 underline text-sm">Back to Invoices</Link>
       </div>
     </PageWrapper>
@@ -104,8 +104,8 @@ export default function InvoiceDetailPage() {
 
       {!editing && (
         <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[invoice.status]||"bg-slate-100 text-slate-600")}>{invoice.status||"—"}</span>
+          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[invoice.status]||"bg-slate-100 text-secondary")}>{invoice.status||"—"}</span>
           <div className="flex-1" />
           {!isPaid && (
             <button onClick={()=>updateStatus("paid")} disabled={saving}
@@ -135,42 +135,42 @@ export default function InvoiceDetailPage() {
               <form onSubmit={save} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Title *</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Title *</label>
                     <input required value={form?.title||""} onChange={e=>setForm({...form,title:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Invoice Number</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Invoice Number</label>
                     <input value={form?.invoice_number||""} onChange={e=>setForm({...form,invoice_number:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Amount (EGP) *</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Amount (EGP) *</label>
                     <input required type="number" value={form?.amount||""} onChange={e=>setForm({...form,amount:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Tax Amount (EGP)</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Tax Amount (EGP)</label>
                     <input type="number" value={form?.tax_amount||""} onChange={e=>setForm({...form,tax_amount:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Status</label>
                     <select value={form?.status||"draft"} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
                       {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Issue Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Issue Date</label>
                     <input type="date" value={form?.issue_date?.slice(0,10)||""} onChange={e=>setForm({...form,issue_date:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Due Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Due Date</label>
                     <input type="date" value={form?.due_date?.slice(0,10)||""} onChange={e=>setForm({...form,due_date:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Notes</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Notes</label>
                   <textarea value={form?.notes||""} onChange={e=>setForm({...form,notes:e.target.value})}
                     rows={3} className={inp+" resize-none"} />
                 </div>
@@ -179,17 +179,17 @@ export default function InvoiceDetailPage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Invoice Number</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Invoice Number</p>
                     <p className="text-slate-800 font-mono font-bold">{invoice.invoice_number||"—"}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Title</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Title</p>
                     <p className="text-slate-700">{invoice.title||"—"}</p>
                   </div>
                 </div>
                 {invoice.notes && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Notes</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Notes</p>
                     <p className="text-slate-700 text-sm">{invoice.notes}</p>
                   </div>
                 )}
@@ -203,10 +203,10 @@ export default function InvoiceDetailPage() {
             <div className="space-y-3">
               <div className="text-center py-3 bg-slate-50 rounded-xl">
                 <div className="text-3xl font-black text-slate-800">EGP {fmtNum(invoice.amount)}</div>
-                <p className="text-xs text-slate-500 mt-1">Invoice Amount</p>
+                <p className="text-xs text-secondary mt-1">Invoice Amount</p>
               </div>
               {invoice.tax_amount > 0 && (
-                <div className="flex justify-between text-xs text-slate-500 px-1">
+                <div className="flex justify-between text-xs text-secondary px-1">
                   <span>Tax</span>
                   <span className="font-semibold text-slate-700">EGP {fmtNum(invoice.tax_amount)}</span>
                 </div>
@@ -223,21 +223,21 @@ export default function InvoiceDetailPage() {
           <SectionCard title="Timeline">
             <dl className="space-y-3">
               {[
-                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[invoice.status]||"bg-slate-100 text-slate-600")}>{invoice.status||"—"}</span>},
+                {label:"Status",    value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[invoice.status]||"bg-slate-100 text-secondary")}>{invoice.status||"—"}</span>},
                 {label:"Issue Date",value:fmtDate(invoice.issue_date||invoice.created_at)},
                 {label:"Due Date",  value:<span className={isOverdue?"text-red-600 font-semibold":""}>{fmtDate(invoice.due_date)}</span>},
                 {label:"Paid Date", value:<span className="text-emerald-600 font-semibold">{fmtDate(invoice.paid_date)}</span>},
                 {label:"Created",   value:fmtDate(invoice.created_at)},
               ].map(({label,value})=>(
                 <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dt className="text-xs text-secondary">{label}</dt>
                   <dd className="text-xs">{value}</dd>
                 </div>
               ))}
             </dl>
           </SectionCard>
 
-          <Link href="/commercial/invoices" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">
+          <Link href="/commercial/invoices" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">
             Back to Invoices
           </Link>
         </div>

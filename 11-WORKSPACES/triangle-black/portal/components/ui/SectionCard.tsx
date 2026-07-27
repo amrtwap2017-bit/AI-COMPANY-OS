@@ -27,7 +27,7 @@ export function SectionCard({ title, subtitle, actions, children, icon, compact,
               {title}
             </h3>
             {subtitle && (
-              <p className="text-xs text-slate-400 mt-0.5 truncate">{subtitle}</p>
+              <p className="text-xs text-tertiary mt-0.5 truncate">{subtitle}</p>
             )}
           </div>
         </div>

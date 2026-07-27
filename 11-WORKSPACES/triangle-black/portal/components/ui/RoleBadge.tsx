@@ -7,7 +7,7 @@ const ROLE_CONFIG: Record<string, {label:string; color:string; bg:string}> = {
   manager: { label:"Manager",  color:"text-purple-800", bg:"bg-purple-100 border-purple-200" },
   agent:   { label:"Engineer", color:"text-blue-800",   bg:"bg-blue-100 border-blue-200" },
   client:  { label:"Client",   color:"text-slate-600",  bg:"bg-slate-100 border-slate-200" },
-  viewer:  { label:"Viewer",   color:"text-slate-500",  bg:"bg-slate-50 border-slate-200" },
+  viewer:  { label:"Viewer",   color:"text-secondary",  bg:"bg-slate-50 border-slate-200" },
 };
 
 export function RoleBadge({ className = "" }: { className?: string }) {

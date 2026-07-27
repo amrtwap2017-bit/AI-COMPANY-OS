@@ -10,7 +10,7 @@ import Link from "next/link";
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtNum  = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
 
-const S = {active:"bg-blue-100 text-blue-800",planning:"bg-amber-100 text-amber-800",on_hold:"bg-slate-100 text-slate-600",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-red-100 text-red-700"};
+const S = {active:"bg-blue-100 text-blue-800",planning:"bg-amber-100 text-amber-800",on_hold:"bg-slate-100 text-secondary",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-red-100 text-red-700"};
 const STATUSES = ["active","planning","on_hold","completed","cancelled"];
 
 export default function ProjectDetailPage() {
@@ -60,7 +60,7 @@ export default function ProjectDetailPage() {
   if (!project || project.detail) return (
     <PageWrapper>
       <div className="text-center py-20">
-        <p className="text-slate-500 mb-4">Project not found</p>
+        <p className="text-secondary mb-4">Project not found</p>
         <Link href="/projects-center" className="text-blue-600 underline text-sm">Back to Projects</Link>
       </div>
     </PageWrapper>
@@ -94,8 +94,8 @@ export default function ProjectDetailPage() {
 
       {!editing && (
         <div className="flex items-center gap-3 mb-5 p-4 bg-white border border-slate-200 rounded-xl">
-          <span className="text-xs font-semibold text-slate-500 mr-2">STATUS:</span>
-          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[project.status]||"bg-slate-100 text-slate-600")}>{project.status?.replace(/_/g," ")||"—"}</span>
+          <span className="text-xs font-semibold text-secondary mr-2">STATUS:</span>
+          <span className={"inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold "+(S[project.status]||"bg-slate-100 text-secondary")}>{project.status?.replace(/_/g," ")||"—"}</span>
           <div className="flex-1" />
           {STATUSES.filter(s=>s!==project.status).slice(0,3).map(s=>(
             <button key={s} onClick={()=>updateStatus(s)} disabled={saving}
@@ -112,33 +112,33 @@ export default function ProjectDetailPage() {
             {editing ? (
               <form onSubmit={save} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Project Name *</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Project Name *</label>
                   <input required value={form?.name||form?.title||""} onChange={e=>setForm({...form,name:e.target.value,title:e.target.value})} className={inp} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                  <label className="block text-xs font-semibold text-secondary mb-1">Description</label>
                   <textarea value={form?.description||""} onChange={e=>setForm({...form,description:e.target.value})}
                     rows={4} className={inp+" resize-none"} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Status</label>
                     <select value={form?.status||"planning"} onChange={e=>setForm({...form,status:e.target.value})} className={inp}>
                       {STATUSES.map(s=><option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Budget (EGP)</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Budget (EGP)</label>
                     <input type="number" value={form?.budget||""} onChange={e=>setForm({...form,budget:e.target.value})} className={inp} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Start Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">Start Date</label>
                     <input type="date" value={form?.start_date?.slice(0,10)||""} onChange={e=>setForm({...form,start_date:e.target.value})} className={inp} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">End Date</label>
+                    <label className="block text-xs font-semibold text-secondary mb-1">End Date</label>
                     <input type="date" value={form?.end_date?.slice(0,10)||""} onChange={e=>setForm({...form,end_date:e.target.value})} className={inp} />
                   </div>
                 </div>
@@ -147,13 +147,13 @@ export default function ProjectDetailPage() {
               <div className="space-y-4">
                 {project.description && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Description</p>
+                    <p className="text-xs font-semibold text-secondary uppercase tracking-wide mb-1">Description</p>
                     <p className="text-slate-700 text-sm">{project.description}</p>
                   </div>
                 )}
                 {progress > 0 && (
                   <div>
-                    <div className="flex justify-between text-xs text-slate-500 mb-2">
+                    <div className="flex justify-between text-xs text-secondary mb-2">
                       <span className="font-semibold text-slate-700">Progress</span>
                       <span className="font-bold">{Math.round(progress)}%</span>
                     </div>
@@ -165,7 +165,7 @@ export default function ProjectDetailPage() {
                 )}
                 {budget > 0 && (
                   <div>
-                    <div className="flex justify-between text-xs text-slate-500 mb-2">
+                    <div className="flex justify-between text-xs text-secondary mb-2">
                       <span className="font-semibold text-slate-700">Budget Used</span>
                       <span className={`font-bold ${budgetUsed>90?"text-red-600":budgetUsed>70?"text-amber-600":"text-slate-700"}`}>{Math.round(budgetUsed)}% of EGP {fmtNum(budget)}</span>
                     </div>
@@ -185,16 +185,16 @@ export default function ProjectDetailPage() {
             <div className="space-y-3">
               <div className="text-center py-2 bg-slate-50 rounded-xl">
                 <div className="text-2xl font-black text-slate-800">EGP {fmtNum(budget)}</div>
-                <p className="text-xs text-slate-500">Total Budget</p>
+                <p className="text-xs text-secondary">Total Budget</p>
               </div>
               {spent > 0 && (
                 <>
                   <div className="flex justify-between text-xs px-1">
-                    <span className="text-slate-500">Spent</span>
+                    <span className="text-secondary">Spent</span>
                     <span className="font-semibold text-slate-700">EGP {fmtNum(spent)}</span>
                   </div>
                   <div className="flex justify-between text-xs px-1">
-                    <span className="text-slate-500">Remaining</span>
+                    <span className="text-secondary">Remaining</span>
                     <span className={`font-semibold ${budget-spent<0?"text-red-600":"text-emerald-600"}`}>EGP {fmtNum(Math.max(0,budget-spent))}</span>
                   </div>
                 </>
@@ -205,21 +205,21 @@ export default function ProjectDetailPage() {
           <SectionCard title="Timeline">
             <dl className="space-y-3">
               {[
-                {label:"Status",  value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[project.status]||"bg-slate-100 text-slate-600")}>{project.status?.replace(/_/g," ")||"—"}</span>},
+                {label:"Status",  value:<span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[project.status]||"bg-slate-100 text-secondary")}>{project.status?.replace(/_/g," ")||"—"}</span>},
                 {label:"Start",   value:fmtDate(project.start_date)},
                 {label:"End",     value:fmtDate(project.end_date)},
                 {label:"Manager", value:project.manager||project.project_manager||"—"},
                 {label:"Site",    value:project.site_name||"—"},
               ].map(({label,value})=>(
                 <div key={label} className="flex justify-between items-center">
-                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dt className="text-xs text-secondary">{label}</dt>
                   <dd className="text-xs text-right">{value}</dd>
                 </div>
               ))}
             </dl>
           </SectionCard>
 
-          <Link href="/projects-center" className="block w-full px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Projects</Link>
+          <Link href="/projects-center" className="block w-full px-3 py-2 text-sm font-semibold text-secondary bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 text-center">Back to Projects</Link>
         </div>
       </div>
     </PageWrapper>

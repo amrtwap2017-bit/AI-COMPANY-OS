@@ -5,7 +5,7 @@ export function ObjectJourneyRibbon({ title, subtitle, steps=[] }:any) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5">
       <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       <div className="flex items-start gap-2 flex-wrap">
         {steps.map((step:any,i:number)=>(
           <div key={i} className="flex items-center gap-2">

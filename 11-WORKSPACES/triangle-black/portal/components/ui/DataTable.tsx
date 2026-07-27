@@ -56,7 +56,7 @@ export function DataTable<T extends Record<string, any>>({
                   style={col.width ? { width: col.width } : undefined}
                   onClick={() => col.sortable && handleSort(col.key)}
                   className={
-                    "px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider " +
+                    "px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider " +
                     (col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left") +
                     (col.sortable ? " cursor-pointer select-none hover:text-slate-700 hover:bg-slate-100 transition-colors" : "")
                   }
@@ -89,7 +89,7 @@ export function DataTable<T extends Record<string, any>>({
               <tr>
                 <td colSpan={columns.length} className="text-center py-20">
                   <div className="text-3xl mb-3 opacity-30">📭</div>
-                  <div className="text-sm font-medium text-slate-400">{empty}</div>
+                  <div className="text-sm font-medium text-tertiary">{empty}</div>
                 </td>
               </tr>
             )}

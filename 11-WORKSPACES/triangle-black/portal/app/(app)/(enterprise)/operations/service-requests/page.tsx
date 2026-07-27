@@ -13,13 +13,13 @@ const STATUS_BADGE = {
   new:         "bg-indigo-100 text-indigo-700",
   in_progress: "bg-amber-100 text-amber-700",
   resolved:    "bg-emerald-100 text-emerald-700",
-  closed:      "bg-slate-100 text-slate-500",
+  closed:      "bg-slate-100 text-secondary",
 };
 const URGENCY_BADGE = {
   urgent:  "bg-red-100 text-red-700 font-bold",
   high:    "bg-orange-100 text-orange-700",
-  normal:  "bg-slate-100 text-slate-600",
-  low:     "bg-slate-50 text-slate-400",
+  normal:  "bg-slate-100 text-secondary",
+  low:     "bg-slate-50 text-tertiary",
 };
 
 export default function ServiceRequestsPage() {
@@ -50,15 +50,15 @@ export default function ServiceRequestsPage() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="tb-page">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">Operations</div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Service Requests</h1>
-          <p className="text-slate-500 text-sm mt-1.5">{srs.length} total · {open.length} open · {unlinked.length} need work order · {linked.length} linked</p>
+          <h1 className="text-3xl font-black text-primary">Service Requests</h1>
+          <p className="text-secondary text-sm mt-1.5">{srs.length} total · {open.length} open · {unlinked.length} need work order · {linked.length} linked</p>
         </div>
         <button onClick={()=>router.push("/workflows/launcher")}
-          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all">
+          className="px-5 py-2.5 rounded-xl text-sm font-bold bg-brand hover:bg-brand-hover text-inverse shadow-sm transition-all">
           ⚡ Auto-Link WOs
         </button>
       </div>
@@ -74,13 +74,13 @@ export default function ServiceRequestsPage() {
           <button key={i} onClick={()=>setStatusFilter(statusFilter===k.filter&&k.filter!=="all"?"all":k.filter)}
             className={`bg-white dark:bg-slate-900 rounded-2xl border p-4 text-center transition-all hover:shadow-md ${statusFilter===k.filter&&k.filter!=="all"?`border-${k.color}-400 shadow-sm`:"border-slate-200 dark:border-slate-800 hover:border-amber-300"}`}>
             <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
-            <div className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{k.label}</div>
+            <div className="text-xs font-medium text-secondary mt-0.5">{k.label}</div>
           </button>
         ))}
       </div>
 
       {unlinked.length > 0 && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-2xl px-5 py-4 flex items-center gap-4">
+        <div className="tb-alert tb-alert-info rounded-2xl">
           <div className="text-2xl">🔗</div>
           <div className="flex-1">
             <div className="font-bold text-blue-800 dark:text-blue-300">{unlinked.length} Open Service Requests Have No Work Order</div>
@@ -96,9 +96,9 @@ export default function ServiceRequestsPage() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e=>setSearch(e.target.value)}
           placeholder="Search service requests..."
-          className="flex-1 min-w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400"/>
+          className="flex-1 min-w-48 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-border-focus"/>
         <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-400">
+          className="bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-border-focus">
           <option value="all">All Status</option>
           <option value="open">Open</option>
           <option value="new">New</option>
@@ -106,39 +106,39 @@ export default function ServiceRequestsPage() {
           <option value="unlinked">Not Linked to WO</option>
         </select>
         {(search||statusFilter!=="all") && (
-          <button onClick={()=>{setSearch("");setStatusFilter("all");}} className="px-3 py-2 text-xs text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Clear ×</button>
+          <button onClick={()=>{setSearch("");setStatusFilter("all");}} className="px-3 py-2 text-xs text-secondary bg-surface border border-border rounded-xl">Clear ×</button>
         )}
-        <div className="text-xs text-slate-400 self-center">{filtered.length} requests</div>
+        <div className="text-xs text-tertiary self-center">{filtered.length} requests</div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-3">📋</div>
-            <div className="font-bold text-slate-900 dark:text-white text-lg">No service requests found</div>
+            <div className="font-bold text-primary text-lg">No service requests found</div>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[1fr_100px_100px_90px_120px] bg-slate-50 dark:bg-slate-800/50 px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="grid grid-cols-[1fr_100px_100px_90px_120px] bg-base-alt dark:bg-surface-alt px-5 py-3 text-xs font-semibold text-secondary uppercase tracking-wider">
               <div>Request</div>
               <div className="text-center">Status</div>
               <div className="text-center">Urgency</div>
               <div className="text-center">Work Order</div>
               <div className="text-center">Created</div>
             </div>
-            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+            <div className="divide-y divide-y-border">
               {filtered.map((sr,i)=>(
                 <button key={i} onClick={()=>router.push(`/operations/service-requests/${sr.id}`)}
-                  className="w-full grid grid-cols-[1fr_100px_100px_90px_120px] items-center px-5 py-4 text-left hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors group">
+                  className="w-full grid grid-cols-[1fr_100px_100px_90px_120px] items-center px-5 py-4 text-left hover:bg-brand-light/20 transition-colors group">
                   <div className="min-w-0 pr-4">
-                    <div className="font-semibold text-sm text-slate-900 dark:text-white truncate group-hover:text-amber-600">{sr.title||sr.description||"—"}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{sr.category||"—"} · {sr.submitted_by||"—"}</div>
+                    <div className="font-semibold text-sm text-primary truncate group-hover:text-amber-600">{sr.title||sr.description||"—"}</div>
+                    <div className="text-xs text-tertiary mt-0.5">{sr.category||"—"} · {sr.submitted_by||"—"}</div>
                   </div>
                   <div className="text-center">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[sr.status]||"bg-slate-100 text-slate-600"}`}>{sr.status||"—"}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${STATUS_BADGE[sr.status]||"bg-slate-100 text-secondary"}`}>{sr.status||"—"}</span>
                   </div>
                   <div className="text-center">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${URGENCY_BADGE[sr.urgency]||"bg-slate-100 text-slate-600"}`}>{sr.urgency||"—"}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${URGENCY_BADGE[sr.urgency]||"bg-slate-100 text-secondary"}`}>{sr.urgency||"—"}</span>
                   </div>
                   <div className="text-center">
                     {sr.work_order_id ? (
@@ -147,7 +147,7 @@ export default function ServiceRequestsPage() {
                       <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-lg">Unlinked</span>
                     )}
                   </div>
-                  <div className="text-center text-xs text-slate-400">{fmtDate(sr.created_at)}</div>
+                  <div className="text-center text-xs text-tertiary">{fmtDate(sr.created_at)}</div>
                 </button>
               ))}
             </div>

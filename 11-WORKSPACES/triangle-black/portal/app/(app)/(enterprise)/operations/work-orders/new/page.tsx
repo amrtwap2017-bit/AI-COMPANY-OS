@@ -63,37 +63,37 @@ export default function NewWorkOrderPage() {
     <PageWrapper>
       <Breadcrumb/>
       <PageHeader title="New Work Order" subtitle="Create engineering work order" badge="NEW"
-        actions={<Link href="/work-orders" className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
+        actions={<Link href="/work-orders" className="flex items-center gap-1.5 px-3 py-2 text-sm text-secondary hover:bg-slate-100 rounded-lg"><ArrowLeft className="w-4 h-4"/> Back</Link>}/>
       {error && <AlertBanner type="error" title={error}/>}
       <form onSubmit={handleSubmit} className="max-w-2xl">
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
           <div>
-            <label className="text-xs font-medium text-slate-600 block mb-1.5">Title <span className="text-red-500">*</span></label>
+            <label className="text-xs font-medium text-secondary block mb-1.5">Title <span className="text-red-500">*</span></label>
             <input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))}
               className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none" required/>
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600 block mb-1.5">Description</label>
+            <label className="text-xs font-medium text-secondary block mb-1.5">Description</label>
             <textarea rows={3} value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))}
               className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none resize-none"/>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Priority</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Priority</label>
               <select value={form.priority} onChange={e=>setForm(f=>({...f,priority:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
                 {["low","medium","high","critical","emergency"].map(p=><option key={p}>{p}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Type</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Type</label>
               <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none">
                 {["maintenance","repair","inspection","installation","emergency"].map(t=><option key={t}>{t}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 block mb-1.5">Due Date</label>
+              <label className="text-xs font-medium text-secondary block mb-1.5">Due Date</label>
               <input type="date" value={form.due_date} onChange={e=>setForm(f=>({...f,due_date:e.target.value}))}
                 className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:border-amber-500 focus:outline-none"/>
             </div>
@@ -104,7 +104,7 @@ export default function NewWorkOrderPage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl">
             {loading ? <><Loader2 className="w-4 h-4 animate-spin"/> Saving...</> : <><Save className="w-4 h-4"/> Create Work Order</>}
           </button>
-          <Link href="/work-orders" className="px-5 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50">Cancel</Link>
+          <Link href="/work-orders" className="px-5 py-2.5 border border-slate-200 text-secondary text-sm font-medium rounded-xl hover:bg-slate-50">Cancel</Link>
         </div>
       </form>
     
@@ -122,7 +122,7 @@ export default function NewWorkOrderPage() {
           <p className="text-sm font-bold text-slate-800">
             {dispatchRec.recommended.name}
           </p>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-secondary mt-0.5">
             Match score: {Math.round((dispatchRec.recommended.score || 0) * 100)}%
             {dispatchRec.warning === "all_full" && " · All technicians at capacity"}
             {dispatchRec.warning === "no_specialist" && " · No specialist available"}

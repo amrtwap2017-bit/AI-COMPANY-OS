@@ -37,7 +37,7 @@ export function ActionBar({
         {filters && <div className="flex items-center gap-2">{filters}</div>}
         <div className="ml-auto flex items-center gap-2">
           {resultCount !== undefined && (
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-tertiary">
               {resultCount}{totalCount !== undefined ? " of " + totalCount : ""} results
             </span>
           )}
@@ -45,14 +45,14 @@ export function ActionBar({
             <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => onView("table")}
-                className={"p-1.5 transition-colors " + (view === "table" ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-slate-50")}
+                className={"p-1.5 transition-colors " + (view === "table" ? "bg-slate-900 text-white" : "text-tertiary hover:bg-slate-50")}
                 aria-label="Table view"
               >
                 <List className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onView("grid")}
-                className={"p-1.5 transition-colors " + (view === "grid" ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-slate-50")}
+                className={"p-1.5 transition-colors " + (view === "grid" ? "bg-slate-900 text-white" : "text-tertiary hover:bg-slate-50")}
                 aria-label="Grid view"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />

@@ -74,12 +74,12 @@ export default function InboxPage() {
         {[
           {label:"Total",    value:total,    color:"text-slate-800"},
           {label:"Unread",   value:unread,   color:unread>0?"text-blue-700":"text-emerald-700"},
-          {label:"Alerts",   value:alerts,   color:alerts>0?"text-red-700":"text-slate-600"},
-          {label:"Warnings", value:warnings, color:warnings>0?"text-amber-700":"text-slate-600"},
+          {label:"Alerts",   value:alerts,   color:alerts>0?"text-red-700":"text-secondary"},
+          {label:"Warnings", value:warnings, color:warnings>0?"text-amber-700":"text-secondary"},
         ].map(k=>(
           <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
             <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.label}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
           </div>
         ))}
       </div>
@@ -95,12 +95,12 @@ export default function InboxPage() {
           </select>
           <button
             onClick={()=>setUnreadOnly(!unreadOnly)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${unreadOnly?"bg-blue-600 text-white border-blue-600":"bg-white text-slate-600 border-slate-200 hover:border-blue-300"}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${unreadOnly?"bg-blue-600 text-white border-blue-600":"bg-white text-secondary border-slate-200 hover:border-blue-300"}`}>
             Unread only
           </button>
           {(tf!=="all"||unreadOnly||q)&&(
             <button onClick={()=>{setTf("all");setUnreadOnly(false);setQ("");}}
-              className="text-xs text-slate-400 hover:text-red-500 underline">Clear</button>
+              className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>
           )}
         </div>
 
@@ -120,21 +120,21 @@ export default function InboxPage() {
                     <p className={`text-sm ${!n.is_read?"font-bold text-slate-900":"font-medium text-slate-700"} truncate`}>{n.title}</p>
                     {!n.is_read && <span className="shrink-0 h-2 w-2 rounded-full bg-blue-600" />}
                   </div>
-                  <p className="text-xs text-slate-500 line-clamp-2">{n.message}</p>
+                  <p className="text-xs text-secondary line-clamp-2">{n.message}</p>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${T_COLOR[n.type]||"bg-slate-100 text-slate-600"}`}>
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${T_COLOR[n.type]||"bg-slate-100 text-secondary"}`}>
                       {n.type||"info"}
                     </span>
                     {n.category && (
-                      <span className="text-xs text-slate-400">{n.category}</span>
+                      <span className="text-xs text-tertiary">{n.category}</span>
                     )}
-                    <span className="text-xs text-slate-400 ml-auto">{fmtDate(n.created_at)}</span>
+                    <span className="text-xs text-tertiary ml-auto">{fmtDate(n.created_at)}</span>
                   </div>
                 </div>
                 {!n.is_read && (
                   <button
                     onClick={e=>{e.stopPropagation();markRead(n.id);}}
-                    className="shrink-0 text-xs text-slate-400 hover:text-blue-600 transition-colors mt-0.5">
+                    className="shrink-0 text-xs text-tertiary hover:text-blue-600 transition-colors mt-0.5">
                     ✓ Read
                   </button>
                 )}

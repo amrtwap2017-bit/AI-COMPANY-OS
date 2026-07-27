@@ -6,7 +6,7 @@ import { PageWrapper, SectionCard, LoadingState } from "@/components/ui";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-slate-600 border-slate-200"};
+const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
 
 export default function WorkbenchPage() {
   const { data: woRaw=[], isLoading:woL } = useQuery(["wb-wo"], () => authFetch("/api/v1/work-orders/?limit=200").then(r=>r.json()), {refetchInterval:30000});
@@ -45,7 +45,7 @@ export default function WorkbenchPage() {
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Operations Workbench</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Live control center · auto-refreshes every 30s</p>
+          <p className="text-sm text-secondary mt-0.5">Live control center · auto-refreshes every 30s</p>
         </div>
         <div className="flex items-center gap-3">
           <div className={`px-3 py-2 rounded-xl border text-sm font-bold ${twinBg} ${twinColor}`}>🔷 Twin: {twinScore}/100</div>
@@ -59,7 +59,7 @@ export default function WorkbenchPage() {
         {KPIS.map(k=>(
           <div key={k.l} className={`${k.bg} rounded-xl border border-slate-200 px-3 py-3 text-center`}>
             <div className={`text-xl font-bold ${k.c}`}>{isLoading?"…":k.v}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{k.l}</div>
+            <div className="text-xs text-secondary mt-0.5">{k.l}</div>
           </div>
         ))}
       </div>
@@ -88,11 +88,11 @@ export default function WorkbenchPage() {
                 <div key={wo.id} className={`flex items-center justify-between py-3 px-1 hover:bg-slate-50 ${wo.priority==="critical"?"bg-red-50/30":""}`}>
                   <div className="min-w-0 flex-1 mr-3">
                     <p className="text-sm font-medium text-slate-800 truncate">{wo.title}</p>
-                    <p className="text-xs text-slate-400">{wo.type||"maintenance"} · {fmtDate(wo.created_at)}</p>
+                    <p className="text-xs text-tertiary">{wo.type||"maintenance"} · {fmtDate(wo.created_at)}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[wo.priority]||P.low)}>{wo.priority||"—"}</span>
-                    <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(wo.status==="in_progress"?"bg-indigo-100 text-indigo-800":wo.status==="open"?"bg-blue-100 text-blue-800":"bg-slate-100 text-slate-600")}>
+                    <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(wo.status==="in_progress"?"bg-indigo-100 text-indigo-800":wo.status==="open"?"bg-blue-100 text-blue-800":"bg-slate-100 text-secondary")}>
                       {wo.status?.replace("_"," ")||"—"}
                     </span>
                   </div>
@@ -111,7 +111,7 @@ export default function WorkbenchPage() {
                   <div key={sr.id} className="flex items-center justify-between py-2.5 px-1">
                     <div className="min-w-0 flex-1 mr-3">
                       <p className="text-sm font-medium text-slate-800 truncate">{sr.title}</p>
-                      <p className="text-xs text-slate-400">{sr.category||"General"} · {fmtDate(sr.created_at)}</p>
+                      <p className="text-xs text-tertiary">{sr.category||"General"} · {fmtDate(sr.created_at)}</p>
                     </div>
                     <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[sr.urgency?.toLowerCase()]||P.low)}>{sr.urgency||"—"}</span>
                   </div>
@@ -128,12 +128,12 @@ export default function WorkbenchPage() {
                   return (
                     <div key={t.id} className={`rounded-lg border p-2.5 ${w<m?"border-slate-200 bg-white":"border-amber-200 bg-amber-50/50"}`}>
                       <p className="text-xs font-semibold text-slate-800 truncate">{t.name}</p>
-                      <p className="text-xs text-slate-400 truncate">{t.specialization||t.trade||"—"}</p>
+                      <p className="text-xs text-tertiary truncate">{t.specialization||t.trade||"—"}</p>
                       <div className="flex items-center gap-1.5 mt-1.5">
                         <div className="flex-1 bg-slate-100 rounded-full h-1.5">
                           <div className={`h-1.5 rounded-full ${pct>=100?"bg-red-500":pct>=60?"bg-amber-500":"bg-emerald-500"}`} style={{width:`${pct}%`}} />
                         </div>
-                        <span className="text-xs text-slate-400">{w}/{m}</span>
+                        <span className="text-xs text-tertiary">{w}/{m}</span>
                       </div>
                     </div>
                   );

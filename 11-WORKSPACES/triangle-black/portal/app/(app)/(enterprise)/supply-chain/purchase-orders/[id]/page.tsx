@@ -18,13 +18,13 @@ const toArr = (d: any): any[] => {
 
 
 const STATUS_COLORS: Record<string, string> = {
-  draft:     "bg-slate-100 text-slate-600",
+  draft:     "bg-slate-100 text-secondary",
   submitted: "bg-blue-100 text-blue-700",
   approved:  "bg-emerald-100 text-emerald-700",
   sent:      "bg-purple-100 text-purple-700",
   received:  "bg-emerald-200 text-emerald-800",
   cancelled: "bg-red-100 text-red-700",
-  closed:    "bg-slate-200 text-slate-500",
+  closed:    "bg-slate-200 text-secondary",
 };
 
 export default function PurchaseOrderDetailPage() {
@@ -49,7 +49,7 @@ export default function PurchaseOrderDetailPage() {
   });
 
   if (isLoading) return <PageWrapper><LoadingState title="Loading purchase order..." /></PageWrapper>;
-  if (!po || po.detail) return <PageWrapper><p className="p-8 text-slate-400">Purchase order not found</p></PageWrapper>;
+  if (!po || po.detail) return <PageWrapper><p className="p-8 text-tertiary">Purchase order not found</p></PageWrapper>;
 
   const lineItems = Array.isArray(items) ? items : items?.data ?? items?.items ?? [];
   const totalValue = Number(po.total_amount || po.total_value || 0);
@@ -75,7 +75,7 @@ export default function PurchaseOrderDetailPage() {
               <div className="text-2xl font-bold text-slate-800">
                 {totalValue.toLocaleString()}
               </div>
-              <div className="text-xs text-slate-500 mt-1">Total Value (EGP)</div>
+              <div className="text-xs text-secondary mt-1">Total Value (EGP)</div>
             </div>
             <div className="space-y-2 text-sm">
               {[
@@ -87,7 +87,7 @@ export default function PurchaseOrderDetailPage() {
                 ["Hotel",         po.hotel_id],
               ].filter(([, v]) => v && v !== "—").map(([k, v]) => (
                 <div key={k as string} className="flex justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-500">{k}</span>
+                  <span className="text-secondary">{k}</span>
                   <span className="text-slate-800 font-medium text-right max-w-32 truncate">{v}</span>
                 </div>
               ))}
@@ -98,13 +98,13 @@ export default function PurchaseOrderDetailPage() {
           {vendor?.name && (
             <SectionCard title="Vendor">
               <div className="flex items-center gap-3 mb-3">
-                <Building className="w-5 h-5 text-slate-400" />
+                <Building className="w-5 h-5 text-tertiary" />
                 <div>
                   <div className="font-medium text-slate-800">{vendor.name}</div>
-                  <div className="text-xs text-slate-500">{vendor.category}</div>
+                  <div className="text-xs text-secondary">{vendor.category}</div>
                 </div>
               </div>
-              <div className="space-y-1 text-xs text-slate-500">
+              <div className="space-y-1 text-xs text-secondary">
                 {vendor.phone && <div>📞 {vendor.phone}</div>}
                 {vendor.email && <div>✉️ {vendor.email}</div>}
                 {vendor.lead_time_days && <div>🚚 Lead time: {vendor.lead_time_days} days</div>}
@@ -133,7 +133,7 @@ export default function PurchaseOrderDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-xs text-slate-500 border-b border-slate-100">
+                    <tr className="text-xs text-secondary border-b border-slate-100">
                       <th className="text-left py-2 font-medium">Item</th>
                       <th className="text-right py-2 font-medium">Qty</th>
                       <th className="text-right py-2 font-medium">Unit Price</th>
@@ -145,7 +145,7 @@ export default function PurchaseOrderDetailPage() {
                       <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50">
                         <td className="py-2">
                           <div className="font-medium text-slate-800">{item.name ?? item.description}</div>
-                          <div className="text-xs text-slate-400">{item.item_code ?? ""}</div>
+                          <div className="text-xs text-tertiary">{item.item_code ?? ""}</div>
                         </td>
                         <td className="py-2 text-right text-slate-700">{item.quantity} {item.unit}</td>
                         <td className="py-2 text-right text-slate-700">
@@ -167,9 +167,9 @@ export default function PurchaseOrderDetailPage() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <Package className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm text-slate-400">No line items available</p>
-                <p className="text-xs text-slate-300 mt-1">Total order value: {totalValue.toLocaleString()} EGP</p>
+                <Package className="w-10 h-10 text-tertiary mx-auto mb-3" />
+                <p className="text-sm text-tertiary">No line items available</p>
+                <p className="text-xs text-tertiary mt-1">Total order value: {totalValue.toLocaleString()} EGP</p>
               </div>
             )}
           </SectionCard>
