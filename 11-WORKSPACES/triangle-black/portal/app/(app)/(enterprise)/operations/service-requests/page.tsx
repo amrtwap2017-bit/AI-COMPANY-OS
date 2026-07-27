@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -98,6 +99,7 @@ export default function ServiceRequestsPage() {
         <div className="tb-section">
           <div className="tb-flex-between mb-4">
             <div className="text-sm text-secondary">{filtered.length} requests</div>
+              <ExportButton data={toArr(srRaw)} filename="service-requests" title="Service Requests"/>
             <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">Work Orders →</button>
           </div>
           {isLoading ? (

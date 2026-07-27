@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -89,6 +90,7 @@ export default function ProjectsCenterPage() {
             ))}
           </div>
           <span className="text-xs text-tertiary ml-auto">{filtered.length} projects</span>
+              <ExportButton data={toArr(projectRaw)} filename="projects" title="Projects"/>
         </div>
 
         {/* Project cards */}
