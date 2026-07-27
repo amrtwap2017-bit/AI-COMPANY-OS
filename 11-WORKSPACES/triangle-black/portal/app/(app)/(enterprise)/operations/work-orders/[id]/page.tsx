@@ -80,15 +80,15 @@ export default function WorkOrderDetailPage() {
 
       {/* DARK HEADER */}
       <div style={{background:"linear-gradient(135deg, #0F172A 0%, #111827 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-        <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+        <div className="tb-canvas">
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-3 mb-6">
             <button onClick={() => router.push("/operations/work-orders")}
-              style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"rgba(248,250,252,0.8)",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",transition:"all 120ms"}}>
+              className="tb-breadcrumb-btn">
               ← Work Orders
             </button>
-            <span style={{color:"rgba(255,255,255,0.15)"}}>/</span>
+            <span className="tb-breadcrumb-sep">/</span>
             <span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem",maxWidth:300}} className="truncate">{wo.title}</span>
           </div>
 
@@ -166,14 +166,14 @@ export default function WorkOrderDetailPage() {
       </div>
 
       {/* CONTENT */}
-      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+      <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
           {/* Main */}
           <div className="xl:col-span-2 space-y-5">
 
             {/* Details card */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Work Order Details</div>
               <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Full Information</div>
               <div className="grid grid-cols-2 gap-3">
@@ -197,7 +197,7 @@ export default function WorkOrderDetailPage() {
 
             {/* Assigned technician */}
             {tech && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:16}}>Assigned Technician</div>
                 <button onClick={() => router.push(`/operations/technicians/${tech.id}`)} className="w-full text-left"
                   style={{display:"flex",alignItems:"center",gap:16,padding:"16px",background:"var(--color-bg-alt)",borderRadius:14,border:"1px solid transparent",transition:"all 120ms ease",cursor:"pointer"}}
@@ -207,7 +207,7 @@ export default function WorkOrderDetailPage() {
                     <span style={{color:"#fff",fontSize:"1.25rem",fontWeight:900}}>{(tech.name||"?")[0]}</span>
                   </div>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>{tech.name}</div>
+                    <div className="tb-empty-title">{tech.name}</div>
                     <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginTop:2}}>{tech.email}</div>
                     <div className="flex gap-2 mt-2 flex-wrap">
                       {(tech.specializations||[]).slice(0,3).map((s,i) => (
@@ -217,7 +217,7 @@ export default function WorkOrderDetailPage() {
                   </div>
                   <div style={{textAlign:"right",flexShrink:0}}>
                     <div style={{fontSize:"0.75rem",color:"var(--color-text-3)"}}>Capacity</div>
-                    <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>{tech.current_work_orders||0}/{tech.max_work_orders||5}</div>
+                    <div className="tb-empty-title">{tech.current_work_orders||0}/{tech.max_work_orders||5}</div>
                   </div>
                 </button>
               </div>
@@ -225,7 +225,7 @@ export default function WorkOrderDetailPage() {
 
             {/* Linked asset */}
             {asset && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:16}}>Asset</div>
                 <button onClick={() => router.push(`/maintenance/assets/${asset.id}`)} className="w-full text-left"
                   style={{display:"flex",alignItems:"center",gap:14,padding:16,background:"var(--color-bg-alt)",borderRadius:14,border:"1px solid transparent",transition:"all 120ms",cursor:"pointer"}}
@@ -246,7 +246,7 @@ export default function WorkOrderDetailPage() {
 
             {/* Related WOs */}
             {relatedWOs.length > 0 && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Related</div>
                 <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Related Work Orders</div>
                 <div className="space-y-2">
@@ -276,7 +276,7 @@ export default function WorkOrderDetailPage() {
           <div className="space-y-4">
 
             {/* Timeline */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Timeline</div>
               <div className="space-y-3">
                 {timeline.map((event,i) => (
@@ -292,7 +292,7 @@ export default function WorkOrderDetailPage() {
             </div>
 
             {/* Quick actions */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Quick Actions</div>
               <div className="space-y-2">
                 {[
@@ -312,7 +312,7 @@ export default function WorkOrderDetailPage() {
             </div>
 
             {/* Record meta */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
               {[["ID",wo.id?.slice(0,16)+"..."],["Created",fmtDate(wo.created_at)],["Updated",fmtDate(wo.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.75rem",padding:"7px 0",borderBottom:i<2?"1px solid var(--color-divider)":"none"}}>

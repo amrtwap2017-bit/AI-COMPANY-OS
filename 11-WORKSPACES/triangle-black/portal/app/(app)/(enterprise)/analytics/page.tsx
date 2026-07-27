@@ -110,13 +110,13 @@ export default function AnalyticsHub() {
         {/* KPI Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {kpiGroups.map((group,gi)=>(
-            <div key={gi} style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div key={gi} className="tb-section">
               <div className="flex items-center justify-between" style={{marginBottom:20}}>
                 <div>
                   <div style={{fontSize:"0.625rem",fontWeight:700,color:group.color,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>{group.section}</div>
-                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>{group.section} KPIs</div>
+                  <div className="tb-empty-title">{group.section} KPIs</div>
                 </div>
-                <button onClick={()=>router.push(group.path)} style={{fontSize:"0.75rem",color:"var(--color-brand)",fontWeight:600,background:"none",border:"none",cursor:"pointer"}}>View →</button>
+                <button onClick={()=>router.push(group.path)} className="tb-section-link">View →</button>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {group.kpis.map((kpi,ki)=>{
@@ -142,13 +142,13 @@ export default function AnalyticsHub() {
         </div>
 
         {/* Twin domain matrix */}
-        <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+        <div className="tb-section">
           <div className="flex items-center justify-between" style={{marginBottom:20}}>
             <div>
               <div style={{fontSize:"0.625rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Digital Twin</div>
-              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>All 8 Operational Domains</div>
+              <div className="tb-empty-title">All 8 Operational Domains</div>
             </div>
-            <button onClick={()=>router.push("/executive/intelligence")} style={{fontSize:"0.75rem",color:"var(--color-brand)",fontWeight:600,background:"none",border:"none",cursor:"pointer"}}>Full report →</button>
+            <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Full report →</button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
             {(twin?.operational_domains??[]).map((dom,i)=>{

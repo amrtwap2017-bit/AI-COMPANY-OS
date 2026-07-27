@@ -101,7 +101,7 @@ export default function ExecutivePage() {
       <div className="max-w-content mx-auto px-8 py-8 space-y-6">
 
         {/* Executive nav */}
-        <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+        <div className="tb-section">
           <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:16}}>Executive Views</div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {subPages.map((nav,i)=>(
@@ -118,7 +118,7 @@ export default function ExecutivePage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Left — alerts */}
-          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+          <div className="tb-section">
             <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Attention Required</div>
             <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Executive Alerts</div>
             {criticalWOs.length===0 && expiring30.length===0 ? (
@@ -152,11 +152,11 @@ export default function ExecutivePage() {
           {/* Right — twin domains + finance */}
           <div className="xl:col-span-2 space-y-5">
             {/* Twin domains */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Digital Twin</div>
               <div className="flex items-center justify-between" style={{marginBottom:20}}>
-                <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>Domain Health — {score}/100</div>
-                <button onClick={()=>router.push("/executive/intelligence")} style={{fontSize:"0.75rem",color:"var(--color-brand)",fontWeight:600,background:"none",border:"none",cursor:"pointer"}}>Full →</button>
+                <div className="tb-empty-title">Domain Health — {score}/100</div>
+                <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Full →</button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {(twin?.operational_domains??[]).map((dom,i)=>{
@@ -176,13 +176,13 @@ export default function ExecutivePage() {
             </div>
 
             {/* Finance snapshot */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div className="flex items-center justify-between" style={{marginBottom:20}}>
                 <div>
                   <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Finance</div>
-                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>Revenue Snapshot</div>
+                  <div className="tb-empty-title">Revenue Snapshot</div>
                 </div>
-                <button onClick={()=>router.push("/invoices")} style={{fontSize:"0.75rem",color:"var(--color-brand)",fontWeight:600,background:"none",border:"none",cursor:"pointer"}}>Full report →</button>
+                <button onClick={()=>router.push("/invoices")} className="tb-section-link">Full report →</button>
               </div>
               <div className="grid grid-cols-4 gap-3" style={{marginBottom:16}}>
                 {[

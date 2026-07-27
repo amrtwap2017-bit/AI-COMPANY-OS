@@ -114,7 +114,7 @@ export function CreateModal({
               {icon}
             </div>
             <div>
-              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>{title}</div>
+              <div className="tb-empty-title">{title}</div>
               <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginTop:1}}>Fill in the details below</div>
             </div>
           </div>

@@ -71,18 +71,18 @@ export default function LeadDetailPage() {
 
       {/* DARK HEADER */}
       <div style={{background:`linear-gradient(135deg, #0F172A 0%, ${isWon?"#0A1F14":isHot?"#1A1208":"#0F172A"} 100%)`,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-        <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+        <div className="tb-canvas">
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-3 mb-6">
             <button onClick={()=>router.push("/commercial/leads")}
-              style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"rgba(248,250,252,0.8)",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",transition:"all 120ms"}}
+              className="tb-breadcrumb-btn"
               onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.1)"}
               onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}>
               ← Leads
             </button>
-            <span style={{color:"rgba(255,255,255,0.15)"}}>/</span>
-            {lead.company && <><span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}}>{lead.company}</span><span style={{color:"rgba(255,255,255,0.15)"}}>/</span></>}
+            <span className="tb-breadcrumb-sep">/</span>
+            {lead.company && <><span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}}>{lead.company}</span><span className="tb-breadcrumb-sep">/</span></>}
             <span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}} className="truncate">{lead.name}</span>
           </div>
 
@@ -159,14 +159,14 @@ export default function LeadDetailPage() {
       </div>
 
       {/* CONTENT */}
-      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+      <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
           {/* Main */}
           <div className="xl:col-span-2 space-y-5">
 
             {/* Lead details */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Contact & Lead Info</div>
               <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Full Details</div>
               <div className="grid grid-cols-2 gap-3">
@@ -198,7 +198,7 @@ export default function LeadDetailPage() {
 
             {/* Linked contract (if won) */}
             {linkedContract && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Converted</div>
                 <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Linked Contract</div>
                 <button onClick={()=>router.push(`/commercial/contracts/${linkedContract.id}`)} className="w-full text-left"
@@ -221,7 +221,7 @@ export default function LeadDetailPage() {
 
             {/* Similar leads */}
             {similarLeads.length > 0 && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Related</div>
                 <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Similar Leads</div>
                 <div className="space-y-2">
@@ -256,7 +256,7 @@ export default function LeadDetailPage() {
           <div className="space-y-4">
 
             {/* Score breakdown */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Lead Scoring</div>
               <div style={{textAlign:"center",marginBottom:16}}>
                 <div style={{fontSize:"3rem",fontWeight:900,color:score>=70?"#34D399":score>=50?"#FCD34D":"#60A5FA",lineHeight:1}}>{score}</div>
@@ -271,7 +271,7 @@ export default function LeadDetailPage() {
             </div>
 
             {/* Actions */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
               <div className="space-y-2">
                 {[
@@ -292,7 +292,7 @@ export default function LeadDetailPage() {
             </div>
 
             {/* Record meta */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
               {[["ID",lead.id?.slice(0,14)+"..."],["Agent",lead.agent_id?.slice(0,12)||"—"],["Created",fmtDate(lead.created_at)],["Updated",fmtDate(lead.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<3?"1px solid var(--color-divider)":"none"}}>

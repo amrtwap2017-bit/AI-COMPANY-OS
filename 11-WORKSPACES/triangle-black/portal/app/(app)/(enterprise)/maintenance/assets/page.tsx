@@ -113,11 +113,11 @@ export default function AssetsPage() {
         )}
 
         {/* Table */}
-        <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,overflow:"hidden"}}>
+        <div className="tb-table">
           {filtered.length === 0 ? (
-            <div style={{textAlign:"center",padding:"64px 24px"}}>
-              <div style={{fontSize:"3rem",marginBottom:16,opacity:0.4}}>🏗️</div>
-              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>No assets found</div>
+            <div className="tb-empty">
+              <div className="tb-empty-icon">🏗️</div>
+              <div className="tb-empty-title">No assets found</div>
               <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginTop:8}}>Try adjusting your filters</div>
             </div>
           ) : (

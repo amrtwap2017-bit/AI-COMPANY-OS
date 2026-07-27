@@ -75,7 +75,7 @@ export default function InvoiceDetailPage() {
 
       {/* DARK HEADER */}
       <div style={{background:"linear-gradient(135deg, #0F172A 0%, #111827 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-        <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+        <div className="tb-canvas">
 
           {/* Back + breadcrumb */}
           <div className="flex items-center gap-3 mb-6" style={{fontSize:"0.75rem",color:"rgba(148,163,184,0.6)"}}>
@@ -143,14 +143,14 @@ export default function InvoiceDetailPage() {
       </div>
 
       {/* CONTENT */}
-      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+      <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
           {/* Main — invoice details */}
           <div className="xl:col-span-2 space-y-5">
 
             {/* Invoice details */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Invoice Details</div>
               <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Financial Information</div>
 
@@ -190,7 +190,7 @@ export default function InvoiceDetailPage() {
 
             {/* Related invoices */}
             {relatedInvoices.length > 0 && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Related</div>
                 <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Other Invoices on this Contract</div>
                 <div className="space-y-2">
@@ -220,7 +220,7 @@ export default function InvoiceDetailPage() {
           <div className="space-y-4">
 
             {/* Actions */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Actions</div>
               <div className="space-y-2">
                 {[
@@ -242,7 +242,7 @@ export default function InvoiceDetailPage() {
 
             {/* Contract info */}
             {linkedContract && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Linked Contract</div>
                 <button onClick={() => router.push(`/commercial/contracts/${linkedContract.id}`)} className="w-full text-left"
                   style={{background:"var(--color-bg-alt)",borderRadius:12,padding:16,border:"1px solid transparent",transition:"all 120ms ease",cursor:"pointer",marginTop:12}}
@@ -268,7 +268,7 @@ export default function InvoiceDetailPage() {
             )}
 
             {/* Meta */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
               {[
                 ["Invoice ID",  inv.id?.slice(0,16)+"..."],

@@ -72,17 +72,17 @@ export default function ContractDetailPage() {
 
       {/* DARK HEADER */}
       <div style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1520 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-        <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+        <div className="tb-canvas">
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-3 mb-6">
             <button onClick={()=>router.push("/commercial/contracts")}
-              style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"rgba(248,250,252,0.8)",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",transition:"all 120ms"}}
+              className="tb-breadcrumb-btn"
               onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.1)"}
               onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}>
               ← Contracts
             </button>
-            <span style={{color:"rgba(255,255,255,0.15)"}}>/</span>
+            <span className="tb-breadcrumb-sep">/</span>
             <span style={{color:"rgba(148,163,184,0.6)",fontSize:"0.75rem"}} className="truncate">{contract.title||contract.id?.slice(0,16)}</span>
           </div>
 
@@ -135,14 +135,14 @@ export default function ContractDetailPage() {
       </div>
 
       {/* CONTENT */}
-      <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 32px"}}>
+      <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
           {/* Main */}
           <div className="xl:col-span-2 space-y-5">
 
             {/* Contract details */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Contract Details</div>
               <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Terms & Conditions</div>
               <div className="grid grid-cols-2 gap-3">
@@ -180,10 +180,10 @@ export default function ContractDetailPage() {
 
             {/* Invoices */}
             {contractInvoices.length > 0 && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Finance</div>
                 <div className="flex items-center justify-between" style={{marginBottom:12}}>
-                  <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>Invoices ({contractInvoices.length})</div>
+                  <div className="tb-empty-title">Invoices ({contractInvoices.length})</div>
                   <div style={{fontSize:"0.75rem",color:"#34D399",fontWeight:700}}>{fmtEGP(totalPaid)} collected</div>
                 </div>
                 {/* Progress */}
@@ -214,7 +214,7 @@ export default function ContractDetailPage() {
 
             {/* Work Orders */}
             {contractWOs.length > 0 && (
-              <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+              <div className="tb-section">
                 <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Operations</div>
                 <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Work Orders ({contractWOs.length})</div>
                 <div className="space-y-2">
@@ -244,7 +244,7 @@ export default function ContractDetailPage() {
           <div className="space-y-4">
 
             {/* Actions */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
               <div className="space-y-2">
                 {[
@@ -265,7 +265,7 @@ export default function ContractDetailPage() {
             </div>
 
             {/* Financial summary */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Financial Summary</div>
               <div className="space-y-3">
                 {[
@@ -284,7 +284,7 @@ export default function ContractDetailPage() {
             </div>
 
             {/* Record meta */}
-            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,padding:24}}>
+            <div className="tb-section">
               <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Record Info</div>
               {[["ID",contract.id?.slice(0,14)+"..."],["Created",fmtDate(contract.created_at)],["Updated",fmtDate(contract.updated_at)]].map(([l,v],i)=>(
                 <div key={i} className="flex justify-between" style={{fontSize:"0.6875rem",padding:"7px 0",borderBottom:i<2?"1px solid var(--color-divider)":"none"}}>

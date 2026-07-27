@@ -163,11 +163,11 @@ export default function WorkOrdersPage() {
         </div>
 
         {/* Table */}
-        <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:20,overflow:"hidden"}}>
+        <div className="tb-table">
           {filtered.length === 0 ? (
-            <div style={{textAlign:"center",padding:"64px 24px"}}>
-              <div style={{fontSize:"3rem",marginBottom:16,opacity:0.4}}>🔧</div>
-              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)"}}>No work orders found</div>
+            <div className="tb-empty">
+              <div className="tb-empty-icon">🔧</div>
+              <div className="tb-empty-title">No work orders found</div>
               <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginTop:8,marginBottom:20}}>Try adjusting your filters or create a new work order</div>
               <button onClick={()=>setShowCreate(true)} style={{background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>+ New Work Order</button>
             </div>
