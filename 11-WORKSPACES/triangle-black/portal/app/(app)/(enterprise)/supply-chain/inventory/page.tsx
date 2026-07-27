@@ -1,172 +1,239 @@
 "use client";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtNum = (n) => { try { return Number(n||0).toLocaleString(); } catch { return "0"; } };
-
-const CATEGORIES = ["all","HVAC","Electrical","Plumbing","Fire Safety","Mechanical","Consumables","Tools","Other"];
+const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function InventoryPage() {
-  const [catFilter, setCatFilter] = useState("all");
-  const [search,    setSearch]    = useState("all");
-  const [lowOnly,   setLowOnly]   = useState(false);
-  const [q,         setQ]         = useState("");
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [filterCat, setFilterCat] = useState("all");
+  const [filterStock, setFilterStock] = useState("all");
 
-  const { data: itemsRaw = [], isLoading: itemsLoading } = useQuery(
-    ["inventory-items"],
-    () => authFetch("/api/v1/inventory-items/?limit=300").then(r => r.json()),
-    { refetchInterval: 120000 }
+  const { data: itemRaw, isLoading } = useQuery(
+    ["inv-items"],
+    () => authFetch("/api/v1/inventory-items/").then(r => r.json()),
+    { refetchInterval: 60000 }
+  );
+  const { data: stockRaw } = useQuery(
+    ["inv-stock"],
+    () => authFetch("/api/v1/stock-balances/").then(r => r.json())
+  );
+  const { data: whRaw } = useQuery(
+    ["inv-wh"],
+    () => authFetch("/api/v1/warehouses/").then(r => r.json())
   );
 
-  const { data: stockRaw = [], isLoading: stockLoading } = useQuery(
-    ["stock-balances"],
-    () => authFetch("/api/v1/stock-balances/?limit=300").then(r => r.json()),
-    { refetchInterval: 120000 }
-  );
-
-  const items  = toArr(itemsRaw);
+  const items  = toArr(itemRaw);
   const stocks = toArr(stockRaw);
+  const whs    = toArr(whRaw);
 
-  const stockMap = stocks.reduce((m, s) => { m[s.item_id] = s; return m; }, {});
+  const cats       = [...new Set(items.map(i => i.category).filter(Boolean))];
+  const lowStock   = items.filter(i => {
+    const bal = stocks.find(s => s.item_id === i.id);
+    return bal && Number(bal.quantity||0) <= Number(i.minimum_quantity||i.min_quantity||5);
+  });
+  const totalValue = stocks.reduce((s, b) => {
+    const item = items.find(i => i.id === b.item_id);
+    return s + (Number(b.quantity||0) * Number(item?.unit_price||item?.cost||0));
+  }, 0);
 
   const enriched = items.map(item => {
-    const stock = stockMap[item.id] || {};
-    return {
-      ...item,
-      qty_on_hand: stock.qty_on_hand ?? item.qty_on_hand ?? 0,
-      qty_reserved: stock.qty_reserved ?? 0,
-      warehouse_name: stock.warehouse_name || "—",
-      is_low: (stock.qty_on_hand ?? item.qty_on_hand ?? 0) < (item.min_stock ?? 0),
-      is_zero: (stock.qty_on_hand ?? item.qty_on_hand ?? 0) === 0,
-    };
+    const bal = stocks.find(s => s.item_id === item.id);
+    const qty = Number(bal?.quantity || 0);
+    const min = Number(item.minimum_quantity || item.min_quantity || 5);
+    return { ...item, current_qty: qty, min_qty: min, is_low: qty <= min };
   });
 
   const filtered = enriched.filter(i => {
-    if (catFilter !== "all" && i.category !== catFilter) return false;
-    if (lowOnly && !i.is_low) return false;
-    if (q && !i.name?.toLowerCase().includes(q.toLowerCase()) &&
-             !i.sku?.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
+    const matchSearch = !search ||
+      (i.name||"").toLowerCase().includes(search.toLowerCase()) ||
+      (i.sku||i.part_number||"").toLowerCase().includes(search.toLowerCase()) ||
+      (i.category||"").toLowerCase().includes(search.toLowerCase());
+    const matchCat   = filterCat   === "all" || i.category === filterCat;
+    const matchStock = filterStock === "all"
+      || (filterStock === "low"  && i.is_low)
+      || (filterStock === "ok"   && !i.is_low);
+    return matchSearch && matchCat && matchStock;
   });
 
-  const isLoading = itemsLoading || stockLoading;
-  const total     = items.length;
-  const lowStock  = enriched.filter(i => i.is_low).length;
-  const zeroStock = enriched.filter(i => i.is_zero).length;
-  const okStock   = total - lowStock;
-  const catCounts = items.reduce((a, i) => { a[i.category] = (a[i.category]||0)+1; return a; }, {});
-
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Inventory"
-        subtitle={`${total} items · ${lowStock} below minimum · ${zeroStock} out of stock`}
-        breadcrumbs={[{label:"Supply Chain",href:"/supply-chain"},{label:"Inventory"}]}
-      />
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        {[
-          {label:"Total Items",   value:total,    color:"text-slate-800"},
-          {label:"OK Stock",      value:okStock,  color:"text-emerald-700"},
-          {label:"Low Stock",     value:lowStock, color:"text-amber-700"},
-          {label:"Out of Stock",  value:zeroStock,color:"text-red-700"},
-        ].map(k => (
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading ? "…" : k.value}</div>
-            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain</div>
+              <h1 className="tb-hero-title">Inventory</h1>
+              <p className="tb-hero-description">{items.length} items · {lowStock.length} low stock · {whs.length} warehouses · {fmtEGP(totalValue)} total value</p>
+            </div>
+            <button onClick={() => router.push("/supply-chain/purchase-requests")} className="tb-btn-primary">
+              + Purchase Request
+            </button>
           </div>
-        ))}
+          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {[
+              { label:"Total Items",   value:items.length,      color:"#F1F5F9" },
+              { label:"Low Stock",     value:lowStock.length,   color:lowStock.length>0?"#F87171":"#34D399" },
+              { label:"Categories",    value:cats.length,       color:"#60A5FA" },
+              { label:"Warehouses",    value:whs.length,        color:"#A78BFA" },
+              { label:"Total Value",   value:fmtEGP(totalValue),color:"#FBBF24" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {!isLoading && lowStock > 0 && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-          <span className="text-amber-500 text-lg">⚠️</span>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-800">{lowStock} items below minimum stock level</p>
-            <p className="text-xs text-amber-600">{zeroStock} items completely out of stock — review reorder requirements</p>
-          </div>
-          <button onClick={() => setLowOnly(!lowOnly)}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${lowOnly ? "bg-brand text-inverse border-amber-600" : "bg-white text-amber-700 border-amber-300 hover:bg-amber-50"}`}>
-            {lowOnly ? "Show all" : "Show low stock only"}
-          </button>
-        </div>
-      )}
-
-      {!isLoading && Object.keys(catCounts).length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {Object.entries(catCounts).sort((a,b) => b[1]-a[1]).map(([cat, count]) => (
-            <button key={cat}
-              onClick={() => setCatFilter(catFilter === cat ? "all" : cat)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${catFilter === cat ? "bg-blue-600 text-white border-blue-600" : "bg-white text-secondary border-slate-200 hover:border-blue-300"}`}>
-              {cat} <span className={catFilter === cat ? "text-blue-200" : "text-tertiary"}>({count})</span>
-            </button>
-          ))}
-          {catFilter !== "all" && (
-            <button onClick={() => setCatFilter("all")} className="text-xs text-tertiary hover:text-red-500 underline px-1">Clear</button>
-          )}
-        </div>
-      )}
-
-      <SectionCard title={`Inventory Items (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search item name or SKU…" value={q}
-            onChange={e => setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-56 focus:outline-none focus:border-blue-400" />
-          {(catFilter !== "all" || lowOnly || q) && (
-            <button onClick={() => { setCatFilter("all"); setLowOnly(false); setQ(""); }}
-              className="text-xs text-tertiary hover:text-red-500 underline">Clear all</button>
-          )}
-        </div>
-
-        {isLoading ? <LoadingState /> : filtered.length === 0 ? (
-          <EmptyState title="No items found" subtitle="Adjust filters to see inventory items" />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  {["Item Name","SKU","Category","Unit","On Hand","Reserved","Min Stock","Status"].map(h => (
-                    <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(item => (
-                  <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${item.is_zero ? "bg-red-50/40" : item.is_low ? "bg-amber-50/30" : ""}`}>
-                    <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800">{item.name}</p>
-                      <p className="text-xs text-tertiary">{item.description?.slice(0,50) || ""}</p>
-                    </td>
-                    <td className="py-3 px-3 font-mono text-xs text-secondary">{item.sku || "—"}</td>
-                    <td className="py-3 px-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{item.category || "—"}</span>
-                    </td>
-                    <td className="py-3 px-3 text-xs text-secondary">{item.unit || "—"}</td>
-                    <td className="py-3 px-3">
-                      <span className={`text-sm font-bold ${item.is_zero ? "text-red-600" : item.is_low ? "text-amber-600" : "text-slate-800"}`}>
-                        {fmtNum(item.qty_on_hand)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-xs text-secondary">{fmtNum(item.qty_reserved)}</td>
-                    <td className="py-3 px-3 text-xs text-secondary">{item.min_stock ? fmtNum(item.min_stock) : "—"}</td>
-                    <td className="py-3 px-3">
-                      {item.is_zero
-                        ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">Out of Stock</span>
-                        : item.is_low
-                        ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Low Stock</span>
-                        : <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">OK</span>
-                      }
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="tb-canvas">
+        {lowStock.length > 0 && (
+          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+            <div className="flex items-center gap-3">
+              <span style={{fontSize:"1.25rem"}}>⚠️</span>
+              <span className="text-sm font-semibold text-red-400">
+                {lowStock.length} item{lowStock.length>1?"s":""} below minimum stock level
+              </span>
+              <button onClick={() => setFilterStock("low")} className="tb-section-link ml-auto">View Low Stock →</button>
+            </div>
           </div>
         )}
-      </SectionCard>
-    </PageWrapper>
+
+        <div className="tb-section">
+          <div className="tb-flex-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <span className="text-secondary text-sm">🔍</span>
+              <input
+                className="tb-search flex-1"
+                placeholder="Search by name, SKU, category..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {["all","low","ok"].map(f => (
+                <button key={f} onClick={() => setFilterStock(f)}
+                  className={`tb-pill ${filterStock === f ? "tb-pill--active" : ""}`}>
+                  {f === "all" ? "All Stock" : f === "low" ? "Low Stock" : "In Stock"}
+                  {f === "low" && lowStock.length > 0 && <span className="ml-1 opacity-80">{lowStock.length}</span>}
+                </button>
+              ))}
+              <div className="w-px bg-border mx-1"/>
+              <button onClick={() => setFilterCat("all")} className={`tb-pill ${filterCat === "all" ? "tb-pill--active" : ""}`}>All</button>
+              {cats.slice(0,5).map(c => (
+                <button key={c} onClick={() => setFilterCat(c)}
+                  className={`tb-pill ${filterCat === c ? "tb-pill--active" : ""}`}>{c}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="tb-section">
+          <div className="tb-flex-between mb-4">
+            <div className="text-sm text-secondary">{filtered.length} items</div>
+            <div className="text-sm font-bold text-emerald-400">{fmtEGP(totalValue)}</div>
+          </div>
+          {isLoading ? (
+            <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          ) : filtered.length === 0 ? (
+            <div className="tb-empty">
+              <div className="tb-empty-icon">📦</div>
+              <div className="tb-empty-title">No items found</div>
+              <div className="tb-empty-desc">{search || filterCat !== "all" ? "Try adjusting filters" : "No inventory items yet"}</div>
+            </div>
+          ) : (
+            <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
+              <div className="tb-table-head" style={{gridTemplateColumns:"2fr 100px 80px 80px 80px 110px"}}>
+                {["Item / SKU","Category","On Hand","Min","Unit Price","Stock"].map((h, i) => (
+                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                ))}
+              </div>
+              {filtered.map((item, i) => {
+                const pct   = item.min_qty > 0 ? Math.min((item.current_qty / item.min_qty) * 100, 100) : 100;
+                const color = item.is_low ? "#F87171" : "#34D399";
+                return (
+                  <button key={i}
+                    onClick={() => router.push(`/supply-chain/inventory/${item.id}`)}
+                    className="tb-table-row"
+                    style={{gridTemplateColumns:"2fr 100px 80px 80px 80px 110px"}}>
+                    <div className="flex items-center gap-3 pr-4 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-base-alt flex items-center justify-center text-xs flex-shrink-0">📦</div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-primary truncate">{item.name||"—"}</div>
+                        <div className="text-xs text-tertiary">{item.sku||item.part_number||"—"}</div>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <span className="tb-badge" style={{fontSize:"0.625rem"}}>{item.category||"—"}</span>
+                    </div>
+                    <div className="text-center text-sm font-bold" style={{color}}>{item.current_qty}</div>
+                    <div className="text-center text-xs text-tertiary">{item.min_qty}</div>
+                    <div className="text-center text-xs text-secondary">{item.unit_price ? fmtEGP(item.unit_price) : "—"}</div>
+                    <div className="px-2">
+                      <div className="tb-progress">
+                        <div className="tb-progress-bar" style={{background:color,width:`${pct}%`}}/>
+                      </div>
+                      {item.is_low && (
+                        <div className="text-center">
+                          <span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem",marginTop:2}}>Low</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="tb-section">
+            <div className="tb-section-title">Items by Category</div>
+            <div className="space-y-2">
+              {cats.map(cat => {
+                const cnt = items.filter(i => i.category === cat).length;
+                const pct = items.length > 0 ? (cnt / items.length) * 100 : 0;
+                const low = enriched.filter(i => i.category === cat && i.is_low).length;
+                return (
+                  <div key={cat}>
+                    <div className="tb-flex-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-secondary capitalize">{cat}</span>
+                        {low > 0 && <span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem"}}>{low} low</span>}
+                      </div>
+                      <span className="text-xs font-bold text-primary">{cnt}</span>
+                    </div>
+                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:"#34D399",width:`${pct}%`}}/></div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="tb-section">
+            <div className="tb-section-title">Quick Navigation</div>
+            <div className="space-y-2">
+              {[
+                { label:"Warehouses",          icon:"🏗️",  path:"/supply-chain/warehouses" },
+                { label:"Stock Balances",       icon:"⚖️",  path:"/supply-chain/stock-levels" },
+                { label:"Goods Receipts",       icon:"✅", path:"/supply-chain/goods-receipts" },
+                { label:"Purchase Requests",    icon:"📋", path:"/supply-chain/purchase-requests" },
+                { label:"Purchase Orders",      icon:"📦", path:"/supply-chain/purchase-orders" },
+              ].map((a, i) => (
+                <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                  <span>{a.icon}</span>
+                  <span className="text-sm text-secondary">{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

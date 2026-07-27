@@ -1,141 +1,285 @@
 "use client";
+// @ts-nocheck
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { PageWrapper, PageHeader, SectionCard, LoadingState, EmptyState } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const P = {critical:"bg-red-100 text-red-800 border-red-200",high:"bg-orange-100 text-orange-800 border-orange-200",medium:"bg-amber-100 text-amber-800 border-amber-200",low:"bg-slate-100 text-secondary border-slate-200"};
-const S = {open:"bg-blue-100 text-blue-800",in_progress:"bg-indigo-100 text-indigo-800",completed:"bg-emerald-100 text-emerald-800",cancelled:"bg-slate-100 text-secondary"};
-
-const STATUSES  = ["all","open","in_progress","completed","cancelled"];
-const PRIORITIES = ["all","critical","high","medium","low"];
+const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
+const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"#94A3B8" };
 
 export default function DispatchPage() {
-  const [q,   setQ]   = useState("");
-  const [sf,  setSf]  = useState("all");
-  const [pf,  setPf]  = useState("all");
+  const router = useRouter();
+  const [view, setView] = useState("board");
+  const [search, setSearch] = useState("");
 
-  const { data: woRaw=[], isLoading: woL } = useQuery(
-    ["dispatch-wo"],
-    () => authFetch("/api/v1/work-orders/?limit=200").then(r=>r.json()),
+  const { data: woRaw, isLoading: woLoading } = useQuery(
+    ["dispatch-wos"],
+    () => authFetch("/api/v1/work-orders/").then(r => r.json()),
     { refetchInterval: 30000 }
   );
-
-  const { data: techRaw=[], isLoading: techL } = useQuery(
-    ["dispatch-tech"],
-    () => authFetch("/api/v1/technicians/?limit=100").then(r=>r.json()),
-    { refetchInterval: 120000 }
+  const { data: techRaw } = useQuery(
+    ["dispatch-techs"],
+    () => authFetch("/api/v1/technicians/").then(r => r.json()),
+    { refetchInterval: 30000 }
+  );
+  const { data: srRaw } = useQuery(
+    ["dispatch-srs"],
+    () => authFetch("/api/v1/service-requests/").then(r => r.json())
   );
 
   const wos   = toArr(woRaw);
   const techs = toArr(techRaw);
-  const isLoading = woL || techL;
+  const srs   = toArr(srRaw);
 
-  const techMap = techs.reduce((m,t) => { m[t.id] = t.name; return m; }, {});
+  const openWOs      = wos.filter(w => w.status === "open");
+  const inProgWOs    = wos.filter(w => w.status === "in_progress");
+  const criticalWOs  = wos.filter(w => w.priority === "critical" && w.status !== "completed");
+  const unassigned   = wos.filter(w => !w.technician_id && w.status !== "completed");
+  const openSRs      = srs.filter(s => s.status === "open");
 
-  const filtered = wos.filter(w => {
-    if (sf !== "all" && w.status !== sf) return false;
-    if (pf !== "all" && w.priority !== pf) return false;
-    if (q && !w.title?.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
-
-  const open      = wos.filter(w => w.status === "open").length;
-  const inProg    = wos.filter(w => w.status === "in_progress").length;
-  const critical  = wos.filter(w => w.priority === "critical" && !["completed","cancelled"].includes(w.status)).length;
-  const unassigned = wos.filter(w => !w.technician_id && !["completed","cancelled"].includes(w.status)).length;
-  const techAvail  = techs.filter(t => t.is_active !== false && (t.current_work_orders||0) < (t.max_work_orders||5)).length;
+  const filtered = wos.filter(w =>
+    w.status !== "completed" &&
+    (!search ||
+      (w.title||"").toLowerCase().includes(search.toLowerCase()) ||
+      (w.priority||"").toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
-    <PageWrapper>
-      <PageHeader
-        title="Dispatch Center"
-        subtitle={`${wos.length} work orders · ${open} open · ${critical} critical · ${unassigned} unassigned`}
-        breadcrumbs={[{label:"Operations",href:"/operations"},{label:"Dispatch"}]}
-      />
-
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-5">
-        {[
-          {label:"Total WOs",    value:wos.length, color:"text-slate-800"},
-          {label:"Open",         value:open,       color:"text-blue-700"},
-          {label:"In Progress",  value:inProg,     color:"text-indigo-700"},
-          {label:"Critical",     value:critical,   color:critical>0?"text-red-700":"text-emerald-700"},
-          {label:"Techs Available",value:techAvail,color:techAvail>0?"text-emerald-700":"text-amber-700"},
-        ].map(k=>(
-          <div key={k.label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className={`text-2xl font-bold ${k.color}`}>{isLoading?"…":k.value}</div>
-            <div className="text-xs text-secondary mt-0.5">{k.label}</div>
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-cyan-400 mb-1.5">Operations</div>
+              <h1 className="tb-hero-title">Dispatch Board</h1>
+              <p className="tb-hero-description">{techs.length} technicians · {openWOs.length} open · {criticalWOs.length} critical · {unassigned.length} unassigned</p>
+            </div>
+            <button onClick={() => router.push("/operations/work-orders")} className="tb-btn-primary">
+              + New Work Order
+            </button>
           </div>
-        ))}
+          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+            {[
+              { label:"Open WOs",    value:openWOs.length,   color:"#60A5FA" },
+              { label:"In Progress", value:inProgWOs.length, color:"#FBBF24" },
+              { label:"Critical",    value:criticalWOs.length, color:criticalWOs.length>0?"#F87171":"#34D399" },
+              { label:"Unassigned",  value:unassigned.length, color:unassigned.length>0?"#FB923C":"#34D399" },
+              { label:"Open SRs",   value:openSRs.length,   color:"#A78BFA" },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {!isLoading && unassigned > 0 && (
-        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-          <span className="text-amber-600 font-bold text-lg">!</span>
-          <p className="text-sm font-semibold text-amber-800">{unassigned} work orders not yet assigned to a technician</p>
-        </div>
-      )}
+      <div className="tb-canvas">
 
-      <SectionCard title={`Work Orders (${filtered.length})`}>
-        <div className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-          <input type="text" placeholder="Search work orders…" value={q}
-            onChange={e=>setQ(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-52 focus:outline-none focus:border-blue-400" />
-          <select value={sf} onChange={e=>setSf(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {STATUSES.map(s=><option key={s} value={s}>{s==="all"?"All Status":s.replace("_"," ")}</option>)}
-          </select>
-          <select value={pf} onChange={e=>setPf(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-            {PRIORITIES.map(p=><option key={p} value={p}>{p==="all"?"All Priority":p}</option>)}
-          </select>
-          {(sf!=="all"||pf!=="all"||q)&&(
-            <button onClick={()=>{setSf("all");setPf("all");setQ("");}}
-              className="text-xs text-tertiary hover:text-red-500 underline">Clear</button>
+        {/* Alerts */}
+        {(criticalWOs.length > 0 || unassigned.length > 0) && (
+          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span style={{fontSize:"1.25rem"}}>🚨</span>
+              <div className="flex-1">
+                {criticalWOs.length > 0 && (
+                  <span className="text-sm font-semibold text-red-400 mr-4">
+                    {criticalWOs.length} critical work order{criticalWOs.length>1?"s":""} need immediate attention
+                  </span>
+                )}
+                {unassigned.length > 0 && (
+                  <span className="text-sm font-semibold" style={{color:"#FB923C"}}>
+                    {unassigned.length} unassigned work order{unassigned.length>1?"s":""}
+                  </span>
+                )}
+              </div>
+              <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">
+                View All →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Technician Board */}
+        <div className="tb-section">
+          <div className="tb-section-header">
+            <div>
+              <div className="text-label-upper text-tertiary mb-1">Field Team</div>
+              <div className="tb-section-title" style={{marginBottom:0}}>Technician Status</div>
+            </div>
+            <button onClick={() => router.push("/operations/technicians")} className="tb-section-link">Manage →</button>
+          </div>
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+            {techs.slice(0,8).map((tech, i) => {
+              const techWOs    = wos.filter(w => w.technician_id === tech.id);
+              const active     = techWOs.filter(w => w.status === "in_progress").length;
+              const openCount  = techWOs.filter(w => w.status === "open").length;
+              const isActive   = active > 0;
+              const isAvail    = !isActive && openCount === 0;
+              const statusColor = isActive ? "#FBBF24" : isAvail ? "#34D399" : "#60A5FA";
+              const statusLabel = isActive ? "Active" : isAvail ? "Available" : "Queued";
+              return (
+                <button key={i}
+                  onClick={() => router.push(`/operations/technicians/${tech.id}`)}
+                  className="tb-section text-left hover:border-brand transition-colors">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-base-alt flex items-center justify-center text-xs font-black text-secondary flex-shrink-0">
+                      {(tech.name||"?").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-primary truncate">{tech.name||"—"}</div>
+                      <div className="text-xs text-tertiary truncate">{tech.specialization||tech.role||"—"}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="tb-badge" style={{background:`${statusColor}18`,color:statusColor,border:`1px solid ${statusColor}30`,fontSize:"0.5625rem"}}>
+                      {statusLabel}
+                    </span>
+                    <span className="text-xs text-tertiary">{techWOs.length} WOs</span>
+                  </div>
+                  {active > 0 && (
+                    <div className="tb-progress mt-2">
+                      <div className="tb-progress-bar" style={{background:"#FBBF24",width:"60%"}}/>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {techs.length > 8 && (
+            <button onClick={() => router.push("/operations/technicians")}
+              className="text-xs text-brand mt-3 hover:text-primary transition-colors">
+              + {techs.length - 8} more technicians →
+            </button>
           )}
         </div>
 
-        {isLoading?<LoadingState/>:filtered.length===0?<EmptyState title="No work orders found"/>:(
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-slate-100">
-                {["Work Order","Type","Priority","Status","Technician","Date"].map(h=>(
-                  <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-secondary uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr></thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.map(w=>(
-                  <tr key={w.id} className={`hover:bg-slate-50 transition-colors ${w.priority==="critical"?"bg-red-50/30":""}`}>
-                    <td className="py-3 px-3">
-                      <p className="font-medium text-slate-800 truncate max-w-xs">{w.title}</p>
-                      {w.description&&<p className="text-xs text-tertiary truncate">{w.description?.slice(0,50)}</p>}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-secondary">{w.type||"maintenance"}</span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className={"inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border "+(P[w.priority]||P.low)}>{w.priority||"—"}</span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className={"inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold "+(S[w.status]||"bg-slate-100 text-secondary")}>{w.status?.replace(/_/g," ")||"—"}</span>
-                    </td>
-                    <td className="py-3 px-3 text-xs">
-                      {w.technician_id
-                        ? <span className="text-slate-700 font-medium">{techMap[w.technician_id]||"Assigned"}</span>
-                        : <span className="text-amber-600 font-semibold">Unassigned</span>
-                      }
-                    </td>
-                    <td className="py-3 px-3 text-xs text-tertiary">{fmtDate(w.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Work Order Queue */}
+        <div className="tb-section">
+          <div className="tb-section-header">
+            <div>
+              <div className="text-label-upper text-tertiary mb-1">Queue</div>
+              <div className="tb-section-title" style={{marginBottom:0}}>Active Work Orders ({filtered.length})</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                className="tb-search"
+                style={{width:200}}
+                placeholder="Search..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All →</button>
+            </div>
           </div>
-        )}
-      </SectionCard>
-    </PageWrapper>
+
+          {woLoading ? (
+            <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          ) : filtered.length === 0 ? (
+            <div className="tb-empty">
+              <div className="tb-empty-icon">✅</div>
+              <div className="tb-empty-title">All clear</div>
+              <div className="tb-empty-desc">No active work orders in the queue</div>
+            </div>
+          ) : (
+            <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
+              <div className="tb-table-head" style={{gridTemplateColumns:"2fr 80px 90px 150px 100px 110px"}}>
+                {["Work Order","Priority","Status","Technician","Asset","Due Date"].map((h, i) => (
+                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                ))}
+              </div>
+              {filtered.slice(0,20).map((wo, i) => {
+                const pc   = PRIORITY_COLOR[wo.priority] || "#94A3B8";
+                const sc   = STATUS_COLOR[wo.status] || "#94A3B8";
+                const tech = techs.find(t => t.id === wo.technician_id);
+                return (
+                  <button key={i}
+                    onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
+                    className="tb-table-row"
+                    style={{gridTemplateColumns:"2fr 80px 90px 150px 100px 110px"}}>
+                    <div className="flex items-center gap-3 pr-4 min-w-0">
+                      <div className="tb-priority-bar" style={{background:pc}}/>
+                      <div className="text-sm font-semibold text-primary truncate">{wo.title||"—"}</div>
+                    </div>
+                    <div className="text-center">
+                      <span className="tb-badge" style={{background:`${pc}18`,color:pc,border:`1px solid ${pc}30`,fontSize:"0.625rem"}}>{wo.priority||"—"}</span>
+                    </div>
+                    <div className="text-center">
+                      <span className="tb-badge" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`,fontSize:"0.625rem"}}>{(wo.status||"—").replace("_"," ")}</span>
+                    </div>
+                    <div className="text-center text-xs text-secondary truncate px-1">
+                      {tech?.name || <span style={{color:"#FB923C"}}>Unassigned</span>}
+                    </div>
+                    <div className="text-center text-xs text-tertiary truncate px-1">{wo.asset_id?.slice(0,10)||"—"}</div>
+                    <div className="text-center text-xs text-tertiary">{fmtDate(wo.due_date)}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Stats row */}
+        <div className="tb-grid-3">
+          <div className="tb-section">
+            <div className="text-xs text-tertiary mb-3">WOs by Priority</div>
+            <div className="space-y-2">
+              {["critical","high","medium","low"].map(p => {
+                const cnt = wos.filter(w => w.priority === p && w.status !== "completed").length;
+                const pct = openWOs.length > 0 ? (cnt / openWOs.length) * 100 : 0;
+                return (
+                  <div key={p}>
+                    <div className="tb-flex-between mb-1">
+                      <span className="text-xs text-secondary capitalize">{p}</span>
+                      <span className="text-xs font-bold text-primary">{cnt}</span>
+                    </div>
+                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:PRIORITY_COLOR[p],width:`${pct}%`}}/></div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="tb-section">
+            <div className="text-xs text-tertiary mb-3">Technician Workload</div>
+            <div className="space-y-2">
+              {techs.slice(0,5).map((tech, i) => {
+                const cnt = wos.filter(w => w.technician_id === tech.id && w.status !== "completed").length;
+                const max = Math.max(...techs.map(t => wos.filter(w => w.technician_id === t.id).length), 1);
+                return (
+                  <div key={i}>
+                    <div className="tb-flex-between mb-1">
+                      <span className="text-xs text-secondary truncate" style={{maxWidth:120}}>{tech.name||"—"}</span>
+                      <span className="text-xs font-bold text-primary">{cnt}</span>
+                    </div>
+                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:"#60A5FA",width:`${(cnt/max)*100}%`}}/></div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="tb-section">
+            <div className="text-xs text-tertiary mb-3">Quick Actions</div>
+            <div className="space-y-2">
+              {[
+                { label:"All Work Orders",     icon:"🔧", path:"/operations/work-orders" },
+                { label:"Service Requests",    icon:"🎫", path:"/operations/service-requests" },
+                { label:"Technicians",         icon:"👷", path:"/operations/technicians" },
+                { label:"Maintenance Plans",   icon:"📅", path:"/maintenance/pm-plans" },
+              ].map((a, i) => (
+                <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
+                  <span>{a.icon}</span>
+                  <span className="text-sm text-secondary">{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
