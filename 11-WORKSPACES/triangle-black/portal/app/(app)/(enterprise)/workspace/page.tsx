@@ -177,6 +177,14 @@ export default function WorkspacePage() {
               )}
             </div>
 
+            {/* Recent Activity */}
+            <div className="tb-section">
+              <div className="tb-section-header">
+                <div className="tb-section-title" style={{marginBottom:0}}>🕐 Recent Activity</div>
+              </div>
+              <ActivityFeed limit={8} compact/>
+            </div>
+
             {/* Automation */}
             <div className="tb-section">
               <div className="tb-section-header">

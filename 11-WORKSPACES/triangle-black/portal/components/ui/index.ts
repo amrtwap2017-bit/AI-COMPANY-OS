@@ -69,3 +69,4 @@ export { KpiCard } from "./KpiCard";
 export { KpiSkeleton, TableSkeleton, CardSkeleton, PageSkeleton } from "./LoadingSkeleton";
 export { StatusBadge } from "./StatusBadge";
 export { CreateModal } from "./CreateModal";
+export { ActivityFeed } from "./ActivityFeed";

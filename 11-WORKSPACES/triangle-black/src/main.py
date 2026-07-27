@@ -1683,3 +1683,101 @@ def renew_contract(contract_id: str, body: dict = None):
             "message":f"Contract renewed for {months} months",
         }
 
+
+
+# ── SPRINT 202: ACTIVITY FEED ────────────────────────────────────────────────
+
+@app.get("/api/v1/activity-feed", tags=["activity"])
+def get_activity_feed(limit: int = 30, entity_id: str = None):
+    """Get recent platform activity — WO updates, lead changes, notifications, automation actions"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    
+    activities = []
+    
+    with Session(eng) as db:
+        def safe(q, p=None):
+            try:
+                return db.execute(text(q), p or {}).fetchall()
+            except:
+                db.rollback()
+                return []
+        
+        # Recent WO status changes (completed ones)
+        wo_filter = "AND wo.id = :eid" if entity_id else ""
+        wo_params = {"l": limit // 4, "eid": entity_id} if entity_id else {"l": limit // 4}
+        wos = safe(f"""
+            SELECT wo.id, wo.title, wo.status, wo.priority,
+                   wo.completed_at as event_time, wo.technician_id,
+                   t.name as technician_name
+            FROM work_orders wo
+            LEFT JOIN technicians t ON t.id = wo.technician_id
+            WHERE wo.completed_at IS NOT NULL {wo_filter}
+            ORDER BY wo.completed_at DESC LIMIT :l
+        """, wo_params)
+        for w in wos:
+            r = dict(w._mapping)
+            activities.append({
+                "id": r["id"], "type": "work_order_completed",
+                "icon": "✅", "color": "#34D399",
+                "title": f"WO Completed: {r['title']}",
+                "description": f"Completed by {r.get('technician_name') or 'Unassigned'} · Priority: {r['priority']}",
+                "entity_type": "work_order", "entity_id": r["id"],
+                "path": f"/operations/work-orders/{r['id']}",
+                "time": str(r["event_time"]),
+            })
+        
+        # Recent notifications (last 20)
+        notif_filter = "AND entity_id = :eid" if entity_id else ""
+        notif_params = {"l": limit // 3, "eid": entity_id} if entity_id else {"l": limit // 3}
+        notifs = safe(f"""
+            SELECT id, title, message, type, entity_id, entity_type, created_at
+            FROM notifications
+            WHERE is_read = false {notif_filter}
+            ORDER BY created_at DESC LIMIT :l
+        """, notif_params)
+        type_icons = {
+            "work_order_created":"🔧","contract_expiring":"⏰","purchase_request_created":"🛒",
+            "contract_renewed":"🔄","lead_created":"👤","work_order_completed":"✅",
+        }
+        for n in notifs:
+            r = dict(n._mapping)
+            activities.append({
+                "id": r["id"], "type": r.get("type","notification"),
+                "icon": type_icons.get(r.get("type",""),"🔔"), "color": "#A78BFA",
+                "title": r["title"], "description": r.get("message",""),
+                "entity_type": r.get("entity_type",""), "entity_id": r.get("entity_id",""),
+                "path": f"/{r.get('entity_type','work_order').replace('_','-')}s/{r.get('entity_id','')}",
+                "time": str(r["created_at"]),
+            })
+        
+        # Recent PM plan WOs (auto-created)
+        pm_wos = safe("""
+            SELECT id, title, created_at, priority
+            FROM work_orders
+            WHERE title LIKE 'PM:%'
+            ORDER BY created_at DESC LIMIT :l
+        """, {"l": 5})
+        for w in pm_wos:
+            r = dict(w._mapping)
+            activities.append({
+                "id": r["id"], "type": "pm_auto_created",
+                "icon": "📅", "color": "#60A5FA",
+                "title": f"Auto-created: {r['title']}",
+                "description": "Automatically created from overdue PM plan",
+                "entity_type": "work_order", "entity_id": r["id"],
+                "path": f"/operations/work-orders/{r['id']}",
+                "time": str(r["created_at"]),
+            })
+    
+    # Sort by time descending and limit
+    activities.sort(key=lambda x: x.get("time",""), reverse=True)
+    return {
+        "activities": activities[:limit],
+        "total": len(activities),
+    }
+
