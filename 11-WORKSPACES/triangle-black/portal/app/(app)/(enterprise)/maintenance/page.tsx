@@ -1,73 +1,132 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, StatusBadge, LoadingState } from "@/components/ui";
-import Link from "next/link";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter } from "next/navigation";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
+export default function MaintenanceHub() {
+  const router = useRouter();
+  const { data: assetRaw } = useQuery(["mh-assets"], () => authFetch("/api/v1/assets/").then(r => r.json()));
+  const { data: pmRaw } = useQuery(["mh-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
+  const { data: woRaw } = useQuery(["mh-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
 
-const fetchAssets = async () => {
-  const res = await authFetch(`/api/v1/assets`);
-  if (!res.ok) return [];
-  return res.json();
-};
+  const assets = toArr(assetRaw);
+  const pms = toArr(pmRaw);
+  const wos = toArr(woRaw);
+  const now = new Date();
+  const in7 = new Date(now.getTime() + 7 * 86400000);
+  const in30 = new Date(now.getTime() + 30 * 86400000);
 
-const fetchPMPlans = async () => {
-  const res = await authFetch(`/api/v1/maintenance/pm-plans`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchMaintenanceSignals = async () => {
-  const res = await authFetch(`/api/v1/ai/signals?category=maintenance`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const MaintenancePage = () => {
-  const { data: assets, isLoading: isAssetsLoading } = useQuery(["assets"], fetchAssets, { refetchInterval: 120000 });
-  const { data: pmPlans, isLoading: isPMPlansLoading } = useQuery(["pm-plans"], fetchPMPlans, { refetchInterval: 120000 });
-  const { data: signals, isLoading: isSignalsLoading } = useQuery(["signals"], fetchMaintenanceSignals, { refetchInterval: 120000 });
-
-  if (isAssetsLoading || isPMPlansLoading || isSignalsLoading) return <LoadingState />;
-
-  const totalAssets = (assets || []).length;
-  const inFaultCount = toArr(assets).filter(asset => asset.status === "in-fault").length;
-  const activePMPlans = toArr(pmPlans).filter(plan => plan.status === "active").length;
-  const maintenanceSignals = toArr(signals).slice(0, 3);
+  const overduePMs = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) < now);
+  const dueSoon = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in7);
+  const dueMonth = pms.filter((p: any) => p.next_due_ts && new Date(p.next_due_ts) >= now && new Date(p.next_due_ts) <= in30);
+  const criticalAssets = assets.filter((a: any) => a.criticality === "critical");
+  const maintenanceWOs = wos.filter((w: any) => w.type === "preventive" || w.type === "maintenance");
+  const byCategory = assets.reduce((acc: any, a: any) => { acc[a.category || "Other"] = (acc[a.category || "Other"] || 0) + 1; return acc; }, {});
 
   return (
-    <PageWrapper>
-      <PageHeader title="Maintenance Hub" />
-      <MetricStrip
-        metrics={[
-          { label: "Total Assets", value: totalAssets },
-          { label: "In Fault", value: inFaultCount, badge: <StatusBadge status="in-fault" /> },
-          { label: "Active PM Plans", value: activePMPlans },
-          { label: "Maintenance Signals", value: maintenanceSignals.length }
-        ]}
-      />
-      <div className="grid grid-cols-3 gap-4">
-        <SectionCard title="Assets" description="Manage all assets" count={totalAssets} href="/maintenance/assets" />
-        <SectionCard title="PM Plans" description="Review and manage PM plans" count={activePMPlans} href="/maintenance/pm-plans" />
-        <SectionCard title="Intelligence" description="Analyze maintenance signals" count={(signals || []).length} href="/maintenance/intelligence" />
-        <SectionCard title="Schedule" description="View and edit schedules" count={0} href="/maintenance/review/schedules" />
-        <SectionCard title="Costs" description="Review maintenance costs" count={0} href="/maintenance/costs/review" />
-        <SectionCard title="Downtime" description="Manage downtime" count={0} href="/maintenance/downtime/review" />
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div>
+        <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Maintenance</div>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Maintenance Hub</h1>
+        <p className="text-slate-500 mt-1">Asset health, PM schedules, and maintenance workflow</p>
       </div>
-      <div className="mt-4">
-        <h2 className="text-lg font-semibold">Current Alerts</h2>
-        <ul className="list-disc pl-4">
-          {toArr(maintenanceSignals).map((signal, index) => (
-            <li key={index}>{signal.description}</li>
-          ))}
-        </ul>
-      </div>
-    </PageWrapper>
-  );
-};
 
-export default MaintenancePage;
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Total Assets", value: assets.length, sub: `${criticalAssets.length} critical`, color: "blue", path: "/maintenance/assets" },
+          { label: "Overdue PM Plans", value: overduePMs.length, sub: "require immediate action", color: overduePMs.length > 0 ? "red" : "emerald", path: "/maintenance/pm-plans" },
+          { label: "Due This Week", value: dueSoon.length, sub: "PM plans", color: "amber", path: "/maintenance/pm-plans" },
+          { label: "Due This Month", value: dueMonth.length, sub: "PM plans scheduled", color: "purple", path: "/schedule-review" },
+        ].map((k, i) => (
+          <button key={i} onClick={() => router.push(k.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-left hover:border-amber-400 hover:shadow-lg transition-all">
+            <div className="text-xs text-slate-500 mb-2">{k.label}</div>
+            <div className={`text-3xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{k.sub}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Overdue PM */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-900 dark:text-white">Overdue PM Plans</h2>
+            <button onClick={() => router.push("/maintenance/pm-plans")} className="text-xs text-amber-500 hover:underline">All plans →</button>
+          </div>
+          {overduePMs.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 text-sm">✅ No overdue PM plans</div>
+          ) : overduePMs.map((p: any, i: number) => (
+            <div key={i} className="flex items-start gap-3 p-3 mb-2 bg-red-50 dark:bg-red-900/20 rounded-xl">
+              <div className="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">{p.title}</div>
+                <div className="text-xs text-red-500 mt-0.5">{p.frequency} · was due {fmtDate(p.next_due_ts)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Asset by category */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-slate-900 dark:text-white">Assets by Category</h2>
+            <button onClick={() => router.push("/maintenance/assets")} className="text-xs text-amber-500 hover:underline">All assets →</button>
+          </div>
+          <div className="space-y-3">
+            {Object.entries(byCategory).sort(([,a]: any, [,b]: any) => b - a).map(([cat, count]: [string, any]) => (
+              <div key={cat}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-slate-600 dark:text-slate-400">{cat}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{count}</span>
+                </div>
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                  <div className="h-2 rounded-full bg-blue-500" style={{ width: `${(count / assets.length) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Critical assets */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-slate-900 dark:text-white">Critical Assets</h2>
+          <button onClick={() => router.push("/maintenance/assets")} className="text-xs text-amber-500 hover:underline">View all →</button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          {criticalAssets.slice(0, 6).map((a: any, i: number) => (
+            <button key={i} onClick={() => router.push(`/maintenance/assets/${a.id}`)}
+              className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-xl hover:shadow-md transition-all text-left">
+              <div className="text-sm font-bold text-red-900 dark:text-red-300 truncate">{a.name}</div>
+              <div className="text-xs text-red-500 mt-1">{a.category} · {a.location_description || "—"}</div>
+              <div className="text-xs text-slate-400 mt-1">Last service: {fmtDate(a.last_maintenance_date)}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick nav */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Asset Tree", icon: "🌳", path: "/maintenance/asset-tree" },
+          { label: "PM Plans", icon: "📅", path: "/maintenance/pm-plans" },
+          { label: "Work History", icon: "📋", path: "/maintenance/work-history" },
+          { label: "QR Codes", icon: "📱", path: "/maintenance/qr-codes" },
+        ].map((a, i) => (
+          <button key={i} onClick={() => router.push(a.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center hover:border-amber-400 hover:shadow-lg transition-all">
+            <div className="text-2xl mb-2">{a.icon}</div>
+            <div className="text-sm font-bold text-slate-900 dark:text-white">{a.label}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

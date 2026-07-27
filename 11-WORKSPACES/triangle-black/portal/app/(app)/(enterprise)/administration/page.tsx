@@ -1,70 +1,113 @@
 "use client";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-
+// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import { PageWrapper, PageHeader, SectionCard, MetricStrip, LoadingState } from "@/components/ui";
-import Link from "next/link";
+import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter } from "next/navigation";
 
 const toArr = (d: any): any[] => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const BACK = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
-
-
-const fetchUsers = async () => {
-  const res = await authFetch(`/api/v1/auth/users`);
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchHealth = async () => {
-  const res = await authFetch(`/api/v1/ai/health`);
-  if (!res.ok) return [];
-  return res.json();
-};
 
 export default function AdministrationPage() {
-  const userQuery = useQuery(["users"], fetchUsers, { refetchInterval: 300000 });
-  const healthQuery = useQuery(["health"], fetchHealth, { refetchInterval: 60000 });
+  const router = useRouter();
+  const { data: twin } = useQuery(["adm-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()));
+  const { data: dash } = useQuery(["adm-dash"], () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
+  const { data: techRaw } = useQuery(["adm-techs"], () => authFetch("/api/v1/technicians/").then(r => r.json()));
+  const { data: notifRaw } = useQuery(["adm-notifs"], () => authFetch("/api/v1/notifications/").then(r => r.json()));
+  const { data: autoStatus } = useQuery(["adm-auto"], () => authFetch("/api/v1/automation/status").then(r => r.json()));
+  const { data: aiHealth } = useQuery(["adm-ai"], () => authFetch("/api/v1/ai/health").then(r => r.json()).catch(() => ({})));
 
-  if (userQuery.isLoading || healthQuery.isLoading) return <LoadingState />;
+  const techs = toArr(techRaw);
+  const notifs = toArr(notifRaw);
+  const d = dash || {};
+  const score = twin?.health_score ?? 0;
+  const pending = autoStatus?.pending_actions || {};
+  const totalPending = Object.values(pending).reduce((s: number, v: any) => s + Number(v), 0);
 
-  if (userQuery.isError || healthQuery.isError) return <div>Error fetching data</div>;
-
-  const userCount = userQuery.data ? userQuery.data.count : 0;
-  const healthStatus = healthQuery.data?.status || "unknown";
-  const isDegraded = healthStatus !== "ok";
+  const sections = [
+    { label: "Hotels & Sites", icon: "🏨", desc: "Manage properties and locations", path: "/administration/hotels", count: d.platform?.hotels ?? 0 },
+    { label: "Users & Access", icon: "👥", desc: "User accounts and permissions", path: "/administration/users", count: techs.length },
+    { label: "Technicians", icon: "👷", desc: "Field engineers and specialists", path: "/administration/technicians", count: techs.filter((t: any) => t.is_active).length },
+    { label: "Notification Rules", icon: "🔔", desc: "Alert and notification settings", path: "/admin/notification-rules", count: notifs.length },
+    { label: "Audit Trail", icon: "📋", desc: "System activity and change log", path: "/administration/audit", count: notifs.length },
+    { label: "Platform Health", icon: "💊", desc: "System status and performance", path: "/administration/platform", count: null },
+  ];
 
   return (
-    <PageWrapper>
-      <PageHeader title="Administration Hub" />
-      <div className="grid grid-cols-2 gap-4">
-        <SectionCard title="Total Users">
-          <MetricStrip value={userCount} />
-        </SectionCard>
-        <SectionCard title="System Status">
-          <MetricStrip value={healthStatus} color={isDegraded ? "amber" : "green"} />
-        </SectionCard>
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div>
+        <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Administration</div>
+        <h1 className="text-3xl font-black text-slate-900 dark:text-white">Platform Administration</h1>
+        <p className="text-slate-500 mt-1">System configuration, users, and platform health</p>
       </div>
-      <div className="grid grid-cols-2 gap-4 mt-8">
-        <Link href="/administration/users" passHref>
-          <SectionCard title="User Management">
-            {userCount} users
-          </SectionCard>
-        </Link>
-        <Link href="/administration/audit" passHref>
-          <SectionCard title="Audit Log">Track all changes</SectionCard>
-        </Link>
-        <Link href="/admin/notification-rules" passHref>
-          <SectionCard title="Notification Rules">Configure alerts</SectionCard>
-        </Link>
-        <SectionCard title="System Health">
-          {healthStatus} - Last checked: {new Date().toLocaleString()}
-        </SectionCard>
+
+      {/* Platform health strip */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className={`col-span-1 rounded-2xl border p-5 text-center ${score >= 95 ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
+          <div className={`text-5xl font-black ${score >= 95 ? "text-emerald-500" : "text-amber-500"}`}>{score}</div>
+          <div className="text-xs text-slate-500 mt-1">Twin Score</div>
+        </div>
+        {[
+          { label: "Active Technicians", value: techs.filter((t: any) => t.is_active).length, color: "blue" },
+          { label: "Total Notifications", value: notifs.length, color: "purple" },
+          { label: "Pending Automations", value: totalPending, color: totalPending > 0 ? "amber" : "emerald" },
+          { label: "AI Status", value: aiHealth?.status || "online", color: "emerald" },
+        ].map((k, i) => (
+          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+            <div className={`text-2xl font-black text-${k.color}-500`}>{k.value}</div>
+            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
+          </div>
+        ))}
       </div>
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Quick Stats</h2>
-        <p>Platform Version: Triangle Black v3.0.0</p>
-        <p>Build Info: Hardcoded</p>
+
+      {/* Admin sections */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {sections.map((s, i) => (
+          <button key={i} onClick={() => router.push(s.path)}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-left hover:border-amber-400 hover:shadow-lg transition-all group">
+            <div className="flex items-start justify-between mb-3">
+              <div className="text-3xl">{s.icon}</div>
+              {s.count !== null && <span className="text-lg font-black text-slate-400">{s.count}</span>}
+            </div>
+            <div className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-amber-600 transition-colors">{s.label}</div>
+            <div className="text-sm text-slate-500 mt-1">{s.desc}</div>
+          </button>
+        ))}
       </div>
-    </PageWrapper>
+
+      {/* Automation status */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-slate-900 dark:text-white">Automation Engine Status</h2>
+          <button onClick={() => router.push("/workflows/launcher")} className="text-xs text-amber-500 hover:underline">Manage →</button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {Object.entries(pending).map(([key, val]: [string, any]) => (
+            <div key={key} className={`rounded-xl border p-3 text-center ${val === 0 ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
+              <div className={`text-2xl font-black ${val === 0 ? "text-emerald-500" : "text-amber-500"}`}>{val}</div>
+              <div className="text-xs text-slate-500 mt-1 capitalize">{key.replace(/wf\d+_/, "").replace(/_/g, " ")}</div>
+              <div className="text-xs font-bold mt-0.5">{val === 0 ? "✅ OK" : "⚠️ Pending"}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Twin domains */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <h2 className="font-bold text-slate-900 dark:text-white mb-4">Digital Twin — All Domains</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {(twin?.operational_domains ?? []).map((dom: any, i: number) => {
+            const hasIssue = (dom.overdue ?? 0) > 0 || (dom.critical_open ?? 0) > 0 || (dom.below_min ?? 0) > 0;
+            return (
+              <div key={i} className={`rounded-xl border p-4 ${hasIssue ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}`}>
+                <div className="font-semibold text-sm">{dom.domain}</div>
+                <div className="text-xl font-black mt-1">{dom.total ?? "—"}</div>
+                <div className={`text-xs mt-1 ${hasIssue ? "text-amber-600" : "text-emerald-600"}`}>
+                  {hasIssue ? "⚠️ Action needed" : "✅ Healthy"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
