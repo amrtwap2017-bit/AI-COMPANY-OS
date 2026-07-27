@@ -1781,3 +1781,41 @@ def get_activity_feed(limit: int = 30, entity_id: str = None):
         "total": len(activities),
     }
 
+
+
+# ── SPRINT 206: INVOICE DETAIL ENDPOINT ──────────────────────────────────────
+
+@app.get("/api/v1/invoices/{invoice_id}", tags=["finance"])
+def get_invoice_detail(invoice_id: str):
+    """Get single invoice with all fields for PDF generation"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else None
+            except Exception:
+                db.rollback()
+                return None
+        inv = safe("SELECT * FROM invoices WHERE id = :id", {"id": invoice_id})
+        if not inv:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Invoice not found")
+        # Try to get contract/client info
+        contract = None
+        if inv.get("contract_id"):
+            contract = safe("SELECT * FROM contracts WHERE id = :id", {"id": inv["contract_id"]})
+        # Try to get work order info
+        wo = None
+        if inv.get("work_order_id"):
+            wo = safe("SELECT * FROM work_orders WHERE id = :id", {"id": inv["work_order_id"]})
+        return {
+            **{k: str(v) if v is not None else None for k, v in inv.items()},
+            "contract": {k: str(v) if v is not None else None for k, v in contract.items()} if contract else None,
+            "work_order": {k: str(v) if v is not None else None for k, v in wo.items()} if wo else None,
+        }
+

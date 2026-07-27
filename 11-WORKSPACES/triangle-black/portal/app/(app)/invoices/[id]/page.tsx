@@ -1,287 +1,324 @@
 "use client";
 // @ts-nocheck
-import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { useRouter, useParams } from "next/navigation";
 
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB", {day:"numeric",month:"long",year:"numeric"}); } catch { return "—"; } };
-const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtDate  = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP   = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const STATUS_CONFIG = {
-  paid:      { label:"Paid",      color:"#34D399", bg:"rgba(16,185,129,0.1)",  border:"rgba(16,185,129,0.25)" },
-  pending:   { label:"Pending",   color:"#FCD34D", bg:"rgba(245,158,11,0.1)",  border:"rgba(245,158,11,0.25)" },
-  overdue:   { label:"Overdue",   color:"#F87171", bg:"rgba(239,68,68,0.1)",   border:"rgba(239,68,68,0.25)" },
-  cancelled: { label:"Cancelled", color:"#94A3B8", bg:"rgba(148,163,184,0.1)", border:"rgba(148,163,184,0.25)" },
+const STATUS_COLOR = {
+  paid:"#34D399", pending:"#FBBF24", overdue:"#F87171",
+  draft:"#94A3B8", cancelled:"#64748B", sent:"#60A5FA"
 };
 
-export default function InvoiceDetailPage() {
-  const { id } = useParams();
-  const router  = useRouter();
+function printInvoice(inv) {
+  const sc     = STATUS_COLOR[inv.status] || "#94A3B8";
+  const amount = Number(inv.total_amount || inv.amount || 0);
+  const tax    = Number(inv.tax_amount || amount * 0.14);
+  const subtot = amount - tax;
 
-  // v4 syntax — correct
-  const { data: invData, isLoading, isError } = useQuery(
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Invoice ${inv.invoice_number || inv.id?.slice(0,8)}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; font-size: 13px; color: #1E293B; background: #fff; padding: 40px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; padding-bottom:20px; border-bottom:2px solid #E2E8F0; }
+  .company-name { font-size:24px; font-weight:900; color:#0F172A; }
+  .company-sub { font-size:11px; color:#64748B; margin-top:4px; }
+  .invoice-title { text-align:right; }
+  .invoice-title h1 { font-size:28px; font-weight:900; color:#0F172A; }
+  .invoice-number { font-size:13px; color:#64748B; margin-top:4px; }
+  .status-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; background:${sc}20; color:${sc}; border:1px solid ${sc}40; margin-top:8px; }
+  .meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:32px; }
+  .meta-label { font-size:10px; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+  .meta-value { font-size:13px; font-weight:600; color:#1E293B; }
+  .items-table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+  .items-table th { background:#F8FAFC; padding:10px 12px; text-align:left; font-size:11px; text-transform:uppercase; color:#64748B; letter-spacing:0.05em; border-bottom:2px solid #E2E8F0; }
+  .items-table th:last-child, .items-table td:last-child { text-align:right; }
+  .items-table td { padding:10px 12px; border-bottom:1px solid #F1F5F9; font-size:13px; }
+  .totals { margin-left:auto; width:280px; }
+  .totals-row { display:flex; justify-content:space-between; padding:6px 0; font-size:13px; }
+  .totals-row.total { border-top:2px solid #E2E8F0; margin-top:4px; padding-top:10px; font-size:16px; font-weight:900; color:#0F172A; }
+  .footer { margin-top:48px; padding-top:16px; border-top:1px solid #E2E8F0; font-size:11px; color:#94A3B8; text-align:center; }
+  @media print { body { padding:20px; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="company-name">Triangle Black</div>
+    <div class="company-sub">Engineering Operations Platform</div>
+    <div class="company-sub">Cairo, Egypt | info@triangleblack.com</div>
+  </div>
+  <div class="invoice-title">
+    <h1>INVOICE</h1>
+    <div class="invoice-number">${inv.invoice_number || `INV-${(inv.id||"").slice(0,8).toUpperCase()}`}</div>
+    <div class="status-badge">${(inv.status||"draft").toUpperCase()}</div>
+  </div>
+</div>
+
+<div class="meta-grid">
+  <div>
+    <div class="meta-label">Bill To</div>
+    <div class="meta-value">${inv.contract?.title || inv.client_name || "—"}</div>
+    ${inv.contract ? `<div style="color:#64748B;font-size:12px;margin-top:2px">Contract: ${inv.contract.title||"—"}</div>` : ""}
+  </div>
+  <div>
+    <div class="meta-label">Invoice Date</div>
+    <div class="meta-value">${fmtDate(inv.issue_date || inv.created_at)}</div>
+    <div style="margin-top:12px">
+      <div class="meta-label">Due Date</div>
+      <div class="meta-value">${fmtDate(inv.due_date)}</div>
+    </div>
+  </div>
+  <div>
+    <div class="meta-label">Work Order</div>
+    <div class="meta-value">${inv.work_order?.title || inv.work_order_id?.slice(0,16) || "—"}</div>
+  </div>
+  <div>
+    <div class="meta-label">Payment Status</div>
+    <div class="meta-value" style="color:${sc}">${(inv.status||"—").toUpperCase()}</div>
+  </div>
+</div>
+
+<table class="items-table">
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th style="text-align:center">Type</th>
+      <th style="text-align:right">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>${inv.description || inv.notes || "Engineering Services"}</td>
+      <td style="text-align:center">${inv.type || "Service"}</td>
+      <td style="text-align:right">${fmtEGP(subtot)}</td>
+    </tr>
+    ${inv.work_order ? `<tr><td style="color:#64748B">Work Order: ${inv.work_order.title||""}</td><td></td><td></td></tr>` : ""}
+  </tbody>
+</table>
+
+<div class="totals">
+  <div class="totals-row"><span style="color:#64748B">Subtotal</span><span>${fmtEGP(subtot)}</span></div>
+  <div class="totals-row"><span style="color:#64748B">VAT (14%)</span><span>${fmtEGP(tax)}</span></div>
+  <div class="totals-row total"><span>Total</span><span style="color:#0F172A">${fmtEGP(amount)}</span></div>
+</div>
+
+<div class="footer">
+  <p>Triangle Black Engineering Operations Platform · Generated ${new Date().toLocaleDateString("en-GB")} · Thank you for your business</p>
+</div>
+</body>
+</html>`;
+
+  const win = window.open("", "_blank", "width=900,height=1100");
+  if (!win) return;
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 500);
+}
+
+export default function InvoiceDetailPage() {
+  const router = useRouter();
+  const params = useParams();
+  const id     = params?.id as string;
+
+  const { data: inv, isLoading } = useQuery(
     ["invoice-detail", id],
     () => authFetch(`/api/v1/invoices/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 
-  // Get all invoices to find related (same contract)
-  const { data: allInv } = useQuery(
-    ["invoices-all"],
-    () => authFetch("/api/v1/invoices/").then(r => r.json())
-  );
-
-  // Get contracts to show contract info
-  const { data: allContracts } = useQuery(
-    ["contracts-inv"],
-    () => authFetch("/api/v1/contracts/").then(r => r.json())
-  );
-
   if (isLoading) return (
-    <div className="min-h-screen" className="bg-base">
-      <div style={{background:"#0F172A",height:200}} className="animate-pulse"/>
-      <div className="max-w-content mx-auto px-8 py-6 space-y-4">
-        {[1,2,3].map(i=><div key={i} style={{height:100,background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:16}} className="animate-pulse"/>)}
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-secondary text-sm animate-pulse">Loading invoice...</div>
+    </div>
+  );
+
+  if (!inv || inv.detail) return (
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">📄</div>
+        <div className="tb-empty-title">Invoice not found</div>
+        <button onClick={() => router.push("/invoices")} className="tb-btn-primary mt-4">Back to Invoices</button>
       </div>
     </div>
   );
 
-  if (isError || !invData) return (
-    <div className="min-h-screen flex items-center justify-center" className="bg-base">
-      <div style={{textAlign:"center",padding:48}}>
-        <div className="tb-empty-icon">⚠️</div>
-        <div style={{fontSize:"1.25rem",fontWeight:700,color:"var(--color-text-1)"}}>Invoice Not Found</div>
-        <div style={{fontSize:"0.875rem",color:"var(--color-text-3)",marginTop:8,marginBottom:24}}>The invoice {id?.slice(0,8)} does not exist or you do not have access.</div>
-        <button onClick={() => router.push("/invoices")} style={{background:"var(--color-brand)",color:"#fff",border:"none",borderRadius:10,padding:"10px 24px",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>← Back to Invoices</button>
-      </div>
-    </div>
-  );
-
-  const inv = Array.isArray(invData) ? invData[0] : invData;
-  if (!inv) return null;
-
-  const sc = STATUS_CONFIG[inv.status] || STATUS_CONFIG.pending;
-  const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-  const allInvoices = toArr(allInv);
-  const allContractsList = toArr(allContracts);
-  const linkedContract = allContractsList.find(c => c.id === inv.contract_id);
-  const relatedInvoices = allInvoices.filter(i => i.id !== inv.id && i.contract_id === inv.contract_id && inv.contract_id).slice(0, 5);
-
-  const isOverdue = inv.status === "overdue" || (inv.status === "pending" && inv.due_date && new Date(inv.due_date) < new Date());
-  const daysOverdue = isOverdue && inv.due_date ? Math.floor((Date.now() - new Date(inv.due_date).getTime()) / 86400000) : 0;
+  const sc     = STATUS_COLOR[inv.status] || "#94A3B8";
+  const amount = Number(inv.total_amount || inv.amount || 0);
+  const tax    = Number(inv.tax_amount || amount * 0.14);
+  const subtot = amount - tax;
 
   return (
-    <div className="min-h-screen" className="bg-base">
-
-      {/* DARK HEADER */}
-      <div style={{background:"linear-gradient(135deg, #0F172A 0%, #111827 100%)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-        <div className="tb-canvas">
-
-          {/* Back + breadcrumb */}
-          <div className="flex items-center gap-3 mb-6" style={{fontSize:"0.75rem",color:"rgba(148,163,184,0.6)"}}>
-            <button onClick={() => router.push("/invoices")}
-              style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px",color:"rgba(248,250,252,0.8)",fontSize:"0.75rem",fontWeight:600,cursor:"pointer",transition:"all 120ms ease"}}
-              onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.1)"}
-              onMouseLeave={e => e.currentTarget.style.background="rgba(255,255,255,0.06)"}>
-              ← Invoices
-            </button>
-            <span style={{color:"rgba(255,255,255,0.2)"}}>/</span>
-            <span style={{color:"rgba(148,163,184,0.6)"}}>{inv.invoice_number}</span>
-          </div>
-
-          {/* Hero row */}
-          <div className="flex items-start justify-between gap-6">
+    <div className="min-h-screen bg-base">
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A18 100%)"}}>
+        <div className="tb-hero-inner">
+          <div className="tb-flex-between gap-6">
             <div>
-              <div className="text-label-upper text-emerald-500 mb-1.5">Finance · Invoice</div>
-              <h1 className="text-page-title" className="text-slate-100">
-                {inv.invoice_number || `INV-${inv.id?.slice(0,8)}`}
-              </h1>
-              {inv.title && <p style={{color:"rgba(148,163,184,0.65)",fontSize:"0.875rem",marginTop:6}}>{inv.title}</p>}
+              <div className="text-label-upper text-emerald-400 mb-1.5">Finance</div>
+              <h1 className="tb-hero-title">{inv.invoice_number || `INV-${id?.slice(0,8)?.toUpperCase()}`}</h1>
+              <p className="tb-hero-description">
+                <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>
+                  {inv.status||"—"}
+                </span>
+                Issued {fmtDate(inv.issue_date || inv.created_at)} · Due {fmtDate(inv.due_date)}
+              </p>
             </div>
-
-            {/* Status + amount */}
-            <div className="flex items-center gap-4 flex-shrink-0">
-              <div style={{background:sc.bg,border:`1px solid ${sc.border}`,borderRadius:14,padding:"16px 24px",textAlign:"center"}}>
-                <div style={{fontSize:"1.75rem",fontWeight:900,color:sc.color,lineHeight:1}}>{fmtEGP(inv.total_amount)}</div>
-                <div style={{fontSize:"0.625rem",color:"rgba(148,163,184,0.6)",marginTop:4,textTransform:"uppercase",letterSpacing:"0.06em"}}>Total Amount</div>
-                <div className="mt-2">
-                  <span style={{fontSize:"0.6875rem",fontWeight:700,padding:"3px 10px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span>
-                </div>
-              </div>
+            <div className="flex gap-3">
+              <button onClick={() => printInvoice(inv)}
+                className="tb-btn-primary flex items-center gap-2">
+                <span>🖨️</span> Print / PDF
+              </button>
+              <button onClick={() => router.push("/invoices")} className="tb-btn-secondary">
+                ← Back
+              </button>
             </div>
           </div>
-
-          {/* KPI strip */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
+          <div className="tb-grid-4 mt-6">
             {[
-              { label:"Amount",      value:fmtEGP(inv.total_amount),     color:sc.color },
-              { label:"Tax",         value:fmtEGP(inv.tax_amount||0),    color:"rgba(148,163,184,0.8)" },
-              { label:"Issue Date",  value:fmtDate(inv.issue_date||inv.created_at), color:"rgba(148,163,184,0.8)" },
-              { label:"Due Date",    value:fmtDate(inv.due_date),        color:isOverdue?"#F87171":"rgba(148,163,184,0.8)" },
-              { label:"Status",      value:sc.label,                      color:sc.color },
-            ].map((k,i)=>(
-              <div key={i} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"11px 12px",backdropFilter:"blur(12px)"}}>
-                <div style={{fontSize:"0.5625rem",color:"rgba(148,163,184,0.5)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:5}}>{k.label}</div>
-                <div style={{fontSize:"0.875rem",fontWeight:700,color:k.color,lineHeight:1}}>{k.value}</div>
+              { label:"Total Amount", value:fmtEGP(amount), color:"#34D399" },
+              { label:"Subtotal",     value:fmtEGP(subtot), color:"#F1F5F9" },
+              { label:"VAT (14%)",    value:fmtEGP(tax),    color:"#FBBF24" },
+              { label:"Status",       value:(inv.status||"—").toUpperCase(), color:sc },
+            ].map((k, i) => (
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.95rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
               </div>
             ))}
           </div>
-
-          {/* Overdue warning */}
-          {isOverdue && daysOverdue > 0 && (
-            <div style={{marginTop:12,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.25)",borderRadius:10,padding:"10px 16px",display:"flex",alignItems:"center",gap:10}}>
-              <span style={{fontSize:"1rem"}}>🚨</span>
-              <div style={{flex:1,fontSize:"0.75rem",color:"#FCA5A5",fontWeight:600}}>
-                This invoice is {daysOverdue} day{daysOverdue>1?"s":""} overdue. Contact the client immediately to arrange payment.
-              </div>
-              <button onClick={() => router.push("/commercial/contracts")} style={{fontSize:"0.6875rem",fontWeight:700,color:"#F87171",background:"none",border:"1px solid rgba(239,68,68,0.3)",borderRadius:6,padding:"4px 10px",cursor:"pointer"}}>
-                View Contract →
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* CONTENT */}
       <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-          {/* Main — invoice details */}
+          {/* Invoice details */}
           <div className="xl:col-span-2 space-y-5">
-
-            {/* Invoice details */}
             <div className="tb-section">
-              <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Invoice Details</div>
-              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:20}}>Financial Information</div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="tb-section-title">Invoice Details</div>
+              <div className="space-y-1">
                 {[
-                  { label:"Invoice Number", value:inv.invoice_number||"—" },
-                  { label:"Status",         value:<span style={{fontSize:"0.75rem",fontWeight:700,padding:"4px 12px",borderRadius:20,background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`}}>{sc.label}</span> },
-                  { label:"Amount (excl. tax)", value:fmtEGP((inv.total_amount||0)-(inv.tax_amount||0)) },
-                  { label:"Tax Amount",     value:fmtEGP(inv.tax_amount||0) },
-                  { label:"Total Amount",   value:<span style={{fontSize:"1.125rem",fontWeight:900,color:sc.color}}>{fmtEGP(inv.total_amount)}</span> },
-                  { label:"Renewal #",      value:inv.renewal_number||"—" },
-                  { label:"Issue Date",     value:fmtDate(inv.issue_date||inv.created_at) },
-                  { label:"Due Date",       value:<span style={{color:isOverdue?"#EF4444":"var(--color-text-1)",fontWeight:isOverdue?700:400}}>{fmtDate(inv.due_date)}{isOverdue?" ⚠️":""}</span> },
-                  { label:"Paid Date",      value:inv.paid_date?fmtDate(inv.paid_date):"Not paid" },
-                  { label:"Created",        value:fmtDate(inv.created_at) },
-                ].map(({label,value},i) => (
-                  <div key={i} style={{background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
-                    <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginBottom:6}}>{label}</div>
-                    <div className="text-sm font-semibold text-primary">{value}</div>
+                  ["Invoice Number", inv.invoice_number || `INV-${id?.slice(0,8)?.toUpperCase()}`],
+                  ["Issue Date",     fmtDate(inv.issue_date || inv.created_at)],
+                  ["Due Date",       fmtDate(inv.due_date)],
+                  ["Status",         inv.status || "—"],
+                  ["Type",           inv.type || "Service Invoice"],
+                  ["Contract",       inv.contract?.title || inv.contract_id?.slice(0,16) || "—"],
+                  ["Work Order",     inv.work_order?.title || inv.work_order_id?.slice(0,16) || "—"],
+                ].map(([l, v], i) => (
+                  <div key={i} className="tb-info-row">
+                    <span className="tb-info-label">{l}</span>
+                    <span className="tb-info-value">{v}</span>
                   </div>
                 ))}
               </div>
-
-              {inv.description && (
-                <div style={{marginTop:16,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
-                  <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginBottom:6}}>Description</div>
-                  <div className="text-sm text-primary leading-relaxed">{inv.description}</div>
-                </div>
-              )}
-              {inv.notes && (
-                <div style={{marginTop:12,background:"var(--color-bg-alt)",borderRadius:12,padding:"14px 16px"}}>
-                  <div style={{fontSize:"0.6875rem",color:"var(--color-text-3)",marginBottom:6}}>Notes</div>
-                  <div className="text-sm text-primary leading-relaxed">{inv.notes}</div>
-                </div>
-              )}
             </div>
 
-            {/* Related invoices */}
-            {relatedInvoices.length > 0 && (
+            {inv.description && (
               <div className="tb-section">
-                <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Related</div>
-                <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:16}}>Other Invoices on this Contract</div>
-                <div className="space-y-2">
-                  {relatedInvoices.map((ri,i) => {
-                    const rs = STATUS_CONFIG[ri.status] || STATUS_CONFIG.pending;
-                    return (
-                      <button key={i} onClick={() => router.push(`/invoices/${ri.id}`)} className="w-full text-left"
-                        style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,background:"var(--color-bg-alt)",border:"1px solid transparent",transition:"all 120ms ease",cursor:"pointer"}}
-                        onMouseEnter={e => {e.currentTarget.style.borderColor="var(--color-brand)";e.currentTarget.style.background="rgba(180,83,9,0.04)";}}
-                        onMouseLeave={e => {e.currentTarget.style.borderColor="transparent";e.currentTarget.style.background="var(--color-bg-alt)";}}>
-                        <div style={{width:3,height:32,background:rs.color,borderRadius:99,flexShrink:0}}/>
-                        <div className="flex-1">
-                          <div className="text-sm font-semibold text-primary">{ri.invoice_number}</div>
-                          <div className="text-xs text-tertiary mt-0.5">{fmtDate(ri.due_date)}</div>
-                        </div>
-                        <div style={{fontSize:"0.875rem",fontWeight:700,color:rs.color}}>{fmtEGP(ri.total_amount)}</div>
-                        <span style={{fontSize:"0.625rem",fontWeight:700,padding:"3px 8px",borderRadius:99,background:rs.bg,color:rs.color,border:`1px solid ${rs.border}`}}>{rs.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <div className="tb-section-title">Description</div>
+                <p className="text-sm text-secondary leading-relaxed">{inv.description}</p>
               </div>
             )}
+
+            {/* Line items simulation */}
+            <div className="tb-section">
+              <div className="tb-section-title">Line Items</div>
+              <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
+                <div className="tb-table-head" style={{gridTemplateColumns:"2fr 100px 130px"}}>
+                  {["Description","Type","Amount"].map((h, i) => (
+                    <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                  ))}
+                </div>
+                <div className="tb-table-row" style={{gridTemplateColumns:"2fr 100px 130px"}}>
+                  <div className="text-sm text-primary">{inv.description || "Engineering Services"}</div>
+                  <div className="text-center text-xs text-secondary">{inv.type || "Service"}</div>
+                  <div className="text-center text-sm font-bold text-emerald-400">{fmtEGP(subtot)}</div>
+                </div>
+                <div className="tb-table-row" style={{gridTemplateColumns:"2fr 100px 130px",opacity:0.7}}>
+                  <div className="text-sm text-tertiary">Value Added Tax</div>
+                  <div className="text-center text-xs text-secondary">VAT 14%</div>
+                  <div className="text-center text-sm font-bold" style={{color:"#FBBF24"}}>{fmtEGP(tax)}</div>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <div className="space-y-1 min-w-48">
+                  {[
+                    { label:"Subtotal", value:fmtEGP(subtot), bold:false },
+                    { label:"VAT 14%",  value:fmtEGP(tax),    bold:false },
+                    { label:"TOTAL",    value:fmtEGP(amount),  bold:true  },
+                  ].map((row, i) => (
+                    <div key={i} className={`tb-flex-between py-1 ${row.bold ? "border-t border-border pt-3 mt-2" : ""}`}>
+                      <span className={`text-sm ${row.bold ? "font-black text-primary" : "text-secondary"}`}>{row.label}</span>
+                      <span className={`text-sm ${row.bold ? "font-black text-emerald-400 text-base" : "text-primary"}`}>{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Right sidebar */}
+          {/* Right panel */}
           <div className="space-y-4">
-
-            {/* Actions */}
             <div className="tb-section">
               <div className="tb-section-title">Actions</div>
               <div className="space-y-2">
-                {[
-                  { label:"← All Invoices",       icon:"💰", path:"/invoices",                   variant:"secondary" },
-                  { label:"View Contract",         icon:"📄", path:inv.contract_id?`/commercial/contracts/${inv.contract_id}`:"/commercial/contracts", variant:"secondary" },
-                  { label:"Finance Dashboard",     icon:"📊", path:"/executive/portfolio",         variant:"secondary" },
-                  { label:"Collection Report",     icon:"📈", path:"/analytics/costs",             variant:"secondary" },
-                ].map((a,i) => (
-                  <button key={i} onClick={() => router.push(a.path)} className="w-full text-left flex items-center gap-3"
-                    style={{padding:"10px 14px",borderRadius:10,background:i===0?"var(--color-bg-alt)":"transparent",border:`1px solid ${i===0?"var(--color-border)":"transparent"}`,fontSize:"0.8125rem",fontWeight:i===0?600:500,color:"var(--color-text-2)",cursor:"pointer",transition:"all 120ms ease"}}
-                    onMouseEnter={e => {e.currentTarget.style.background="rgba(180,83,9,0.06)";e.currentTarget.style.color="var(--color-brand)";e.currentTarget.style.borderColor="rgba(180,83,9,0.2)";}}
-                    onMouseLeave={e => {e.currentTarget.style.background=i===0?"var(--color-bg-alt)":"transparent";e.currentTarget.style.color="var(--color-text-2)";e.currentTarget.style.borderColor=i===0?"var(--color-border)":"transparent";}}>
-                    <span>{a.icon}</span>
-                    {a.label}
+                <button onClick={() => printInvoice(inv)}
+                  className="tb-action-item w-full justify-start" style={{color:"#34D399"}}>
+                  <span>🖨️</span>
+                  <span className="text-sm">Print / Download PDF</span>
+                </button>
+                <button onClick={() => router.push("/invoices")} className="tb-action-item w-full justify-start">
+                  <span>📋</span>
+                  <span className="text-sm">All Invoices</span>
+                </button>
+                {inv.contract_id && (
+                  <button onClick={() => router.push(`/commercial/contracts/${inv.contract_id}`)}
+                    className="tb-action-item w-full justify-start">
+                    <span>📄</span>
+                    <span className="text-sm">View Contract</span>
                   </button>
-                ))}
+                )}
+                {inv.work_order_id && (
+                  <button onClick={() => router.push(`/operations/work-orders/${inv.work_order_id}`)}
+                    className="tb-action-item w-full justify-start">
+                    <span>🔧</span>
+                    <span className="text-sm">View Work Order</span>
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Contract info */}
-            {linkedContract && (
+            <div className="tb-section">
+              <div className="tb-section-title">Payment Status</div>
+              <div className="text-center py-4">
+                <div className="text-5xl font-black mb-2" style={{color:sc}}>
+                  {inv.status === "paid" ? "✓" : inv.status === "overdue" ? "!" : "○"}
+                </div>
+                <div className="text-sm font-bold" style={{color:sc}}>{(inv.status||"—").toUpperCase()}</div>
+                <div className="text-xs text-tertiary mt-1">
+                  {inv.status === "paid" ? "Payment received" :
+                   inv.status === "overdue" ? `Overdue since ${fmtDate(inv.due_date)}` :
+                   `Due ${fmtDate(inv.due_date)}`}
+                </div>
+              </div>
+            </div>
+
+            {inv.notes && (
               <div className="tb-section">
-                <div style={{fontSize:"0.6875rem",fontWeight:700,color:"var(--color-text-3)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Linked Contract</div>
-                <button onClick={() => router.push(`/commercial/contracts/${linkedContract.id}`)} className="w-full text-left"
-                  style={{background:"var(--color-bg-alt)",borderRadius:12,padding:16,border:"1px solid transparent",transition:"all 120ms ease",cursor:"pointer",marginTop:12}}
-                  onMouseEnter={e => {e.currentTarget.style.borderColor="var(--color-brand)";}}
-                  onMouseLeave={e => {e.currentTarget.style.borderColor="transparent";}}>
-                  <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:8}}>{linkedContract.title||`Contract ${linkedContract.id?.slice(0,8)}`}</div>
-                  <div className="space-y-2">
-                    {[
-                      ["Status",    linkedContract.status],
-                      ["Value",     fmtEGP(linkedContract.total_value)],
-                      ["Monthly",   fmtEGP(linkedContract.monthly_value)],
-                      ["Expires",   fmtDate(linkedContract.end_date)],
-                    ].map(([l,v],i) => (
-                      <div key={i} className="flex justify-between" style={{fontSize:"0.75rem"}}>
-                        <span className="text-tertiary">{l}</span>
-                        <span style={{fontWeight:600,color:"var(--color-text-1)"}}>{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{fontSize:"0.6875rem",color:"var(--color-brand)",marginTop:12,fontWeight:600}}>View full contract →</div>
-                </button>
+                <div className="tb-section-title">Notes</div>
+                <p className="text-sm text-secondary">{inv.notes}</p>
               </div>
             )}
-
-            {/* Meta */}
-            <div className="tb-section">
-              <div className="tb-section-title">Record Info</div>
-              {[
-                ["Invoice ID",  inv.id?.slice(0,16)+"..."],
-                ["Hotel",       inv.hotel_id?.slice(0,12)+"..."],
-                ["Created",     fmtDate(inv.created_at)],
-                ["Updated",     fmtDate(inv.updated_at)],
-              ].map(([l,v],i) => (
-                <div key={i} className="flex justify-between" style={{fontSize:"0.75rem",padding:"8px 0",borderBottom:i<3?"1px solid var(--color-divider)":"none"}}>
-                  <span className="text-tertiary">{l}</span>
-                  <span style={{fontWeight:500,color:"var(--color-text-2)",fontFamily:"monospace"}}>{v}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
