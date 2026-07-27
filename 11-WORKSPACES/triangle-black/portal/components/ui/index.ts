@@ -63,3 +63,4 @@ export { useConfirm } from "./ConfirmDialog";
 export { ApprovalModal } from "./ApprovalModal";
 export { NotificationBell } from "./NotificationBell";
 export { WorkflowBar } from "./WorkflowBar";
+export { RoleBadge, RoleGate } from "./RoleBadge";
