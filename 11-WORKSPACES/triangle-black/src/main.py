@@ -2608,3 +2608,187 @@ def change_password(request: Request, current_password: str, new_password: str):
                 raise
             return {"status": "error", "message": str(e)}
 
+# ── SPRINT 244: ADVANCED REPORTING ENDPOINTS ─────────────────────────────────
+
+@app.get("/api/v1/reports/work-orders", tags=["reports"])
+def report_work_orders():
+    """Work orders summary report data"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception: db.rollback(); return []
+        
+        summary = safe("""
+            SELECT 
+                count(*) as total,
+                count(*) FILTER (WHERE status='completed') as completed,
+                count(*) FILTER (WHERE status='open') as open_count,
+                count(*) FILTER (WHERE status='in_progress') as in_progress,
+                count(*) FILTER (WHERE priority='critical') as critical,
+                count(*) FILTER (WHERE priority='high') as high_priority,
+                count(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days') as last_30_days,
+                avg(EXTRACT(EPOCH FROM (completed_at - created_at))/3600) FILTER (WHERE completed_at IS NOT NULL) as avg_resolution_hours
+            FROM work_orders
+        """)
+        
+        by_category = safe("""
+            SELECT a.category, count(wo.id) as count, 
+                   count(wo.id) FILTER (WHERE wo.priority='critical') as critical_count
+            FROM work_orders wo
+            LEFT JOIN assets a ON a.id = wo.asset_id
+            WHERE a.category IS NOT NULL
+            GROUP BY a.category ORDER BY count DESC LIMIT 8
+        """)
+        
+        recent = safe("""
+            SELECT wo.id, wo.title, wo.status, wo.priority, wo.created_at,
+                   t.name as technician_name, a.name as asset_name
+            FROM work_orders wo
+            LEFT JOIN technicians t ON t.id = wo.technician_id
+            LEFT JOIN assets a ON a.id = wo.asset_id
+            ORDER BY wo.created_at DESC LIMIT 20
+        """)
+        
+        return {
+            "summary": summary[0] if summary else {},
+            "by_category": by_category,
+            "recent": recent,
+            "report_type": "work_orders",
+            "generated_at": __import__('datetime').datetime.now().isoformat(),
+        }
+
+@app.get("/api/v1/reports/assets", tags=["reports"])
+def report_assets():
+    """Asset register report data"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception: db.rollback(); return []
+        
+        summary = safe("""
+            SELECT count(*) as total,
+                   count(*) FILTER (WHERE status='Operational') as operational,
+                   count(*) FILTER (WHERE status='In Fault') as faulted,
+                   count(*) FILTER (WHERE status='Under Maintenance') as under_maintenance,
+                   count(DISTINCT category) as categories
+            FROM assets
+        """)
+        
+        by_category = safe("""
+            SELECT category, count(*) as total,
+                   count(*) FILTER (WHERE status='Operational') as operational,
+                   count(*) FILTER (WHERE status='In Fault') as faulted
+            FROM assets GROUP BY category ORDER BY total DESC
+        """)
+        
+        all_assets = safe("""
+            SELECT a.id, a.name, a.category, a.status, a.location,
+                   a.manufacturer, a.model, a.last_maintenance_date,
+                   count(wo.id) as total_wos,
+                   count(wo.id) FILTER (WHERE wo.priority='critical') as critical_wos
+            FROM assets a
+            LEFT JOIN work_orders wo ON wo.asset_id = a.id
+            GROUP BY a.id, a.name, a.category, a.status, a.location, a.manufacturer, a.model, a.last_maintenance_date
+            ORDER BY a.category, a.name
+        """)
+        
+        return {
+            "summary": summary[0] if summary else {},
+            "by_category": by_category,
+            "assets": all_assets,
+            "report_type": "assets",
+            "generated_at": __import__('datetime').datetime.now().isoformat(),
+        }
+
+@app.get("/api/v1/reports/daily-summary", tags=["reports"])
+def report_daily_summary():
+    """Daily operational summary"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from datetime import datetime, timedelta
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception: db.rollback(); return []
+        def safe_one(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else {}
+            except Exception: db.rollback(); return {}
+
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
+        
+        wo_today = safe_one("SELECT count(*) as created, count(*) FILTER (WHERE status='completed') as completed FROM work_orders WHERE DATE(created_at)=:d", {"d": str(today)})
+        wo_open = safe_one("SELECT count(*) as total, count(*) FILTER (WHERE priority='critical') as critical FROM work_orders WHERE status IN ('open','in_progress')", {})
+        pm_due = safe_one("SELECT count(*) as overdue, count(*) FILTER (WHERE next_due_ts BETWEEN NOW() AND NOW()+INTERVAL '7 days') as due_week FROM maintenance_plans WHERE next_due_ts IS NOT NULL", {})
+        finance = safe_one("SELECT count(*) as total_invoices, sum(total_amount) FILTER (WHERE status='paid') as collected, sum(total_amount) FILTER (WHERE status='pending') as pending FROM invoices", {})
+        alerts = safe("SELECT title, message, type FROM notifications WHERE is_read=false ORDER BY created_at DESC LIMIT 5", {})
+        
+        return {
+            "date": str(today),
+            "work_orders": {"created_today": wo_today.get("created",0), "completed_today": wo_today.get("completed",0), "open_total": wo_open.get("total",0), "critical_open": wo_open.get("critical",0)},
+            "maintenance": {"overdue_pms": pm_due.get("overdue",0), "due_this_week": pm_due.get("due_week",0)},
+            "finance": {"total_invoices": finance.get("total_invoices",0), "collected": float(finance.get("collected") or 0), "pending": float(finance.get("pending") or 0)},
+            "alerts": alerts,
+            "generated_at": datetime.now().isoformat(),
+        }
+
+@app.get("/api/v1/reports/contracts", tags=["reports"])
+def report_contracts():
+    """Contracts portfolio report"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from datetime import datetime, timedelta
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, params=None):
+            try:
+                rows = db.execute(text(q), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception: db.rollback(); return []
+        def safe_one(q, params=None):
+            try:
+                r = db.execute(text(q), params or {}).fetchone()
+                return dict(r._mapping) if r else {}
+            except Exception: db.rollback(); return {}
+        
+        summary = safe_one("""
+            SELECT count(*) as total,
+                   count(*) FILTER (WHERE status='active') as active,
+                   count(*) FILTER (WHERE status='expired') as expired,
+                   sum(total_value) FILTER (WHERE status='active') as active_value,
+                   count(*) FILTER (WHERE end_date BETWEEN NOW() AND NOW()+INTERVAL '30 days' AND status='active') as expiring_30d
+            FROM contracts
+        """)
+        
+        contracts = safe("""
+            SELECT id, title, client_name, status, total_value, start_date, end_date,
+                   EXTRACT(DAY FROM (end_date - NOW())) as days_remaining
+            FROM contracts ORDER BY status, end_date ASC LIMIT 50
+        """)
+        
+        return {
+            "summary": summary,
+            "contracts": contracts,
+            "report_type": "contracts",
+            "generated_at": datetime.now().isoformat(),
+        }
+
