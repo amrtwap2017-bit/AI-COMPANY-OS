@@ -2273,3 +2273,38 @@ def projects_portal(limit: int = 50):
             return [dict(r._mapping) for r in rows]
         except Exception: db.rollback(); return []
 
+@app.get("/api/v1/rfqs-portal", tags=["portal"], include_in_schema=False)
+def rfqs_portal(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM rfqs ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/goods-receipts-portal", tags=["portal"], include_in_schema=False)
+def goods_receipts_portal(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM goods_receipts ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/assets-portal", tags=["portal"], include_in_schema=False)
+def assets_v2_portal(limit: int = 100):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM assets ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []

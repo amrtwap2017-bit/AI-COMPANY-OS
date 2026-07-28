@@ -23,7 +23,7 @@ export default function AssetsPage() {
   const [critF,    setCritF]    = useState("all");
 
   const { data: raw, isLoading } = useQuery(
-    ["assets-list"], () => authFetch("/api/v1/assets/").then(r=>r.json()), {refetchInterval:120000}
+    ["assets-list"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()), {refetchInterval:120000}
   );
   const { data: twin } = useQuery(["assets-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
 

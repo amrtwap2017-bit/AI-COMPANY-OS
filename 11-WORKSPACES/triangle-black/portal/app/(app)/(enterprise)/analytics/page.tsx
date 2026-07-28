@@ -13,7 +13,7 @@ export default function AnalyticsHub() {
   const { data: twin }     = useQuery(["an-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
   const { data: woRaw }    = useQuery(["an-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const { data: invRaw }   = useQuery(["an-inv"],    () => authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: assetRaw } = useQuery(["an-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: assetRaw } = useQuery(["an-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()));
 
   const wos    = toArr(woRaw);
   const inv    = toArr(invRaw);

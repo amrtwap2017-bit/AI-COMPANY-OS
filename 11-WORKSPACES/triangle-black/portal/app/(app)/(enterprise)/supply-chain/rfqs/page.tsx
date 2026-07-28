@@ -10,7 +10,7 @@ const SC = { open:"#60A5FA", sent:"#A78BFA", received:"#FBBF24", closed:"#34D399
 export default function RFQsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const { data: rfqRaw, isLoading } = useQuery(["rfq-list"], () => authFetch("/api/v1/rfqs/").then(r=>r.json()));
+  const { data: rfqRaw, isLoading } = useQuery(["rfq-list"], () => authFetch("/api/v1/rfqs-portal").then(r=>r.json()));
   const rfqs = toArr(rfqRaw);
   const filtered = rfqs.filter(r => !search || (r.rfq_number||r.title||r.id||"").toLowerCase().includes(search.toLowerCase()));
   return (

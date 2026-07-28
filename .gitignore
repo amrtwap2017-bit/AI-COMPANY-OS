@@ -26,3 +26,9 @@ tasks/logs/
 tasks/
 tasks/**
 SPRINT_*_ANALYSIS.md
+backups/
+*.sql
+*.log
+__pycache__/
+.next/
+node_modules/

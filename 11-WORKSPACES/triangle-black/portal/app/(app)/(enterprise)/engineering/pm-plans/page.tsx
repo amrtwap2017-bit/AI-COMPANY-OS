@@ -8,7 +8,7 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 export default function EngineeringPMPlansPage() {
   const router = useRouter();
   const { data: pmRaw }    = useQuery(["epmp-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
-  const { data: assetRaw } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: assetRaw } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()));
   const pms = toArr(pmRaw); const assets = toArr(assetRaw);
   const now = new Date();
   const overdue = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function MaintenancePage() {
   const router = useRouter();
-  const { data: assetRaw } = useQuery(["maint-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: assetRaw } = useQuery(["maint-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()));
   const { data: pmRaw }    = useQuery(["maint-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
   const { data: woRaw }    = useQuery(["maint-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const assets = toArr(assetRaw); const pms = toArr(pmRaw); const wos = toArr(woRaw);
