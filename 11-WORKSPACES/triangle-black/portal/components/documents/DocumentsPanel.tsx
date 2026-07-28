@@ -67,7 +67,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
   );
 
   const deleteMut = useMutation(
-    (docId) => authFetch(`/api/v1/documents/${docId}`, { method: "DELETE" }).then(r=>r.json()),
+    (docId) => authFetch(`/api/v1/documents/v2/${docId}`, { method: "DELETE" }).then(r=>r.json()),
     { onSuccess: () => qc.invalidateQueries(["documents", entityType, entityId]) }
   );
 
@@ -86,7 +86,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
       fd.append("notes", form.notes);
       fd.append("uploaded_by", "amr@triangleblack.com");
       const token = localStorage.getItem("tb_token") || document.cookie.split("tb_token=")[1]?.split(";")[0] || "";
-      const r = await fetch("/api/v1/documents/upload", {
+      const r = await fetch("/api/v1/documents/v2/upload", {
         method: "POST", body: fd,
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });

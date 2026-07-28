@@ -3282,6 +3282,26 @@ def list_grns(limit: int = 50):
         except Exception as e:
             db.rollback(); return []
 
+
+
+@app.post("/api/v1/debug/upload-test", tags=["debug"], include_in_schema=False)
+async def debug_upload(request: Request):
+    """Debug endpoint to test multipart parsing"""
+    try:
+        ct = request.headers.get("content-type", "")
+        form = await request.form()
+        keys = list(form.keys())
+        file_obj = form.get("file")
+        return {
+            "content_type": ct,
+            "form_keys": keys,
+            "has_file": bool(file_obj),
+            "file_name": getattr(file_obj, "filename", None) if file_obj else None,
+            "status": "form parsed OK"
+        }
+    except Exception as e:
+        return {"error": str(e), "content_type": request.headers.get("content-type", "")}
+
 # ── SPRINT 248: UNIVERSAL DOCUMENT ATTACHMENT SYSTEM ─────────────────────────
 
 UPLOAD_BASE = "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/uploads"
@@ -3296,7 +3316,7 @@ DOC_CATEGORIES = {
     "grn": ["delivery_note","inspection_report","packing_list","other"],
 }
 
-@app.post("/api/v1/documents/upload", tags=["documents"])
+@app.post("/api/v1/documents/v2/upload", tags=["documents"])
 async def upload_document(request: Request):
     """Upload a document for any entity: vendor, purchase_orders_v2, sow, grn"""
     import os, uuid
@@ -3437,7 +3457,7 @@ def view_document(doc_id: str):
         except HTTPException: raise
         except Exception as e: raise HTTPException(500, str(e))
 
-@app.delete("/api/v1/documents/{doc_id}", tags=["documents"])
+@app.delete("/api/v1/documents/v2/{doc_id}", tags=["documents"])
 def delete_document(doc_id: str):
     import os
     from sqlalchemy import text, create_engine
