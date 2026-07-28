@@ -7,7 +7,22 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => {
+  if (!d || d === null || d === undefined) return "—";
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime()) || dt.getFullYear() < 1990) return "—";
+    return dt.toLocaleDateString("en-GB");
+  } catch { return "—"; }
+};
+const fmtDateTime = (d) => {
+  if (!d || d === null || d === undefined) return "—";
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime()) || dt.getFullYear() < 1990) return "—";
+    return dt.toLocaleString("en-GB", {dateStyle:"short",timeStyle:"short"});
+  } catch { return "—"; }
+};
 
 const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
 const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", resolved:"#34D399", closed:"#94A3B8", cancelled:"#64748B" };

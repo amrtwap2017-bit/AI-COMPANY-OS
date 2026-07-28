@@ -8,7 +8,22 @@ import { useRouter } from "next/navigation";
 import { CreateModal } from "@/components/ui/CreateModal";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => {
+  if (!d || d === null || d === undefined) return "—";
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime()) || dt.getFullYear() < 1990) return "—";
+    return dt.toLocaleDateString("en-GB");
+  } catch { return "—"; }
+};
+const fmtDateTime = (d) => {
+  if (!d || d === null || d === undefined) return "—";
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime()) || dt.getFullYear() < 1990) return "—";
+    return dt.toLocaleString("en-GB", {dateStyle:"short",timeStyle:"short"});
+  } catch { return "—"; }
+};
 
 const P_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"rgba(148,163,184,0.5)" };
 const S_COLOR  = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"rgba(148,163,184,0.4)" };

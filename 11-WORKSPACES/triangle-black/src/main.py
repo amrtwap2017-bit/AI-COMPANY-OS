@@ -3813,3 +3813,107 @@ def get_lead_portal_v2(lead_id: str):
         except HTTPException: raise
         except Exception as e:
             return {"error": str(e)}
+
+# ── SPRINT 251: UNIVERSAL DELETE ENDPOINTS ────────────────────────────────────
+
+@app.delete("/api/v1/work-orders/{wo_id}", tags=["operations"])
+def delete_work_order(wo_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            row = db.execute(text("SELECT id FROM work_orders WHERE id=:id"), {"id": wo_id}).fetchone()
+            if not row:
+                from fastapi import HTTPException; raise HTTPException(404, "Work order not found")
+            db.execute(text("DELETE FROM work_orders WHERE id=:id"), {"id": wo_id})
+            db.commit()
+            return {"status": "deleted", "id": wo_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.delete("/api/v1/service-requests/{sr_id}", tags=["operations"])
+def delete_service_request(sr_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("DELETE FROM service_requests WHERE id=:id"), {"id": sr_id})
+            db.commit()
+            return {"status": "deleted", "id": sr_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.delete("/api/v1/assets/{asset_id}", tags=["operations"])
+def delete_asset(asset_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("DELETE FROM assets WHERE id=:id"), {"id": asset_id})
+            db.commit()
+            return {"status": "deleted", "id": asset_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.delete("/api/v1/vendors/v2/{vendor_id}", tags=["procurement"])
+def delete_vendor(vendor_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("DELETE FROM vendors WHERE id=:id"), {"id": vendor_id})
+            db.commit()
+            return {"status": "deleted", "id": vendor_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.delete("/api/v1/scope-of-work/v2/{sow_id}", tags=["procurement"])
+def delete_sow(sow_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("DELETE FROM scope_of_work WHERE id=:id"), {"id": sow_id})
+            db.commit()
+            return {"status": "deleted", "id": sow_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.delete("/api/v1/supplier-invoices/v2/{invoice_id}", tags=["invoices"])
+def delete_invoice(invoice_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("DELETE FROM supplier_invoices WHERE id=:id"), {"id": invoice_id})
+            db.commit()
+            return {"status": "deleted", "id": invoice_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.delete("/api/v1/purchase-orders-v2/v2/{po_id}", tags=["procurement"])
+def delete_po(po_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("DELETE FROM po_line_items WHERE po_id=:id"), {"id": po_id})
+            db.execute(text("DELETE FROM purchase_orders_v2 WHERE id=:id"), {"id": po_id})
+            db.commit()
+            return {"status": "deleted", "id": po_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
