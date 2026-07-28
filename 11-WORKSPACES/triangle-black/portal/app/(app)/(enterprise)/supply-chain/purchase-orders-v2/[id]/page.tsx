@@ -34,7 +34,12 @@ export default function POv2DetailPage() {
     }).then(r=>r.json()),
     { onSuccess: () => { qc.invalidateQueries(["po-v2-detail",id]); setNewLine({...EMPTY_LINE}); setShowAddLine(false); }}
   );
-  if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading PO…</div></div>;
+  const deleteMut = useMutation(
+    () => authFetch(`/api/v1/purchase-orders-v2/v2/${id}`, { method: "DELETE" }),
+    { onSuccess: () => router.push("/supply-chain/purchase-orders-v2") }
+  );
+
+    if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading PO…</div></div>;
   if (!po || po.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">PO not found</div></div>;
   const sc = SC[po.status]||"#94A3B8";
   const lines = po.line_items || [];
@@ -56,6 +61,13 @@ export default function POv2DetailPage() {
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/purchase-orders-v2")} className="tb-btn-secondary">← PO List</button>
+            <button
+              onClick={()=>{ if(window.confirm("Delete this purchase order? This cannot be undone.")) deleteMut.mutate(); }}
+              disabled={deleteMut.isLoading}
+              className="tb-btn-secondary"
+              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
+            </button>
             <div className="flex gap-2 flex-wrap">
               {actions.map((a,i)=>(
                 <button key={i} onClick={()=>statusMut.mutate(a.status)} disabled={statusMut.isLoading}

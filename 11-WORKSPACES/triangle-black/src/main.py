@@ -3917,3 +3917,181 @@ def delete_po(po_id: str):
             return {"status": "deleted", "id": po_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
+
+# ── SPRINT 252: EXECUTIVE DASHBOARD ──────────────────────────────────────────
+
+@app.get("/api/v1/executive/dashboard", tags=["executive"])
+def executive_dashboard():
+    """Real-time executive KPIs for Triangle Black"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, p=None):
+            try:
+                r = db.execute(text(q), p or {}).fetchone()
+                return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        def safe_list(q, p=None):
+            try:
+                rows = db.execute(text(q), p or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except: db.rollback(); return []
+
+        # Work Orders KPIs
+        wo_summary = safe("""
+            SELECT
+              count(*) as total,
+              count(*) FILTER (WHERE status='open') as open_count,
+              count(*) FILTER (WHERE status='in_progress') as in_progress,
+              count(*) FILTER (WHERE status='completed') as completed,
+              count(*) FILTER (WHERE priority='critical' AND status != 'completed') as critical_open,
+              count(*) FILTER (WHERE due_date < NOW() AND status NOT IN ('completed','cancelled')) as overdue
+            FROM work_orders
+        """)
+
+        # Service Requests KPIs
+        sr_summary = safe("""
+            SELECT
+              count(*) as total,
+              count(*) FILTER (WHERE status='open') as open_count,
+              count(*) FILTER (WHERE urgency='critical') as critical,
+              count(*) FILTER (WHERE urgency='high') as high_urgency
+            FROM service_requests
+        """)
+
+        # Financial KPIs
+        invoice_summary = safe("""
+            SELECT
+              count(*) as total,
+              COALESCE(sum(total_amount),0) as total_value,
+              COALESCE(sum(balance_due),0) as outstanding,
+              COALESCE(sum(amount_paid),0) as collected,
+              count(*) FILTER (WHERE payment_status='unpaid') as unpaid_count,
+              count(*) FILTER (WHERE payment_status='paid') as paid_count,
+              count(*) FILTER (WHERE due_date < CURRENT_DATE AND payment_status != 'paid') as overdue_count
+            FROM supplier_invoices
+        """)
+
+        # Procurement KPIs
+        vendor_summary = safe("""
+            SELECT count(*) as total, count(*) FILTER (WHERE is_approved=true) as approved
+            FROM vendors
+        """)
+        po_summary = safe("""
+            SELECT
+              count(*) as total,
+              count(*) FILTER (WHERE status='pending_approval') as pending,
+              COALESCE(sum(total_amount),0) as total_value
+            FROM purchase_orders_v2
+        """)
+
+        # Project KPIs
+        project_summary = safe("""
+            SELECT
+              count(*) as total,
+              count(*) FILTER (WHERE status='active') as active,
+              COALESCE(sum(budget),0) as total_budget,
+              COALESCE(avg(completion_pct),0) as avg_completion
+            FROM projects
+        """)
+
+        # Asset KPIs
+        asset_summary = safe("""
+            SELECT
+              count(*) as total,
+              count(*) FILTER (WHERE status='operational') as operational,
+              count(*) FILTER (WHERE status='under_maintenance') as under_maintenance,
+              count(*) FILTER (WHERE next_maintenance_date < NOW()) as overdue_maintenance
+            FROM assets
+        """)
+
+        # Technician KPIs
+        tech_summary = safe("""
+            SELECT count(*) as total, count(*) FILTER (WHERE is_active=true) as active
+            FROM technicians
+        """)
+
+        # Critical Work Orders (top 5)
+        critical_wos = safe_list("""
+            SELECT wo.id, wo.title, wo.priority, wo.status, wo.due_date,
+                   t.name as technician_name, s.name as site_name
+            FROM work_orders wo
+            LEFT JOIN technicians t ON t.id = wo.technician_id
+            LEFT JOIN sites s ON s.id = wo.site_id
+            WHERE wo.priority = 'critical' AND wo.status != 'completed'
+            ORDER BY wo.created_at DESC LIMIT 5
+        """)
+
+        # Outstanding Invoices (top 3)
+        outstanding_invoices = safe_list("""
+            SELECT id, invoice_number, vendor_invoice_number, balance_due, due_date, status
+            FROM supplier_invoices
+            WHERE payment_status != 'paid' AND balance_due > 0
+            ORDER BY due_date ASC LIMIT 3
+        """)
+
+        # Recent Service Requests
+        recent_srs = safe_list("""
+            SELECT id, title, urgency, status, created_at,
+                   site_id
+            FROM service_requests
+            WHERE status = 'open'
+            ORDER BY CASE urgency WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
+                     created_at DESC
+            LIMIT 5
+        """)
+
+        # Assets needing maintenance
+        maintenance_due = safe_list("""
+            SELECT id, name, category, status, next_maintenance_date, site_id
+            FROM assets
+            WHERE next_maintenance_date < NOW() + INTERVAL '7 days'
+            ORDER BY next_maintenance_date ASC LIMIT 5
+        """)
+
+        # Revenue by month (last 6 months)
+        revenue_trend = safe_list("""
+            SELECT
+              DATE_TRUNC('month', created_at) as month,
+              COALESCE(sum(total_amount),0) as invoiced,
+              COALESCE(sum(amount_paid),0) as collected
+            FROM supplier_invoices
+            WHERE created_at > NOW() - INTERVAL '6 months'
+            GROUP BY DATE_TRUNC('month', created_at)
+            ORDER BY month
+        """)
+
+        return {
+            "generated_at": datetime.utcnow().isoformat(),
+            "operations": {
+                "work_orders": wo_summary,
+                "service_requests": sr_summary,
+                "assets": asset_summary,
+                "technicians": tech_summary,
+                "critical_work_orders": critical_wos,
+                "recent_service_requests": recent_srs,
+                "maintenance_due": maintenance_due,
+            },
+            "financial": {
+                "invoices": invoice_summary,
+                "vendors": vendor_summary,
+                "purchase_orders": po_summary,
+                "projects": project_summary,
+                "outstanding_invoices": outstanding_invoices,
+                "revenue_trend": revenue_trend,
+            },
+            "alerts": {
+                "critical_wos": wo_summary.get("critical_open", 0),
+                "overdue_wos": wo_summary.get("overdue", 0),
+                "overdue_invoices": invoice_summary.get("overdue_count", 0),
+                "maintenance_overdue": asset_summary.get("overdue_maintenance", 0),
+                "total_alerts": (
+                    (wo_summary.get("critical_open") or 0) +
+                    (wo_summary.get("overdue") or 0) +
+                    (invoice_summary.get("overdue_count") or 0)
+                ),
+            },
+        }

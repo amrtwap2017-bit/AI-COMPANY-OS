@@ -30,7 +30,12 @@ export default function VendorDetailPage() {
     }).then(r=>r.json()),
     { onSuccess: () => qc.invalidateQueries(["vendor-detail", id]) }
   );
-  if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading vendor…</div></div>;
+  const deleteMut = useMutation(
+    () => authFetch(`/api/v1/vendors/v2/${id}`, { method: "DELETE" }),
+    { onSuccess: () => router.push("/supply-chain/vendor-management") }
+  );
+
+    if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading vendor…</div></div>;
   if (!vendor || vendor.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">Vendor not found</div></div>;
   const pos = vendor.purchase_orders || [];
   const totalPOValue = pos.reduce((s,p)=>s+Number(p.total_amount||0),0);
@@ -40,6 +45,13 @@ export default function VendorDetailPage() {
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/vendor-management")} className="tb-btn-secondary">← Vendors</button>
+            <button
+              onClick={()=>{ if(window.confirm("Delete this vendor? This cannot be undone.")) deleteMut.mutate(); }}
+              disabled={deleteMut.isLoading}
+              className="tb-btn-secondary"
+              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
+            </button>
             {!vendor.is_approved && (
               <button onClick={()=>approveMut.mutate()} className="tb-btn-primary" style={{background:"#16A34A"}}>✓ Approve Vendor</button>
             )}

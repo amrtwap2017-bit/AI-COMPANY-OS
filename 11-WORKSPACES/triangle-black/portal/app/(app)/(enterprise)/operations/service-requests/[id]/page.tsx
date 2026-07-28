@@ -1,6 +1,6 @@
 "use client";
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
@@ -42,7 +42,12 @@ export default function ServiceRequestDetailPage() {
     { enabled: !!sr?.work_order_id }
   );
 
-  if (isLoading) return (
+  const deleteMut = useMutation(
+    () => authFetch(`/api/v1/service-requests/${id}`, { method: "DELETE" }),
+    { onSuccess: () => router.push("/operations/service-requests") }
+  );
+
+    if (isLoading) return (
     <div className="min-h-screen bg-base flex items-center justify-center">
       <div className="text-secondary text-sm animate-pulse">Loading...</div>
     </div>
@@ -54,6 +59,13 @@ export default function ServiceRequestDetailPage() {
         <div className="tb-empty-icon">🎫</div>
         <div className="tb-empty-title">Service request not found</div>
         <button onClick={() => router.push("/operations/service-requests")} className="tb-btn-primary mt-4">Back</button>
+        <button
+          onClick={()=>{ if(window.confirm("Delete this service request? This cannot be undone.")) deleteMut.mutate(); }}
+          disabled={deleteMut.isLoading}
+          className="tb-btn-secondary"
+          style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+          {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
+        </button>
       </div>
     </div>
   );

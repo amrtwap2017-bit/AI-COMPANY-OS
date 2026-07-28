@@ -37,7 +37,12 @@ export default function InvoiceDetailPage() {
     }).then(r=>r.json()),
     { onSuccess: () => { qc.invalidateQueries(["invoice-detail",id]); setShowPay(false); setPayForm({amount:"",method:"bank_transfer",reference:"",notes:""}); }}
   );
-  if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary animate-pulse">Loading invoice…</div></div>;
+  const deleteMut = useMutation(
+    () => authFetch(`/api/v1/supplier-invoices/v2/${id}`, { method: "DELETE" }),
+    { onSuccess: () => router.push("/supply-chain/invoices") }
+  );
+
+    if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary animate-pulse">Loading invoice…</div></div>;
   if (!inv || inv.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">Invoice not found</div></div>;
   const sc = SC[inv.status]||"#94A3B8";
   const mc = MC[inv.match_result]||"#94A3B8";
@@ -50,6 +55,13 @@ export default function InvoiceDetailPage() {
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/invoices")} className="tb-btn-secondary">← Invoices</button>
+            <button
+              onClick={()=>{ if(window.confirm("Delete this invoice? This cannot be undone.")) deleteMut.mutate(); }}
+              disabled={deleteMut.isLoading}
+              className="tb-btn-secondary"
+              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
+            </button>
             <div className="flex gap-2 flex-wrap">
               {(inv.status==="submitted"||inv.status==="matching") && (
                 <button onClick={()=>matchMut.mutate()} disabled={matchMut.isLoading} className="tb-btn-primary" style={{background:"#7C3AED",fontSize:"0.75rem"}}>
