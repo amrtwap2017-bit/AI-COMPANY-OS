@@ -61,7 +61,7 @@ export default function ScopeOfWorkPage() {
                 return (
                   <button key={i} onClick={()=>router.push("/supply-chain/scope-of-work/"+s.id)} className="tb-table-row" style={{gridTemplateColumns:"1fr 90px 100px 120px 110px 100px"}}>
                     <div className="min-w-0 pr-4"><div className="text-sm font-semibold text-primary truncate">{s.title}</div><div className="text-xs text-tertiary">{s.sow_number||"—"}</div></div>
-                    <div className="text-center"><span className="tb-badge" style={{fontSize:"0.5625rem"}}>{s.type||"service"}</span></div>
+                    <div className="text-center"><span className="tb-badge" style={{fontSize:"0.5625rem"}}>{s.sow_type||"service"}</span></div>
                     <div className="text-center"><span className="tb-badge" style={{background:sc+"18",color:sc,border:"1px solid "+sc+"30",fontSize:"0.5625rem"}}>{(s.status||"").replace("_"," ")}</span></div>
                     <div className="text-center text-xs text-secondary truncate px-1">{s.client_name||"—"}</div>
                     <div className="text-center text-sm font-bold text-emerald-400">{fmtEGP(s.total_cost||0)}</div>
