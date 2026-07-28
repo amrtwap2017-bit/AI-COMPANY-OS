@@ -109,6 +109,35 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# ── SPRINT 232: RATE LIMITING ─────────────────────────────────────────────────
+import time
+from collections import defaultdict
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+_req_counts: dict = defaultdict(list)
+RATE_LIMIT_MAX = 200
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        _req_counts[ip] = [t for t in _req_counts[ip] if t > now - 60]
+        if len(_req_counts[ip]) >= RATE_LIMIT_MAX:
+            return JSONResponse(status_code=429,
+                content={"detail": f"Rate limit: {RATE_LIMIT_MAX} req/min exceeded"})
+        _req_counts[ip].append(now)
+        response = await call_next(request)
+        remaining = max(0, RATE_LIMIT_MAX - len(_req_counts[ip]))
+        response.headers["X-RateLimit-Limit"] = str(RATE_LIMIT_MAX)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        return response
+
+app.add_middleware(RateLimitMiddleware)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 # Attach rate limiter if available
 if RATE_LIMITING:
     app.state.limiter = limiter
