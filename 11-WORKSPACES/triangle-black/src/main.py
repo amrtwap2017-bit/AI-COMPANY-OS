@@ -2357,19 +2357,22 @@ def get_current_user_info(request: Request):
         eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
         with Session(eng) as db:
             role_row = db.execute(text("SELECT role FROM user_roles WHERE user_id=:uid LIMIT 1"), {"uid": user_id}).fetchone()
-            role = role_row[0] if role_row else "viewer"
-            perms = db.execute(text("""
-                SELECT p.resource, p.action FROM role_permissions rp
-                JOIN permissions p ON p.id = rp.permission_id
-                JOIN roles r ON r.id = rp.role_id
-                WHERE r.name = :role
-            """), {"role": role}).fetchall()
+            role = str(role_row[0]) if role_row else "viewer"
+            perms = db.execute(text(
+                "SELECT p.resource, p.action FROM role_permissions rp "
+                "JOIN permissions p ON p.id = rp.permission_id "
+                "JOIN roles r ON r.id = rp.role_id "
+                "WHERE r.name = :role"
+            ), {"role": role}).fetchall()
+            is_admin = (role == "admin")
             return {
-                "user_id": user_id,
-                "email": email,
+                "user_id": str(user_id),
+                "email": str(email),
                 "role": role,
-                "permissions": [{"resource": row[0], "action": row[1]} for row in perms],
-                "is_admin": role == "admin",
+                "permissions": [{"resource": str(row[0]), "action": str(row[1])} for row in perms],
+                "is_admin": is_admin,
+                "can_write": role in ("admin", "manager", "engineer", "finance"),
+                "can_read_finance": role in ("admin", "manager", "finance"),
             }
     except Exception as e:
         return {"user_id": "", "email": "", "role": "viewer", "permissions": [], "is_admin": False}

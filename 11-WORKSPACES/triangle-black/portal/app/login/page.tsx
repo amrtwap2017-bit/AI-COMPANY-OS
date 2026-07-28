@@ -24,6 +24,19 @@ export default function LoginPage() {
       if (data.access_token) {
         if (typeof window !== "undefined") {
           localStorage.setItem("tb_token", data.access_token);
+          localStorage.setItem("tb_access_token", data.access_token);
+          // Fetch user role and store it
+          try {
+            const meRes = await fetch("/api/v1/auth/me", {
+              headers: { "Authorization": "Bearer " + data.access_token }
+            });
+            if (meRes.ok) {
+              const meData = await meRes.json();
+              localStorage.setItem("tb_user_role", meData.role || "viewer");
+              localStorage.setItem("tb_user_email", meData.email || "");
+              localStorage.setItem("tb_is_admin", String(meData.is_admin || false));
+            }
+          } catch(e) {}
           document.cookie = "tb_token=" + data.access_token + "; path=/; max-age=86400";
           document.cookie = "tb_access_token=" + data.access_token + "; path=/; max-age=86400";
         }
