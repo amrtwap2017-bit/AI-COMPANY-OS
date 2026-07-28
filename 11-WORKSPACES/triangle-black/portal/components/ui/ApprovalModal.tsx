@@ -16,8 +16,8 @@ interface ApprovalModalProps {
 
 const ENDPOINTS: Record<string, { approve: string; reject: string }> = {
   purchase_request: {
-    approve: (id: string) => `/api/v1/purchase-requests/${id}/approve`,
-    reject:  (id: string) => `/api/v1/purchase-requests/${id}/reject`,
+    approve: (id: string) => `/api/v1/purchase-requests-portal${id}/approve`,
+    reject:  (id: string) => `/api/v1/purchase-requests-portal${id}/reject`,
   },
   work_order: {
     approve: (id: string) => `/api/v1/work-orders/${id}/transition`,
@@ -40,7 +40,7 @@ export function ApprovalModal({
   const approve = useMutation({
     mutationFn: () => authFetch(
       entityType === "purchase_request"
-        ? `/api/v1/purchase-requests/${entityId}/approve`
+        ? `/api/v1/purchase-requests-portal${entityId}/approve`
         : entityType === "project"
           ? `/api/v1/projects/${entityId}/transition`
           : `/api/v1/work-orders/${entityId}/transition`,
@@ -64,7 +64,7 @@ export function ApprovalModal({
   const reject = useMutation({
     mutationFn: () => authFetch(
       entityType === "purchase_request"
-        ? `/api/v1/purchase-requests/${entityId}/reject`
+        ? `/api/v1/purchase-requests-portal${entityId}/reject`
         : entityType === "project"
           ? `/api/v1/projects/${entityId}/transition`
           : `/api/v1/work-orders/${entityId}/transition`,
