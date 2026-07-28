@@ -2235,3 +2235,41 @@ def inventory_items_portal(limit: int = 200):
             db.rollback()
             return []
 
+# ── SPRINT 230: SITES / WAREHOUSES / PROJECTS PORTAL ENDPOINTS ──
+
+@app.get("/api/v1/sites-portal", tags=["portal"], include_in_schema=False)
+def sites_portal(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM sites ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/warehouses-portal", tags=["portal"], include_in_schema=False)
+def warehouses_portal(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM warehouses ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/projects-portal", tags=["portal"], include_in_schema=False)
+def projects_portal(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM projects ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+

@@ -8,7 +8,7 @@ export default function SiteDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
-  const { data: siteRaw, isLoading } = useQuery(["site-d", id], () => authFetch("/api/v1/sites/").then(r=>r.json()), { enabled: !!id });
+  const { data: siteRaw, isLoading } = useQuery(["site-d", id], () => authFetch("/api/v1/sites-portal").then(r=>r.json()), { enabled: !!id });
   const { data: assetRaw } = useQuery(["site-d-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
   const sites = toArr(siteRaw); const assets = toArr(assetRaw);
   const site = sites.find(s=>s.id===id)||sites[0];

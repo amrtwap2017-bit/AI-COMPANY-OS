@@ -25,7 +25,7 @@ export default function InventoryPage() {
   );
   const { data: whRaw } = useQuery(
     ["inv-wh"],
-    () => authFetch("/api/v1/warehouses/").then(r => r.json())
+    () => authFetch("/api/v1/warehouses-portal").then(r => r.json())
   );
 
   const items  = toArr(itemRaw);

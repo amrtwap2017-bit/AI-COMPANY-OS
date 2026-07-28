@@ -9,7 +9,7 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 export default function PortfolioPage() {
   const router = useRouter();
   const { data: contRaw } = useQuery(["pf-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: projRaw } = useQuery(["pf-projs"], () => authFetch("/api/v1/projects/").then(r=>r.json()));
+  const { data: projRaw } = useQuery(["pf-projs"], () => authFetch("/api/v1/projects-portal").then(r=>r.json()));
   const { data: invRaw }  = useQuery(["pf-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
   const contracts = toArr(contRaw); const projects = toArr(projRaw); const inv = toArr(invRaw);
   const activeContracts = contracts.filter(c=>c.status==="active");

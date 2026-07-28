@@ -9,7 +9,7 @@ export default function HotelDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
-  const { data: siteRaw, isLoading } = useQuery(["hotel-d", id], () => authFetch("/api/v1/sites/").then(r=>r.json()));
+  const { data: siteRaw, isLoading } = useQuery(["hotel-d", id], () => authFetch("/api/v1/sites-portal").then(r=>r.json()));
   const { data: assetRaw } = useQuery(["hotel-d-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
   const { data: ctRaw } = useQuery(["hotel-d-cts"], () => authFetch("/api/v1/contracts-portal").then(r=>r.json()));
   const sites = toArr(siteRaw); const assets = toArr(assetRaw); const contracts = toArr(ctRaw);

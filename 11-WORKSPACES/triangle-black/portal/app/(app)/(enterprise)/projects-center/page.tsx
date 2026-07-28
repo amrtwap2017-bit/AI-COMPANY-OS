@@ -19,7 +19,7 @@ export default function ProjectsCenterPage() {
   const [search,   setSearch]   = useState("");
   const [statusF,  setStatusF]  = useState("all");
 
-  const { data: raw, isLoading } = useQuery(["proj-list"], () => authFetch("/api/v1/projects/").then(r=>r.json()));
+  const { data: raw, isLoading } = useQuery(["proj-list"], () => authFetch("/api/v1/projects-portal").then(r=>r.json()));
   const { data: woRaw } = useQuery(["proj-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
 
   const projects = toArr(raw);

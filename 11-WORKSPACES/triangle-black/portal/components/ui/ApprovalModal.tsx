@@ -24,8 +24,8 @@ const ENDPOINTS: Record<string, { approve: string; reject: string }> = {
     reject:  (id: string) => `/api/v1/work-orders/${id}/transition`,
   },
   project: {
-    approve: (id: string) => `/api/v1/projects/${id}/transition`,
-    reject:  (id: string) => `/api/v1/projects/${id}/transition`,
+    approve: (id: string) => `/api/v1/projects-portal${id}/transition`,
+    reject:  (id: string) => `/api/v1/projects-portal${id}/transition`,
   },
 };
 
@@ -42,7 +42,7 @@ export function ApprovalModal({
       entityType === "purchase_request"
         ? `/api/v1/purchase-requests-portal${entityId}/approve`
         : entityType === "project"
-          ? `/api/v1/projects/${entityId}/transition`
+          ? `/api/v1/projects-portal${entityId}/transition`
           : `/api/v1/work-orders/${entityId}/transition`,
       {
         method: "POST",
@@ -66,7 +66,7 @@ export function ApprovalModal({
       entityType === "purchase_request"
         ? `/api/v1/purchase-requests-portal${entityId}/reject`
         : entityType === "project"
-          ? `/api/v1/projects/${entityId}/transition`
+          ? `/api/v1/projects-portal${entityId}/transition`
           : `/api/v1/work-orders/${entityId}/transition`,
       {
         method: "POST",
