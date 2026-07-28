@@ -43,7 +43,7 @@ export function EnterpriseTopbar() {
   useEffect(() => {
     const token = tokenManager.getToken() || "";
     if (!token) return;
-    authFetch("/api/v1/notifications/?limit=20", {
+    authFetch("/api/v1/notifications-portal?limit=20", {
       redirect: "follow",
       headers: { Authorization: "Bearer " + token }
     })

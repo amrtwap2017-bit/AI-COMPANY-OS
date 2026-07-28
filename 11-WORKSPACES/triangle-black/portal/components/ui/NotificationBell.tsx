@@ -23,13 +23,13 @@ export function NotificationBell() {
 
   const { data: count = {} } = useQuery({
     queryKey: ["notif-count"],
-    queryFn: () => authFetch("/api/v1/notifications/live/count").then(r => r.json()),
+    queryFn: () => authFetch("/api/v1/notifications-portal?limit=1").then(r => r.json()),
     refetchInterval: 30000,
   });
 
   const { data: notifs = {}, refetch } = useQuery({
     queryKey: ["notif-list"],
-    queryFn: () => authFetch("/api/v1/notifications/live/").then(r => r.json()),
+    queryFn: () => authFetch("/api/v1/notifications-portal").then(r => r.json()),
     enabled: isOpen,
     refetchInterval: isOpen ? 30000 : false,
   });
