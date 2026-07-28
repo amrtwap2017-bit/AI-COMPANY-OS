@@ -2340,7 +2340,7 @@ def assets_v2_portal(limit: int = 100):
 
 # ── PHASE B SPRINT 233: RBAC ENDPOINTS ───────────────────────────────────────
 
-@app.get("/api/v1/auth/me", tags=["auth"])
+@app.get("/api/v1/me", tags=["auth"])
 def get_current_user_info(request: Request):
     """Return current user info including role and permissions"""
     import base64 as _b64

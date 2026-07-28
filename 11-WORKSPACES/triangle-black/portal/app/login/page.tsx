@@ -27,7 +27,7 @@ export default function LoginPage() {
           localStorage.setItem("tb_access_token", data.access_token);
           // Fetch user role and store it
           try {
-            const meRes = await fetch("/api/v1/auth/me", {
+            const meRes = await fetch("/api/v1/me", {
               headers: { "Authorization": "Bearer " + data.access_token }
             });
             if (meRes.ok) {
