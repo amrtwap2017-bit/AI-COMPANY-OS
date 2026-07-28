@@ -1,0 +1,35 @@
+name: Triangle Black CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Syntax check backend
+        run: |
+          cd 11-WORKSPACES/triangle-black
+          python3 -m py_compile src/main.py
+          echo "✅ Backend syntax OK"
+
+  portal-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install and build portal
+        run: |
+          cd 11-WORKSPACES/triangle-black/portal
+          npm ci --prefer-offline 2>/dev/null || npm install
+          node node_modules/.bin/next build
+          echo "✅ Portal build OK"
