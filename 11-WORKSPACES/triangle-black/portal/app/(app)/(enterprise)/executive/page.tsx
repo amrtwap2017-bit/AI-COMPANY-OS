@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { RoleBadge } from "@/components/ui/RoleBadge";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -64,6 +65,7 @@ export default function ExecutivePage() {
             <div>
               <div className="text-label-upper text-purple-400 mb-1.5">Executive Center</div>
               <h1 className="tb-hero-title">Executive Dashboard</h1>
+              <div style={{marginTop:6}}><RoleBadge size="md"/></div>
               <p className="tb-hero-description">Real-time business intelligence and decision support</p>
             </div>
             <div className="flex items-center gap-4">
