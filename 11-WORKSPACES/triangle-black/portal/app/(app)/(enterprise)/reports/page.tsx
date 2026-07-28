@@ -102,9 +102,12 @@ export default function ReportsPage() {
               <p className="tb-hero-description">12 report types across Operations, Financial, Procurement, Engineering</p>
             </div>
             {selectedReport && reportRows.length > 0 && (
+              <div className="flex gap-2">
               <button onClick={exportCSV} className="tb-btn-primary" style={{background:"#16A34A",fontSize:"0.75rem"}}>
                 ↓ Export CSV ({reportRows.length} rows)
               </button>
+              <a href={selectedReport ? `/api/v1/pdf/report/${selectedReport}` : "#"} target="_blank" className="tb-btn-secondary" style={{fontSize:"0.75rem",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}}>📄 PDF</a>
+              </div>
             )}
           </div>
           {/* Category Filter */}

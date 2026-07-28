@@ -54,6 +54,7 @@ export default function WorkOrderDetailPage() {
         <div className="tb-empty-icon">🔧</div>
         <div className="tb-empty-title">Work order not found</div>
         <button onClick={() => router.push("/operations/work-orders")} className="tb-btn-primary mt-4">Back</button>
+            <a href={`/api/v1/pdf/work-order/${id}`} target="_blank" rel="noopener noreferrer" className="tb-btn-secondary" style={{fontSize:"0.75rem",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}}>📄 Export PDF</a>
         <button
               onClick={()=>{ if(confirm("Delete this work order? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}

@@ -4540,3 +4540,534 @@ def generate_report(
         else:
             from fastapi import HTTPException
             raise HTTPException(404, f"Report type '{report_type}' not found. Use /api/v1/reports/catalog to see available reports.")
+
+# ── SPRINT 254: PDF REPORT EXPORT ENGINE ─────────────────────────────────────
+
+def _tb_pdf_header(c, doc_title, doc_subtitle="", doc_number=""):
+    """Draw Triangle Black branded header on PDF page"""
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    W = 210*mm
+    # Dark header bar
+    c.setFillColor(colors.HexColor("#0F172A"))
+    c.rect(0, 267*mm, W, 30*mm, fill=1, stroke=0)
+    # Company name
+    c.setFillColor(colors.HexColor("#F59E0B"))
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(15*mm, 281*mm, "TRIANGLE BLACK")
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 8)
+    c.drawString(15*mm, 275*mm, "Engineering Services — MEP & Facilities Management")
+    # Doc number top right
+    if doc_number:
+        c.setFillColor(colors.HexColor("#60A5FA"))
+        c.setFont("Helvetica-Bold", 10)
+        c.drawRightString(W-15*mm, 281*mm, doc_number)
+    # Document title bar
+    c.setFillColor(colors.HexColor("#1E293B"))
+    c.rect(0, 253*mm, W, 14*mm, fill=1, stroke=0)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 13)
+    c.drawString(15*mm, 257*mm, doc_title)
+    if doc_subtitle:
+        c.setFillColor(colors.HexColor("#94A3B8"))
+        c.setFont("Helvetica", 9)
+        c.drawRightString(W-15*mm, 257*mm, doc_subtitle)
+
+def _tb_pdf_footer(c, page_num=1):
+    """Draw footer on PDF page"""
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from datetime import datetime
+    W = 210*mm
+    c.setFillColor(colors.HexColor("#1E293B"))
+    c.rect(0, 0, W, 12*mm, fill=1, stroke=0)
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 7)
+    c.drawString(15*mm, 4*mm, f"Generated: {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC — Triangle Black Engineering Services")
+    c.drawRightString(W-15*mm, 4*mm, f"Page {page_num} | CONFIDENTIAL")
+
+def _draw_kv_row(c, y, label, value, label_w=60, page_w=210, mm=None):
+    """Draw a key-value row"""
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm as _mm
+    mm = mm or _mm
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 8)
+    c.drawString(15*mm, y, label)
+    c.setFillColor(colors.HexColor("#E2E8F0"))
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString((15+label_w)*mm, y, str(value) if value else "—")
+
+def _draw_table(c, headers, rows, col_widths, y_start, row_h=7, mm=None):
+    """Draw a data table, returns final y position"""
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm as _mm
+    mm = mm or _mm
+    x_start = 15*mm
+    # Header row
+    c.setFillColor(colors.HexColor("#1E3A5F"))
+    c.rect(x_start, y_start, sum(w*mm for w in col_widths), row_h*mm, fill=1, stroke=0)
+    x = x_start
+    for i, (hdr, w) in enumerate(zip(headers, col_widths)):
+        c.setFillColor(colors.HexColor("#60A5FA"))
+        c.setFont("Helvetica-Bold", 7)
+        c.drawString(x+2*mm, y_start+2*mm, str(hdr)[:int(w*1.4)])
+        x += w*mm
+    y = y_start - row_h*mm
+    for ri, row in enumerate(rows):
+        if y < 20*mm:
+            break
+        bg = "#0F172A" if ri%2==0 else "#1E293B"
+        c.setFillColor(colors.HexColor(bg))
+        c.rect(x_start, y, sum(w*mm for w in col_widths), row_h*mm, fill=1, stroke=0)
+        x = x_start
+        for val, w in zip(row, col_widths):
+            c.setFillColor(colors.HexColor("#E2E8F0"))
+            c.setFont("Helvetica", 7)
+            s = str(val) if val is not None else "—"
+            if len(s) > int(w*1.4): s = s[:int(w*1.4)-1]+"…"
+            c.drawString(x+2*mm, y+2*mm, s)
+            x += w*mm
+        y -= row_h*mm
+    return y
+
+
+@app.get("/api/v1/pdf/purchase-order/{po_id}", tags=["pdf"])
+def pdf_purchase_order(po_id: str):
+    """Generate PDF for a Purchase Order"""
+    import os, io
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        po = db.execute(text("""
+            SELECT po.*, v.company_name as vendor_name, v.email as vendor_email,
+                   v.phone as vendor_phone, v.city as vendor_city
+            FROM purchase_orders_v2 po LEFT JOIN vendors v ON v.id=po.vendor_id
+            WHERE po.id=:id
+        """), {"id": po_id}).fetchone()
+        if not po: raise HTTPException(404, "PO not found")
+        lines = db.execute(text("SELECT * FROM po_line_items WHERE po_id=:id ORDER BY line_number"), {"id": po_id}).fetchall()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(210*mm, 297*mm))
+    po = dict(po._mapping)
+    line_list = [dict(l._mapping) for l in lines]
+    _tb_pdf_header(c, "PURCHASE ORDER", f"Status: {po.get('status','').upper()}", po.get('po_number','—'))
+    _tb_pdf_footer(c)
+    # PO Details
+    y = 248*mm
+    details = [
+        ("PO Number:", po.get('po_number','—')),
+        ("Title:", po.get('title','—')),
+        ("Vendor:", po.get('vendor_name','—')),
+        ("Vendor Email:", po.get('vendor_email','—')),
+        ("Currency:", po.get('currency','EGP')),
+        ("Payment Terms:", f"{po.get('payment_terms',30)} days"),
+        ("Status:", po.get('status','—')),
+        ("Approved By:", po.get('approved_by','—')),
+        ("Created:", str(po.get('created_at','—'))[:10]),
+        ("Delivery Date:", str(po.get('delivery_date','—'))[:10]),
+    ]
+    for label, val in details:
+        _draw_kv_row(c, y, label, val)
+        y -= 7*mm
+    # Line Items Table
+    y -= 5*mm
+    c.setFillColor(colors.HexColor("#F59E0B"))
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(15*mm, y, "LINE ITEMS")
+    y -= 5*mm
+    headers = ["#","Description","Unit","Qty","Unit Price","VAT%","Total"]
+    col_widths = [10,65,15,15,20,15,20]
+    rows = []
+    for l in line_list:
+        rows.append([l.get('line_number','—'), l.get('description','—')[:45], l.get('unit','unit'),
+                     f"{float(l.get('quantity',0)):,.3f}", f"EGP {float(l.get('unit_price',0)):,.2f}",
+                     f"{float(l.get('vat_pct',14))}%", f"EGP {float(l.get('total_amount',0)):,.2f}"])
+    y = _draw_table(c, headers, rows, col_widths, y)
+    # Totals
+    y -= 5*mm
+    totals = [
+        ("Subtotal:", f"EGP {float(po.get('subtotal',0)):,.2f}"),
+        ("VAT:", f"EGP {float(po.get('vat_amount',0)):,.2f}"),
+        ("GRAND TOTAL:", f"EGP {float(po.get('total_amount',0)):,.2f}"),
+    ]
+    for label, val in totals:
+        c.setFillColor(colors.HexColor("#1E293B"))
+        c.rect(130*mm, y-1*mm, 65*mm, 7*mm, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor("#94A3B8"))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(132*mm, y+1*mm, label)
+        c.setFillColor(colors.HexColor("#34D399") if label=="GRAND TOTAL:" else colors.HexColor("#E2E8F0"))
+        c.drawRightString(193*mm, y+1*mm, val)
+        y -= 8*mm
+    c.save()
+    buf.seek(0)
+    fname = f"PO_{po.get('po_number','unknown')}_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
+    return Response(content=buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})
+
+
+@app.get("/api/v1/pdf/invoice/{invoice_id}", tags=["pdf"])
+def pdf_invoice(invoice_id: str):
+    """Generate PDF for a Supplier Invoice"""
+    import os, io
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        inv = db.execute(text("""
+            SELECT si.*, v.company_name as vendor_name, v.email as vendor_email, v.vendor_code
+            FROM supplier_invoices si LEFT JOIN vendors v ON v.id=si.vendor_id WHERE si.id=:id
+        """), {"id": invoice_id}).fetchone()
+        if not inv: raise HTTPException(404, "Invoice not found")
+        payments = db.execute(text("SELECT * FROM invoice_payments WHERE invoice_id=:id ORDER BY payment_date"), {"id": invoice_id}).fetchall()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(210*mm, 297*mm))
+    inv = dict(inv._mapping)
+    pmts = [dict(p._mapping) for p in payments]
+    mc = {"matched":"#34D399","mismatch":"#F87171","partial":"#FBBF24","pending":"#94A3B8"}.get(inv.get("match_result","pending"),"#94A3B8")
+    _tb_pdf_header(c, "SUPPLIER INVOICE", f"Match: {inv.get('match_result','pending').upper()}", inv.get('invoice_number','—'))
+    _tb_pdf_footer(c)
+    y = 248*mm
+    details = [
+        ("Invoice No.:", inv.get('invoice_number','—')),
+        ("Vendor Invoice:", inv.get('vendor_invoice_number','—')),
+        ("Vendor:", inv.get('vendor_name','—')),
+        ("Invoice Date:", str(inv.get('invoice_date','—'))[:10]),
+        ("Due Date:", str(inv.get('due_date','—'))[:10]),
+        ("Currency:", inv.get('currency','EGP')),
+        ("Status:", inv.get('status','—')),
+        ("Payment Status:", inv.get('payment_status','—')),
+        ("Match Result:", inv.get('match_result','—')),
+        ("Approved By:", inv.get('approved_by','—')),
+    ]
+    for label, val in details:
+        _draw_kv_row(c, y, label, val)
+        y -= 7*mm
+    y -= 5*mm
+    c.setFillColor(colors.HexColor("#F59E0B"))
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(15*mm, y, "FINANCIAL SUMMARY")
+    y -= 5*mm
+    fin = [
+        ("Subtotal:", f"EGP {float(inv.get('subtotal',0) or 0):,.2f}"),
+        (f"VAT ({inv.get('vat_pct',14)}%):", f"EGP {float(inv.get('vat_amount',0) or 0):,.2f}"),
+        ("Total Amount:", f"EGP {float(inv.get('total_amount',0) or 0):,.2f}"),
+        ("Amount Paid:", f"EGP {float(inv.get('amount_paid',0) or 0):,.2f}"),
+        ("Balance Due:", f"EGP {float(inv.get('balance_due',0) or 0):,.2f}"),
+    ]
+    for label, val in fin:
+        is_total = "Balance" in label or "Total Amount" in label
+        c.setFillColor(colors.HexColor("#1E293B"))
+        c.rect(15*mm, y-1*mm, 180*mm, 7*mm, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor("#94A3B8"))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(17*mm, y+1*mm, label)
+        c.setFillColor(colors.HexColor("#34D399") if is_total else colors.HexColor("#E2E8F0"))
+        c.setFont("Helvetica-Bold" if is_total else "Helvetica", 8)
+        c.drawRightString(193*mm, y+1*mm, val)
+        y -= 8*mm
+    if pmts:
+        y -= 5*mm
+        c.setFillColor(colors.HexColor("#F59E0B"))
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(15*mm, y, "PAYMENT HISTORY")
+        y -= 5*mm
+        ph = ["Date","Method","Reference","Amount"]
+        pw = [30,40,60,30]
+        pr = [[str(p.get('payment_date','—'))[:10], p.get('payment_method','—').replace('_',' '),
+               p.get('reference_number','—'), f"EGP {float(p.get('amount',0)):,.2f}"] for p in pmts]
+        _draw_table(c, ph, pr, pw, y)
+    c.save()
+    buf.seek(0)
+    fname = f"INV_{inv.get('invoice_number','unknown')}_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
+    return Response(content=buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})
+
+
+@app.get("/api/v1/pdf/scope-of-work/{sow_id}", tags=["pdf"])
+def pdf_sow(sow_id: str):
+    """Generate PDF for a Scope of Work / BOQ"""
+    import os, io
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        sow = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
+        if not sow: raise HTTPException(404, "SOW not found")
+        items = db.execute(text("SELECT * FROM boq_items WHERE sow_id=:id ORDER BY item_number"), {"id": sow_id}).fetchall()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(210*mm, 297*mm))
+    sow = dict(sow._mapping)
+    boq = [dict(i._mapping) for i in items]
+    _tb_pdf_header(c, "SCOPE OF WORK", f"Type: {sow.get('type','—').upper()}", sow.get('sow_number','—'))
+    _tb_pdf_footer(c)
+    y = 248*mm
+    for label, val in [
+        ("SOW Number:", sow.get('sow_number','—')),
+        ("Title:", sow.get('title','—')),
+        ("Client:", sow.get('client_name','—')),
+        ("Type:", sow.get('type','—')),
+        ("Status:", sow.get('status','—')),
+        ("Currency:", sow.get('currency','EGP')),
+        ("Estimated Days:", str(sow.get('estimated_days',0))),
+        ("Prepared By:", sow.get('prepared_by','—')),
+        ("Approved By:", sow.get('approved_by','—')),
+    ]:
+        _draw_kv_row(c, y, label, val)
+        y -= 7*mm
+    y -= 5*mm
+    c.setFillColor(colors.HexColor("#F59E0B"))
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(15*mm, y, "BILL OF QUANTITIES")
+    y -= 5*mm
+    bh = ["#","Description","Unit","Qty","Unit Rate","Total"]
+    bw = [10,70,15,15,25,25]
+    br = []
+    boq_subtotal = 0
+    for item in boq:
+        t_amt = float(item.get('total_amount',0) or 0)
+        boq_subtotal += t_amt
+        br.append([item.get('item_number','—'), item.get('description','—')[:50],
+                   item.get('unit','unit'), f"{float(item.get('quantity',0)):,.3f}",
+                   f"EGP {float(item.get('unit_rate',0)):,.2f}", f"EGP {t_amt:,.2f}"])
+    y = _draw_table(c, bh, br, bw, y)
+    y -= 5*mm
+    overhead = boq_subtotal * (float(sow.get('overhead_pct',15) or 15)/100)
+    profit = (boq_subtotal+overhead) * (float(sow.get('profit_margin_pct',10) or 10)/100)
+    labor = float(sow.get('labor_cost',0) or 0)
+    grand_total = float(sow.get('total_cost',0) or (boq_subtotal+overhead+profit+labor))
+    for label, val in [
+        ("BOQ Subtotal:", f"EGP {boq_subtotal:,.2f}"),
+        (f"Labor Cost:", f"EGP {labor:,.2f}"),
+        (f"Overhead ({sow.get('overhead_pct',15)}%):", f"EGP {overhead:,.2f}"),
+        (f"Profit ({sow.get('profit_margin_pct',10)}%):", f"EGP {profit:,.2f}"),
+        ("GRAND TOTAL:", f"EGP {grand_total:,.2f}"),
+    ]:
+        c.setFillColor(colors.HexColor("#1E293B"))
+        c.rect(130*mm, y-1*mm, 65*mm, 7*mm, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor("#94A3B8"))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(132*mm, y+1*mm, label)
+        c.setFillColor(colors.HexColor("#34D399") if "TOTAL" in label else colors.HexColor("#E2E8F0"))
+        c.drawRightString(193*mm, y+1*mm, val)
+        y -= 8*mm
+    c.save()
+    buf.seek(0)
+    fname = f"SOW_{sow.get('sow_number','unknown')}_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
+    return Response(content=buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})
+
+
+@app.get("/api/v1/pdf/work-order/{wo_id}", tags=["pdf"])
+def pdf_work_order(wo_id: str):
+    """Generate PDF for a Work Order"""
+    import os, io
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        wo = db.execute(text("""
+            SELECT wo.*, t.name as technician_name, t.specializations,
+                   s.name as site_name, s.address as site_address,
+                   a.name as asset_name, a.category as asset_category, a.model as asset_model
+            FROM work_orders wo
+            LEFT JOIN technicians t ON t.id=wo.technician_id
+            LEFT JOIN sites s ON s.id=wo.site_id
+            LEFT JOIN assets a ON a.id=wo.asset_id
+            WHERE wo.id=:id
+        """), {"id": wo_id}).fetchone()
+        if not wo: raise HTTPException(404, "Work order not found")
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(210*mm, 297*mm))
+    wo = dict(wo._mapping)
+    pc = {"critical":"#F87171","high":"#FB923C","medium":"#FBBF24","low":"#34D399"}.get(wo.get("priority","medium"),"#94A3B8")
+    _tb_pdf_header(c, "WORK ORDER", f"Priority: {wo.get('priority','—').upper()}", wo.get('id','—')[:12].upper())
+    _tb_pdf_footer(c)
+    y = 248*mm
+    for label, val in [
+        ("Title:", wo.get('title','—')),
+        ("Type:", wo.get('type','—')),
+        ("Priority:", wo.get('priority','—')),
+        ("Status:", wo.get('status','—')),
+        ("Site:", wo.get('site_name','—')),
+        ("Site Address:", wo.get('site_address','—')),
+        ("Asset:", wo.get('asset_name','—')),
+        ("Asset Category:", wo.get('asset_category','—')),
+        ("Technician:", wo.get('technician_name','—')),
+        ("Created:", str(wo.get('created_at','—'))[:16]),
+        ("Due Date:", str(wo.get('due_date','—'))[:16]),
+        ("Started:", str(wo.get('started_at','—'))[:16] if wo.get('started_at') else '—'),
+        ("Completed:", str(wo.get('completed_at','—'))[:16] if wo.get('completed_at') else '—'),
+    ]:
+        _draw_kv_row(c, y, label, val)
+        y -= 7*mm
+    if wo.get('description'):
+        y -= 5*mm
+        c.setFillColor(colors.HexColor("#F59E0B"))
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(15*mm, y, "DESCRIPTION")
+        y -= 5*mm
+        c.setFillColor(colors.HexColor("#1E293B"))
+        c.rect(15*mm, y-25*mm, 180*mm, 28*mm, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor("#E2E8F0"))
+        c.setFont("Helvetica", 8)
+        desc = wo.get('description','')
+        words = desc.split()
+        line_str = ""
+        ly = y - 5*mm
+        for word in words:
+            test = (line_str + " " + word).strip()
+            if len(test) > 85:
+                c.drawString(17*mm, ly, line_str)
+                ly -= 5*mm
+                line_str = word
+                if ly < y-23*mm: break
+            else:
+                line_str = test
+        if line_str:
+            c.drawString(17*mm, ly, line_str)
+    c.save()
+    buf.seek(0)
+    fname = f"WO_{wo_id[:8].upper()}_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
+    return Response(content=buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})
+
+
+@app.get("/api/v1/pdf/report/{report_type}", tags=["pdf"])
+def pdf_report(report_type: str, status: str=None, priority: str=None,
+               payment_status: str=None, date_from: str=None, date_to: str=None,
+               vendor_id: str=None, site_id: str=None, limit: int=200):
+    """Generate PDF for any report type"""
+    import os, io, requests as req_lib
+    from fastapi.responses import Response
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors
+    from datetime import datetime
+    params = {}
+    if status: params["status"]=status
+    if priority: params["priority"]=priority
+    if payment_status: params["payment_status"]=payment_status
+    if date_from: params["date_from"]=date_from
+    if date_to: params["date_to"]=date_to
+    if vendor_id: params["vendor_id"]=vendor_id
+    if site_id: params["site_id"]=site_id
+    params["limit"] = limit
+    API_BASE = os.environ.get("REPORT_ENGINE_URL","http://localhost:8030")
+    try:
+        resp = req_lib.get(f"{API_BASE}/api/v1/report-engine/{report_type}", params=params, timeout=30)
+        report_data = resp.json()
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(500, f"Failed to fetch report data: {str(e)}")
+    rows = report_data.get("data",[])
+    columns = report_data.get("columns",[])
+    summary = report_data.get("summary",{})
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(297*mm, 210*mm))  # Landscape A4
+    W, H = 297*mm, 210*mm
+    # Header
+    c.setFillColor(colors.HexColor("#0F172A"))
+    c.rect(0, H-20*mm, W, 20*mm, fill=1, stroke=0)
+    c.setFillColor(colors.HexColor("#F59E0B"))
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(10*mm, H-13*mm, "TRIANGLE BLACK")
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 8)
+    c.drawString(10*mm, H-18*mm, "Engineering Services — Report Export")
+    title = report_type.replace("_"," ").title() + " Report"
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(80*mm, H-14*mm, title)
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 8)
+    c.drawRightString(W-10*mm, H-13*mm, f"Generated: {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC")
+    c.drawRightString(W-10*mm, H-18*mm, f"Records: {report_data.get('record_count', len(rows))}")
+    # Summary bar
+    if summary and isinstance(summary, dict):
+        c.setFillColor(colors.HexColor("#1E293B"))
+        c.rect(0, H-32*mm, W, 12*mm, fill=1, stroke=0)
+        sx = 10*mm
+        for key, val in list(summary.items())[:6]:
+            label = key.replace("_"," ").title()[:15]
+            value = f"EGP {float(val):,.0f}" if isinstance(val,(int,float)) and ("amount" in key or "value" in key or "outstanding" in key or "collected" in key) else str(val) if val is not None else "—"
+            c.setFillColor(colors.HexColor("#94A3B8"))
+            c.setFont("Helvetica", 6)
+            c.drawString(sx, H-24*mm, label)
+            c.setFillColor(colors.HexColor("#60A5FA"))
+            c.setFont("Helvetica-Bold", 8)
+            c.drawString(sx, H-28*mm, value[:18])
+            sx += 45*mm
+            if sx > W-40*mm: break
+    # Data table
+    if columns and rows:
+        y = H-35*mm
+        col_count = min(len(columns), 10)
+        visible_cols = columns[:col_count]
+        col_w = (W-20*mm) / col_count
+        c.setFillColor(colors.HexColor("#1E3A5F"))
+        c.rect(10*mm, y, W-20*mm, 7*mm, fill=1, stroke=0)
+        x = 10*mm
+        for col in visible_cols:
+            c.setFillColor(colors.HexColor("#60A5FA"))
+            c.setFont("Helvetica-Bold", 6)
+            c.drawString(x+1*mm, y+2*mm, col.replace("_"," ").title()[:int(col_w/mm*1.2)])
+            x += col_w
+        y -= 6*mm
+        for ri, row in enumerate(rows[:25]):
+            if y < 15*mm: break
+            bg = "#0F172A" if ri%2==0 else "#1E293B"
+            c.setFillColor(colors.HexColor(bg))
+            c.rect(10*mm, y, W-20*mm, 6*mm, fill=1, stroke=0)
+            x = 10*mm
+            for col in visible_cols:
+                val = row.get(col)
+                s = str(val)[:int(col_w/mm*1.3)] if val is not None else "—"
+                c.setFillColor(colors.HexColor("#E2E8F0"))
+                c.setFont("Helvetica", 6)
+                c.drawString(x+1*mm, y+1.5*mm, s)
+                x += col_w
+            y -= 6*mm
+        if len(rows) > 25:
+            c.setFillColor(colors.HexColor("#94A3B8"))
+            c.setFont("Helvetica", 7)
+            c.drawString(10*mm, y-3*mm, f"... and {len(rows)-25} more records. Export CSV for complete data.")
+    # Footer
+    c.setFillColor(colors.HexColor("#1E293B"))
+    c.rect(0, 0, W, 8*mm, fill=1, stroke=0)
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 6)
+    c.drawString(10*mm, 2.5*mm, "Triangle Black Engineering Services — CONFIDENTIAL")
+    c.drawRightString(W-10*mm, 2.5*mm, "Generated by Triangle Black Platform")
+    c.save()
+    buf.seek(0)
+    fname = f"Report_{report_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}.pdf"
+    return Response(content=buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})

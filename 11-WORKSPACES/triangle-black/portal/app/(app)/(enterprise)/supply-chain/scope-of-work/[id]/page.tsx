@@ -44,6 +44,7 @@ export default function SOWDetailPage() {
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/scope-of-work")} className="tb-btn-secondary">← SOW List</button>
+            <a href={`/api/v1/pdf/scope-of-work/${id}`} target="_blank" rel="noopener noreferrer" className="tb-btn-secondary" style={{fontSize:"0.75rem",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}}>📄 Export PDF</a>
             <button
               onClick={()=>{ if(window.confirm("Delete this scope of work? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}

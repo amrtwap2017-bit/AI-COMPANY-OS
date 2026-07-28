@@ -55,6 +55,7 @@ export default function InvoiceDetailPage() {
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/invoices")} className="tb-btn-secondary">← Invoices</button>
+            <a href={`/api/v1/pdf/invoice/${id}`} target="_blank" rel="noopener noreferrer" className="tb-btn-secondary" style={{fontSize:"0.75rem",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}}>📄 Export PDF</a>
             <button
               onClick={()=>{ if(window.confirm("Delete this invoice? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}

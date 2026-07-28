@@ -61,6 +61,7 @@ export default function POv2DetailPage() {
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/purchase-orders-v2")} className="tb-btn-secondary">← PO List</button>
+            <a href={`/api/v1/pdf/purchase-order/${id}`} target="_blank" rel="noopener noreferrer" className="tb-btn-secondary" style={{fontSize:"0.75rem",textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px"}}>📄 Export PDF</a>
             <button
               onClick={()=>{ if(window.confirm("Delete this purchase order? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}
