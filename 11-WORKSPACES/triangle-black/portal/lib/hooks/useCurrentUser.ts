@@ -1,6 +1,7 @@
 // @ts-nocheck
 "use client";
 import { useState, useEffect } from "react";
+import { tokenManager } from "@/lib/auth/token-manager";
 
 interface CurrentUser {
   id: string;
@@ -30,18 +31,16 @@ export function useCurrentUser(): CurrentUser | null {
 
   useEffect(() => {
     try {
-      // Get token from cookie
-      const token = document.cookie
-        .split("; ")
-        .find(row => row.startsWith("tb_access_token="))
-        ?.split("=")[1];
-
+      const token = tokenManager.getToken();
       if (!token) return;
-
-      // Decode JWT payload (base64)
       const parts = token.split(".");
       if (parts.length !== 3) return;
       const payload = JSON.parse(atob(parts[1]));
+      // Check expiry
+      if (payload.exp * 1000 < Date.now()) {
+        tokenManager.clearAll();
+        return;
+      }
       setUser({
         id:    payload.sub || "",
         email: payload.email || "",
@@ -59,16 +58,16 @@ export function useCurrentUser(): CurrentUser | null {
 export function useRole() {
   const user = useCurrentUser();
   return {
-    role:      user?.role || "viewer",
-    label:     ROLE_LABELS[user?.role || "viewer"] || user?.role || "—",
-    color:     ROLE_COLORS[user?.role || "viewer"] || ROLE_COLORS.viewer,
-    isAdmin:   user?.role === "admin",
-    isManager: ["admin","manager"].includes(user?.role || ""),
-    isEngineer:["admin","manager","agent"].includes(user?.role || ""),
-    isFinance: ["admin","manager","finance"].includes(user?.role || ""),
-    isClient:  user?.role === "client",
-    canCreate: user?.role !== "client" && user?.role !== "viewer",
-    canApprove:["admin","manager"].includes(user?.role || ""),
-    canDelete: user?.role === "admin",
+    role:       user?.role || "viewer",
+    label:      ROLE_LABELS[user?.role || "viewer"] || user?.role || "—",
+    color:      ROLE_COLORS[user?.role || "viewer"] || ROLE_COLORS.viewer,
+    isAdmin:    user?.role === "admin",
+    isManager:  ["admin", "manager"].includes(user?.role || ""),
+    isEngineer: ["admin", "manager", "agent"].includes(user?.role || ""),
+    isFinance:  ["admin", "manager", "finance"].includes(user?.role || ""),
+    isClient:   user?.role === "client",
+    canCreate:  user?.role !== "client" && user?.role !== "viewer",
+    canApprove: ["admin", "manager"].includes(user?.role || ""),
+    canDelete:  user?.role === "admin",
   };
 }

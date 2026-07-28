@@ -1,21 +1,11 @@
-// useAuthFetch — always reads fresh token, sends Authorization header
-// Token is stored in localStorage as "tb_token" and cookie as "tb_token"
+// Triangle Black - Auth Fetch Hook
+// Single token source: tokenManager -> localStorage["tb_access_token"]
+import { tokenManager } from "@/lib/auth/token-manager";
 
-function getToken(): string {
-  if (typeof window === "undefined") return "";
-  // Try localStorage first
-  const ls = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token");
-  if (ls) return ls;
-  // Fall back to cookie
-  const match = document.cookie.match(/(?:^|;\s*)tb_token=([^;]*)/);
-  if (match) return decodeURIComponent(match[1]);
-  const match2 = document.cookie.match(/(?:^|;\s*)tb_access_token=([^;]*)/);
-  if (match2) return decodeURIComponent(match2[1]);
-  return "";
-}
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
 
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = getToken();
+  const token = tokenManager.getToken() || "";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string> || {}),
@@ -23,7 +13,9 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  return fetch(url, { ...options, headers });
+  // Prepend API base if relative URL
+  const fullUrl = url.startsWith("http") ? url : API_BASE + url;
+  return fetch(fullUrl, { ...options, headers });
 }
 
 export function useAuthFetch() {
