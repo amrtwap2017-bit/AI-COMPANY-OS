@@ -25,7 +25,7 @@ export default function PurchaseOrdersPage() {
     { refetchInterval: 60000 }
   );
   const { data: suppRaw } = useQuery(["po-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.json()));
-  const { data: prRaw }   = useQuery(["po-prs"],   () => authFetch("/api/v1/purchase-requests/").then(r => r.json()));
+  const { data: prRaw }   = useQuery(["po-prs"],   () => authFetch("/api/v1/purchase-requests-portal").then(r => r.json()));
 
   const pos   = toArr(poRaw);
   const supps = toArr(suppRaw);

@@ -35,7 +35,7 @@ export default function InboxPage() {
 
   useEffect(() => {
     // authFetch automatically adds Authorization: Bearer <token> header
-    authFetch("/api/v1/notifications/?limit=30")
+    authFetch("/api/v1/notifications-portal?limit=30")
       .then(r => r.json())
       .then(d => {
         setNotifs(Array.isArray(d) ? d : d?.items || d?.data || []);

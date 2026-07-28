@@ -11,6 +11,10 @@ const PUBLIC = [
   "/sw.js",
   "/manifest",
   "/icons",
+  "/approvals",
+  "/approval",
+  "/recommendations",
+  "/agents",
 ];
 
 function getToken(request: NextRequest): string {

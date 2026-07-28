@@ -10,7 +10,7 @@ export default function AnalyticsCosts() {
   const { data: invRaw }  = useQuery(["ac-inv"],  () => authFetch("/api/v1/invoices/").then(r=>r.json()));
   const { data: poRaw }   = useQuery(["ac-pos"],  () => authFetch("/api/v1/purchase-orders/").then(r=>r.json()));
   const { data: prRaw }   = useQuery(["ac-prs"],  () => authFetch("/api/v1/purchase-requests/").then(r=>r.json()));
-  const { data: contRaw } = useQuery(["ac-cont"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
+  const { data: contRaw } = useQuery(["ac-cont"], () => authFetch("/api/v1/contracts-portal").then(r=>r.json()));
   const inv = toArr(invRaw); const pos = toArr(poRaw);
   const prs = toArr(prRaw); const contracts = toArr(contRaw);
   const totalRevenue  = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);

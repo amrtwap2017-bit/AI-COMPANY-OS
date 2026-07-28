@@ -15,8 +15,8 @@ export default function ExecutivePage() {
   const { data: dash }        = useQuery(["exe-dash"],   () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()), {refetchInterval:30000});
   const { data: woRaw }       = useQuery(["exe-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const { data: invRaw }      = useQuery(["exe-inv"],    () => authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: contractRaw } = useQuery(["exe-cont"],   () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: notifRaw }    = useQuery(["exe-notifs"], () => authFetch("/api/v1/notifications/").then(r=>r.json()));
+  const { data: contractRaw } = useQuery(["exe-cont"],   () => authFetch("/api/v1/contracts-portal").then(r=>r.json()));
+  const { data: notifRaw }    = useQuery(["exe-notifs"], () => authFetch("/api/v1/notifications-portal").then(r=>r.json()));
   const { data: autoStatus }  = useQuery(["exe-auto"],   () => authFetch("/api/v1/automation/status").then(r=>r.json()));
 
   const wos       = toArr(woRaw);

@@ -23,7 +23,7 @@ export default function ContractDetailPage() {
 
   const { data: ct, isLoading } = useQuery(
     ["ct-detail", id],
-    () => authFetch(`/api/v1/contracts/${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/contracts-portal${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 

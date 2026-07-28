@@ -7,8 +7,8 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 export default function CustomersPage() {
   const router = useRouter();
-  const { data: contRaw } = useQuery(["cust-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: leadRaw } = useQuery(["cust-leads"], () => authFetch("/api/v1/leads/").then(r=>r.json()));
+  const { data: contRaw } = useQuery(["cust-conts"], () => authFetch("/api/v1/contracts-portal").then(r=>r.json()));
+  const { data: leadRaw } = useQuery(["cust-leads"], () => authFetch("/api/v1/leads-portal").then(r=>r.json()));
   const { data: invRaw }  = useQuery(["cust-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
   const contracts = toArr(contRaw); const leads = toArr(leadRaw); const inv = toArr(invRaw);
   const clients = [...new Set(contracts.map(c=>c.client_name).filter(Boolean))];

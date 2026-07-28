@@ -23,7 +23,7 @@ export default function LeadDetailPage() {
 
   const { data: lead, isLoading } = useQuery(
     ["lead-detail", id],
-    () => authFetch(`/api/v1/leads/${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/leads-portal${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 

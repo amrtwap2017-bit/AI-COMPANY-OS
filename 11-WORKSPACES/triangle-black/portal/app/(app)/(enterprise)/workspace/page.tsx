@@ -17,7 +17,7 @@ export default function WorkspacePage() {
   const { data: twin }     = useQuery(["ws-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
   const { data: dash }     = useQuery(["ws-dash"],   () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()), {refetchInterval:60000});
   const { data: woRaw }    = useQuery(["ws-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: notifRaw } = useQuery(["ws-notifs"], () => authFetch("/api/v1/notifications/").then(r=>r.json()));
+  const { data: notifRaw } = useQuery(["ws-notifs"], () => authFetch("/api/v1/notifications-portal").then(r=>r.json()));
   const { data: pmRaw }    = useQuery(["ws-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
   const { data: autoStatus, refetch: refetchAuto } = useQuery(["ws-auto"], () => authFetch("/api/v1/automation/status").then(r=>r.json()));
 

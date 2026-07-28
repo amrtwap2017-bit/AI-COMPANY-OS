@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function SupplyChainHub() {
   const router = useRouter();
-  const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders/").then(r=>r.json()));
-  const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests/").then(r=>r.json()));
+  const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r=>r.json()));
+  const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r=>r.json()));
   const { data: invRaw } = useQuery(["sc-hub-inv"], () => authFetch("/api/v1/inventory-items-portal").then(r=>r.json()));
   const { data: suppRaw } = useQuery(["sc-hub-supps"], () => authFetch("/api/v1/suppliers/").then(r=>r.json()));
   const pos = toArr(poRaw); const prs = toArr(prRaw);

@@ -10,7 +10,7 @@ export default function ExceptionsPage() {
   const { data: woRaw }   = useQuery(["exc-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const { data: contRaw } = useQuery(["exc-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
   const { data: pmRaw }   = useQuery(["exc-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
-  const { data: notifRaw }= useQuery(["exc-notifs"],() => authFetch("/api/v1/notifications/?limit=100").then(r=>r.json()));
+  const { data: notifRaw }= useQuery(["exc-notifs"],() => authFetch("/api/v1/notifications-portal?limit=100").then(r=>r.json()));
   const wos = toArr(woRaw); const contracts = toArr(contRaw);
   const pms = toArr(pmRaw); const notifs = toArr(notifRaw);
   const now = new Date();

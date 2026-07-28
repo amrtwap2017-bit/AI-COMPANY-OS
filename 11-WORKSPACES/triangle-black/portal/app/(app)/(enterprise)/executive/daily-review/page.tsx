@@ -9,7 +9,7 @@ export default function DailyReviewPage() {
   const router = useRouter();
   const today = new Date().toLocaleDateString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
   const { data: woRaw }   = useQuery(["dr-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: notifRaw }= useQuery(["dr-notifs"],() => authFetch("/api/v1/notifications/?limit=50").then(r=>r.json()));
+  const { data: notifRaw }= useQuery(["dr-notifs"],() => authFetch("/api/v1/notifications-portal?limit=50").then(r=>r.json()));
   const { data: twin }    = useQuery(["dr-twin"],  () => authFetch("/api/v1/twin/state").then(r=>r.json()));
   const { data: actRaw }  = useQuery(["dr-act"],   () => authFetch("/api/v1/activity-feed?limit=15").then(r=>r.json()));
   const wos = toArr(woRaw); const notifs = toArr(notifRaw);
