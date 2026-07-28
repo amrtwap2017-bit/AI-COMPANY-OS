@@ -2792,3 +2792,211 @@ def report_contracts():
             "generated_at": datetime.now().isoformat(),
         }
 
+# ── SPRINT 245: PROCUREMENT WORKFLOW ENDPOINTS ────────────────────────────────
+
+@app.get("/api/v1/scope-of-work/", tags=["procurement"])
+def scope_of_work_list(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM scope_of_work ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.post("/api/v1/scope-of-work/", tags=["procurement"])
+def create_sow(request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os, json
+    body = {}
+    try:
+        import asyncio
+        body = asyncio.run(request.json()) if hasattr(request,'json') else {}
+    except: pass
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM scope_of_work")).scalar()
+            sow_number = f"SOW-{str(count).zfill(5)}"
+            db.execute(text("""
+                INSERT INTO scope_of_work (id, sow_number, title, description, type, status, client_name, currency, estimated_days, labor_cost, materials_cost, overhead_pct, profit_margin_pct, prepared_by)
+                VALUES (gen_random_uuid()::text, :num, :title, :desc, :type, 'draft', :client, :currency, :days, :labor, :materials, :overhead, :margin, :prepared_by)
+            """), {
+                "num": sow_number, "title": body.get("title","New SOW"),
+                "desc": body.get("description",""), "type": body.get("type","service"),
+                "client": body.get("client_name",""), "currency": body.get("currency","EGP"),
+                "days": body.get("estimated_days",0), "labor": body.get("labor_cost",0),
+                "materials": body.get("materials_cost",0), "overhead": body.get("overhead_pct",15),
+                "margin": body.get("profit_margin_pct",10), "prepared_by": body.get("prepared_by","")
+            })
+            db.commit()
+            row = db.execute(text("SELECT * FROM scope_of_work WHERE sow_number=:n"), {"n": sow_number}).fetchone()
+            return dict(row._mapping)
+        except Exception as e: db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/scope-of-work/{sow_id}", tags=["procurement"])
+def get_sow(sow_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            sow = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
+            if not sow: from fastapi import HTTPException; raise HTTPException(404, "SOW not found")
+            items = db.execute(text("SELECT * FROM boq_items WHERE sow_id=:id ORDER BY item_number"), {"id": sow_id}).fetchall()
+            return {**dict(sow._mapping), "boq_items": [dict(i._mapping) for i in items]}
+        except Exception as e: return {"error": str(e)}
+
+@app.get("/api/v1/vendors/", tags=["procurement"])
+def list_vendors(limit: int = 100):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM vendors WHERE blacklisted=false ORDER BY rating DESC, company_name LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/rfq/", tags=["procurement"])
+def list_rfqs(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM rfq_headers ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/rfq/{rfq_id}", tags=["procurement"])
+def get_rfq(rfq_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rfq = db.execute(text("SELECT * FROM rfq_headers WHERE id=:id"), {"id": rfq_id}).fetchone()
+            if not rfq: from fastapi import HTTPException; raise HTTPException(404, "RFQ not found")
+            items = db.execute(text("SELECT * FROM rfq_items WHERE rfq_id=:id ORDER BY item_number"), {"id": rfq_id}).fetchall()
+            quotes = db.execute(text("SELECT vq.*, v.company_name as vendor_name FROM vendor_quotations vq LEFT JOIN vendors v ON v.id=vq.vendor_id WHERE vq.rfq_id=:id ORDER BY vq.total_amount ASC"), {"id": rfq_id}).fetchall()
+            return {**dict(rfq._mapping), "items": [dict(i._mapping) for i in items], "quotations": [dict(q._mapping) for q in quotes]}
+        except Exception as e: return {"error": str(e)}
+
+@app.get("/api/v1/purchase-orders-v2/", tags=["procurement"])
+def list_pos_v2(limit: int = 100):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT po.*, v.company_name as vendor_name
+                FROM purchase_orders_v2 po
+                LEFT JOIN vendors v ON v.id = po.vendor_id
+                ORDER BY po.created_at DESC LIMIT :l
+            """), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/purchase-orders-v2/{po_id}", tags=["procurement"])
+def get_po_v2(po_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            po = db.execute(text("SELECT po.*, v.company_name as vendor_name, v.email as vendor_email FROM purchase_orders_v2 po LEFT JOIN vendors v ON v.id=po.vendor_id WHERE po.id=:id"), {"id": po_id}).fetchone()
+            if not po: from fastapi import HTTPException; raise HTTPException(404, "PO not found")
+            items = db.execute(text("SELECT * FROM po_line_items WHERE po_id=:id ORDER BY line_number"), {"id": po_id}).fetchall()
+            grns = db.execute(text("SELECT * FROM goods_receipt_notes WHERE po_id=:id"), {"id": po_id}).fetchall()
+            return {**dict(po._mapping), "line_items": [dict(i._mapping) for i in items], "grns": [dict(g._mapping) for g in grns]}
+        except Exception as e: return {"error": str(e)}
+
+@app.patch("/api/v1/purchase-orders-v2/{po_id}", tags=["procurement"])
+async def update_po_v2(po_id: str, request: Request):
+    """Update PO — currency, qty, prices, etc."""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            allowed = ["currency","exchange_rate","payment_terms","delivery_date","delivery_address","status","approved_by","approved_at","notes","internal_notes","vendor_notes","terms_conditions"]
+            updates = {k: v for k,v in body.items() if k in allowed}
+            if updates:
+                set_clause = ", ".join([f"{k}=:{k}" for k in updates])
+                updates["id"] = po_id
+                db.execute(text(f"UPDATE purchase_orders_v2 SET {set_clause}, updated_at=NOW() WHERE id=:id"), updates)
+                db.commit()
+            row = db.execute(text("SELECT * FROM purchase_orders_v2 WHERE id=:id"), {"id": po_id}).fetchone()
+            return dict(row._mapping) if row else {"error": "PO not found"}
+        except Exception as e: db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/approval-requests/", tags=["procurement"])
+def list_approvals(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM approval_requests ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.post("/api/v1/approval-requests/{request_id}/approve", tags=["procurement"])
+async def approve_request(request_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("UPDATE approval_requests SET status='approved', approved_by=:by, approved_at=NOW(), notes=:notes WHERE id=:id"),
+                {"by": body.get("approved_by","admin"), "notes": body.get("notes",""), "id": request_id})
+            # Update the source document
+            ar = db.execute(text("SELECT * FROM approval_requests WHERE id=:id"), {"id": request_id}).fetchone()
+            if ar:
+                doc_type = ar[2]; doc_id = ar[3]
+                if doc_type == "sow":
+                    db.execute(text("UPDATE scope_of_work SET status='approved', approved_by=:by, approved_at=NOW() WHERE id=:id"), {"by": body.get("approved_by","admin"), "id": doc_id})
+                elif doc_type == "po":
+                    db.execute(text("UPDATE purchase_orders_v2 SET status='approved', approved_by=:by, approved_at=NOW() WHERE id=:id"), {"by": body.get("approved_by","admin"), "id": doc_id})
+                elif doc_type == "rfq":
+                    db.execute(text("UPDATE rfq_headers SET status='sent', approved_by=:by WHERE id=:id"), {"by": body.get("approved_by","admin"), "id": doc_id})
+            db.commit()
+            return {"status": "approved", "request_id": request_id}
+        except Exception as e: db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/procurement/dashboard", tags=["procurement"])
+def procurement_dashboard():
+    """Procurement overview KPIs"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe_one(q, p=None):
+            try: r = db.execute(text(q), p or {}).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        return {
+            "sow":      safe_one("SELECT count(*) as total, count(*) FILTER (WHERE status='pending_approval') as pending, count(*) FILTER (WHERE status='approved') as approved FROM scope_of_work"),
+            "vendors":  safe_one("SELECT count(*) as total, count(*) FILTER (WHERE is_approved=true) as approved FROM vendors"),
+            "rfqs":     safe_one("SELECT count(*) as total, count(*) FILTER (WHERE status='sent') as active, count(*) FILTER (WHERE status='responses_received') as with_quotes FROM rfq_headers"),
+            "pos":      safe_one("SELECT count(*) as total, count(*) FILTER (WHERE status='approved') as approved, sum(total_amount) as total_value FROM purchase_orders_v2"),
+            "approvals":safe_one("SELECT count(*) as total, count(*) FILTER (WHERE status='pending') as pending FROM approval_requests"),
+            "grns":     safe_one("SELECT count(*) as total FROM goods_receipt_notes"),
+        }
+
