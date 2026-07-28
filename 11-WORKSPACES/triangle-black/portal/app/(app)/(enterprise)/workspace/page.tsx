@@ -1,5 +1,6 @@
 "use client";
 // @ts-nocheck
+import { RoleBadge } from "@/components/ui/RoleBadge";
 import { ActivityFeed } from "@/components/ui/ActivityFeed";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -89,6 +90,7 @@ export default function WorkspacePage() {
                 <span className="text-label-upper" style={{color:"rgba(148,163,184,0.7)"}}>Triangle Black — Platform Live</span>
               </div>
               <h1 className="tb-hero-title">Platform Command Center</h1>
+              <div style={{marginBottom:8}}><RoleBadge size="md"/></div>
               <p className="tb-hero-description">{today}</p>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">

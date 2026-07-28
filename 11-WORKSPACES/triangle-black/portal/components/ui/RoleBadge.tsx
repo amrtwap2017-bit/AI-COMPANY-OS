@@ -1,40 +1,60 @@
-// @ts-nocheck
 "use client";
-import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+// @ts-nocheck
+// RoleBadge — shows current user role from localStorage
+import { useEffect, useState } from "react";
 
-const ROLE_CONFIG: Record<string, {label:string; color:string; bg:string}> = {
-  admin:   { label:"Admin",    color:"text-red-800",    bg:"bg-red-100 border-red-200" },
-  manager: { label:"Manager",  color:"text-purple-800", bg:"bg-purple-100 border-purple-200" },
-  agent:   { label:"Engineer", color:"text-blue-800",   bg:"bg-blue-100 border-blue-200" },
-  client:  { label:"Client",   color:"text-slate-600",  bg:"bg-slate-100 border-slate-200" },
-  viewer:  { label:"Viewer",   color:"text-secondary",  bg:"bg-slate-50 border-slate-200" },
+const ROLE_COLORS: Record<string, string> = {
+  admin:      "#F87171",
+  manager:    "#FB923C",
+  engineer:   "#FBBF24",
+  technician: "#34D399",
+  finance:    "#60A5FA",
+  viewer:     "#94A3B8",
+  supplier:   "#A78BFA",
 };
 
-export function RoleBadge({ className = "" }: { className?: string }) {
-  const user = useCurrentUser();
-  if (!user) return null;
+const ROLE_ICONS: Record<string, string> = {
+  admin:      "👑",
+  manager:    "📊",
+  engineer:   "🔧",
+  technician: "👷",
+  finance:    "💰",
+  viewer:     "👁️",
+  supplier:   "🏭",
+};
 
-  const config = ROLE_CONFIG[user.role] || ROLE_CONFIG.viewer;
+export function RoleBadge({ size = "sm" }: { size?: "sm" | "md" }) {
+  const [role, setRole] = useState<string>("");
+
+  useEffect(() => {
+    const r = localStorage.getItem("tb_user_role") || "";
+    setRole(r);
+  }, []);
+
+  if (!role) return null;
+
+  const color = ROLE_COLORS[role] || "#94A3B8";
+  const icon  = ROLE_ICONS[role]  || "👤";
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${config.bg} ${config.color} ${className}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
-      {config.label}
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 4,
+      padding: size === "md" ? "4px 10px" : "2px 8px",
+      borderRadius: 20,
+      background: color + "18",
+      border: "1px solid " + color + "40",
+      color: color,
+      fontSize: size === "md" ? "0.8125rem" : "0.6875rem",
+      fontWeight: 700,
+      textTransform: "uppercase",
+      letterSpacing: "0.05em",
+    }}>
+      <span style={{fontSize: size === "md" ? "0.875rem" : "0.75rem"}}>{icon}</span>
+      {role}
     </span>
   );
 }
 
-export function RoleGate({
-  roles,
-  children,
-  fallback = null,
-}: {
-  roles: string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}) {
-  const user = useCurrentUser();
-  if (!user) return fallback;
-  if (!roles.includes(user.role)) return fallback;
-  return children;
-}
+export default RoleBadge;
