@@ -2343,55 +2343,75 @@ def assets_v2_portal(limit: int = 100):
 @app.get("/api/v1/auth/me", tags=["auth"])
 def get_current_user_info(request: Request):
     """Return current user info including role and permissions"""
-    from sqlalchemy import text, create_engine
-    from sqlalchemy.orm import Session
-    import os
-    auth_header = request.headers.get("Authorization", "")
-    token = auth_header.replace("Bearer ", "").strip()
-    if not token:
+    import base64 as _b64
+    import json as _js
+    import os as _os
+    from sqlalchemy import text as _text, create_engine as _ce
+    from sqlalchemy.orm import Session as _Sess
+
+    auth_header = request.headers.get("Authorization", "") or ""
+    raw_token = auth_header.replace("Bearer ", "").replace("bearer ", "").strip()
+
+    if not raw_token:
         from fastapi import HTTPException
         raise HTTPException(status_code=401, detail="Not authenticated")
+
+    # Decode JWT payload (no verification needed — just read claims)
+    user_id = ""
+    email = ""
     try:
-        import base64, json as _json
-        parts = token.split(".")
+        parts = raw_token.split(".")
         if len(parts) >= 2:
-            padded = parts[1] + "=" * (4 - len(parts[1]) % 4)
-            payload = _json.loads(base64.urlsafe_b64decode(padded))
-        else:
-            payload = {}
-        user_id = str(payload.get("sub", ""))
-        email   = str(payload.get("email", ""))
-        eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
-        with Session(eng) as db:
-            try:
-                role_row = db.execute(text("SELECT role FROM user_roles WHERE user_id=:uid LIMIT 1"), {"uid": user_id}).fetchone()
-                role = str(role_row[0]).strip() if role_row else "admin"
-            except Exception:
-                db.rollback()
-                role = "admin"
-            try:
-                perm_rows = db.execute(text(
-                    "SELECT p.resource, p.action FROM role_permissions rp "
+            seg = parts[1]
+            seg += "=" * ((4 - len(seg) % 4) % 4)
+            payload_data = _js.loads(_b64.urlsafe_b64decode(seg))
+            user_id = str(payload_data.get("sub") or "")
+            email   = str(payload_data.get("email") or "")
+    except Exception:
+        pass
+
+    # Query role and permissions from DB
+    role = "admin"
+    perms = []
+    try:
+        _eng = _ce(_os.environ.get("DATABASE_URL", "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+        with _Sess(_eng) as _db:
+            _row = _db.execute(
+                _text("SELECT role FROM user_roles WHERE user_id = :uid LIMIT 1"),
+                {"uid": user_id}
+            ).fetchone()
+            if _row:
+                role = str(_row[0]).strip()
+
+            _prows = _db.execute(
+                _text(
+                    "SELECT p.resource, p.action "
+                    "FROM role_permissions rp "
                     "JOIN permissions p ON p.id = rp.permission_id "
                     "JOIN roles r ON r.id = rp.role_id "
-                    "WHERE r.name = :role"
-                ), {"role": role}).fetchall()
-                perms = [{"resource": str(row[0]), "action": str(row[1])} for row in perm_rows]
-            except Exception:
-                db.rollback()
-                perms = []
-        return {
-            "user_id": user_id,
-            "email": email,
-            "role": role,
-            "permissions": perms,
-            "is_admin": True if role == "admin" else False,
-            "can_write": True if role in ("admin","manager","engineer","finance") else False,
-            "can_read_finance": True if role in ("admin","manager","finance") else False,
-            "permissions_count": len(perms),
-        }
-    except Exception as ex:
-        return {"user_id":"","email":"","role":"viewer","permissions":[],"is_admin":False,"can_write":False,"can_read_finance":False,"permissions_count":0}
+                    "WHERE r.name = :rname"
+                ),
+                {"rname": role}
+            ).fetchall()
+            perms = [{"resource": str(r[0]), "action": str(r[1])} for r in _prows]
+    except Exception as _e:
+        pass
+
+    _is_admin      = role == "admin"
+    _can_write     = role in ("admin", "manager", "engineer", "finance")
+    _can_finance   = role in ("admin", "manager", "finance")
+
+    return {
+        "user_id":          user_id,
+        "email":            email,
+        "role":             role,
+        "is_admin":         bool(_is_admin),
+        "can_write":        bool(_can_write),
+        "can_read_finance": bool(_can_finance),
+        "permissions":      perms,
+        "permissions_count": len(perms),
+    }
+
 
 @app.get("/api/v1/rbac/roles", tags=["rbac"])
 def list_roles():
