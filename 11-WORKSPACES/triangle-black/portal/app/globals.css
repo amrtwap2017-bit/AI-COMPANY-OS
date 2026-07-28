@@ -894,3 +894,141 @@ body {
 /* ── OVERFLOW UTILITIES ──────────────────────────────────────────────── */
 .tb-truncate { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tb-nowrap   { white-space:nowrap; }
+
+/* ── SPRINT 241: MOBILE RESPONSIVENESS ─────────────────────────────────────── */
+
+/* Mobile-first breakpoint overrides */
+@media (max-width: 768px) {
+  /* Hero section */
+  .tb-hero-inner {
+    padding: 16px !important;
+  }
+  .tb-hero-title {
+    font-size: 1.5rem !important;
+  }
+  .tb-hero-description {
+    font-size: 0.8125rem !important;
+  }
+  
+  /* KPI strip — 2 columns on mobile */
+  .tb-grid-4,
+  .tb-grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  
+  /* Canvas padding */
+  .tb-canvas {
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+  
+  /* Section padding */
+  .tb-section {
+    padding: 12px !important;
+  }
+  
+  /* Table — horizontal scroll */
+  .tb-table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Table rows — min touch target */
+  .tb-table-row {
+    min-height: 48px !important;
+  }
+  
+  /* Action items — full width */
+  .tb-action-item {
+    min-height: 44px !important;
+  }
+  
+  /* Flex between — wrap on mobile */
+  .tb-flex-between {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  
+  /* Pills — wrap */
+  .tb-pill {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+  }
+  
+  /* Score badge */
+  .tb-score-badge {
+    padding: 8px 12px !important;
+  }
+  .tb-score-value {
+    font-size: 2rem !important;
+  }
+  
+  /* Search input */
+  .tb-search {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  /* Buttons minimum touch target */
+  button {
+    min-height: 36px;
+  }
+  
+  /* Sidebar hidden on mobile — handled by portal shell */
+  .tb-sidebar-desktop {
+    display: none !important;
+  }
+  
+  /* Hero KPI grid — 2 cols */
+  .tb-hero-inner .tb-grid-4,
+  .tb-hero-inner .tb-grid-6 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Domain cards — single column */
+  .tb-domain-card {
+    padding: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small — single column everything */
+  .tb-grid-4,
+  .tb-grid-3,
+  .tb-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .tb-hero-title {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Table head hidden on tiny screens — show data only */
+  .tb-table-head {
+    display: none !important;
+  }
+  
+  .tb-table-row {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  }
+}
+
+/* Touch-friendly links and buttons */
+@media (hover: none) and (pointer: coarse) {
+  .tb-section-link,
+  .tb-action-item {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .hover\:bg-base-alt:hover {
+    background: transparent !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */

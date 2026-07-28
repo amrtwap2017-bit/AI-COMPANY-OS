@@ -11,6 +11,12 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700", "900"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: "Triangle Black",
   description: "Enterprise Operations Platform for Engineering Companies",
