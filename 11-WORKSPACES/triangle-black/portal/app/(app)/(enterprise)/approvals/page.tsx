@@ -1,6 +1,9 @@
-// Server-side redirect — instant, no flash, no useEffect delay
-import { redirect } from "next/navigation";
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function ApprovalsPage() {
-  redirect("/workspace");
+export default function ApprovalsRedirect() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/supply-chain/approvals-center"); }, []);
+  return null;
 }
