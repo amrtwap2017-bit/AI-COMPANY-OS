@@ -3,81 +3,163 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+
+const RISK_COLOR = {
+  CRITICAL: "#F87171",
+  HIGH:     "#FB923C",
+  MEDIUM:   "#FBBF24",
+  LOW:      "#34D399",
+};
+
 export default function PredictivePage() {
   const router = useRouter();
-  const { data: woRaw }   = useQuery(["pred-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: contRaw } = useQuery(["pred-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: invRaw }  = useQuery(["pred-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: pmRaw }   = useQuery(["pred-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
-  const wos = toArr(woRaw); const contracts = toArr(contRaw);
-  const inv = toArr(invRaw); const pms = toArr(pmRaw);
-  const now = new Date();
-  const next30 = new Date(now.getTime()+30*86400000);
-  const next7  = new Date(now.getTime()+7*86400000);
-  const pmsDueWeek  = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=next7);
-  const pmsDueMonth = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>next7&&new Date(p.next_due_ts)<=next30);
-  const ctExpiring  = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=next30);
-  const wosDue      = wos.filter(w=>w.due_date&&new Date(w.due_date)>=now&&new Date(w.due_date)<=next7&&w.status!=="completed");
-  const predictions = [
-    {label:"PM Plans due this week",      value:pmsDueWeek.length,  color:"#FBBF24", action:"Schedule",  path:"/maintenance/pm-plans"},
-    {label:"PM Plans due this month",     value:pmsDueMonth.length, color:"#60A5FA", action:"Plan",      path:"/maintenance/pm-plans"},
-    {label:"Contracts expiring (30d)",    value:ctExpiring.length,  color:"#FB923C", action:"Renew",     path:"/commercial/contracts"},
-    {label:"Work orders due this week",   value:wosDue.length,      color:"#F87171", action:"Dispatch",  path:"/operations/work-orders"},
-  ];
+  const { data: pred, isLoading } = useQuery(
+    ["pred-maint"],
+    () => authFetch("/api/v1/ai/predictive-maintenance").then(r=>r.json()),
+    { staleTime: 300000, refetchOnWindowFocus: false }
+  );
+  const { data: patterns } = useQuery(
+    ["wo-patterns"],
+    () => authFetch("/api/v1/ai/work-order-patterns").then(r=>r.json()),
+    { staleTime: 300000, refetchOnWindowFocus: false }
+  );
+
+  const predictions = toArr(pred?.predictions);
+  const patternList = toArr(patterns?.patterns);
+  const highRisk    = predictions.filter(p=>p.risk_score>=40);
+  const critical    = predictions.filter(p=>p.risk_score>=70);
+
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1530 100%)"}}>
         <div className="tb-hero-inner">
-          <div className="text-label-upper text-cyan-400 mb-1.5">Executive · AI</div>
-          <h1 className="tb-hero-title">Predictive Intelligence</h1>
-          <p className="tb-hero-description">Upcoming events, predicted issues and recommended actions</p>
+          <div className="tb-flex-between gap-6">
+            <div>
+              <div className="text-label-upper text-cyan-400 mb-1.5">Executive · AI</div>
+              <h1 className="tb-hero-title">Predictive Maintenance</h1>
+              <p className="tb-hero-description">AI-powered asset health analysis and failure prediction</p>
+            </div>
+            <button onClick={()=>router.push("/executive")} className="tb-btn-secondary">← Back</button>
+          </div>
           <div className="tb-grid-4 mt-6">
-            {predictions.map((k,i)=>(
-              <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
+            {[
+              {label:"Analyzed",    value:predictions.length,  color:"#F1F5F9"},
+              {label:"High Risk",   value:highRisk.length,     color:highRisk.length>0?"#FB923C":"#34D399"},
+              {label:"Critical",    value:critical.length,     color:critical.length>0?"#F87171":"#34D399"},
+              {label:"Patterns",    value:patternList.length,  color:"#A78BFA"},
+            ].map((k,i)=>(
+              <div key={i} className="tb-hero-kpi">
+                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </div>
             ))}
           </div>
         </div>
       </div>
+
       <div className="tb-canvas">
-        <div className="tb-section">
-          <div className="tb-section-title">Predictions & Recommendations</div>
-          <div className="space-y-3">
-            {predictions.map((pred,i)=>(
-              pred.value>0 ? (
-                <button key={i} onClick={()=>router.push(pred.path)} className="w-full flex items-center gap-4 p-4 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
-                  <div style={{width:48,height:48,borderRadius:12,background:pred.color+"18",border:"1px solid "+pred.color+"30",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.25rem",flexShrink:0}}>🔮</div>
-                  <div className="flex-1"><div className="text-sm font-bold text-primary">{pred.label}</div><div className="text-xs text-tertiary mt-0.5">Recommended action: {pred.action}</div></div>
-                  <div className="text-right flex-shrink-0"><div className="text-2xl font-black" style={{color:pred.color}}>{pred.value}</div><div className="text-xs text-brand">{pred.action} →</div></div>
-                </button>
-              ) : (
-                <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-base-alt opacity-50">
-                  <div style={{width:48,height:48,borderRadius:12,background:"#34D39918",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"1.25rem",flexShrink:0}}>✅</div>
-                  <div className="text-sm text-secondary">{pred.label} — none upcoming</div>
-                </div>
-              )
-            ))}
+        {pred?.ai_summary && pred.ai_summary !== "AI analysis unavailable" && (
+          <div className="tb-section" style={{borderColor:"#A78BFA40",background:"#A78BFA08"}}>
+            <div className="flex items-start gap-3">
+              <span style={{fontSize:"1.5rem"}}>🤖</span>
+              <div>
+                <div className="text-xs text-tertiary mb-1">AI Analysis (Qwen 2.5)</div>
+                <div className="text-sm text-secondary">{pred.ai_summary}</div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
         <div className="tb-section">
-          <div className="text-label-upper text-tertiary mb-4">Upcoming PM Plans</div>
-          {[...pmsDueWeek,...pmsDueMonth].slice(0,5).length===0 ? (
-            <div className="tb-empty" style={{padding:"24px 0"}}><div className="tb-empty-icon" style={{fontSize:"2rem"}}>📅</div><div className="tb-empty-desc">No PM plans due in the next 30 days</div></div>
+          <div className="tb-section-header">
+            <div className="tb-section-title" style={{marginBottom:0}}>Asset Risk Scores</div>
+            <button onClick={()=>router.push("/maintenance/assets")} className="tb-section-link">All Assets →</button>
+          </div>
+          {isLoading ? (
+            <div className="space-y-3 mt-3">{[1,2,3,4,5].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          ) : predictions.length===0 ? (
+            <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-desc">No assets found</div></div>
           ) : (
-            <div className="space-y-2">
-              {[...pmsDueWeek,...pmsDueMonth].slice(0,5).map((pm,i)=>{
-                const daysUntil=Math.ceil((new Date(pm.next_due_ts)-now)/86400000);
+            <div className="space-y-2 mt-3">
+              {predictions.map((pred,i)=>{
+                const c = RISK_COLOR[pred.risk_label]||"#94A3B8";
                 return (
-                  <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
-                    <div className="flex items-center gap-2 min-w-0"><span className="text-base">📅</span><span className="text-sm text-secondary truncate">{pm.title||"—"}</span></div>
-                    <span className="text-xs flex-shrink-0" style={{color:daysUntil<=7?"#FBBF24":"#94A3B8"}}>in {daysUntil}d</span>
+                  <button key={i} onClick={()=>router.push("/maintenance/assets/"+pred.asset_id)}
+                    className="w-full flex items-start gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left"
+                    style={{borderLeft:"3px solid "+c}}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-bold text-primary truncate">{pred.asset_name}</div>
+                        <span className="tb-badge flex-shrink-0" style={{background:c+"18",color:c,border:"1px solid "+c+"30",fontSize:"0.5625rem"}}>
+                          {pred.risk_label}
+                        </span>
+                      </div>
+                      <div className="text-xs text-tertiary mt-0.5">{pred.recommendation}</div>
+                      <div className="flex items-center gap-4 mt-1">
+                        <span className="text-xs text-secondary">{pred.category}</span>
+                        <span className="text-xs text-tertiary">{pred.total_wos} WOs</span>
+                        {pred.critical_wos>0&&<span className="text-xs font-bold text-red-400">{pred.critical_wos} critical</span>}
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      <div className="text-2xl font-black" style={{color:c}}>{pred.risk_score}</div>
+                      <div className="text-xs text-tertiary">risk</div>
+                    </div>
                   </button>
                 );
               })}
             </div>
           )}
+        </div>
+
+        {patternList.length>0&&(
+          <div className="tb-section">
+            <div className="tb-section-header">
+              <div className="tb-section-title" style={{marginBottom:0}}>Recurring Issue Patterns</div>
+              <span className="text-xs text-tertiary">{patternList.length} patterns detected</span>
+            </div>
+            <div className="tb-table" style={{borderRadius:12,overflow:"hidden",marginTop:12}}>
+              <div className="tb-table-head" style={{gridTemplateColumns:"2fr 100px 80px 120px"}}>
+                {["Asset","Category","Count","Avg Resolution"].map((h,i)=>(
+                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
+                ))}
+              </div>
+              {patternList.slice(0,8).map((pat,i)=>{
+                const pc={critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[pat.priority]||"#94A3B8";
+                return (
+                  <div key={i} className="tb-table-row" style={{gridTemplateColumns:"2fr 100px 80px 120px"}}>
+                    <div className="flex items-center gap-2 pr-4 min-w-0">
+                      <div className="tb-priority-bar" style={{background:pc}}/>
+                      <div className="text-sm font-medium text-primary truncate">{pat.asset_name||"—"}</div>
+                    </div>
+                    <div className="text-center text-xs text-secondary">{pat.category||"—"}</div>
+                    <div className="text-center text-sm font-bold" style={{color:pc}}>{pat.occurrence_count}</div>
+                    <div className="text-center text-xs text-tertiary">
+                      {pat.avg_resolution_hours ? Math.round(pat.avg_resolution_hours)+"h" : "—"}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="tb-section">
+          <div className="text-label-upper text-tertiary mb-4">Maintenance Intelligence</div>
+          <div className="tb-grid-3">
+            {[
+              {label:"Assets",        icon:"⚙️",  path:"/maintenance/assets"},
+              {label:"PM Plans",      icon:"📅", path:"/maintenance/pm-plans"},
+              {label:"Work Orders",   icon:"🔧", path:"/operations/work-orders"},
+            ].map((a,i)=>(
+              <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
+                <span className="text-xl">{a.icon}</span>
+                <span className="text-xs font-medium text-secondary">{a.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
