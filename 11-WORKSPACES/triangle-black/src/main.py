@@ -2794,6 +2794,96 @@ def report_contracts():
             "generated_at": datetime.now().isoformat(),
         }
 
+# ── PROCUREMENT LIST ENDPOINTS (GET) ─────────────────────────────────────────
+# Added separately because Sprint 245 functions were never persisted
+
+@app.get("/api/v1/scope-of-work/", tags=["procurement"])
+def get_sow_list(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM scope_of_work ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/vendors/", tags=["procurement"])
+def get_vendors_list(limit: int = 100):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM vendors WHERE blacklisted=false ORDER BY rating DESC, company_name LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/rfq/", tags=["procurement"])
+def get_rfq_list(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM rfq_headers ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/purchase-orders-v2/", tags=["procurement"])
+def get_pos_v2_list(limit: int = 100):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT po.*, v.company_name as vendor_name
+                FROM purchase_orders_v2 po
+                LEFT JOIN vendors v ON v.id = po.vendor_id
+                ORDER BY po.created_at DESC LIMIT :l
+            """), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/approval-requests/", tags=["procurement"])
+def get_approvals_list(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT * FROM approval_requests ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+@app.get("/api/v1/procurement/dashboard", tags=["procurement"])
+def get_procurement_dashboard():
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, p=None):
+            try:
+                r = db.execute(text(q), p or {}).fetchone()
+                return dict(r._mapping) if r else {}
+            except:
+                db.rollback(); return {}
+        return {
+            "sow": safe("SELECT count(*) as total, count(*) FILTER (WHERE status='pending_approval') as pending, count(*) FILTER (WHERE status='approved') as approved FROM scope_of_work"),
+            "vendors": safe("SELECT count(*) as total, count(*) FILTER (WHERE is_approved=true) as approved FROM vendors"),
+            "rfqs": safe("SELECT count(*) as total, count(*) FILTER (WHERE status='sent') as active, count(*) FILTER (WHERE status='responses_received') as with_quotes FROM rfq_headers"),
+            "pos": safe("SELECT count(*) as total, count(*) FILTER (WHERE status='approved') as approved, COALESCE(sum(total_amount),0) as total_value FROM purchase_orders_v2"),
+            "approvals": safe("SELECT count(*) as total, count(*) FILTER (WHERE status='pending') as pending FROM approval_requests"),
+            "grns": safe("SELECT count(*) as total FROM goods_receipt_notes"),
+        }
+
 # ── SPRINT 247: DETAIL + CREATE + BID COMPARISON ENDPOINTS ───────────────────
 
 @app.get("/api/v1/vendors/{vendor_id}", tags=["procurement"])
