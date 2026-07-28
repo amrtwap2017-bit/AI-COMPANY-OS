@@ -121,7 +121,7 @@ export default function ProcurementHub() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Procurement Modules</div>
-          <div className="tb-grid-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {modules.map((m, i) => (
               <button
                 key={i}

@@ -38,7 +38,7 @@ export default function InvoicesPage() {
               <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Procurement</button>
             </div>
           </div>
-          <div className="tb-grid-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total Invoices",value:dash?.totals?.total||0,color:"#F1F5F9"},
               {label:"Total Value",value:fmtEGP(dash?.totals?.total_value||0),color:"#60A5FA"},

@@ -80,7 +80,7 @@ export default function ExecutiveDashboardPage() {
           </div>
 
           {/* TOP KPI ROW */}
-          <div className="tb-grid-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {
                 label:"Open Work Orders",

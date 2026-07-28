@@ -166,7 +166,7 @@ export default function WorkOrdersPage() {
         </div>
 
         {/* Table */}
-        <div className="tb-table">
+        <div className="tb-table hidden md:block">
           {filtered.length === 0 ? (
             <div className="tb-empty">
               <div className="tb-empty-icon">🔧</div>

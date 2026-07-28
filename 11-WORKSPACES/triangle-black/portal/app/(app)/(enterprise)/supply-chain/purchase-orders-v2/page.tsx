@@ -33,7 +33,7 @@ export default function PurchaseOrdersV2Page() {
               <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Back</button>
             </div>
           </div>
-          <div className="tb-grid-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total POs",value:pos.length,color:"#F1F5F9"},
               {label:"Pending",value:pos.filter(p=>p.status==="pending_approval").length,color:"#FBBF24"},

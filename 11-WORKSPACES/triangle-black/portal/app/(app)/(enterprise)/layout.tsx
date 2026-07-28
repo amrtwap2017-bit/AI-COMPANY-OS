@@ -1,3 +1,4 @@
+import { MobileBottomNav } from "@/components/workspace/MobileBottomNav";
 // @ts-nocheck
 // Triangle Black - Enterprise Layout
 // FIXED: Does NOT wrap in EnterpriseShell

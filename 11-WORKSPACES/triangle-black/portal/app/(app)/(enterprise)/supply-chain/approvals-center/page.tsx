@@ -37,7 +37,7 @@ export default function ApprovalsCenterPage() {
             </div>
             <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Back</button>
           </div>
-          <div className="tb-grid-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total",value:approvals.length,color:"#F1F5F9"},
               {label:"Pending",value:pending.length,color:pending.length>0?"#FBBF24":"#34D399"},
