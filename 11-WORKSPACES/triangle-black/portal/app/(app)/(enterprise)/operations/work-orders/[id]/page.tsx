@@ -1,6 +1,6 @@
 "use client";
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
@@ -37,6 +37,11 @@ export default function WorkOrderDetailPage() {
     { enabled: !!id }
   );
 
+  const deleteMut = useMutation(
+    () => authFetch(`/api/v1/work-orders/${id}`, { method: "DELETE" }),
+    { onSuccess: () => router.push("/operations/work-orders") }
+  );
+
   if (isLoading) return (
     <div className="min-h-screen bg-base flex items-center justify-center">
       <div className="text-secondary text-sm animate-pulse">Loading work order...</div>
@@ -49,6 +54,13 @@ export default function WorkOrderDetailPage() {
         <div className="tb-empty-icon">🔧</div>
         <div className="tb-empty-title">Work order not found</div>
         <button onClick={() => router.push("/operations/work-orders")} className="tb-btn-primary mt-4">Back</button>
+        <button
+              onClick={()=>{ if(confirm("Delete this work order? This cannot be undone.")) deleteMut.mutate(); }}
+              disabled={deleteMut.isLoading}
+              className="tb-btn-secondary"
+              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
+            </button>
       </div>
     </div>
   );
