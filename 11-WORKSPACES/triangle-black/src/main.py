@@ -3285,12 +3285,9 @@ def list_grns(limit: int = 50):
 # ── SPRINT 248: UNIVERSAL DOCUMENT ATTACHMENT SYSTEM ─────────────────────────
 
 UPLOAD_BASE = "/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/uploads"
-ALLOWED_TYPES = {"application/pdf","image/png","image/jpeg","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","image/jpg"}
 ALLOWED_EXT   = {".pdf",".png",".jpg",".jpeg",".docx",".xlsx"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
 REQUIRED_VENDOR_DOCS = {"trade_license", "tax_card"}
-
 DOC_CATEGORIES = {
     "vendor": ["trade_license","commercial_reg","tax_card","bank_letter","iso_cert","insurance","portfolio","nda","other"],
     "purchase_request": ["technical_spec","quote","approval_email","delivery_note","inspection_report","invoice","other"],
@@ -3301,34 +3298,39 @@ DOC_CATEGORIES = {
 
 @app.post("/api/v1/documents/upload", tags=["documents"])
 async def upload_document(request: Request):
-    """Upload a document and attach it to any entity (vendor, po, sow, grn)"""
+    """Upload a document for any entity: vendor, purchase_orders_v2, sow, grn"""
     import os, uuid
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from fastapi import HTTPException
 
-    form = await request.form()
-    entity_type  = form.get("entity_type", "")
-    entity_id    = form.get("entity_id", "")
-    doc_category = form.get("doc_category", "other")
-    doc_name     = form.get("doc_name", "")
-    uploaded_by  = form.get("uploaded_by", "")
-    notes        = form.get("notes", "")
-    hotel_id     = form.get("hotel_id", "tb-default-hotel-000000000001")
-    file         = form.get("file")
+    try:
+        form = await request.form()
+    except Exception as e:
+        return {"error": f"Failed to parse form: {str(e)}"}
 
-    if not file or not hasattr(file, "filename"):
-        return {"error": "No file provided"}
+    entity_type  = str(form.get("entity_type") or "")
+    entity_id    = str(form.get("entity_id") or "")
+    doc_category = str(form.get("doc_category") or "other")
+    doc_name     = str(form.get("doc_name") or "")
+    uploaded_by  = str(form.get("uploaded_by") or "")
+    notes        = str(form.get("notes") or "")
+    hotel_id     = str(form.get("hotel_id") or "tb-default-hotel-000000000001")
+    file_obj     = form.get("file")
 
-    ext = Path(file.filename).suffix.lower()
+    if not entity_type or not entity_id:
+        return {"error": "entity_type and entity_id are required"}
+    if not file_obj or not hasattr(file_obj, "filename"):
+        return {"error": "No file provided or invalid file field"}
+
+    ext = Path(file_obj.filename).suffix.lower()
     if ext not in ALLOWED_EXT:
-        return {"error": f"File type {ext} not allowed. Use: {', '.join(ALLOWED_EXT)}"}
+        return {"error": f"File type {ext} not allowed. Allowed: {sorted(ALLOWED_EXT)}"}
 
-    contents = await file.read()
+    contents = await file_obj.read()
     if len(contents) > MAX_FILE_SIZE:
         return {"error": "File too large. Max 10MB."}
 
-    safe_entity = entity_type.replace("/","_")
     folder_map = {
         "vendor": "vendors",
         "purchase_request": "purchase-requests",
@@ -3336,40 +3338,53 @@ async def upload_document(request: Request):
         "sow": "sow",
         "grn": "grn",
     }
-    folder = folder_map.get(entity_type, safe_entity)
+    folder = folder_map.get(entity_type, entity_type)
     upload_dir = Path(UPLOAD_BASE) / hotel_id / folder / entity_id
     upload_dir.mkdir(parents=True, exist_ok=True)
 
-    unique_name = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+    unique_name = f"{uuid.uuid4().hex[:8]}_{file_obj.filename}"
     file_path = upload_dir / unique_name
     file_path.write_bytes(contents)
 
     eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
     with Session(eng) as db:
         try:
-            is_required = doc_category in REQUIRED_VENDOR_DOCS and entity_type == "vendor"
+            is_req = doc_category in REQUIRED_VENDOR_DOCS and entity_type == "vendor"
             doc_id = str(uuid.uuid4())
             db.execute(text("""
-                INSERT INTO entity_documents (id, hotel_id, entity_type, entity_id, doc_category,
-                    doc_name, file_name, file_path, file_size_bytes, mime_type,
-                    is_required, uploaded_by, notes)
-                VALUES (:id, :hotel_id, :entity_type, :entity_id, :cat,
-                    :name, :fname, :fpath, :fsize, :mime,
-                    :required, :by, :notes)
+                INSERT INTO entity_documents
+                  (id, hotel_id, entity_type, entity_id, doc_category, doc_name,
+                   file_name, file_path, file_size_bytes, mime_type, is_required,
+                   uploaded_by, notes)
+                VALUES
+                  (:id, :hotel_id, :et, :eid, :cat, :name,
+                   :fname, :fpath, :fsize, :mime, :req,
+                   :by, :notes)
             """), {
                 "id": doc_id, "hotel_id": hotel_id,
-                "entity_type": entity_type, "entity_id": entity_id,
-                "cat": doc_category, "name": doc_name or file.filename,
-                "fname": unique_name, "fpath": str(file_path),
-                "fsize": len(contents), "mime": file.content_type or "application/octet-stream",
-                "required": is_required, "by": uploaded_by, "notes": notes
+                "et": entity_type, "eid": entity_id,
+                "cat": doc_category,
+                "name": doc_name or file_obj.filename,
+                "fname": unique_name,
+                "fpath": str(file_path),
+                "fsize": len(contents),
+                "mime": getattr(file_obj, "content_type", "application/octet-stream") or "application/octet-stream",
+                "req": is_req,
+                "by": uploaded_by,
+                "notes": notes,
             })
             db.commit()
             return {
-                "id": doc_id, "doc_name": doc_name or file.filename,
-                "file_name": unique_name, "file_size_bytes": len(contents),
-                "doc_category": doc_category, "entity_type": entity_type,
-                "entity_id": entity_id, "url": f"/api/v1/documents/{doc_id}/view"
+                "id": doc_id,
+                "doc_name": doc_name or file_obj.filename,
+                "file_name": unique_name,
+                "file_size_bytes": len(contents),
+                "file_size_kb": round(len(contents)/1024, 1),
+                "doc_category": doc_category,
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "is_required": is_req,
+                "url": f"/api/v1/documents/{doc_id}/view",
             }
         except Exception as e:
             db.rollback()
@@ -3394,7 +3409,7 @@ def list_documents(entity_type: str, entity_id: str):
             docs = [dict(r._mapping) for r in rows]
             for d in docs:
                 d["url"] = f"/api/v1/documents/{d['id']}/view"
-                d["file_size_kb"] = round(d.get("file_size_bytes",0) / 1024, 1)
+                d["file_size_kb"] = round((d.get("file_size_bytes") or 0) / 1024, 1)
             return docs
         except Exception as e:
             db.rollback(); return []
@@ -3410,11 +3425,9 @@ def view_document(doc_id: str):
     with Session(eng) as db:
         try:
             row = db.execute(text("SELECT file_path, file_name, mime_type FROM entity_documents WHERE id=:id"), {"id": doc_id}).fetchone()
-            if not row:
-                raise HTTPException(404, "Document not found")
+            if not row: raise HTTPException(404, "Document not found")
             fp = Path(row.file_path)
-            if not fp.exists():
-                raise HTTPException(404, "File not found on disk")
+            if not fp.exists(): raise HTTPException(404, "File missing from disk")
             return FileResponse(
                 path=str(fp),
                 filename=row.file_name,
@@ -3422,8 +3435,7 @@ def view_document(doc_id: str):
                 headers={"Content-Disposition": f"inline; filename={row.file_name}"}
             )
         except HTTPException: raise
-        except Exception as e:
-            raise HTTPException(500, str(e))
+        except Exception as e: raise HTTPException(500, str(e))
 
 @app.delete("/api/v1/documents/{doc_id}", tags=["documents"])
 def delete_document(doc_id: str):
@@ -3435,7 +3447,7 @@ def delete_document(doc_id: str):
         try:
             row = db.execute(text("SELECT file_path FROM entity_documents WHERE id=:id"), {"id": doc_id}).fetchone()
             if not row:
-                from fastapi import HTTPException; raise HTTPException(404, "Document not found")
+                from fastapi import HTTPException; raise HTTPException(404, "Not found")
             fp = Path(row.file_path)
             if fp.exists(): fp.unlink()
             db.execute(text("DELETE FROM entity_documents WHERE id=:id"), {"id": doc_id})
@@ -3446,7 +3458,6 @@ def delete_document(doc_id: str):
 
 @app.get("/api/v1/vendors/{vendor_id}/doc-status", tags=["documents"])
 def vendor_doc_status(vendor_id: str):
-    """Check if vendor has all required documents for approval"""
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3454,21 +3465,21 @@ def vendor_doc_status(vendor_id: str):
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
-                SELECT doc_category, count(*) as count
+                SELECT doc_category, count(*) as cnt
                 FROM entity_documents
                 WHERE entity_type='vendor' AND entity_id=:id
                 GROUP BY doc_category
             """), {"id": vendor_id}).fetchall()
-            uploaded = {r.doc_category: r.count for r in rows}
+            uploaded = {r.doc_category: r.cnt for r in rows}
             required = list(REQUIRED_VENDOR_DOCS)
-            missing = [cat for cat in required if cat not in uploaded]
+            missing  = [c for c in required if c not in uploaded]
             return {
                 "vendor_id": vendor_id,
                 "required": required,
                 "uploaded_categories": list(uploaded.keys()),
                 "missing_required": missing,
                 "approval_ready": len(missing) == 0,
-                "total_documents": sum(uploaded.values())
+                "total_documents": sum(uploaded.values()),
             }
         except Exception as e:
             db.rollback(); return {"error": str(e)}
