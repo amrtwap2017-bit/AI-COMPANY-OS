@@ -224,6 +224,101 @@ app.include_router(purchase_orders_router, prefix="/api/v1")
 app.include_router(goods_receipts_router, prefix="/api/v1")
 
 
+
+# ── SPRINT 238: ROLE ENFORCEMENT HELPER ──────────────────────────────────────
+import base64 as _b64_rbac
+import json as _js_rbac
+
+def _get_user_role_from_token(request: Request) -> str:
+    """Extract role from JWT token via DB lookup"""
+    try:
+        auth = request.headers.get("Authorization", "")
+        token = auth.replace("Bearer ", "").strip()
+        if not token:
+            return "anonymous"
+        parts = token.split(".")
+        if len(parts) < 2:
+            return "viewer"
+        seg = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
+        payload = _js_rbac.loads(_b64_rbac.urlsafe_b64decode(seg))
+        user_id = str(payload.get("sub", ""))
+        if not user_id:
+            return "viewer"
+        from sqlalchemy import text as _text2, create_engine as _ce2
+        from sqlalchemy.orm import Session as _S2
+        import os as _os2
+        eng = _ce2(_os2.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+        with _S2(eng) as db:
+            row = db.execute(_text2("SELECT role FROM user_roles WHERE user_id=:uid LIMIT 1"), {"uid": user_id}).fetchone()
+            return str(row[0]).strip() if row else "viewer"
+    except Exception:
+        return "viewer"
+
+ROLE_LEVELS = {"admin": 1, "manager": 2, "engineer": 3, "finance": 3, "technician": 4, "supplier": 4, "viewer": 5, "anonymous": 99}
+
+def require_role(min_level: int = 2):
+    """Dependency — raises 403 if user role level > min_level"""
+    def checker(request: Request):
+        role = _get_user_role_from_token(request)
+        level = ROLE_LEVELS.get(role, 99)
+        if level > min_level:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access denied. Required level: {min_level}, your role: {role} (level {level})"
+            )
+        return role
+    return checker
+
+def require_admin(request: Request):
+    """Dependency — admin only"""
+    role = _get_user_role_from_token(request)
+    if role != "admin":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail=f"Admin required. Your role: {role}")
+    return role
+
+# Role management endpoint
+@app.post("/api/v1/rbac/users/{user_id}/role", tags=["rbac"])
+def assign_user_role(user_id: str, role: str, _admin: str = Depends(require_admin), request: Request = None):
+    """Admin only — assign role to user"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    valid_roles = ["admin","manager","engineer","technician","finance","supplier","viewer"]
+    if role not in valid_roles:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid role. Choose from: {valid_roles}")
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            existing = db.execute(text("SELECT id FROM user_roles WHERE user_id=:uid"), {"uid": user_id}).fetchone()
+            if existing:
+                db.execute(text("UPDATE user_roles SET role=:role WHERE user_id=:uid"), {"role": role, "uid": user_id})
+            else:
+                db.execute(text("INSERT INTO user_roles (id,user_id,role) VALUES (gen_random_uuid()::text,:uid,:role)"), {"uid": user_id, "role": role})
+            db.commit()
+            return {"user_id": user_id, "role": role, "status": "updated"}
+        except Exception as e:
+            db.rollback()
+            return {"error": str(e)}
+
+@app.get("/api/v1/rbac/users", tags=["rbac"])
+def list_user_roles(_admin: str = Depends(require_admin)):
+    """Admin only — list all user roles"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("SELECT ur.user_id, ur.role, ur.created_at FROM user_roles ur ORDER BY ur.created_at")).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception: db.rollback(); return []
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 @app.get("/health")
 def health():
     db_ok = check_connection()
