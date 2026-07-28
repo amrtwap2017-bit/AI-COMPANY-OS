@@ -2550,3 +2550,61 @@ def list_permissions():
             return [dict(r._mapping) for r in rows]
         except Exception: db.rollback(); return []
 
+# ── SPRINT 239: PASSWORD CHANGE ───────────────────────────────────────────────
+
+@app.post("/api/v1/auth/change-password", tags=["auth"])
+def change_password(request: Request, current_password: str, new_password: str):
+    """Change password for authenticated user"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    from src.core.auth import verify_password, hash_password
+
+    auth = request.headers.get("Authorization", "")
+    token = auth.replace("Bearer ", "").strip()
+    if not token:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    import base64, json as _js
+    try:
+        parts = token.split(".")
+        seg = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
+        payload = _js.loads(base64.urlsafe_b64decode(seg))
+        user_id = str(payload.get("sub",""))
+        email = str(payload.get("email",""))
+    except Exception:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            # Get current password hash
+            user = db.execute(
+                text("SELECT id, hashed_password FROM users WHERE id=:uid OR email=:email LIMIT 1"),
+                {"uid": user_id, "email": email}
+            ).fetchone()
+            if not user:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=404, detail="User not found")
+
+            # Verify current password
+            if not verify_password(current_password, str(user[1])):
+                from fastapi import HTTPException
+                raise HTTPException(status_code=400, detail="Current password incorrect")
+
+            # Update password
+            new_hash = hash_password(new_password)
+            db.execute(
+                text("UPDATE users SET hashed_password=:h WHERE id=:uid"),
+                {"h": new_hash, "uid": str(user[0])}
+            )
+            db.commit()
+            return {"status": "success", "message": "Password changed successfully"}
+        except Exception as e:
+            db.rollback()
+            if "HTTP" in str(type(e)):
+                raise
+            return {"status": "error", "message": str(e)}
+
