@@ -3534,6 +3534,29 @@ def list_invoices(status: str = None, limit: int = 50):
         except Exception as e:
             db.rollback(); return []
 
+@app.get("/api/v1/supplier-invoices/dashboard", tags=["invoices"])
+def invoice_dashboard():
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q):
+            try: r = db.execute(text(q)).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        return {
+            "totals": safe("SELECT count(*) as total, COALESCE(sum(total_amount),0) as total_value, COALESCE(sum(balance_due),0) as total_outstanding FROM supplier_invoices"),
+            "by_status": {
+                "draft": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='draft'").get("n",0),
+                "submitted": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='submitted'").get("n",0),
+                "approved": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='approved'").get("n",0),
+                "paid": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='paid'").get("n",0),
+                "mismatch": safe("SELECT count(*) as n FROM supplier_invoices WHERE match_result='mismatch'").get("n",0),
+            },
+            "overdue": safe("SELECT count(*) as n, COALESCE(sum(balance_due),0) as amount FROM supplier_invoices WHERE due_date < CURRENT_DATE AND payment_status != 'paid'"),
+        }
+
+
 @app.get("/api/v1/supplier-invoices/{invoice_id}", tags=["invoices"])
 def get_invoice(invoice_id: str):
     import os
@@ -3751,25 +3774,3 @@ async def record_payment(invoice_id: str, request: Request):
             }
         except Exception as e:
             db.rollback(); return {"error": str(e)}
-
-@app.get("/api/v1/supplier-invoices/dashboard", tags=["invoices"])
-def invoice_dashboard():
-    import os
-    from sqlalchemy import text, create_engine
-    from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
-    with Session(eng) as db:
-        def safe(q):
-            try: r = db.execute(text(q)).fetchone(); return dict(r._mapping) if r else {}
-            except: db.rollback(); return {}
-        return {
-            "totals": safe("SELECT count(*) as total, COALESCE(sum(total_amount),0) as total_value, COALESCE(sum(balance_due),0) as total_outstanding FROM supplier_invoices"),
-            "by_status": {
-                "draft": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='draft'").get("n",0),
-                "submitted": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='submitted'").get("n",0),
-                "approved": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='approved'").get("n",0),
-                "paid": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='paid'").get("n",0),
-                "mismatch": safe("SELECT count(*) as n FROM supplier_invoices WHERE match_result='mismatch'").get("n",0),
-            },
-            "overdue": safe("SELECT count(*) as n, COALESCE(sum(balance_due),0) as amount FROM supplier_invoices WHERE due_date < CURRENT_DATE AND payment_status != 'paid'"),
-        }
