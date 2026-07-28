@@ -1,11 +1,13 @@
 "use client";
 // @ts-nocheck
+import { useRole } from "@/lib/hooks/useRole";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function AdministrationPage() {
   const router = useRouter();
+  const { is_admin, role } = useRole();
   const { data: twin } = useQuery(["adm-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
   const score = twin?.health_score||0;
   const modules = [
@@ -31,6 +33,11 @@ export default function AdministrationPage() {
         </div>
       </div>
       <div className="tb-canvas">
+        {!is_admin && role && (
+          <div className="tb-section" style={{borderColor:"#FBBF2440",background:"#FBBF2408"}}>
+            <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold" style={{color:"#FBBF24"}}>Read-only access — role: {role}. Admin required for changes.</span></div>
+          </div>
+        )}
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Admin Modules</div>
           <div className="tb-grid-3">

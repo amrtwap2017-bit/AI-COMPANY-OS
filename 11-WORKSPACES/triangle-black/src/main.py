@@ -109,6 +109,22 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+
+# ── SPRINT 237: REQUEST ID MIDDLEWARE ─────────────────────────────────────────
+import uuid as _uuid
+from starlette.middleware.base import BaseHTTPMiddleware as _BHTTP2
+
+class RequestIDMiddleware(_BHTTP2):
+    async def dispatch(self, request, call_next):
+        req_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())[:8]
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = req_id
+        return response
+
+app.add_middleware(RequestIDMiddleware)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 # ── SPRINT 232: RATE LIMITING ─────────────────────────────────────────────────
 import time
 from collections import defaultdict
