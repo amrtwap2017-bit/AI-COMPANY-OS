@@ -89,6 +89,18 @@ from src.commercial.email_notifications.router import router as email_notificati
 
 
 
+
+# Rate limiting
+try:
+    from slowapi import Limiter, _rate_limit_exceeded_handler
+    from slowapi.util import get_remote_address
+    from slowapi.errors import RateLimitExceeded
+    limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
+    RATE_LIMITING = True
+except ImportError:
+    RATE_LIMITING = False
+    print("INFO: slowapi not installed — rate limiting disabled")
+
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform — Multi-Hotel",
@@ -96,6 +108,12 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Attach rate limiter if available
+if RATE_LIMITING:
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 app.add_middleware(
     CORSMiddleware,
