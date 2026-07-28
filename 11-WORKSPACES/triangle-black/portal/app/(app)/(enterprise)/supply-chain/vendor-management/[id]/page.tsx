@@ -1,7 +1,7 @@
-
 "use client";
 // @ts-nocheck
-import { useState } from "react";
+import DocumentsPanel from "@/components/documents/DocumentsPanel";
+mport { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
@@ -17,6 +17,11 @@ export default function VendorDetailPage() {
     ["vendor-detail", id],
     () => authFetch(`/api/v1/vendors/${id}`).then(r=>r.json()),
     { staleTime: 30000 }
+  );
+  const { data: docStatus } = useQuery(
+    ["vendor-doc-status", id],
+    () => authFetch(`/api/v1/vendors/${id}/doc-status`).then(r=>r.json()),
+    { staleTime: 30000, enabled: !!id }
   );
   const approveMut = useMutation(
     () => authFetch(`/api/v1/vendors/${id}`, {
@@ -51,6 +56,14 @@ export default function VendorDetailPage() {
                 <span className="text-xs text-tertiary">{vendor.vendor_code}</span>
                 <span className="text-xs" style={{color:"#FBBF24"}}>{STARS(vendor.rating)} {Number(vendor.rating||0).toFixed(1)}</span>
                 <span className="tb-badge" style={{background:vendor.is_approved?"#34D39918":"#F8717118",color:vendor.is_approved?"#34D399":"#F87171"}}>{vendor.is_approved?"Approved":"Pending"}</span>
+                {docStatus && !docStatus.approval_ready && (
+                  <span className="tb-badge" style={{background:"#F8717118",color:"#F87171",fontSize:"0.45rem"}}>
+                    ⚠ Missing: {(docStatus.missing_required||[]).join(", ")}
+                  </span>
+                )}
+                {docStatus?.approval_ready && (
+                  <span className="tb-badge" style={{background:"#34D39918",color:"#34D399",fontSize:"0.45rem"}}>📋 Docs Complete</span>
+                )}
               </div>
             </div>
           </div>
@@ -71,9 +84,9 @@ export default function VendorDetailPage() {
       </div>
       <div className="tb-canvas">
         <div className="flex gap-2 mb-4">
-          {["overview","pos","banking"].map(tab=>(
+          {["overview","pos","banking","documents"].map(tab=>(
             <button key={tab} onClick={()=>setActiveTab(tab)} className={"tb-pill "+(activeTab===tab?"tb-pill--active":"")}>
-              {tab==="overview"?"Overview":tab==="pos"?"Purchase Orders":"Banking"}
+              {tab==="overview"?"Overview":tab==="pos"?"Purchase Orders":tab==="banking"?"Banking":"Documents"}
             </button>
           ))}
         </div>
@@ -132,6 +145,15 @@ export default function VendorDetailPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {activeTab === "documents" && (
+          <DocumentsPanel
+            entityType="vendor"
+            entityId={id as string}
+            title="Vendor Documents"
+            categories={["trade_license","commercial_reg","tax_card","bank_letter","iso_cert","insurance","portfolio","nda","other"]}
+          />
         )}
       </div>
     </div>

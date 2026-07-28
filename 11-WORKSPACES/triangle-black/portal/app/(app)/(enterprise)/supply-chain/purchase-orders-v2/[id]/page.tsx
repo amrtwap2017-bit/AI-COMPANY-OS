@@ -1,7 +1,7 @@
-
 "use client";
 // @ts-nocheck
-import { useState } from "react";
+import DocumentsPanel from "@/components/documents/DocumentsPanel";
+mport { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
@@ -95,9 +95,9 @@ export default function POv2DetailPage() {
       </div>
       <div className="tb-canvas">
         <div className="flex gap-2 mb-4">
-          {["lines","grns","details"].map(tab=>(
+          {["lines","grns","details","documents"].map(tab=>(
             <button key={tab} onClick={()=>setActiveTab(tab)} className={"tb-pill "+(activeTab===tab?"tb-pill--active":"")}>
-              {tab==="lines"?"Line Items":tab==="grns"?"GRN History":"Details"}
+              {tab==="lines"?"Line Items":tab==="grns"?"GRN History":tab==="details"?"Details":"Documents"}
               {tab==="grns"&&grns.length>0&&<span className="ml-1 opacity-60">{grns.length}</span>}
             </button>
           ))}
@@ -201,6 +201,15 @@ export default function POv2DetailPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {activeTab === "documents" && (
+          <DocumentsPanel
+            entityType="purchase_orders_v2"
+            entityId={id as string}
+            title="PO Documents"
+            categories={["technical_spec","quote","approval_email","delivery_note","inspection_report","invoice","po_document","other"]}
+          />
         )}
       </div>
     </div>
