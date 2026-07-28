@@ -4,7 +4,7 @@ from __future__ import annotations
 Triangle Black — Main FastAPI Application v1.4.0
 Hotel Engineering Platform — Multi-hotel tenant isolation
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(levelname)s %(message)s')
