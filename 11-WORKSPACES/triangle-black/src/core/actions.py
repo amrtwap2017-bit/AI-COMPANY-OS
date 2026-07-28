@@ -2328,28 +2328,29 @@ def procurement_dashboard(
         RFQ.status == "open"
     ).scalar() or 0
 
-    # Top vendors by spend
-    top_vendors_raw = (
-        db.query(
-            PurchaseOrder.vendor_id,
-            func.sum(PurchaseOrder.total_amount).label("spend"),
-            func.count(PurchaseOrder.id).label("pos"),
-        )
-        .filter(PurchaseOrder.hotel_id == hotel_id)
-        .group_by(PurchaseOrder.vendor_id)
-        .order_by(func.sum(PurchaseOrder.total_amount).desc())
-        .limit(5).all()
-    )
+    # Top vendors by spend — query suppliers table (not InventoryVendor)
+    from sqlalchemy import text as sql_text
+    top_vendors_raw = db.execute(sql_text("""
+        SELECT 
+            po.supplier_id as vendor_id,
+            s.company_name as vendor_name,
+            SUM(po.total_amount) as total_spend,
+            COUNT(po.id) as total_pos
+        FROM purchase_orders po
+        LEFT JOIN suppliers s ON s.id = po.supplier_id
+        WHERE po.hotel_id = :hotel_id AND po.supplier_id IS NOT NULL
+        GROUP BY po.supplier_id, s.company_name
+        ORDER BY SUM(po.total_amount) DESC
+        LIMIT 5
+    """), {"hotel_id": hotel_id}).fetchall()
 
     top_vendors = []
     for row in top_vendors_raw:
-        v = db.query(InventoryVendor).filter(
-            InventoryVendor.id == row[0]).first()
         top_vendors.append({
             "vendor_id":   row[0],
-            "vendor_name": v.name if v else "Unknown",
-            "total_spend": float(row[1] or 0),
-            "total_pos":   row[2],
+            "vendor_name": row[1] or "Supplier",
+            "total_spend": float(row[2] or 0),
+            "total_pos":   row[3],
         })
 
     return {
