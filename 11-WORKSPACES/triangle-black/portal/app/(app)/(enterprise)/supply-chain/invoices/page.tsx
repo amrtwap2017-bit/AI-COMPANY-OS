@@ -21,7 +21,7 @@ export default function InvoicesPage() {
     () => authFetch(`/api/v1/supplier-invoices/${filter !== "all" ? `?status=${filter}` : ""}`).then(r=>r.json()),
     { staleTime: 30000 }
   );
-  const { data: dash } = useQuery(["invoice-dash"], () => authFetch("/api/v1/invoices/dashboard").then(r=>r.json()), { staleTime: 60000 });
+  const { data: dash } = useQuery(["invoice-dash"], () => authFetch("/api/v1/supplier-invoices/dashboard").then(r=>r.json()), { staleTime: 60000 });
   const invoices = toArr(raw);
   return (
     <div className="min-h-screen bg-base">

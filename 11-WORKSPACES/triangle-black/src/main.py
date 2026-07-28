@@ -3752,7 +3752,7 @@ async def record_payment(invoice_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.get("/api/v1/invoices/dashboard", tags=["invoices"])
+@app.get("/api/v1/supplier-invoices/dashboard", tags=["invoices"])
 def invoice_dashboard():
     import os
     from sqlalchemy import text, create_engine
