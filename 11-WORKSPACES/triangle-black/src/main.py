@@ -4095,3 +4095,448 @@ def executive_dashboard():
                 ),
             },
         }
+
+# ── SPRINT 253: UNIVERSAL REPORT ENGINE ──────────────────────────────────────
+
+@app.get("/api/v1/report-engine/catalog", tags=["reports"])
+def reports_catalog():
+    """List all available reports with metadata"""
+    return {
+        "reports": [
+            {"id":"work_orders","category":"Operations","label":"Work Orders Report",
+             "description":"All work orders with status, priority, technician, site, dates",
+             "filters":["status","priority","site_id","technician_id","date_from","date_to"]},
+            {"id":"service_requests","category":"Operations","label":"Service Requests Report",
+             "description":"Service requests by urgency, category, status, site",
+             "filters":["status","urgency","site_id","date_from","date_to"]},
+            {"id":"asset_maintenance","category":"Operations","label":"Asset Maintenance Report",
+             "description":"Assets with maintenance schedule, overdue, status",
+             "filters":["site_id","category","status"]},
+            {"id":"technician_productivity","category":"Operations","label":"Technician Productivity",
+             "description":"Work orders completed per technician with status breakdown",
+             "filters":["technician_id","date_from","date_to"]},
+            {"id":"invoices","category":"Financial","label":"Invoice Report",
+             "description":"All invoices with payment status, match result, vendor, amounts",
+             "filters":["status","payment_status","vendor_id","date_from","date_to"]},
+            {"id":"invoice_aging","category":"Financial","label":"Invoice Aging Report",
+             "description":"Outstanding invoices grouped by aging bucket (current/30/60/90+ days)",
+             "filters":["vendor_id"]},
+            {"id":"purchase_orders","category":"Procurement","label":"Purchase Orders Report",
+             "description":"POs with vendor, status, line items, totals, delivery status",
+             "filters":["status","vendor_id","date_from","date_to"]},
+            {"id":"vendor_performance","category":"Procurement","label":"Vendor Performance Report",
+             "description":"Vendor ratings, PO count, invoice totals, approval status",
+             "filters":["category","is_approved"]},
+            {"id":"scope_of_work","category":"Engineering","label":"Scope of Work / BOQ Report",
+             "description":"SOWs with BOQ breakdown, costs, approval status",
+             "filters":["status","type","date_from","date_to"]},
+            {"id":"rfq_comparison","category":"Procurement","label":"RFQ & Bid Comparison",
+             "description":"RFQs with all quotations, lowest bid, awarded vendor",
+             "filters":["status","date_from","date_to"]},
+            {"id":"project_status","category":"Engineering","label":"Project Status Report",
+             "description":"Projects with budget, completion %, manager, timeline",
+             "filters":["status"]},
+            {"id":"executive_summary","category":"Executive","label":"Executive Summary Report",
+             "description":"KPIs across all modules — operations, financial, procurement",
+             "filters":["date_from","date_to"]},
+        ]
+    }
+
+@app.get("/api/v1/report-engine/{report_type}", tags=["reports"])
+def generate_report(
+    report_type: str,
+    status: str = None,
+    priority: str = None,
+    urgency: str = None,
+    site_id: str = None,
+    technician_id: str = None,
+    vendor_id: str = None,
+    category: str = None,
+    payment_status: str = None,
+    is_approved: str = None,
+    date_from: str = None,
+    date_to: str = None,
+    limit: int = 500
+):
+    """Universal report endpoint — returns structured data + summary stats"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime, timedelta
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def q(sql, params=None):
+            try:
+                rows = db.execute(text(sql), params or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except Exception as e:
+                db.rollback(); return []
+        def q1(sql, params=None):
+            try:
+                r = db.execute(text(sql), params or {}).fetchone()
+                return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+
+        # Date filter helper
+        def date_filter(col, df=date_from, dt=date_to):
+            parts = []
+            p = {}
+            if df:
+                parts.append(f"{col} >= :df"); p["df"] = df
+            if dt:
+                parts.append(f"{col} <= :dt"); p["dt"] = dt
+            return (" AND " + " AND ".join(parts)) if parts else "", p
+
+        report_id = report_type.replace("-","_")
+
+        # ── WORK ORDERS ────────────────────────────────────────────────────────
+        if report_id == "work_orders":
+            where, params = ["1=1"], {}
+            if status: where.append("wo.status=:status"); params["status"]=status
+            if priority: where.append("wo.priority=:priority"); params["priority"]=priority
+            if site_id: where.append("wo.site_id=:site_id"); params["site_id"]=site_id
+            if technician_id: where.append("wo.technician_id=:tech"); params["tech"]=technician_id
+            if date_from: where.append("wo.created_at>=:df"); params["df"]=date_from
+            if date_to: where.append("wo.created_at<=:dt"); params["dt"]=date_to
+            params["l"] = limit
+            data = q(f"""
+                SELECT wo.id, wo.title, wo.type, wo.priority, wo.status,
+                       wo.created_at, wo.due_date, wo.started_at, wo.completed_at,
+                       t.name as technician_name, s.name as site_name,
+                       a.name as asset_name, a.category as asset_category
+                FROM work_orders wo
+                LEFT JOIN technicians t ON t.id = wo.technician_id
+                LEFT JOIN sites s ON s.id = wo.site_id
+                LEFT JOIN assets a ON a.id = wo.asset_id
+                WHERE {" AND ".join(where)}
+                ORDER BY CASE wo.priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
+                         wo.created_at DESC
+                LIMIT :l
+            """, params)
+            summary = q1("""
+                SELECT count(*) as total,
+                  count(*) FILTER (WHERE status='open') as open_count,
+                  count(*) FILTER (WHERE status='in_progress') as in_progress,
+                  count(*) FILTER (WHERE status='completed') as completed,
+                  count(*) FILTER (WHERE priority='critical') as critical,
+                  count(*) FILTER (WHERE priority='high') as high_priority
+                FROM work_orders
+            """)
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":summary,"columns":["title","type","priority","status","technician_name","site_name","due_date","created_at"],"data":data}
+
+        # ── SERVICE REQUESTS ───────────────────────────────────────────────────
+        elif report_id == "service_requests":
+            where, params = ["1=1"], {}
+            if status: where.append("sr.status=:s"); params["s"]=status
+            if urgency: where.append("sr.urgency=:u"); params["u"]=urgency
+            if site_id: where.append("sr.site_id=:sid"); params["sid"]=site_id
+            if date_from: where.append("sr.created_at>=:df"); params["df"]=date_from
+            if date_to: where.append("sr.created_at<=:dt"); params["dt"]=date_to
+            params["l"] = limit
+            data = q(f"""
+                SELECT sr.id, sr.title, sr.urgency, sr.status, sr.category,
+                       sr.submitted_by, sr.contact_phone, sr.created_at, sr.resolved_at,
+                       s.name as site_name
+                FROM service_requests sr
+                LEFT JOIN sites s ON s.id = sr.site_id
+                WHERE {" AND ".join(where)}
+                ORDER BY CASE sr.urgency WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
+                         sr.created_at DESC LIMIT :l
+            """, params)
+            summary = q1("SELECT count(*) as total, count(*) FILTER (WHERE status='open') as open_count, count(*) FILTER (WHERE urgency='critical') as critical FROM service_requests")
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":summary,
+                    "columns":["title","urgency","status","category","submitted_by","site_name","created_at","resolved_at"],"data":data}
+
+        # ── ASSET MAINTENANCE ──────────────────────────────────────────────────
+        elif report_id == "asset_maintenance":
+            where, params = ["1=1"], {}
+            if site_id: where.append("a.site_id=:sid"); params["sid"]=site_id
+            if category: where.append("a.category=:cat"); params["cat"]=category
+            if status: where.append("a.status=:s"); params["s"]=status
+            params["l"] = limit
+            data = q(f"""
+                SELECT a.id, a.name, a.category, a.manufacturer, a.model,
+                       a.status, a.criticality, a.location_description,
+                       a.last_maintenance_date, a.next_maintenance_date,
+                       s.name as site_name,
+                       CASE WHEN a.next_maintenance_date < NOW() THEN 'OVERDUE'
+                            WHEN a.next_maintenance_date < NOW()+INTERVAL '30 days' THEN 'DUE SOON'
+                            ELSE 'OK' END as maintenance_status
+                FROM assets a
+                LEFT JOIN sites s ON s.id = a.site_id
+                WHERE {" AND ".join(where)}
+                ORDER BY a.next_maintenance_date ASC LIMIT :l
+            """, params)
+            summary = q1("""SELECT count(*) as total,
+                count(*) FILTER (WHERE next_maintenance_date < NOW()) as overdue,
+                count(*) FILTER (WHERE next_maintenance_date BETWEEN NOW() AND NOW()+INTERVAL '30 days') as due_soon,
+                count(*) FILTER (WHERE status='operational') as operational,
+                count(*) FILTER (WHERE status='under_maintenance') as under_maintenance
+                FROM assets""")
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":summary,
+                    "columns":["name","category","manufacturer","status","criticality","site_name","last_maintenance_date","next_maintenance_date","maintenance_status"],"data":data}
+
+        # ── TECHNICIAN PRODUCTIVITY ────────────────────────────────────────────
+        elif report_id == "technician_productivity":
+            params = {}
+            if date_from: params["df"]=date_from
+            if date_to: params["dt"]=date_to
+            date_clause = ""
+            if date_from: date_clause += " AND wo.created_at >= :df"
+            if date_to: date_clause += " AND wo.created_at <= :dt"
+            data = q(f"""
+                SELECT t.id, t.name, t.specializations, t.is_active,
+                       count(wo.id) as total_work_orders,
+                       count(wo.id) FILTER (WHERE wo.status='completed') as completed,
+                       count(wo.id) FILTER (WHERE wo.status='in_progress') as in_progress,
+                       count(wo.id) FILTER (WHERE wo.status='open') as open_orders,
+                       count(wo.id) FILTER (WHERE wo.priority='critical') as critical_handled
+                FROM technicians t
+                LEFT JOIN work_orders wo ON wo.technician_id = t.id {date_clause}
+                GROUP BY t.id, t.name, t.specializations, t.is_active
+                ORDER BY completed DESC
+            """, params)
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":{"total_technicians":len(data)},
+                    "columns":["name","specializations","total_work_orders","completed","in_progress","open_orders","critical_handled"],"data":data}
+
+        # ── INVOICES ───────────────────────────────────────────────────────────
+        elif report_id == "invoices":
+            where, params = ["1=1"], {}
+            if status: where.append("si.status=:s"); params["s"]=status
+            if payment_status: where.append("si.payment_status=:ps"); params["ps"]=payment_status
+            if vendor_id: where.append("si.vendor_id=:vid"); params["vid"]=vendor_id
+            if date_from: where.append("si.invoice_date>=:df"); params["df"]=date_from
+            if date_to: where.append("si.invoice_date<=:dt"); params["dt"]=date_to
+            params["l"] = limit
+            data = q(f"""
+                SELECT si.id, si.invoice_number, si.vendor_invoice_number,
+                       si.status, si.payment_status, si.match_result,
+                       si.invoice_date, si.due_date, si.currency,
+                       si.subtotal, si.vat_amount, si.total_amount,
+                       si.amount_paid, si.balance_due, si.net_payable,
+                       si.vat_pct, si.withholding_tax_pct,
+                       si.approved_by, si.match_variance_pct,
+                       v.company_name as vendor_name, v.vendor_code,
+                       po.po_number
+                FROM supplier_invoices si
+                LEFT JOIN vendors v ON v.id = si.vendor_id
+                LEFT JOIN purchase_orders_v2 po ON po.id = si.po_id
+                WHERE {" AND ".join(where)}
+                ORDER BY si.invoice_date DESC LIMIT :l
+            """, params)
+            summary = q1("""SELECT count(*) as total,
+                COALESCE(sum(total_amount),0) as total_value,
+                COALESCE(sum(balance_due),0) as total_outstanding,
+                COALESCE(sum(amount_paid),0) as total_collected,
+                count(*) FILTER (WHERE payment_status='paid') as paid_count,
+                count(*) FILTER (WHERE payment_status='unpaid') as unpaid_count,
+                count(*) FILTER (WHERE due_date < CURRENT_DATE AND payment_status!='paid') as overdue_count
+                FROM supplier_invoices""")
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":summary,
+                    "columns":["invoice_number","vendor_name","status","payment_status","match_result","invoice_date","due_date","total_amount","amount_paid","balance_due"],"data":data}
+
+        # ── INVOICE AGING ──────────────────────────────────────────────────────
+        elif report_id == "invoice_aging":
+            data = q("""
+                SELECT si.id, si.invoice_number, si.invoice_date, si.due_date,
+                       si.total_amount, si.balance_due, si.payment_status,
+                       v.company_name as vendor_name, v.vendor_code,
+                       CURRENT_DATE - si.due_date::date as days_overdue,
+                       CASE
+                         WHEN si.payment_status = 'paid' THEN 'Paid'
+                         WHEN si.due_date::date >= CURRENT_DATE THEN 'Current'
+                         WHEN CURRENT_DATE - si.due_date::date <= 30 THEN '1-30 Days'
+                         WHEN CURRENT_DATE - si.due_date::date <= 60 THEN '31-60 Days'
+                         WHEN CURRENT_DATE - si.due_date::date <= 90 THEN '61-90 Days'
+                         ELSE '90+ Days'
+                       END as aging_bucket
+                FROM supplier_invoices si
+                LEFT JOIN vendors v ON v.id = si.vendor_id
+                WHERE si.payment_status != 'paid' AND si.balance_due > 0
+                ORDER BY si.due_date ASC
+            """)
+            aging_summary = q("""
+                SELECT
+                  CASE
+                    WHEN due_date::date >= CURRENT_DATE THEN 'Current'
+                    WHEN CURRENT_DATE - due_date::date <= 30 THEN '1-30 Days'
+                    WHEN CURRENT_DATE - due_date::date <= 60 THEN '31-60 Days'
+                    WHEN CURRENT_DATE - due_date::date <= 90 THEN '61-90 Days'
+                    ELSE '90+ Days'
+                  END as bucket,
+                  count(*) as invoice_count,
+                  COALESCE(sum(balance_due),0) as amount
+                FROM supplier_invoices
+                WHERE payment_status != 'paid' AND balance_due > 0
+                GROUP BY bucket ORDER BY bucket
+            """)
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"aging_summary":aging_summary,
+                    "columns":["invoice_number","vendor_name","invoice_date","due_date","balance_due","days_overdue","aging_bucket"],"data":data}
+
+        # ── PURCHASE ORDERS ────────────────────────────────────────────────────
+        elif report_id == "purchase_orders":
+            where, params = ["1=1"], {}
+            if status: where.append("po.status=:s"); params["s"]=status
+            if vendor_id: where.append("po.vendor_id=:vid"); params["vid"]=vendor_id
+            if date_from: where.append("po.created_at>=:df"); params["df"]=date_from
+            if date_to: where.append("po.created_at<=:dt"); params["dt"]=date_to
+            params["l"] = limit
+            data = q(f"""
+                SELECT po.id, po.po_number, po.title, po.status, po.po_type,
+                       po.currency, po.subtotal, po.vat_amount, po.total_amount,
+                       po.payment_terms, po.delivery_date, po.created_at,
+                       po.approved_by, po.approved_at,
+                       v.company_name as vendor_name, v.vendor_code,
+                       v.category as vendor_category,
+                       (SELECT count(*) FROM po_line_items WHERE po_id=po.id) as line_item_count
+                FROM purchase_orders_v2 po
+                LEFT JOIN vendors v ON v.id = po.vendor_id
+                WHERE {" AND ".join(where)}
+                ORDER BY po.created_at DESC LIMIT :l
+            """, params)
+            summary = q1("""SELECT count(*) as total,
+                COALESCE(sum(total_amount),0) as total_value,
+                count(*) FILTER (WHERE status='approved') as approved,
+                count(*) FILTER (WHERE status='pending_approval') as pending,
+                count(*) FILTER (WHERE status='received') as received,
+                count(*) FILTER (WHERE status='paid') as paid
+                FROM purchase_orders_v2""")
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":summary,
+                    "columns":["po_number","vendor_name","status","currency","total_amount","payment_terms","delivery_date","approved_by","created_at"],"data":data}
+
+        # ── VENDOR PERFORMANCE ─────────────────────────────────────────────────
+        elif report_id == "vendor_performance":
+            where, params = ["1=1"], {}
+            if category: where.append("v.category=:cat"); params["cat"]=category
+            if is_approved: where.append("v.is_approved=:ia"); params["ia"]=(is_approved.lower()=="true")
+            data = q(f"""
+                SELECT v.id, v.vendor_code, v.company_name, v.category,
+                       v.is_approved, v.rating, v.payment_terms, v.currency, v.city,
+                       v.contact_person, v.email,
+                       count(DISTINCT po.id) as total_pos,
+                       COALESCE(sum(po.total_amount),0) as total_po_value,
+                       count(DISTINCT si.id) as total_invoices,
+                       COALESCE(sum(si.total_amount),0) as total_invoiced,
+                       COALESCE(sum(si.balance_due),0) as outstanding_amount
+                FROM vendors v
+                LEFT JOIN purchase_orders_v2 po ON po.vendor_id = v.id
+                LEFT JOIN supplier_invoices si ON si.vendor_id = v.id
+                WHERE {" AND ".join(where)}
+                GROUP BY v.id, v.vendor_code, v.company_name, v.category,
+                         v.is_approved, v.rating, v.payment_terms, v.currency, v.city,
+                         v.contact_person, v.email
+                ORDER BY v.rating DESC, total_pos DESC
+            """, params)
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),
+                    "summary":{"total_vendors":len(data),"approved":sum(1 for d in data if d.get("is_approved"))},
+                    "columns":["vendor_code","company_name","category","is_approved","rating","total_pos","total_po_value","total_invoices","outstanding_amount"],"data":data}
+
+        # ── SCOPE OF WORK ──────────────────────────────────────────────────────
+        elif report_id == "scope_of_work":
+            where, params = ["1=1"], {}
+            if status: where.append("s.status=:st"); params["st"]=status
+            if date_from: where.append("s.created_at>=:df"); params["df"]=date_from
+            if date_to: where.append("s.created_at<=:dt"); params["dt"]=date_to
+            params["l"] = limit
+            data = q(f"""
+                SELECT s.id, s.sow_number, s.title, s.type, s.status,
+                       s.client_name, s.currency, s.total_cost,
+                       s.labor_cost, s.materials_cost, s.overhead_pct, s.profit_margin_pct,
+                       s.estimated_days, s.prepared_by, s.approved_by,
+                       s.created_at, s.approved_at,
+                       (SELECT count(*) FROM boq_items WHERE sow_id=s.id) as boq_item_count,
+                       (SELECT COALESCE(sum(total_amount),0) FROM boq_items WHERE sow_id=s.id) as boq_subtotal
+                FROM scope_of_work s
+                WHERE {" AND ".join(where)}
+                ORDER BY s.created_at DESC LIMIT :l
+            """, params)
+            summary = q1("""SELECT count(*) as total,
+                COALESCE(sum(total_cost),0) as total_value,
+                count(*) FILTER (WHERE status='approved') as approved,
+                count(*) FILTER (WHERE status='pending_approval') as pending
+                FROM scope_of_work""")
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),"summary":summary,
+                    "columns":["sow_number","title","type","status","client_name","total_cost","boq_item_count","boq_subtotal","estimated_days","approved_by","created_at"],"data":data}
+
+        # ── RFQ COMPARISON ─────────────────────────────────────────────────────
+        elif report_id == "rfq_comparison":
+            where, params = ["1=1"], {}
+            if status: where.append("rfq.status=:s"); params["s"]=status
+            if date_from: where.append("rfq.created_at>=:df"); params["df"]=date_from
+            if date_to: where.append("rfq.created_at<=:dt"); params["dt"]=date_to
+            params["l"] = limit
+            data = q(f"""
+                SELECT rfq.id, rfq.rfq_number, rfq.title, rfq.status,
+                       rfq.rfq_type, rfq.total_budget, rfq.currency,
+                       rfq.submission_deadline, rfq.created_at,
+                       rfq.prepared_by, rfq.awarded_vendor_id,
+                       (SELECT count(*) FROM vendor_quotations WHERE rfq_id=rfq.id) as quotation_count,
+                       (SELECT min(total_amount) FROM vendor_quotations WHERE rfq_id=rfq.id) as lowest_bid,
+                       (SELECT max(total_amount) FROM vendor_quotations WHERE rfq_id=rfq.id) as highest_bid,
+                       av.company_name as awarded_vendor_name
+                FROM rfq_headers rfq
+                LEFT JOIN vendors av ON av.id = rfq.awarded_vendor_id
+                WHERE {" AND ".join(where)}
+                ORDER BY rfq.created_at DESC LIMIT :l
+            """, params)
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),
+                    "summary":{"total_rfqs":len(data),"awarded":sum(1 for d in data if d.get("awarded_vendor_id"))},
+                    "columns":["rfq_number","title","status","rfq_type","total_budget","quotation_count","lowest_bid","highest_bid","awarded_vendor_name","submission_deadline"],"data":data}
+
+        # ── PROJECT STATUS ─────────────────────────────────────────────────────
+        elif report_id == "project_status":
+            where, params = ["1=1"], {}
+            if status: where.append("p.status=:s"); params["s"]=status
+            data = q(f"""
+                SELECT p.id, p.title, p.status, p.start_date, p.end_date,
+                       p.budget, p.completion_pct,
+                       t.name as manager_name,
+                       CASE WHEN p.end_date < NOW() AND p.status != 'completed' THEN 'Overdue'
+                            WHEN p.end_date < NOW()+INTERVAL '30 days' THEN 'Due Soon'
+                            ELSE 'On Track' END as timeline_status
+                FROM projects p
+                LEFT JOIN technicians t ON t.id = p.manager_id::varchar
+                WHERE {" AND ".join(where)}
+                ORDER BY p.start_date DESC
+            """, params)
+            return {"report_type":report_id,"generated_at":datetime.utcnow().isoformat(),
+                    "record_count":len(data),
+                    "summary":{"total_projects":len(data),"active":sum(1 for d in data if d.get("status")=="active"),
+                               "total_budget":sum(float(d.get("budget",0) or 0) for d in data)},
+                    "columns":["title","status","start_date","end_date","budget","completion_pct","manager_name","timeline_status"],"data":data}
+
+        # ── EXECUTIVE SUMMARY ──────────────────────────────────────────────────
+        elif report_id == "executive_summary":
+            params = {}
+            if date_from: params["df"]=date_from
+            if date_to: params["dt"]=date_to
+            date_clause = ""
+            if date_from: date_clause += " AND created_at >= :df"
+            if date_to: date_clause += " AND created_at <= :dt"
+            return {
+                "report_type":report_id,
+                "generated_at":datetime.utcnow().isoformat(),
+                "operations": q1(f"SELECT count(*) as total_wos, count(*) FILTER (WHERE status='open') as open_wos, count(*) FILTER (WHERE priority='critical' AND status!='completed') as critical_wos FROM work_orders WHERE 1=1 {date_clause}", params),
+                "service_requests": q1(f"SELECT count(*) as total, count(*) FILTER (WHERE status='open') as open_count FROM service_requests WHERE 1=1 {date_clause}", params),
+                "financial": q1("SELECT count(*) as total_invoices, COALESCE(sum(total_amount),0) as total_invoiced, COALESCE(sum(balance_due),0) as outstanding, COALESCE(sum(amount_paid),0) as collected FROM supplier_invoices"),
+                "procurement": q1("SELECT count(*) as total_pos, COALESCE(sum(total_amount),0) as total_po_value, count(*) FILTER (WHERE status='approved') as approved_pos FROM purchase_orders_v2"),
+                "vendors": q1("SELECT count(*) as total, count(*) FILTER (WHERE is_approved=true) as approved FROM vendors"),
+                "assets": q1("SELECT count(*) as total, count(*) FILTER (WHERE status='operational') as operational, count(*) FILTER (WHERE next_maintenance_date < NOW()) as overdue_maintenance FROM assets"),
+                "projects": q1("SELECT count(*) as total, COALESCE(sum(budget),0) as total_budget, COALESCE(avg(completion_pct),0) as avg_completion FROM projects WHERE status='active'"),
+                "record_count": 1,
+                "data": []
+            }
+
+        else:
+            from fastapi import HTTPException
+            raise HTTPException(404, f"Report type '{report_type}' not found. Use /api/v1/reports/catalog to see available reports.")
