@@ -2962,6 +2962,24 @@ async def update_vendor(vendor_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
+
+@app.get("/api/v1/scope-of-work/{sow_id}", tags=["procurement"])
+def get_sow_detail(sow_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            sow = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
+            if not sow:
+                from fastapi import HTTPException; raise HTTPException(404, "SOW not found")
+            items = db.execute(text("SELECT * FROM boq_items WHERE sow_id=:id ORDER BY item_number"), {"id": sow_id}).fetchall()
+            return {**dict(sow._mapping), "boq_items": [dict(i._mapping) for i in items]}
+        except Exception as e:
+            if "404" in str(e): raise
+            return {"error": str(e)}
+
 @app.post("/api/v1/scope-of-work/{sow_id}/approve", tags=["procurement"])
 async def approve_sow(sow_id: str, request: Request):
     from sqlalchemy import text, create_engine
