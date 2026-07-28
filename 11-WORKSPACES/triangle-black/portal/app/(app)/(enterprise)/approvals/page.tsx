@@ -1,26 +1,6 @@
-"use client";
-// @ts-nocheck
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+// Server-side redirect — instant, no flash, no useEffect delay
+import { redirect } from "next/navigation";
 
 export default function ApprovalsPage() {
-  const router = useRouter();
-  
-  useEffect(() => {
-    // Instant redirect — no delay
-    router.replace("/workspace");
-  }, []);
-
-  // Show immediately while redirecting — no spinner loop
-  return (
-    <div className="min-h-screen bg-base flex items-center justify-center">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A,#0E1B30)"}}>
-        <div className="tb-hero-inner text-center">
-          <div className="text-label-upper text-cyan-400 mb-2">Redirecting</div>
-          <h1 className="tb-hero-title">Triangle Black</h1>
-          <p className="tb-hero-description">Taking you to workspace...</p>
-        </div>
-      </div>
-    </div>
-  );
+  redirect("/workspace");
 }
