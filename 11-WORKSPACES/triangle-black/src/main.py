@@ -3507,3 +3507,269 @@ def vendor_doc_status(vendor_id: str):
 @app.get("/api/v1/documents/categories", tags=["documents"])
 def get_doc_categories(entity_type: str = "vendor"):
     return {"entity_type": entity_type, "categories": DOC_CATEGORIES.get(entity_type, ["other"])}
+
+# ── SPRINT 249: INVOICE MATCHING SYSTEM ──────────────────────────────────────
+
+@app.get("/api/v1/supplier-invoices/", tags=["invoices"])
+def list_invoices(status: str = None, limit: int = 50):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = "WHERE si.status=:s" if status else ""
+            params = {"s": status} if status else {}
+            params["l"] = limit
+            rows = db.execute(text(f"""
+                SELECT si.*, v.company_name as vendor_name, v.email as vendor_email,
+                       po.po_number
+                FROM supplier_invoices si
+                LEFT JOIN vendors v ON v.id = si.vendor_id
+                LEFT JOIN purchase_orders_v2 po ON po.id = si.po_id
+                {where}
+                ORDER BY si.created_at DESC LIMIT :l
+            """), params).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.get("/api/v1/supplier-invoices/{invoice_id}", tags=["invoices"])
+def get_invoice(invoice_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            inv = db.execute(text("""
+                SELECT si.*, v.company_name as vendor_name, v.email as vendor_email,
+                       v.phone as vendor_phone, po.po_number, po.total_amount as po_total_amount
+                FROM supplier_invoices si
+                LEFT JOIN vendors v ON v.id = si.vendor_id
+                LEFT JOIN purchase_orders_v2 po ON po.id = si.po_id
+                WHERE si.id=:id
+            """), {"id": invoice_id}).fetchone()
+            if not inv: raise HTTPException(404, "Invoice not found")
+            lines = db.execute(text("""
+                SELECT il.*, pol.description as po_description
+                FROM invoice_line_items il
+                LEFT JOIN po_line_items pol ON pol.id = il.po_line_item_id
+                WHERE il.invoice_id=:id ORDER BY il.line_number
+            """), {"id": invoice_id}).fetchall()
+            payments = db.execute(text("""
+                SELECT * FROM invoice_payments WHERE invoice_id=:id ORDER BY created_at DESC
+            """), {"id": invoice_id}).fetchall()
+            return {
+                **dict(inv._mapping),
+                "line_items": [dict(l._mapping) for l in lines],
+                "payments": [dict(p._mapping) for p in payments]
+            }
+        except HTTPException: raise
+        except Exception as e: return {"error": str(e)}
+
+@app.post("/api/v1/supplier-invoices/", tags=["invoices"])
+async def create_invoice(request: Request):
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM supplier_invoices")).scalar()
+            inv_number = f"INV-{str(count).zfill(5)}"
+            subtotal = float(body.get("subtotal", 0))
+            vat_pct = float(body.get("vat_pct", 14))
+            wht_pct = float(body.get("withholding_tax_pct", 0))
+            vat_amt = subtotal * (vat_pct / 100)
+            wht_amt = subtotal * (wht_pct / 100)
+            total = subtotal + vat_amt
+            net_payable = total - wht_amt
+            db.execute(text("""
+                INSERT INTO supplier_invoices
+                  (id, invoice_number, vendor_invoice_number, vendor_id, po_id, grn_id,
+                   status, invoice_date, due_date, currency, exchange_rate,
+                   subtotal, vat_pct, vat_amount, withholding_tax_pct, withholding_tax_amount,
+                   total_amount, net_payable, po_total, grn_total,
+                   submitted_by, payment_status, balance_due, notes)
+                VALUES
+                  (:id, :num, :vnum, :vendor, :po, :grn,
+                   'submitted', :idate, :ddate, :currency, :xrate,
+                   :subtotal, :vat_pct, :vat_amt, :wht_pct, :wht_amt,
+                   :total, :net, :po_total, :grn_total,
+                   :by, 'unpaid', :net, :notes)
+            """), {
+                "id": str(uuid.uuid4()), "num": inv_number,
+                "vnum": body.get("vendor_invoice_number",""),
+                "vendor": body.get("vendor_id"), "po": body.get("po_id"),
+                "grn": body.get("grn_id"), "idate": body.get("invoice_date"),
+                "ddate": body.get("due_date"), "currency": body.get("currency","EGP"),
+                "xrate": body.get("exchange_rate",1), "subtotal": subtotal,
+                "vat_pct": vat_pct, "vat_amt": vat_amt, "wht_pct": wht_pct,
+                "wht_amt": wht_amt, "total": total, "net": net_payable,
+                "po_total": body.get("po_total",0), "grn_total": body.get("grn_total",0),
+                "by": body.get("submitted_by",""), "notes": body.get("notes","")
+            })
+            db.commit()
+            row = db.execute(text("SELECT * FROM supplier_invoices WHERE invoice_number=:n"), {"n": inv_number}).fetchone()
+            return dict(row._mapping)
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/supplier-invoices/{invoice_id}/match", tags=["invoices"])
+def run_three_way_match(invoice_id: str):
+    """Run 3-way match: Invoice vs PO vs GRN"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            inv = db.execute(text("SELECT * FROM supplier_invoices WHERE id=:id"), {"id": invoice_id}).fetchone()
+            if not inv:
+                from fastapi import HTTPException; raise HTTPException(404, "Invoice not found")
+            inv_dict = dict(inv._mapping)
+            invoice_total = float(inv_dict.get("total_amount") or 0)
+            po_total = float(inv_dict.get("po_total") or 0)
+            grn_total = float(inv_dict.get("grn_total") or 0)
+            TOLERANCE = 0.02  # 2%
+            issues = []
+            if po_total > 0:
+                variance_po = abs(invoice_total - po_total) / po_total
+                if variance_po > TOLERANCE:
+                    issues.append(f"Invoice ({invoice_total:,.0f}) vs PO ({po_total:,.0f}): {variance_po*100:.1f}% variance")
+            if grn_total > 0:
+                variance_grn = abs(invoice_total - grn_total) / grn_total
+                if variance_grn > TOLERANCE:
+                    issues.append(f"Invoice ({invoice_total:,.0f}) vs GRN ({grn_total:,.0f}): {variance_grn*100:.1f}% variance")
+            if not issues:
+                match_result = "matched"
+                match_notes = "3-way match passed — Invoice, PO, and GRN amounts within tolerance"
+            elif len(issues) == 1 and po_total == 0:
+                match_result = "partial"
+                match_notes = "Partial match — no PO linked"
+            else:
+                match_result = "mismatch"
+                match_notes = "; ".join(issues)
+            variance_pct = 0
+            if po_total > 0:
+                variance_pct = round(abs(invoice_total - po_total) / po_total * 100, 2)
+            db.execute(text("""
+                UPDATE supplier_invoices
+                SET match_result=:mr, match_notes=:mn, match_variance_pct=:vp,
+                    status=CASE WHEN :mr='matched' THEN 'matching' ELSE 'mismatch' END,
+                    updated_at=NOW()
+                WHERE id=:id
+            """), {"mr": match_result, "mn": match_notes, "vp": variance_pct, "id": invoice_id})
+            db.commit()
+            return {
+                "invoice_id": invoice_id,
+                "match_result": match_result,
+                "match_notes": match_notes,
+                "variance_pct": variance_pct,
+                "invoice_total": invoice_total,
+                "po_total": po_total,
+                "grn_total": grn_total,
+                "approved_for_payment": match_result == "matched"
+            }
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/supplier-invoices/{invoice_id}/approve", tags=["invoices"])
+async def approve_invoice(invoice_id: str, request: Request):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            action = body.get("action","approve")
+            status = "approved" if action == "approve" else "rejected"
+            db.execute(text("""
+                UPDATE supplier_invoices
+                SET status=:s, approved_by=:by, approved_at=NOW(),
+                    rejection_reason=:reason, updated_at=NOW()
+                WHERE id=:id
+            """), {"s": status, "by": body.get("approved_by","admin"),
+                   "reason": body.get("rejection_reason",""), "id": invoice_id})
+            db.commit()
+            row = db.execute(text("SELECT * FROM supplier_invoices WHERE id=:id"), {"id": invoice_id}).fetchone()
+            return dict(row._mapping) if row else {"error": "Not found"}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/supplier-invoices/{invoice_id}/pay", tags=["invoices"])
+async def record_payment(invoice_id: str, request: Request):
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            amount = float(body.get("amount", 0))
+            db.execute(text("""
+                INSERT INTO invoice_payments
+                  (id, invoice_id, vendor_id, payment_date, amount, currency,
+                   payment_method, reference_number, bank_account, notes, recorded_by)
+                VALUES
+                  (:id, :inv, :vendor, :pdate, :amount, :currency,
+                   :method, :ref, :bank, :notes, :by)
+            """), {
+                "id": str(uuid.uuid4()), "inv": invoice_id,
+                "vendor": body.get("vendor_id",""), "pdate": body.get("payment_date"),
+                "amount": amount, "currency": body.get("currency","EGP"),
+                "method": body.get("payment_method","bank_transfer"),
+                "ref": body.get("reference_number",""),
+                "bank": body.get("bank_account",""),
+                "notes": body.get("notes",""), "by": body.get("recorded_by","admin")
+            })
+            total_paid_row = db.execute(text("""
+                SELECT COALESCE(sum(amount),0) as total_paid
+                FROM invoice_payments WHERE invoice_id=:id
+            """), {"id": invoice_id}).fetchone()
+            total_paid = float(total_paid_row.total_paid)
+            inv_row = db.execute(text("SELECT net_payable FROM supplier_invoices WHERE id=:id"), {"id": invoice_id}).fetchone()
+            net_payable = float(inv_row.net_payable) if inv_row else 0
+            balance = max(0, net_payable - total_paid)
+            pay_status = "paid" if balance <= 0 else "partial"
+            db.execute(text("""
+                UPDATE supplier_invoices
+                SET amount_paid=:paid, balance_due=:balance,
+                    payment_status=:ps, status=CASE WHEN :ps='paid' THEN 'paid' ELSE status END,
+                    updated_at=NOW()
+                WHERE id=:id
+            """), {"paid": total_paid, "balance": balance, "ps": pay_status, "id": invoice_id})
+            db.commit()
+            return {
+                "invoice_id": invoice_id, "amount_paid": amount,
+                "total_paid": total_paid, "balance_due": balance,
+                "payment_status": pay_status
+            }
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/invoices/dashboard", tags=["invoices"])
+def invoice_dashboard():
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q):
+            try: r = db.execute(text(q)).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        return {
+            "totals": safe("SELECT count(*) as total, COALESCE(sum(total_amount),0) as total_value, COALESCE(sum(balance_due),0) as total_outstanding FROM supplier_invoices"),
+            "by_status": {
+                "draft": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='draft'").get("n",0),
+                "submitted": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='submitted'").get("n",0),
+                "approved": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='approved'").get("n",0),
+                "paid": safe("SELECT count(*) as n FROM supplier_invoices WHERE status='paid'").get("n",0),
+                "mismatch": safe("SELECT count(*) as n FROM supplier_invoices WHERE match_result='mismatch'").get("n",0),
+            },
+            "overdue": safe("SELECT count(*) as n, COALESCE(sum(balance_due),0) as amount FROM supplier_invoices WHERE due_date < CURRENT_DATE AND payment_status != 'paid'"),
+        }
