@@ -175,53 +175,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-API_PREFIX = "/api/v1"
-
-app.include_router(leads_router,         prefix=API_PREFIX + "/leads")
-app.include_router(agents_router,        prefix=API_PREFIX)
-app.include_router(pipeline_router,      prefix=API_PREFIX)
-app.include_router(activity_router,      prefix=API_PREFIX)
-app.include_router(search_router,        prefix=API_PREFIX)
-app.include_router(webhook_router,       prefix=API_PREFIX)
-app.include_router(quotation_router,     prefix=API_PREFIX)
-app.include_router(auth_router,          prefix=API_PREFIX)
-app.include_router(reporting_router,     prefix=API_PREFIX)
-app.include_router(contracts_router,     prefix=API_PREFIX)
-app.include_router(actions_router,       prefix=API_PREFIX)
-app.include_router(notifications_router, prefix=API_PREFIX)
-app.include_router(invoices_router,      prefix=API_PREFIX)
-app.include_router(hotels_router,        prefix=API_PREFIX)
-app.include_router(cache_router,              prefix=API_PREFIX)
-app.include_router(pagination_router,         prefix=API_PREFIX)
-app.include_router(email_notification_router, prefix=API_PREFIX)
-
-# Inventory & Procurement
-app.include_router(inv_items_router, prefix="/api/v1")
-try:
-    app.include_router(work_orders_router, prefix="/api/v1")
-    logger.info("  OK: work_orders_router")
-except Exception as e:
-    logger.warning("WARN: work_orders_router: {e}")
-try:
-    from src.commercial.technicians.router import router as technicians_router
-    app.include_router(technicians_router, prefix="/api/v1")
-    logger.info("  OK: technicians_router")
-except Exception as e:
-    logger.warning("WARN: technicians_router: {e}")
-try:
-    from src.commercial.assets.router import router as assets_router
-    app.include_router(assets_router, prefix="/api/v1")
-    logger.info("  OK: assets_router")
-except Exception as e:
-    logger.warning("WARN: assets_router: {e}")
-app.include_router(warehouses_router, prefix="/api/v1")
-app.include_router(inv_vendors_router, prefix="/api/v1")
-app.include_router(stock_movements_router, prefix="/api/v1")
-app.include_router(sites_router, prefix="/api/v1")
-app.include_router(service_requests_router, prefix="/api/v1")
-app.include_router(purchase_requests_router, prefix="/api/v1")
-app.include_router(purchase_orders_router, prefix="/api/v1")
-app.include_router(goods_receipts_router, prefix="/api/v1")
 
 
 
@@ -317,6 +270,55 @@ def list_user_roles(_admin: str = Depends(require_admin)):
         except Exception: db.rollback(); return []
 
 # ─────────────────────────────────────────────────────────────────────────────
+
+
+API_PREFIX = "/api/v1"
+
+app.include_router(leads_router,         prefix=API_PREFIX + "/leads")
+app.include_router(agents_router,        prefix=API_PREFIX)
+app.include_router(pipeline_router,      prefix=API_PREFIX)
+app.include_router(activity_router,      prefix=API_PREFIX)
+app.include_router(search_router,        prefix=API_PREFIX)
+app.include_router(webhook_router,       prefix=API_PREFIX)
+app.include_router(quotation_router,     prefix=API_PREFIX)
+app.include_router(auth_router,          prefix=API_PREFIX)
+app.include_router(reporting_router,     prefix=API_PREFIX)
+app.include_router(contracts_router,     prefix=API_PREFIX)
+app.include_router(actions_router,       prefix=API_PREFIX)
+app.include_router(notifications_router, prefix=API_PREFIX)
+app.include_router(invoices_router,      prefix=API_PREFIX)
+app.include_router(hotels_router,        prefix=API_PREFIX)
+app.include_router(cache_router,              prefix=API_PREFIX)
+app.include_router(pagination_router,         prefix=API_PREFIX)
+app.include_router(email_notification_router, prefix=API_PREFIX)
+
+# Inventory & Procurement
+app.include_router(inv_items_router, prefix="/api/v1")
+try:
+    app.include_router(work_orders_router, prefix="/api/v1")
+    logger.info("  OK: work_orders_router")
+except Exception as e:
+    logger.warning("WARN: work_orders_router: {e}")
+try:
+    from src.commercial.technicians.router import router as technicians_router
+    app.include_router(technicians_router, prefix="/api/v1")
+    logger.info("  OK: technicians_router")
+except Exception as e:
+    logger.warning("WARN: technicians_router: {e}")
+try:
+    from src.commercial.assets.router import router as assets_router
+    app.include_router(assets_router, prefix="/api/v1")
+    logger.info("  OK: assets_router")
+except Exception as e:
+    logger.warning("WARN: assets_router: {e}")
+app.include_router(warehouses_router, prefix="/api/v1")
+app.include_router(inv_vendors_router, prefix="/api/v1")
+app.include_router(stock_movements_router, prefix="/api/v1")
+app.include_router(sites_router, prefix="/api/v1")
+app.include_router(service_requests_router, prefix="/api/v1")
+app.include_router(purchase_requests_router, prefix="/api/v1")
+app.include_router(purchase_orders_router, prefix="/api/v1")
+app.include_router(goods_receipts_router, prefix="/api/v1")
 
 
 @app.get("/health")
