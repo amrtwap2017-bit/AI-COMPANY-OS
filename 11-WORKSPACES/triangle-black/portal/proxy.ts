@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Paths that NEVER need a token
+// Only the login endpoint is truly public (no token required)
 const PUBLIC = [
   "/login",
-  "/api/v1/auth/",   // login endpoint
+  "/api/v1/auth/login",  // login endpoint — no token needed
   "/api/auth",
   "/_next",
   "/favicon",
@@ -28,8 +28,7 @@ function getToken(request: NextRequest): string {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Always allow public paths
-  if (PUBLIC.some(p => pathname.startsWith(p))) {
+  if (PUBLIC.some(p => pathname === p || pathname.startsWith(p + "?"))) {
     return NextResponse.next();
   }
 
@@ -39,7 +38,7 @@ export function proxy(request: NextRequest) {
 
   const token = getToken(request);
 
-  // Inject Authorization header for all proxied API requests
+  // Inject Authorization header for ALL /api/v1/ requests (including /auth/me)
   if (pathname.startsWith("/api/v1/")) {
     if (!token) {
       return new NextResponse(JSON.stringify({ detail: "Not authenticated" }), {
@@ -54,7 +53,7 @@ export function proxy(request: NextRequest) {
     });
   }
 
-  // Page routes — redirect to login if no token
+  // Page routes
   if (!token) {
     return NextResponse.redirect(
       new URL("/login?from=" + encodeURIComponent(pathname), request.url)

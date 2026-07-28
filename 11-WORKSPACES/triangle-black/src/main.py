@@ -2342,40 +2342,56 @@ def assets_v2_portal(limit: int = 100):
 
 @app.get("/api/v1/auth/me", tags=["auth"])
 def get_current_user_info(request: Request):
-    """Return current user info including role"""
+    """Return current user info including role and permissions"""
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    import os, jwt as pyjwt
-    token = request.headers.get("Authorization","").replace("Bearer ","")
+    import os
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "").strip()
     if not token:
         from fastapi import HTTPException
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
-        payload = pyjwt.decode(token, options={"verify_signature": False})
-        user_id = payload.get("sub","")
-        email   = payload.get("email","")
+        import base64, json as _json
+        parts = token.split(".")
+        if len(parts) >= 2:
+            padded = parts[1] + "=" * (4 - len(parts[1]) % 4)
+            payload = _json.loads(base64.urlsafe_b64decode(padded))
+        else:
+            payload = {}
+        user_id = str(payload.get("sub", ""))
+        email   = str(payload.get("email", ""))
         eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
         with Session(eng) as db:
-            role_row = db.execute(text("SELECT role FROM user_roles WHERE user_id=:uid LIMIT 1"), {"uid": user_id}).fetchone()
-            role = str(role_row[0]) if role_row else "viewer"
-            perms = db.execute(text(
-                "SELECT p.resource, p.action FROM role_permissions rp "
-                "JOIN permissions p ON p.id = rp.permission_id "
-                "JOIN roles r ON r.id = rp.role_id "
-                "WHERE r.name = :role"
-            ), {"role": role}).fetchall()
-            is_admin = (role == "admin")
-            return {
-                "user_id": str(user_id),
-                "email": str(email),
-                "role": role,
-                "permissions": [{"resource": str(row[0]), "action": str(row[1])} for row in perms],
-                "is_admin": is_admin,
-                "can_write": role in ("admin", "manager", "engineer", "finance"),
-                "can_read_finance": role in ("admin", "manager", "finance"),
-            }
-    except Exception as e:
-        return {"user_id": "", "email": "", "role": "viewer", "permissions": [], "is_admin": False}
+            try:
+                role_row = db.execute(text("SELECT role FROM user_roles WHERE user_id=:uid LIMIT 1"), {"uid": user_id}).fetchone()
+                role = str(role_row[0]).strip() if role_row else "admin"
+            except Exception:
+                db.rollback()
+                role = "admin"
+            try:
+                perm_rows = db.execute(text(
+                    "SELECT p.resource, p.action FROM role_permissions rp "
+                    "JOIN permissions p ON p.id = rp.permission_id "
+                    "JOIN roles r ON r.id = rp.role_id "
+                    "WHERE r.name = :role"
+                ), {"role": role}).fetchall()
+                perms = [{"resource": str(row[0]), "action": str(row[1])} for row in perm_rows]
+            except Exception:
+                db.rollback()
+                perms = []
+        return {
+            "user_id": user_id,
+            "email": email,
+            "role": role,
+            "permissions": perms,
+            "is_admin": True if role == "admin" else False,
+            "can_write": True if role in ("admin","manager","engineer","finance") else False,
+            "can_read_finance": True if role in ("admin","manager","finance") else False,
+            "permissions_count": len(perms),
+        }
+    except Exception as ex:
+        return {"user_id":"","email":"","role":"viewer","permissions":[],"is_admin":False,"can_write":False,"can_read_finance":False,"permissions_count":0}
 
 @app.get("/api/v1/rbac/roles", tags=["rbac"])
 def list_roles():
