@@ -2793,3 +2793,382 @@ def report_contracts():
             "report_type": "contracts",
             "generated_at": datetime.now().isoformat(),
         }
+
+# ── SPRINT 247: DETAIL + CREATE + BID COMPARISON ENDPOINTS ───────────────────
+
+@app.get("/api/v1/vendors/{vendor_id}", tags=["procurement"])
+def get_vendor(vendor_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            v = db.execute(text("SELECT * FROM vendors WHERE id=:id"), {"id": vendor_id}).fetchone()
+            if not v:
+                from fastapi import HTTPException; raise HTTPException(404, "Vendor not found")
+            pos = db.execute(text("""
+                SELECT po.id, po.po_number, po.title, po.status, po.total_amount, po.currency, po.created_at
+                FROM purchase_orders_v2 po WHERE po.vendor_id=:id ORDER BY po.created_at DESC LIMIT 10
+            """), {"id": vendor_id}).fetchall()
+            return {**dict(v._mapping), "purchase_orders": [dict(r._mapping) for r in pos]}
+        except Exception as e:
+            if "404" in str(e): raise
+            return {"error": str(e)}
+
+@app.post("/api/v1/vendors/", tags=["procurement"])
+async def create_vendor(request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM vendors")).scalar()
+            code = f"VND-{str(count).zfill(3)}"
+            db.execute(text("""
+                INSERT INTO vendors (id, vendor_code, company_name, category, contact_person, email, phone,
+                    city, country, payment_terms, currency, is_approved, notes)
+                VALUES (gen_random_uuid()::text, :code, :name, :cat, :contact, :email, :phone,
+                    :city, :country, :terms, :currency, false, :notes)
+            """), {
+                "code": code, "name": body.get("company_name",""), "cat": body.get("category","General"),
+                "contact": body.get("contact_person",""), "email": body.get("email",""),
+                "phone": body.get("phone",""), "city": body.get("city","Cairo"),
+                "country": body.get("country","Egypt"), "terms": body.get("payment_terms",30),
+                "currency": body.get("currency","EGP"), "notes": body.get("notes","")
+            })
+            db.commit()
+            row = db.execute(text("SELECT * FROM vendors WHERE vendor_code=:c"), {"c": code}).fetchone()
+            return dict(row._mapping)
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.patch("/api/v1/vendors/{vendor_id}", tags=["procurement"])
+async def update_vendor(vendor_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            allowed = ["company_name","category","contact_person","email","phone","city","country",
+                       "payment_terms","currency","rating","is_approved","approved_by","notes",
+                       "bank_name","bank_account","bank_iban","blacklisted","blacklist_reason"]
+            updates = {k: v for k,v in body.items() if k in allowed}
+            if updates:
+                if body.get("is_approved") == True and "approved_by" not in updates:
+                    updates["approved_by"] = "admin"
+                    from datetime import datetime
+                    updates["approved_at"] = datetime.utcnow().isoformat()
+                set_clause = ", ".join([f"{k}=:{k}" for k in updates])
+                updates["id"] = vendor_id
+                db.execute(text(f"UPDATE vendors SET {set_clause}, updated_at=NOW() WHERE id=:id"), updates)
+                db.commit()
+            row = db.execute(text("SELECT * FROM vendors WHERE id=:id"), {"id": vendor_id}).fetchone()
+            return dict(row._mapping) if row else {"error": "Not found"}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/scope-of-work/{sow_id}/approve", tags=["procurement"])
+async def approve_sow(sow_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            action = body.get("action","approve")
+            status = "approved" if action == "approve" else "rejected"
+            db.execute(text("""
+                UPDATE scope_of_work SET status=:s, approved_by=:by, approved_at=NOW(), updated_at=NOW()
+                WHERE id=:id
+            """), {"s": status, "by": body.get("approved_by","admin"), "id": sow_id})
+            db.commit()
+            row = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
+            return dict(row._mapping) if row else {"error": "Not found"}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.patch("/api/v1/scope-of-work/{sow_id}", tags=["procurement"])
+async def update_sow(sow_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            allowed = ["title","description","type","status","client_name","client_email","currency",
+                       "estimated_days","labor_cost","materials_cost","overhead_pct","profit_margin_pct",
+                       "total_cost","scope_details","exclusions","assumptions","notes","validity_days"]
+            updates = {k: v for k,v in body.items() if k in allowed}
+            if updates:
+                set_clause = ", ".join([f"{k}=:{k}" for k in updates])
+                updates["id"] = sow_id
+                db.execute(text(f"UPDATE scope_of_work SET {set_clause}, updated_at=NOW() WHERE id=:id"), updates)
+                db.commit()
+            row = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
+            items = db.execute(text("SELECT * FROM boq_items WHERE sow_id=:id ORDER BY item_number"), {"id": sow_id}).fetchall()
+            return {**dict(row._mapping), "boq_items": [dict(i._mapping) for i in items]} if row else {"error": "Not found"}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/scope-of-work/{sow_id}/boq-items", tags=["procurement"])
+async def add_boq_item(sow_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM boq_items WHERE sow_id=:id"), {"id": sow_id}).scalar()
+            db.execute(text("""
+                INSERT INTO boq_items (id, sow_id, item_number, description, unit, quantity, unit_rate, category, notes)
+                VALUES (gen_random_uuid()::text, :sow, :num, :desc, :unit, :qty, :rate, :cat, :notes)
+            """), {
+                "sow": sow_id, "num": count, "desc": body.get("description","Item"),
+                "unit": body.get("unit","unit"), "qty": body.get("quantity",1),
+                "rate": body.get("unit_rate",0), "cat": body.get("category","material"),
+                "notes": body.get("notes","")
+            })
+            db.commit()
+            items = db.execute(text("SELECT * FROM boq_items WHERE sow_id=:id ORDER BY item_number"), {"id": sow_id}).fetchall()
+            return [dict(i._mapping) for i in items]
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/rfq/{rfq_id}/bid-comparison", tags=["procurement"])
+def bid_comparison(rfq_id: str):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rfq = db.execute(text("SELECT * FROM rfq_headers WHERE id=:id"), {"id": rfq_id}).fetchone()
+            if not rfq:
+                from fastapi import HTTPException; raise HTTPException(404, "RFQ not found")
+            items = db.execute(text("SELECT * FROM rfq_items WHERE rfq_id=:id ORDER BY item_number"), {"id": rfq_id}).fetchall()
+            quotations = db.execute(text("""
+                SELECT vq.*, v.company_name as vendor_name, v.rating as vendor_rating,
+                       v.payment_terms as vendor_payment_terms
+                FROM vendor_quotations vq
+                LEFT JOIN vendors v ON v.id = vq.vendor_id
+                WHERE vq.rfq_id=:id ORDER BY vq.total_amount ASC
+            """), {"id": rfq_id}).fetchall()
+            q_details = []
+            for q in quotations:
+                q_items = db.execute(text("""
+                    SELECT qi.*, ri.description as rfq_description
+                    FROM quotation_items qi
+                    LEFT JOIN rfq_items ri ON ri.id = qi.rfq_item_id
+                    WHERE qi.quotation_id=:id
+                """), {"id": q.id}).fetchall()
+                q_details.append({**dict(q._mapping), "items": [dict(i._mapping) for i in q_items]})
+            return {
+                **dict(rfq._mapping),
+                "rfq_items": [dict(i._mapping) for i in items],
+                "quotations": q_details,
+                "lowest_price": min([q.get("total_amount",0) for q in [dict(q._mapping) for q in quotations]], default=0),
+                "quotation_count": len(quotations)
+            }
+        except Exception as e:
+            if "404" in str(e): raise
+            return {"error": str(e)}
+
+@app.post("/api/v1/rfq/{rfq_id}/award", tags=["procurement"])
+async def award_rfq(rfq_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            vendor_id = body.get("vendor_id")
+            quotation_id = body.get("quotation_id")
+            db.execute(text("""
+                UPDATE rfq_headers SET status='awarded', awarded_vendor_id=:vid,
+                awarded_at=NOW(), approved_by=:by, updated_at=NOW() WHERE id=:id
+            """), {"vid": vendor_id, "by": body.get("awarded_by","admin"), "id": rfq_id})
+            if quotation_id:
+                db.execute(text("UPDATE vendor_quotations SET is_selected=true WHERE id=:id"), {"id": quotation_id})
+                db.execute(text("UPDATE vendor_quotations SET is_selected=false WHERE rfq_id=:rid AND id!=:id"), {"rid": rfq_id, "id": quotation_id})
+            db.commit()
+            return {"status": "awarded", "rfq_id": rfq_id, "vendor_id": vendor_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/purchase-orders-v2/", tags=["procurement"])
+async def create_po_v2(request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM purchase_orders_v2")).scalar()
+            po_number = f"PO-{str(count).zfill(5)}"
+            db.execute(text("""
+                INSERT INTO purchase_orders_v2 (id, po_number, title, vendor_id, rfq_id, sow_id,
+                    status, po_type, currency, payment_terms, delivery_address, subtotal,
+                    vat_amount, total_amount, prepared_by, internal_notes)
+                VALUES (gen_random_uuid()::text, :num, :title, :vendor, :rfq, :sow,
+                    'draft', :ptype, :currency, :terms, :addr, :subtotal, :vat, :total, :by, :notes)
+            """), {
+                "num": po_number, "title": body.get("title","New PO"),
+                "vendor": body.get("vendor_id"), "rfq": body.get("rfq_id"),
+                "sow": body.get("sow_id"), "ptype": body.get("po_type","standard"),
+                "currency": body.get("currency","EGP"), "terms": body.get("payment_terms",30),
+                "addr": body.get("delivery_address",""), "subtotal": body.get("subtotal",0),
+                "vat": body.get("vat_amount",0), "total": body.get("total_amount",0),
+                "by": body.get("prepared_by",""), "notes": body.get("internal_notes","")
+            })
+            db.commit()
+            row = db.execute(text("SELECT * FROM purchase_orders_v2 WHERE po_number=:n"), {"n": po_number}).fetchone()
+            return dict(row._mapping)
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/purchase-orders-v2/{po_id}/line-items", tags=["procurement"])
+async def add_po_line_item(po_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM po_line_items WHERE po_id=:id"), {"id": po_id}).scalar()
+            qty = float(body.get("quantity",1))
+            price = float(body.get("unit_price",0))
+            disc = float(body.get("discount_pct",0))
+            vat = float(body.get("vat_pct",14))
+            subtotal = qty * price * (1 - disc/100)
+            vat_amt = subtotal * (vat/100)
+            total = subtotal + vat_amt
+            db.execute(text("""
+                INSERT INTO po_line_items (id, po_id, line_number, description, specification,
+                    unit, quantity, unit_price, currency, discount_pct, vat_pct,
+                    total_before_vat, vat_amount, total_amount, notes)
+                VALUES (gen_random_uuid()::text, :po, :num, :desc, :spec,
+                    :unit, :qty, :price, :currency, :disc, :vat,
+                    :subtotal, :vat_amt, :total, :notes)
+            """), {
+                "po": po_id, "num": count, "desc": body.get("description","Item"),
+                "spec": body.get("specification",""), "unit": body.get("unit","unit"),
+                "qty": qty, "price": price, "currency": body.get("currency","EGP"),
+                "disc": disc, "vat": vat, "subtotal": subtotal, "vat_amt": vat_amt,
+                "total": total, "notes": body.get("notes","")
+            })
+            new_total = db.execute(text("SELECT COALESCE(sum(total_amount),0) FROM po_line_items WHERE po_id=:id"), {"id": po_id}).scalar()
+            db.execute(text("UPDATE purchase_orders_v2 SET total_amount=:t, updated_at=NOW() WHERE id=:id"), {"t": new_total, "id": po_id})
+            db.commit()
+            items = db.execute(text("SELECT * FROM po_line_items WHERE po_id=:id ORDER BY line_number"), {"id": po_id}).fetchall()
+            return [dict(i._mapping) for i in items]
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.patch("/api/v1/purchase-orders-v2/{po_id}/line-items/{line_id}", tags=["procurement"])
+async def update_po_line_item(po_id: str, line_id: str, request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            qty = float(body.get("quantity",1))
+            price = float(body.get("unit_price",0))
+            disc = float(body.get("discount_pct",0))
+            vat = float(body.get("vat_pct",14))
+            subtotal = qty * price * (1 - disc/100)
+            vat_amt = subtotal * (vat/100)
+            total = subtotal + vat_amt
+            db.execute(text("""
+                UPDATE po_line_items SET description=:desc, unit=:unit, quantity=:qty,
+                    unit_price=:price, discount_pct=:disc, vat_pct=:vat,
+                    total_before_vat=:subtotal, vat_amount=:vat_amt, total_amount=:total,
+                    notes=:notes
+                WHERE id=:id AND po_id=:po
+            """), {
+                "desc": body.get("description",""), "unit": body.get("unit","unit"),
+                "qty": qty, "price": price, "disc": disc, "vat": vat,
+                "subtotal": subtotal, "vat_amt": vat_amt, "total": total,
+                "notes": body.get("notes",""), "id": line_id, "po": po_id
+            })
+            new_total = db.execute(text("SELECT COALESCE(sum(total_amount),0) FROM po_line_items WHERE po_id=:id"), {"id": po_id}).scalar()
+            db.execute(text("UPDATE purchase_orders_v2 SET total_amount=:t, updated_at=NOW() WHERE id=:id"), {"t": new_total, "id": po_id})
+            db.commit()
+            items = db.execute(text("SELECT * FROM po_line_items WHERE po_id=:id ORDER BY line_number"), {"id": po_id}).fetchall()
+            return [dict(i._mapping) for i in items]
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/goods-receipt-notes/", tags=["procurement"])
+async def create_grn(request: Request):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            count = db.execute(text("SELECT count(*)+1 FROM goods_receipt_notes")).scalar()
+            grn_number = f"GRN-{str(count).zfill(5)}"
+            db.execute(text("""
+                INSERT INTO goods_receipt_notes (id, grn_number, po_id, vendor_id, status,
+                    received_by, delivery_note_no, vehicle_no, inspection_passed, warehouse_id, notes)
+                VALUES (gen_random_uuid()::text, :num, :po, :vendor, 'received',
+                    :by, :dn, :vehicle, :passed, :wh, :notes)
+            """), {
+                "num": grn_number, "po": body.get("po_id"), "vendor": body.get("vendor_id"),
+                "by": body.get("received_by","admin"), "dn": body.get("delivery_note_no",""),
+                "vehicle": body.get("vehicle_no",""), "passed": body.get("inspection_passed",True),
+                "wh": body.get("warehouse_id",""), "notes": body.get("notes","")
+            })
+            db.commit()
+            row = db.execute(text("SELECT * FROM goods_receipt_notes WHERE grn_number=:n"), {"n": grn_number}).fetchone()
+            grn_id = row.id
+            for item in body.get("items",[]):
+                db.execute(text("""
+                    INSERT INTO grn_items (id, grn_id, po_line_item_id, description,
+                        ordered_qty, received_qty, accepted_qty, rejected_qty, unit_price, total_value, notes)
+                    VALUES (gen_random_uuid()::text, :grn, :po_line, :desc,
+                        :oqty, :rqty, :aqty, :rejqty, :price, :total, :notes)
+                """), {
+                    "grn": grn_id, "po_line": item.get("po_line_item_id"),
+                    "desc": item.get("description",""), "oqty": item.get("ordered_qty",0),
+                    "rqty": item.get("received_qty",0), "aqty": item.get("accepted_qty",0),
+                    "rejqty": item.get("rejected_qty",0), "price": item.get("unit_price",0),
+                    "total": item.get("total_value",0), "notes": item.get("notes","")
+                })
+            db.commit()
+            return dict(row._mapping)
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/goods-receipt-notes/", tags=["procurement"])
+def list_grns(limit: int = 50):
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT g.*, v.company_name as vendor_name, p.po_number
+                FROM goods_receipt_notes g
+                LEFT JOIN vendors v ON v.id = g.vendor_id
+                LEFT JOIN purchase_orders_v2 p ON p.id = g.po_id
+                ORDER BY g.created_at DESC LIMIT :l
+            """), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
