@@ -30,7 +30,7 @@ export default function LeadsPage() {
   const [statusF,     setStatusF]     = useState("all");
   const [showCreate,  setShowCreate]  = useState(false);
 
-  const { data: raw, isLoading } = useQuery(["leads-list"], () => authFetch("/api/v1/leads-portal").then(r=>r.json()));
+  const { data: raw, isLoading } = useQuery(["leads-list"], () => authFetch("/api/v1/leads-portal-v2").then(r=>r.json()));
   const leads = toArr(raw);
 
   const filtered = leads.filter(l => {
@@ -47,7 +47,7 @@ export default function LeadsPage() {
   return (
     <div className="min-h-screen bg-base">
       <CreateModal open={showCreate} onClose={()=>setShowCreate(false)} title="Lead" icon="👤"
-        endpoint="/api/v1/leads-portal" fields={leadFields} invalidateKeys={["leads-list"]}
+        endpoint="/api/v1/leads-portal-v2" fields={leadFields} invalidateKeys={["leads-list"]}
         successPath="/commercial/leads/"/>
 
       {/* HERO */}

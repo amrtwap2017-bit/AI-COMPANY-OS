@@ -3774,3 +3774,42 @@ async def record_payment(invoice_id: str, request: Request):
             }
         except Exception as e:
             db.rollback(); return {"error": str(e)}
+
+# ── LEADS PORTAL — Public endpoint (no auth required, used by commercial pages) ──
+@app.get("/api/v1/leads-portal-v2", tags=["commercial"], include_in_schema=False)
+def leads_portal_v2(limit: int = 100):
+    """Public leads list for portal pages"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT id, title, name, company, email, phone, status, stage,
+                       value, currency, hotel_id, created_at, updated_at
+                FROM leads
+                ORDER BY created_at DESC LIMIT :l
+            """), {"l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback()
+            return []
+
+@app.get("/api/v1/leads-portal-v2/{lead_id}", tags=["commercial"], include_in_schema=False)
+def get_lead_portal_v2(lead_id: str):
+    """Public lead detail for portal pages"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            row = db.execute(text("SELECT * FROM leads WHERE id=:id"), {"id": lead_id}).fetchone()
+            if not row:
+                raise HTTPException(404, "Lead not found")
+            return dict(row._mapping)
+        except HTTPException: raise
+        except Exception as e:
+            return {"error": str(e)}
