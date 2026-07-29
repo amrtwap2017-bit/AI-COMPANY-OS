@@ -1,6 +1,8 @@
-// Server-side redirect — no flash, instant navigation
-import { redirect } from "next/navigation";
-
-export default function Page() {
-  redirect("/supply-chain");
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function InvoiceMatchingRedirect() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/supply-chain/invoices"); }, []);
+  return null;
 }

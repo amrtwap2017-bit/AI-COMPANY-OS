@@ -1,6 +1,8 @@
-// Server-side redirect — no flash, instant navigation
-import { redirect } from "next/navigation";
-
-export default function Page() {
-  redirect("/maintenance");
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function QRCodesRedirect() {
+  const router = useRouter();
+  useEffect(() => { router.replace("/operations/assets/qr"); }, []);
+  return null;
 }
