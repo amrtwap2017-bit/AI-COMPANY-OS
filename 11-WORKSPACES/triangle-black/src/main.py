@@ -5690,3 +5690,220 @@ def client_projects(site_id: str):
             return [dict(r._mapping) for r in rows]
         except Exception as e:
             db.rollback(); return []
+
+# ── SPRINT 259: SUPPLIER PORTAL API ──────────────────────────────────────────
+
+@app.post("/api/v1/supplier/login", tags=["supplier-portal"])
+async def supplier_login(request: Request):
+    """Supplier portal login with email + PIN"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime, timedelta
+    import jwt as pyjwt
+    body = await request.json()
+    email = body.get("email","").lower().strip()
+    pin = str(body.get("pin","")).strip()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            supplier = db.execute(text("""
+                SELECT sa.*, v.company_name, v.category, v.rating, v.vendor_code,
+                       v.email as vendor_email, v.phone as vendor_phone
+                FROM supplier_accounts sa
+                LEFT JOIN vendors v ON v.id=sa.vendor_id
+                WHERE sa.email=:email AND sa.is_active=true
+            """), {"email": email}).fetchone()
+            if not supplier:
+                from fastapi import HTTPException; raise HTTPException(401, "Invalid email or PIN")
+            s = dict(supplier._mapping)
+            if s.get("pin_hash") != pin:
+                from fastapi import HTTPException; raise HTTPException(401, "Invalid email or PIN")
+            db.execute(text("UPDATE supplier_accounts SET last_login=NOW() WHERE id=:id"), {"id": s["id"]})
+            db.commit()
+            secret = os.environ.get("JWT_SECRET_KEY","tb-jwt-secret-2026")
+            token_data = {
+                "sub": s["id"], "email": email, "role": "supplier",
+                "vendor_id": s["vendor_id"], "company": s["company_name"],
+                "exp": datetime.utcnow() + timedelta(hours=24)
+            }
+            token = pyjwt.encode(token_data, secret, algorithm="HS256")
+            return {
+                "access_token": token, "token_type": "bearer",
+                "supplier": {
+                    "id": s["id"], "name": s["name"], "email": email,
+                    "vendor_id": s["vendor_id"], "company_name": s["company_name"],
+                    "category": s["category"], "vendor_code": s["vendor_code"],
+                    "rating": s["rating"], "role": "supplier"
+                }
+            }
+        except Exception as e:
+            if "401" in str(e):
+                from fastapi import HTTPException; raise HTTPException(401, "Invalid email or PIN")
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/supplier/dashboard", tags=["supplier-portal"])
+def supplier_dashboard(vendor_id: str):
+    """Supplier dashboard — their KPIs"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, p=None):
+            try: r=db.execute(text(q),p or {}).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        po = safe("SELECT count(*) as total, count(*) FILTER (WHERE status='approved') as approved, count(*) FILTER (WHERE status='pending_approval') as pending, COALESCE(sum(total_amount),0) as total_value FROM purchase_orders_v2 WHERE vendor_id=:v", {"v": vendor_id})
+        inv = safe("SELECT count(*) as total, COALESCE(sum(total_amount),0) as total_invoiced, COALESCE(sum(balance_due),0) as outstanding FROM supplier_invoices WHERE vendor_id=:v", {"v": vendor_id})
+        rfq = safe("SELECT count(*) as total, count(*) FILTER (WHERE status='sent') as active FROM rfq_headers WHERE awarded_vendor_id=:v OR id IN (SELECT rfq_id FROM vendor_quotations WHERE vendor_id=:v)", {"v": vendor_id})
+        vendor = safe("SELECT company_name, category, rating, vendor_code, payment_terms, city, is_approved FROM vendors WHERE id=:v", {"v": vendor_id})
+        recent_pos = db.execute(text("""
+            SELECT id, po_number, title, status, total_amount, currency, created_at
+            FROM purchase_orders_v2 WHERE vendor_id=:v ORDER BY created_at DESC LIMIT 5
+        """), {"v": vendor_id}).fetchall()
+        return {
+            "vendor_id": vendor_id,
+            "vendor": vendor,
+            "purchase_orders": po,
+            "invoices": inv,
+            "rfqs": rfq,
+            "recent_pos": [dict(r._mapping) for r in recent_pos]
+        }
+
+@app.get("/api/v1/supplier/purchase-orders", tags=["supplier-portal"])
+def supplier_purchase_orders(vendor_id: str, status: str = None, limit: int = 50):
+    """Supplier's POs"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = ["po.vendor_id=:v"]
+            params = {"v": vendor_id, "l": limit}
+            if status: where.append("po.status=:s"); params["s"]=status
+            rows = db.execute(text(f"""
+                SELECT po.id, po.po_number, po.title, po.status, po.po_type,
+                       po.currency, po.total_amount, po.payment_terms,
+                       po.delivery_date, po.created_at, po.approved_at,
+                       (SELECT count(*) FROM po_line_items WHERE po_id=po.id) as line_count
+                FROM purchase_orders_v2 po
+                WHERE {" AND ".join(where)}
+                ORDER BY po.created_at DESC LIMIT :l
+            """), params).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.get("/api/v1/supplier/rfqs", tags=["supplier-portal"])
+def supplier_rfqs(vendor_id: str, limit: int = 20):
+    """RFQs where supplier is invited or has submitted quote"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT rfq.id, rfq.rfq_number, rfq.title, rfq.status, rfq.rfq_type,
+                       rfq.total_budget, rfq.currency, rfq.submission_deadline, rfq.created_at,
+                       vq.id as my_quote_id, vq.total_amount as my_quote_amount,
+                       vq.status as quote_status, vq.is_selected
+                FROM rfq_headers rfq
+                LEFT JOIN vendor_quotations vq ON vq.rfq_id=rfq.id AND vq.vendor_id=:v
+                WHERE rfq.awarded_vendor_id=:v OR vq.vendor_id=:v OR rfq.status='sent'
+                ORDER BY rfq.created_at DESC LIMIT :l
+            """), {"v": vendor_id, "l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.post("/api/v1/supplier/quotes", tags=["supplier-portal"])
+async def submit_quote(request: Request):
+    """Supplier submits quotation for an RFQ"""
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            qn = f"QT-{body.get('vendor_id','VND')[:4].upper()}-{uuid.uuid4().hex[:6].upper()}"
+            db.execute(text("""
+                INSERT INTO vendor_quotations
+                  (id, rfq_id, vendor_id, quotation_number, status, submitted_at,
+                   currency, payment_terms, delivery_days, total_amount, notes)
+                VALUES
+                  (:id, :rfq, :vendor, :qn, 'submitted', NOW(),
+                   :currency, :terms, :days, :amount, :notes)
+                ON CONFLICT (id) DO NOTHING
+            """), {
+                "id": str(uuid.uuid4()), "rfq": body.get("rfq_id"),
+                "vendor": body.get("vendor_id"), "qn": qn,
+                "currency": body.get("currency","EGP"),
+                "terms": body.get("payment_terms",30),
+                "days": body.get("delivery_days",7),
+                "amount": float(body.get("total_amount",0)),
+                "notes": body.get("notes","")
+            })
+            db.commit()
+            return {"status": "submitted", "quotation_number": qn, "message": "Your quotation has been submitted successfully."}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/supplier/invoices", tags=["supplier-portal"])
+def supplier_invoices(vendor_id: str, limit: int = 30):
+    """Supplier's invoices"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT id, invoice_number, vendor_invoice_number, status, payment_status,
+                       match_result, invoice_date, due_date, currency,
+                       total_amount, amount_paid, balance_due, created_at
+                FROM supplier_invoices WHERE vendor_id=:v ORDER BY created_at DESC LIMIT :l
+            """), {"v": vendor_id, "l": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.get("/api/v1/supplier/profile", tags=["supplier-portal"])
+def supplier_profile(vendor_id: str):
+    """Supplier profile and documents"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            vendor = db.execute(text("SELECT * FROM vendors WHERE id=:v"), {"v": vendor_id}).fetchone()
+            if not vendor:
+                from fastapi import HTTPException; raise HTTPException(404, "Vendor not found")
+            docs = db.execute(text("""
+                SELECT id, doc_category, doc_name, file_name, file_size_bytes,
+                       is_required, is_verified, created_at,
+                       '/api/v1/documents/' || id || '/view' as url
+                FROM entity_documents WHERE entity_type='vendor' AND entity_id=:v
+                ORDER BY doc_category, created_at DESC
+            """), {"v": vendor_id}).fetchall()
+            doc_status = db.execute(text("""
+                SELECT doc_category, count(*) as count FROM entity_documents
+                WHERE entity_type='vendor' AND entity_id=:v GROUP BY doc_category
+            """), {"v": vendor_id}).fetchall()
+            uploaded_cats = {r.doc_category for r in doc_status}
+            required = {"trade_license","tax_card"}
+            return {
+                **dict(vendor._mapping),
+                "documents": [dict(r._mapping) for r in docs],
+                "doc_status": {
+                    "uploaded_categories": list(uploaded_cats),
+                    "missing_required": list(required - uploaded_cats),
+                    "approval_ready": required.issubset(uploaded_cats),
+                    "total_documents": len(docs)
+                }
+            }
+        except HTTPException: raise
+        except Exception as e: return {"error": str(e)}
