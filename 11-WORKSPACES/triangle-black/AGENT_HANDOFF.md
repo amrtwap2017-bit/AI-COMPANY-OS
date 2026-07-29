@@ -466,3 +466,135 @@ Twin health:    93/100
 ================================================================================
 END OF HANDOFF — Read completely before writing ANY code
 ================================================================================
+
+================================================================================
+SPRINT 266-271 UPDATES — 29/07/2026
+================================================================================
+
+## STARTUP SEQUENCE (MANDATORY — use this exact order)
+
+STEP 1 — Kill old processes:
+  pkill -f "uvicorn src.main:app" 2>/dev/null; fuser -k 8030/tcp 2>/dev/null; fuser -k 3000/tcp 2>/dev/null; sleep 3
+
+STEP 2 — Start backend (MUST export .env first):
+  cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+  export $(grep -v '^#' .env | grep -v '^$' | xargs)
+  nohup .venv/bin/python3 -m uvicorn src.main:app --host 0.0.0.0 --port 8030 --workers 1 --log-level warning > /tmp/tb_backend_manual.log 2>&1 &
+  sleep 10
+
+STEP 3 — Start portal:
+  cd /home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/portal
+  nohup node node_modules/.bin/next start --port 3000 > /tmp/tb_portal.log 2>&1 &
+  sleep 8
+
+STEP 4 — Verify:
+  curl -s http://localhost:8030/api/v1/health; echo
+
+NOTE: ./start.sh exists but only works when port 8030 is free.
+NOTE: TB_SECRET_KEY must be exported from .env before uvicorn starts.
+      The env loader in main.py reads .env at startup as fallback.
+
+## SECURITY CHANGES (Sprint 267-268)
+
+TB_SECRET_KEY: Set in .env — non-default cryptographic secret
+JWT:           bcrypt passwords, proper expiry, refresh tokens
+Users:         10 real users with bcrypt hashed passwords
+               amr@triangleblack.com / admin123 (admin)
+               manager@triangleblack.com (manager)
+               engineer@triangleblack.com (agent)
+               finance@triangleblack.com (manager)
+New endpoints: GET /health
+               GET /api/v1/health
+               GET /api/v1/me
+               GET /api/v1/users/
+               PATCH /api/v1/users/{id}/role
+               GET /api/v1/security/audit
+               DELETE /api/v1/platform-notif/cleanup
+
+## NAVIGATION (Sprint 270-271)
+
+nav.ts:        COMPLETE — all 200+ pages connected
+Groups:        Platform | Operations | Supply Chain | Intelligence | Platform Admin
+New centers:   engineering, maintenance (assets), projects-center, analytics,
+               administration, settings
+Sidebar fix:   group.items (NOT group.keys) — was causing crash
+All pages:     reachable from sidebar — no lost modules
+
+## DATABASE STATE (Sprint 271 Integrated Seed)
+
+scope_of_work:       5  (SOW-001 to SOW-005, all hotel sites)
+boq_items:          24  (3-4 BOQ lines per SOW)
+rfq_headers:         5  (all linked to SOWs)
+vendor_quotations:  10  (bid comparison with technical + commercial scores)
+purchase_orders_v2:  4  (PO-001 to PO-004, all linked)
+po_line_items:      14  (real materials with VAT calculations)
+goods_receipt_notes: 3  (GRN-001 HVAC accepted, GRN-002 plumbing accepted, GRN-003 electrical inspected)
+grn_items:           8  (received quantities with inspection notes)
+approval_requests:   4  (pending — SOW-002, PO-004, SOW-005, RFQ-005)
+supplier_invoices:  10  (all linked to vendors, 2 new linked to POs)
+contracts:           4  (real hotel contracts)
+work_orders:       169
+technicians:        31
+assets:             54
+sites:               5
+users:              10
+
+SEED DATA IDs (complete):
+SOWs:    sow-demo-001 (HVAC/Nile Plaza) sow-demo-002 (Electrical/Cairo Festival)
+         sow-demo-003 (Plumbing/Four Seasons) sow-demo-004 (Fire/Hilton)
+         sow-demo-005 (Civil/Marriott Sharm)
+RFQs:    rfq-demo-001 to rfq-demo-005 (all linked to SOWs)
+Bids:    vq-001-1 (Arctic HVAC — selected) vq-004-1 (BlueLine — selected)
+         vq-005-1 vq-005-2 (Civil bids — pending evaluation)
+POs:     po-demo-001 (HVAC approved+sent) po-demo-002 (Electrical sent)
+         po-demo-003 (Plumbing received) po-demo-004 (Fire approved)
+GRNs:    grn-demo-001 (HVAC accepted) grn-demo-002 (Plumbing accepted)
+         grn-demo-003 (Electrical inspected)
+Invoices:inv-demo-001 (matching/HVAC) inv-demo-002 (submitted/Electrical)
+         inv-demo-003 (paid/Fire) inv-demo-004 (approved/Plumbing)
+         inv-demo-005 (matching/Electrical partial)
+
+## LEGACY ROUTERS DISABLED (Sprint 269)
+
+These 6 routers are commented out in main.py due to conflicts:
+payment_tracking_router, dashboard_router, system_notifications_router,
+email_service_router, inventory_alerts_router, vendor_portal_router
+They still exist in src/commercial/ — can be fixed in a future sprint.
+
+## PORTAL PAGES
+
+200+ pages all reachable. Key new paths added to nav:
+/analytics                    Analytics hub
+/analytics/costs              Cost breakdown
+/analytics/sla                SLA trends
+/analytics/trends             Historical trends
+/analytics/scorecards         KPI scorecards
+/engineering                  Engineering hub
+/engineering/pm-plans         PM plans
+/maintenance/assets           Asset registry (54 assets)
+/maintenance/pm-plans         PM plan management
+/maintenance/asset-tree       Hierarchical view
+/projects-center              Project management
+/projects-center/timeline     Gantt view
+/administration               Platform admin
+/administration/audit         Audit log
+/settings/users               User management with role editor
+
+## PROCUREMENT DASHBOARD LIVE KPIs
+
+curl auth + GET /api/v1/procurement/dashboard returns:
+{sow:{total:5,pending:1,approved:3}, vendors:{total:10,approved:9},
+ rfqs:{total:5,active:1,with_quotes:2}, pos:{total:4,approved:2,total_value:132924},
+ approvals:{total:4,pending:4}, grns:{total:3}}
+
+## WHAT NEXT SESSION SHOULD PRIORITIZE
+
+1. Time entries seed — add realistic labor hours so time tracking shows data
+2. Analytics pages — wire /analytics/costs and /analytics/sla to real API data
+3. Test full browser flow — login → workspace → each module → click through
+4. Notification cleanup — add cron or schedule to clean notifications > 7 days
+5. SLA page alignment — frontend uses overall.total_requests key now confirmed
+
+================================================================================
+END OF SPRINT 266-271 UPDATES
+================================================================================
