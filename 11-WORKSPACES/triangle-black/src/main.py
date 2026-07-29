@@ -1,6 +1,21 @@
 from __future__ import annotations
 from pathlib import Path
 
+# SPRINT_268_ENV_LOADER
+import os as _os_268
+from pathlib import Path as _Path_268
+_env_file = _Path_268(__file__).parent.parent / ".env"
+if _env_file.exists():
+    for _line in _env_file.read_text().splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _k, _v = _line.split("=", 1)
+            if _k.strip() not in _os_268.environ:
+                _os_268.environ[_k.strip()] = _v.strip()
+    del _line, _k, _v
+del _env_file, _os_268, _Path_268
+
+
 """
 Triangle Black — Main FastAPI Application v1.4.0
 Hotel Engineering Platform — Multi-hotel tenant isolation
