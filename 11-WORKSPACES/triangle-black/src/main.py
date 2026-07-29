@@ -3820,6 +3820,7 @@ def delete_work_order(wo_id: str):
                 from fastapi import HTTPException; raise HTTPException(404, "Work order not found")
             db.execute(text("DELETE FROM work_orders WHERE id=:id"), {"id": wo_id})
             db.commit()
+            _audit(db, "work_order", wo_id, "deleted")
             return {"status": "deleted", "id": wo_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -3834,6 +3835,7 @@ def delete_service_request(sr_id: str):
         try:
             db.execute(text("DELETE FROM service_requests WHERE id=:id"), {"id": sr_id})
             db.commit()
+            _audit(db, "service_request", sr_id, "deleted")
             return {"status": "deleted", "id": sr_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -3848,6 +3850,7 @@ def delete_asset(asset_id: str):
         try:
             db.execute(text("DELETE FROM assets WHERE id=:id"), {"id": asset_id})
             db.commit()
+            _audit(db, "asset", asset_id, "deleted")
             return {"status": "deleted", "id": asset_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -3862,6 +3865,7 @@ def delete_vendor(vendor_id: str):
         try:
             db.execute(text("DELETE FROM vendors WHERE id=:id"), {"id": vendor_id})
             db.commit()
+            _audit(db, "vendor", vendor_id, "deleted")
             return {"status": "deleted", "id": vendor_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -3876,6 +3880,7 @@ def delete_sow(sow_id: str):
         try:
             db.execute(text("DELETE FROM scope_of_work WHERE id=:id"), {"id": sow_id})
             db.commit()
+            _audit(db, "scope_of_work", sow_id, "deleted")
             return {"status": "deleted", "id": sow_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -3890,6 +3895,7 @@ def delete_invoice(invoice_id: str):
         try:
             db.execute(text("DELETE FROM supplier_invoices WHERE id=:id"), {"id": invoice_id})
             db.commit()
+            _audit(db, "supplier_invoice", invoice_id, "deleted")
             return {"status": "deleted", "id": invoice_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -3905,6 +3911,7 @@ def delete_po(po_id: str):
             db.execute(text("DELETE FROM po_line_items WHERE po_id=:id"), {"id": po_id})
             db.execute(text("DELETE FROM purchase_orders_v2 WHERE id=:id"), {"id": po_id})
             db.commit()
+            _audit(db, "purchase_order", po_id, "deleted")
             return {"status": "deleted", "id": po_id}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -6581,6 +6588,7 @@ async def log_time(request: Request):
                 WHERE id=:id
             """), {"id": body.get("work_order_id")})
             db.commit()
+            _audit(db, "time_entry", entry_id, "logged", request, new_value=f"{hours}h | EGP {labor_cost}")
             return {"id":entry_id,"hours_logged":hours,"labor_cost":labor_cost,"status":"logged"}
         except Exception as e:
             db.rollback(); return {"error": str(e)}
@@ -6857,3 +6865,52 @@ def security_audit(request: Request):
             db.rollback()
             return {"error": str(e)}
 # SPRINT_269C_PATCHED
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 280 — AUTO AUDIT TRAIL
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT_280_AUTO_AUDIT
+
+def _audit(db, entity_type, entity_id, action, request=None, old_value=None, new_value=None, metadata=None):
+    """Write an audit event to platform_audit_log. Never raises."""
+    try:
+        import uuid, datetime
+        from sqlalchemy import text as _aud_text
+        actor_id = "system"
+        actor_name = "System"
+        if request:
+            try:
+                auth = request.headers.get("Authorization", "")
+                token = auth.replace("Bearer ", "").strip()
+                if token:
+                    import base64, json as _ajson
+                    parts = token.split(".")
+                    if len(parts) >= 2:
+                        seg = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
+                        payload = _ajson.loads(base64.urlsafe_b64decode(seg))
+                        actor_id = str(payload.get("sub", "system"))
+                        actor_name = str(payload.get("email", "System"))
+            except Exception:
+                pass
+        db.execute(_aud_text("""
+            INSERT INTO platform_audit_log
+                (id, entity_type, entity_id, action, actor_id, actor_name,
+                 old_value, new_value, hotel_id, metadata, created_at)
+            VALUES
+                (:id, :etype, :eid, :action, :aid, :aname,
+                 :old, :new, 'tb-default-hotel-000000000001', :meta, NOW())
+        """), {
+            "id": str(uuid.uuid4()),
+            "etype": entity_type,
+            "eid": str(entity_id) if entity_id else None,
+            "action": action,
+            "aid": actor_id,
+            "aname": actor_name,
+            "old": str(old_value)[:500] if old_value else None,
+            "new": str(new_value)[:500] if new_value else None,
+            "meta": str(metadata)[:500] if metadata else None,
+        })
+        db.commit()
+    except Exception:
+        try: db.rollback()
+        except: pass
