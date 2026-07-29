@@ -6013,11 +6013,11 @@ async def generate_pm_work_orders(request: Request):
                 db.execute(text("""
                     INSERT INTO work_orders
                       (id, hotel_id, title, description, priority, status, type,
-                       technician_id, site_id, asset_id, due_date, updated_at)
+                       technician_id, site_id, asset_id, due_date, created_at, updated_at)
                     VALUES
                       (:id, 'tb-default-hotel-000000000001', :title,
                        :desc, :pri, 'open', 'preventive',
-                       :tech, :site, :asset, :due, NOW())
+                       :tech, :site, :asset, :due, NOW(), NOW())
                 """), {
                     "id": wo_id, "title": wo_title,
                     "desc": f"Scheduled preventive maintenance for {a['name']} at {a.get('site_name','')}. Last maintenance: {str(a.get('last_maintenance_date','Never'))[:10]}",
