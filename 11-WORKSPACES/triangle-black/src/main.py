@@ -5341,7 +5341,7 @@ def financial_dashboard():
         cost = safe("""
             SELECT
               COALESCE(sum(total_cost),0) as total_sow_value,
-              COALESCE(sum(labor_cost),0) as total_labor,
+              COALESCE(sum(COALESCE(labor_cost, hours_logged * hourly_rate, 0)),0) as total_labor,
               COALESCE(sum(materials_cost),0) as total_materials,
               COALESCE(sum(total_cost - labor_cost - materials_cost),0) as total_overhead_profit,
               count(*) as sow_count
@@ -6627,7 +6627,7 @@ def time_tracking_summary():
         totals = safe("""
             SELECT count(*) as total_entries,
               COALESCE(sum(hours_logged),0) as total_hours,
-              COALESCE(sum(labor_cost),0) as total_labor_cost,
+              COALESCE(sum(COALESCE(labor_cost, hours_logged * hourly_rate, 0)),0) as total_labor_cost,
               COALESCE(avg(hours_logged),0) as avg_hours_per_entry
             FROM time_entries
         """)
@@ -6649,7 +6649,7 @@ def time_tracking_summary():
             SELECT work_type,
               count(*) as entries,
               COALESCE(sum(hours_logged),0) as total_hours,
-              COALESCE(sum(labor_cost),0) as total_cost
+              COALESCE(sum(COALESCE(labor_cost, hours_logged * hourly_rate, 0)),0) as total_cost
             FROM time_entries
             GROUP BY work_type ORDER BY total_hours DESC
         """)
