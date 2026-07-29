@@ -327,7 +327,7 @@ export function EnterpriseSidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5 scrollbar-none">
         {navGroups.map((group, gi) => {
-          const centers = group.keys.map(k => centerMap[k]).filter(Boolean);
+          const centers = group.items.map(k => centerMap[k]).filter(Boolean);
           if (centers.length === 0) return null;
 
           return (
