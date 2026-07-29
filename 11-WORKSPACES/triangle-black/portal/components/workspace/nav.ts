@@ -30,6 +30,10 @@ export const enterpriseCenters: NavCenter[] = [
     shortLabel: "Home",
     href: "/workspace",
     badge: "Live",
+    children: [
+      { label: "Workspace Hub",  href: "/workspace",         icon: "🏠", description: "Platform overview" },
+      { label: "My Day",         href: "/workspace/my-day",  icon: "☀️",  description: "Your daily command center" },
+    ],
   },
 
   // ── EXECUTIVE INTELLIGENCE ───────────────────────────────────────────────
