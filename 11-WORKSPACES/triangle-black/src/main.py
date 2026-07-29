@@ -5071,3 +5071,242 @@ def pdf_report(report_type: str, status: str=None, priority: str=None,
     fname = f"Report_{report_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M')}.pdf"
     return Response(content=buf.getvalue(), media_type="application/pdf",
                     headers={"Content-Disposition": f"inline; filename={fname}"})
+
+# ── SPRINT 256: NOTIFICATIONS + DISPATCH ─────────────────────────────────────
+
+@app.get("/api/v1/platform-notif/", tags=["notifications"])
+def list_notifications(limit: int = 50, unread_only: bool = False):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = "WHERE is_read=false" if unread_only else ""
+            rows = db.execute(text(f"""
+                SELECT * FROM notifications {where}
+                ORDER BY created_at DESC LIMIT :l
+            """), {"l": limit}).fetchall()
+            unread = db.execute(text("SELECT count(*) FROM notifications WHERE is_read=false")).scalar()
+            return {
+                "notifications": [dict(r._mapping) for r in rows],
+                "unread_count": unread,
+                "total": len(rows)
+            }
+        except Exception as e:
+            db.rollback(); return {"notifications":[],"unread_count":0,"total":0}
+
+@app.post("/api/v1/platform-notif/{notif_id}/read", tags=["notifications"])
+def mark_notification_read(notif_id: str):
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("UPDATE notifications SET is_read=true WHERE id=:id"), {"id": notif_id})
+            db.commit()
+            return {"status": "read", "id": notif_id}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/platform-notif/mark-all-read", tags=["notifications"])
+def mark_all_read():
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            result = db.execute(text("UPDATE notifications SET is_read=true WHERE is_read=false"))
+            db.commit()
+            return {"status": "all read", "updated": result.rowcount}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.post("/api/v1/platform-notif/generate", tags=["notifications"])
+def generate_notifications():
+    """Auto-generate notifications from live platform data"""
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            created = 0
+            def add_notif(ntype, title, message, entity_type=None, entity_id=None, entity_url=None, priority="medium"):
+                nonlocal created
+                # Check if similar notification exists in last 24h
+                existing = db.execute(text("""
+                    SELECT id FROM notifications
+                    WHERE title=:t AND entity_id=:eid AND entity_type=:et
+                    AND created_at > NOW()-INTERVAL '24 hours'
+                """), {"t": title, "eid": entity_id or "", "et": entity_type or ""}).fetchone()
+                if not existing:
+                    db.execute(text("""
+                        INSERT INTO notifications (id, type, title, message, entity_type, entity_id, entity_url, priority)
+                        VALUES (:id, :type, :title, :msg, :et, :eid, :url, :pri)
+                    """), {
+                        "id": str(uuid.uuid4()), "type": ntype,
+                        "title": title, "msg": message,
+                        "et": entity_type, "eid": entity_id, "url": entity_url, "pri": priority
+                    })
+                    created += 1
+
+            # 1. Critical work orders
+            critical_wos = db.execute(text("""
+                SELECT wo.id, wo.title, s.name as site_name
+                FROM work_orders wo LEFT JOIN sites s ON s.id=wo.site_id
+                WHERE wo.priority='critical' AND wo.status='open'
+                ORDER BY wo.created_at DESC LIMIT 5
+            """)).fetchall()
+            for wo in critical_wos:
+                add_notif("alert", f"Critical WO: {wo.title[:40]}", f"Critical work order at {wo.site_name or 'Unknown site'} requires immediate attention.",
+                          "work_order", wo.id, f"/operations/work-orders/{wo.id}", "critical")
+
+            # 2. Overdue work orders
+            overdue_wos = db.execute(text("""
+                SELECT wo.id, wo.title, wo.due_date
+                FROM work_orders wo
+                WHERE wo.due_date < NOW() AND wo.status NOT IN ('completed','cancelled')
+                ORDER BY wo.due_date ASC LIMIT 5
+            """)).fetchall()
+            for wo in overdue_wos:
+                add_notif("warning", f"Overdue WO: {wo.title[:40]}",
+                          f"Work order was due {str(wo.due_date)[:10]} and is not yet completed.",
+                          "work_order", wo.id, f"/operations/work-orders/{wo.id}", "high")
+
+            # 3. Overdue invoices
+            overdue_inv = db.execute(text("""
+                SELECT si.id, si.invoice_number, si.balance_due, v.company_name
+                FROM supplier_invoices si LEFT JOIN vendors v ON v.id=si.vendor_id
+                WHERE si.due_date < CURRENT_DATE AND si.payment_status != 'paid' AND si.balance_due > 0
+                LIMIT 5
+            """)).fetchall()
+            for inv in overdue_inv:
+                add_notif("alert", f"Invoice Overdue: {inv.invoice_number}",
+                          f"Invoice from {inv.company_name or 'vendor'} — EGP {float(inv.balance_due or 0):,.0f} outstanding.",
+                          "invoice", inv.id, f"/supply-chain/invoices/{inv.id}", "high")
+
+            # 4. Matched invoices ready for approval
+            matched_inv = db.execute(text("""
+                SELECT id, invoice_number FROM supplier_invoices
+                WHERE match_result='matched' AND status='matching' LIMIT 3
+            """)).fetchall()
+            for inv in matched_inv:
+                add_notif("info", f"Invoice Ready: {inv.invoice_number}",
+                          "3-way match passed. Invoice is ready for approval.",
+                          "invoice", inv.id, f"/supply-chain/invoices/{inv.id}", "medium")
+
+            # 5. Critical service requests
+            critical_srs = db.execute(text("""
+                SELECT sr.id, sr.title, s.name as site_name
+                FROM service_requests sr LEFT JOIN sites s ON s.id=sr.site_id
+                WHERE sr.urgency='critical' AND sr.status='open'
+                ORDER BY sr.created_at DESC LIMIT 3
+            """)).fetchall()
+            for sr in critical_srs:
+                add_notif("alert", f"Critical SR: {sr.title[:40]}",
+                          f"Critical service request at {sr.site_name or 'site'} needs immediate response.",
+                          "service_request", sr.id, f"/operations/service-requests/{sr.id}", "critical")
+
+            db.commit()
+            unread = db.execute(text("SELECT count(*) FROM notifications WHERE is_read=false")).scalar()
+            return {"status": "generated", "created": created, "unread_count": unread}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.patch("/api/v1/work-orders/{wo_id}/assign", tags=["operations"])
+async def assign_work_order(wo_id: str, request: Request):
+    """Assign technician to work order (for Kanban dispatch)"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            technician_id = body.get("technician_id")
+            db.execute(text("""
+                UPDATE work_orders SET technician_id=:tid, updated_at=NOW() WHERE id=:id
+            """), {"tid": technician_id, "id": wo_id})
+            db.commit()
+            wo = db.execute(text("""
+                SELECT wo.*, t.name as technician_name
+                FROM work_orders wo LEFT JOIN technicians t ON t.id=wo.technician_id
+                WHERE wo.id=:id
+            """), {"id": wo_id}).fetchone()
+            return dict(wo._mapping) if wo else {"error": "Not found"}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.patch("/api/v1/work-orders/{wo_id}/status", tags=["operations"])
+async def update_wo_status(wo_id: str, request: Request):
+    """Update work order status (for Kanban dispatch)"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            new_status = body.get("status")
+            updates = {"status": new_status, "id": wo_id}
+            extra = ""
+            if new_status == "in_progress":
+                extra = ", started_at=NOW()"
+            elif new_status == "completed":
+                extra = ", completed_at=NOW()"
+            db.execute(text(f"""
+                UPDATE work_orders SET status=:status{extra}, updated_at=NOW() WHERE id=:id
+            """), updates)
+            db.commit()
+            return {"status": "updated", "wo_id": wo_id, "new_status": new_status}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/dispatch/board", tags=["operations"])
+def dispatch_board(site_id: str = None, priority: str = None, technician_id: str = None):
+    """Get Kanban board data grouped by status"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where, params = ["1=1"], {}
+            if site_id: where.append("wo.site_id=:sid"); params["sid"]=site_id
+            if priority: where.append("wo.priority=:pri"); params["pri"]=priority
+            if technician_id: where.append("wo.technician_id=:tid"); params["tid"]=technician_id
+            params["l"] = 100
+            rows = db.execute(text(f"""
+                SELECT wo.id, wo.title, wo.priority, wo.status, wo.type,
+                       wo.due_date, wo.created_at, wo.started_at, wo.completed_at,
+                       t.name as technician_name, t.specializations,
+                       s.name as site_name
+                FROM work_orders wo
+                LEFT JOIN technicians t ON t.id=wo.technician_id
+                LEFT JOIN sites s ON s.id=wo.site_id
+                WHERE {" AND ".join(where)}
+                ORDER BY CASE wo.priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
+                         wo.created_at DESC
+                LIMIT :l
+            """), params).fetchall()
+            all_wos = [dict(r._mapping) for r in rows]
+            # Group by status
+            board = {
+                "open": [w for w in all_wos if w["status"]=="open"],
+                "in_progress": [w for w in all_wos if w["status"]=="in_progress"],
+                "completed": [w for w in all_wos if w["status"]=="completed"],
+            }
+            # Technicians list for assignment dropdown
+            techs = db.execute(text("SELECT id, name, specializations, is_active FROM technicians WHERE is_active=true ORDER BY name")).fetchall()
+            return {
+                "board": board,
+                "counts": {k: len(v) for k,v in board.items()},
+                "technicians": [dict(t._mapping) for t in techs]
+            }
+        except Exception as e:
+            db.rollback(); return {"board":{},"counts":{},"technicians":[]}

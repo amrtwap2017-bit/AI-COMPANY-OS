@@ -1,75 +1,145 @@
 "use client";
 // @ts-nocheck
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d) => {
+  if (!d) return "—";
+  try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); }
+  catch { return "—"; }
+};
+const isOverdue = (d) => d && new Date(d) < new Date() && new Date(d).getFullYear() > 1990;
 
-const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
-const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"#94A3B8" };
+const PRIORITY_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
+const STATUS_CONFIG = {
+  open:        {label:"Open",        color:"#60A5FA", bg:"#1E3A5F"},
+  in_progress: {label:"In Progress", color:"#FBBF24", bg:"#3A2F0E"},
+  completed:   {label:"Completed",   color:"#34D399", bg:"#0D2A1E"},
+};
+const COLUMNS = ["open","in_progress","completed"];
 
-export default function DispatchPage() {
+function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
+  const [showAssign, setShowAssign] = useState(false);
+  const pc = PRIORITY_COLORS[wo.priority] || "#94A3B8";
+  const overdue = isOverdue(wo.due_date);
+  return (
+    <div className="rounded-xl border border-border transition-all hover:border-brand/40 cursor-pointer"
+         style={{background:"#1E293B",borderLeft:`3px solid ${pc}`}}>
+      <div className="p-3" onClick={()=>onClick(wo.id)}>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="text-xs font-bold text-primary leading-tight flex-1">{wo.title.slice(0,55)}{wo.title.length>55?"…":""}</div>
+          <span className="tb-badge flex-shrink-0" style={{background:pc+"18",color:pc,fontSize:"0.45rem",border:`1px solid ${pc}30`}}>
+            {wo.priority}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {wo.site_name && <span className="text-xs text-tertiary">📍 {wo.site_name.split(' ').slice(0,2).join(' ')}</span>}
+          <span className="text-xs text-tertiary">⚙️ {wo.type}</span>
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <div className="text-xs" style={{color:overdue?"#F87171":"#64748B"}}>
+            {overdue ? "⚠ Overdue: " : "Due: "}{fmtDate(wo.due_date)}
+          </div>
+          {wo.technician_name && (
+            <div className="flex items-center gap-1">
+              <div className="w-5 h-5 rounded-full bg-brand/20 flex items-center justify-center text-xs font-bold text-brand">
+                {(wo.technician_name||"?").charAt(0)}
+              </div>
+              <span className="text-xs text-secondary">{wo.technician_name.split(" ")[0]}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="border-t border-border/50 px-3 py-2 flex items-center gap-2">
+        <button onClick={(e)=>{e.stopPropagation();setShowAssign(!showAssign);}}
+          className="text-xs text-brand hover:text-brand/80 flex-1 text-left">
+          {wo.technician_name ? "Reassign ↓" : "+ Assign Tech"}
+        </button>
+        {wo.status !== "completed" && (
+          <button onClick={(e)=>{e.stopPropagation();onStatus(wo.id, wo.status==="open"?"in_progress":"completed");}}
+            className="text-xs px-2 py-0.5 rounded-lg transition-colors"
+            style={{background:wo.status==="open"?"#FBBF2420":"#34D39920",color:wo.status==="open"?"#FBBF24":"#34D399"}}>
+            {wo.status==="open"?"▶ Start":"✓ Done"}
+          </button>
+        )}
+      </div>
+      {showAssign && (
+        <div className="px-3 pb-3" onClick={e=>e.stopPropagation()}>
+          <select className="tb-input w-full text-xs" defaultValue={wo.technician_id||""}
+            onChange={e=>{onAssign(wo.id,e.target.value);setShowAssign(false);}}>
+            <option value="">Unassigned</option>
+            {techs.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function DispatchBoardPage() {
   const router = useRouter();
-  const [view, setView] = useState("board");
-  const [search, setSearch] = useState("");
+  const qc = useQueryClient();
+  const [filterSite, setFilterSite] = useState("");
+  const [filterPriority, setFilterPriority] = useState("");
 
-  const { data: woRaw, isLoading: woLoading } = useQuery(
-    ["dispatch-wos"],
-    () => authFetch("/api/v1/work-orders/").then(r => r.json()),
-    { refetchInterval: 30000 }
-  );
-  const { data: techRaw } = useQuery(
-    ["dispatch-techs"],
-    () => authFetch("/api/v1/technicians/").then(r => r.json()),
-    { refetchInterval: 30000 }
-  );
-  const { data: srRaw } = useQuery(
-    ["dispatch-srs"],
-    () => authFetch("/api/v1/service-requests/").then(r => r.json())
+  const { data: boardData, isLoading } = useQuery(
+    ["dispatch-board", filterSite, filterPriority],
+    () => {
+      const params = new URLSearchParams();
+      if (filterSite) params.set("site_id", filterSite);
+      if (filterPriority) params.set("priority", filterPriority);
+      return authFetch(`/api/v1/dispatch/board?${params}`).then(r=>r.json());
+    },
+    { staleTime: 15000, refetchInterval: 30000 }
   );
 
-  const wos   = toArr(woRaw);
-  const techs = toArr(techRaw);
-  const srs   = toArr(srRaw);
+  const board = boardData?.board || {};
+  const counts = boardData?.counts || {};
+  const techs = boardData?.technicians || [];
 
-  const openWOs      = wos.filter(w => w.status === "open");
-  const inProgWOs    = wos.filter(w => w.status === "in_progress");
-  const criticalWOs  = wos.filter(w => w.priority === "critical" && w.status !== "completed");
-  const unassigned   = wos.filter(w => !w.technician_id && w.status !== "completed");
-  const openSRs      = srs.filter(s => s.status === "open");
-
-  const filtered = wos.filter(w =>
-    w.status !== "completed" &&
-    (!search ||
-      (w.title||"").toLowerCase().includes(search.toLowerCase()) ||
-      (w.priority||"").toLowerCase().includes(search.toLowerCase()))
+  const assignMut = useMutation(
+    ({wo_id, tech_id}) => authFetch(`/api/v1/work-orders/${wo_id}/assign`, {
+      method:"PATCH", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({technician_id:tech_id})
+    }).then(r=>r.json()),
+    { onSuccess: () => qc.invalidateQueries(["dispatch-board"]) }
   );
+
+  const statusMut = useMutation(
+    ({wo_id, status}) => authFetch(`/api/v1/work-orders/${wo_id}/status`, {
+      method:"PATCH", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({status})
+    }).then(r=>r.json()),
+    { onSuccess: () => qc.invalidateQueries(["dispatch-board"]) }
+  );
+
+  const totalOpen = counts.open || 0;
+  const totalIP = counts.in_progress || 0;
+  const critical = [...(board.open||[]),...(board.in_progress||[])].filter(w=>w.priority==="critical").length;
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
         <div className="tb-hero-inner">
-          <div className="tb-flex-between gap-6">
+          <div className="tb-flex-between mb-4">
             <div>
-              <div className="text-label-upper text-cyan-400 mb-1.5">Operations</div>
+              <div className="text-label-upper text-emerald-400 mb-1">Operations</div>
               <h1 className="tb-hero-title">Dispatch Board</h1>
-              <p className="tb-hero-description">{techs.length} technicians · {openWOs.length} open · {criticalWOs.length} critical · {unassigned.length} unassigned</p>
+              <p className="tb-hero-description">Assign technicians · Track progress · Real-time status</p>
             </div>
-            <button onClick={() => router.push("/operations/work-orders")} className="tb-btn-primary">
+            <button onClick={()=>router.push("/operations/work-orders/new")} className="tb-btn-primary" style={{fontSize:"0.75rem"}}>
               + New Work Order
             </button>
           </div>
-          <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label:"Open WOs",    value:openWOs.length,   color:"#60A5FA" },
-              { label:"In Progress", value:inProgWOs.length, color:"#FBBF24" },
-              { label:"Critical",    value:criticalWOs.length, color:criticalWOs.length>0?"#F87171":"#34D399" },
-              { label:"Unassigned",  value:unassigned.length, color:unassigned.length>0?"#FB923C":"#34D399" },
-              { label:"Open SRs",   value:openSRs.length,   color:"#A78BFA" },
-            ].map((k, i) => (
+              {label:"Open",value:totalOpen,color:"#60A5FA"},
+              {label:"In Progress",value:totalIP,color:"#FBBF24"},
+              {label:"Completed",value:counts.completed||0,color:"#34D399"},
+              {label:"Critical",value:critical,color:critical>0?"#F87171":"#34D399"},
+            ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -80,205 +150,69 @@ export default function DispatchPage() {
       </div>
 
       <div className="tb-canvas">
-
-        {/* Alerts */}
-        {(criticalWOs.length > 0 || unassigned.length > 0) && (
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span style={{fontSize:"1.25rem"}}>🚨</span>
-              <div className="flex-1">
-                {criticalWOs.length > 0 && (
-                  <span className="text-sm font-semibold text-red-400 mr-4">
-                    {criticalWOs.length} critical work order{criticalWOs.length>1?"s":""} need immediate attention
-                  </span>
-                )}
-                {unassigned.length > 0 && (
-                  <span className="text-sm font-semibold" style={{color:"#FB923C"}}>
-                    {unassigned.length} unassigned work order{unassigned.length>1?"s":""}
-                  </span>
-                )}
-              </div>
-              <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">
-                View All →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Technician Board */}
-        <div className="tb-section">
-          <div className="tb-section-header">
-            <div>
-              <div className="text-label-upper text-tertiary mb-1">Field Team</div>
-              <div className="tb-section-title" style={{marginBottom:0}}>Technician Status</div>
-            </div>
-            <button onClick={() => router.push("/operations/technicians")} className="tb-section-link">Manage →</button>
-          </div>
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-            {techs.slice(0,8).map((tech, i) => {
-              const techWOs    = wos.filter(w => w.technician_id === tech.id);
-              const active     = techWOs.filter(w => w.status === "in_progress").length;
-              const openCount  = techWOs.filter(w => w.status === "open").length;
-              const isActive   = active > 0;
-              const isAvail    = !isActive && openCount === 0;
-              const statusColor = isActive ? "#FBBF24" : isAvail ? "#34D399" : "#60A5FA";
-              const statusLabel = isActive ? "Active" : isAvail ? "Available" : "Queued";
-              return (
-                <button key={i}
-                  onClick={() => router.push(`/operations/technicians/${tech.id}`)}
-                  className="tb-section text-left hover:border-brand transition-colors">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-base-alt flex items-center justify-center text-xs font-black text-secondary flex-shrink-0">
-                      {(tech.name||"?").charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-semibold text-primary truncate">{tech.name||"—"}</div>
-                      <div className="text-xs text-tertiary truncate">{tech.specialization||tech.role||"—"}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="tb-badge" style={{background:`${statusColor}18`,color:statusColor,border:`1px solid ${statusColor}30`,fontSize:"0.5625rem"}}>
-                      {statusLabel}
-                    </span>
-                    <span className="text-xs text-tertiary">{techWOs.length} WOs</span>
-                  </div>
-                  {active > 0 && (
-                    <div className="tb-progress mt-2">
-                      <div className="tb-progress-bar" style={{background:"#FBBF24",width:"60%"}}/>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {techs.length > 8 && (
-            <button onClick={() => router.push("/operations/technicians")}
-              className="text-xs text-brand mt-3 hover:text-primary transition-colors">
-              + {techs.length - 8} more technicians →
+        {/* Filters */}
+        <div className="flex gap-3 mb-4 flex-wrap">
+          <select className="tb-input" value={filterPriority} onChange={e=>setFilterPriority(e.target.value)} style={{minWidth:"140px"}}>
+            <option value="">All Priorities</option>
+            {["critical","high","medium","low"].map(p=><option key={p} value={p}>{p}</option>)}
+          </select>
+          <select className="tb-input" value={filterSite} onChange={e=>setFilterSite(e.target.value)} style={{minWidth:"180px"}}>
+            <option value="">All Sites</option>
+            {[{id:"site-nile-plaza",name:"Nile Plaza"},{id:"site-cairo-festival",name:"Cairo Festival"},{id:"site-four-seasons",name:"Four Seasons"},{id:"site-hilton-cairo",name:"Hilton Cairo"}].map(s=>(
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          {(filterPriority||filterSite) && (
+            <button onClick={()=>{setFilterPriority("");setFilterSite("");}} className="tb-btn-secondary" style={{fontSize:"0.75rem",padding:"6px 12px"}}>
+              Reset
             </button>
           )}
         </div>
 
-        {/* Work Order Queue */}
-        <div className="tb-section">
-          <div className="tb-section-header">
-            <div>
-              <div className="text-label-upper text-tertiary mb-1">Queue</div>
-              <div className="tb-section-title" style={{marginBottom:0}}>Active Work Orders ({filtered.length})</div>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                className="tb-search"
-                style={{width:200}}
-                placeholder="Search..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-              <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All →</button>
-            </div>
-          </div>
-
-          {woLoading ? (
-            <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
-          ) : filtered.length === 0 ? (
-            <div className="tb-empty">
-              <div className="tb-empty-icon">✅</div>
-              <div className="tb-empty-title">All clear</div>
-              <div className="tb-empty-desc">No active work orders in the queue</div>
-            </div>
-          ) : (
-            <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
-              <div className="tb-table-head" style={{gridTemplateColumns:"2fr 80px 90px 150px 100px 110px"}}>
-                {["Work Order","Priority","Status","Technician","Asset","Due Date"].map((h, i) => (
-                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
-                ))}
-              </div>
-              {filtered.slice(0,20).map((wo, i) => {
-                const pc   = PRIORITY_COLOR[wo.priority] || "#94A3B8";
-                const sc   = STATUS_COLOR[wo.status] || "#94A3B8";
-                const tech = techs.find(t => t.id === wo.technician_id);
-                return (
-                  <button key={i}
-                    onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
-                    className="tb-table-row"
-                    style={{gridTemplateColumns:"2fr 80px 90px 150px 100px 110px"}}>
-                    <div className="flex items-center gap-3 pr-4 min-w-0">
-                      <div className="tb-priority-bar" style={{background:pc}}/>
-                      <div className="text-sm font-semibold text-primary truncate">{wo.title||"—"}</div>
+        {isLoading ? (
+          <div className="grid grid-cols-3 gap-4">{[1,2,3].map(i=><div key={i} className="h-96 bg-base-alt rounded-2xl animate-pulse"/>)}</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {COLUMNS.map(col=>{
+              const cfg = STATUS_CONFIG[col];
+              const wos = board[col] || [];
+              return (
+                <div key={col} className="flex flex-col rounded-2xl overflow-hidden border border-border"
+                     style={{background:"#0F172A"}}>
+                  {/* Column Header */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border"
+                       style={{background:cfg.bg}}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{background:cfg.color}}/>
+                      <span className="text-sm font-bold" style={{color:cfg.color}}>{cfg.label}</span>
                     </div>
-                    <div className="text-center">
-                      <span className="tb-badge" style={{background:`${pc}18`,color:pc,border:`1px solid ${pc}30`,fontSize:"0.625rem"}}>{wo.priority||"—"}</span>
-                    </div>
-                    <div className="text-center">
-                      <span className="tb-badge" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`,fontSize:"0.625rem"}}>{(wo.status||"—").replace("_"," ")}</span>
-                    </div>
-                    <div className="text-center text-xs text-secondary truncate px-1">
-                      {tech?.name || <span style={{color:"#FB923C"}}>Unassigned</span>}
-                    </div>
-                    <div className="text-center text-xs text-tertiary truncate px-1">{wo.asset_id?.slice(0,10)||"—"}</div>
-                    <div className="text-center text-xs text-tertiary">{fmtDate(wo.due_date)}</div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Stats row */}
-        <div className="tb-grid-3">
-          <div className="tb-section">
-            <div className="text-xs text-tertiary mb-3">WOs by Priority</div>
-            <div className="space-y-2">
-              {["critical","high","medium","low"].map(p => {
-                const cnt = wos.filter(w => w.priority === p && w.status !== "completed").length;
-                const pct = openWOs.length > 0 ? (cnt / openWOs.length) * 100 : 0;
-                return (
-                  <div key={p}>
-                    <div className="tb-flex-between mb-1">
-                      <span className="text-xs text-secondary capitalize">{p}</span>
-                      <span className="text-xs font-bold text-primary">{cnt}</span>
-                    </div>
-                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:PRIORITY_COLOR[p],width:`${pct}%`}}/></div>
+                    <span className="text-xs font-black px-2 py-0.5 rounded-full"
+                          style={{background:cfg.color+"20",color:cfg.color}}>
+                      {wos.length}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="tb-section">
-            <div className="text-xs text-tertiary mb-3">Technician Workload</div>
-            <div className="space-y-2">
-              {techs.slice(0,5).map((tech, i) => {
-                const cnt = wos.filter(w => w.technician_id === tech.id && w.status !== "completed").length;
-                const max = Math.max(...techs.map(t => wos.filter(w => w.technician_id === t.id).length), 1);
-                return (
-                  <div key={i}>
-                    <div className="tb-flex-between mb-1">
-                      <span className="text-xs text-secondary truncate" style={{maxWidth:120}}>{tech.name||"—"}</span>
-                      <span className="text-xs font-bold text-primary">{cnt}</span>
-                    </div>
-                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:"#60A5FA",width:`${(cnt/max)*100}%`}}/></div>
+                  {/* Cards */}
+                  <div className="flex-1 p-3 space-y-2 overflow-y-auto" style={{maxHeight:"70vh"}}>
+                    {wos.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-8 gap-2">
+                        <div style={{fontSize:"2rem",opacity:0.3}}>📋</div>
+                        <div className="text-xs text-tertiary">No {cfg.label.toLowerCase()} work orders</div>
+                      </div>
+                    ) : (
+                      wos.map(wo=>(
+                        <WOCard key={wo.id} wo={wo} techs={techs}
+                          onAssign={(wo_id,tech_id)=>assignMut.mutate({wo_id,tech_id})}
+                          onStatus={(wo_id,status)=>statusMut.mutate({wo_id,status})}
+                          onClick={(id)=>router.push("/operations/work-orders/"+id)}
+                        />
+                      ))
+                    )}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="tb-section">
-            <div className="text-xs text-tertiary mb-3">Quick Actions</div>
-            <div className="space-y-2">
-              {[
-                { label:"All Work Orders",     icon:"🔧", path:"/operations/work-orders" },
-                { label:"Service Requests",    icon:"🎫", path:"/operations/service-requests" },
-                { label:"Technicians",         icon:"👷", path:"/operations/technicians" },
-                { label:"Maintenance Plans",   icon:"📅", path:"/maintenance/pm-plans" },
-              ].map((a, i) => (
-                <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
-                  <span>{a.icon}</span>
-                  <span className="text-sm text-secondary">{a.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
