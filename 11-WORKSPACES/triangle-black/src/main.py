@@ -355,24 +355,16 @@ def root():
     return {"service": "Triangle Black API", "version": "3.0.0", "docs": "/docs"}
 
 # ── Sprint 20 Modules ─────────────────────────────────────────────────────────
-try:
-    from src.commercial.payment_tracking.router import router as payment_tracking_router
-    app.include_router(payment_tracking_router, prefix="/api/v1")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: payment_tracking_router: {e}")
 try:
     from src.commercial.projects.router import router as projects_router
     app.include_router(projects_router, prefix="/api/v1")
 except Exception as e:
     logger.warning("WARN: projects_router: {e}")
-try:
-    from src.commercial.dashboard.router import router as dashboard_router
-    app.include_router(dashboard_router, prefix="/api/v1")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: dashboard_router: {e}")
-try:
-    from src.commercial.system_notifications.router import router as notifications_router
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: system_notifications_router: {e}")
 
 # ── Auto-wired Sprint 20-22 modules ──────────────────────────────────────
@@ -381,25 +373,13 @@ try:
     app.include_router(documents_router, prefix="/api/v1")
 except Exception as e:
     logger.warning("WARN: documents: {e}")
-try:
-    from src.commercial.email_service.router import router as email_service_router
-    app.include_router(email_service_router, prefix="/api/v1")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: email_service: {e}")
-try:
-    from src.commercial.inventory_alerts.router import router as inventory_alerts_router
-    app.include_router(inventory_alerts_router, prefix="/api/v1")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: inventory_alerts: {e}")
-try:
-    from src.commercial.pdf_service.router import router as pdf_service_router
-    app.include_router(pdf_service_router, prefix="/api/v1")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: pdf_service: {e}")
-try:
-    from src.commercial.vendor_portal.router import router as vendor_portal_router
-    app.include_router(vendor_portal_router, prefix="/api/v1")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.warning(f"WARN: vendor_portal: {e}")
 # ── Sprint 11: AI Operations Routers ──────────────────────────
 try:
@@ -531,11 +511,7 @@ except Exception as e:
     logger.info("  WARN pdf_export: {e}")
 
 # ── Sprint 74 — SLA Dashboard + Executive KPI + Reorder Automation ───────────
-try:
-    from src.commercial.sla_dashboard.router import router as sla_dashboard_router
-    app.include_router(sla_dashboard_router, prefix="/api/v1")
-    logger.info("  OK: sla_dashboard_router")
-except Exception as e:
+    # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
     logger.info("  WARN sla_dashboard: {e}")
 
 try:
@@ -6881,3 +6857,4 @@ def security_audit(request: Request):
         except Exception as e:
             db.rollback()
             return {"error": str(e)}
+# SPRINT_269C_PATCHED
