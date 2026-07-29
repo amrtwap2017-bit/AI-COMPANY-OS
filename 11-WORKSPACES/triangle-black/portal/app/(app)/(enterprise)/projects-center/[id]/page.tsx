@@ -9,8 +9,8 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  active:"#34D399", planning:"#60A5FA", completed:"#A78BFA",
-  on_hold:"#FBBF24", cancelled:"#F87171"
+  active:"#547C4D", planning:"#5B7C8C", completed:"#8D7443",
+  on_hold:"#B07A2A", cancelled:"#A84A3D"
 };
 
 export default function ProjectDetailPage() {
@@ -20,7 +20,7 @@ export default function ProjectDetailPage() {
 
   const { data: proj, isLoading } = useQuery(
     ["proj-detail", id],
-    () => authFetch(`/api/v1/projects-portal${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/projects/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 
@@ -64,10 +64,10 @@ export default function ProjectDetailPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Progress",   value:`${progress}%`,                          color:progress>=80?"#34D399":"#FBBF24" },
+              { label:"Progress",   value:`${progress}%`,                          color:progress>=80?"#547C4D":"#B07A2A" },
               { label:"Budget",     value:fmtEGP(proj.budget||proj.total_value||0), color:"#F1F5F9" },
-              { label:"Work Orders",value:wos.length,                              color:"#60A5FA" },
-              { label:"End Date",   value:fmtDate(proj.end_date),                  color:"#A78BFA" },
+              { label:"Work Orders",value:wos.length,                              color:"#5B7C8C" },
+              { label:"End Date",   value:fmtDate(proj.end_date),                  color:"#8D7443" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -87,10 +87,10 @@ export default function ProjectDetailPage() {
               <div className="mb-3">
                 <div className="tb-flex-between mb-2">
                   <span className="text-sm text-secondary">{completedWOs}/{wos.length} work orders complete</span>
-                  <span className="text-sm font-bold" style={{color:progress>=80?"#34D399":"#FBBF24"}}>{progress}%</span>
+                  <span className="text-sm font-bold" style={{color:progress>=80?"#547C4D":"#B07A2A"}}>{progress}%</span>
                 </div>
                 <div className="tb-progress tb-progress--md">
-                  <div className="tb-progress-bar" style={{background:progress>=80?"#34D399":"#FBBF24",width:`${progress}%`,transition:"width 0.5s ease"}}/>
+                  <div className="tb-progress-bar" style={{background:progress>=80?"#547C4D":"#B07A2A",width:`${progress}%`,transition:"width 0.5s ease"}}/>
                 </div>
               </div>
             </div>
@@ -131,8 +131,8 @@ export default function ProjectDetailPage() {
                 </div>
                 <div className="space-y-2 mt-3">
                   {wos.map((wo, i) => {
-                    const pc = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" }[wo.priority] || "#94A3B8";
-                    const sc2 = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399" }[wo.status] || "#94A3B8";
+                    const pc = { critical:"#A84A3D", high:"#FB923C", medium:"#B07A2A", low:"#94A3B8" }[wo.priority] || "#94A3B8";
+                    const sc2 = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" }[wo.status] || "#94A3B8";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
