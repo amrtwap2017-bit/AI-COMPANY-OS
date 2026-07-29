@@ -46,25 +46,25 @@ const ICONS: Record<string, any> = {
 
 // ── Color map ─────────────────────────────────────────────────────
 const COLORS: Record<string, string> = {
-  workspace:          "text-neutral-400",
-  executive:          "text-neutral-400",
-  customers:          "text-neutral-500",
-  commercial:         "text-amber-400",
-  operations:         "text-neutral-400",
-  "supply-chain":     "text-neutral-400",
-  "financial":        "text-neutral-400",
-  "assets":           "text-neutral-500",
-  "portals":          "text-neutral-500",
-  "reports":          "text-neutral-500",
-  engineering:        "text-neutral-400",
-  maintenance:        "text-neutral-500",
-  ai:                 "text-neutral-400",
-  analytics:          "text-neutral-500",
-  "projects-center":  "text-neutral-500",
-  administration:     "text-neutral-500",
-  approvals:          "text-neutral-400",
-  agents:             "text-neutral-400",
-  settings:           "text-neutral-500",
+  workspace:          "text-[#A89478]",
+  executive:          "text-[#A89478]",
+  customers:          "text-[#8C7A69]",
+  commercial:         "text-[#A89478]",
+  operations:         "text-[#A89478]",
+  "supply-chain":     "text-[#A89478]",
+  "financial":        "text-[#A89478]",
+  "assets":           "text-[#8C7A69]",
+  "portals":          "text-[#8C7A69]",
+  "reports":          "text-[#8C7A69]",
+  engineering:        "text-[#A89478]",
+  maintenance:        "text-[#8C7A69]",
+  ai:                 "text-[#A89478]",
+  analytics:          "text-[#A89478]",
+  "projects-center":  "text-[#8C7A69]",
+  administration:     "text-[#8C7A69]",
+  approvals:          "text-[#A89478]",
+  agents:             "text-[#A89478]",
+  settings:           "text-[#8C7A69]",
 };
 
 // ── Badge styles ──────────────────────────────────────────────────
@@ -135,7 +135,7 @@ function NavItem({
 
       {/* Tooltip when collapsed */}
       {collapsed && tooltip === center.key && (
-        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-neutral-800/40 text-white text-xs font-medium rounded-lg shadow-xl border border-neutral-700/40 whitespace-nowrap pointer-events-none">
+        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-white/5 text-white text-xs font-medium rounded-lg shadow-xl border border-neutral-700/40 whitespace-nowrap pointer-events-none">
           {center.label}
           {center.badge && <span className="ml-1.5 text-amber-400">{center.badge}</span>}
         </div>
@@ -158,7 +158,7 @@ function NavAccordion({
   const pathname = usePathname();
   const [open, setOpen] = useState(isActive || isChildActive);
   const Icon   = ICONS[center.key]  || LayoutDashboard;
-  const color  = COLORS[center.key] || "text-neutral-500";
+  const color  = COLORS[center.key] || "text-[#7A6A5C]";
   const anyActive = isActive || isChildActive;
 
   // Auto-open when navigating to a child
@@ -187,7 +187,7 @@ function NavAccordion({
           )}
         </Link>
         {tooltip === center.key && (
-          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-neutral-800/40 text-white text-xs font-medium rounded-lg shadow-xl border border-neutral-700/40 whitespace-nowrap pointer-events-none">
+          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-white/5 text-white text-xs font-medium rounded-lg shadow-xl border border-neutral-700/40 whitespace-nowrap pointer-events-none">
             {center.label}
             {center.badge && <span className="ml-1.5 text-amber-400">{center.badge}</span>}
           </div>
@@ -218,7 +218,7 @@ function NavAccordion({
         )}
         {open
           ? <ChevronDown className="w-3 h-3 text-tertiary flex-shrink-0 ml-0.5" />
-          : <ChevronRight className="w-3 h-3 text-neutral-500 flex-shrink-0 ml-0.5" />
+          : <ChevronRight className="w-3 h-3 text-[#7A6A5C] flex-shrink-0 ml-0.5" />
         }
       </button>
 
@@ -417,7 +417,7 @@ export function EnterpriseSidebar() {
               <span className="text-white text-xs font-black">{initials}</span>
             </button>
             {tooltip === "user" && (
-              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-neutral-800/40 text-white text-xs font-medium rounded-lg shadow-xl border border-neutral-700/40 whitespace-nowrap pointer-events-none">
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 px-2.5 py-1.5 bg-white/5 text-white text-xs font-medium rounded-lg shadow-xl border border-neutral-700/40 whitespace-nowrap pointer-events-none">
                 {user?.name || "User"} · Sign out
               </div>
             )}
