@@ -6115,3 +6115,276 @@ def maintenance_stats():
             }
         except Exception as e:
             db.rollback(); return {}
+
+# ── SPRINT 261: ASSET QR CODE SYSTEM ─────────────────────────────────────────
+
+@app.get("/api/v1/qr/asset/{asset_id}", tags=["qr"])
+def get_asset_qr(asset_id: str, size: int = 300):
+    """Generate QR code PNG for an asset — links to /asset/{asset_id} scan page"""
+    import os, io
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    try:
+        import qrcode
+        from qrcode.image.pil import PilImage
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        raise HTTPException(500, "qrcode/Pillow not installed. Run: pip install qrcode[pil] Pillow")
+
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        asset = db.execute(text("""
+            SELECT a.id, a.name, a.category, a.location_description, a.manufacturer, a.model,
+                   a.serial_number, s.name as site_name
+            FROM assets a LEFT JOIN sites s ON s.id=a.site_id WHERE a.id=:id
+        """), {"id": asset_id}).fetchone()
+        if not asset:
+            raise HTTPException(404, "Asset not found")
+        a = dict(asset._mapping)
+
+    portal_url = os.environ.get("PORTAL_URL", "http://localhost:3000")
+    scan_url = f"{portal_url}/asset/{asset_id}"
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10, border=2
+    )
+    qr.add_data(scan_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#0F172A", back_color="white")
+
+    # Create label card
+    card_w, card_h = 400, 520
+    card = Image.new("RGB", (card_w, card_h), "white")
+    draw = ImageDraw.Draw(card)
+
+    # Header bar
+    draw.rectangle([0, 0, card_w, 50], fill="#0F172A")
+    draw.text((card_w//2, 25), "TRIANGLE BLACK", fill="#F59E0B", anchor="mm")
+
+    # QR code centered
+    qr_size = 240
+    qr_img = qr_img.resize((qr_size, qr_size), Image.LANCZOS)
+    qr_x = (card_w - qr_size) // 2
+    card.paste(qr_img, (qr_x, 60))
+
+    # Asset info
+    draw.rectangle([0, 310, card_w, 520], fill="#F8FAFC")
+    name = a["name"][:28] if len(a["name"]) > 28 else a["name"]
+    draw.text((card_w//2, 330), name, fill="#0F172A", anchor="mm")
+    draw.text((card_w//2, 360), a.get("category","") or "", fill="#64748B", anchor="mm")
+    loc = (a.get("location_description","") or "")[:35]
+    draw.text((card_w//2, 385), loc, fill="#64748B", anchor="mm")
+    site = (a.get("site_name","") or "")[:35]
+    draw.text((card_w//2, 410), site, fill="#94A3B8", anchor="mm")
+
+    # Footer instruction
+    draw.rectangle([0, 440, card_w, 480], fill="#059669")
+    draw.text((card_w//2, 460), "Scan to view asset & create work order", fill="white", anchor="mm")
+
+    # ID small
+    draw.text((card_w//2, 500), f"ID: {asset_id[:16]}", fill="#94A3B8", anchor="mm")
+
+    buf = io.BytesIO()
+    card.save(buf, format="PNG", dpi=(300,300))
+    buf.seek(0)
+
+    fname = f"QR_{a['name'][:20].replace(' ','_')}.png"
+    return Response(content=buf.getvalue(), media_type="image/png",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})
+
+
+@app.get("/api/v1/qr/asset/{asset_id}/data", tags=["qr"])
+def get_asset_scan_data(asset_id: str):
+    """Get asset data for QR scan landing page — includes open WOs + maintenance history"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            asset = db.execute(text("""
+                SELECT a.*, s.name as site_name, s.address as site_address, s.contact_person, s.contact_phone
+                FROM assets a LEFT JOIN sites s ON s.id=a.site_id WHERE a.id=:id
+            """), {"id": asset_id}).fetchone()
+            if not asset:
+                raise HTTPException(404, "Asset not found")
+
+            # Open work orders for this asset
+            open_wos = db.execute(text("""
+                SELECT wo.id, wo.title, wo.priority, wo.status, wo.type, wo.created_at, wo.due_date,
+                       t.name as technician_name
+                FROM work_orders wo LEFT JOIN technicians t ON t.id=wo.technician_id
+                WHERE wo.asset_id=:id AND wo.status NOT IN ('completed','cancelled')
+                ORDER BY CASE wo.priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
+                         wo.created_at DESC LIMIT 5
+            """), {"id": asset_id}).fetchall()
+
+            # Recent completed WOs
+            history = db.execute(text("""
+                SELECT wo.id, wo.title, wo.type, wo.status, wo.completed_at, wo.created_at,
+                       t.name as technician_name
+                FROM work_orders wo LEFT JOIN technicians t ON t.id=wo.technician_id
+                WHERE wo.asset_id=:id AND wo.status='completed'
+                ORDER BY wo.completed_at DESC LIMIT 5
+            """), {"id": asset_id}).fetchall()
+
+            a = dict(asset._mapping)
+            return {
+                "asset": a,
+                "qr_url": f"/api/v1/qr/asset/{asset_id}",
+                "open_work_orders": [dict(r._mapping) for r in open_wos],
+                "maintenance_history": [dict(r._mapping) for r in history],
+                "stats": {
+                    "open_wos": len(open_wos),
+                    "history_count": len(history),
+                    "is_overdue": bool(
+                        a.get("next_maintenance_date") and
+                        str(a.get("next_maintenance_date",""))[:10] < str(__import__("datetime").date.today())
+                    )
+                }
+            }
+        except HTTPException: raise
+        except Exception as e: return {"error": str(e)}
+
+
+@app.get("/api/v1/qr/assets/list", tags=["qr"])
+def list_asset_qr_links(site_id: str = None, limit: int = 100):
+    """List all assets with their QR code URLs"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = "WHERE a.id IS NOT NULL"
+            params = {"l": limit}
+            if site_id: where += " AND a.site_id=:sid"; params["sid"]=site_id
+            rows = db.execute(text(f"""
+                SELECT a.id, a.name, a.category, a.status, a.criticality,
+                       a.location_description, a.next_maintenance_date,
+                       s.name as site_name,
+                       '/api/v1/qr/asset/' || a.id as qr_url,
+                       '/asset/' || a.id as scan_url
+                FROM assets a LEFT JOIN sites s ON s.id=a.site_id
+                {where}
+                ORDER BY s.name, a.category, a.name LIMIT :l
+            """), params).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+
+@app.get("/api/v1/qr/asset/{asset_id}/print-sheet", tags=["qr"])
+def print_asset_qr_sheet(asset_id: str):
+    """Generate A4 PDF print sheet with QR code + asset info"""
+    import os, io
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors
+    from datetime import datetime
+    try:
+        import qrcode
+        from PIL import Image
+        import tempfile
+    except ImportError:
+        raise HTTPException(500, "qrcode/Pillow not installed")
+
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        asset = db.execute(text("""
+            SELECT a.*, s.name as site_name FROM assets a
+            LEFT JOIN sites s ON s.id=a.site_id WHERE a.id=:id
+        """), {"id": asset_id}).fetchone()
+        if not asset:
+            raise HTTPException(404, "Asset not found")
+        a = dict(asset._mapping)
+
+    portal_url = os.environ.get("PORTAL_URL","http://localhost:3000")
+    scan_url = f"{portal_url}/asset/{asset_id}"
+
+    # Generate QR
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=8, border=2)
+    qr.add_data(scan_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#0F172A", back_color="white")
+    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    qr_img.save(tmp.name)
+    tmp.close()
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(210*mm, 297*mm))
+    W, H = 210*mm, 297*mm
+
+    # Header
+    c.setFillColor(colors.HexColor("#0F172A"))
+    c.rect(0, H-30*mm, W, 30*mm, fill=1, stroke=0)
+    c.setFillColor(colors.HexColor("#F59E0B"))
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(W/2, H-16*mm, "TRIANGLE BLACK ENGINEERING SERVICES")
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(W/2, H-24*mm, "Asset Identification & Maintenance QR Code")
+
+    # QR Code
+    qr_size = 100*mm
+    qr_x = (W - qr_size) / 2
+    c.drawImage(tmp.name, qr_x, H-145*mm, qr_size, qr_size)
+
+    # Scan instruction
+    c.setFillColor(colors.HexColor("#059669"))
+    c.rect(30*mm, H-160*mm, W-60*mm, 12*mm, fill=1, stroke=0)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(W/2, H-153*mm, "📱 Scan with phone camera to view asset & create work order")
+
+    # Asset Details Box
+    c.setFillColor(colors.HexColor("#F8FAFC"))
+    c.rect(20*mm, H-240*mm, W-40*mm, 75*mm, fill=1, stroke=1)
+
+    details = [
+        ("Asset Name", a.get("name","—")),
+        ("Category", a.get("category","—")),
+        ("Manufacturer", f"{a.get('manufacturer','—')} {a.get('model','') or ''}"),
+        ("Location", a.get("location_description","—") or "—"),
+        ("Site", a.get("site_name","—")),
+        ("Criticality", (a.get("criticality","—") or "—").upper()),
+        ("Serial No.", a.get("serial_number","—") or "—"),
+        ("Last Maintenance", str(a.get("last_maintenance_date","—") or "—")[:10]),
+        ("Next Maintenance", str(a.get("next_maintenance_date","—") or "—")[:10]),
+        ("Asset ID", asset_id[:20]),
+    ]
+    y = H-175*mm
+    for i, (label, value) in enumerate(details):
+        col = 0 if i % 2 == 0 else (W/2)
+        if i % 2 == 0 and i > 0: y -= 9*mm
+        c.setFillColor(colors.HexColor("#64748B"))
+        c.setFont("Helvetica", 7)
+        c.drawString(25*mm + col, y, label + ":")
+        c.setFillColor(colors.HexColor("#0F172A"))
+        c.setFont("Helvetica-Bold", 8)
+        val = str(value)[:35] if value else "—"
+        c.drawString(25*mm + col, y-4*mm, val)
+
+    # Footer
+    c.setFillColor(colors.HexColor("#1E293B"))
+    c.rect(0, 0, W, 15*mm, fill=1, stroke=0)
+    c.setFillColor(colors.HexColor("#94A3B8"))
+    c.setFont("Helvetica", 7)
+    c.drawCentredString(W/2, 6*mm, f"Generated: {datetime.utcnow().strftime('%d/%m/%Y')} | Triangle Black Engineering Services | MEP & Facilities Management")
+
+    c.save()
+    buf.seek(0)
+    import os as _os
+    _os.unlink(tmp.name)
+    fname = f"QR_Sheet_{(a.get('name','asset'))[:20].replace(' ','_')}.pdf"
+    return Response(content=buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"inline; filename={fname}"})
