@@ -36,6 +36,22 @@ export default function ExecutiveDashboardPage() {
     { staleTime: 60000, refetchInterval: 120000 }
   );
 
+  const { data: procDash } = useQuery(
+    ["exec-procurement"],
+    () => authFetch("/api/v1/procurement/dashboard").then(r=>r.json()),
+    { staleTime: 60000 }
+  );
+  const { data: timeDash } = useQuery(
+    ["exec-time"],
+    () => authFetch("/api/v1/time-entries/summary").then(r=>r.json()),
+    { staleTime: 60000 }
+  );
+  const { data: slaDash } = useQuery(
+    ["exec-sla"],
+    () => authFetch("/api/v1/sla/dashboard").then(r=>r.json()),
+    { staleTime: 60000 }
+  );
+
   if (isLoading) return (
     <div className="min-h-screen bg-base flex items-center justify-center">
       <div className="text-center space-y-3">
@@ -54,6 +70,17 @@ export default function ExecutiveDashboardPage() {
   const proj = fin.projects || {};
 
   const totalAlerts = alerts.total_alerts || 0;
+
+  // Sprint 276: Intelligence data
+  const proc = procDash || {};
+  const timeData = timeDash || {};
+  const sla = slaDash || {};
+  const siteSla = sla.site_sla || [];
+  const topTechs = (timeData.by_technician || []).slice(0, 5);
+  const totalLaborCost = timeData.totals?.total_labor_cost || 0;
+  const totalLaborHours = timeData.totals?.total_hours || 0;
+  const poSpend = proc.pos?.total_value || 0;
+  const pendingApprovals = proc.approvals?.pending || 0;
 
   return (
     <div className="min-h-screen bg-base">
@@ -307,6 +334,115 @@ export default function ExecutiveDashboardPage() {
             </div>
 
           </div>
+        </div>
+
+        {/* ── SPRINT 276: INTELLIGENCE ROW ────────────────────────────────── */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-4">
+
+          {/* SLA Site Grades */}
+          <div className="tb-section">
+            <div className="tb-flex-between mb-3">
+              <div className="tb-section-title" style={{marginBottom:0}}>SLA by Site</div>
+              <button onClick={()=>router.push("/operations/sla")} className="text-xs text-brand">SLA Dashboard →</button>
+            </div>
+            <div className="space-y-2">
+              {siteSla.map((site,i) => {
+                const gc = site.sla_grade==="A"?"#34D399":site.sla_grade==="B"?"#60A5FA":site.sla_grade==="C"?"#FBBF24":"#F87171";
+                return (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0" style={{background:gc+"20",color:gc}}>
+                      {site.sla_grade}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold text-primary truncate">{site.site_name}</div>
+                      <div className="text-xs text-tertiary">{site.resolved}/{site.total_requests} resolved · {site.avg_resolution_hours ? Math.round(site.avg_resolution_hours)+"h avg" : "—"}</div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-sm font-black" style={{color:gc}}>{site.sla_score}</div>
+                      <div className="text-xs text-tertiary">score</div>
+                    </div>
+                  </div>
+                );
+              })}
+              {siteSla.length === 0 && (
+                <div className="text-xs text-tertiary text-center py-4">No SLA data available</div>
+              )}
+            </div>
+            <div className="mt-3 pt-3 border-t border-border flex justify-between text-xs">
+              <span className="text-tertiary">Overall</span>
+              <span className="font-bold text-secondary">{sla.overall?.total_requests||0} requests · {sla.overall?.resolved||0} resolved · {sla.breach_count||0} breaches</span>
+            </div>
+          </div>
+
+          {/* Labor Intelligence */}
+          <div className="tb-section">
+            <div className="tb-flex-between mb-3">
+              <div className="tb-section-title" style={{marginBottom:0}}>Labor Intelligence</div>
+              <button onClick={()=>router.push("/operations/time-tracking")} className="text-xs text-brand">Time Tracking →</button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 rounded-xl bg-base-alt text-center">
+                <div className="text-lg font-black text-emerald-400">{Math.round(totalLaborHours)}</div>
+                <div className="text-xs text-tertiary">Hours Logged</div>
+              </div>
+              <div className="p-3 rounded-xl bg-base-alt text-center">
+                <div className="text-lg font-black text-amber-400">{fmtEGP(totalLaborCost)}</div>
+                <div className="text-xs text-tertiary">Labor Cost</div>
+              </div>
+            </div>
+            <div className="text-xs text-tertiary mb-2 font-semibold">Top Technicians</div>
+            <div className="space-y-1.5">
+              {topTechs.map((tech,i) => (
+                <div key={i} className="flex items-center gap-2 py-1.5">
+                  <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-black flex-shrink-0" style={{background:"rgba(255,255,255,0.05)",color:"#94A3B8"}}>
+                    {i+1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-primary truncate">{tech.name}</div>
+                  </div>
+                  <div className="text-xs font-bold text-secondary flex-shrink-0">{tech.total_hours}h</div>
+                  <div className="text-xs font-bold text-emerald-400 flex-shrink-0 w-20 text-right">{fmtEGP(tech.total_cost)}</div>
+                </div>
+              ))}
+              {topTechs.length === 0 && (
+                <div className="text-xs text-tertiary text-center py-3">No time entries logged</div>
+              )}
+            </div>
+          </div>
+
+          {/* Procurement Intelligence */}
+          <div className="tb-section">
+            <div className="tb-flex-between mb-3">
+              <div className="tb-section-title" style={{marginBottom:0}}>Procurement</div>
+              <button onClick={()=>router.push("/supply-chain/procurement")} className="text-xs text-brand">P2P Hub →</button>
+            </div>
+            <div className="space-y-3">
+              {[
+                {label:"Active SOWs",value:proc.sow?.total||0,sub:`${proc.sow?.pending||0} pending approval`,color:"#60A5FA"},
+                {label:"Active RFQs",value:proc.rfqs?.total||0,sub:`${proc.rfqs?.with_quotes||0} with vendor quotes`,color:"#FBBF24"},
+                {label:"Purchase Orders",value:proc.pos?.total||0,sub:fmtEGP(poSpend)+" total value",color:"#A78BFA"},
+                {label:"Goods Received",value:proc.grns?.total||0,sub:"deliveries accepted",color:"#34D399"},
+                {label:"Approved Vendors",value:proc.vendors?.approved||0,sub:`of ${proc.vendors?.total||0} total vendors`,color:"#34D399"},
+              ].map((row,i)=>(
+                <div key={i} className="flex items-center justify-between py-2 border-b border-border">
+                  <div>
+                    <span className="text-xs text-tertiary">{row.label}</span>
+                    <div className="text-xs opacity-50" style={{color:row.color}}>{row.sub}</div>
+                  </div>
+                  <span className="text-lg font-black" style={{color:row.color}}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+            {pendingApprovals > 0 && (
+              <button onClick={()=>router.push("/supply-chain/approvals-center")}
+                className="w-full mt-3 flex items-center justify-center gap-2 p-2 rounded-xl transition-colors"
+                style={{background:"#FBBF2410",border:"1px solid #FBBF2430"}}>
+                <span style={{color:"#FBBF24",fontSize:"0.8rem"}}>✍</span>
+                <span className="text-xs font-bold" style={{color:"#FBBF24"}}>{pendingApprovals} Pending Approvals</span>
+              </button>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
