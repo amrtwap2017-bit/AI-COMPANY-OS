@@ -93,3 +93,6 @@ require_admin   = require_role("admin")
 require_manager = require_role("admin", "manager")
 require_agent   = require_role("admin", "manager", "agent")
 require_any     = require_role("admin", "manager", "agent", "client")
+
+# Legacy alias — vendor portal compatibility
+require_vendor = require_role("admin", "manager", "agent")
