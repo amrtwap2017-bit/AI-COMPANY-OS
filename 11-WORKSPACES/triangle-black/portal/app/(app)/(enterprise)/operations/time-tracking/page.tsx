@@ -50,7 +50,7 @@ export default function TimeTrackingPage() {
     () => authFetch("/api/v1/technicians/").then(r=>r.json()),
     { staleTime: 60000 }
   );
-  const techs = toArr(techsRaw).filter(t=>t.id?.startsWith("tech-"));
+  const techs = toArr(techsRaw);
 
   const { data: wosRaw } = useQuery(
     ["wos-tt"],
