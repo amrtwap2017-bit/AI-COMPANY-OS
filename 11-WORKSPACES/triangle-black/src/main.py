@@ -6633,15 +6633,14 @@ def time_tracking_summary():
         """)
 
         by_tech = safe_list("""
-            SELECT t.id, t.name, t.specializations,
+            SELECT t.id, t.name, COALESCE(t.specializations::text, '[]') as specializations,
               count(te.id) as entries,
               COALESCE(sum(te.hours_logged),0) as total_hours,
               COALESCE(sum(COALESCE(te.labor_cost, te.hours_logged * te.hourly_rate, 0)),0) as total_cost,
               COALESCE(avg(te.hours_logged),0) as avg_hours
             FROM technicians t
-            LEFT JOIN time_entries te ON te.technician_id=t.id
-            WHERE te.id IS NOT NULL
-            GROUP BY t.id, t.name, t.specializations
+            JOIN time_entries te ON te.technician_id=t.id
+            GROUP BY t.id, t.name, COALESCE(t.specializations::text, '[]')
             ORDER BY total_hours DESC
         """)
 
