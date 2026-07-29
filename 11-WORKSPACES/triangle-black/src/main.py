@@ -5910,7 +5910,7 @@ def supplier_profile(vendor_id: str):
 
 # ── SPRINT 260: PREVENTIVE MAINTENANCE SCHEDULER ─────────────────────────────
 
-@app.get("/api/v1/maintenance/schedule", tags=["maintenance"])
+@app.get("/api/v1/pm-schedule/assets", tags=["maintenance"])
 def maintenance_schedule(site_id: str = None, status: str = None, limit: int = 100):
     """All assets with maintenance schedule status"""
     import os
@@ -5961,7 +5961,7 @@ def maintenance_schedule(site_id: str = None, status: str = None, limit: int = 1
         except Exception as e:
             db.rollback(); return {"assets":[],"summary":{}}
 
-@app.post("/api/v1/maintenance/generate-work-orders", tags=["maintenance"])
+@app.post("/api/v1/pm-schedule/generate", tags=["maintenance"])
 async def generate_pm_work_orders(request: Request):
     """Auto-generate preventive maintenance WOs for overdue/due-soon assets"""
     import os, uuid
@@ -6047,7 +6047,7 @@ async def generate_pm_work_orders(request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.get("/api/v1/maintenance/calendar", tags=["maintenance"])
+@app.get("/api/v1/pm-schedule/calendar", tags=["maintenance"])
 def maintenance_calendar():
     """Next 30 days maintenance calendar grouped by week"""
     import os
@@ -6089,7 +6089,7 @@ def maintenance_calendar():
         except Exception as e:
             db.rollback(); return {"weeks":{},"overdue":[]}
 
-@app.get("/api/v1/maintenance/stats", tags=["maintenance"])
+@app.get("/api/v1/pm-schedule/stats", tags=["maintenance"])
 def maintenance_stats():
     """Maintenance KPI stats"""
     import os

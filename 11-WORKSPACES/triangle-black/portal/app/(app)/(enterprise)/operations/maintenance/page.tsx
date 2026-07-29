@@ -34,31 +34,31 @@ export default function MaintenanceSchedulerPage() {
   const [genResult, setGenResult] = useState(null);
 
   const { data: schedData, isLoading } = useQuery(
-    ["maintenance-schedule"],
-    () => authFetch("/api/v1/maintenance/schedule?limit=100").then(r=>r.json()),
+    ["pm-schedule-assets"],
+    () => authFetch("/api/v1/pm-schedule/assets?limit=100").then(r=>r.json()),
     { staleTime: 30000, refetchInterval: 60000 }
   );
 
   const { data: calData } = useQuery(
-    ["maintenance-calendar"],
-    () => authFetch("/api/v1/maintenance/calendar").then(r=>r.json()),
+    ["pm-schedule-calendar"],
+    () => authFetch("/api/v1/pm-schedule/calendar").then(r=>r.json()),
     { staleTime: 60000 }
   );
 
   const { data: stats } = useQuery(
-    ["maintenance-stats"],
-    () => authFetch("/api/v1/maintenance/stats").then(r=>r.json()),
+    ["pm-schedule-stats"],
+    () => authFetch("/api/v1/pm-schedule/stats").then(r=>r.json()),
     { staleTime: 30000 }
   );
 
   const genMut = useMutation(
-    () => authFetch("/api/v1/maintenance/generate-work-orders", {
+    () => authFetch("/api/v1/pm-schedule/generate", {
       method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"
     }).then(r=>r.json()),
     { onSuccess: (data) => {
         setGenResult(data);
-        qc.invalidateQueries(["maintenance-schedule"]);
-        qc.invalidateQueries(["maintenance-stats"]);
+        qc.invalidateQueries(["pm-schedule-assets"]);
+        qc.invalidateQueries(["pm-schedule-stats"]);
       }
     }
   );
