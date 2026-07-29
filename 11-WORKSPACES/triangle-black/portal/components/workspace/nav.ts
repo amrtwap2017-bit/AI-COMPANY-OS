@@ -15,7 +15,9 @@ export interface NavCenter {
   label: string;
   shortLabel?: string;
   href: string;
+  subtitle?: string;  // optional for backward compat
   badge?: string;
+  icon?: string;
   children?: NavItem[];
 }
 
