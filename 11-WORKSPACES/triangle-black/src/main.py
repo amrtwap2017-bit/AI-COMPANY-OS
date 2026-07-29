@@ -6388,3 +6388,295 @@ def print_asset_qr_sheet(asset_id: str):
     fname = f"QR_Sheet_{(a.get('name','asset'))[:20].replace(' ','_')}.pdf"
     return Response(content=buf.getvalue(), media_type="application/pdf",
                     headers={"Content-Disposition": f"inline; filename={fname}"})
+
+# ── SPRINT 264+265: SLA DASHBOARD + TIME TRACKING ────────────────────────────
+
+# SLA response time targets (hours) by urgency
+SLA_RESPONSE = {"critical":2,"high":4,"medium":8,"low":24}
+SLA_RESOLUTION = {"critical":8,"high":24,"medium":48,"low":72}
+
+@app.get("/api/v1/sla/dashboard", tags=["sla"])
+def sla_dashboard():
+    """SLA compliance dashboard — response + resolution rates per site"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe_list(q, p=None):
+            try: return [dict(r._mapping) for r in db.execute(text(q),p or {}).fetchall()]
+            except: db.rollback(); return []
+        def safe(q, p=None):
+            try: r=db.execute(text(q),p or {}).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+
+        # Overall SLA summary from service requests
+        overall = safe("""
+            SELECT
+              count(*) as total_requests,
+              count(*) FILTER (WHERE status='resolved' OR resolved_at IS NOT NULL) as resolved,
+              count(*) FILTER (WHERE urgency='critical') as critical_count,
+              count(*) FILTER (WHERE urgency='high') as high_count,
+              ROUND(AVG(CASE WHEN resolved_at IS NOT NULL
+                THEN EXTRACT(EPOCH FROM (resolved_at - created_at))/3600
+                ELSE NULL END)::numeric, 2) as avg_resolution_hours
+            FROM service_requests
+        """)
+
+        # Per-site SLA performance
+        site_sla = safe_list("""
+            SELECT
+              s.id as site_id, s.name as site_name,
+              count(sr.id) as total_requests,
+              count(sr.id) FILTER (WHERE sr.status IN ('resolved','completed')) as resolved,
+              count(sr.id) FILTER (WHERE sr.urgency='critical') as critical,
+              count(sr.id) FILTER (WHERE sr.urgency='high') as high_urgency,
+              count(sr.id) FILTER (WHERE sr.status='open') as open_count,
+              count(sr.id) FILTER (WHERE sr.status='in_progress') as in_progress,
+              ROUND(AVG(CASE WHEN sr.resolved_at IS NOT NULL
+                THEN EXTRACT(EPOCH FROM (sr.resolved_at - sr.created_at))/3600
+                ELSE NULL END)::numeric, 2) as avg_resolution_hours,
+              ROUND(
+                100.0 * count(sr.id) FILTER (WHERE sr.status IN ('resolved','completed')) /
+                NULLIF(count(sr.id), 0)
+              , 1) as resolution_rate_pct
+            FROM sites s
+            LEFT JOIN service_requests sr ON sr.site_id=s.id
+            GROUP BY s.id, s.name
+            ORDER BY s.name
+        """)
+
+        # Work order response SLA (time from created to started)
+        wo_sla = safe_list("""
+            SELECT
+              wo.priority,
+              count(*) as total,
+              count(*) FILTER (WHERE wo.started_at IS NOT NULL) as started,
+              ROUND(AVG(CASE WHEN wo.started_at IS NOT NULL
+                THEN EXTRACT(EPOCH FROM (wo.started_at - wo.created_at))/3600
+                ELSE NULL END)::numeric, 2) as avg_response_hours,
+              count(*) FILTER (WHERE wo.started_at IS NOT NULL AND
+                EXTRACT(EPOCH FROM (wo.started_at - wo.created_at))/3600 >
+                CASE wo.priority WHEN 'critical' THEN 2 WHEN 'high' THEN 4
+                WHEN 'medium' THEN 8 ELSE 24 END
+              ) as breached_response
+            FROM work_orders wo
+            WHERE wo.created_at > NOW()-INTERVAL '30 days'
+            GROUP BY wo.priority
+            ORDER BY CASE wo.priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2
+                     WHEN 'medium' THEN 3 ELSE 4 END
+        """)
+
+        # Current SLA breaches (open items past SLA deadline)
+        breaches = safe_list("""
+            SELECT sr.id, sr.title, sr.urgency, sr.status, sr.created_at,
+                   s.name as site_name,
+                   ROUND(EXTRACT(EPOCH FROM (NOW()-sr.created_at))/3600::numeric, 1) as hours_open,
+                   CASE sr.urgency
+                     WHEN 'critical' THEN 8 WHEN 'high' THEN 24
+                     WHEN 'medium' THEN 48 ELSE 72
+                   END as sla_target_hours,
+                   ROUND(EXTRACT(EPOCH FROM (NOW()-sr.created_at))/3600 -
+                     CASE sr.urgency WHEN 'critical' THEN 8 WHEN 'high' THEN 24
+                     WHEN 'medium' THEN 48 ELSE 72 END, 1) as hours_overdue
+            FROM service_requests sr
+            LEFT JOIN sites s ON s.id=sr.site_id
+            WHERE sr.status NOT IN ('resolved','completed','cancelled')
+            AND EXTRACT(EPOCH FROM (NOW()-sr.created_at))/3600 >
+              CASE sr.urgency WHEN 'critical' THEN 8 WHEN 'high' THEN 24
+              WHEN 'medium' THEN 48 ELSE 72 END
+            ORDER BY hours_overdue DESC LIMIT 10
+        """)
+
+        # SLA compliance score per site (0-100)
+        for site in site_sla:
+            total = site.get("total_requests") or 1
+            resolved = site.get("resolved") or 0
+            open_critical = (site.get("critical") or 0) - resolved
+            score = max(0, min(100, int(resolved/total*100) - open_critical*5))
+            site["sla_score"] = score
+            site["sla_grade"] = "A" if score>=90 else "B" if score>=75 else "C" if score>=60 else "D"
+
+        return {
+            "generated_at": datetime.utcnow().isoformat(),
+            "overall": overall,
+            "site_sla": site_sla,
+            "work_order_sla": wo_sla,
+            "active_breaches": breaches,
+            "breach_count": len(breaches),
+            "sla_targets": SLA_RESOLUTION
+        }
+
+@app.get("/api/v1/sla/breaches", tags=["sla"])
+def sla_breaches(site_id: str = None, urgency: str = None):
+    """All active SLA breaches"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = ["sr.status NOT IN ('resolved','completed','cancelled')"]
+            params = {}
+            if site_id: where.append("sr.site_id=:sid"); params["sid"]=site_id
+            if urgency: where.append("sr.urgency=:u"); params["u"]=urgency
+            rows = db.execute(text(f"""
+                SELECT sr.id, sr.title, sr.urgency, sr.status, sr.created_at, sr.submitted_by,
+                       s.name as site_name,
+                       ROUND(EXTRACT(EPOCH FROM (NOW()-sr.created_at))/3600, 1) as hours_open,
+                       CASE sr.urgency WHEN 'critical' THEN 8 WHEN 'high' THEN 24
+                         WHEN 'medium' THEN 48 ELSE 72 END as sla_target_hours
+                FROM service_requests sr LEFT JOIN sites s ON s.id=sr.site_id
+                WHERE {" AND ".join(where)}
+                ORDER BY CASE sr.urgency WHEN 'critical' THEN 1 WHEN 'high' THEN 2
+                         WHEN 'medium' THEN 3 ELSE 4 END, sr.created_at ASC
+            """), params).fetchall()
+            result = []
+            for r in rows:
+                d = dict(r._mapping)
+                d["is_breached"] = float(d.get("hours_open") or 0) > float(d.get("sla_target_hours") or 72)
+                d["hours_overdue"] = max(0, float(d.get("hours_open") or 0) - float(d.get("sla_target_hours") or 72))
+                result.append(d)
+            return sorted(result, key=lambda x: x.get("hours_overdue",0), reverse=True)
+        except Exception as e:
+            db.rollback(); return []
+
+@app.post("/api/v1/time-entries/", tags=["time-tracking"])
+async def log_time(request: Request):
+    """Log time entry for a work order"""
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            start = body.get("start_time")
+            end = body.get("end_time")
+            hours = float(body.get("hours_logged", 0))
+            if not hours and start and end:
+                from datetime import datetime as dt
+                s = dt.fromisoformat(str(start).replace("Z",""))
+                e = dt.fromisoformat(str(end).replace("Z",""))
+                hours = round((e-s).total_seconds()/3600, 2)
+
+            # Get technician hourly rate
+            tech = db.execute(text("SELECT id FROM technicians WHERE id=:id"), {"id": body.get("technician_id","")}).fetchone()
+            hourly_rate = float(body.get("hourly_rate") or 150)
+            labor_cost = round(hours * hourly_rate, 2)
+
+            entry_id = str(uuid.uuid4())
+            db.execute(text("""
+                INSERT INTO time_entries
+                  (id, hotel_id, work_order_id, technician_id, work_type,
+                   start_time, end_time, hours_logged, hourly_rate, labor_cost,
+                   notes, is_billable)
+                VALUES
+                  (:id, 'tb-default-hotel-000000000001', :wo, :tech, :wtype,
+                   :start, :end, :hours, :rate, :cost,
+                   :notes, :billable)
+            """), {
+                "id": entry_id, "wo": body.get("work_order_id"),
+                "tech": body.get("technician_id"), "wtype": body.get("work_type","on_site"),
+                "start": start, "end": end, "hours": hours,
+                "rate": hourly_rate, "cost": labor_cost,
+                "notes": body.get("notes",""), "billable": body.get("is_billable",True)
+            })
+            # Update WO labor cost total
+            db.execute(text("""
+                UPDATE work_orders SET updated_at=NOW()
+                WHERE id=:id
+            """), {"id": body.get("work_order_id")})
+            db.commit()
+            return {"id":entry_id,"hours_logged":hours,"labor_cost":labor_cost,"status":"logged"}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/time-entries/", tags=["time-tracking"])
+def list_time_entries(work_order_id: str = None, technician_id: str = None, limit: int = 50):
+    """List time entries"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where, params = ["1=1"], {"l": limit}
+            if work_order_id: where.append("te.work_order_id=:wo"); params["wo"]=work_order_id
+            if technician_id: where.append("te.technician_id=:tid"); params["tid"]=technician_id
+            rows = db.execute(text(f"""
+                SELECT te.*, t.name as technician_name, wo.title as wo_title
+                FROM time_entries te
+                LEFT JOIN technicians t ON t.id=te.technician_id
+                LEFT JOIN work_orders wo ON wo.id=te.work_order_id
+                WHERE {" AND ".join(where)}
+                ORDER BY te.start_time DESC LIMIT :l
+            """), params).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.get("/api/v1/time-entries/summary", tags=["time-tracking"])
+def time_tracking_summary():
+    """Time tracking summary — utilization, costs, by technician"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe_list(q, p=None):
+            try: return [dict(r._mapping) for r in db.execute(text(q),p or {}).fetchall()]
+            except: db.rollback(); return []
+        def safe(q, p=None):
+            try: r=db.execute(text(q),p or {}).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+
+        totals = safe("""
+            SELECT count(*) as total_entries,
+              COALESCE(sum(hours_logged),0) as total_hours,
+              COALESCE(sum(labor_cost),0) as total_labor_cost,
+              COALESCE(avg(hours_logged),0) as avg_hours_per_entry
+            FROM time_entries
+        """)
+
+        by_tech = safe_list("""
+            SELECT t.id, t.name, t.specializations,
+              count(te.id) as entries,
+              COALESCE(sum(te.hours_logged),0) as total_hours,
+              COALESCE(sum(te.labor_cost),0) as total_cost,
+              COALESCE(avg(te.hours_logged),0) as avg_hours
+            FROM technicians t
+            LEFT JOIN time_entries te ON te.technician_id=t.id
+            WHERE t.id LIKE 'tech-%'
+            GROUP BY t.id, t.name, t.specializations
+            ORDER BY total_hours DESC
+        """)
+
+        by_work_type = safe_list("""
+            SELECT work_type,
+              count(*) as entries,
+              COALESCE(sum(hours_logged),0) as total_hours,
+              COALESCE(sum(labor_cost),0) as total_cost
+            FROM time_entries
+            GROUP BY work_type ORDER BY total_hours DESC
+        """)
+
+        by_wo = safe_list("""
+            SELECT te.work_order_id, wo.title, wo.priority, wo.status,
+              count(te.id) as entries,
+              COALESCE(sum(te.hours_logged),0) as total_hours,
+              COALESCE(sum(te.labor_cost),0) as total_cost
+            FROM time_entries te
+            LEFT JOIN work_orders wo ON wo.id=te.work_order_id
+            GROUP BY te.work_order_id, wo.title, wo.priority, wo.status
+            ORDER BY total_hours DESC LIMIT 10
+        """)
+
+        return {
+            "totals": totals,
+            "by_technician": by_tech,
+            "by_work_type": by_work_type,
+            "top_work_orders": by_wo
+        }

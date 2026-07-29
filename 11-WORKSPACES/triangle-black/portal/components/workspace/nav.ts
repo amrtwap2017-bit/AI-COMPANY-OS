@@ -60,6 +60,8 @@ export const enterpriseCenters: NavCenter[] = [
       { label: "Maintenance Schedule", href: "/operations/maintenance",          icon: "📅", description: "PM scheduler + calendar" },
       { label: "Technicians",          href: "/operations/technicians",          icon: "👷", description: "Team management" },
       { label: "Sites",                href: "/operations/sites",                icon: "📍", description: "Hotel sites" },
+      { label: "SLA Dashboard",        href: "/operations/sla",                  icon: "⏱", description: "Response time KPIs + breaches" },
+      { label: "Time Tracking",        href: "/operations/time-tracking",        icon: "🕐", description: "Log hours + labor costs" },
     ],
   },
 
