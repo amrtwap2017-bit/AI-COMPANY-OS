@@ -62,6 +62,7 @@ export const enterpriseCenters: NavCenter[] = [
       { label: "Sites",                href: "/operations/sites",                icon: "📍", description: "Hotel sites" },
       { label: "SLA Dashboard",        href: "/operations/sla",                  icon: "⏱", description: "Response time KPIs + breaches" },
       { label: "Time Tracking",        href: "/operations/time-tracking",        icon: "🕐", description: "Log hours + labor costs" },
+      { label: "Contracts",            href: "/operations/contracts",            icon: "📄", description: "Active contracts + renewals" },
     ],
   },
 
@@ -150,6 +151,17 @@ export const enterpriseCenters: NavCenter[] = [
       { label: "Contracts",            href: "/commercial/contracts",            icon: "📋", description: "Active contracts" },
     ],
   },
+  // ── SETTINGS ───────────────────────────────────────────────────────────────
+  {
+    key: "settings",
+    label: "Settings",
+    shortLabel: "Settings",
+    href: "/settings/users",
+    children: [
+      { label: "User Management",      href: "/settings/users",                  icon: "👥", description: "16 users · role editor" },
+      { label: "Security Audit",       href: "/settings/users",                  icon: "🔒", description: "JWT · RBAC · posture" },
+    ],
+  },
 ];
 
 // Navigation groups for sections
@@ -168,7 +180,7 @@ export const navGroups = [
   },
   {
     label: "Intelligence",
-    items: ["reports", "portals", "commercial"],
+    items: ["reports", "portals", "commercial", "settings"],
   },
 ];
 
@@ -186,3 +198,4 @@ export const mobilePrimaryNav = [
 // ── Legacy re-exports for backward compat ──────────────────────────
 export type NavChild = NavItem;
 export type NavGroup = { label: string; keys: string[]; };
+// SPRINT_270_NAV
