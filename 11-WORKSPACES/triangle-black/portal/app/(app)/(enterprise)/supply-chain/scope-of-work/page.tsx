@@ -8,6 +8,20 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#34D399",rejected:"#F87171",sent_to_client:"#A78BFA"};
+const handleExport = (url: string) => {
+    const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
+    const a = document.createElement("a");
+    a.href = "http://localhost:8030" + url + "?token=" + token;
+    fetch("http://localhost:8030" + url, {headers: {"Authorization": "Bearer " + token}})
+      .then(r => r.blob())
+      .then(blob => {
+        const dl = document.createElement("a");
+        dl.href = URL.createObjectURL(blob);
+        dl.download = url.split("/").pop() + "_" + new Date().toISOString().slice(0,10) + ".csv";
+        dl.click();
+      });
+  };
+
 export default function ScopeOfWorkPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -25,6 +39,7 @@ export default function ScopeOfWorkPage() {
               <p className="tb-hero-description">{sows.length} documents · BOQ & cost estimates</p>
             </div>
             <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Back</button>
+                <button onClick={()=>handleExport("/api/v1/export/scope-of-work")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>⬇ Export CSV</button>
           </div>
           <div className="tb-grid-4 mt-6">
             {[{label:"Total",value:sows.length,color:"#F1F5F9"},{label:"Draft",value:sows.filter(s=>s.status==="draft").length,color:"#94A3B8"},{label:"Pending",value:sows.filter(s=>s.status==="pending_approval").length,color:"#FBBF24"},{label:"Approved",value:sows.filter(s=>s.status==="approved").length,color:"#34D399"}].map((k,i)=>(

@@ -6,6 +6,20 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
+const handleExport = (url: string) => {
+    const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
+    const a = document.createElement("a");
+    a.href = "http://localhost:8030" + url + "?token=" + token;
+    fetch("http://localhost:8030" + url, {headers: {"Authorization": "Bearer " + token}})
+      .then(r => r.blob())
+      .then(blob => {
+        const dl = document.createElement("a");
+        dl.href = URL.createObjectURL(blob);
+        dl.download = url.split("/").pop() + "_" + new Date().toISOString().slice(0,10) + ".csv";
+        dl.click();
+      });
+  };
+
 export default function VendorManagementPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -33,6 +47,7 @@ export default function VendorManagementPage() {
               <p className="tb-hero-description">{vendors.length} vendors · {vendors.filter(v=>v.is_approved).length} approved</p>
             </div>
             <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Back</button>
+                <button onClick={()=>handleExport("/api/v1/export/vendors")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>⬇ Export CSV</button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[

@@ -81,6 +81,19 @@ export default function TimeTrackingPage() {
   const estHours = Number(form.hours_logged || 0);
   const estCost = estHours * Number(form.hourly_rate || 0);
 
+  const handleExport = (url: string) => {
+    const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
+    const a = document.createElement("a");
+    a.href = "http://localhost:8030" + url + "?token=" + token;
+    fetch("http://localhost:8030" + url, {headers: {"Authorization": "Bearer " + token}})
+      .then(r => r.blob())
+      .then(blob => {
+        const dl = document.createElement("a");
+        dl.href = URL.createObjectURL(blob);
+        dl.download = url.split("/").pop() + "_" + new Date().toISOString().slice(0,10) + ".csv";
+        dl.click();
+      });
+  };
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>

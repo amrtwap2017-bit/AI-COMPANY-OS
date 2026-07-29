@@ -8,6 +8,20 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#60A5FA",sent:"#A78BFA",acknowledged:"#A78BFA",partial:"#FB923C",received:"#34D399",invoiced:"#34D399",paid:"#34D399",cancelled:"#F87171"};
+const handleExport = (url: string) => {
+    const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
+    const a = document.createElement("a");
+    a.href = "http://localhost:8030" + url + "?token=" + token;
+    fetch("http://localhost:8030" + url, {headers: {"Authorization": "Bearer " + token}})
+      .then(r => r.blob())
+      .then(blob => {
+        const dl = document.createElement("a");
+        dl.href = URL.createObjectURL(blob);
+        dl.download = url.split("/").pop() + "_" + new Date().toISOString().slice(0,10) + ".csv";
+        dl.click();
+      });
+  };
+
 export default function PurchaseOrdersV2Page() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -31,6 +45,7 @@ export default function PurchaseOrdersV2Page() {
             </div>
             <div className="flex gap-2">
               <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Back</button>
+                <button onClick={()=>handleExport("/api/v1/export/purchase-orders")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>⬇ Export CSV</button>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
