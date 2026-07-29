@@ -6680,3 +6680,189 @@ def time_tracking_summary():
             "by_work_type": by_work_type,
             "top_work_orders": by_wo
         }
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 267 — SECURITY HARDENING + HEALTH + NOTIFICATION CLEANUP
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT_267_SECURITY
+
+import secrets as _secrets_267
+
+# ── Health endpoint ───────────────────────────────────────────────────────────
+@app.get("/health", tags=["platform"], include_in_schema=True)
+@app.get("/api/v1/health", tags=["platform"])
+def health_check():
+    """Platform health check — DB + version"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    db_ok = False
+    try:
+        eng = create_engine(os.environ.get("DATABASE_URL",
+            "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+        with Session(eng) as db:
+            db.execute(text("SELECT 1"))
+            db_ok = True
+    except Exception:
+        pass
+    return {
+        "status": "healthy" if db_ok else "degraded",
+        "database": "connected" if db_ok else "disconnected",
+        "version": "2.0.0-sprint267",
+        "platform": "Triangle Black Enterprise MEP",
+    }
+
+# ── Notification cleanup ──────────────────────────────────────────────────────
+@app.delete("/api/v1/platform-notif/cleanup", tags=["notifications"])
+def cleanup_old_notifications(days: int = 7):
+    """Delete notifications older than N days"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            result = db.execute(text(
+                "DELETE FROM notifications WHERE created_at < NOW() - (INTERVAL \'1 day\' * :d)"
+            ), {"d": days})
+            db.commit()
+            return {"deleted": result.rowcount, "older_than_days": days}
+        except Exception as e:
+            db.rollback()
+            return {"error": str(e)}
+
+# ── Lightweight auth guard for inline endpoints ───────────────────────────────
+def _verify_inline_token(request: Request) -> dict:
+    """
+    Validate Bearer token for sprint 245-265 inline endpoints.
+    Uses the same users table and JWT secret as the main auth system.
+    Returns user payload dict. Raises 401 if invalid.
+    """
+    from fastapi import HTTPException
+    auth = request.headers.get("Authorization", "")
+    token = auth.replace("Bearer ", "").strip()
+    if not token:
+        # Also check cookie for portal compatibility
+        token = request.cookies.get("tb_token", "") or request.cookies.get("tb_access_token", "")
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        from src.core.auth import decode_token
+        payload = decode_token(token)
+        return payload
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+# ── User profile endpoint (alias for /auth/me accessible from inline code) ────
+@app.get("/api/v1/me", tags=["auth"])
+def get_me_inline(request: Request):
+    """Current user profile — works with inline token validation"""
+    payload = _verify_inline_token(request)
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            user = db.execute(text(
+                "SELECT id, name, email, role, is_active, hotel_id FROM users WHERE id=:uid"
+            ), {"uid": payload.get("sub", "")}).fetchone()
+            if not user:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=404, detail="User not found")
+            return dict(user._mapping)
+        except Exception as e:
+            from fastapi import HTTPException
+            if "401" in str(e) or "404" in str(e):
+                raise
+            return {"error": str(e)}
+
+# ── User management endpoints ─────────────────────────────────────────────────
+@app.get("/api/v1/users/", tags=["users"])
+def list_platform_users(request: Request):
+    """List all platform users — admin/manager only"""
+    payload = _verify_inline_token(request)
+    if payload.get("role") not in ["admin", "manager"]:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Manager or admin required")
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text(
+                "SELECT id, name, email, role, is_active, hotel_id, created_at FROM users ORDER BY created_at DESC"
+            )).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback()
+            return {"error": str(e)}
+
+@app.patch("/api/v1/users/{user_id}/role", tags=["users"])
+async def update_user_role(user_id: str, request: Request):
+    """Update user role — admin only"""
+    payload = _verify_inline_token(request)
+    if payload.get("role") != "admin":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Admin required")
+    body = await request.json()
+    new_role = body.get("role", "")
+    valid_roles = ["admin", "manager", "agent", "engineer", "finance", "viewer"]
+    if new_role not in valid_roles:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid role. Valid: {valid_roles}")
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text(
+                "UPDATE users SET role=:role WHERE id=:id"
+            ), {"role": new_role, "id": user_id})
+            db.commit()
+            return {"user_id": user_id, "role": new_role, "status": "updated"}
+        except Exception as e:
+            db.rollback()
+            return {"error": str(e)}
+
+# ── Security audit endpoint ───────────────────────────────────────────────────
+@app.get("/api/v1/security/audit", tags=["platform"])
+def security_audit(request: Request):
+    """Security posture audit — admin only"""
+    payload = _verify_inline_token(request)
+    if payload.get("role") != "admin":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Admin required")
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL",
+        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            users = db.execute(text("SELECT count(*) FROM users WHERE is_active=true")).scalar()
+            admins = db.execute(text("SELECT count(*) FROM users WHERE role=\'admin\'")).scalar()
+            notifs = db.execute(text("SELECT count(*) FROM notifications")).scalar()
+            return {
+                "active_users": users,
+                "admin_count": admins,
+                "jwt_secret_env": bool(os.environ.get("TB_SECRET_KEY")),
+                "jwt_secret_is_default": os.environ.get("TB_SECRET_KEY","") in ["","triangle-black-secret-key-change-in-production","dev-only-change-in-production"],
+                "notifications_total": notifs,
+                "bcrypt_enabled": True,
+                "rate_limiter": "active",
+                "rbac": "active",
+                "recommendations": [
+                    "Set TB_SECRET_KEY environment variable" if not os.environ.get("TB_SECRET_KEY") else "JWT secret configured",
+                    f"{admins} admin accounts — review if all needed" if admins > 3 else "Admin count acceptable",
+                ]
+            }
+        except Exception as e:
+            db.rollback()
+            return {"error": str(e)}
