@@ -6580,7 +6580,7 @@ async def log_time(request: Request):
             """), {
                 "id": entry_id, "wo": body.get("work_order_id"),
                 "tech": body.get("technician_id"), "wtype": body.get("work_type","on_site"),
-                "start": start, "end": end, "hours": hours,
+                "start": start or __import__("datetime").datetime.utcnow().isoformat(), "end": end, "hours": hours,
                 "rate": hourly_rate, "cost": labor_cost,
                 "notes": body.get("notes",""), "billable": body.get("is_billable",True)
             })
