@@ -5511,3 +5511,182 @@ def cash_flow():
             }
         except Exception as e:
             db.rollback(); return {"inflows":[],"outflows":[]}
+
+# ── SPRINT 258: CUSTOMER PORTAL API ──────────────────────────────────────────
+
+@app.post("/api/v1/client/login", tags=["client-portal"])
+async def client_login(request: Request):
+    """Client portal login with email + PIN"""
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime, timedelta
+    import jwt as pyjwt
+    body = await request.json()
+    email = body.get("email","").lower().strip()
+    pin = str(body.get("pin","")).strip()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            client = db.execute(text("""
+                SELECT ca.*, s.name as site_name, s.address as site_address
+                FROM client_accounts ca
+                LEFT JOIN sites s ON s.id=ca.site_id
+                WHERE ca.email=:email AND ca.is_active=true
+            """), {"email": email}).fetchone()
+            if not client:
+                from fastapi import HTTPException
+                raise HTTPException(401, "Invalid email or PIN")
+            c = dict(client._mapping)
+            if c.get("pin_hash") != pin:
+                from fastapi import HTTPException
+                raise HTTPException(401, "Invalid email or PIN")
+            db.execute(text("UPDATE client_accounts SET last_login=NOW() WHERE id=:id"), {"id": c["id"]})
+            db.commit()
+            secret = os.environ.get("JWT_SECRET_KEY","tb-jwt-secret-2026")
+            token_data = {
+                "sub": c["id"], "email": email, "role": "client",
+                "site_id": c["site_id"], "company": c["company_name"],
+                "exp": datetime.utcnow() + timedelta(hours=24)
+            }
+            token = pyjwt.encode(token_data, secret, algorithm="HS256")
+            return {
+                "access_token": token, "token_type": "bearer",
+                "client": {"id":c["id"],"name":c["name"],"email":email,
+                           "company_name":c["company_name"],"site_id":c["site_id"],
+                           "site_name":c.get("site_name",""),"role":"client"}
+            }
+        except Exception as e:
+            if "401" in str(e) or "Invalid" in str(e):
+                from fastapi import HTTPException
+                raise HTTPException(401, "Invalid email or PIN")
+            db.rollback()
+            return {"error": str(e)}
+
+@app.get("/api/v1/client/dashboard", tags=["client-portal"])
+def client_dashboard(site_id: str):
+    """Client dashboard — their site KPIs only"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, p=None):
+            try: r=db.execute(text(q),p or {}).fetchone(); return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        wo = safe("SELECT count(*) as total, count(*) FILTER (WHERE status='open') as open_count, count(*) FILTER (WHERE status='in_progress') as in_progress, count(*) FILTER (WHERE status='completed') as completed, count(*) FILTER (WHERE priority='critical') as critical FROM work_orders WHERE site_id=:s", {"s": site_id})
+        sr = safe("SELECT count(*) as total, count(*) FILTER (WHERE status='open') as open_count FROM service_requests WHERE site_id=:s", {"s": site_id})
+        assets = safe("SELECT count(*) as total, count(*) FILTER (WHERE status='operational') as operational FROM assets WHERE site_id=:s", {"s": site_id})
+        projects_q = safe("SELECT count(*) as total, count(*) FILTER (WHERE status='active') as active FROM projects WHERE site_id=:s", {"s": site_id})
+        # Recent activity
+        recent_wos = db.execute(text("""
+            SELECT wo.id, wo.title, wo.priority, wo.status, wo.type, wo.created_at, wo.due_date,
+                   t.name as technician_name
+            FROM work_orders wo LEFT JOIN technicians t ON t.id=wo.technician_id
+            WHERE wo.site_id=:s ORDER BY wo.created_at DESC LIMIT 5
+        """), {"s": site_id}).fetchall()
+        return {
+            "site_id": site_id,
+            "work_orders": wo, "service_requests": sr,
+            "assets": assets, "projects": projects_q,
+            "recent_work_orders": [dict(r._mapping) for r in recent_wos]
+        }
+
+@app.get("/api/v1/client/work-orders", tags=["client-portal"])
+def client_work_orders(site_id: str, status: str = None, limit: int = 50):
+    """Client's work orders — their site only"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = ["wo.site_id=:s"]
+            params = {"s": site_id, "l": limit}
+            if status: where.append("wo.status=:st"); params["st"] = status
+            rows = db.execute(text(f"""
+                SELECT wo.id, wo.title, wo.type, wo.priority, wo.status,
+                       wo.created_at, wo.due_date, wo.started_at, wo.completed_at,
+                       t.name as technician_name, a.name as asset_name
+                FROM work_orders wo
+                LEFT JOIN technicians t ON t.id=wo.technician_id
+                LEFT JOIN assets a ON a.id=wo.asset_id
+                WHERE {" AND ".join(where)}
+                ORDER BY CASE wo.priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END, wo.created_at DESC
+                LIMIT :l
+            """), params).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.post("/api/v1/client/service-requests", tags=["client-portal"])
+async def client_create_sr(request: Request):
+    """Client raises a new service request"""
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            db.execute(text("""
+                INSERT INTO service_requests
+                  (id, hotel_id, site_id, title, description, urgency, status, category, submitted_by, contact_phone, updated_at)
+                VALUES
+                  (:id, 'tb-default-hotel-000000000001', :site, :title, :desc, :urgency, 'open', :cat, :by, :phone, NOW())
+            """), {
+                "id": str(uuid.uuid4()), "site": body.get("site_id"),
+                "title": body.get("title",""), "desc": body.get("description",""),
+                "urgency": body.get("urgency","medium"), "cat": body.get("category","fault"),
+                "by": body.get("submitted_by",""), "phone": body.get("contact_phone","")
+            })
+            db.commit()
+            return {"status": "created", "message": "Your service request has been submitted. Our team will respond shortly."}
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/client/sow-approvals", tags=["client-portal"])
+def client_sow_approvals(site_id: str = None, client_name: str = None):
+    """SOWs waiting for client approval"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = ["s.status IN ('approved','sent_to_client','pending_approval')"]
+            params = {"l": 20}
+            if client_name: where.append("s.client_name ILIKE :cn"); params["cn"] = f"%{client_name}%"
+            rows = db.execute(text(f"""
+                SELECT s.id, s.sow_number, s.title, s.type, s.status, s.client_name,
+                       s.total_cost, s.currency, s.estimated_days, s.scope_details,
+                       s.created_at, s.approved_at,
+                       (SELECT count(*) FROM boq_items WHERE sow_id=s.id) as boq_count
+                FROM scope_of_work s
+                WHERE {" AND ".join(where)}
+                ORDER BY s.created_at DESC LIMIT :l
+            """), params).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
+
+@app.get("/api/v1/client/projects", tags=["client-portal"])
+def client_projects(site_id: str):
+    """Active projects at client site"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT p.id, p.title, p.status, p.start_date, p.end_date,
+                       p.completion_pct, t.name as manager_name
+                FROM projects p
+                LEFT JOIN technicians t ON t.id=p.manager_id::varchar
+                WHERE p.site_id=:sid
+                ORDER BY p.start_date DESC
+            """), {"sid": site_id}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            db.rollback(); return []
