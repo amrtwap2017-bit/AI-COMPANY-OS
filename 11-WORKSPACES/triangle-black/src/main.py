@@ -5907,3 +5907,211 @@ def supplier_profile(vendor_id: str):
             }
         except HTTPException: raise
         except Exception as e: return {"error": str(e)}
+
+# ── SPRINT 260: PREVENTIVE MAINTENANCE SCHEDULER ─────────────────────────────
+
+@app.get("/api/v1/maintenance/schedule", tags=["maintenance"])
+def maintenance_schedule(site_id: str = None, status: str = None, limit: int = 100):
+    """All assets with maintenance schedule status"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            where = ["a.next_maintenance_date IS NOT NULL"]
+            params = {"l": limit}
+            if site_id: where.append("a.site_id=:sid"); params["sid"]=site_id
+            rows = db.execute(text(f"""
+                SELECT a.id as asset_id, a.name as asset_name, a.category,
+                       a.manufacturer, a.model, a.criticality, a.status,
+                       a.last_maintenance_date, a.next_maintenance_date,
+                       a.location_description,
+                       s.name as site_name,
+                       CURRENT_DATE - a.next_maintenance_date::date as overdue_days,
+                       CASE
+                         WHEN a.next_maintenance_date::date < CURRENT_DATE THEN 'overdue'
+                         WHEN a.next_maintenance_date::date <= CURRENT_DATE + INTERVAL '7 days' THEN 'due_soon'
+                         WHEN a.next_maintenance_date::date <= CURRENT_DATE + INTERVAL '30 days' THEN 'upcoming'
+                         ELSE 'scheduled'
+                       END as schedule_status,
+                       (SELECT count(*) FROM work_orders wo
+                        WHERE wo.asset_id=a.id AND wo.type='preventive'
+                        AND wo.created_at > NOW()-INTERVAL '60 days'
+                        AND wo.status NOT IN ('cancelled')) as recent_wo_count
+                FROM assets a
+                LEFT JOIN sites s ON s.id=a.site_id
+                WHERE {" AND ".join(where)}
+                ORDER BY a.next_maintenance_date ASC LIMIT :l
+            """), params).fetchall()
+            data = [dict(r._mapping) for r in rows]
+            overdue = [d for d in data if d["schedule_status"]=="overdue"]
+            due_soon = [d for d in data if d["schedule_status"]=="due_soon"]
+            upcoming = [d for d in data if d["schedule_status"]=="upcoming"]
+            return {
+                "assets": data,
+                "summary": {
+                    "total": len(data),
+                    "overdue": len(overdue),
+                    "due_soon": len(due_soon),
+                    "upcoming": len(upcoming),
+                    "scheduled": len(data)-len(overdue)-len(due_soon)-len(upcoming)
+                }
+            }
+        except Exception as e:
+            db.rollback(); return {"assets":[],"summary":{}}
+
+@app.post("/api/v1/maintenance/generate-work-orders", tags=["maintenance"])
+async def generate_pm_work_orders(request: Request):
+    """Auto-generate preventive maintenance WOs for overdue/due-soon assets"""
+    import os, uuid
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime, timedelta
+    body = await request.json()
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            # Get assets due for maintenance (overdue + due in 7 days)
+            assets = db.execute(text("""
+                SELECT a.id, a.name, a.category, a.site_id, a.criticality,
+                       a.next_maintenance_date, a.last_maintenance_date,
+                       s.name as site_name
+                FROM assets a
+                LEFT JOIN sites s ON s.id=a.site_id
+                WHERE a.next_maintenance_date IS NOT NULL
+                AND a.next_maintenance_date::date <= CURRENT_DATE + INTERVAL '7 days'
+                AND NOT EXISTS (
+                    SELECT 1 FROM work_orders wo
+                    WHERE wo.asset_id=a.id AND wo.type='preventive'
+                    AND wo.status NOT IN ('completed','cancelled')
+                    AND wo.created_at > NOW()-INTERVAL '30 days'
+                )
+                ORDER BY a.next_maintenance_date ASC
+                LIMIT 20
+            """)).fetchall()
+
+            # Find best available technician per category
+            def get_tech(category):
+                tech = db.execute(text("""
+                    SELECT id, name FROM technicians
+                    WHERE is_active=true
+                    AND specializations::text ILIKE :cat
+                    AND current_work_orders < max_work_orders
+                    ORDER BY current_work_orders ASC LIMIT 1
+                """), {"cat": f"%{category}%"}).fetchone()
+                return dict(tech._mapping) if tech else None
+
+            created = []
+            for asset in assets:
+                a = dict(asset._mapping)
+                tech = get_tech(a["category"]) or get_tech("HVAC")
+                priority = "high" if a["criticality"] in ["critical"] else "medium"
+                wo_id = str(uuid.uuid4())
+                wo_title = f"Preventive Maintenance — {a['name']}"
+                due = (datetime.utcnow() + timedelta(days=3)).isoformat()
+                db.execute(text("""
+                    INSERT INTO work_orders
+                      (id, hotel_id, title, description, priority, status, type,
+                       technician_id, site_id, asset_id, due_date, updated_at)
+                    VALUES
+                      (:id, 'tb-default-hotel-000000000001', :title,
+                       :desc, :pri, 'open', 'preventive',
+                       :tech, :site, :asset, :due, NOW())
+                """), {
+                    "id": wo_id, "title": wo_title,
+                    "desc": f"Scheduled preventive maintenance for {a['name']} at {a.get('site_name','')}. Last maintenance: {str(a.get('last_maintenance_date','Never'))[:10]}",
+                    "pri": priority,
+                    "tech": tech["id"] if tech else None,
+                    "site": a["site_id"], "asset": a["id"], "due": due
+                })
+                # Update asset next maintenance date (+90 days)
+                db.execute(text("""
+                    UPDATE assets SET
+                      last_maintenance_date=CURRENT_DATE,
+                      next_maintenance_date=CURRENT_DATE+INTERVAL '90 days'
+                    WHERE id=:id
+                """), {"id": a["id"]})
+                created.append({
+                    "wo_id": wo_id, "asset": a["name"],
+                    "site": a.get("site_name",""), "priority": priority,
+                    "technician": tech["name"] if tech else "Unassigned"
+                })
+            db.commit()
+            return {
+                "status": "generated",
+                "created_count": len(created),
+                "work_orders": created,
+                "message": f"Created {len(created)} preventive maintenance work orders"
+            }
+        except Exception as e:
+            db.rollback(); return {"error": str(e)}
+
+@app.get("/api/v1/maintenance/calendar", tags=["maintenance"])
+def maintenance_calendar():
+    """Next 30 days maintenance calendar grouped by week"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT a.id, a.name, a.category, a.criticality,
+                       a.next_maintenance_date,
+                       s.name as site_name,
+                       DATE_TRUNC('week', a.next_maintenance_date::timestamp) as week_start,
+                       EXTRACT(DOW FROM a.next_maintenance_date::timestamp) as day_of_week
+                FROM assets a
+                LEFT JOIN sites s ON s.id=a.site_id
+                WHERE a.next_maintenance_date IS NOT NULL
+                AND a.next_maintenance_date::date BETWEEN CURRENT_DATE AND CURRENT_DATE+INTERVAL '30 days'
+                ORDER BY a.next_maintenance_date ASC
+            """)).fetchall()
+            weeks = {}
+            for r in rows:
+                d = dict(r._mapping)
+                week = str(d["week_start"])[:10] if d["week_start"] else "unknown"
+                if week not in weeks: weeks[week] = []
+                weeks[week].append(d)
+            # Also get overdue
+            overdue = db.execute(text("""
+                SELECT a.id, a.name, a.category, a.next_maintenance_date, s.name as site_name
+                FROM assets a LEFT JOIN sites s ON s.id=a.site_id
+                WHERE a.next_maintenance_date::date < CURRENT_DATE
+                ORDER BY a.next_maintenance_date ASC
+            """)).fetchall()
+            return {
+                "weeks": weeks,
+                "overdue": [dict(r._mapping) for r in overdue],
+                "total_assets": len(rows)
+            }
+        except Exception as e:
+            db.rollback(); return {"weeks":{},"overdue":[]}
+
+@app.get("/api/v1/maintenance/stats", tags=["maintenance"])
+def maintenance_stats():
+    """Maintenance KPI stats"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            return {
+                "assets": db.execute(text("""
+                    SELECT count(*) as total,
+                      count(*) FILTER (WHERE next_maintenance_date::date < CURRENT_DATE) as overdue,
+                      count(*) FILTER (WHERE next_maintenance_date::date BETWEEN CURRENT_DATE AND CURRENT_DATE+7) as due_week,
+                      count(*) FILTER (WHERE next_maintenance_date::date BETWEEN CURRENT_DATE+8 AND CURRENT_DATE+30) as due_month,
+                      count(*) FILTER (WHERE status='operational') as operational
+                    FROM assets WHERE next_maintenance_date IS NOT NULL
+                """)).fetchone()._mapping,
+                "wos_this_month": db.execute(text("""
+                    SELECT count(*) as created,
+                      count(*) FILTER (WHERE status='completed') as completed
+                    FROM work_orders WHERE type='preventive' AND created_at > NOW()-INTERVAL '30 days'
+                """)).fetchone()._mapping,
+            }
+        except Exception as e:
+            db.rollback(); return {}
