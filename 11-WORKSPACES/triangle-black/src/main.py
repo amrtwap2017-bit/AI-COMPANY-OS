@@ -6636,11 +6636,11 @@ def time_tracking_summary():
             SELECT t.id, t.name, t.specializations,
               count(te.id) as entries,
               COALESCE(sum(te.hours_logged),0) as total_hours,
-              COALESCE(sum(te.labor_cost),0) as total_cost,
+              COALESCE(sum(COALESCE(te.labor_cost, te.hours_logged * te.hourly_rate, 0)),0) as total_cost,
               COALESCE(avg(te.hours_logged),0) as avg_hours
             FROM technicians t
             LEFT JOIN time_entries te ON te.technician_id=t.id
-            WHERE t.id LIKE 'tech-%'
+            WHERE te.id IS NOT NULL
             GROUP BY t.id, t.name, t.specializations
             ORDER BY total_hours DESC
         """)
@@ -6658,7 +6658,7 @@ def time_tracking_summary():
             SELECT te.work_order_id, wo.title, wo.priority, wo.status,
               count(te.id) as entries,
               COALESCE(sum(te.hours_logged),0) as total_hours,
-              COALESCE(sum(te.labor_cost),0) as total_cost
+              COALESCE(sum(COALESCE(te.labor_cost, te.hours_logged * te.hourly_rate, 0)),0) as total_cost
             FROM time_entries te
             LEFT JOIN work_orders wo ON wo.id=te.work_order_id
             GROUP BY te.work_order_id, wo.title, wo.priority, wo.status
