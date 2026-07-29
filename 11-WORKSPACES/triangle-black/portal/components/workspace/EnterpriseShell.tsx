@@ -1,5 +1,6 @@
 
 "use client";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 // @ts-nocheck
 // Triangle Black V7 — Enterprise Shell — Luxury Command Center
 import { useState } from "react";
@@ -45,14 +46,16 @@ export function EnterpriseShell({ children, rail }: EnterpriseShellProps) {
 
         {rail ? (
           <div className="grid min-h-0 flex-1 gap-6 p-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <main className="min-w-0" id="main-content">{children}</main>
+            <main className="min-w-0" id="main-content"><Breadcrumb />
+        {children}</main>
             <aside className="hidden xl:block">
               <div className="sticky top-20 space-y-4">{rail}</div>
             </aside>
           </div>
         ) : (
           <main className="flex-1 overflow-y-auto" id="main-content">
-            {children}
+            <Breadcrumb />
+        {children}
           </main>
         )}
       </div>

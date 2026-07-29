@@ -1,307 +1,296 @@
 "use client";
 // @ts-nocheck
-import { RoleBadge } from "@/components/ui/RoleBadge";
-import { ActivityFeed } from "@/components/ui/ActivityFeed";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+
+const CENTERS = [
+  {
+    icon:"🔧", label:"Operations",       path:"/operations/work-orders",
+    desc:"Work orders, dispatch, maintenance", color:"#F97316",
+    sub:["Work Orders","/operations/work-orders","Dispatch Board","/operations/dispatch","Maintenance","/operations/maintenance"]
+  },
+  {
+    icon:"🏗️", label:"Procurement",      path:"/supply-chain/procurement",
+    desc:"P2P: SOW→RFQ→PO→GRN→Invoice", color:"#FBBF24",
+    sub:["Vendors","/supply-chain/vendor-management","RFQs","/supply-chain/rfq-management","Purchase Orders","/supply-chain/purchase-orders-v2"]
+  },
+  {
+    icon:"💰", label:"Financial",         path:"/financial",
+    desc:"P&L, invoices, aged receivables", color:"#34D399",
+    sub:["P&L Dashboard","/financial","Invoices","/supply-chain/invoices","Reports","/reports"]
+  },
+  {
+    icon:"📊", label:"Reports",           path:"/reports",
+    desc:"12 report types — CSV + PDF", color:"#60A5FA",
+    sub:["Report Center","/reports","Work Orders","/reports","Invoices","/reports"]
+  },
+  {
+    icon:"📅", label:"Maintenance",       path:"/operations/maintenance",
+    desc:"PM scheduler, asset calendar", color:"#A78BFA",
+    sub:["Schedule","/operations/maintenance","Asset QR","/operations/assets/qr","Assets","/maintenance/assets"]
+  },
+  {
+    icon:"📈", label:"Executive",         path:"/executive/dashboard",
+    desc:"Live KPIs, alerts, decisions", color:"#FB923C",
+    sub:["Dashboard","/executive/dashboard","Financial P&L","/financial","Notifications","/notifications"]
+  },
+  {
+    icon:"🏨", label:"Client Portal",     path:"/client-portal",
+    desc:"Hotel clients — light theme", color:"#059669",
+    sub:["Login","/client-portal","Dashboard","/client-portal/dashboard","Raise Request","/client-portal/request"]
+  },
+  {
+    icon:"🏭", label:"Supplier Portal",   path:"/supplier-portal",
+    desc:"Vendors — bids, POs, invoices", color:"#D97706",
+    sub:["Login","/supplier-portal","Dashboard","/supplier-portal/dashboard","RFQs","/supplier-portal/rfqs"]
+  },
+];
+
+const QUICK_ACTIONS = [
+  {icon:"🔧",label:"New Work Order",    path:"/operations/work-orders/new",   color:"#F97316"},
+  {icon:"🎫",label:"Service Request",   path:"/operations/service-requests",   color:"#60A5FA"},
+  {icon:"📋",label:"Dispatch Board",    path:"/operations/dispatch",            color:"#A78BFA"},
+  {icon:"📦",label:"Purchase Orders",   path:"/supply-chain/purchase-orders-v2",color:"#FBBF24"},
+  {icon:"📄",label:"Invoices",          path:"/supply-chain/invoices",          color:"#34D399"},
+  {icon:"📱",label:"Asset QR Codes",    path:"/operations/assets/qr",          color:"#FB923C"},
+];
 
 export default function WorkspacePage() {
   const router = useRouter();
-  const qc     = useQueryClient();
-  const [runningAuto, setRunningAuto] = useState(false);
-  const [autoResult,  setAutoResult]  = useState(null);
+  const { user } = useAuth();
 
-  const { data: twin }     = useQuery(["ws-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: dash }     = useQuery(["ws-dash"],   () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()), {refetchInterval:60000});
-  const { data: woRaw }    = useQuery(["ws-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: notifRaw } = useQuery(["ws-notifs"], () => authFetch("/api/v1/notifications-portal").then(r=>r.json()));
-  const { data: pmRaw }    = useQuery(["ws-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
-  const { data: autoStatus, refetch: refetchAuto } = useQuery(["ws-auto"], () => authFetch("/api/v1/automation/status").then(r=>r.json()));
+  const { data: execDash } = useQuery(
+    ["workspace-exec"],
+    () => authFetch("/api/v1/executive/dashboard").then(r=>r.json()),
+    { staleTime: 60000 }
+  );
 
-  const wos    = toArr(woRaw);
-  const notifs = toArr(notifRaw);
-  const pms    = toArr(pmRaw);
-  const d      = dash || {};
-  const score  = twin?.health_score ?? 0;
-  const now    = new Date();
-  const today  = now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const { data: wos } = useQuery(
+    ["workspace-wos"],
+    () => authFetch("/api/v1/work-orders/?limit=5").then(r=>r.json()),
+    { staleTime: 30000 }
+  );
 
-  const pending      = autoStatus?.pending_actions || {};
-  const totalPending = Object.values(pending).reduce((s,v) => s+Number(v), 0);
-  const unreadNotifs = notifs.filter(n => !n.is_read);
-  const criticalWOs  = wos.filter(w => w.priority==="critical" && w.status!=="completed");
-  const openWOs      = wos.filter(w => w.status==="open");
-  const inProgressWOs= wos.filter(w => w.status==="in_progress");
-  const overduePMs   = pms.filter(p => p.next_due_ts && new Date(p.next_due_ts) < now);
-  const completedWOs = wos.filter(w => w.status==="completed");
-  const compRate     = wos.length > 0 ? Math.round(completedWOs.length/wos.length*100) : 0;
-  const collRate     = (d.finance?.total_invoices||0) > 0 ? Math.round((d.finance?.paid||0)/(d.finance?.total_invoices||1)*100) : 0;
+  const { data: notifs } = useQuery(
+    ["workspace-notifs"],
+    () => authFetch("/api/v1/platform-notif/?limit=5").then(r=>r.json()),
+    { staleTime: 30000 }
+  );
 
-  const urgentItems = [
-    ...criticalWOs.map(w => ({type:"Critical WO", title:w.title, path:`/operations/work-orders/${w.id}`, color:"red"})),
-    ...overduePMs.slice(0,2).map(p => ({type:"Overdue PM", title:p.title, path:"/maintenance/pm-plans", color:"amber"})),
-  ].slice(0,6);
+  const { data: invDash } = useQuery(
+    ["workspace-inv"],
+    () => authFetch("/api/v1/supplier-invoices/dashboard").then(r=>r.json()),
+    { staleTime: 60000 }
+  );
 
-  const runAutomation = async () => {
-    setRunningAuto(true);
-    try {
-      const res = await authFetch("/api/v1/automation/run", {method:"POST"});
-      setAutoResult(await res.json());
-      refetchAuto();
-    } finally { setRunningAuto(false); }
-  };
+  const ops = execDash?.operations?.work_orders || {};
+  const alerts = execDash?.alerts || {};
+  const invTotals = invDash?.totals || {};
+  const recentWOs = Array.isArray(wos) ? wos : [];
+  const recentNotifs = notifs?.notifications || [];
+  const unreadCount = notifs?.unread_count || 0;
 
-  const domainHealth = [
-    {domain:"Operations",  metric:`${openWOs.length} open WOs`,        health:compRate,    path:"/operations"},
-    {domain:"Maintenance", metric:`${overduePMs.length} overdue PM`,    health:overduePMs.length===0?100:Math.max(0,100-overduePMs.length*10), path:"/maintenance"},
-    {domain:"Commercial",  metric:`${d.commercial?.active_contracts??0} active`, health:85, path:"/commercial"},
-    {domain:"Finance",     metric:`${collRate}% collected`,             health:collRate,    path:"/invoices"},
-    {domain:"Supply Chain",metric:`${d.procurement?.purchase_requests??0} PRs`, health:80, path:"/supply-chain"},
-    {domain:"Platform",    metric:`${score}/100 twin score`,            health:score,       path:"/executive/intelligence"},
-  ];
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const today = new Date().toLocaleDateString("en-GB", {weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
-  const quickLinks = [
-    {label:"My Day",     icon:"☀️", path:"/workspace/my-day"},
-    {label:"Work Orders",icon:"🔧", path:"/operations/work-orders"},
-    {label:"Dispatch",   icon:"👷", path:"/operations/dispatch"},
-    {label:"PM Plans",   icon:"📅", path:"/maintenance/pm-plans"},
-    {label:"Assets",     icon:"🏗️", path:"/maintenance/assets"},
-    {label:"Contracts",  icon:"📄", path:"/commercial/contracts"},
-    {label:"Invoices",   icon:"💰", path:"/invoices"},
-    {label:"Procurement",icon:"📦", path:"/supply-chain"},
-    {label:"Analytics",  icon:"📊", path:"/analytics"},
-    {label:"Automation", icon:"⚡", path:"/workflows/launcher"},
-  ];
+  const PC = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
+  const SC = {open:"#60A5FA",in_progress:"#FBBF24",completed:"#34D399"};
 
   return (
     <div className="min-h-screen bg-base">
 
-      {/* HERO */}
-      <div className="tb-hero">
+      {/* ── HERO ───────────────────────────────────────────────────────── */}
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0A0F1E 0%,#0D1A2A 40%,#0F1A10 100%)"}}>
         <div className="tb-hero-inner">
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
-                <span className="text-label-upper" style={{color:"rgba(148,163,184,0.7)"}}>Triangle Black — Platform Live</span>
-              </div>
-              <h1 className="tb-hero-title">Platform Command Center</h1>
-              <div style={{marginBottom:8}}><RoleBadge size="md"/></div>
-              <p className="tb-hero-description">{today}</p>
-            </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {totalPending > 0 && (
-                <button onClick={runAutomation} disabled={runningAuto} className="tb-hero-btn tb-hero-btn--glass">
-                  {runningAuto ? "⏳ Running..." : `⚡ Auto (${totalPending})`}
-                </button>
-              )}
-              <div className={`tb-score-badge ${score>=95?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-                <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FCD34D"}}>{score}</div>
-                <div className="tb-score-label">Digital Twin</div>
-                <div className="tb-score-sub" style={{color:score>=95?"#34D399":"#FCD34D"}}>
-                  {score>=98?"A+":score>=95?"A":"A-"}
-                </div>
-              </div>
-            </div>
+          <div className="mb-6">
+            <div className="text-label-upper text-emerald-400 mb-1">Triangle Black Engineering Services</div>
+            <h1 className="text-3xl font-black text-white mb-1">{greeting}, {user?.name?.split(" ")[0] || "Amr"}!</h1>
+            <p className="text-slate-400 text-sm">{today}</p>
           </div>
 
-          {/* KPI strip */}
-          <div className="tb-grid-8 mt-6">
+          {/* Live KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Open WOs",       value:openWOs.length,         color:"#60A5FA", path:"/operations/work-orders"},
-              {label:"In Progress",    value:inProgressWOs.length,   color:"#FBBF24", path:"/operations/dispatch"},
-              {label:"Critical",       value:criticalWOs.length,     color:criticalWOs.length>0?"#F87171":"#34D399", path:"/executive/exceptions"},
-              {label:"PM Overdue",     value:overduePMs.length,      color:overduePMs.length>0?"#F87171":"#34D399", path:"/maintenance/pm-plans"},
-              {label:"Alerts",         value:unreadNotifs.length,    color:"#A78BFA", path:"/inbox"},
-              {label:"Contracts",      value:d.commercial?.active_contracts??0, color:"#34D399", path:"/commercial/contracts"},
-              {label:"WO Complete",    value:`${compRate}%`,         color:compRate>=80?"#34D399":"#FBBF24", path:"/analytics/scorecards"},
-              {label:"Collection",     value:`${collRate}%`,         color:collRate>=85?"#34D399":"#FBBF24", path:"/invoices"},
-            ].map((k,i) => (
-              <button key={i} onClick={() => router.push(k.path)} className="tb-hero-kpi text-left">
-                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
+              {label:"Open Work Orders",  value:ops.open_count||0,    sub:`${ops.critical_open||0} critical`,   color:"#60A5FA",  path:"/operations/work-orders"},
+              {label:"Outstanding",        value:fmtEGP(invTotals.total_outstanding||0), sub:"invoices payable", color:"#FBBF24",  path:"/supply-chain/invoices"},
+              {label:"Pending Approvals",  value:ops.overdue||0,       sub:"action required",  color:alerts.total_alerts>0?"#F87171":"#34D399", path:"/supply-chain/approvals-center"},
+              {label:"Platform Alerts",    value:alerts.total_alerts||0,sub:`${unreadCount} notifications`,color:alerts.total_alerts>0?"#F87171":"#34D399",path:"/notifications"},
+            ].map((k,i)=>(
+              <button key={i} onClick={()=>router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
+                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.4rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
+                <div className="text-xs opacity-50 mt-0.5">{k.sub}</div>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="tb-canvas">
+      <div className="tb-canvas space-y-6">
 
-        {/* Automation success */}
-        {autoResult && (
-          <div className="tb-alert tb-alert-success">
-            <span className="text-2xl">✅</span>
-            <div>
-              <div style={{fontWeight:700,color:"#34D399",fontSize:"0.875rem"}}>
-                Automation — {autoResult.total_actions} actions taken
-              </div>
-              <div style={{fontSize:"0.75rem",color:"rgba(52,211,153,0.7)",marginTop:2}}>
-                {autoResult.wf01_pm_to_wo?.created?.length||0} PM→WO · {autoResult.wf02_contract_renewals?.notified?.length||0} renewals · {autoResult.wf03_stock_auto_pr?.created?.length||0} auto-PRs
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 3-column grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-          {/* LEFT */}
-          <div className="space-y-4">
-
-            {/* Urgent items */}
-            <div className="tb-section">
-              <div className="tb-section-header">
-                <div>
-                  <div className="text-label-upper text-tertiary mb-1">Attention Required</div>
-                  <div className="font-bold text-primary" style={{marginBottom:0}}>Urgent Items</div>
-                </div>
-                <button onClick={() => router.push("/executive/exceptions")} className="tb-section-link">All →</button>
-              </div>
-              {urgentItems.length === 0 ? (
-                <div className="tb-empty" style={{padding:"32px 0"}}>
-                  <div className="tb-empty-icon" style={{fontSize:"2.5rem"}}>✅</div>
-                  <div className="tb-empty-desc">All clear</div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {urgentItems.map((item,i) => (
-                    <button key={i} onClick={() => router.push(item.path)} className={`w-full text-left tb-domain-card ${item.color==="red"?"tb-domain-card--danger":"tb-domain-card--warn"}`}>
-                      <div className="text-label-upper mb-1" style={{color:item.color==="red"?"#F87171":"#FBBF24"}}>{item.type}</div>
-                      <div className="text-sm font-semibold text-primary truncate">{item.title}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Recent Activity */}
-            <div className="tb-section">
-              <div className="tb-section-header">
-                <div className="tb-section-title" style={{marginBottom:0}}>🕐 Recent Activity</div>
-              </div>
-              <ActivityFeed limit={8} compact/>
-            </div>
-
-            {/* Automation */}
-            <div className="tb-section">
-              <div className="tb-section-header">
-                <div className="font-bold text-primary" style={{marginBottom:0}}>⚡ Automation</div>
-                <button onClick={() => router.push("/workflows/launcher")} className="tb-section-link">Manage →</button>
-              </div>
-              <div className="space-y-2">
-                {Object.entries(pending).map(([key, val]) => (
-                  <div key={key} className="flex items-center justify-between py-2">
-                    <span className="text-sm text-secondary capitalize">{key.replace(/wf\d+_/,"").replace(/_/g," ")}</span>
-                    <span className={`tb-badge ${val===0?"tb-badge--success":"tb-badge--warning"}`}>
-                      {val===0?"✓ OK":`${val} pending`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* CENTER + RIGHT */}
-          <div className="xl:col-span-2 space-y-5">
-
-            {/* Domain health */}
-            <div className="tb-section">
-              <div className="tb-section-header">
-                <div>
-                  <div className="text-label-upper text-tertiary mb-1">Digital Twin</div>
-                  <div className="font-bold text-primary" style={{marginBottom:0}}>Domain Health</div>
-                </div>
-                <button onClick={() => router.push("/executive/intelligence")} className="tb-section-link">Full view →</button>
-              </div>
-              <div className="tb-grid-3">
-                {domainHealth.map((item,i) => {
-                  const h = item.health;
-                  const cls = h>=80?"tb-domain-card--ok":h>=60?"tb-domain-card--warn":"tb-domain-card--danger";
-                  const color = h>=80?"#34D399":h>=60?"#FBBF24":"#F87171";
-                  return (
-                    <button key={i} onClick={() => router.push(item.path)} className={`tb-domain-card ${cls}`}>
-                      <div className="flex justify-between mb-2">
-                        <div className="text-xs font-semibold text-primary">{item.domain}</div>
-                        <div className="text-xs font-black" style={{color}}>{h>=80?"✓":h>=60?"!":"✗"}</div>
-                      </div>
-                      <div className="text-2xl font-black" style={{color}}>{Math.round(h)}%</div>
-                      <div className="text-xs text-tertiary mt-1">{item.metric}</div>
-                      <div className="mt-2 h-0.5 bg-black/10 rounded-full overflow-hidden">
-                        <div className="h-0.5 rounded-full" style={{background:color,width:`${Math.min(h,100)}%`}}/>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Recent WOs */}
-            <div className="tb-table">
-              <div className="tb-section-header" style={{padding:"16px 24px",borderBottom:"1px solid var(--color-divider)"}}>
-                <div>
-                  <div className="text-label-upper text-tertiary mb-1">Live Queue</div>
-                  <div className="font-bold text-primary" style={{marginBottom:0}}>Recent Work Orders</div>
-                </div>
-                <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All {wos.length} →</button>
-              </div>
-              {wos.slice(0,6).map((w,i) => {
-                const pColor = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"rgba(148,163,184,0.4)"}[w.priority]||"rgba(148,163,184,0.4)";
-                const sColor = {open:"#60A5FA",in_progress:"#FBBF24",completed:"#34D399",cancelled:"rgba(148,163,184,0.4)"}[w.status]||"rgba(148,163,184,0.4)";
-                return (
-                  <button key={i} onClick={() => router.push(`/operations/work-orders/${w.id}`)}
-                    className="tb-table-row flex items-center gap-4">
-                    <div className="tb-priority-bar" style={{background:pColor}}/>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-primary truncate">{w.title}</div>
-                      <div className="text-xs text-tertiary mt-0.5 capitalize">{w.type||"corrective"}</div>
-                    </div>
-                    <span className="tb-badge" style={{background:`${sColor}18`,color:sColor,border:`1px solid ${sColor}30`}}>
-                      {w.status}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Twin domains */}
-            <div className="tb-section">
-              <div className="tb-section-header">
-                <div className="font-bold text-primary" style={{marginBottom:0}}>Digital Twin — All Domains</div>
-                <button onClick={() => router.push("/executive/intelligence")} className="tb-section-link">Details →</button>
-              </div>
-              <div className="tb-grid-8">
-                {(twin?.operational_domains??[]).map((dom,i) => {
-                  const hasIssue = (dom.overdue??0)>0||(dom.critical_open??0)>0||(dom.below_min??0)>0;
-                  const cls = hasIssue ? "tb-domain-card--warn" : "tb-domain-card--ok";
-                  return (
-                    <div key={i} className={`tb-domain-card ${cls} text-center`}>
-                      <div className="text-xl font-black">{dom.total??0}</div>
-                      <div className="text-xs mt-1" style={{color:hasIssue?"#FBBF24":"#34D399",fontSize:"0.5625rem",textTransform:"uppercase",letterSpacing:"0.04em"}}>{dom.domain}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+        {/* ── QUICK ACTIONS ─────────────────────────────────────────────── */}
+        <div className="tb-section">
+          <div className="tb-section-title">Quick Actions</div>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-3">
+            {QUICK_ACTIONS.map((action,i)=>(
+              <button key={i} onClick={()=>router.push(action.path)}
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border hover:border-brand/40 transition-all group"
+                style={{background:"rgba(255,255,255,0.02)"}}>
+                <span style={{fontSize:"1.75rem"}}>{action.icon}</span>
+                <span className="text-xs font-semibold text-secondary text-center leading-tight group-hover:text-primary transition-colors">{action.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Quick access */}
+        {/* ── PLATFORM CENTERS ──────────────────────────────────────────── */}
         <div className="tb-section">
-          <div className="text-label-upper text-tertiary mb-4">Quick Access</div>
-          <div className="tb-grid-8" style={{gridTemplateColumns:"repeat(10,1fr)"}}>
-            {quickLinks.map((a,i) => (
-              <button key={i} onClick={() => router.push(a.path)}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-base-alt transition-colors border border-transparent hover:border-border">
-                <span className="text-xl">{a.icon}</span>
-                <span className="text-label" style={{fontSize:"0.5625rem",textAlign:"center",color:"var(--color-text-3)"}}>{a.label}</span>
+          <div className="tb-section-title">Platform Modules</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-3">
+            {CENTERS.map((center,i)=>(
+              <div key={i} className="rounded-2xl border border-border overflow-hidden"
+                   style={{background:"rgba(255,255,255,0.02)"}}>
+                {/* Center header — clickable */}
+                <button onClick={()=>router.push(center.path)}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-base-alt transition-colors text-left">
+                  <span style={{fontSize:"1.75rem"}}>{center.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-primary">{center.label}</div>
+                    <div className="text-xs text-tertiary mt-0.5">{center.desc}</div>
+                  </div>
+                  <span className="text-brand text-xs flex-shrink-0">→</span>
+                </button>
+                {/* Sub links */}
+                <div className="border-t border-border px-4 py-2 flex flex-wrap gap-2">
+                  {center.sub.reduce((acc, val, idx) => {
+                    if (idx % 2 === 0) acc.push([val, center.sub[idx+1]]);
+                    return acc;
+                  }, []).map(([label, path], si)=>(
+                    <button key={si} onClick={()=>router.push(path)}
+                      className="text-xs text-tertiary hover:text-brand transition-colors py-1">
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── RECENT ACTIVITY + NOTIFICATIONS ───────────────────────────── */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+          {/* Recent Work Orders */}
+          <div className="tb-section">
+            <div className="tb-flex-between mb-3">
+              <div className="tb-section-title" style={{marginBottom:0}}>Recent Work Orders</div>
+              <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand">View all →</button>
+            </div>
+            {recentWOs.length === 0 ? (
+              <div className="tb-empty" style={{padding:"24px"}}><div className="tb-empty-icon">🔧</div><div className="tb-empty-title">No work orders</div></div>
+            ) : (
+              <div className="space-y-2">
+                {recentWOs.map((wo,i)=>{
+                  const pc = PC[wo.priority]||"#94A3B8";
+                  const sc = SC[wo.status]||"#94A3B8";
+                  return (
+                    <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)}
+                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:pc}}/>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-primary truncate">{wo.title}</div>
+                        <div className="text-xs text-tertiary">{wo.type} · {wo.priority}</div>
+                      </div>
+                      <span className="tb-badge flex-shrink-0" style={{background:sc+"18",color:sc,fontSize:"0.5rem"}}>{(wo.status||"").replace(/_/g," ")}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Recent Notifications */}
+          <div className="tb-section">
+            <div className="tb-flex-between mb-3">
+              <div className="tb-section-title" style={{marginBottom:0}}>
+                Notifications
+                {unreadCount > 0 && <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-yellow-400/20 text-yellow-400 font-bold">{unreadCount} new</span>}
+              </div>
+              <button onClick={()=>router.push("/notifications")} className="text-xs text-brand">View all →</button>
+            </div>
+            {recentNotifs.length === 0 ? (
+              <div className="tb-empty" style={{padding:"24px"}}>
+                <div className="tb-empty-icon">🔔</div>
+                <div className="tb-empty-title">No notifications</div>
+                <button onClick={()=>authFetch("/api/v1/platform-notif/generate",{method:"POST"}).then(()=>window.location.reload())}
+                  className="tb-btn-primary mt-3" style={{fontSize:"0.7rem",padding:"6px 12px"}}>
+                  ⚡ Scan Platform
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentNotifs.map((notif,i)=>{
+                  const typeColor = notif.type==="alert"?"#F87171":notif.type==="warning"?"#FBBF24":notif.type==="success"?"#34D399":"#60A5FA";
+                  const typeIcon = notif.type==="alert"?"🚨":notif.type==="warning"?"⚠️":notif.type==="success"?"✅":"ℹ️";
+                  return (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-base-alt"
+                         style={{opacity:notif.is_read?0.6:1}}>
+                      <span>{typeIcon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-primary truncate">{notif.title}</div>
+                        <div className="text-xs text-tertiary truncate">{notif.message}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── PORTAL ACCESS ─────────────────────────────────────────────── */}
+        <div className="tb-section">
+          <div className="tb-section-title">External Portals</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+            {[
+              {
+                icon:"🏨", title:"Client Portal",
+                desc:"Hotel clients view their work orders, raise requests, approve SOWs",
+                path:"/client-portal", color:"#059669",
+                hint:"PIN: 1234 | ahmed.fouad@nileplaza.com"
+              },
+              {
+                icon:"🏭", title:"Supplier Portal",
+                desc:"Vendors submit quotes, view POs, upload invoices, manage documents",
+                path:"/supplier-portal", color:"#D97706",
+                hint:"PIN: 1234 | info@arctic-hvac.com"
+              },
+            ].map((portal,i)=>(
+              <button key={i} onClick={()=>router.push(portal.path)}
+                className="flex items-start gap-4 p-5 rounded-2xl border border-border hover:border-brand/40 transition-all text-left"
+                style={{background:"rgba(255,255,255,0.02)"}}>
+                <span style={{fontSize:"2.5rem"}}>{portal.icon}</span>
+                <div className="flex-1">
+                  <div className="text-base font-bold text-primary mb-1">{portal.title}</div>
+                  <div className="text-sm text-secondary mb-2">{portal.desc}</div>
+                  <div className="text-xs text-tertiary font-mono">{portal.hint}</div>
+                  <div className="mt-3 text-xs font-bold" style={{color:portal.color}}>Open Portal →</div>
+                </div>
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* ── BUILT WITH ────────────────────────────────────────────────── */}
+        <div className="tb-section" style={{background:"rgba(255,255,255,0.01)"}}>
+          <div className="text-xs text-tertiary text-center">
+            Triangle Black Engineering Services · MEP & Facilities Management Platform<br/>
+            Built with Next.js 14 + FastAPI + PostgreSQL + Qwen AI · Sprints 245–262 · Twin Health: 95/100
           </div>
         </div>
       </div>
