@@ -14,81 +14,88 @@
    - Every pixel communicates information
 ════════════════════════════════════════════════════════════════ */
 
-/* ── LIGHT THEME (Default) ────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   DESERT PREMIUM DARK — WARM-DARK ENTERPRISE THEME
+   Configured via: lib/platform-config.ts
+   ONE accent color. ONE identity. Configurable per customer.
+════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Brand — Amber 700 / Premium amber accent */
-  --color-brand:        #B45309;
-  --color-brand-hover:  #92400E;
-  --color-brand-light:  #FEF3C7;
-  --color-brand-mid:    #D97706;
-  --color-brand-muted:  #FDE68A;
+  /* ── BRAND — Warm Gold (change ONE value → entire platform changes) */
+  --color-brand:        #C9A84C;  /* Warm gold — the ONE accent */
+  --color-brand-hover:  #A8893A;  /* Darker gold on hover */
+  --color-brand-light:  #C9A84C18; /* Gold at 10% for hover backgrounds */
+  --color-brand-mid:    #D4B05A;  /* Slightly lighter gold */
+  --color-brand-muted:  #C9A84C0A; /* Gold at 4% — very subtle */
 
-  /* Backgrounds */
-  --color-bg:           #F8FAFC;
-  --color-bg-alt:       #F1F5F9;
-  --color-surface:      #FFFFFF;
-  --color-surface-alt:  #F8FAFC;
-  --color-surface-raised: #FFFFFF;
-  --color-overlay:      rgba(15, 23, 42, 0.5);
+  /* ── BACKGROUNDS — Warm dark, not cold black */
+  --color-bg:           #151210;  /* Body — warm espresso dark */
+  --color-bg-alt:       #1C1916;  /* Alt bg — slightly lighter */
+  --color-surface:      #201D1A;  /* Card surface — warm charcoal */
+  --color-surface-alt:  #272320;  /* Elevated surface */
+  --color-surface-raised: #2E2A26; /* Highest surface */
+  --color-overlay:      rgba(0, 0, 0, 0.75);
 
-  /* Sidebar — Always dark regardless of theme */
-  --color-sidebar:          #0F172A;
-  --color-sidebar-hover:    #1E293B;
-  --color-sidebar-active:   #1E293B;
-  --color-sidebar-border:   #1E293B;
-  --color-sidebar-text:     #94A3B8;
-  --color-sidebar-text-active: #FFFFFF;
+  /* ── SIDEBAR — Premium matte black */
+  --color-sidebar:             #0D0B09;  /* Near-black warm */
+  --color-sidebar-hover:       #1A1714;  /* Subtle warm hover */
+  --color-sidebar-active:      #221E1A;  /* Active item bg */
+  --color-sidebar-border:      #1A1714;  /* Invisible border */
+  --color-sidebar-text:        #6B5B4A;  /* Warm stone default */
+  --color-sidebar-text-active: #F5EDD8;  /* Warm cream when active */
+  --color-sidebar-accent:      #C9A84C;  /* Gold accent in sidebar */
 
-  /* Topbar */
-  --color-topbar:       #FFFFFF;
-  --color-topbar-border:#E2E8F0;
+  /* ── TOPBAR — Sandy warm header */
+  --color-topbar:        #D9C3A9;  /* Sandy warm — your exact request */
+  --color-topbar-border: #C4A98A;  /* Slightly darker sand */
+  --color-topbar-text:   #2A1F14;  /* Dark warm text on sandy bg */
 
-  /* Text — 3-level hierarchy */
-  --color-text-1:       #0F172A;  /* Primary — headings, values */
-  --color-text-2:       #475569;  /* Secondary — descriptions, labels */
-  --color-text-3:       #94A3B8;  /* Tertiary — timestamps, placeholders */
-  --color-text-disabled:#CBD5E1;  /* Disabled */
-  --color-text-inv:     #FFFFFF;  /* On dark backgrounds */
-  --color-text-brand:   #B45309;  /* Brand text */
+  /* ── TEXT — Warm cream hierarchy */
+  --color-text-1:       #F5EDD8;  /* Primary — warm cream */
+  --color-text-2:       #A89880;  /* Secondary — warm stone */
+  --color-text-3:       #6B5B4A;  /* Tertiary — dark warm */
+  --color-text-disabled:#3D3530;  /* Disabled */
+  --color-text-inv:     #0D0B09;  /* On light/gold backgrounds */
+  --color-text-brand:   #C9A84C;  /* Gold text */
 
-  /* Borders */
-  --color-border:       #E2E8F0;
-  --color-border-hover: #CBD5E1;
-  --color-border-focus: #B45309;
-  --color-border-strong:#94A3B8;
-  --color-divider:      #F1F5F9;
+  /* ── BORDERS — Warm subtle */
+  --color-border:       #2A2520;  /* Default border — warm */
+  --color-border-hover: #3D3530;  /* Hover border */
+  --color-border-focus: #C9A84C;  /* Focus — gold */
+  --color-border-strong:#6B5B4A;  /* Strong border */
+  --color-divider:      #1C1916;  /* Divider — very subtle */
 
-  /* Semantic Status Colors */
-  --color-success:      #10B981;
-  --color-success-bg:   #ECFDF5;
-  --color-success-border:#A7F3D0;
-  --color-success-text: #065F46;
+  /* ── STATUS — Muted warm palette */
+  --color-success:       #6EBF8B;  /* Soft green */
+  --color-success-bg:    rgba(110,191,139,0.08);
+  --color-success-border:rgba(110,191,139,0.2);
+  --color-success-text:  #6EBF8B;
 
-  --color-warning:      #F59E0B;
-  --color-warning-bg:   #FFFBEB;
-  --color-warning-border:#FDE68A;
-  --color-warning-text: #92400E;
+  --color-warning:       #D4A843;  /* Gold-adjacent warning */
+  --color-warning-bg:    rgba(212,168,67,0.08);
+  --color-warning-border:rgba(212,168,67,0.2);
+  --color-warning-text:  #D4A843;
 
-  --color-danger:       #EF4444;
-  --color-danger-bg:    #FEF2F2;
-  --color-danger-border:#FECACA;
-  --color-danger-text:  #991B1B;
+  --color-danger:        #C4604A;  /* Terracotta danger — warm not cold red */
+  --color-danger-bg:     rgba(196,96,74,0.08);
+  --color-danger-border: rgba(196,96,74,0.2);
+  --color-danger-text:   #C4604A;
 
-  --color-info:         #3B82F6;
-  --color-info-bg:      #EFF6FF;
-  --color-info-border:  #BFDBFE;
-  --color-info-text:    #1E40AF;
+  --color-info:          #7B9FBF;  /* Muted steel blue */
+  --color-info-bg:       rgba(123,159,191,0.08);
+  --color-info-border:   rgba(123,159,191,0.2);
+  --color-info-text:     #7B9FBF;
 
-  /* Operational Status */
-  --color-status-operational: #10B981;
-  --color-status-fault:       #EF4444;
-  --color-status-maintenance: #F59E0B;
-  --color-status-offline:     #94A3B8;
-  --color-status-critical:    #DC2626;
-  --color-status-pending:     #F59E0B;
-  --color-status-completed:   #10B981;
-  --color-status-cancelled:   #94A3B8;
-  --color-status-overdue:     #EF4444;
+  /* ── OPERATIONAL STATUS */
+  --color-status-operational: #6EBF8B;
+  --color-status-fault:       #C4604A;
+  --color-status-maintenance: #D4A843;
+  --color-status-offline:     #6B5B4A;
+  --color-status-critical:    #C4604A;
+  --color-status-pending:     #D4A843;
+  --color-status-completed:   #6EBF8B;
+  --color-status-cancelled:   #6B5B4A;
+  --color-status-overdue:     #C4604A;
 
   /* Spacing System — 8px base */
   --space-1:  4px;
@@ -137,54 +144,29 @@
   --page-padding: 24px;
 }
 
-/* ── DARK THEME — Luxury Command Center ───────────────────── */
+/* ── DARK THEME — same as root (warm-dark is default dark) ── */
+/* Reserved for future light/dark toggle support */
 .dark {
-  /* Backgrounds — Deep charcoal, not pure black */
-  --color-bg:           #0A0F1A;
-  --color-bg-alt:       #0F172A;
-  --color-surface:      #111827;
-  --color-surface-alt:  #1E293B;
-  --color-surface-raised: #1E293B;
-  --color-overlay:      rgba(0, 0, 0, 0.7);
-
-  /* Topbar */
-  --color-topbar:       #0F172A;
-  --color-topbar-border:#1E293B;
-
-  /* Text */
-  --color-text-1:       #F1F5F9;
-  --color-text-2:       #94A3B8;
-  --color-text-3:       #475569;
-  --color-text-disabled:#334155;
-  --color-text-inv:     #0F172A;
-
-  /* Borders — Subtle, low contrast */
-  --color-border:       #1E293B;
-  --color-border-hover: #334155;
-  --color-border-strong:#475569;
-  --color-divider:      #0F172A;
-
-  /* Semantic Status — Muted for dark */
-  --color-success-bg:   rgba(16, 185, 129, 0.1);
-  --color-success-border:rgba(16, 185, 129, 0.2);
-  --color-success-text: #34D399;
-
-  --color-warning-bg:   rgba(245, 158, 11, 0.1);
-  --color-warning-border:rgba(245, 158, 11, 0.2);
-  --color-warning-text: #FCD34D;
-
-  --color-danger-bg:    rgba(239, 68, 68, 0.1);
-  --color-danger-border:rgba(239, 68, 68, 0.2);
-  --color-danger-text:  #F87171;
-
-  --color-info-bg:      rgba(59, 130, 246, 0.1);
-  --color-info-border:  rgba(59, 130, 246, 0.2);
-  --color-info-text:    #60A5FA;
-
-  /* Shadows — More pronounced on dark */
-  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.4);
+  --color-bg:             #0F0D0B;
+  --color-bg-alt:         #151210;
+  --color-surface:        #1C1916;
+  --color-surface-alt:    #201D1A;
+  --color-surface-raised: #272320;
+  --color-overlay:        rgba(0, 0, 0, 0.85);
+  --color-topbar:         #D9C3A9;
+  --color-topbar-border:  #C4A98A;
+  --color-text-1:         #F5EDD8;
+  --color-text-2:         #A89880;
+  --color-text-3:         #6B5B4A;
+  --color-text-disabled:  #3D3530;
+  --color-text-inv:       #0D0B09;
+  --color-border:         #272320;
+  --color-border-hover:   #3D3530;
+  --color-border-strong:  #6B5B4A;
+  --color-divider:        #151210;
+  --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 8px -1px rgba(0,0,0,0.6), 0 2px 4px -2px rgba(0,0,0,0.5);
+  --shadow-lg: 0 10px 20px -3px rgba(0,0,0,0.7), 0 4px 8px -4px rgba(0,0,0,0.5);
 }
 
 /* ── BASE STYLES ──────────────────────────────────────────── */
@@ -392,7 +374,7 @@ body {
 
 /* ── PAGE HERO (dark header pattern used on 40+ pages) ──────────────── */
 .tb-hero {
-  background: linear-gradient(180deg, #0F172A 0%, #111827 100%);
+  background: linear-gradient(180deg, #0D0B09 0%, #151210 100%);
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .tb-hero-inner {
@@ -561,7 +543,7 @@ body {
   border-top: none;
 }
 .tb-table-row:last-child { border-bottom: none; }
-.tb-table-row:hover { background: rgba(180,83,9,0.04); }
+.tb-table-row:hover { background: rgba(201,168,76,0.06); }
 .tb-table-row--danger:hover { background: rgba(239,68,68,0.06); }
 
 /* ── STATUS DOT ──────────────────────────────────────────────────────── */
@@ -637,8 +619,8 @@ body {
   transition: all var(--duration-fast) ease;
 }
 .tb-action-item:hover {
-  background: rgba(180,83,9,0.06);
-  border-color: rgba(180,83,9,0.2);
+  background: rgba(201,168,76,0.06);
+  border-color: rgba(201,168,76,0.2);
   color: var(--color-brand);
 }
 
@@ -748,7 +730,7 @@ body {
 .tb-avatar--md  { width:36px;  height:36px;  font-size:0.875rem; }
 .tb-avatar--lg  { width:48px;  height:48px;  font-size:1.125rem; }
 .tb-avatar--xl  { width:64px;  height:64px;  font-size:1.5rem; }
-.tb-avatar--brand { background: linear-gradient(135deg, #B45309, #D97706); color:#fff; }
+.tb-avatar--brand { background: linear-gradient(135deg, #A8893A, #C9A84C); color:#0D0B09; }
 .tb-avatar--surface { background: var(--color-bg-alt); color: var(--color-text-2); border: 1px solid var(--color-border); }
 
 /* ── ICON BOX ────────────────────────────────────────────────────────── */
@@ -759,7 +741,7 @@ body {
 .tb-icon-box--sm  { width:28px; height:28px; font-size:0.875rem; }
 .tb-icon-box--md  { width:36px; height:36px; font-size:1rem; }
 .tb-icon-box--lg  { width:44px; height:44px; font-size:1.25rem; }
-.tb-icon-box--brand   { background:rgba(180,83,9,0.1);  border:1px solid rgba(180,83,9,0.2); }
+.tb-icon-box--brand   { background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.2); }
 .tb-icon-box--success { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); }
 .tb-icon-box--danger  { background:rgba(239,68,68,0.1);  border:1px solid rgba(239,68,68,0.2); }
 .tb-icon-box--info    { background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.2); }
@@ -823,7 +805,7 @@ body {
   background:var(--color-surface); color:var(--color-text-2);
 }
 .tb-pill:hover { border-color:var(--color-brand); color:var(--color-brand); }
-.tb-pill--active { background:rgba(180,83,9,0.08); border-color:rgba(180,83,9,0.3); color:var(--color-brand); }
+.tb-pill--active { background:rgba(201,168,76,0.1); border-color:rgba(201,168,76,0.3); color:var(--color-brand); }
 .tb-pill--primary { background:var(--color-brand); color:#fff; border-color:var(--color-brand); }
 .tb-pill--primary:hover { background:var(--color-brand-hover); }
 

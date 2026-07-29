@@ -49,7 +49,7 @@ const COLORS: Record<string, string> = {
   workspace:          "text-slate-300",
   executive:          "text-emerald-400",
   customers:          "text-blue-400",
-  commercial:         "text-amber-400",
+  commercial:         "text-yellow-500",
   operations:         "text-orange-400",
   "supply-chain":     "text-yellow-400",
   "financial":        "text-emerald-400",
@@ -106,16 +106,16 @@ function NavItem({
           "flex items-center gap-3 text-sm font-medium transition-all group relative",
           collapsed ? "px-0 py-2.5 justify-center rounded-xl" : "px-3 py-2 rounded-xl",
           isActive
-            ? "bg-slate-800/80 text-white"
-            : "text-tertiary hover:text-white hover:bg-slate-800/60",
+            ? "text-white"
+            : "text-tertiary hover:text-white",
         ].join(" ")}
       >
         {isActive && !collapsed && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-700 rounded-r-full" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#C9A84C"}} />
         )}
         <Icon className={[
           "w-4 h-4 flex-shrink-0",
-          isActive ? "text-amber-400" : color + " group-hover:text-white",
+          isActive ? "text-yellow-500" : color + " group-hover:text-white",
         ].join(" ")} />
         {!collapsed && (
           <>
@@ -125,7 +125,7 @@ function NavItem({
                 {center.badge}
               </span>
             )}
-            {isActive && <ChevronRight className="w-3 h-3 text-amber-500 flex-shrink-0" />}
+            {isActive && <ChevronRight className="w-3 h-3 text-yellow-400 flex-shrink-0" />}
           </>
         )}
         {collapsed && center.badge && isActive && (
@@ -178,10 +178,10 @@ function NavAccordion({
           href={center.href}
           className={[
             "flex items-center justify-center px-0 py-2.5 rounded-xl text-sm font-medium transition-all",
-            anyActive ? "bg-slate-800/80 text-white" : "text-tertiary hover:text-white hover:bg-slate-800/60",
+            anyActive ? "text-white" : "text-tertiary hover:text-white",
           ].join(" ")}
         >
-          <Icon className={["w-4 h-4", anyActive ? "text-amber-400" : color].join(" ")} />
+          <Icon className={["w-4 h-4", anyActive ? "text-yellow-500" : color].join(" ")} />
           {center.badge && anyActive && (
             <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-700 rounded-full" />
           )}
@@ -203,13 +203,13 @@ function NavAccordion({
         onClick={() => setOpen(o => !o)}
         className={[
           "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group relative",
-          anyActive ? "text-white" : "text-tertiary hover:text-white hover:bg-slate-800/60",
+          anyActive ? "text-white" : "text-tertiary hover:text-white",
         ].join(" ")}
       >
         {anyActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-700 rounded-r-full" />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#C9A84C"}} />
         )}
-        <Icon className={["w-4 h-4 flex-shrink-0", anyActive ? "text-amber-400" : color + " group-hover:text-white"].join(" ")} />
+        <Icon className={["w-4 h-4 flex-shrink-0", anyActive ? "text-yellow-500" : color + " group-hover:text-white"].join(" ")} />
         <span className="flex-1 text-left truncate">{center.shortLabel || center.label}</span>
         {center.badge && (
           <span className={"text-[10px] px-1.5 py-0.5 rounded-md font-bold flex-shrink-0 " + badgeClass(center.badge)}>
@@ -231,14 +231,10 @@ function NavAccordion({
               <Link
                 key={child.href}
                 href={child.href}
-                className={[
-                  "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all",
-                  childActive
-                    ? "text-amber-400 bg-amber-700/10 font-semibold"
-                    : "text-tertiary hover:text-white hover:bg-slate-800/40",
-                ].join(" ")}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all"
+                style={childActive ? {color:"#C9A84C",background:"rgba(201,168,76,0.08)",fontWeight:600} : {}}
               >
-                <span className={"w-1 h-1 rounded-full flex-shrink-0 " + (childActive ? "bg-amber-400" : "bg-slate-600")} />
+                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{background:childActive?"#C9A84C":"#475569"}} />
                 <span className="flex-1 truncate">{child.label}</span>
                 {child.badge && (
                   <span className={"text-[9px] px-1 py-0.5 rounded font-bold " + badgeClass(child.badge)}>
@@ -283,16 +279,20 @@ export function EnterpriseSidebar() {
   const centerMap = Object.fromEntries(enterpriseCenters.map(c => [c.key, c]));
 
   return (
-    <aside className={[
-      "shrink-0 flex flex-col bg-slate-950 border-r border-slate-800/60 transition-all",
-      collapsed ? "w-16" : "w-60",
-    ].join(" ")}>
+    <aside
+      className={["shrink-0 flex flex-col transition-all", collapsed ? "w-16" : "w-60"].join(" ")}
+      style={{
+        background: "var(--color-sidebar)",
+        borderRight: "1px solid rgba(201,168,76,0.08)",
+        boxShadow: "4px 0 24px rgba(0,0,0,0.4)",
+      }}
+    >
 
       {/* Header / Logo */}
       <div className="h-14 flex items-center border-b border-slate-800/60 flex-shrink-0 px-3 gap-2.5">
         <Link href="/workspace" className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-black text-sm">TB</span>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:"linear-gradient(135deg,#A8893A,#C9A84C)"}}>
+            <span style={{color:"#0D0B09"}} className="font-black text-sm">TB</span>
           </div>
           {!collapsed && (
             <div className="min-w-0">
