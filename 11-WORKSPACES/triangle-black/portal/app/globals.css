@@ -25,181 +25,148 @@
      TRIANGLE BLACK DESIGN LANGUAGE — TBDL 1.0
      "Luxury Engineering. Quiet Confidence. Operational Excellence."
 
-     Configured in: lib/platform-config.ts
-     ONE brand color. Change platform-config.ts → everything changes.
-     Never add decorative colors. Every color earns its place.
+     WARM LIGHT workspace — comfortable for 8h daily use.
+     Login pages use inline dark styles.
+     ONE brand color: Champagne Bronze #B9924C
   ════════════════════════════════════════════════════════ */
 
-  /* ── BRAND — Champagne Bronze (not yellow, not gold — bronze) ── */
-  --color-brand:        #B9924C;   /* Champagne bronze — Rolex, not warning */
-  --color-brand-hover:  #A88446;   /* Darker bronze on hover */
-  --color-brand-light:  #D4B06A;   /* Lighter champagne — highlights */
-  --color-brand-mid:    #C9A05A;   /* Mid tone */
-  --color-brand-muted:  rgba(185,146,76,0.08); /* 8% — very subtle */
-  --color-brand-border: rgba(185,146,76,0.28); /* Border tint */
+  /* ── BRAND — Champagne Bronze ────────────────────────────── */
+  --color-brand:        #B9924C;
+  --color-brand-hover:  #A88446;
+  --color-brand-light:  rgba(185,146,76,0.08);
+  --color-brand-mid:    #C9A05A;
+  --color-brand-muted:  rgba(185,146,76,0.05);
+  --color-brand-border: rgba(185,146,76,0.22);
 
-  /* ── BACKGROUNDS — Matte Espresso hierarchy ──────────────────── */
-  --color-bg:              #181614;  /* Primary — matte espresso black */
-  --color-bg-alt:          #221E1B;  /* Secondary — slightly lighter */
-  --color-surface:         #2D2723;  /* Panel background */
-  --color-surface-alt:     #332C27;  /* Elevated panel */
-  --color-surface-raised:  #3D352F;  /* Highest card elevation */
-  --color-overlay:         rgba(0,0,0,0.80);
+  /* ── BACKGROUNDS — Premium warm cream ──────────────────── */
+  --color-bg:              #FAF8F5;  /* Body — warm cream, not cold white */
+  --color-bg-alt:          #F3EFE8;  /* Alt bg — warm stone 50 */
+  --color-surface:         #FFFFFF;  /* Card — clean white */
+  --color-surface-alt:     #FAF8F5;  /* Elevated — warm cream */
+  --color-surface-raised:  #FFFFFF;  /* Highest card */
+  --color-overlay:         rgba(34,29,26,0.50);
 
-  /* ── SIDEBAR — Premium matte obsidian ────────────────────────── */
-  --color-sidebar:             #0F0D0B;  /* Obsidian black */
-  --color-sidebar-hover:       rgba(185,146,76,0.06); /* Gold tint on hover */
-  --color-sidebar-active:      rgba(185,146,76,0.10); /* Gold tint active */
-  --color-sidebar-border:      rgba(185,146,76,0.06); /* Barely visible */
-  --color-sidebar-text:        #6D5F53;  /* Warm stone — default */
-  --color-sidebar-text-active: #F3EFE8;  /* Warm ivory when active */
-  --color-sidebar-accent:      #B9924C;  /* Bronze accent */
+  /* ── SIDEBAR — Premium matte obsidian (always dark) ──────── */
+  --color-sidebar:             #0F0D0B;
+  --color-sidebar-hover:       rgba(185,146,76,0.06);
+  --color-sidebar-active:      rgba(185,146,76,0.10);
+  --color-sidebar-border:      rgba(185,146,76,0.06);
+  --color-sidebar-text:        #6D5F53;
+  --color-sidebar-text-active: #F3EFE8;
+  --color-sidebar-accent:      #B9924C;
 
-  /* ── TOPBAR — Sandy architectural ───────────────────────────── */
-  --color-topbar:        #D9C3A9;   /* Sandy warm — as requested */
-  --color-topbar-border: #C4A98A;   /* Slightly darker sand */
-  --color-topbar-text:   #221D1A;   /* Dark warm — readable on sand */
+  /* ── TOPBAR — Sandy warm header ──────────────────────────── */
+  --color-topbar:        #FFFFFF;
+  --color-topbar-border: #E8E0D4;
+  --color-topbar-text:   #221D1A;
 
-  /* ── TEXT — Warm ivory hierarchy ────────────────────────────── */
-  --color-text-1:       #F3EFE8;   /* Primary — warm ivory */
-  --color-text-2:       #B29F8B;   /* Secondary — warm stone 400 */
-  --color-text-3:       #6D5F53;   /* Tertiary — warm stone 600 */
-  --color-text-disabled:#544941;   /* Disabled — stone 700 */
-  --color-text-inv:     #181614;   /* On light/bronze backgrounds */
-  --color-text-brand:   #B9924C;   /* Bronze text */
+  /* ── TEXT — Dark warm hierarchy on light background ─────── */
+  --color-text-1:       #221D1A;  /* Primary — warm near-black */
+  --color-text-2:       #6D5F53;  /* Secondary — warm stone */
+  --color-text-3:       #B29F8B;  /* Tertiary — light stone */
+  --color-text-disabled:#D3C5B4;  /* Disabled */
+  --color-text-inv:     #F3EFE8;  /* On dark/bronze backgrounds */
+  --color-text-brand:   #B9924C;  /* Bronze text */
 
-  /* ── BORDERS — Warm architectural ───────────────────────────── */
-  --color-border:        #2D2723;   /* Default — warm panel color */
-  --color-border-hover:  #3D352F;   /* Hover — elevated */
-  --color-border-focus:  #B9924C;   /* Focus — bronze */
-  --color-border-strong: #6D5F53;   /* Strong — stone 600 */
-  --color-divider:       #221E1B;   /* Very subtle — almost invisible */
+  /* ── BORDERS — Warm sand ─────────────────────────────────── */
+  --color-border:        #E8E0D4;  /* Default — warm sand */
+  --color-border-hover:  #D3C5B4;  /* Hover — darker sand */
+  --color-border-focus:  #B9924C;  /* Focus — bronze */
+  --color-border-strong: #B29F8B;  /* Strong */
+  --color-divider:       #F3EFE8;  /* Very subtle divider */
 
-  /* ── STATUS — Muted, calm, architectural ────────────────────── */
-  /* Success — Olive, not bright green */
+  /* ── STATUS — Calm, warm, architectural ──────────────────── */
   --color-success:        #547C4D;
-  --color-success-bg:     rgba(84,124,77,0.10);
-  --color-success-border: rgba(84,124,77,0.25);
-  --color-success-text:   #7AAE72;
+  --color-success-bg:     rgba(84,124,77,0.08);
+  --color-success-border: rgba(84,124,77,0.20);
+  --color-success-text:   #3D6438;
 
-  /* Warning — Warm amber, not yellow */
   --color-warning:        #B07A2A;
-  --color-warning-bg:     rgba(176,122,42,0.10);
-  --color-warning-border: rgba(176,122,42,0.25);
-  --color-warning-text:   #CFA058;
+  --color-warning-bg:     rgba(176,122,42,0.08);
+  --color-warning-border: rgba(176,122,42,0.20);
+  --color-warning-text:   #8F5F1A;
 
-  /* Danger — Deep terracotta, not neon red */
   --color-danger:         #A84A3D;
-  --color-danger-bg:      rgba(168,74,61,0.10);
-  --color-danger-border:  rgba(168,74,61,0.25);
-  --color-danger-text:    #C87060;
+  --color-danger-bg:      rgba(168,74,61,0.08);
+  --color-danger-border:  rgba(168,74,61,0.20);
+  --color-danger-text:    #8C3428;
 
-  /* Info — Muted bronze-blue, not electric */
   --color-info:           #5B7C8C;
-  --color-info-bg:        rgba(91,124,140,0.10);
-  --color-info-border:    rgba(91,124,140,0.25);
-  --color-info-text:      #7BA0B4;
+  --color-info-bg:        rgba(91,124,140,0.08);
+  --color-info-border:    rgba(91,124,140,0.20);
+  --color-info-text:      #3D5F6D;
 
-  /* AI — Bronze, not purple. AI is part of operations. */
   --color-ai:             #8D7443;
-  --color-ai-bg:          rgba(141,116,67,0.10);
-  --color-ai-border:      rgba(141,116,67,0.25);
-  --color-ai-text:        #B9924C;
+  --color-ai-bg:          rgba(141,116,67,0.08);
+  --color-ai-border:      rgba(141,116,67,0.20);
+  --color-ai-text:        #6D5A33;
 
-  /* ── OPERATIONAL STATUS ──────────────────────────────────────── */
+  /* ── OPERATIONAL STATUS ──────────────────────────────────── */
   --color-status-operational: #547C4D;
   --color-status-fault:       #A84A3D;
   --color-status-maintenance: #B07A2A;
-  --color-status-offline:     #544941;
+  --color-status-offline:     #B29F8B;
   --color-status-critical:    #A84A3D;
   --color-status-pending:     #B07A2A;
   --color-status-completed:   #547C4D;
-  --color-status-cancelled:   #544941;
+  --color-status-cancelled:   #B29F8B;
   --color-status-overdue:     #A84A3D;
 
-  /* ── SPACING — 8px base system ──────────────────────────────── */
-  --space-1:  4px;
-  --space-2:  8px;
-  --space-3:  12px;
-  --space-4:  16px;
-  --space-5:  20px;
-  --space-6:  24px;
-  --space-8:  32px;
-  --space-10: 40px;
-  --space-12: 48px;
+  /* ── SPACING ─────────────────────────────────────────────── */
+  --space-1:  4px;  --space-2:  8px;  --space-3:  12px;
+  --space-4:  16px; --space-5:  20px; --space-6:  24px;
+  --space-8:  32px; --space-10: 40px; --space-12: 48px;
   --space-16: 64px;
 
-  /* ── BORDER RADIUS — Architectural, not bubbly ───────────────── */
-  --radius-sm:   4px;    /* Badges, tiny elements */
-  --radius-md:   6px;    /* Inputs, buttons */
-  --radius-lg:   10px;   /* Cards small */
-  --radius-xl:   14px;   /* Cards standard */
-  --radius-2xl:  18px;   /* Cards large */
-  --radius-full: 9999px; /* Pills */
+  /* ── BORDER RADIUS — Architectural ───────────────────────── */
+  --radius-sm:   4px;   --radius-md:   6px;   --radius-lg:   10px;
+  --radius-xl:   14px;  --radius-2xl:  18px;  --radius-full: 9999px;
 
-  /* ── SHADOWS — Almost invisible. Depth, not drama ────────────── */
+  /* ── SHADOWS — Soft warm, not cold ───────────────────────── */
   --shadow-none: none;
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.20);
-  --shadow-md:   0 4px 12px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.15);
-  --shadow-lg:   0 12px 32px rgba(0,0,0,0.30), 0 4px 8px rgba(0,0,0,0.20);
-  --shadow-xl:   0 20px 40px rgba(0,0,0,0.35), 0 8px 16px rgba(0,0,0,0.20);
+  --shadow-sm:   0 1px 3px rgba(34,29,26,0.06);
+  --shadow-md:   0 4px 12px rgba(34,29,26,0.08), 0 1px 3px rgba(34,29,26,0.04);
+  --shadow-lg:   0 12px 32px rgba(34,29,26,0.10), 0 4px 8px rgba(34,29,26,0.06);
+  --shadow-xl:   0 20px 40px rgba(34,29,26,0.12), 0 8px 16px rgba(34,29,26,0.06);
 
-  /* ── ANIMATION — Calm, not dramatic ─────────────────────────── */
-  --duration-fast: 100ms;
-  --duration-base: 160ms;
-  --duration-slow: 280ms;
+  /* ── ANIMATION ───────────────────────────────────────────── */
+  --duration-fast: 100ms;  --duration-base: 160ms;  --duration-slow: 280ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-enter:    cubic-bezier(0, 0, 0.2, 1);
   --ease-exit:     cubic-bezier(0.4, 0, 1, 1);
 
-  /* ── TYPOGRAPHY ──────────────────────────────────────────────── */
+  /* ── TYPOGRAPHY ──────────────────────────────────────────── */
   --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  /* ── LAYOUT ──────────────────────────────────────────────────── */
-  --sidebar-width:      240px;
-  --sidebar-collapsed:  64px;
-  --topbar-height:      56px;
-  --content-max:        1400px;
-  --page-padding:       24px;
+  /* ── LAYOUT ──────────────────────────────────────────────── */
+  --sidebar-width: 240px; --sidebar-collapsed: 64px;
+  --topbar-height: 56px;  --content-max: 1400px;
+  --page-padding: 24px;
 }
 
-/* ── DARK VARIANT — Same warm identity, deeper blacks ─────────── */
+/* ── DARK VARIANT (reserved for future toggle) ─────────────── */
 .dark {
-  --color-bg:              #0F0D0B;
-  --color-bg-alt:          #181614;
-  --color-surface:         #221E1B;
-  --color-surface-alt:     #2D2723;
-  --color-surface-raised:  #332C27;
-  --color-overlay:         rgba(0,0,0,0.90);
-  --shadow-sm:   0 1px 4px rgba(0,0,0,0.40);
-  --shadow-md:   0 4px 16px rgba(0,0,0,0.50), 0 1px 4px rgba(0,0,0,0.30);
-  --shadow-lg:   0 12px 40px rgba(0,0,0,0.60), 0 4px 12px rgba(0,0,0,0.40);
-}
-
-/* ── DARK THEME — same as root (warm-dark is default dark) ── */
-/* Reserved for future light/dark toggle support */
-.dark {
-  --color-bg:             #0F0D0B;
-  --color-bg-alt:         #151210;
-  --color-surface:        #1C1916;
-  --color-surface-alt:    #201D1A;
-  --color-surface-raised: #272320;
-  --color-overlay:        rgba(0, 0, 0, 0.85);
-  --color-topbar:         #D9C3A9;
-  --color-topbar-border:  #C4A98A;
-  --color-text-1:         #F5EDD8;
-  --color-text-2:         #A89880;
-  --color-text-3:         #6B5B4A;
-  --color-text-disabled:  #3D3530;
-  --color-text-inv:       #0D0B09;
-  --color-border:         #272320;
-  --color-border-hover:   #3D3530;
-  --color-border-strong:  #6B5B4A;
-  --color-divider:        #151210;
-  --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.5);
-  --shadow-md: 0 4px 8px -1px rgba(0,0,0,0.6), 0 2px 4px -2px rgba(0,0,0,0.5);
-  --shadow-lg: 0 10px 20px -3px rgba(0,0,0,0.7), 0 4px 8px -4px rgba(0,0,0,0.5);
+  --color-bg:              #181614;
+  --color-bg-alt:          #221E1B;
+  --color-surface:         #2D2723;
+  --color-surface-alt:     #332C27;
+  --color-surface-raised:  #3D352F;
+  --color-overlay:         rgba(0,0,0,0.80);
+  --color-topbar:          #D9C3A9;
+  --color-topbar-border:   #C4A98A;
+  --color-text-1:          #F3EFE8;
+  --color-text-2:          #B29F8B;
+  --color-text-3:          #6D5F53;
+  --color-text-disabled:   #544941;
+  --color-text-inv:        #181614;
+  --color-border:          #2D2723;
+  --color-border-hover:    #3D352F;
+  --color-border-strong:   #6D5F53;
+  --color-divider:         #221E1B;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.40);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.50);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.60);
 }
 
 /* ── BASE STYLES ──────────────────────────────────────────── */
@@ -293,7 +260,7 @@ body {
 
 /* ── SELECTION ────────────────────────────────────────────── */
 ::selection {
-  background-color: var(--color-brand-light);
+  background-color: rgba(185,146,76,0.15);
   color: var(--color-text-1);
 }
 
@@ -407,15 +374,7 @@ body {
 
 /* ── PAGE HERO (dark header pattern used on 40+ pages) ──────────────── */
 .tb-hero {
-  background:
-    linear-gradient(
-      140deg,
-      #141210 0%,
-      #1A1715 18%,
-      #211B18 38%,
-      #2A231E 72%,
-      #181513 100%
-    );
+  background: linear-gradient(140deg, #1A1715 0%, #221E1B 40%, #2A231E 100%);
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .tb-hero-inner {
@@ -432,7 +391,7 @@ body {
 .tb-hero-title {
   font-size: 2rem;
   font-weight: 900;
-  color: #F1F5F9;
+  color: #F3EFE8;
   letter-spacing: -0.02em;
   line-height: 1.1;
   margin: 0;
@@ -584,7 +543,7 @@ body {
   border-top: none;
 }
 .tb-table-row:last-child { border-bottom: none; }
-.tb-table-row:hover { background: rgba(185,146,76,0.06); }
+.tb-table-row:hover { background: #F7F3EC; }
 .tb-table-row--danger:hover { background: rgba(239,68,68,0.06); }
 
 /* ── STATUS DOT ──────────────────────────────────────────────────────── */
