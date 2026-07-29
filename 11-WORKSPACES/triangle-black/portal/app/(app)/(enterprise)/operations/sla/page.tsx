@@ -147,7 +147,7 @@ export default function SLADashboardPage() {
                   </div>
                   {woSLA.map((row,i)=>{
                     const pc = URGENCY_COLORS[row.priority]||"#94A3B8";
-                    const target = SLA_RESPONSE[row.priority]||24;
+                    const target = (sla?.sla_targets || {critical:8,high:24,medium:48,low:72})[row.priority]||24;
                     const isBreached = Number(row.avg_response_hours||0) > target;
                     return (
                       <div key={i} className="tb-table-row" style={{gridTemplateColumns:"100px 80px 80px 100px 120px"}}>
