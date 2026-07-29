@@ -107,12 +107,12 @@ export default function ProcurementHub() {
           </p>
           <div className="tb-grid-4 mt-6">
             {kpis.map((k, i) => (
-              <div key={i} className="tb-hero-kpi">
+              <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{ color: k.color }}>
                   {k.value}
                 </div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

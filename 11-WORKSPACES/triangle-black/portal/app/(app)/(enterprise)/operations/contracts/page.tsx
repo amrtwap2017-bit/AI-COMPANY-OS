@@ -58,10 +58,10 @@ export default function ContractsPage() {
               { label: "Pending Sign", value: pendingCount, color: "#FBBF24" },
               { label: "Total Value", value: fmtEGP(contracts.reduce((s, c) => s + Number(c.total_value || 0), 0)), color: "#A78BFA" },
             ].map((k, i) => (
-              <div key={i} className="tb-hero-kpi">
+              <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{ color: k.color, fontSize: "0.95rem" }}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

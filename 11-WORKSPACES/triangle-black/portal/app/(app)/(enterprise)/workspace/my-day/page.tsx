@@ -63,11 +63,11 @@ export default function MyDayPage() {
               {label:"SLA Breaches",value:slaBreaches.length,color:slaBreaches.length>0?"#F87171":"#34D399",icon:"⏱"},
               {label:"Open WOs",value:ops.open_count||0,color:"#60A5FA",icon:"🔧"},
             ].map((k,i)=>(
-              <div key={i} className="tb-hero-kpi">
+  <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="flex items-center gap-2 mb-1"><span>{k.icon}</span></div>
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

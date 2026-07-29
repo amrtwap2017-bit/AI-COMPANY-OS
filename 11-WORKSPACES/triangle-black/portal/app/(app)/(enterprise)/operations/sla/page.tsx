@@ -71,10 +71,10 @@ export default function SLADashboardPage() {
               {label:"Active Breaches",value:breachCount,color:breachCount>0?"#F87171":"#34D399"},
               {label:"Avg Resolution",value:overall.avg_resolution_hours?`${Number(overall.avg_resolution_hours).toFixed(1)}h`:"—",color:"#60A5FA"},
             ].map((k,i)=>(
-              <div key={i} className="tb-hero-kpi">
+              <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

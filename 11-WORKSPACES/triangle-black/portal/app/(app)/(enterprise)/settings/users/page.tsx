@@ -65,7 +65,7 @@ export default function UserManagementPage() {
               { label: "Managers", value: users.filter((u) => u.role === "manager").length, color: "#FBBF24" },
               { label: "Active", value: users.filter((u) => u.is_active).length, color: "#34D399" },
             ].map((k, i) => (
-              <div key={i} className="tb-hero-kpi">
+              <div key={i} className="tb-hero-kpi cursor-default">
                 <div className="tb-hero-kpi-value" style={{ color: k.color }}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
               </div>
