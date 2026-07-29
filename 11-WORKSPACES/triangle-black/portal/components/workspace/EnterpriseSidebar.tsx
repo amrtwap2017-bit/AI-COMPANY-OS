@@ -46,39 +46,39 @@ const ICONS: Record<string, any> = {
 
 // ── Color map ─────────────────────────────────────────────────────
 const COLORS: Record<string, string> = {
-  workspace:          "text-slate-300",
-  executive:          "text-emerald-400",
-  customers:          "text-blue-400",
+  workspace:          "text-stone-300",
+  executive:          "text-stone-300",
+  customers:          "text-stone-400",
   commercial:         "text-yellow-500",
-  operations:         "text-orange-400",
-  "supply-chain":     "text-yellow-400",
-  "financial":        "text-emerald-400",
-  "assets":           "text-cyan-400",
-  "portals":          "text-indigo-400",
-  "reports":          "text-blue-400",
-  engineering:        "text-purple-400",
-  maintenance:        "text-red-400",
-  ai:                 "text-amber-300",
-  analytics:          "text-cyan-400",
-  "projects-center":  "text-indigo-400",
-  administration:     "text-rose-400",
-  approvals:          "text-emerald-400",
-  agents:             "text-amber-300",
-  settings:           "text-violet-400",
+  operations:         "text-stone-300",
+  "supply-chain":     "text-stone-300",
+  "financial":        "text-stone-300",
+  "assets":           "text-stone-400",
+  "portals":          "text-stone-400",
+  "reports":          "text-stone-400",
+  engineering:        "text-stone-300",
+  maintenance:        "text-stone-400",
+  ai:                 "text-stone-300",
+  analytics:          "text-stone-400",
+  "projects-center":  "text-stone-400",
+  administration:     "text-stone-400",
+  approvals:          "text-stone-300",
+  agents:             "text-stone-300",
+  settings:           "text-stone-400",
 };
 
 // ── Badge styles ──────────────────────────────────────────────────
 function badgeClass(badge: string): string {
-  if (badge === "AI")    return "bg-amber-700/40 text-amber-300";
-  if (badge === "New")   return "bg-blue-700/40 text-blue-300";
-  if (badge === "Live")  return "bg-emerald-700/40 text-emerald-300";
-  if (badge === "Inbox") return "bg-purple-700/40 text-purple-300";
-  if (badge === "OPS")   return "bg-orange-700/40 text-orange-300";
-  if (badge === "CRM")   return "bg-amber-700/40 text-amber-300";
-  if (badge === "SCM")   return "bg-yellow-700/40 text-yellow-300";
-  if (badge === "MNT")   return "bg-red-700/40 text-red-300";
-  if (badge === "ENG")   return "bg-purple-700/40 text-purple-300";
-  return "bg-slate-700 text-slate-300";
+  if (badge === "AI")    return "bg-stone-700/40 text-stone-300";
+  if (badge === "New")   return "bg-stone-700/40 text-stone-200";
+  if (badge === "Live")  return "bg-stone-700/30 text-stone-200";
+  if (badge === "Inbox") return "bg-stone-700/40 text-stone-300";
+  if (badge === "OPS")   return "bg-stone-800/60 text-stone-300";
+  if (badge === "CRM")   return "bg-stone-800/60 text-stone-300";
+  if (badge === "SCM")   return "bg-stone-800/60 text-stone-300";
+  if (badge === "MNT")   return "bg-stone-800/60 text-stone-300";
+  if (badge === "ENG")   return "bg-stone-800/60 text-stone-300";
+  return "bg-stone-800/50 text-stone-400";
 }
 
 // ── Single nav item (no children) ────────────────────────────────
@@ -111,7 +111,7 @@ function NavItem({
         ].join(" ")}
       >
         {isActive && !collapsed && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#C9A84C"}} />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#B9924C"}} />
         )}
         <Icon className={[
           "w-4 h-4 flex-shrink-0",
@@ -207,7 +207,7 @@ function NavAccordion({
         ].join(" ")}
       >
         {anyActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#C9A84C"}} />
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#B9924C"}} />
         )}
         <Icon className={["w-4 h-4 flex-shrink-0", anyActive ? "text-yellow-500" : color + " group-hover:text-white"].join(" ")} />
         <span className="flex-1 text-left truncate">{center.shortLabel || center.label}</span>

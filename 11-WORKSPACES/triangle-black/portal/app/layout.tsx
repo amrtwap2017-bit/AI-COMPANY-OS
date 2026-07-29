@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-// Inter — Premium sans-serif, zero layout shift
-const inter = Inter({
+// Plus Jakarta Sans — Luxury engineering typography
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "900"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const viewport = {
@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${jakarta.variable} font-sans antialiased`}>
         <Providers>
           {children}
         </Providers>
