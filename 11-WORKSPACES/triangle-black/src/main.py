@@ -5310,3 +5310,204 @@ def dispatch_board(site_id: str = None, priority: str = None, technician_id: str
             }
         except Exception as e:
             db.rollback(); return {"board":{},"counts":{},"technicians":[]}
+
+# ── SPRINT 257: FINANCIAL P&L DASHBOARD ──────────────────────────────────────
+
+@app.get("/api/v1/financial/dashboard", tags=["financial"])
+def financial_dashboard():
+    """Complete financial KPIs for P&L dashboard"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    from datetime import datetime
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        def safe(q, p=None):
+            try:
+                r = db.execute(text(q), p or {}).fetchone()
+                return dict(r._mapping) if r else {}
+            except: db.rollback(); return {}
+        def safe_list(q, p=None):
+            try:
+                rows = db.execute(text(q), p or {}).fetchall()
+                return [dict(r._mapping) for r in rows]
+            except: db.rollback(); return []
+
+        # Revenue KPIs
+        revenue = safe("""
+            SELECT
+              COALESCE(sum(total_amount),0) as total_invoiced,
+              COALESCE(sum(amount_paid),0) as total_collected,
+              COALESCE(sum(balance_due),0) as total_outstanding,
+              count(*) as invoice_count,
+              count(*) FILTER (WHERE payment_status='paid') as paid_count,
+              count(*) FILTER (WHERE payment_status='unpaid') as unpaid_count,
+              COALESCE(avg(CASE WHEN total_amount > 0 THEN amount_paid/total_amount*100 ELSE 0 END),0) as collection_rate_pct
+            FROM supplier_invoices
+        """)
+
+        # Cost KPIs (from SOWs)
+        cost = safe("""
+            SELECT
+              COALESCE(sum(total_cost),0) as total_sow_value,
+              COALESCE(sum(labor_cost),0) as total_labor,
+              COALESCE(sum(materials_cost),0) as total_materials,
+              COALESCE(sum(total_cost - labor_cost - materials_cost),0) as total_overhead_profit,
+              count(*) as sow_count
+            FROM scope_of_work
+        """)
+
+        # PO spend
+        po_spend = safe("""
+            SELECT
+              COALESCE(sum(total_amount),0) as total_po_value,
+              count(*) as po_count,
+              count(*) FILTER (WHERE status='paid') as paid_pos
+            FROM purchase_orders_v2
+        """)
+
+        # Project P&L
+        projects_pl = safe_list("""
+            SELECT p.id, p.title, p.status, p.budget,
+                   p.completion_pct,
+                   COALESCE(p.budget * p.completion_pct / 100, 0) as earned_value,
+                   COALESCE((SELECT sum(si.total_amount) FROM supplier_invoices si WHERE si.po_id IN
+                     (SELECT id FROM purchase_orders_v2 WHERE sow_id IN
+                       (SELECT id FROM scope_of_work WHERE contract_id = p.id))), 0) as actual_cost
+            FROM projects p
+            ORDER BY p.budget DESC
+        """)
+
+        # Aged receivables
+        aged = safe_list("""
+            SELECT
+              CASE
+                WHEN due_date::date >= CURRENT_DATE THEN 'Current'
+                WHEN CURRENT_DATE - due_date::date <= 30 THEN '1-30 Days'
+                WHEN CURRENT_DATE - due_date::date <= 60 THEN '31-60 Days'
+                WHEN CURRENT_DATE - due_date::date <= 90 THEN '61-90 Days'
+                ELSE '90+ Days'
+              END as bucket,
+              count(*) as count,
+              COALESCE(sum(balance_due),0) as amount
+            FROM supplier_invoices
+            WHERE payment_status != 'paid' AND balance_due > 0
+            GROUP BY bucket
+            ORDER BY CASE bucket WHEN 'Current' THEN 1 WHEN '1-30 Days' THEN 2
+                     WHEN '31-60 Days' THEN 3 WHEN '61-90 Days' THEN 4 ELSE 5 END
+        """)
+
+        # Monthly revenue trend (last 6 months)
+        monthly = safe_list("""
+            SELECT
+              TO_CHAR(DATE_TRUNC('month', created_at), 'Mon YYYY') as month,
+              DATE_TRUNC('month', created_at) as month_date,
+              COALESCE(sum(total_amount),0) as invoiced,
+              COALESCE(sum(amount_paid),0) as collected,
+              COALESCE(sum(balance_due),0) as outstanding
+            FROM supplier_invoices
+            WHERE created_at > NOW() - INTERVAL '6 months'
+            GROUP BY DATE_TRUNC('month', created_at), TO_CHAR(DATE_TRUNC('month', created_at), 'Mon YYYY')
+            ORDER BY month_date
+        """)
+
+        # Vendor spend by category
+        vendor_spend = safe_list("""
+            SELECT v.category,
+                   count(DISTINCT v.id) as vendor_count,
+                   count(DISTINCT po.id) as po_count,
+                   COALESCE(sum(po.total_amount),0) as total_spend
+            FROM vendors v
+            LEFT JOIN purchase_orders_v2 po ON po.vendor_id=v.id
+            WHERE v.category IS NOT NULL
+            GROUP BY v.category
+            ORDER BY total_spend DESC
+        """)
+
+        # Net position
+        net_profit_potential = float(revenue.get("total_invoiced") or 0) - float(po_spend.get("total_po_value") or 0)
+        collection_rate = float(revenue.get("collection_rate_pct") or 0)
+
+        return {
+            "generated_at": datetime.utcnow().isoformat(),
+            "revenue": revenue,
+            "costs": cost,
+            "po_spend": po_spend,
+            "projects_pl": projects_pl,
+            "aged_receivables": aged,
+            "monthly_trend": monthly,
+            "vendor_spend": vendor_spend,
+            "summary": {
+                "net_profit_potential": net_profit_potential,
+                "collection_rate_pct": round(collection_rate, 1),
+                "total_sow_pipeline": float(cost.get("total_sow_value") or 0),
+                "cash_at_risk": float(revenue.get("total_outstanding") or 0),
+            }
+        }
+
+@app.get("/api/v1/financial/project-pl", tags=["financial"])
+def project_pl():
+    """P&L breakdown per project"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT p.id, p.title, p.status, p.start_date, p.end_date,
+                       p.budget, p.completion_pct,
+                       COALESCE(p.budget * p.completion_pct / 100, 0) as earned_value,
+                       t.name as manager_name
+                FROM projects p
+                LEFT JOIN technicians t ON t.id=p.manager_id::varchar
+                ORDER BY p.budget DESC
+            """)).fetchall()
+            result = []
+            for r in rows:
+                d = dict(r._mapping)
+                budget = float(d.get("budget") or 0)
+                completion = float(d.get("completion_pct") or 0)
+                earned = budget * completion / 100
+                d["earned_value"] = earned
+                d["remaining_budget"] = budget - earned
+                d["profit_margin_pct"] = round((earned / budget * 100) if budget > 0 else 0, 1)
+                result.append(d)
+            return result
+        except Exception as e:
+            db.rollback(); return []
+
+@app.get("/api/v1/financial/cash-flow", tags=["financial"])
+def cash_flow():
+    """Monthly cash flow — inflows vs outflows"""
+    import os
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            inflows = db.execute(text("""
+                SELECT TO_CHAR(DATE_TRUNC('month',payment_date),'Mon YYYY') as month,
+                       DATE_TRUNC('month',payment_date) as month_dt,
+                       COALESCE(sum(amount),0) as amount
+                FROM invoice_payments
+                WHERE payment_date > NOW()-INTERVAL '6 months'
+                GROUP BY DATE_TRUNC('month',payment_date), TO_CHAR(DATE_TRUNC('month',payment_date),'Mon YYYY')
+                ORDER BY month_dt
+            """)).fetchall()
+            outflows = db.execute(text("""
+                SELECT TO_CHAR(DATE_TRUNC('month',created_at),'Mon YYYY') as month,
+                       DATE_TRUNC('month',created_at) as month_dt,
+                       COALESCE(sum(total_amount),0) as amount
+                FROM purchase_orders_v2
+                WHERE created_at > NOW()-INTERVAL '6 months'
+                AND status IN ('approved','sent','received','paid')
+                GROUP BY DATE_TRUNC('month',created_at), TO_CHAR(DATE_TRUNC('month',created_at),'Mon YYYY')
+                ORDER BY month_dt
+            """)).fetchall()
+            return {
+                "inflows": [dict(r._mapping) for r in inflows],
+                "outflows": [dict(r._mapping) for r in outflows]
+            }
+        except Exception as e:
+            db.rollback(); return {"inflows":[],"outflows":[]}
