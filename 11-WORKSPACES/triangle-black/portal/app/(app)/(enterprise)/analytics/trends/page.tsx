@@ -11,13 +11,26 @@ import {
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const DarkTooltip = ({ active, payload, label }: any) => {
+const WarmTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"#332C27",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-      {label && <div style={{fontSize:"0.75rem",color:"#6D5F53",marginBottom:4}}>{label}</div>}
+    <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:10,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.08)"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600}}>{label}</div>}
       {payload.map((p: any, i: number) => (
-        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#221D1A"}}>
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"var(--color-text-1)"}}>
+          {p.name}: {p.value}{p.unit||""}
+        </div>
+      ))}
+    </div>
+  );
+};
+const _OLD_DARK = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{background:"var(--color-surface)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4}}>{label}</div>}
+      {payload.map((p: any, i: number) => (
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"var(--color-text-1)"}}>
           {p.name}: {p.value}
         </div>
       ))}
@@ -151,8 +164,8 @@ export default function AnalyticsTrends() {
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false}/>
                 <XAxis dataKey="month" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
-                <Tooltip content={<DarkTooltip/>}/>
-                <Legend formatter={(v)=><span style={{color:"#6D5F53",fontSize:"0.75rem"}}>{v}</span>}/>
+                <Tooltip content={<WarmTooltip/>}/>
+                <Legend formatter={(v)=><span style={{color:"var(--color-text-3)",fontSize:"0.75rem"}}>{v}</span>}/>
                 <Area type="monotone" dataKey="total"     name="Total WOs"     stroke="#5B7C8C" fill="url(#colorTotal)"     strokeWidth={2}/>
                 <Area type="monotone" dataKey="completed" name="Completed"      stroke="#547C4D" fill="url(#colorCompleted)" strokeWidth={2}/>
                 <Line type="monotone" dataKey="critical"  name="Critical"       stroke="#A84A3D" strokeWidth={2} dot={{r:3,fill:"#A84A3D"}}/>
@@ -184,7 +197,7 @@ export default function AnalyticsTrends() {
                   <XAxis dataKey="month" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                   <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}
                     tickFormatter={v=>v>=1000?`${Math.round(v/1000)}k`:v}/>
-                  <Tooltip content={<DarkTooltip/>}/>
+                  <Tooltip content={<WarmTooltip/>}/>
                   <Bar dataKey="paid"    name="Paid"    fill="#547C4D" radius={[4,4,0,0]} stackId="a"/>
                   <Bar dataKey="pending" name="Pending" fill="#B07A2A" radius={[4,4,0,0]} stackId="a"/>
                 </BarChart>
@@ -208,7 +221,7 @@ export default function AnalyticsTrends() {
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} horizontal={false}/>
                 <XAxis type="number" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis type="category" dataKey="stage" tick={AXIS_STYLE} axisLine={false} tickLine={false} width={80}/>
-                <Tooltip content={<DarkTooltip/>}/>
+                <Tooltip content={<WarmTooltip/>}/>
                 <Bar dataKey="count" name="Leads" radius={[0,6,6,0]}>
                   {leadStatusData.map((e,i)=><Cell key={i} fill={e.fill}/>)}
                 </Bar>

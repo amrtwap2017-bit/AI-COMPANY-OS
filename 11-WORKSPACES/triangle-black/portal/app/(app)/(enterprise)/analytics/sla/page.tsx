@@ -11,13 +11,26 @@ import {
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const DarkTooltip = ({ active, payload, label }: any) => {
+const WarmTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"#332C27",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-      {label && <div style={{fontSize:"0.75rem",color:"#6D5F53",marginBottom:4}}>{label}</div>}
+    <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:10,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.08)"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600}}>{label}</div>}
       {payload.map((p: any, i: number) => (
-        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#221D1A"}}>
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"var(--color-text-1)"}}>
+          {p.name}: {p.value}{p.unit||""}
+        </div>
+      ))}
+    </div>
+  );
+};
+const _OLD_DARK = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{background:"var(--color-surface)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4}}>{label}</div>}
+      {payload.map((p: any, i: number) => (
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"var(--color-text-1)"}}>
           {p.name}: {p.value}{p.unit||""}
         </div>
       ))}
@@ -51,7 +64,7 @@ export default function AnalyticsSLA() {
       total:group.length, completed:completed.length,
       breached:breached.length, compliance,
       target:slaTargets[priority],
-      color:priority==="critical"?"#A84A3D":priority==="high"?"#B07A2A":priority==="medium"?"#B07A2A":"#6D5F53",
+      color:priority==="critical"?"#A84A3D":priority==="high"?"#B07A2A":priority==="medium"?"#B07A2A":"var(--color-text-3)",
     };
   });
 
@@ -116,7 +129,7 @@ export default function AnalyticsSLA() {
                 <XAxis dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis domain={[0,100]} tick={AXIS_STYLE} axisLine={false} tickLine={false}
                   tickFormatter={v=>`${v}%`}/>
-                <Tooltip content={<DarkTooltip/>}/>
+                <Tooltip content={<WarmTooltip/>}/>
                 <ReferenceLine y={85} stroke="#B9924C" strokeDasharray="4 4" label={{value:"Target 85%",fill:"#B9924C",fontSize:10}}/>
                 <Bar dataKey="compliance" name="Compliance" radius={[6,6,0,0]} unit="%">
                   {complianceChartData.map((e,i)=><Cell key={i} fill={e.color}/>)}
@@ -136,7 +149,7 @@ export default function AnalyticsSLA() {
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false}/>
                 <XAxis dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
-                <Tooltip content={<DarkTooltip/>}/>
+                <Tooltip content={<WarmTooltip/>}/>
                 <Bar dataKey="completed" name="Completed" fill="#547C4D" radius={[4,4,0,0]} stackId="a"/>
                 <Bar dataKey="breached"  name="Breached"  fill="#A84A3D" radius={[4,4,0,0]} stackId="a"/>
               </BarChart>
@@ -183,7 +196,7 @@ export default function AnalyticsSLA() {
               </div>
               {breachedWOs.map((w,i)=>{
                 const daysOver = Math.floor((now.getTime()-new Date(w.due_date).getTime())/86400000);
-                const pc = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[w.priority]||"#6D5F53";
+                const pc = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"var(--color-text-3)"}[w.priority]||"var(--color-text-3)";
                 return (
                   <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
                     className="tb-table-row" style={{gridTemplateColumns:"1fr 90px 120px 110px"}}>

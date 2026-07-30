@@ -12,13 +12,26 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 // Custom tooltip for dark theme
-const DarkTooltip = ({ active, payload, label }: any) => {
+const WarmTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"#332C27",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-      {label && <div style={{fontSize:"0.75rem",color:"#6D5F53",marginBottom:4}}>{label}</div>}
+    <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:10,padding:"10px 14px",boxShadow:"0 8px 24px rgba(0,0,0,0.08)"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600}}>{label}</div>}
       {payload.map((p: any, i: number) => (
-        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#221D1A"}}>
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"var(--color-text-1)"}}>
+          {p.name}: {p.value}{p.unit||""}
+        </div>
+      ))}
+    </div>
+  );
+};
+const _OLD_DARK = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{background:"var(--color-surface)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4}}>{label}</div>}
+      {payload.map((p: any, i: number) => (
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"var(--color-text-1)"}}>
           {p.name}: {typeof p.value === "number" ? p.value.toLocaleString() : p.value}
         </div>
       ))}
@@ -60,7 +73,7 @@ export default function AnalyticsScorecards() {
     {name:"Open",       value:wos.filter(w=>w.status==="open").length,        fill:"#5B7C8C"},
     {name:"In Progress",value:wos.filter(w=>w.status==="in_progress").length,  fill:"#B07A2A"},
     {name:"Completed",  value:wos.filter(w=>w.status==="completed").length,    fill:"#547C4D"},
-    {name:"Cancelled",  value:wos.filter(w=>w.status==="cancelled").length,    fill:"#6D5F53"},
+    {name:"Cancelled",  value:wos.filter(w=>w.status==="cancelled").length,    fill:"var(--color-text-3)"},
   ];
 
   // WO by priority - bar chart
@@ -68,7 +81,7 @@ export default function AnalyticsScorecards() {
     {name:"Critical",value:wos.filter(w=>w.priority==="critical").length, fill:"#A84A3D"},
     {name:"High",    value:wos.filter(w=>w.priority==="high").length,     fill:"#B07A2A"},
     {name:"Medium",  value:wos.filter(w=>w.priority==="medium").length,   fill:"#B07A2A"},
-    {name:"Low",     value:wos.filter(w=>w.priority==="low").length,      fill:"#6D5F53"},
+    {name:"Low",     value:wos.filter(w=>w.priority==="low").length,      fill:"var(--color-text-3)"},
   ];
 
   // Invoice status - pie chart
@@ -76,7 +89,7 @@ export default function AnalyticsScorecards() {
     {name:"Paid",      value:inv.filter(i=>i.status==="paid").length,      fill:"#547C4D"},
     {name:"Pending",   value:inv.filter(i=>i.status==="pending").length,   fill:"#B07A2A"},
     {name:"Overdue",   value:inv.filter(i=>i.status==="overdue").length,   fill:"#A84A3D"},
-    {name:"Cancelled", value:inv.filter(i=>i.status==="cancelled").length, fill:"#6D5F53"},
+    {name:"Cancelled", value:inv.filter(i=>i.status==="cancelled").length, fill:"var(--color-text-3)"},
   ].filter(d=>d.value>0);
 
   // Asset by category - bar chart
@@ -153,8 +166,8 @@ export default function AnalyticsScorecards() {
             <ResponsiveContainer width="100%" height={280}>
               <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={kpiData}>
                 <RadialBar minAngle={15} label={{position:"insideStart",fill:"#fff",fontSize:10}} background clockWise dataKey="value" max={100}/>
-                <Legend iconSize={10} formatter={(value)=><span style={{color:"#6D5F53",fontSize:"0.75rem"}}>{value}</span>}/>
-                <Tooltip content={<DarkTooltip/>}/>
+                <Legend iconSize={10} formatter={(value)=><span style={{color:"var(--color-text-3)",fontSize:"0.75rem"}}>{value}</span>}/>
+                <Tooltip content={<WarmTooltip/>}/>
               </RadialBarChart>
             </ResponsiveContainer>
           </div>
@@ -170,7 +183,7 @@ export default function AnalyticsScorecards() {
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false}/>
                 <XAxis dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
-                <Tooltip content={<DarkTooltip/>}/>
+                <Tooltip content={<WarmTooltip/>}/>
                 <Bar dataKey="value" radius={[6,6,0,0]}>
                   {woStatusData.map((entry,i)=><Cell key={i} fill={entry.fill}/>)}
                 </Bar>
@@ -193,7 +206,7 @@ export default function AnalyticsScorecards() {
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} horizontal={false}/>
                 <XAxis type="number" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis type="category" dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false} width={70}/>
-                <Tooltip content={<DarkTooltip/>}/>
+                <Tooltip content={<WarmTooltip/>}/>
                 <Bar dataKey="value" radius={[0,6,6,0]}>
                   {woPriorityData.map((entry,i)=><Cell key={i} fill={entry.fill}/>)}
                 </Bar>
@@ -213,7 +226,7 @@ export default function AnalyticsScorecards() {
                   <Pie data={invoiceData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value">
                     {invoiceData.map((entry,i)=><Cell key={i} fill={entry.fill}/>)}
                   </Pie>
-                  <Tooltip content={<DarkTooltip/>}/>
+                  <Tooltip content={<WarmTooltip/>}/>
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-3">
@@ -242,7 +255,7 @@ export default function AnalyticsScorecards() {
               <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false}/>
               <XAxis dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
               <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
-              <Tooltip content={<DarkTooltip/>}/>
+              <Tooltip content={<WarmTooltip/>}/>
               <Bar dataKey="value" fill="#B07A2A" radius={[6,6,0,0]}/>
             </BarChart>
           </ResponsiveContainer>
