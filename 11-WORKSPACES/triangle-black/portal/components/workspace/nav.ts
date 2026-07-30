@@ -31,8 +31,9 @@ export const enterpriseCenters: NavCenter[] = [
     href: "/workspace",
     badge: "Live",
     children: [
-      { label: "Workspace Hub",  href: "/workspace",         icon: "🏠", description: "Platform overview" },
-      { label: "My Day",         href: "/workspace/my-day",  icon: "☀️",  description: "Your daily command center" },
+      { label: "Workspace Hub",  href: "/workspace",            icon: "🏠", description: "Platform overview" },
+      { label: "My Day",         href: "/workspace/my-day",     icon: "☀️", description: "Your daily command center" },
+      { label: "All Modules",    href: "/workspace/all-modules",icon: "🧭", description: "Complete sitemap" },
     ],
   },
 
