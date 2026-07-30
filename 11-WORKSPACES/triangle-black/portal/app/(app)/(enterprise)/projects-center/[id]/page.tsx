@@ -40,14 +40,14 @@ export default function ProjectDetailPage() {
     </div>
   );
 
-  const sc  = STATUS_COLOR[proj.status] || "#94A3B8";
+  const sc  = STATUS_COLOR[proj.status] || "#6D5F53";
   const wos = proj.work_orders || [];
   const completedWOs = wos.filter(w => w.status === "completed").length;
   const progress = wos.length > 0 ? Math.round((completedWOs / wos.length) * 100) : Number(proj.progress || 0);
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A14 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A14 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -65,7 +65,7 @@ export default function ProjectDetailPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Progress",   value:`${progress}%`,                          color:progress>=80?"#547C4D":"#B07A2A" },
-              { label:"Budget",     value:fmtEGP(proj.budget||proj.total_value||0), color:"#F1F5F9" },
+              { label:"Budget",     value:fmtEGP(proj.budget||proj.total_value||0), color:"#221D1A" },
               { label:"Work Orders",value:wos.length,                              color:"#5B7C8C" },
               { label:"End Date",   value:fmtDate(proj.end_date),                  color:"#8D7443" },
             ].map((k, i) => (
@@ -131,8 +131,8 @@ export default function ProjectDetailPage() {
                 </div>
                 <div className="space-y-2 mt-3">
                   {wos.map((wo, i) => {
-                    const pc = { critical:"#A84A3D", high:"#FB923C", medium:"#B07A2A", low:"#94A3B8" }[wo.priority] || "#94A3B8";
-                    const sc2 = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" }[wo.status] || "#94A3B8";
+                    const pc = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" }[wo.priority] || "#6D5F53";
+                    const sc2 = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" }[wo.status] || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/operations/work-orders/${wo.id}`)}

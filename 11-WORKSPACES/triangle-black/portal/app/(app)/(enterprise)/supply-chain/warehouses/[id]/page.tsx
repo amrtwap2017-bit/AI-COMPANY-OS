@@ -42,7 +42,7 @@ export default function WarehouseDetailPage() {
             <button onClick={()=>router.push("/supply-chain/warehouses")} className="tb-btn-secondary">← Back</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Stock Items",value:whStocks.length,color:"#34D399"},{label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"#F87171":"#34D399"},{label:"Total Value",value:fmtEGP(totalValue),color:"#FBBF24"},{label:"Status",value:wh?.status||"Active",color:"#60A5FA"}].map((k,i)=>(
+            {[{label:"Stock Items",value:whStocks.length,color:"#547C4D"},{label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"#A84A3D":"#547C4D"},{label:"Total Value",value:fmtEGP(totalValue),color:"#B07A2A"},{label:"Status",value:wh?.status||"Active",color:"#5B7C8C"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -50,7 +50,7 @@ export default function WarehouseDetailPage() {
       </div>
       <div className="tb-canvas">
         {lowStock.length>0&&(
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold text-red-400">{lowStock.length} items below minimum in this warehouse</span><button onClick={()=>router.push("/supply-chain/purchase-requests")} className="tb-section-link ml-auto">Create PR →</button></div>
           </div>
         )}
@@ -75,7 +75,7 @@ export default function WarehouseDetailPage() {
                   <button key={i} onClick={()=>router.push("/supply-chain/inventory/"+(s.item_id||s.id))} className="tb-action-item w-full justify-between">
                     <div className="flex items-center gap-2 min-w-0"><span>📦</span><span className="text-sm text-secondary truncate">{item?.name||s.item_id?.slice(0,16)||"—"}</span></div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-sm font-bold" style={{color:isLow?"#F87171":"#34D399"}}>{qty}</span>
+                      <span className="text-sm font-bold" style={{color:isLow?"#A84A3D":"#547C4D"}}>{qty}</span>
                       {isLow&&<span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem"}}>Low</span>}
                     </div>
                   </button>

@@ -7,8 +7,8 @@ import { useRouter, useParams } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
-const WO_STATUS_COLOR = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"#94A3B8" };
+const PRIORITY_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" };
+const WO_STATUS_COLOR = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D", cancelled:"#6D5F53" };
 
 export default function TechnicianDetailPage() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function TechnicianDetailPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div className="flex items-center gap-4">
@@ -65,10 +65,10 @@ export default function TechnicianDetailPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Total WOs",       value:stats.total_wos||0,    color:"#F1F5F9" },
-              { label:"Completed",       value:stats.completed||0,    color:"#34D399" },
-              { label:"Active",          value:openWOs.length,        color:openWOs.length>0?"#FBBF24":"#34D399" },
-              { label:"Completion Rate", value:`${compRate}%`,        color:compRate>=80?"#34D399":"#FBBF24" },
+              { label:"Total WOs",       value:stats.total_wos||0,    color:"#221D1A" },
+              { label:"Completed",       value:stats.completed||0,    color:"#547C4D" },
+              { label:"Active",          value:openWOs.length,        color:openWOs.length>0?"#B07A2A":"#547C4D" },
+              { label:"Completion Rate", value:`${compRate}%`,        color:compRate>=80?"#547C4D":"#B07A2A" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -117,8 +117,8 @@ export default function TechnicianDetailPage() {
                     ))}
                   </div>
                   {wos.map((wo, i) => {
-                    const pc  = PRIORITY_COLOR[wo.priority] || "#94A3B8";
-                    const wsc = WO_STATUS_COLOR[wo.status]  || "#94A3B8";
+                    const pc  = PRIORITY_COLOR[wo.priority] || "#6D5F53";
+                    const wsc = WO_STATUS_COLOR[wo.status]  || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
@@ -147,10 +147,10 @@ export default function TechnicianDetailPage() {
             <div className="tb-section">
               <div className="tb-section-title">Performance</div>
               <div className="text-center py-3">
-                <div className="text-5xl font-black mb-1" style={{color:compRate>=80?"#34D399":"#FBBF24"}}>{compRate}%</div>
+                <div className="text-5xl font-black mb-1" style={{color:compRate>=80?"#547C4D":"#B07A2A"}}>{compRate}%</div>
                 <div className="text-xs text-tertiary">completion rate</div>
                 <div className="tb-progress tb-progress--md mt-3">
-                  <div className="tb-progress-bar" style={{background:compRate>=80?"#34D399":"#FBBF24",width:`${compRate}%`}}/>
+                  <div className="tb-progress-bar" style={{background:compRate>=80?"#547C4D":"#B07A2A",width:`${compRate}%`}}/>
                 </div>
               </div>
               <div className="tb-grid-3 mt-3 text-center">
@@ -163,7 +163,7 @@ export default function TechnicianDetailPage() {
                   <div className="text-xs text-tertiary">Done</div>
                 </div>
                 <div>
-                  <div className="text-lg font-black" style={{color:openWOs.length>0?"#FBBF24":"#34D399"}}>{openWOs.length}</div>
+                  <div className="text-lg font-black" style={{color:openWOs.length>0?"#B07A2A":"#547C4D"}}>{openWOs.length}</div>
                   <div className="text-xs text-tertiary">Active</div>
                 </div>
               </div>

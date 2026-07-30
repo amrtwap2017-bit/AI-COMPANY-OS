@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={!!error}
           aria-describedby={error ? inputId + "-error" : helper ? inputId + "-helper" : undefined}
           className={[
-            "block w-full rounded-xl border bg-white text-sm text-slate-900",
+            "block w-full rounded-xl border bg-white text-sm text-stone-900",
             "placeholder-slate-400 transition-colors",
             "focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400",
             "disabled:bg-slate-50 disabled:text-tertiary disabled:cursor-not-allowed",
@@ -46,7 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             "py-2.5",
             error
               ? "border-red-300 focus:border-red-400 focus:ring-red-500/20"
-              : "border-slate-200 hover:border-slate-300",
+              : "border-stone-200 hover:border-slate-300",
             className,
           ].join(" ")}
           {...props}

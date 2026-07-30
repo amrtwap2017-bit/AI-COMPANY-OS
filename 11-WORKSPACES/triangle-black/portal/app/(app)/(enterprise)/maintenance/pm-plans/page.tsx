@@ -61,10 +61,10 @@ export default function PMPlansPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              {label:"Overdue",       value:overdue.length,  color:overdue.length>0?"#F87171":"#34D399",  filter:"overdue"},
-              {label:"Due This Week", value:dueWeek.length,  color:dueWeek.length>0?"#FBBF24":"#94A3B8",  filter:"week"},
-              {label:"Due This Month",value:dueMonth.length, color:"#60A5FA",                              filter:"month"},
-              {label:"Scheduled",    value:scheduled.length, color:"#34D399",                              filter:"all"},
+              {label:"Overdue",       value:overdue.length,  color:overdue.length>0?"#A84A3D":"#547C4D",  filter:"overdue"},
+              {label:"Due This Week", value:dueWeek.length,  color:dueWeek.length>0?"#B07A2A":"#6D5F53",  filter:"week"},
+              {label:"Due This Month",value:dueMonth.length, color:"#5B7C8C",                              filter:"month"},
+              {label:"Scheduled",    value:scheduled.length, color:"#547C4D",                              filter:"all"},
             ].map((k,i)=>{
               const active=dueFilter===k.filter;
               return (
@@ -88,7 +88,7 @@ export default function PMPlansPage() {
             <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
               {overdue.length} PM Plans Overdue — {overdue.slice(0,2).map(p=>p.title).join(" · ")}
             </div>
-            <button onClick={()=>{setDueFilter("overdue");}} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
+            <button onClick={()=>{setDueFilter("overdue");}} className="tb-ai-insight-action" style={{color:"#A84A3D",borderColor:"rgba(239,68,68,0.3)"}}>
               Show Overdue
             </button>
           </div>

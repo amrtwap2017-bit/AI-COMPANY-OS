@@ -41,7 +41,7 @@ export default function VendorDetailPage() {
   const totalPOValue = pos.reduce((s,p)=>s+Number(p.total_amount||0),0);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1E1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/vendor-management")} className="tb-btn-secondary">← Vendors</button>
@@ -49,7 +49,7 @@ export default function VendorDetailPage() {
               onClick={()=>{ if(window.confirm("Delete this vendor? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}
               className="tb-btn-secondary"
-              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>
               {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
             </button>
             {!vendor.is_approved && (
@@ -66,25 +66,25 @@ export default function VendorDetailPage() {
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="tb-badge">{vendor.category}</span>
                 <span className="text-xs text-tertiary">{vendor.vendor_code}</span>
-                <span className="text-xs" style={{color:"#FBBF24"}}>{STARS(vendor.rating)} {Number(vendor.rating||0).toFixed(1)}</span>
-                <span className="tb-badge" style={{background:vendor.is_approved?"#34D39918":"#F8717118",color:vendor.is_approved?"#34D399":"#F87171"}}>{vendor.is_approved?"Approved":"Pending"}</span>
+                <span className="text-xs" style={{color:"#B07A2A"}}>{STARS(vendor.rating)} {Number(vendor.rating||0).toFixed(1)}</span>
+                <span className="tb-badge" style={{background:vendor.is_approved?"#547C4D18":"#A84A3D18",color:vendor.is_approved?"#547C4D":"#A84A3D"}}>{vendor.is_approved?"Approved":"Pending"}</span>
                 {docStatus && !docStatus.approval_ready && (
-                  <span className="tb-badge" style={{background:"#F8717118",color:"#F87171",fontSize:"0.45rem"}}>
+                  <span className="tb-badge" style={{background:"#A84A3D18",color:"#A84A3D",fontSize:"0.45rem"}}>
                     ⚠ Missing: {(docStatus.missing_required||[]).join(", ")}
                   </span>
                 )}
                 {docStatus?.approval_ready && (
-                  <span className="tb-badge" style={{background:"#34D39918",color:"#34D399",fontSize:"0.45rem"}}>📋 Docs Complete</span>
+                  <span className="tb-badge" style={{background:"#547C4D18",color:"#547C4D",fontSize:"0.45rem"}}>📋 Docs Complete</span>
                 )}
               </div>
             </div>
           </div>
           <div className="tb-grid-4">
             {[
-              {label:"Total POs",value:pos.length,color:"#60A5FA"},
-              {label:"Total Value",value:fmtEGP(totalPOValue),color:"#34D399"},
-              {label:"Rating",value:`${Number(vendor.rating||0).toFixed(1)}/5`,color:"#FBBF24"},
-              {label:"Payment Terms",value:`${vendor.payment_terms||30} days`,color:"#A78BFA"},
+              {label:"Total POs",value:pos.length,color:"#5B7C8C"},
+              {label:"Total Value",value:fmtEGP(totalPOValue),color:"#547C4D"},
+              {label:"Rating",value:`${Number(vendor.rating||0).toFixed(1)}/5`,color:"#B07A2A"},
+              {label:"Payment Terms",value:`${vendor.payment_terms||30} days`,color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>

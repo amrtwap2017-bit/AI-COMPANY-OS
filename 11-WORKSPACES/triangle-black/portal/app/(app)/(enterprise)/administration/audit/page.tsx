@@ -18,10 +18,10 @@ const fmtDate = (d) => {
 };
 
 const ACTION_COLORS = {
-  created:"#34D399", status_changed:"#60A5FA", approved:"#34D399",
-  selected:"#A78BFA", sent_to_vendor:"#FBBF24", accepted:"#34D399",
-  assigned:"#60A5FA", logged:"#94A3B8", login:"#94A3B8",
-  updated:"#FBBF24", deleted:"#F87171",
+  created:"#547C4D", status_changed:"#5B7C8C", approved:"#547C4D",
+  selected:"#8D7443", sent_to_vendor:"#B07A2A", accepted:"#547C4D",
+  assigned:"#5B7C8C", logged:"#6D5F53", login:"#6D5F53",
+  updated:"#B07A2A", deleted:"#A84A3D",
 };
 const ENTITY_ICONS = {
   scope_of_work:"📋", rfq_header:"📝", vendor_quotation:"⚖️",
@@ -59,17 +59,17 @@ export default function AuditTrailPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#1A0A15 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#1A0A15 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-rose-400 mb-1.5">Administration</div>
           <h1 className="tb-hero-title">Audit Trail</h1>
           <p className="tb-hero-description">Complete activity log — who changed what and when</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
             {[
-              {label:"Events (7d)",value:stats.total_events||0,color:"#F1F5F9"},
-              {label:"Entity Types",value:stats.entity_types||0,color:"#60A5FA"},
-              {label:"Unique Actors",value:stats.unique_actors||0,color:"#A78BFA"},
-              {label:"Last Event",value:fmtRelative(stats.last_event),color:"#34D399"},
+              {label:"Events (7d)",value:stats.total_events||0,color:"#221D1A"},
+              {label:"Entity Types",value:stats.entity_types||0,color:"#5B7C8C"},
+              {label:"Unique Actors",value:stats.unique_actors||0,color:"#8D7443"},
+              {label:"Last Event",value:fmtRelative(stats.last_event),color:"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -134,7 +134,7 @@ export default function AuditTrailPage() {
               ) : (
                 <div className="space-y-1">
                   {events.map((e,i) => {
-                    const ac = ACTION_COLORS[e.action] || "#94A3B8";
+                    const ac = ACTION_COLORS[e.action] || "#6D5F53";
                     const icon = ENTITY_ICONS[e.entity_type] || "📄";
                     const path = ENTITY_PATHS[e.entity_type];
                     return (
@@ -154,9 +154,9 @@ export default function AuditTrailPage() {
                           )}
                           {e.old_value && e.new_value && (
                             <div className="text-xs text-tertiary mt-0.5">
-                              <span style={{color:"#F87171"}}>-{e.old_value}</span>
+                              <span style={{color:"#A84A3D"}}>-{e.old_value}</span>
                               <span className="mx-1">→</span>
-                              <span style={{color:"#34D399"}}>+{e.new_value}</span>
+                              <span style={{color:"#547C4D"}}>+{e.new_value}</span>
                             </div>
                           )}
                           {e.metadata && (

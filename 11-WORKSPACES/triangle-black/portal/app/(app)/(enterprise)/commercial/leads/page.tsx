@@ -11,8 +11,8 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR = {
-  new:"#60A5FA", qualified:"#A78BFA", proposal:"#818CF8",
-  negotiation:"#FBBF24", won:"#34D399", lost:"#F87171"
+  new:"#5B7C8C", qualified:"#8D7443", proposal:"#818CF8",
+  negotiation:"#B07A2A", won:"#547C4D", lost:"#A84A3D"
 };
 
 const leadFields = [
@@ -51,7 +51,7 @@ export default function LeadsPage() {
         successPath="/commercial/leads/"/>
 
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1520 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1520 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -151,9 +151,9 @@ export default function LeadsPage() {
                       <span className="tb-badge" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`,fontSize:"0.625rem"}}>{l.status||"—"}</span>
                     </div>
                     <div className="text-center">
-                      <div className="text-base font-black" style={{color:score>=70?"#34D399":score>=50?"#FBBF24":"#60A5FA"}}>{score}</div>
+                      <div className="text-base font-black" style={{color:score>=70?"#547C4D":score>=50?"#B07A2A":"#5B7C8C"}}>{score}</div>
                       <div className="tb-progress tb-progress--sm mt-1">
-                        <div className="tb-progress-bar" style={{background:score>=70?"#34D399":score>=50?"#FBBF24":"#60A5FA",width:`${score}%`}}/>
+                        <div className="tb-progress-bar" style={{background:score>=70?"#547C4D":score>=50?"#B07A2A":"#5B7C8C",width:`${score}%`}}/>
                       </div>
                     </div>
                     <div className="text-center text-xs text-tertiary">{fmtDate(l.updated_at)}</div>

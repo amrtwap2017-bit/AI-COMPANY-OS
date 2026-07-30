@@ -54,7 +54,7 @@ export default function TechniciansPage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A1208 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A1208 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>

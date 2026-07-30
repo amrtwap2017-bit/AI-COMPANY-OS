@@ -22,7 +22,7 @@ export function SearchInput({ label, className = "", onClear, value, showHint, o
         onChange={onChange}
         aria-label={label || "Search"}
         {...props}
-        className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 placeholder-slate-400 transition-all"
+        className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 placeholder-slate-400 transition-all"
       />
       {hasValue && onClear ? (
         <button
@@ -34,7 +34,7 @@ export function SearchInput({ label, className = "", onClear, value, showHint, o
           <X className="w-3 h-3" />
         </button>
       ) : showHint ? (
-        <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 border border-slate-200 rounded px-1.5 py-0.5 pointer-events-none">/</kbd>
+        <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 border border-stone-200 rounded px-1.5 py-0.5 pointer-events-none">/</kbd>
       ) : null}
     </div>
   );

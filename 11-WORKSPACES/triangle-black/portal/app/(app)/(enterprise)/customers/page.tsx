@@ -16,13 +16,13 @@ export default function CustomersPage() {
   const revenue = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0F28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0F28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Commercial</div>
           <h1 className="tb-hero-title">Customers</h1>
           <p className="tb-hero-description">{clients.length} clients · {activeContracts.length} active contracts · {fmtEGP(revenue)} collected</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Clients",value:clients.length,color:"#F1F5F9"},{label:"Active Contracts",value:activeContracts.length,color:"#34D399"},{label:"Total Leads",value:leads.length,color:"#60A5FA"},{label:"Revenue",value:fmtEGP(revenue),color:"#FBBF24"}].map((k,i)=>(
+            {[{label:"Clients",value:clients.length,color:"#221D1A"},{label:"Active Contracts",value:activeContracts.length,color:"#547C4D"},{label:"Total Leads",value:leads.length,color:"#5B7C8C"},{label:"Revenue",value:fmtEGP(revenue),color:"#B07A2A"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

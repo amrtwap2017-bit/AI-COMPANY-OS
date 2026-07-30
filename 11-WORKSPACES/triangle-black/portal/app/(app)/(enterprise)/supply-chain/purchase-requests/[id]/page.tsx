@@ -9,8 +9,8 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  pending:"#60A5FA", approved:"#34D399", rejected:"#F87171",
-  ordered:"#A78BFA", draft:"#94A3B8", cancelled:"#64748B"
+  pending:"#5B7C8C", approved:"#547C4D", rejected:"#A84A3D",
+  ordered:"#8D7443", draft:"#6D5F53", cancelled:"#64748B"
 };
 
 export default function PurchaseRequestDetailPage() {
@@ -40,7 +40,7 @@ export default function PurchaseRequestDetailPage() {
     </div>
   );
 
-  const sc = STATUS_COLOR[pr.status] || "#94A3B8";
+  const sc = STATUS_COLOR[pr.status] || "#6D5F53";
 
   return (
     <div className="min-h-screen bg-base">
@@ -60,9 +60,9 @@ export default function PurchaseRequestDetailPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Status",      value:(pr.status||"—").toUpperCase(),   color:sc },
-              { label:"Total",       value:fmtEGP(pr.total_amount||0),       color:"#34D399" },
-              { label:"Requested By",value:pr.requested_by||"—",             color:"#F1F5F9" },
-              { label:"Created",     value:fmtDate(pr.created_at),           color:"#94A3B8" },
+              { label:"Total",       value:fmtEGP(pr.total_amount||0),       color:"#547C4D" },
+              { label:"Requested By",value:pr.requested_by||"—",             color:"#221D1A" },
+              { label:"Created",     value:fmtDate(pr.created_at),           color:"#6D5F53" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -112,9 +112,9 @@ export default function PurchaseRequestDetailPage() {
               <div className="tb-section-title">Approval Status</div>
               <div className="space-y-3">
                 {[
-                  { label:"Submitted",  date:pr.created_at,  done:true,                               color:"#60A5FA" },
-                  { label:"Approved",   date:pr.approved_at, done:pr.status==="approved"||pr.status==="ordered", color:"#34D399" },
-                  { label:"Ordered",    date:pr.ordered_at,  done:pr.status==="ordered",              color:"#A78BFA" },
+                  { label:"Submitted",  date:pr.created_at,  done:true,                               color:"#5B7C8C" },
+                  { label:"Approved",   date:pr.approved_at, done:pr.status==="approved"||pr.status==="ordered", color:"#547C4D" },
+                  { label:"Ordered",    date:pr.ordered_at,  done:pr.status==="ordered",              color:"#8D7443" },
                 ].map((step, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{

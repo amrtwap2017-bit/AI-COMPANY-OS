@@ -1,10 +1,10 @@
 // @ts-nocheck
 "use client";
 export function SLARiskBoard({ title, subtitle, items=[] }:any) {
-  const colors:any = { warning:"bg-amber-50 border-amber-200 text-amber-700", success:"bg-emerald-50 border-emerald-200 text-emerald-700", neutral:"bg-slate-50 border-slate-200 text-slate-600" };
+  const colors:any = { warning:"bg-amber-50 border-amber-200 text-amber-700", success:"bg-emerald-50 border-emerald-200 text-emerald-700", neutral:"bg-slate-50 border-stone-200 text-slate-600" };
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5">
-      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+    <div className="bg-white rounded-2xl border border-stone-200 p-5">
+      <h3 className="font-semibold text-stone-900 mb-1">{title}</h3>
       {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {items.map((item:any,i:number)=>(

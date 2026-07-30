@@ -19,7 +19,7 @@ export default function RFQManagementPage() {
   const filtered = filter==="all" ? rfqs : rfqs.filter(r=>r.status===filter);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A12 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <div>
@@ -31,7 +31,7 @@ export default function RFQManagementPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total",value:rfqs.length,color:"#F1F5F9"},
+              {label:"Total",value:rfqs.length,color:"#221D1A"},
               {label:"Active",value:rfqs.filter(r=>r.status==="sent").length,color:"#5B7C8C"},
               {label:"With Quotes",value:rfqs.filter(r=>r.status==="responses_received").length,color:"#B07A2A"},
               {label:"Awarded",value:rfqs.filter(r=>r.status==="awarded").length,color:"#547C4D"},

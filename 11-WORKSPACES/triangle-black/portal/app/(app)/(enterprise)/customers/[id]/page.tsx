@@ -19,7 +19,7 @@ export default function CustomerDetailPage() {
   const revenue = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0F28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0F28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -30,7 +30,7 @@ export default function CustomerDetailPage() {
             <button onClick={()=>router.push("/customers")} className="tb-btn-secondary">← Back</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Contracts",value:contracts.length,color:"#34D399"},{label:"Active",value:active.length,color:"#60A5FA"},{label:"Revenue",value:fmtEGP(revenue),color:"#FBBF24"},{label:"Invoices",value:inv.length,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Contracts",value:contracts.length,color:"#547C4D"},{label:"Active",value:active.length,color:"#5B7C8C"},{label:"Revenue",value:fmtEGP(revenue),color:"#B07A2A"},{label:"Invoices",value:inv.length,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -42,7 +42,7 @@ export default function CustomerDetailPage() {
           {isLoading ? <div className="space-y-2">{[1,2,3].map(i=><div key={i} className="h-12 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : <div className="space-y-2 mt-3">
             {contracts.slice(0,8).map((c,i)=>{
-              const sc={active:"#34D399",expired:"#F87171",pending:"#FBBF24"}[c.status]||"#94A3B8";
+              const sc={active:"#547C4D",expired:"#A84A3D",pending:"#B07A2A"}[c.status]||"#6D5F53";
               return (
                 <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)} className="tb-action-item w-full justify-between">
                   <div className="flex items-center gap-2 min-w-0"><span>📄</span><div className="min-w-0"><div className="text-sm text-secondary truncate">{c.title||c.id?.slice(0,20)}</div><div className="text-xs text-tertiary">{fmtEGP(c.total_value||0)} · {fmtDate(c.end_date)}</div></div></div>

@@ -8,22 +8,22 @@ type CenterModuleGridProps = { title: string; subtitle: string; items: CenterMod
 const statusMap: Record<string, string> = {
   Live:    "bg-emerald-50 text-emerald-700 border-emerald-200",
   Legacy:  "bg-amber-50 text-amber-700 border-amber-200",
-  Planned: "bg-slate-100 text-slate-600 border-slate-200",
+  Planned: "bg-slate-100 text-slate-600 border-stone-200",
 };
 
 export function CenterModuleGrid({ title, subtitle, items }: CenterModuleGridProps) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-5 py-4">
-        <h2 className="text-sm font-bold text-slate-900">{title}</h2>
+    <section className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+      <div className="border-b border-stone-100 px-5 py-4">
+        <h2 className="text-sm font-bold text-stone-900">{title}</h2>
         <p className="mt-0.5 text-xs text-secondary">{subtitle}</p>
       </div>
       <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => {
           const inner = (
-            <div className="group h-full rounded-xl border border-slate-200 bg-slate-50 p-4 transition-all hover:border-amber-300 hover:bg-white hover:shadow-md">
+            <div className="group h-full rounded-xl border border-stone-200 bg-slate-50 p-4 transition-all hover:border-amber-300 hover:bg-white hover:shadow-md">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="text-sm font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">{item.title}</div>
+                <div className="text-sm font-semibold text-stone-900 group-hover:text-amber-700 transition-colors">{item.title}</div>
                 {item.status && (
                   <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide flex-shrink-0 ${statusMap[item.status]}`}>{item.status}</span>
                 )}

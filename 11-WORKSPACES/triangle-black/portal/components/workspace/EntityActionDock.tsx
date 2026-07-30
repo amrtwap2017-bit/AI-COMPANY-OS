@@ -17,12 +17,12 @@ type EntityActionDockProps = {
 function toneClasses(tone?: DockAction["tone"]) {
   if (tone === "success") return "border-emerald-200 bg-emerald-50";
   if (tone === "warning") return "border-amber-200 bg-amber-50";
-  return "border-slate-200 bg-slate-50";
+  return "border-stone-200 bg-slate-50";
 }
 
 export function EntityActionDock({ title, subtitle, actions }: EntityActionDockProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Action Dock

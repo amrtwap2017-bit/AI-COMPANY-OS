@@ -22,9 +22,9 @@ const fmtDateTime = (d) => {
   } catch { return "—"; }
 };
 
-const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
-const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", resolved:"#34D399", closed:"#94A3B8" };
-const WO_SC          = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399" };
+const PRIORITY_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" };
+const STATUS_COLOR   = { open:"#5B7C8C", in_progress:"#B07A2A", resolved:"#547C4D", closed:"#6D5F53" };
+const WO_SC          = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" };
 
 export default function ServiceRequestDetailPage() {
   const router = useRouter();
@@ -63,20 +63,20 @@ export default function ServiceRequestDetailPage() {
           onClick={()=>{ if(window.confirm("Delete this service request? This cannot be undone.")) deleteMut.mutate(); }}
           disabled={deleteMut.isLoading}
           className="tb-btn-secondary"
-          style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+          style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>
           {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
         </button>
       </div>
     </div>
   );
 
-  const pc  = PRIORITY_COLOR[sr.priority] || "#94A3B8";
-  const sc  = STATUS_COLOR[sr.status]     || "#94A3B8";
+  const pc  = PRIORITY_COLOR[sr.priority] || "#6D5F53";
+  const sc  = STATUS_COLOR[sr.status]     || "#6D5F53";
   const wo  = woRaw && !woRaw.detail ? woRaw : null;
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -94,8 +94,8 @@ export default function ServiceRequestDetailPage() {
             {[
               { label:"Priority",  value:(sr.priority||"—").toUpperCase(),        color:pc },
               { label:"Status",    value:(sr.status||"—").replace("_"," ").toUpperCase(), color:sc },
-              { label:"Requester", value:sr.requester_name||"—",                  color:"#F1F5F9" },
-              { label:"Work Order",value:wo ? "Linked" : "Not Linked",            color:wo?"#34D399":"#94A3B8" },
+              { label:"Requester", value:sr.requester_name||"—",                  color:"#221D1A" },
+              { label:"Work Order",value:wo ? "Linked" : "Not Linked",            color:wo?"#547C4D":"#6D5F53" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -148,20 +148,20 @@ export default function ServiceRequestDetailPage() {
                     <div className="text-sm font-semibold text-primary">{wo.title||"—"}</div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="tb-badge" style={{
-                        background:(WO_SC[wo.status]||"#94A3B8")+"18",
-                        color:WO_SC[wo.status]||"#94A3B8",
+                        background:(WO_SC[wo.status]||"#6D5F53")+"18",
+                        color:WO_SC[wo.status]||"#6D5F53",
                         fontSize:"0.5rem"
                       }}>{(wo.status||"—").replace("_"," ")}</span>
                       <span className="text-xs text-tertiary">{wo.priority||"—"} priority</span>
                     </div>
                   </div>
-                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#60A5FA"}}>View →</span>
+                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#5B7C8C"}}>View →</span>
                 </button>
               </div>
             )}
 
             {!wo && (
-              <div className="tb-section" style={{borderColor:"#FBBF2430",background:"#FBBF2408"}}>
+              <div className="tb-section" style={{borderColor:"#B07A2A30",background:"#B07A2A08"}}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span style={{fontSize:"1.125rem"}}>⚠️</span>
@@ -179,9 +179,9 @@ export default function ServiceRequestDetailPage() {
               <div className="tb-section-title">Status Timeline</div>
               <div className="space-y-3">
                 {[
-                  { label:"Submitted",   date:sr.created_at,  done:true,                           color:"#60A5FA" },
-                  { label:"In Progress", date:sr.updated_at,  done:sr.status==="in_progress"||sr.status==="resolved"||sr.status==="closed", color:"#FBBF24" },
-                  { label:"Resolved",    date:sr.resolved_at, done:sr.status==="resolved"||sr.status==="closed", color:"#34D399" },
+                  { label:"Submitted",   date:sr.created_at,  done:true,                           color:"#5B7C8C" },
+                  { label:"In Progress", date:sr.updated_at,  done:sr.status==="in_progress"||sr.status==="resolved"||sr.status==="closed", color:"#B07A2A" },
+                  { label:"Resolved",    date:sr.resolved_at, done:sr.status==="resolved"||sr.status==="closed", color:"#547C4D" },
                 ].map((step, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{

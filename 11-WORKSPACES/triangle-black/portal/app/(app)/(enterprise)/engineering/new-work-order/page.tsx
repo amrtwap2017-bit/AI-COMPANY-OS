@@ -13,20 +13,20 @@ export default function NewWorkOrderPage() {
   const unlinkedSRs = srs.filter(s=>!s.work_order_id&&s.status==="open");
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Operations</div>
           <h1 className="tb-hero-title">New Work Order</h1>
           <p className="tb-hero-description">{techs.length} technicians · {assets.length} assets · {unlinkedSRs.length} unlinked service requests</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Technicians",value:techs.length,color:"#34D399"},{label:"Assets",value:assets.length,color:"#60A5FA"},{label:"Open SRs",value:unlinkedSRs.length,color:unlinkedSRs.length>0?"#FBBF24":"#34D399"},{label:"Ready",value:"Yes",color:"#34D399"}].map((k,i)=>(
+            {[{label:"Technicians",value:techs.length,color:"#547C4D"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Open SRs",value:unlinkedSRs.length,color:unlinkedSRs.length>0?"#B07A2A":"#547C4D"},{label:"Ready",value:"Yes",color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
         </div>
       </div>
       <div className="tb-canvas">
-        <div className="tb-section" style={{borderColor:"#60A5FA40",background:"#60A5FA08"}}>
+        <div className="tb-section" style={{borderColor:"#5B7C8C40",background:"#5B7C8C08"}}>
           <div className="flex items-center gap-3 flex-wrap">
             <span style={{fontSize:"1.25rem"}}>💡</span>
             <div className="flex-1"><div className="text-sm font-semibold text-primary">Work Order Creation</div><div className="text-xs text-tertiary">Navigate to Work Orders to create a new WO</div></div>
@@ -38,7 +38,7 @@ export default function NewWorkOrderPage() {
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Unlinked Service Requests ({unlinkedSRs.length})</div><button onClick={()=>router.push("/operations/service-requests")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {unlinkedSRs.slice(0,5).map((sr,i)=>{
-                const pc={critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[sr.priority]||"#94A3B8";
+                const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[sr.priority]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/operations/service-requests/"+sr.id)} className="tb-action-item w-full justify-between">
                     <div className="flex items-center gap-2 min-w-0"><div className="tb-priority-bar" style={{background:pc}}/><span className="text-sm text-secondary truncate">{sr.title||"—"}</span></div>

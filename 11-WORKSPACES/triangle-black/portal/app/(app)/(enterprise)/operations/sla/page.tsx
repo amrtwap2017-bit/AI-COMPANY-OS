@@ -54,7 +54,7 @@ export default function SLADashboardPage() {
             </div>
             <div className="flex gap-2">
               {breachCount > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{background:"#F8717118",border:"1px solid #F8717140"}}>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{background:"#A84A3D18",border:"1px solid #A84A3D40"}}>
                   <span style={{color:"#A84A3D",fontSize:"1.2rem"}}>🚨</span>
                   <span className="text-sm font-black" style={{color:"#A84A3D"}}>{breachCount} Active Breaches</span>
                 </div>
@@ -66,7 +66,7 @@ export default function SLADashboardPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total Requests",value:overall.total_requests||0,color:"#F1F5F9"},
+              {label:"Total Requests",value:overall.total_requests||0,color:"#221D1A"},
               {label:"Resolved",value:overall.resolved||0,color:"#547C4D"},
               {label:"Active Breaches",value:breachCount,color:breachCount>0?"#A84A3D":"#547C4D"},
               {label:"Avg Resolution",value:overall.avg_resolution_hours?`${Number(overall.avg_resolution_hours).toFixed(1)}h`:"—",color:"#5B7C8C"},
@@ -102,7 +102,7 @@ export default function SLADashboardPage() {
                     const gc = GRADE_COLORS[grade]||"#6D5F53";
                     return (
                       <div key={i} className="p-4 rounded-2xl border border-border"
-                           style={{background:GRADE_BG[grade]||"#1E293B"}}>
+                           style={{background:GRADE_BG[grade]||"#332C27"}}>
                         <div className="flex items-start justify-between mb-3">
                           <div>
                             <div className="text-sm font-bold text-primary">{site.site_name||"Unknown Site"}</div>
@@ -214,7 +214,7 @@ export default function SLADashboardPage() {
                   const uc = URGENCY_COLORS[item.urgency]||"#6D5F53";
                   const overdue = Number(item.hours_overdue||0);
                   return (
-                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl border" style={{background:"#F8717108",borderColor:"#F8717130"}}>
+                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl border" style={{background:"#A84A3D08",borderColor:"#A84A3D30"}}>
                       <div className="flex-shrink-0">
                         <span className="tb-badge" style={{background:uc+"18",color:uc}}>{item.urgency}</span>
                       </div>

@@ -19,13 +19,13 @@ export default function MaintenanceIntelligencePage() {
   const compRate     = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance · AI</div>
           <h1 className="tb-hero-title">Maintenance Intelligence</h1>
           <p className="tb-hero-description">AI-powered maintenance insights and health analysis</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Asset Health",value:assetHealth+"%",color:assetHealth>=95?"#34D399":"#FBBF24"},{label:"PM Compliance",value:pmCompliance+"%",color:pmCompliance>=90?"#34D399":"#FBBF24"},{label:"Faulted",value:faulted.length,color:faulted.length>0?"#F87171":"#34D399"},{label:"Overdue PMs",value:overduePMs.length,color:overduePMs.length>0?"#FBBF24":"#34D399"}].map((k,i)=>(
+            {[{label:"Asset Health",value:assetHealth+"%",color:assetHealth>=95?"#547C4D":"#B07A2A"},{label:"PM Compliance",value:pmCompliance+"%",color:pmCompliance>=90?"#547C4D":"#B07A2A"},{label:"Faulted",value:faulted.length,color:faulted.length>0?"#A84A3D":"#547C4D"},{label:"Overdue PMs",value:overduePMs.length,color:overduePMs.length>0?"#B07A2A":"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -33,16 +33,16 @@ export default function MaintenanceIntelligencePage() {
       </div>
       <div className="tb-canvas">
         <div className="tb-grid-3">
-          {[{label:"Asset Health",value:assetHealth,color:"#34D399",path:"/maintenance/assets"},{label:"PM Compliance",value:pmCompliance,color:"#A78BFA",path:"/maintenance/pm-plans"},{label:"WO Completion",value:compRate,color:"#60A5FA",path:"/operations/work-orders"}].map((k,i)=>(
+          {[{label:"Asset Health",value:assetHealth,color:"#547C4D",path:"/maintenance/assets"},{label:"PM Compliance",value:pmCompliance,color:"#8D7443",path:"/maintenance/pm-plans"},{label:"WO Completion",value:compRate,color:"#5B7C8C",path:"/operations/work-orders"}].map((k,i)=>(
             <button key={i} onClick={()=>router.push(k.path)} className="tb-section text-center hover:border-brand transition-colors">
-              <div className="text-3xl font-black mb-2" style={{color:k.value>=80?k.color:"#F87171"}}>{k.value}%</div>
+              <div className="text-3xl font-black mb-2" style={{color:k.value>=80?k.color:"#A84A3D"}}>{k.value}%</div>
               <div className="text-xs text-secondary mb-2">{k.label}</div>
-              <div className="tb-progress"><div className="tb-progress-bar" style={{background:k.value>=80?k.color:"#F87171",width:k.value+"%"}}/></div>
+              <div className="tb-progress"><div className="tb-progress-bar" style={{background:k.value>=80?k.color:"#A84A3D",width:k.value+"%"}}/></div>
             </button>
           ))}
         </div>
         {(faulted.length>0||overduePMs.length>0||criticalWOs.length>0)&&(
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="tb-section-title">Attention Required</div>
             <div className="space-y-2">
               {faulted.slice(0,3).map((a,i)=>(

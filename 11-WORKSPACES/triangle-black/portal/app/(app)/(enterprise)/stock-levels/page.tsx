@@ -28,7 +28,7 @@ export default function StockLevelsPage() {
           <h1 className="tb-hero-title">Stock Levels</h1>
           <p className="tb-hero-description">{stocks.length} stock records · {lowStock.length} below minimum</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Records",value:stocks.length,color:"#F1F5F9"},{label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"#F87171":"#34D399"},{label:"In Stock",value:enriched.filter(s=>!s.is_low).length,color:"#34D399"},{label:"Items",value:items.length,color:"#60A5FA"}].map((k,i)=>(
+            {[{label:"Total Records",value:stocks.length,color:"#221D1A"},{label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"#A84A3D":"#547C4D"},{label:"In Stock",value:enriched.filter(s=>!s.is_low).length,color:"#547C4D"},{label:"Items",value:items.length,color:"#5B7C8C"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -36,7 +36,7 @@ export default function StockLevelsPage() {
       </div>
       <div className="tb-canvas">
         {lowStock.length>0&&(
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold text-red-400">{lowStock.length} items below minimum stock level</span><button onClick={()=>router.push("/supply-chain/purchase-requests")} className="tb-section-link ml-auto">Create PR →</button></div>
           </div>
         )}
@@ -55,7 +55,7 @@ export default function StockLevelsPage() {
               {["Item","Category","On Hand","Min","Status"].map((h,i)=><div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>)}
             </div>
             {filtered.map((s,i)=>{
-              const c=s.is_low?"#F87171":"#34D399";
+              const c=s.is_low?"#A84A3D":"#547C4D";
               return (
                 <button key={i} onClick={()=>router.push("/supply-chain/inventory/"+(s.item_id||s.id))} className="tb-table-row" style={{gridTemplateColumns:"2fr 100px 80px 80px 100px"}}>
                   <div className="text-sm font-medium text-primary truncate pr-4">{s.item_name}</div>

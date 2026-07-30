@@ -96,7 +96,7 @@ export default function TimeTrackingPage() {
   };
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -110,10 +110,10 @@ export default function TimeTrackingPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total Hours",value:`${Number(totals.total_hours||0).toFixed(1)}h`,color:"#60A5FA"},
-              {label:"Labor Cost",value:fmtEGP(totals.total_labor_cost||0),color:"#34D399"},
-              {label:"Time Entries",value:totals.total_entries||0,color:"#A78BFA"},
-              {label:"Avg Per Entry",value:`${Number(totals.avg_hours_per_entry||0).toFixed(1)}h`,color:"#FBBF24"},
+              {label:"Total Hours",value:`${Number(totals.total_hours||0).toFixed(1)}h`,color:"#5B7C8C"},
+              {label:"Labor Cost",value:fmtEGP(totals.total_labor_cost||0),color:"#547C4D"},
+              {label:"Time Entries",value:totals.total_entries||0,color:"#8D7443"},
+              {label:"Avg Per Entry",value:`${Number(totals.avg_hours_per_entry||0).toFixed(1)}h`,color:"#B07A2A"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>

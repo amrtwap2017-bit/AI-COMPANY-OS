@@ -36,8 +36,8 @@ export function Input({
         required={required}
         disabled={disabled}
         className={[
-          "block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm",
-          "text-slate-900 placeholder-slate-400 bg-white",
+          "block w-full rounded-xl border border-stone-200 px-3.5 py-2.5 text-sm",
+          "text-stone-900 placeholder-slate-400 bg-white",
           "focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent",
           "disabled:bg-slate-50 disabled:text-tertiary disabled:cursor-not-allowed",
           "transition-colors",

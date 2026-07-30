@@ -15,22 +15,22 @@ export default function CommercialPage() {
   const won    = leads.filter(l=>l.status==="won");
   const revenue= inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
   const modules = [
-    {label:"Leads",         icon:"👤", path:"/commercial/leads",     count:leads.length,    color:"#60A5FA"},
-    {label:"Pipeline",      icon:"📊", path:"/commercial/pipeline",  count:null,            color:"#A78BFA"},
-    {label:"Contracts",     icon:"📄", path:"/commercial/contracts", count:active.length,   color:"#34D399"},
-    {label:"Customers",     icon:"🏢", path:"/customers",            count:null,            color:"#FBBF24"},
-    {label:"Invoices",      icon:"💰", path:"/invoices",             count:inv.length,      color:"#F97316"},
-    {label:"Cost Analysis", icon:"📈", path:"/analytics/costs",      count:null,            color:"#94A3B8"},
+    {label:"Leads",         icon:"👤", path:"/commercial/leads",     count:leads.length,    color:"#5B7C8C"},
+    {label:"Pipeline",      icon:"📊", path:"/commercial/pipeline",  count:null,            color:"#8D7443"},
+    {label:"Contracts",     icon:"📄", path:"/commercial/contracts", count:active.length,   color:"#547C4D"},
+    {label:"Customers",     icon:"🏢", path:"/customers",            count:null,            color:"#B07A2A"},
+    {label:"Invoices",      icon:"💰", path:"/invoices",             count:inv.length,      color:"#B07A2A"},
+    {label:"Cost Analysis", icon:"📈", path:"/analytics/costs",      count:null,            color:"#6D5F53"},
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0F28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0F28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Commercial</h1>
           <p className="tb-hero-description">{leads.length} leads · {active.length} active contracts · {fmtEGP(revenue)} revenue</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Open Leads",value:leads.filter(l=>l.status!=="won"&&l.status!=="lost").length,color:"#60A5FA"},{label:"Won Deals",value:won.length,color:"#34D399"},{label:"Active Contracts",value:active.length,color:"#A78BFA"},{label:"Revenue",value:fmtEGP(revenue),color:"#FBBF24"}].map((k,i)=>(
+            {[{label:"Open Leads",value:leads.filter(l=>l.status!=="won"&&l.status!=="lost").length,color:"#5B7C8C"},{label:"Won Deals",value:won.length,color:"#547C4D"},{label:"Active Contracts",value:active.length,color:"#8D7443"},{label:"Revenue",value:fmtEGP(revenue),color:"#B07A2A"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

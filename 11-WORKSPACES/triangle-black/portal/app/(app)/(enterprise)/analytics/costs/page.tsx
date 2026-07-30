@@ -18,16 +18,16 @@ export default function AnalyticsCosts() {
   const totalSpend    = pos.reduce((s,p)=>s+Number(p.total_amount||p.total_value||0),0);
   const contractValue = contracts.filter(c=>c.status==="active").reduce((s,c)=>s+Number(c.total_value||c.value||0),0);
   const kpis = [
-    { label:"Revenue Collected",  value:fmtEGP(totalRevenue),  color:"#34D399",  icon:"💰" },
-    { label:"Pending Revenue",     value:fmtEGP(totalPending),  color:"#FBBF24",  icon:"⏰" },
-    { label:"Procurement Spend",   value:fmtEGP(totalSpend),    color:"#F87171",  icon:"🛒" },
-    { label:"Active Contracts",    value:fmtEGP(contractValue), color:"#A78BFA",  icon:"📄" },
-    { label:"Net Position",        value:fmtEGP(totalRevenue-totalSpend), color:totalRevenue>totalSpend?"#34D399":"#F87171", icon:"📊" },
-    { label:"Invoice Count",       value:inv.length,             color:"#60A5FA",  icon:"📋" },
+    { label:"Revenue Collected",  value:fmtEGP(totalRevenue),  color:"#547C4D",  icon:"💰" },
+    { label:"Pending Revenue",     value:fmtEGP(totalPending),  color:"#B07A2A",  icon:"⏰" },
+    { label:"Procurement Spend",   value:fmtEGP(totalSpend),    color:"#A84A3D",  icon:"🛒" },
+    { label:"Active Contracts",    value:fmtEGP(contractValue), color:"#8D7443",  icon:"📄" },
+    { label:"Net Position",        value:fmtEGP(totalRevenue-totalSpend), color:totalRevenue>totalSpend?"#547C4D":"#A84A3D", icon:"📊" },
+    { label:"Invoice Count",       value:inv.length,             color:"#5B7C8C",  icon:"📋" },
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1B30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Analytics</div>
           <h1 className="tb-hero-title">Cost Analysis</h1>

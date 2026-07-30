@@ -3,8 +3,8 @@
 export function WatchlistPanel({ title, subtitle, items=[] }:any) {
   const sevColors:any = { critical:"text-red-600 bg-red-50 border-red-200", warning:"text-amber-600 bg-amber-50 border-amber-200", success:"text-emerald-600 bg-emerald-50 border-emerald-200" };
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5">
-      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+    <div className="bg-white rounded-2xl border border-stone-200 p-5">
+      <h3 className="font-semibold text-stone-900 mb-1">{title}</h3>
       {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       {items.length===0 ? (
         <p className="text-sm text-tertiary italic py-4 text-center">No watch items</p>

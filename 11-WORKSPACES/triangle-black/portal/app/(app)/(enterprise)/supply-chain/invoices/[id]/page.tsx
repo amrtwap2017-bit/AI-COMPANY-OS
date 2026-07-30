@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const SC = {draft:"#94A3B8",submitted:"#60A5FA",matching:"#A78BFA",matched:"#34D399",mismatch:"#F87171",approved:"#34D399",rejected:"#F87171",paid:"#10B981"};
-const MC = {matched:"#34D399",partial:"#FBBF24",mismatch:"#F87171",pending:"#94A3B8"};
+const SC = {draft:"#6D5F53",submitted:"#5B7C8C",matching:"#8D7443",matched:"#547C4D",mismatch:"#A84A3D",approved:"#547C4D",rejected:"#A84A3D",paid:"#547C4D"};
+const MC = {matched:"#547C4D",partial:"#B07A2A",mismatch:"#A84A3D",pending:"#6D5F53"};
 export default function InvoiceDetailPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -44,14 +44,14 @@ export default function InvoiceDetailPage() {
 
     if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary animate-pulse">Loading invoice…</div></div>;
   if (!inv || inv.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">Invoice not found</div></div>;
-  const sc = SC[inv.status]||"#94A3B8";
-  const mc = MC[inv.match_result]||"#94A3B8";
+  const sc = SC[inv.status]||"#6D5F53";
+  const mc = MC[inv.match_result]||"#6D5F53";
   const lines = inv.line_items || [];
   const payments = inv.payments || [];
   const overdue = inv.due_date && new Date(inv.due_date) < new Date() && inv.payment_status !== "paid";
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/invoices")} className="tb-btn-secondary">← Invoices</button>
@@ -60,7 +60,7 @@ export default function InvoiceDetailPage() {
               onClick={()=>{ if(window.confirm("Delete this invoice? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}
               className="tb-btn-secondary"
-              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>
               {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
             </button>
             <div className="flex gap-2 flex-wrap">
@@ -73,7 +73,7 @@ export default function InvoiceDetailPage() {
                 <button onClick={()=>approveMut.mutate("approve")} disabled={approveMut.isLoading} className="tb-btn-primary" style={{background:"#16A34A",fontSize:"0.75rem"}}>✓ Approve</button>
               )}
               {inv.status==="matching" && inv.match_result==="mismatch" && (
-                <button onClick={()=>approveMut.mutate("reject")} disabled={approveMut.isLoading} className="tb-btn-secondary" style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>✗ Reject</button>
+                <button onClick={()=>approveMut.mutate("reject")} disabled={approveMut.isLoading} className="tb-btn-secondary" style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>✗ Reject</button>
               )}
               {inv.status==="approved" && inv.payment_status!=="paid" && (
                 <button onClick={()=>setShowPay(!showPay)} className="tb-btn-primary" style={{background:"#0369A1",fontSize:"0.75rem"}}>💳 Record Payment</button>
@@ -86,14 +86,14 @@ export default function InvoiceDetailPage() {
             <span className="tb-badge" style={{background:sc+"18",color:sc,border:`1px solid ${sc}30`}}>{inv.status}</span>
             <span className="tb-badge" style={{background:mc+"18",color:mc,border:`1px solid ${mc}30`}}>Match: {inv.match_result||"pending"}</span>
             <span className="text-xs text-tertiary">Vendor: {inv.vendor_name||"—"}</span>
-            {overdue && <span className="tb-badge" style={{background:"#F8717118",color:"#F87171"}}>⚠ OVERDUE</span>}
+            {overdue && <span className="tb-badge" style={{background:"#A84A3D18",color:"#A84A3D"}}>⚠ OVERDUE</span>}
           </div>
           <div className="tb-grid-4">
             {[
-              {label:"Invoice Total",value:fmtEGP(inv.total_amount||0),color:"#60A5FA"},
-              {label:"PO Total",value:fmtEGP(inv.po_total||0),color:"#A78BFA"},
-              {label:"Balance Due",value:fmtEGP(inv.balance_due||0),color:Number(inv.balance_due||0)>0?"#FBBF24":"#34D399"},
-              {label:"Variance",value:`${inv.match_variance_pct||0}%`,color:Number(inv.match_variance_pct||0)>2?"#F87171":Number(inv.match_variance_pct||0)>0?"#FBBF24":"#34D399"},
+              {label:"Invoice Total",value:fmtEGP(inv.total_amount||0),color:"#5B7C8C"},
+              {label:"PO Total",value:fmtEGP(inv.po_total||0),color:"#8D7443"},
+              {label:"Balance Due",value:fmtEGP(inv.balance_due||0),color:Number(inv.balance_due||0)>0?"#B07A2A":"#547C4D"},
+              {label:"Variance",value:`${inv.match_variance_pct||0}%`,color:Number(inv.match_variance_pct||0)>2?"#A84A3D":Number(inv.match_variance_pct||0)>0?"#B07A2A":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
@@ -106,7 +106,7 @@ export default function InvoiceDetailPage() {
       <div className="tb-canvas">
         {showPay && (
           <div className="tb-section mb-4" style={{borderColor:"#0369A140",background:"#0369A108"}}>
-            <div className="tb-section-title" style={{color:"#60A5FA"}}>Record Payment</div>
+            <div className="tb-section-title" style={{color:"#5B7C8C"}}>Record Payment</div>
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div><label className="text-xs text-tertiary block mb-1">Amount (EGP) *</label><input type="number" className="tb-input w-full" placeholder={`Max: ${fmtEGP(inv.balance_due||0)}`} value={payForm.amount} onChange={e=>setPayForm({...payForm,amount:e.target.value})}/></div>
               <div><label className="text-xs text-tertiary block mb-1">Payment Method</label>
@@ -124,8 +124,8 @@ export default function InvoiceDetailPage() {
           </div>
         )}
         {matchMut.data && (
-          <div className="tb-section mb-4" style={{borderColor:matchMut.data.approved_for_payment?"#34D39940":"#F8717140",background:matchMut.data.approved_for_payment?"#34D39908":"#F8717108"}}>
-            <div className="text-sm font-bold" style={{color:matchMut.data.approved_for_payment?"#34D399":"#F87171"}}>
+          <div className="tb-section mb-4" style={{borderColor:matchMut.data.approved_for_payment?"#547C4D40":"#A84A3D40",background:matchMut.data.approved_for_payment?"#547C4D08":"#A84A3D08"}}>
+            <div className="text-sm font-bold" style={{color:matchMut.data.approved_for_payment?"#547C4D":"#A84A3D"}}>
               {matchMut.data.approved_for_payment?"✅ 3-Way Match PASSED — Ready for Approval":"❌ 3-Way Match FAILED — Review Required"}
             </div>
             <div className="text-xs text-secondary mt-1">{matchMut.data.match_notes}</div>
@@ -176,7 +176,7 @@ export default function InvoiceDetailPage() {
                 </div>
                 {lines.map((line,i)=>{
                   const ms = line.match_status;
-                  const lineColor = ms==="matched"?"#34D399":ms==="qty_mismatch"||ms==="price_mismatch"?"#F87171":"#94A3B8";
+                  const lineColor = ms==="matched"?"#547C4D":ms==="qty_mismatch"||ms==="price_mismatch"?"#A84A3D":"#6D5F53";
                   return (
                     <div key={i} className="tb-table-row" style={{gridTemplateColumns:"1fr 60px 80px 80px 80px 100px 80px",borderLeft:`3px solid ${lineColor}`}}>
                       <div className="text-sm text-primary truncate pr-2">{line.description}</div>
@@ -206,7 +206,7 @@ export default function InvoiceDetailPage() {
                       <div className="text-sm font-semibold text-primary">{fmtEGP(pay.amount||0)}</div>
                       <div className="text-xs text-tertiary">{pay.payment_method?.replace("_"," ")} · {fmtDate(pay.payment_date)} · Ref: {pay.reference_number||"—"}</div>
                     </div>
-                    <span className="tb-badge" style={{background:"#34D39918",color:"#34D399",fontSize:"0.5rem"}}>PAID</span>
+                    <span className="tb-badge" style={{background:"#547C4D18",color:"#547C4D",fontSize:"0.5rem"}}>PAID</span>
                   </div>
                 ))}
                 <div className="pt-2 border-t border-border flex justify-between text-sm font-bold">
@@ -215,7 +215,7 @@ export default function InvoiceDetailPage() {
                 </div>
                 <div className="flex justify-between text-sm font-bold">
                   <span className="text-secondary">Balance Due</span>
-                  <span style={{color:Number(inv.balance_due||0)>0?"#FBBF24":"#34D399"}}>{fmtEGP(inv.balance_due||0)}</span>
+                  <span style={{color:Number(inv.balance_due||0)>0?"#B07A2A":"#547C4D"}}>{fmtEGP(inv.balance_due||0)}</span>
                 </div>
               </div>
             )}
@@ -226,9 +226,9 @@ export default function InvoiceDetailPage() {
             <div className="tb-section-title">3-Way Match Details</div>
             <div className="space-y-3 mt-3">
               {[
-                {label:"Invoice Amount",value:inv.total_amount||0,color:"#60A5FA"},
-                {label:"PO Amount",value:inv.po_total||0,color:"#A78BFA"},
-                {label:"GRN Amount",value:inv.grn_total||0,color:"#FBBF24"},
+                {label:"Invoice Amount",value:inv.total_amount||0,color:"#5B7C8C"},
+                {label:"PO Amount",value:inv.po_total||0,color:"#8D7443"},
+                {label:"GRN Amount",value:inv.grn_total||0,color:"#B07A2A"},
               ].map((row,i)=>(
                 <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-base-alt">
                   <div className="w-3 h-3 rounded-full flex-shrink-0" style={{background:row.color}}/>
@@ -236,13 +236,13 @@ export default function InvoiceDetailPage() {
                   <div className="text-sm font-bold text-primary">{fmtEGP(row.value)}</div>
                 </div>
               ))}
-              <div className="p-4 rounded-xl mt-2" style={{background:inv.match_result==="matched"?"#34D39910":"#F8717110",border:`1px solid ${inv.match_result==="matched"?"#34D39930":"#F8717130"}`}}>
-                <div className="text-sm font-bold mb-1" style={{color:MC[inv.match_result]||"#94A3B8"}}>
+              <div className="p-4 rounded-xl mt-2" style={{background:inv.match_result==="matched"?"#547C4D10":"#A84A3D10",border:`1px solid ${inv.match_result==="matched"?"#547C4D30":"#A84A3D30"}`}}>
+                <div className="text-sm font-bold mb-1" style={{color:MC[inv.match_result]||"#6D5F53"}}>
                   Match Result: {(inv.match_result||"pending").toUpperCase()}
                 </div>
                 <div className="text-xs text-secondary">{inv.match_notes||"Run 3-way match to validate this invoice."}</div>
                 {Number(inv.match_variance_pct||0) > 0 && (
-                  <div className="text-xs mt-1" style={{color:Number(inv.match_variance_pct||0)>2?"#F87171":"#FBBF24"}}>
+                  <div className="text-xs mt-1" style={{color:Number(inv.match_variance_pct||0)>2?"#A84A3D":"#B07A2A"}}>
                     Variance: {inv.match_variance_pct}% {Number(inv.match_variance_pct||0)<=2?"(within tolerance)":"(exceeds 2% tolerance)"}
                   </div>
                 )}

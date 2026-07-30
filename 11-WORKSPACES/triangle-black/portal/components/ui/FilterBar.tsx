@@ -30,7 +30,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
             value={search.value}
             onChange={e => search.onChange(e.target.value)}
             placeholder={search.placeholder || "Search..."}
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-xl
+            className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-stone-200 rounded-xl
               focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400
               placeholder-slate-400 transition-all"
           />
@@ -45,7 +45,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
               key={f.label}
               value={f.value}
               onChange={e => f.onChange(e.target.value)}
-              className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2
+              className="text-xs bg-white border border-stone-200 rounded-xl px-3 py-2
                 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400
                 text-slate-600 font-medium cursor-pointer"
             >

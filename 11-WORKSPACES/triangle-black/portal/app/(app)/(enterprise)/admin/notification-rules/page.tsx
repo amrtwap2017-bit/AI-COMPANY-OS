@@ -5,12 +5,12 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const TYPE_META = {
-  work_order_created:{icon:"🔧",color:"#60A5FA",label:"Work Order Created"},
-  work_order_completed:{icon:"✅",color:"#34D399",label:"Work Order Completed"},
-  contract_expiring:{icon:"⏰",color:"#FBBF24",label:"Contract Expiring"},
-  purchase_request_created:{icon:"🛒",color:"#F97316",label:"PR Created"},
-  pm_overdue:{icon:"📅",color:"#FB923C",label:"PM Overdue"},
-  asset_fault:{icon:"⚙️",color:"#F87171",label:"Asset Fault"},
+  work_order_created:{icon:"🔧",color:"#5B7C8C",label:"Work Order Created"},
+  work_order_completed:{icon:"✅",color:"#547C4D",label:"Work Order Completed"},
+  contract_expiring:{icon:"⏰",color:"#B07A2A",label:"Contract Expiring"},
+  purchase_request_created:{icon:"🛒",color:"#B07A2A",label:"PR Created"},
+  pm_overdue:{icon:"📅",color:"#B07A2A",label:"PM Overdue"},
+  asset_fault:{icon:"⚙️",color:"#A84A3D",label:"Asset Fault"},
 };
 export default function NotificationRulesPage() {
   const router = useRouter();
@@ -19,13 +19,13 @@ export default function NotificationRulesPage() {
   const types = [...new Set(notifs.map(n=>n.type).filter(Boolean))];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0E28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0E28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Admin</div>
           <h1 className="tb-hero-title">Notification Rules</h1>
           <p className="tb-hero-description">{notifs.length} notifications · {types.length} types · {notifs.filter(n=>!n.is_read).length} unread</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:notifs.length,color:"#F1F5F9"},{label:"Unread",value:notifs.filter(n=>!n.is_read).length,color:"#FBBF24"},{label:"Types",value:types.length,color:"#A78BFA"},{label:"Rules Active",value:types.length,color:"#34D399"}].map((k,i)=>(
+            {[{label:"Total",value:notifs.length,color:"#221D1A"},{label:"Unread",value:notifs.filter(n=>!n.is_read).length,color:"#B07A2A"},{label:"Types",value:types.length,color:"#8D7443"},{label:"Rules Active",value:types.length,color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -36,7 +36,7 @@ export default function NotificationRulesPage() {
           <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Notification Types</div><button onClick={()=>router.push("/notifications")} className="tb-section-link">All →</button></div>
           <div className="tb-grid-3 mt-4">
             {types.map((type,i)=>{
-              const meta = TYPE_META[type]||{icon:"🔔",color:"#94A3B8",label:type};
+              const meta = TYPE_META[type]||{icon:"🔔",color:"#6D5F53",label:type};
               const cnt = notifs.filter(n=>n.type===type).length;
               const unread = notifs.filter(n=>n.type===type&&!n.is_read).length;
               return (

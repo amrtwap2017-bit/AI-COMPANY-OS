@@ -18,12 +18,12 @@ const fmtDays = (n) => {
 };
 
 const STATUS_CONFIG = {
-  overdue:   {color:"#F87171",bg:"#F8717110",label:"Overdue",icon:"🚨"},
-  due_soon:  {color:"#FBBF24",bg:"#FBBF2410",label:"Due This Week",icon:"⚠️"},
-  upcoming:  {color:"#60A5FA",bg:"#60A5FA10",label:"Due This Month",icon:"📅"},
-  scheduled: {color:"#34D399",bg:"#34D39910",label:"Scheduled",icon:"✅"},
+  overdue:   {color:"#A84A3D",bg:"#A84A3D10",label:"Overdue",icon:"🚨"},
+  due_soon:  {color:"#B07A2A",bg:"#B07A2A10",label:"Due This Week",icon:"⚠️"},
+  upcoming:  {color:"#5B7C8C",bg:"#5B7C8C10",label:"Due This Month",icon:"📅"},
+  scheduled: {color:"#547C4D",bg:"#547C4D10",label:"Scheduled",icon:"✅"},
 };
-const CRIT_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
+const CRIT_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
 
 export default function MaintenanceSchedulerPage() {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function MaintenanceSchedulerPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -92,7 +92,7 @@ export default function MaintenanceSchedulerPage() {
                 onClick={()=>genMut.mutate()}
                 disabled={genMut.isLoading}
                 className="tb-btn-primary"
-                style={{background:genMut.isLoading?"#4B5563":"#D97706",fontSize:"0.75rem"}}>
+                style={{background:genMut.isLoading?"#4B5563":"#B07A2A",fontSize:"0.75rem"}}>
                 {genMut.isLoading?"Generating…":"⚡ Auto-Generate WOs"}
               </button>
               <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>
@@ -103,8 +103,8 @@ export default function MaintenanceSchedulerPage() {
 
           {/* Generation Result */}
           {genResult && (
-            <div className="mb-4 p-3 rounded-xl" style={{background:genResult.error?"#F8717110":"#34D39910",border:`1px solid ${genResult.error?"#F8717140":"#34D39940"}`}}>
-              <div className="text-sm font-bold" style={{color:genResult.error?"#F87171":"#34D399"}}>
+            <div className="mb-4 p-3 rounded-xl" style={{background:genResult.error?"#A84A3D10":"#547C4D10",border:`1px solid ${genResult.error?"#A84A3D40":"#547C4D40"}`}}>
+              <div className="text-sm font-bold" style={{color:genResult.error?"#A84A3D":"#547C4D"}}>
                 {genResult.error ? `❌ Error: ${genResult.error}` : `✅ ${genResult.message}`}
               </div>
               {genResult.work_orders?.length > 0 && (
@@ -118,10 +118,10 @@ export default function MaintenanceSchedulerPage() {
           {/* KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Overdue",value:assetStats.overdue||0,color:"#F87171",sub:"immediate action"},
-              {label:"Due This Week",value:assetStats.due_week||0,color:"#FBBF24",sub:"schedule now"},
-              {label:"Due This Month",value:assetStats.due_month||0,color:"#60A5FA",sub:"plan ahead"},
-              {label:"WOs Created",value:woStats.created||0,color:"#34D399",sub:`${woStats.completed||0} completed`},
+              {label:"Overdue",value:assetStats.overdue||0,color:"#A84A3D",sub:"immediate action"},
+              {label:"Due This Week",value:assetStats.due_week||0,color:"#B07A2A",sub:"schedule now"},
+              {label:"Due This Month",value:assetStats.due_month||0,color:"#5B7C8C",sub:"plan ahead"},
+              {label:"WOs Created",value:woStats.created||0,color:"#547C4D",sub:`${woStats.completed||0} completed`},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -190,7 +190,7 @@ export default function MaintenanceSchedulerPage() {
               <div className="space-y-2">
                 {filtered.map((asset,i)=>{
                   const cfg = STATUS_CONFIG[asset.schedule_status] || STATUS_CONFIG.scheduled;
-                  const cc = CRIT_COLORS[asset.criticality] || "#94A3B8";
+                  const cc = CRIT_COLORS[asset.criticality] || "#6D5F53";
                   const hasRecentWO = (asset.recent_wo_count||0) > 0;
                   return (
                     <div key={i} className="flex items-center gap-4 p-4 rounded-xl border transition-colors"
@@ -200,7 +200,7 @@ export default function MaintenanceSchedulerPage() {
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                           <span className="text-sm font-bold text-primary truncate">{asset.asset_name}</span>
                           <span className="tb-badge" style={{fontSize:"0.45rem",background:cc+"18",color:cc}}>{asset.criticality}</span>
-                          {hasRecentWO && <span className="tb-badge" style={{fontSize:"0.45rem",background:"#34D39918",color:"#34D399"}}>WO Active</span>}
+                          {hasRecentWO && <span className="tb-badge" style={{fontSize:"0.45rem",background:"#547C4D18",color:"#547C4D"}}>WO Active</span>}
                         </div>
                         <div className="text-xs text-tertiary">{asset.category} · {asset.site_name} · {asset.location_description?.slice(0,40)||"—"}</div>
                       </div>
@@ -225,8 +225,8 @@ export default function MaintenanceSchedulerPage() {
           <div className="space-y-4">
             {/* Overdue */}
             {overdue_cal.length > 0 && (
-              <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
-                <div className="tb-section-title" style={{color:"#F87171"}}>🚨 Overdue ({overdue_cal.length} assets)</div>
+              <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
+                <div className="tb-section-title" style={{color:"#A84A3D"}}>🚨 Overdue ({overdue_cal.length} assets)</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                   {overdue_cal.map((a,i)=>(
                     <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt">
@@ -249,7 +249,7 @@ export default function MaintenanceSchedulerPage() {
                   <div className="tb-section-title">Week of {fmtDate(week)} ({weekAssets.length} assets)</div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                     {weekAssets.map((a,i)=>{
-                      const cc = CRIT_COLORS[a.criticality]||"#94A3B8";
+                      const cc = CRIT_COLORS[a.criticality]||"#6D5F53";
                       return (
                         <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt">
                           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:cc}}/>

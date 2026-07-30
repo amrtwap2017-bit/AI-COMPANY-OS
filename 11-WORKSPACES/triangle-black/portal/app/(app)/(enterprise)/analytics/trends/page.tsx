@@ -14,10 +14,10 @@ const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 const DarkTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"#1E293B",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-      {label && <div style={{fontSize:"0.75rem",color:"#94A3B8",marginBottom:4}}>{label}</div>}
+    <div style={{background:"#332C27",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"#6D5F53",marginBottom:4}}>{label}</div>}
       {payload.map((p: any, i: number) => (
-        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#F1F5F9"}}>
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#221D1A"}}>
           {p.name}: {p.value}
         </div>
       ))}
@@ -75,12 +75,12 @@ export default function AnalyticsTrends() {
 
   // ── Lead pipeline trend ─────────────────────────────────────────────
   const leadStatusData = [
-    {stage:"New",        count:leads.filter(l=>l.status==="new").length,         fill:"#60A5FA"},
-    {stage:"Qualified",  count:leads.filter(l=>l.status==="qualified").length,   fill:"#A78BFA"},
+    {stage:"New",        count:leads.filter(l=>l.status==="new").length,         fill:"#5B7C8C"},
+    {stage:"Qualified",  count:leads.filter(l=>l.status==="qualified").length,   fill:"#8D7443"},
     {stage:"Proposal",   count:leads.filter(l=>l.status==="proposal").length,    fill:"#818CF8"},
-    {stage:"Negotiation",count:leads.filter(l=>l.status==="negotiation").length, fill:"#FBBF24"},
-    {stage:"Won",        count:leads.filter(l=>l.status==="won").length,         fill:"#34D399"},
-    {stage:"Lost",       count:leads.filter(l=>l.status==="lost").length,        fill:"#F87171"},
+    {stage:"Negotiation",count:leads.filter(l=>l.status==="negotiation").length, fill:"#B07A2A"},
+    {stage:"Won",        count:leads.filter(l=>l.status==="won").length,         fill:"#547C4D"},
+    {stage:"Lost",       count:leads.filter(l=>l.status==="lost").length,        fill:"#A84A3D"},
   ];
 
   // ── PM Plan compliance trend (static simulation from real data) ─────
@@ -97,7 +97,7 @@ export default function AnalyticsTrends() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1B30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -108,12 +108,12 @@ export default function AnalyticsTrends() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(6,1fr)"}}>
             {[
-              {label:"WO Completion",   value:`${compRate}%`,  color:compRate>=85?"#34D399":"#FBBF24"},
-              {label:"Collection Rate", value:`${collRate}%`,  color:collRate>=90?"#34D399":"#FBBF24"},
-              {label:"PM Compliance",   value:`${pmCompliance}%`, color:pmCompliance>=90?"#34D399":"#FBBF24"},
-              {label:"Total WOs",       value:wos.length,      color:"#60A5FA"},
-              {label:"Active Leads",    value:leads.filter(l=>l.status!=="won"&&l.status!=="lost").length, color:"#A78BFA"},
-              {label:"PM Overdue",      value:pmOverdue,       color:pmOverdue>0?"#F87171":"#34D399"},
+              {label:"WO Completion",   value:`${compRate}%`,  color:compRate>=85?"#547C4D":"#B07A2A"},
+              {label:"Collection Rate", value:`${collRate}%`,  color:collRate>=90?"#547C4D":"#B07A2A"},
+              {label:"PM Compliance",   value:`${pmCompliance}%`, color:pmCompliance>=90?"#547C4D":"#B07A2A"},
+              {label:"Total WOs",       value:wos.length,      color:"#5B7C8C"},
+              {label:"Active Leads",    value:leads.filter(l=>l.status!=="won"&&l.status!=="lost").length, color:"#8D7443"},
+              {label:"PM Overdue",      value:pmOverdue,       color:pmOverdue>0?"#A84A3D":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.125rem"}}>{k.value}</div>
@@ -140,22 +140,22 @@ export default function AnalyticsTrends() {
               <AreaChart data={woTrendData}>
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#60A5FA" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#5B7C8C" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#5B7C8C" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#34D399" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#34D399" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#547C4D" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#547C4D" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} vertical={false}/>
                 <XAxis dataKey="month" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <Tooltip content={<DarkTooltip/>}/>
-                <Legend formatter={(v)=><span style={{color:"#94A3B8",fontSize:"0.75rem"}}>{v}</span>}/>
-                <Area type="monotone" dataKey="total"     name="Total WOs"     stroke="#60A5FA" fill="url(#colorTotal)"     strokeWidth={2}/>
-                <Area type="monotone" dataKey="completed" name="Completed"      stroke="#34D399" fill="url(#colorCompleted)" strokeWidth={2}/>
-                <Line type="monotone" dataKey="critical"  name="Critical"       stroke="#F87171" strokeWidth={2} dot={{r:3,fill:"#F87171"}}/>
+                <Legend formatter={(v)=><span style={{color:"#6D5F53",fontSize:"0.75rem"}}>{v}</span>}/>
+                <Area type="monotone" dataKey="total"     name="Total WOs"     stroke="#5B7C8C" fill="url(#colorTotal)"     strokeWidth={2}/>
+                <Area type="monotone" dataKey="completed" name="Completed"      stroke="#547C4D" fill="url(#colorCompleted)" strokeWidth={2}/>
+                <Line type="monotone" dataKey="critical"  name="Critical"       stroke="#A84A3D" strokeWidth={2} dot={{r:3,fill:"#A84A3D"}}/>
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -185,8 +185,8 @@ export default function AnalyticsTrends() {
                   <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}
                     tickFormatter={v=>v>=1000?`${Math.round(v/1000)}k`:v}/>
                   <Tooltip content={<DarkTooltip/>}/>
-                  <Bar dataKey="paid"    name="Paid"    fill="#34D399" radius={[4,4,0,0]} stackId="a"/>
-                  <Bar dataKey="pending" name="Pending" fill="#FBBF24" radius={[4,4,0,0]} stackId="a"/>
+                  <Bar dataKey="paid"    name="Paid"    fill="#547C4D" radius={[4,4,0,0]} stackId="a"/>
+                  <Bar dataKey="pending" name="Pending" fill="#B07A2A" radius={[4,4,0,0]} stackId="a"/>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -222,12 +222,12 @@ export default function AnalyticsTrends() {
           <div className="tb-section-title">Platform KPI Trends — Current Period</div>
           <div className="tb-grid-3">
             {[
-              {label:"WO Completion Rate",    value:compRate,     target:85,  color:"#34D399", path:"/operations/work-orders",   unit:"%"},
-              {label:"Invoice Collection",    value:collRate,     target:90,  color:"#FBBF24", path:"/invoices",                 unit:"%"},
-              {label:"PM Plan Compliance",    value:pmCompliance, target:90,  color:"#A78BFA", path:"/maintenance/pm-plans",     unit:"%"},
-              {label:"Asset Uptime",          value:100,          target:95,  color:"#60A5FA", path:"/maintenance/assets",       unit:"%"},
-              {label:"Contract Active Rate",  value:Math.round(43/72*100), target:60, color:"#F97316", path:"/commercial/contracts", unit:"%"},
-              {label:"Lead Conversion",       value:leads.length>0?Math.round(leads.filter(l=>l.status==="won").length/leads.length*100):0, target:20, color:"#34D399", path:"/commercial/leads", unit:"%"},
+              {label:"WO Completion Rate",    value:compRate,     target:85,  color:"#547C4D", path:"/operations/work-orders",   unit:"%"},
+              {label:"Invoice Collection",    value:collRate,     target:90,  color:"#B07A2A", path:"/invoices",                 unit:"%"},
+              {label:"PM Plan Compliance",    value:pmCompliance, target:90,  color:"#8D7443", path:"/maintenance/pm-plans",     unit:"%"},
+              {label:"Asset Uptime",          value:100,          target:95,  color:"#5B7C8C", path:"/maintenance/assets",       unit:"%"},
+              {label:"Contract Active Rate",  value:Math.round(43/72*100), target:60, color:"#B07A2A", path:"/commercial/contracts", unit:"%"},
+              {label:"Lead Conversion",       value:leads.length>0?Math.round(leads.filter(l=>l.status==="won").length/leads.length*100):0, target:20, color:"#547C4D", path:"/commercial/leads", unit:"%"},
             ].map((k,i)=>{
               const isGood = k.value >= k.target;
               return (
@@ -244,7 +244,7 @@ export default function AnalyticsTrends() {
                     </div>
                   </div>
                   <div className="tb-progress">
-                    <div className="tb-progress-bar" style={{background:isGood?k.color:"#F87171",width:`${Math.min(k.value,100)}%`}}/>
+                    <div className="tb-progress-bar" style={{background:isGood?k.color:"#A84A3D",width:`${Math.min(k.value,100)}%`}}/>
                   </div>
                 </button>
               );

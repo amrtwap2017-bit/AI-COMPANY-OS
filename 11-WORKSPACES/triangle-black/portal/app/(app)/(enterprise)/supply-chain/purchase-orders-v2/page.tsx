@@ -35,7 +35,7 @@ export default function PurchaseOrdersV2Page() {
   const totalValue = filtered.reduce((s,p)=>s+Number(p.total_amount||0),0);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <div>
@@ -50,7 +50,7 @@ export default function PurchaseOrdersV2Page() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total POs",value:pos.length,color:"#F1F5F9"},
+              {label:"Total POs",value:pos.length,color:"#221D1A"},
               {label:"Pending",value:pos.filter(p=>p.status==="pending_approval").length,color:"#B07A2A"},
               {label:"Approved",value:pos.filter(p=>p.status==="approved").length,color:"#547C4D"},
               {label:"Total Value",value:fmtEGP(pos.reduce((s,p)=>s+Number(p.total_amount||0),0)),color:"#8D7443"},

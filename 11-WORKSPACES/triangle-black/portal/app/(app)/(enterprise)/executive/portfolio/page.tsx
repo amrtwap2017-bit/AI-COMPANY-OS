@@ -19,13 +19,13 @@ export default function PortfolioPage() {
   const expiringSoon = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Executive</div>
           <h1 className="tb-hero-title">Portfolio</h1>
           <p className="tb-hero-description">Active contracts, projects and revenue overview</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Active Contracts",value:activeContracts.length,color:"#34D399"},{label:"Portfolio Value",value:fmtEGP(contractValue),color:"#FBBF24"},{label:"Active Projects",value:projects.filter(p=>p.status==="active").length,color:"#60A5FA"},{label:"Revenue",value:fmtEGP(revenue),color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Active Contracts",value:activeContracts.length,color:"#547C4D"},{label:"Portfolio Value",value:fmtEGP(contractValue),color:"#B07A2A"},{label:"Active Projects",value:projects.filter(p=>p.status==="active").length,color:"#5B7C8C"},{label:"Revenue",value:fmtEGP(revenue),color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -33,8 +33,8 @@ export default function PortfolioPage() {
       </div>
       <div className="tb-canvas">
         {expiringSoon.length>0 && (
-          <div className="tb-section" style={{borderColor:"#FBBF2440",background:"#FBBF2408"}}>
-            <div className="flex items-center gap-2"><span>⏰</span><span className="text-sm font-semibold" style={{color:"#FBBF24"}}>{expiringSoon.length} contract{expiringSoon.length>1?"s":""} expiring within 30 days</span><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link ml-auto">View →</button></div>
+          <div className="tb-section" style={{borderColor:"#B07A2A40",background:"#B07A2A08"}}>
+            <div className="flex items-center gap-2"><span>⏰</span><span className="text-sm font-semibold" style={{color:"#B07A2A"}}>{expiringSoon.length} contract{expiringSoon.length>1?"s":""} expiring within 30 days</span><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link ml-auto">View →</button></div>
           </div>
         )}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

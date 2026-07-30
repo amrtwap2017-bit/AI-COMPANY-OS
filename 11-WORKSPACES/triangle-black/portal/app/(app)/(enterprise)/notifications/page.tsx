@@ -18,10 +18,10 @@ const fmtRelative = (d) => {
 };
 
 const TYPE_CONFIG = {
-  alert:   {icon:"🚨",color:"#F87171",bg:"#F8717110"},
-  warning: {icon:"⚠️",color:"#FBBF24",bg:"#FBBF2410"},
-  info:    {icon:"ℹ️",color:"#60A5FA",bg:"#60A5FA10"},
-  success: {icon:"✅",color:"#34D399",bg:"#34D39910"},
+  alert:   {icon:"🚨",color:"#A84A3D",bg:"#A84A3D10"},
+  warning: {icon:"⚠️",color:"#B07A2A",bg:"#B07A2A10"},
+  info:    {icon:"ℹ️",color:"#5B7C8C",bg:"#5B7C8C10"},
+  success: {icon:"✅",color:"#547C4D",bg:"#547C4D10"},
 };
 
 export default function NotificationsPage() {
@@ -54,7 +54,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0A1530 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -76,10 +76,10 @@ export default function NotificationsPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total",value:notifications.length,color:"#F1F5F9"},
-              {label:"Unread",value:unread,color:unread>0?"#FBBF24":"#34D399"},
-              {label:"Alerts",value:notifications.filter(n=>n.type==="alert").length,color:"#F87171"},
-              {label:"Critical",value:notifications.filter(n=>n.priority==="critical").length,color:notifications.filter(n=>n.priority==="critical").length>0?"#F87171":"#34D399"},
+              {label:"Total",value:notifications.length,color:"#221D1A"},
+              {label:"Unread",value:unread,color:unread>0?"#B07A2A":"#547C4D"},
+              {label:"Alerts",value:notifications.filter(n=>n.type==="alert").length,color:"#A84A3D"},
+              {label:"Critical",value:notifications.filter(n=>n.priority==="critical").length,color:notifications.filter(n=>n.priority==="critical").length>0?"#A84A3D":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -92,7 +92,7 @@ export default function NotificationsPage() {
 
       <div className="tb-canvas">
         {generateMut.data && (
-          <div className="tb-section mb-4" style={{borderColor:"#34D39940",background:"#34D39908"}}>
+          <div className="tb-section mb-4" style={{borderColor:"#547C4D40",background:"#547C4D08"}}>
             <div className="text-sm font-bold text-emerald-400">
               ✅ Scan complete — {generateMut.data.created} new notifications generated
             </div>
@@ -147,7 +147,7 @@ export default function NotificationsPage() {
                           {notif.type}
                         </span>
                         {notif.priority === "critical" && (
-                          <span className="tb-badge" style={{fontSize:"0.45rem",background:"#F8717118",color:"#F87171"}}>CRITICAL</span>
+                          <span className="tb-badge" style={{fontSize:"0.45rem",background:"#A84A3D18",color:"#A84A3D"}}>CRITICAL</span>
                         )}
                         {notif.entity_url && (
                           <span className="text-xs text-brand ml-auto">View →</span>

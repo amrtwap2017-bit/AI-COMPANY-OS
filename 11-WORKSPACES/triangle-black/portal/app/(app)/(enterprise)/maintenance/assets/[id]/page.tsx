@@ -8,10 +8,10 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR = {
-  Operational:"#34D399", "In Fault":"#F87171", "Under Maintenance":"#FBBF24", Inactive:"#94A3B8"
+  Operational:"#547C4D", "In Fault":"#A84A3D", "Under Maintenance":"#B07A2A", Inactive:"#6D5F53"
 };
-const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
-const WO_STATUS_COLOR = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"#94A3B8" };
+const PRIORITY_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" };
+const WO_STATUS_COLOR = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D", cancelled:"#6D5F53" };
 
 export default function AssetDetailPage() {
   const router = useRouter();
@@ -40,14 +40,14 @@ export default function AssetDetailPage() {
     </div>
   );
 
-  const sc   = STATUS_COLOR[asset.status] || "#94A3B8";
+  const sc   = STATUS_COLOR[asset.status] || "#6D5F53";
   const wos  = asset.work_orders || [];
   const pms  = asset.pm_plans || [];
   const openWOs = wos.filter(w => w.status !== "completed").length;
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -64,9 +64,9 @@ export default function AssetDetailPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Status",       value:asset.status||"—",       color:sc },
-              { label:"Category",     value:asset.category||"—",     color:"#60A5FA" },
-              { label:"Work Orders",  value:wos.length,               color:openWOs>0?"#FBBF24":"#34D399" },
-              { label:"PM Plans",     value:pms.length,               color:"#A78BFA" },
+              { label:"Category",     value:asset.category||"—",     color:"#5B7C8C" },
+              { label:"Work Orders",  value:wos.length,               color:openWOs>0?"#B07A2A":"#547C4D" },
+              { label:"PM Plans",     value:pms.length,               color:"#8D7443" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -118,8 +118,8 @@ export default function AssetDetailPage() {
                     ))}
                   </div>
                   {wos.map((wo, i) => {
-                    const pc  = PRIORITY_COLOR[wo.priority]  || "#94A3B8";
-                    const wsc = WO_STATUS_COLOR[wo.status]   || "#94A3B8";
+                    const pc  = PRIORITY_COLOR[wo.priority]  || "#6D5F53";
+                    const wsc = WO_STATUS_COLOR[wo.status]   || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
@@ -190,8 +190,8 @@ export default function AssetDetailPage() {
                 )}
               </div>
               {openWOs > 0 && (
-                <div className="mt-2 p-2 rounded-lg text-center" style={{background:"#FBBF2410",border:"1px solid #FBBF2430"}}>
-                  <div className="text-xs" style={{color:"#FBBF24"}}>{openWOs} active work order{openWOs>1?"s":""}</div>
+                <div className="mt-2 p-2 rounded-lg text-center" style={{background:"#B07A2A10",border:"1px solid #B07A2A30"}}>
+                  <div className="text-xs" style={{color:"#B07A2A"}}>{openWOs} active work order{openWOs>1?"s":""}</div>
                 </div>
               )}
             </div>

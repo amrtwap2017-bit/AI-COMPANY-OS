@@ -29,12 +29,12 @@ export default function NewWorkOrderPage() {
     { onSuccess: (data) => { if (data.id) router.push("/operations/work-orders/"+data.id); } }
   );
 
-  const PRIORITY_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
-  const pc = PRIORITY_COLORS[form.priority] || "#94A3B8";
+  const PRIORITY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
+  const pc = PRIORITY_COLORS[form.priority] || "#6D5F53";
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn-secondary">← Work Orders</button>

@@ -10,11 +10,11 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_CONFIG = {
-  "Operational":       { color:"#34D399", bg:"rgba(16,185,129,0.1)",  border:"rgba(16,185,129,0.2)" },
-  "In Fault":          { color:"#F87171", bg:"rgba(239,68,68,0.1)",   border:"rgba(239,68,68,0.2)" },
-  "Under Maintenance": { color:"#FBBF24", bg:"rgba(245,158,11,0.1)",  border:"rgba(245,158,11,0.2)" },
+  "Operational":       { color:"#547C4D", bg:"rgba(16,185,129,0.1)",  border:"rgba(16,185,129,0.2)" },
+  "In Fault":          { color:"#A84A3D", bg:"rgba(239,68,68,0.1)",   border:"rgba(239,68,68,0.2)" },
+  "Under Maintenance": { color:"#B07A2A", bg:"rgba(245,158,11,0.1)",  border:"rgba(245,158,11,0.2)" },
 };
-const CRIT_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"rgba(148,163,184,0.4)" };
+const CRIT_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"rgba(148,163,184,0.4)" };
 
 export default function AssetsPage() {
   const router = useRouter();
@@ -49,7 +49,7 @@ export default function AssetsPage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A0A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0A0A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -58,18 +58,18 @@ export default function AssetsPage() {
               <p className="tb-hero-description">{assets.length} assets · {critical.length} critical · {uptimePct}% uptime</p>
             </div>
             <div className={`tb-score-badge ${score>=95?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-              <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{uptimePct}%</div>
+              <div className="tb-score-value" style={{color:score>=95?"#547C4D":"#B07A2A"}}>{uptimePct}%</div>
               <div className="tb-score-label">Uptime</div>
             </div>
           </div>
           <div className="tb-grid-6 mt-6">
             {[
               {label:"Total",      value:assets.length,         color:"rgba(148,163,184,0.9)"},
-              {label:"Operational",value:operational.length,    color:"#34D399"},
-              {label:"In Fault",   value:faulted.length,        color:faulted.length>0?"#F87171":"#34D399"},
-              {label:"Maintenance",value:underMaint.length,     color:"#FBBF24"},
-              {label:"Critical",   value:critical.length,       color:"#F87171"},
-              {label:"Overdue Svc",value:overdueService.length, color:overdueService.length>0?"#F87171":"#34D399"},
+              {label:"Operational",value:operational.length,    color:"#547C4D"},
+              {label:"In Fault",   value:faulted.length,        color:faulted.length>0?"#A84A3D":"#547C4D"},
+              {label:"Maintenance",value:underMaint.length,     color:"#B07A2A"},
+              {label:"Critical",   value:critical.length,       color:"#A84A3D"},
+              {label:"Overdue Svc",value:overdueService.length, color:overdueService.length>0?"#A84A3D":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -87,7 +87,7 @@ export default function AssetsPage() {
             <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
               {faulted.length} Asset{faulted.length>1?"s":""} In Fault — {faulted.slice(0,2).map(a=>a.name).join(" · ")}
             </div>
-            <button onClick={()=>router.push("/maintenance/actions")} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
+            <button onClick={()=>router.push("/maintenance/actions")} className="tb-ai-insight-action" style={{color:"#A84A3D",borderColor:"rgba(239,68,68,0.3)"}}>
               View Faults →
             </button>
           </div>

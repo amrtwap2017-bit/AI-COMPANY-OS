@@ -27,7 +27,7 @@ function toneClasses(item: InboxItem) {
   if (item.followUp === "done") return "border-emerald-200 bg-emerald-50";
   if (item.followUp === "in_progress") return "border-amber-200 bg-amber-50";
   if (item.unread) return "border-sky-200 bg-sky-50";
-  return "border-slate-200 bg-slate-50";
+  return "border-stone-200 bg-slate-50";
 }
 
 export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
@@ -42,7 +42,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
   } = props;
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Notification Inbox
@@ -52,7 +52,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
+        <div className="mt-5 rounded-2xl border border-dashed border-stone-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
           No notifications are currently available.
         </div>
       ) : (
@@ -69,10 +69,10 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                    <span className="rounded-full border border-stone-200 bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
                       {item.acknowledged ? "acknowledged" : "unacknowledged"}
                     </span>
-                    <span className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                    <span className="rounded-full border border-stone-200 bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
                       {item.followUp}
                     </span>
                   </div>
@@ -85,7 +85,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
                     <button
                       type="button"
                       onClick={() => onMarkRead(item.id)}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                      className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
                     >
                       Mark read
                     </button>
@@ -94,7 +94,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
                   <button
                     type="button"
                     onClick={() => onToggleAcknowledged(item.id, !item.acknowledged)}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
                   >
                     {item.acknowledged ? "Unacknowledge" : "Acknowledge"}
                   </button>
@@ -102,7 +102,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
                   <button
                     type="button"
                     onClick={() => onSetFollowUp(item.id, "planned")}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
                   >
                     Plan
                   </button>
@@ -110,7 +110,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
                   <button
                     type="button"
                     onClick={() => onSetFollowUp(item.id, "in_progress")}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
                   >
                     In Progress
                   </button>
@@ -118,7 +118,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
                   <button
                     type="button"
                     onClick={() => onSetFollowUp(item.id, "done")}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
                   >
                     Done
                   </button>

@@ -45,11 +45,11 @@ export function ConfirmDialog({
           justify-center mb-4 ${colors.icon}`}>
           <AlertTriangle className="w-6 h-6" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>
+        <h3 className="text-lg font-bold text-stone-900 mb-2">{title}</h3>
         <p className="text-sm text-secondary mb-6">{description}</p>
         <div className="flex gap-3">
           <button onClick={onCancel}
-            className="flex-1 px-4 py-2 rounded-xl border border-slate-200
+            className="flex-1 px-4 py-2 rounded-xl border border-stone-200
               text-slate-700 text-sm font-medium hover:bg-slate-50">
             {cancelText}
           </button>

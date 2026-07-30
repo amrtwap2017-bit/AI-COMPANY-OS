@@ -24,9 +24,9 @@ const fmtRelative = (d) => {
   } catch { return ""; }
 };
 
-const PRIORITY_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
-const STATUS_COLORS = {open:"#60A5FA",in_progress:"#FBBF24",completed:"#34D399",cancelled:"#94A3B8"};
-const URGENCY_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
+const PRIORITY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
+const STATUS_COLORS = {open:"#5B7C8C",in_progress:"#B07A2A",completed:"#547C4D",cancelled:"#6D5F53"};
+const URGENCY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
 
 export default function ExecutiveDashboardPage() {
   const router = useRouter();
@@ -95,9 +95,9 @@ export default function ExecutiveDashboardPage() {
             </div>
             <div className="flex gap-2">
               {totalAlerts > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{background:"#F8717118",border:"1px solid #F8717140"}}>
-                  <span style={{color:"#F87171",fontSize:"1.25rem"}}>⚠</span>
-                  <span className="text-sm font-bold" style={{color:"#F87171"}}>{totalAlerts} Alerts</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{background:"#A84A3D18",border:"1px solid #A84A3D40"}}>
+                  <span style={{color:"#A84A3D",fontSize:"1.25rem"}}>⚠</span>
+                  <span className="text-sm font-bold" style={{color:"#A84A3D"}}>{totalAlerts} Alerts</span>
                 </div>
               )}
               <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>
@@ -113,7 +113,7 @@ export default function ExecutiveDashboardPage() {
                 label:"Open Work Orders",
                 value: wo.open_count || 0,
                 sub: `${wo.critical_open||0} critical · ${wo.overdue||0} overdue`,
-                color: (wo.critical_open||0) > 0 ? "#F87171" : "#60A5FA",
+                color: (wo.critical_open||0) > 0 ? "#A84A3D" : "#5B7C8C",
                 icon:"🔧",
                 path:"/operations/work-orders"
               },
@@ -121,7 +121,7 @@ export default function ExecutiveDashboardPage() {
                 label:"Revenue Collected",
                 value: fmtEGP(inv.collected||0),
                 sub: `EGP ${Number(inv.outstanding||0).toLocaleString()} outstanding`,
-                color:"#34D399",
+                color:"#547C4D",
                 icon:"💰",
                 path:"/supply-chain/invoices"
               },
@@ -129,7 +129,7 @@ export default function ExecutiveDashboardPage() {
                 label:"Active Projects",
                 value: proj.active || 0,
                 sub: `EGP ${Number(proj.total_budget||0).toLocaleString()} budget · ${Math.round(proj.avg_completion||0)}% avg`,
-                color:"#A78BFA",
+                color:"#8D7443",
                 icon:"🏗️",
                 path:"/projects"
               },
@@ -137,7 +137,7 @@ export default function ExecutiveDashboardPage() {
                 label:"Service Requests",
                 value: sr.open_count || 0,
                 sub: `${sr.critical||0} critical · ${sr.high_urgency||0} high`,
-                color: (sr.critical||0) > 0 ? "#FB923C" : "#FBBF24",
+                color: (sr.critical||0) > 0 ? "#B07A2A" : "#B07A2A",
                 icon:"🎫",
                 path:"/operations/service-requests"
               },
@@ -169,10 +169,10 @@ export default function ExecutiveDashboardPage() {
               </div>
               <div className="grid grid-cols-4 gap-3">
                 {[
-                  {label:"Total",value:wo.total||0,color:"#F1F5F9"},
-                  {label:"Open",value:wo.open_count||0,color:"#60A5FA"},
-                  {label:"In Progress",value:wo.in_progress||0,color:"#FBBF24"},
-                  {label:"Completed",value:wo.completed||0,color:"#34D399"},
+                  {label:"Total",value:wo.total||0,color:"#221D1A"},
+                  {label:"Open",value:wo.open_count||0,color:"#5B7C8C"},
+                  {label:"In Progress",value:wo.in_progress||0,color:"#B07A2A"},
+                  {label:"Completed",value:wo.completed||0,color:"#547C4D"},
                 ].map((s,i)=>(
                   <div key={i} className="p-3 rounded-xl bg-base-alt text-center">
                     <div className="text-2xl font-black" style={{color:s.color}}>{s.value}</div>
@@ -183,9 +183,9 @@ export default function ExecutiveDashboardPage() {
               {/* Progress bar */}
               <div className="mt-3 h-2 rounded-full bg-base-alt overflow-hidden flex">
                 {wo.total > 0 && <>
-                  <div style={{width:`${(wo.open_count||0)/wo.total*100}%`,background:"#60A5FA"}}/>
-                  <div style={{width:`${(wo.in_progress||0)/wo.total*100}%`,background:"#FBBF24"}}/>
-                  <div style={{width:`${(wo.completed||0)/wo.total*100}%`,background:"#34D399"}}/>
+                  <div style={{width:`${(wo.open_count||0)/wo.total*100}%`,background:"#5B7C8C"}}/>
+                  <div style={{width:`${(wo.in_progress||0)/wo.total*100}%`,background:"#B07A2A"}}/>
+                  <div style={{width:`${(wo.completed||0)/wo.total*100}%`,background:"#547C4D"}}/>
                 </>}
               </div>
             </div>
@@ -194,20 +194,20 @@ export default function ExecutiveDashboardPage() {
             {(ops.critical_work_orders||[]).length > 0 && (
               <div className="tb-section">
                 <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#F87171"}}>⚠ Critical Work Orders</div>
-                  <span className="tb-badge" style={{background:"#F8717118",color:"#F87171",fontSize:"0.5rem"}}>{(ops.critical_work_orders||[]).length} ACTIVE</span>
+                  <div className="tb-section-title" style={{marginBottom:0,color:"#A84A3D"}}>⚠ Critical Work Orders</div>
+                  <span className="tb-badge" style={{background:"#A84A3D18",color:"#A84A3D",fontSize:"0.5rem"}}>{(ops.critical_work_orders||[]).length} ACTIVE</span>
                 </div>
                 <div className="space-y-2">
                   {(ops.critical_work_orders||[]).map((wo_item,i)=>(
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo_item.id)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface border border-red-400/20 transition-colors text-left">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:"#F87171"}}/>
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:"#A84A3D"}}/>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-primary truncate">{wo_item.title}</div>
                         <div className="text-xs text-tertiary">{wo_item.site_name||"—"} · {wo_item.technician_name||"Unassigned"}</div>
                       </div>
                       <div className="flex-shrink-0 text-right">
-                        <span className="tb-badge" style={{background:"#FBBF2418",color:wo_item.status==="in_progress"?"#FBBF24":"#60A5FA",fontSize:"0.45rem"}}>
+                        <span className="tb-badge" style={{background:"#B07A2A18",color:wo_item.status==="in_progress"?"#B07A2A":"#5B7C8C",fontSize:"0.45rem"}}>
                           {(wo_item.status||"").replace(/_/g," ")}
                         </span>
                         <div className="text-xs text-tertiary mt-0.5">{fmtDate(wo_item.due_date)}</div>
@@ -229,7 +229,7 @@ export default function ExecutiveDashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {(ops.recent_service_requests||[]).map((sr_item,i)=>{
-                    const uc = URGENCY_COLORS[sr_item.urgency]||"#94A3B8";
+                    const uc = URGENCY_COLORS[sr_item.urgency]||"#6D5F53";
                     return (
                       <button key={i} onClick={()=>router.push("/operations/service-requests/"+sr_item.id)}
                         className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left">
@@ -255,10 +255,10 @@ export default function ExecutiveDashboardPage() {
               <div className="tb-section-title">Financial Snapshot</div>
               <div className="space-y-3">
                 {[
-                  {label:"Total Invoiced",value:fmtEGP(inv.total_value||0),color:"#60A5FA"},
-                  {label:"Collected",value:fmtEGP(inv.collected||0),color:"#34D399"},
-                  {label:"Outstanding",value:fmtEGP(inv.outstanding||0),color:(inv.outstanding||0)>0?"#FBBF24":"#34D399"},
-                  {label:"Overdue Invoices",value:`${inv.overdue_count||0} invoices`,color:(inv.overdue_count||0)>0?"#F87171":"#34D399"},
+                  {label:"Total Invoiced",value:fmtEGP(inv.total_value||0),color:"#5B7C8C"},
+                  {label:"Collected",value:fmtEGP(inv.collected||0),color:"#547C4D"},
+                  {label:"Outstanding",value:fmtEGP(inv.outstanding||0),color:(inv.outstanding||0)>0?"#B07A2A":"#547C4D"},
+                  {label:"Overdue Invoices",value:`${inv.overdue_count||0} invoices`,color:(inv.overdue_count||0)>0?"#A84A3D":"#547C4D"},
                 ].map((row,i)=>(
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border">
                     <span className="text-xs text-tertiary">{row.label}</span>
@@ -285,7 +285,7 @@ export default function ExecutiveDashboardPage() {
                           <div className="text-xs font-semibold text-primary">{inv_item.invoice_number}</div>
                           <div className="text-xs text-tertiary">{overdue?"⚠ OVERDUE ":""}Due: {fmtDate(inv_item.due_date)}</div>
                         </div>
-                        <div className="text-sm font-black" style={{color:overdue?"#F87171":"#FBBF24"}}>
+                        <div className="text-sm font-black" style={{color:overdue?"#A84A3D":"#B07A2A"}}>
                           {fmtEGP(inv_item.balance_due||0)}
                         </div>
                       </button>
@@ -298,13 +298,13 @@ export default function ExecutiveDashboardPage() {
             {/* Assets Maintenance Due */}
             {(ops.maintenance_due||[]).length > 0 && (
               <div className="tb-section">
-                <div className="tb-section-title" style={{color:"#FBBF24"}}>🔩 Maintenance Due</div>
+                <div className="tb-section-title" style={{color:"#B07A2A"}}>🔩 Maintenance Due</div>
                 <div className="space-y-2 mt-2">
                   {(ops.maintenance_due||[]).map((a,i)=>{
                     const overdue = a.next_maintenance_date && new Date(a.next_maintenance_date) < new Date();
                     return (
                       <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-base-alt">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:overdue?"#F87171":"#FBBF24"}}/>
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:overdue?"#A84A3D":"#B07A2A"}}/>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-semibold text-primary truncate">{a.name}</div>
                           <div className="text-xs text-tertiary">{a.category} · {fmtDate(a.next_maintenance_date)}</div>
@@ -321,9 +321,9 @@ export default function ExecutiveDashboardPage() {
               <div className="tb-section-title">Projects</div>
               <div className="space-y-2 mt-2">
                 {[
-                  {label:"Active",value:proj.active||0,color:"#34D399"},
-                  {label:"Total Budget",value:fmtEGP(proj.total_budget||0),color:"#A78BFA"},
-                  {label:"Avg Progress",value:`${Math.round(proj.avg_completion||0)}%`,color:"#60A5FA"},
+                  {label:"Active",value:proj.active||0,color:"#547C4D"},
+                  {label:"Total Budget",value:fmtEGP(proj.total_budget||0),color:"#8D7443"},
+                  {label:"Avg Progress",value:`${Math.round(proj.avg_completion||0)}%`,color:"#5B7C8C"},
                 ].map((row,i)=>(
                   <div key={i} className="flex justify-between text-xs py-1.5 border-b border-border">
                     <span className="text-tertiary">{row.label}</span>
@@ -347,7 +347,7 @@ export default function ExecutiveDashboardPage() {
             </div>
             <div className="space-y-2">
               {siteSla.map((site,i) => {
-                const gc = site.sla_grade==="A"?"#34D399":site.sla_grade==="B"?"#60A5FA":site.sla_grade==="C"?"#FBBF24":"#F87171";
+                const gc = site.sla_grade==="A"?"#547C4D":site.sla_grade==="B"?"#5B7C8C":site.sla_grade==="C"?"#B07A2A":"#A84A3D";
                 return (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0" style={{background:gc+"20",color:gc}}>
@@ -394,7 +394,7 @@ export default function ExecutiveDashboardPage() {
             <div className="space-y-1.5">
               {topTechs.map((tech,i) => (
                 <div key={i} className="flex items-center gap-2 py-1.5">
-                  <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-black flex-shrink-0" style={{background:"rgba(255,255,255,0.05)",color:"#94A3B8"}}>
+                  <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-black flex-shrink-0" style={{background:"rgba(255,255,255,0.05)",color:"#6D5F53"}}>
                     {i+1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -418,11 +418,11 @@ export default function ExecutiveDashboardPage() {
             </div>
             <div className="space-y-3">
               {[
-                {label:"Active SOWs",value:proc.sow?.total||0,sub:`${proc.sow?.pending||0} pending approval`,color:"#60A5FA"},
-                {label:"Active RFQs",value:proc.rfqs?.total||0,sub:`${proc.rfqs?.with_quotes||0} with vendor quotes`,color:"#FBBF24"},
-                {label:"Purchase Orders",value:proc.pos?.total||0,sub:fmtEGP(poSpend)+" total value",color:"#A78BFA"},
-                {label:"Goods Received",value:proc.grns?.total||0,sub:"deliveries accepted",color:"#34D399"},
-                {label:"Approved Vendors",value:proc.vendors?.approved||0,sub:`of ${proc.vendors?.total||0} total vendors`,color:"#34D399"},
+                {label:"Active SOWs",value:proc.sow?.total||0,sub:`${proc.sow?.pending||0} pending approval`,color:"#5B7C8C"},
+                {label:"Active RFQs",value:proc.rfqs?.total||0,sub:`${proc.rfqs?.with_quotes||0} with vendor quotes`,color:"#B07A2A"},
+                {label:"Purchase Orders",value:proc.pos?.total||0,sub:fmtEGP(poSpend)+" total value",color:"#8D7443"},
+                {label:"Goods Received",value:proc.grns?.total||0,sub:"deliveries accepted",color:"#547C4D"},
+                {label:"Approved Vendors",value:proc.vendors?.approved||0,sub:`of ${proc.vendors?.total||0} total vendors`,color:"#547C4D"},
               ].map((row,i)=>(
                 <div key={i} className="flex items-center justify-between py-2 border-b border-border">
                   <div>
@@ -436,9 +436,9 @@ export default function ExecutiveDashboardPage() {
             {pendingApprovals > 0 && (
               <button onClick={()=>router.push("/supply-chain/approvals-center")}
                 className="w-full mt-3 flex items-center justify-center gap-2 p-2 rounded-xl transition-colors"
-                style={{background:"#FBBF2410",border:"1px solid #FBBF2430"}}>
-                <span style={{color:"#FBBF24",fontSize:"0.8rem"}}>✍</span>
-                <span className="text-xs font-bold" style={{color:"#FBBF24"}}>{pendingApprovals} Pending Approvals</span>
+                style={{background:"#B07A2A10",border:"1px solid #B07A2A30"}}>
+                <span style={{color:"#B07A2A",fontSize:"0.8rem"}}>✍</span>
+                <span className="text-xs font-bold" style={{color:"#B07A2A"}}>{pendingApprovals} Pending Approvals</span>
               </button>
             )}
           </div>

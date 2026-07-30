@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const PC = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"};
-const SC = {open:"#60A5FA",in_progress:"#FBBF24",resolved:"#34D399",closed:"#94A3B8"};
+const PC = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"};
+const SC = {open:"#5B7C8C",in_progress:"#B07A2A",resolved:"#547C4D",closed:"#6D5F53"};
 export default function TasksPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -19,13 +19,13 @@ export default function TasksPage() {
   const filtered = filter==="all" ? srs : srs.filter(s=>s.status===filter||s.priority===filter);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Operations</div>
           <h1 className="tb-hero-title">Tasks</h1>
           <p className="tb-hero-description">{srs.length} tasks · {open} open · {critical} critical</p>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
-            {[{label:"Total",value:srs.length,color:"#F1F5F9"},{label:"Open",value:open,color:"#60A5FA"},{label:"In Progress",value:srs.filter(s=>s.status==="in_progress").length,color:"#FBBF24"},{label:"Critical",value:critical,color:critical>0?"#F87171":"#34D399"},{label:"Linked WOs",value:srs.filter(s=>s.work_order_id).length,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Total",value:srs.length,color:"#221D1A"},{label:"Open",value:open,color:"#5B7C8C"},{label:"In Progress",value:srs.filter(s=>s.status==="in_progress").length,color:"#B07A2A"},{label:"Critical",value:critical,color:critical>0?"#A84A3D":"#547C4D"},{label:"Linked WOs",value:srs.filter(s=>s.work_order_id).length,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -47,7 +47,7 @@ export default function TasksPage() {
           : filtered.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No tasks</div></div>
           : <div className="space-y-2">
             {filtered.map((sr,i)=>{
-              const pc=PC[sr.priority]||"#94A3B8"; const sc=SC[sr.status]||"#94A3B8";
+              const pc=PC[sr.priority]||"#6D5F53"; const sc=SC[sr.status]||"#6D5F53";
               const wo=wos.find(w=>w.id===sr.work_order_id);
               return (
                 <button key={i} onClick={()=>router.push("/operations/service-requests/"+sr.id)} className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">

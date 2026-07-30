@@ -13,7 +13,7 @@ type ExecutiveSignalBoardProps = {
 
 export function ExecutiveSignalBoard({ title, subtitle, items }: ExecutiveSignalBoardProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Executive Intelligence
@@ -24,7 +24,7 @@ export function ExecutiveSignalBoard({ title, subtitle, items }: ExecutiveSignal
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item, index) => (
-          <div key={`${item.label}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div key={`${item.label}-${index}`} className="rounded-2xl border border-stone-200 bg-slate-50 p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.label}
             </div>

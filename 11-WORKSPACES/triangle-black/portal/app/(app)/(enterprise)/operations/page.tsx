@@ -15,22 +15,22 @@ export default function OperationsPage() {
   const criticalWOs= wos.filter(w=>w.priority==="critical"&&w.status!=="completed").length;
   const openSRs    = srs.filter(s=>s.status==="open").length;
   const modules = [
-    {label:"Work Orders",      icon:"🔧", path:"/operations/work-orders",         count:wos.length,    color:"#60A5FA"},
-    {label:"Dispatch Board",   icon:"📋", path:"/operations/dispatch",             count:openWOs,       color:"#FBBF24"},
-    {label:"Service Requests", icon:"🎫", path:"/operations/service-requests",     count:openSRs,       color:"#A78BFA"},
-    {label:"Technicians",      icon:"👷", path:"/operations/technicians",          count:techs.length,  color:"#34D399"},
-    {label:"Sites",            icon:"🏢", path:"/operations/sites",                count:null,          color:"#94A3B8"},
-    {label:"Maintenance",      icon:"⚙️",  path:"/maintenance",                    count:null,          color:"#F97316"},
+    {label:"Work Orders",      icon:"🔧", path:"/operations/work-orders",         count:wos.length,    color:"#5B7C8C"},
+    {label:"Dispatch Board",   icon:"📋", path:"/operations/dispatch",             count:openWOs,       color:"#B07A2A"},
+    {label:"Service Requests", icon:"🎫", path:"/operations/service-requests",     count:openSRs,       color:"#8D7443"},
+    {label:"Technicians",      icon:"👷", path:"/operations/technicians",          count:techs.length,  color:"#547C4D"},
+    {label:"Sites",            icon:"🏢", path:"/operations/sites",                count:null,          color:"#6D5F53"},
+    {label:"Maintenance",      icon:"⚙️",  path:"/maintenance",                    count:null,          color:"#B07A2A"},
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Operations</h1>
           <p className="tb-hero-description">{wos.length} work orders · {techs.length} technicians · {openSRs} open requests</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Open WOs",value:openWOs,color:"#60A5FA"},{label:"In Progress",value:inProgWOs,color:"#FBBF24"},{label:"Critical",value:criticalWOs,color:criticalWOs>0?"#F87171":"#34D399"},{label:"Open SRs",value:openSRs,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Open WOs",value:openWOs,color:"#5B7C8C"},{label:"In Progress",value:inProgWOs,color:"#B07A2A"},{label:"Critical",value:criticalWOs,color:criticalWOs>0?"#A84A3D":"#547C4D"},{label:"Open SRs",value:openSRs,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

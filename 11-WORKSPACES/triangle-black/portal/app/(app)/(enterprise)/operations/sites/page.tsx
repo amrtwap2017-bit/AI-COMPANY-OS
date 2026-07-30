@@ -11,13 +11,13 @@ export default function SitesPage() {
   const sites = toArr(siteRaw); const assets = toArr(assetRaw);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Operations</div>
           <h1 className="tb-hero-title">Sites</h1>
           <p className="tb-hero-description">{sites.length} sites · {assets.length} assets</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Sites",value:sites.length,color:"#F1F5F9"},{label:"Assets",value:assets.length,color:"#60A5FA"},{label:"Active",value:sites.filter(s=>s.status==="active"||!s.status).length,color:"#34D399"},{label:"Faulted",value:assets.filter(a=>a.status==="In Fault").length,color:assets.filter(a=>a.status==="In Fault").length>0?"#F87171":"#34D399"}].map((k,i)=>(
+            {[{label:"Sites",value:sites.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Active",value:sites.filter(s=>s.status==="active"||!s.status).length,color:"#547C4D"},{label:"Faulted",value:assets.filter(a=>a.status==="In Fault").length,color:assets.filter(a=>a.status==="In Fault").length>0?"#A84A3D":"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

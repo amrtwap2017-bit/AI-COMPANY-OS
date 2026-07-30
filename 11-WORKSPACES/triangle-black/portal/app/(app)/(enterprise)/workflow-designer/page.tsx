@@ -10,22 +10,22 @@ export default function WorkflowDesignerPage() {
   const { data: srRaw } = useQuery(["wd-srs"], () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
   const wos = toArr(woRaw); const srs = toArr(srRaw);
   const workflows = [
-    {label:"SR → Work Order",    icon:"🎫→🔧", desc:"Service request creates work order automatically", active:srs.filter(s=>s.work_order_id).length, total:srs.length, color:"#60A5FA"},
-    {label:"PM → Work Order",    icon:"📅→🔧", desc:"Overdue PM plan triggers work order creation",     active:wos.filter(w=>w.title?.startsWith("PM:")).length, total:wos.length, color:"#A78BFA"},
-    {label:"WO → Invoice",       icon:"🔧→💰", desc:"Completed work order creates invoice draft",       active:wos.filter(w=>w.status==="completed").length, total:wos.length, color:"#34D399"},
-    {label:"Contract → Renewal", icon:"📄→🔄", desc:"Expiring contract triggers renewal notification",  active:0, total:0, color:"#FBBF24"},
-    {label:"Stock Alert → PR",   icon:"📦→📋", desc:"Low stock triggers purchase request",             active:0, total:0, color:"#F97316"},
-    {label:"WO → Notification",  icon:"🔧→🔔", desc:"Work order status change sends notification",     active:wos.filter(w=>w.status!=="completed").length, total:wos.length, color:"#F87171"},
+    {label:"SR → Work Order",    icon:"🎫→🔧", desc:"Service request creates work order automatically", active:srs.filter(s=>s.work_order_id).length, total:srs.length, color:"#5B7C8C"},
+    {label:"PM → Work Order",    icon:"📅→🔧", desc:"Overdue PM plan triggers work order creation",     active:wos.filter(w=>w.title?.startsWith("PM:")).length, total:wos.length, color:"#8D7443"},
+    {label:"WO → Invoice",       icon:"🔧→💰", desc:"Completed work order creates invoice draft",       active:wos.filter(w=>w.status==="completed").length, total:wos.length, color:"#547C4D"},
+    {label:"Contract → Renewal", icon:"📄→🔄", desc:"Expiring contract triggers renewal notification",  active:0, total:0, color:"#B07A2A"},
+    {label:"Stock Alert → PR",   icon:"📦→📋", desc:"Low stock triggers purchase request",             active:0, total:0, color:"#B07A2A"},
+    {label:"WO → Notification",  icon:"🔧→🔔", desc:"Work order status change sends notification",     active:wos.filter(w=>w.status!=="completed").length, total:wos.length, color:"#A84A3D"},
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0A1A30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Platform · Automation</div>
           <h1 className="tb-hero-title">Workflow Designer</h1>
           <p className="tb-hero-description">Automated workflow rules and business process automation</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Workflows",value:workflows.length,color:"#60A5FA"},{label:"Active WOs",value:wos.filter(w=>w.status!=="completed").length,color:"#FBBF24"},{label:"Linked SRs",value:srs.filter(s=>s.work_order_id).length,color:"#34D399"},{label:"Auto-created",value:wos.filter(w=>w.title?.startsWith("PM:")).length,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Workflows",value:workflows.length,color:"#5B7C8C"},{label:"Active WOs",value:wos.filter(w=>w.status!=="completed").length,color:"#B07A2A"},{label:"Linked SRs",value:srs.filter(s=>s.work_order_id).length,color:"#547C4D"},{label:"Auto-created",value:wos.filter(w=>w.title?.startsWith("PM:")).length,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

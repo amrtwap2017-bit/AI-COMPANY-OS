@@ -14,13 +14,13 @@ export default function ConnectSignalsPage() {
   const activities = actRaw?.activities||[];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0A1A30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">AI · Signals</div>
           <h1 className="tb-hero-title">Connect Signals</h1>
           <p className="tb-hero-description">Real-time AI signals, platform events, and operational intelligence</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Active Signals",value:signals.length,color:"#60A5FA"},{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Events",value:activities.length,color:"#A78BFA"},{label:"Status",value:"Live",color:"#34D399"}].map((k,i)=>(
+            {[{label:"Active Signals",value:signals.length,color:"#5B7C8C"},{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Events",value:activities.length,color:"#8D7443"},{label:"Status",value:"Live",color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -36,7 +36,7 @@ export default function ConnectSignalsPage() {
                 <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-base-alt">
                   <span style={{fontSize:"1rem"}}>🔮</span>
                   <div className="flex-1 min-w-0"><div className="text-xs font-semibold text-primary truncate">{sig.title||sig.message||"Signal"}</div><div className="text-xs text-tertiary">{sig.type||"AI"}</div></div>
-                  <span className="tb-badge" style={{fontSize:"0.5rem",color:"#A78BFA"}}>{sig.severity||"info"}</span>
+                  <span className="tb-badge" style={{fontSize:"0.5rem",color:"#8D7443"}}>{sig.severity||"info"}</span>
                 </div>
               ))}
             </div>

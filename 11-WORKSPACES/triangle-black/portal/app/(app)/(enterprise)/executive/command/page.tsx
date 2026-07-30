@@ -20,7 +20,7 @@ export default function CommandPage() {
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -29,7 +29,7 @@ export default function CommandPage() {
               <p className="tb-hero-description">Quick access to all platform modules</p>
             </div>
             <div className={"tb-score-badge "+(score>=95?"tb-score-badge--success":"tb-score-badge--warning")}>
-              <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{score}</div>
+              <div className="tb-score-value" style={{color:score>=95?"#547C4D":"#B07A2A"}}>{score}</div>
               <div className="tb-score-label">Twin Score</div>
             </div>
           </div>

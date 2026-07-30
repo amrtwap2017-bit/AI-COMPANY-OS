@@ -8,8 +8,8 @@ export function EntityTabs({ tabs }: { tabs: Tab[] }) {
   const [active, setActive] = useState(tabs[0]?.id || "");
   const content = tabs.find(t => t.id === active)?.content;
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-      <nav className="flex overflow-x-auto border-b border-slate-200 scrollbar-none">
+    <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+      <nav className="flex overflow-x-auto border-b border-stone-200 scrollbar-none">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActive(tab.id)}
             className={"flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors " + (

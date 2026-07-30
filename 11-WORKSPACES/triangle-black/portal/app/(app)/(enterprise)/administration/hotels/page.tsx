@@ -17,7 +17,7 @@ export default function HotelsPage() {
           <h1 className="tb-hero-title">Hotels & Sites</h1>
           <p className="tb-hero-description">{sites.length} sites · {assets.length} assets registered</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Sites",value:sites.length,color:"#F1F5F9"},{label:"Assets",value:assets.length,color:"#60A5FA"},{label:"Active",value:sites.filter(s=>s.status==="active"||!s.status).length,color:"#34D399"},{label:"Categories",value:[...new Set(assets.map(a=>a.category).filter(Boolean))].length,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Sites",value:sites.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Active",value:sites.filter(s=>s.status==="active"||!s.status).length,color:"#547C4D"},{label:"Categories",value:[...new Set(assets.map(a=>a.category).filter(Boolean))].length,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

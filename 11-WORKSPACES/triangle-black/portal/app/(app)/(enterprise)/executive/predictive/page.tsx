@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 const RISK_COLOR = {
-  CRITICAL: "#F87171",
-  HIGH:     "#FB923C",
-  MEDIUM:   "#FBBF24",
-  LOW:      "#34D399",
+  CRITICAL: "#A84A3D",
+  HIGH:     "#B07A2A",
+  MEDIUM:   "#B07A2A",
+  LOW:      "#547C4D",
 };
 
 export default function PredictivePage() {
@@ -45,10 +45,10 @@ export default function PredictivePage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              {label:"Analyzed",    value:predictions.length,  color:"#F1F5F9"},
-              {label:"High Risk",   value:highRisk.length,     color:highRisk.length>0?"#FB923C":"#34D399"},
-              {label:"Critical",    value:critical.length,     color:critical.length>0?"#F87171":"#34D399"},
-              {label:"Patterns",    value:patternList.length,  color:"#A78BFA"},
+              {label:"Analyzed",    value:predictions.length,  color:"#221D1A"},
+              {label:"High Risk",   value:highRisk.length,     color:highRisk.length>0?"#B07A2A":"#547C4D"},
+              {label:"Critical",    value:critical.length,     color:critical.length>0?"#A84A3D":"#547C4D"},
+              {label:"Patterns",    value:patternList.length,  color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -61,7 +61,7 @@ export default function PredictivePage() {
 
       <div className="tb-canvas">
         {pred?.ai_summary && pred.ai_summary !== "AI analysis unavailable" && (
-          <div className="tb-section" style={{borderColor:"#A78BFA40",background:"#A78BFA08"}}>
+          <div className="tb-section" style={{borderColor:"#8D744340",background:"#8D744308"}}>
             <div className="flex items-start gap-3">
               <span style={{fontSize:"1.5rem"}}>🤖</span>
               <div>
@@ -84,7 +84,7 @@ export default function PredictivePage() {
           ) : (
             <div className="space-y-2 mt-3">
               {predictions.map((pred,i)=>{
-                const c = RISK_COLOR[pred.risk_label]||"#94A3B8";
+                const c = RISK_COLOR[pred.risk_label]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/maintenance/assets/"+pred.asset_id)}
                     className="w-full flex items-start gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left"
@@ -127,7 +127,7 @@ export default function PredictivePage() {
                 ))}
               </div>
               {patternList.slice(0,8).map((pat,i)=>{
-                const pc={critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[pat.priority]||"#94A3B8";
+                const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[pat.priority]||"#6D5F53";
                 return (
                   <div key={i} className="tb-table-row" style={{gridTemplateColumns:"2fr 100px 80px 120px"}}>
                     <div className="flex items-center gap-2 pr-4 min-w-0">

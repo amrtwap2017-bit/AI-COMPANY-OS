@@ -37,7 +37,7 @@ export function EntityShell({
   return (
     <div className="space-y-0 -mt-6 -mx-6">
       {/* Entity Header */}
-      <div className="bg-white border-b border-slate-200 px-6 pt-6 pb-0">
+      <div className="bg-white border-b border-stone-200 px-6 pt-6 pb-0">
         {/* Back + breadcrumb */}
         {backHref && (
           <div className="flex items-center gap-2 mb-4">
@@ -56,7 +56,7 @@ export function EntityShell({
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap mb-1">
-              <h1 className="text-xl font-bold text-slate-900 truncate">{title}</h1>
+              <h1 className="text-xl font-bold text-stone-900 truncate">{title}</h1>
               {status && <StatusPill status={status} dot />}
               {badge && (
                 <span className={`text-xs px-2 py-0.5 rounded-full font-semibold bg-${badgeColor}-100 text-${badgeColor}-700 border border-${badgeColor}-200`}>
@@ -82,12 +82,12 @@ export function EntityShell({
 
         {/* Hero metrics */}
         {heroMetrics.length > 0 && (
-          <div className="flex items-center gap-6 mb-4 pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-6 mb-4 pb-4 border-b border-stone-100">
             {heroMetrics.map((m, i) => (
               <div key={i} className="flex items-center gap-2">
                 <div>
                   <div className="text-xs text-tertiary font-medium">{m.label}</div>
-                  <div className={`text-lg font-bold ${m.color ? `text-${m.color}-600` : "text-slate-900"}`}>{m.value}</div>
+                  <div className={`text-lg font-bold ${m.color ? `text-${m.color}-600` : "text-stone-900"}`}>{m.value}</div>
                 </div>
                 {i < heroMetrics.length - 1 && <div className="w-px h-8 bg-slate-200 ml-2" />}
               </div>
@@ -102,7 +102,7 @@ export function EntityShell({
               className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? "border-amber-600 text-amber-700"
-                  : "border-transparent text-secondary hover:text-slate-800 hover:border-slate-300"
+                  : "border-transparent text-secondary hover:text-stone-800 hover:border-slate-300"
               }`}>
               {tab.icon && <span>{tab.icon}</span>}
               {tab.label}

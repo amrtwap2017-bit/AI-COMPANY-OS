@@ -9,8 +9,8 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  draft:"#94A3B8", pending:"#60A5FA", approved:"#A78BFA",
-  ordered:"#FBBF24", received:"#34D399", cancelled:"#F87171"
+  draft:"#6D5F53", pending:"#5B7C8C", approved:"#8D7443",
+  ordered:"#B07A2A", received:"#547C4D", cancelled:"#A84A3D"
 };
 
 export default function PurchaseOrderDetailPage() {
@@ -40,7 +40,7 @@ export default function PurchaseOrderDetailPage() {
     </div>
   );
 
-  const sc = STATUS_COLOR[po.status] || "#94A3B8";
+  const sc = STATUS_COLOR[po.status] || "#6D5F53";
   const amount = Number(po.total_amount || po.total_value || 0);
 
   return (
@@ -61,9 +61,9 @@ export default function PurchaseOrderDetailPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Status",     value:(po.status||"—").toUpperCase(), color:sc },
-              { label:"Total",      value:fmtEGP(amount),                 color:"#34D399" },
-              { label:"Supplier",   value:po.supplier_name||"—",          color:"#60A5FA" },
-              { label:"Order Date", value:fmtDate(po.order_date||po.created_at), color:"#94A3B8" },
+              { label:"Total",      value:fmtEGP(amount),                 color:"#547C4D" },
+              { label:"Supplier",   value:po.supplier_name||"—",          color:"#5B7C8C" },
+              { label:"Order Date", value:fmtDate(po.order_date||po.created_at), color:"#6D5F53" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -105,10 +105,10 @@ export default function PurchaseOrderDetailPage() {
               <div className="tb-section-title">Order Lifecycle</div>
               <div className="space-y-3">
                 {[
-                  { label:"Created",   date:po.created_at,          done:true,                         color:"#60A5FA" },
-                  { label:"Approved",  date:po.approved_at,         done:["approved","ordered","received"].includes(po.status), color:"#A78BFA" },
-                  { label:"Ordered",   date:po.order_date,          done:["ordered","received"].includes(po.status), color:"#FBBF24" },
-                  { label:"Received",  date:po.received_date,       done:po.status==="received",       color:"#34D399" },
+                  { label:"Created",   date:po.created_at,          done:true,                         color:"#5B7C8C" },
+                  { label:"Approved",  date:po.approved_at,         done:["approved","ordered","received"].includes(po.status), color:"#8D7443" },
+                  { label:"Ordered",   date:po.order_date,          done:["ordered","received"].includes(po.status), color:"#B07A2A" },
+                  { label:"Received",  date:po.received_date,       done:po.status==="received",       color:"#547C4D" },
                 ].map((step, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{

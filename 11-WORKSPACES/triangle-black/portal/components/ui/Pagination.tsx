@@ -39,7 +39,7 @@ export function Pagination({
           <select
             value={pageSize}
             onChange={e => { onPageSize(Number(e.target.value)); onPage(1); }}
-            className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400"
+            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400"
           >
             {pageSizes.map(s => (
               <option key={s} value={s}>{s} per page</option>
@@ -54,7 +54,7 @@ export function Pagination({
             onClick={() => onPage(page - 1)}
             disabled={page === 1}
             aria-label="Previous page"
-            className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+            className="px-3 py-1.5 text-sm rounded-lg border border-stone-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
           >←</button>
 
           {getPages().map((p, i) =>
@@ -66,7 +66,7 @@ export function Pagination({
                 onClick={() => onPage(p)}
                 aria-label={"Page " + p}
                 aria-current={p === page ? "page" : undefined}
-                className={"px-3 py-1.5 text-sm rounded-lg border transition-colors " + (p === page ? "bg-amber-600 border-amber-600 text-white font-semibold" : "border-slate-200 text-slate-600 hover:bg-slate-50")}
+                className={"px-3 py-1.5 text-sm rounded-lg border transition-colors " + (p === page ? "bg-amber-600 border-amber-600 text-white font-semibold" : "border-stone-200 text-slate-600 hover:bg-slate-50")}
               >
                 {p}
               </button>
@@ -77,7 +77,7 @@ export function Pagination({
             onClick={() => onPage(page + 1)}
             disabled={page === totalPages}
             aria-label="Next page"
-            className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+            className="px-3 py-1.5 text-sm rounded-lg border border-stone-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
           >→</button>
         </div>
       )}

@@ -10,8 +10,8 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  draft:"#94A3B8", pending:"#60A5FA", approved:"#A78BFA",
-  ordered:"#FBBF24", received:"#34D399", cancelled:"#F87171"
+  draft:"#6D5F53", pending:"#5B7C8C", approved:"#8D7443",
+  ordered:"#B07A2A", received:"#547C4D", cancelled:"#A84A3D"
 };
 
 export default function PurchaseOrdersPage() {
@@ -65,11 +65,11 @@ export default function PurchaseOrdersPage() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
-              { label:"Total POs",   value:pos.length,        color:"#F1F5F9" },
-              { label:"Pending",     value:pending,           color:"#60A5FA" },
-              { label:"Approved",    value:approved,          color:"#A78BFA" },
-              { label:"Received",    value:received,          color:"#34D399" },
-              { label:"Open PRs",    value:openPRs,           color:"#FBBF24" },
+              { label:"Total POs",   value:pos.length,        color:"#221D1A" },
+              { label:"Pending",     value:pending,           color:"#5B7C8C" },
+              { label:"Approved",    value:approved,          color:"#8D7443" },
+              { label:"Received",    value:received,          color:"#547C4D" },
+              { label:"Open PRs",    value:openPRs,           color:"#B07A2A" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -141,7 +141,7 @@ export default function PurchaseOrdersPage() {
                 ))}
               </div>
               {filtered.map((po, i) => {
-                const sc = STATUS_COLOR[po.status] || "#94A3B8";
+                const sc = STATUS_COLOR[po.status] || "#6D5F53";
                 const supp = supps.find(s => s.id === po.supplier_id);
                 return (
                   <button

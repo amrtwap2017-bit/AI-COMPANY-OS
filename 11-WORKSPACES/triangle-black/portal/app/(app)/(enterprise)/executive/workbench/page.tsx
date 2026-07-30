@@ -25,13 +25,13 @@ export default function WorkbenchPage() {
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Executive</div>
           <h1 className="tb-hero-title">Executive Workbench</h1>
           <p className="tb-hero-description">Personal workspace for executive decision-making</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"WOs",value:d.work_orders?.total||0,color:"#60A5FA"},{label:"Contracts",value:d.commercial?.active_contracts||0,color:"#34D399"},{label:"Alerts",value:d.notifications?.unread||0,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"WOs",value:d.work_orders?.total||0,color:"#5B7C8C"},{label:"Contracts",value:d.commercial?.active_contracts||0,color:"#547C4D"},{label:"Alerts",value:d.notifications?.unread||0,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

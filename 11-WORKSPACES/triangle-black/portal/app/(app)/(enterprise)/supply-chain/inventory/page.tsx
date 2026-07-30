@@ -77,11 +77,11 @@ export default function InventoryPage() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
-              { label:"Total Items",   value:items.length,      color:"#F1F5F9" },
-              { label:"Low Stock",     value:lowStock.length,   color:lowStock.length>0?"#F87171":"#34D399" },
-              { label:"Categories",    value:cats.length,       color:"#60A5FA" },
-              { label:"Warehouses",    value:whs.length,        color:"#A78BFA" },
-              { label:"Total Value",   value:fmtEGP(totalValue),color:"#FBBF24" },
+              { label:"Total Items",   value:items.length,      color:"#221D1A" },
+              { label:"Low Stock",     value:lowStock.length,   color:lowStock.length>0?"#A84A3D":"#547C4D" },
+              { label:"Categories",    value:cats.length,       color:"#5B7C8C" },
+              { label:"Warehouses",    value:whs.length,        color:"#8D7443" },
+              { label:"Total Value",   value:fmtEGP(totalValue),color:"#B07A2A" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -94,7 +94,7 @@ export default function InventoryPage() {
 
       <div className="tb-canvas">
         {lowStock.length > 0 && (
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="flex items-center gap-3">
               <span style={{fontSize:"1.25rem"}}>⚠️</span>
               <span className="text-sm font-semibold text-red-400">
@@ -156,7 +156,7 @@ export default function InventoryPage() {
               </div>
               {filtered.map((item, i) => {
                 const pct   = item.min_qty > 0 ? Math.min((item.current_qty / item.min_qty) * 100, 100) : 100;
-                const color = item.is_low ? "#F87171" : "#34D399";
+                const color = item.is_low ? "#A84A3D" : "#547C4D";
                 return (
                   <button key={i}
                     onClick={() => router.push(`/supply-chain/inventory/${item.id}`)}
@@ -209,7 +209,7 @@ export default function InventoryPage() {
                       </div>
                       <span className="text-xs font-bold text-primary">{cnt}</span>
                     </div>
-                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:"#34D399",width:`${pct}%`}}/></div>
+                    <div className="tb-progress"><div className="tb-progress-bar" style={{background:"#547C4D",width:`${pct}%`}}/></div>
                   </div>
                 );
               })}

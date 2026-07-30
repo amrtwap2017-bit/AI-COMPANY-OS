@@ -36,7 +36,7 @@ export default function SOWCreatePage() {
   };
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A12 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/scope-of-work")} className="tb-btn-secondary">← SOW List</button>
@@ -45,10 +45,10 @@ export default function SOWCreatePage() {
           <h1 className="tb-hero-title">Scope of Work</h1>
           <div className="tb-grid-4 mt-4">
             {[
-              {label:"BOQ Items",value:boqItems.length,color:"#60A5FA"},
-              {label:"BOQ Total",value:fmtEGP(boqSubtotal),color:"#FBBF24"},
-              {label:"Grand Total",value:fmtEGP(grandTotal),color:"#34D399"},
-              {label:"Est. Days",value:`${form.estimated_days||0}d`,color:"#A78BFA"},
+              {label:"BOQ Items",value:boqItems.length,color:"#5B7C8C"},
+              {label:"BOQ Total",value:fmtEGP(boqSubtotal),color:"#B07A2A"},
+              {label:"Grand Total",value:fmtEGP(grandTotal),color:"#547C4D"},
+              {label:"Est. Days",value:`${form.estimated_days||0}d`,color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>

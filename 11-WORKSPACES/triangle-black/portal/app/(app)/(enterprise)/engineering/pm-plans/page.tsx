@@ -16,13 +16,13 @@ export default function EngineeringPMPlansPage() {
   const onTrack = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>new Date(now.getTime()+7*86400000));
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Engineering</div>
           <h1 className="tb-hero-title">PM Plans</h1>
           <p className="tb-hero-description">{pms.length} plans · {overdue.length} overdue · {dueWeek.length} due this week</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Plans",value:pms.length,color:"#F1F5F9"},{label:"Overdue",value:overdue.length,color:overdue.length>0?"#F87171":"#34D399"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#FBBF24":"#34D399"},{label:"On Track",value:onTrack.length,color:"#34D399"}].map((k,i)=>(
+            {[{label:"Total Plans",value:pms.length,color:"#221D1A"},{label:"Overdue",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"On Track",value:onTrack.length,color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -36,7 +36,7 @@ export default function EngineeringPMPlansPage() {
               const due = pm.next_due_ts?new Date(pm.next_due_ts):null;
               const isOverdue = due&&due<now;
               const daysUntil = due?Math.ceil((due-now)/86400000):null;
-              const c = isOverdue?"#F87171":daysUntil!==null&&daysUntil<=7?"#FBBF24":"#34D399";
+              const c = isOverdue?"#A84A3D":daysUntil!==null&&daysUntil<=7?"#B07A2A":"#547C4D";
               return (
                 <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                   <div className="flex items-center gap-2 min-w-0"><span style={{fontSize:"1rem"}}>📅</span><div className="min-w-0"><div className="text-sm text-secondary truncate">{pm.title||"—"}</div><div className="text-xs text-tertiary">{pm.plan_type||"—"}</div></div></div>

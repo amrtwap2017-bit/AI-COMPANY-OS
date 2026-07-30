@@ -18,10 +18,10 @@ export default function WarehousesPage() {
           <p className="tb-hero-description">{whs.length} warehouses · {stocks.length} stock balance records</p>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Total",          value:whs.length,    color:"#F1F5F9" },
-              { label:"Stock Records",  value:stocks.length, color:"#34D399" },
-              { label:"Active",         value:whs.filter(w=>w.status==="active"||!w.status).length, color:"#60A5FA" },
-              { label:"Locations",      value:whs.length,    color:"#A78BFA" },
+              { label:"Total",          value:whs.length,    color:"#221D1A" },
+              { label:"Stock Records",  value:stocks.length, color:"#547C4D" },
+              { label:"Active",         value:whs.filter(w=>w.status==="active"||!w.status).length, color:"#5B7C8C" },
+              { label:"Locations",      value:whs.length,    color:"#8D7443" },
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}

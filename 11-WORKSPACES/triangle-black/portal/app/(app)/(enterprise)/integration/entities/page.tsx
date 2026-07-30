@@ -28,7 +28,7 @@ export default function IntegrationEntitiesPage() {
           <h1 className="tb-hero-title">Entity Catalog</h1>
           <p className="tb-hero-description">Platform entity registry and API documentation</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Entities",value:entities.length,color:"#F1F5F9"},{label:"Assets",value:assets.length,color:"#60A5FA"},{label:"Work Orders",value:wos.length,color:"#FBBF24"},{label:"Contracts",value:contracts.length,color:"#34D399"}].map((k,i)=>(
+            {[{label:"Entities",value:entities.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Work Orders",value:wos.length,color:"#B07A2A"},{label:"Contracts",value:contracts.length,color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -44,7 +44,7 @@ export default function IntegrationEntitiesPage() {
             {entities.map((e,i)=>(
               <button key={i} onClick={()=>router.push(e.path)} className="tb-table-row" style={{gridTemplateColumns:"1fr 80px 1fr"}}>
                 <div className="flex items-center gap-2"><span>{e.icon}</span><span className="text-sm font-medium text-primary">{e.name}</span></div>
-                <div className="text-center text-sm font-bold" style={{color:"#60A5FA"}}>{e.count??"-"}</div>
+                <div className="text-center text-sm font-bold" style={{color:"#5B7C8C"}}>{e.count??"-"}</div>
                 <div className="text-xs text-tertiary font-mono">{e.api}</div>
               </button>
             ))}

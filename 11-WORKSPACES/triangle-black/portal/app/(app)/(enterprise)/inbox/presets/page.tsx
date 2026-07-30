@@ -9,22 +9,22 @@ export default function InboxPresetsPage() {
   const { data: notifRaw } = useQuery(["ip-notifs"], () => authFetch("/api/v1/notifications-portal?limit=100").then(r=>r.json()));
   const notifs = toArr(notifRaw);
   const presets = [
-    {label:"Critical Alerts",    filter:"critical",    icon:"🚨", color:"#F87171", desc:"Work orders and PM plans requiring immediate action"},
-    {label:"Contract Alerts",    filter:"contract",    icon:"📄", color:"#FBBF24", desc:"Expiring or renewed contracts"},
-    {label:"Procurement",        filter:"purchase",    icon:"🛒", color:"#F97316", desc:"Purchase requests and approvals"},
-    {label:"Maintenance",        filter:"pm",          icon:"📅", color:"#FB923C", desc:"PM plans and asset maintenance"},
+    {label:"Critical Alerts",    filter:"critical",    icon:"🚨", color:"#A84A3D", desc:"Work orders and PM plans requiring immediate action"},
+    {label:"Contract Alerts",    filter:"contract",    icon:"📄", color:"#B07A2A", desc:"Expiring or renewed contracts"},
+    {label:"Procurement",        filter:"purchase",    icon:"🛒", color:"#B07A2A", desc:"Purchase requests and approvals"},
+    {label:"Maintenance",        filter:"pm",          icon:"📅", color:"#B07A2A", desc:"PM plans and asset maintenance"},
     {label:"CRM Updates",        filter:"lead",        icon:"👤", color:"#EC4899", desc:"Lead and customer notifications"},
-    {label:"Work Orders",        filter:"work_order",  icon:"🔧", color:"#60A5FA", desc:"Work order status updates"},
+    {label:"Work Orders",        filter:"work_order",  icon:"🔧", color:"#5B7C8C", desc:"Work order status updates"},
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0E28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0E28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Inbox</div>
           <h1 className="tb-hero-title">Inbox Presets</h1>
           <p className="tb-hero-description">Filtered notification views by category</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:notifs.length,color:"#F1F5F9"},{label:"Unread",value:notifs.filter(n=>!n.is_read).length,color:"#FBBF24"},{label:"Presets",value:presets.length,color:"#A78BFA"},{label:"Types",value:[...new Set(notifs.map(n=>n.type).filter(Boolean))].length,color:"#60A5FA"}].map((k,i)=>(
+            {[{label:"Total",value:notifs.length,color:"#221D1A"},{label:"Unread",value:notifs.filter(n=>!n.is_read).length,color:"#B07A2A"},{label:"Presets",value:presets.length,color:"#8D7443"},{label:"Types",value:[...new Set(notifs.map(n=>n.type).filter(Boolean))].length,color:"#5B7C8C"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

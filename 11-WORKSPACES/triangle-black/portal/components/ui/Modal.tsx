@@ -57,12 +57,12 @@ export function Modal({
         className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
         onClick={closeOnBackdrop ? onClose : undefined}
       />
-      <div className={"relative w-full bg-white rounded-2xl shadow-lg border border-slate-200 flex flex-col max-h-[90vh] " + (SIZES[size] || SIZES.md)}>
+      <div className={"relative w-full bg-white rounded-2xl shadow-lg border border-stone-200 flex flex-col max-h-[90vh] " + (SIZES[size] || SIZES.md)}>
         {(title || onClose) && (
-          <div className="flex items-start justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
+          <div className="flex items-start justify-between px-6 py-4 border-b border-stone-100 flex-shrink-0">
             <div>
               {title && (
-                <h2 id="modal-title" className="text-base font-semibold text-slate-900">{title}</h2>
+                <h2 id="modal-title" className="text-base font-semibold text-stone-900">{title}</h2>
               )}
               {description && (
                 <p className="text-sm text-secondary mt-0.5">{description}</p>
@@ -82,7 +82,7 @@ export function Modal({
           {children}
         </div>
         {footer && (
-          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl flex-shrink-0">
+          <div className="px-6 py-4 border-t border-stone-100 bg-slate-50/50 rounded-b-2xl flex-shrink-0">
             {footer}
           </div>
         )}

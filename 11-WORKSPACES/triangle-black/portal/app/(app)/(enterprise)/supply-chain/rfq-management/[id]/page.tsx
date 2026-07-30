@@ -7,7 +7,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const SC = {draft:"#94A3B8",sent:"#60A5FA",responses_received:"#FBBF24",evaluated:"#A78BFA",awarded:"#34D399",cancelled:"#F87171"};
+const SC = {draft:"#6D5F53",sent:"#5B7C8C",responses_received:"#B07A2A",evaluated:"#8D7443",awarded:"#547C4D",cancelled:"#A84A3D"};
 export default function RFQDetailPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -28,13 +28,13 @@ export default function RFQDetailPage() {
   );
   if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading RFQ…</div></div>;
   if (!rfq || rfq.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">RFQ not found</div></div>;
-  const sc = SC[rfq.status]||"#94A3B8";
+  const sc = SC[rfq.status]||"#6D5F53";
   const quotes = rfq.quotations || [];
   const items = rfq.rfq_items || [];
   const lowest = rfq.lowest_price || 0;
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A12 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/rfq-management")} className="tb-btn-secondary">← RFQ List</button>
@@ -49,10 +49,10 @@ export default function RFQDetailPage() {
           </div>
           <div className="tb-grid-4">
             {[
-              {label:"Line Items",value:items.length,color:"#60A5FA"},
-              {label:"Quotations",value:quotes.length,color:"#FBBF24"},
-              {label:"Lowest Bid",value:fmtEGP(lowest),color:"#34D399"},
-              {label:"Budget",value:fmtEGP(rfq.total_budget||0),color:"#A78BFA"},
+              {label:"Line Items",value:items.length,color:"#5B7C8C"},
+              {label:"Quotations",value:quotes.length,color:"#B07A2A"},
+              {label:"Lowest Bid",value:fmtEGP(lowest),color:"#547C4D"},
+              {label:"Budget",value:fmtEGP(rfq.total_budget||0),color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
@@ -102,13 +102,13 @@ export default function RFQDetailPage() {
                   const isLowest = Number(q.total_amount||0) === lowest && lowest > 0;
                   const savings = lowest > 0 ? ((Number(q.total_amount||0)-lowest)/lowest*100) : 0;
                   return (
-                    <div key={i} className="p-4 rounded-xl border transition-colors" style={{background: q.is_selected?"#34D39908":"rgba(255,255,255,0.02)", borderColor: q.is_selected?"#34D39940":isLowest?"#FBBF2440":"rgba(255,255,255,0.06)"}}>
+                    <div key={i} className="p-4 rounded-xl border transition-colors" style={{background: q.is_selected?"#547C4D08":"rgba(255,255,255,0.02)", borderColor: q.is_selected?"#547C4D40":isLowest?"#B07A2A40":"rgba(255,255,255,0.06)"}}>
                       <div className="flex items-center justify-between gap-4 mb-3">
                         <div>
                           <div className="text-sm font-bold text-primary flex items-center gap-2">
                             {q.vendor_name||"Unknown Vendor"}
-                            {isLowest && <span className="tb-badge" style={{background:"#FBBF2418",color:"#FBBF24",fontSize:"0.5rem"}}>LOWEST</span>}
-                            {q.is_selected && <span className="tb-badge" style={{background:"#34D39918",color:"#34D399",fontSize:"0.5rem"}}>SELECTED</span>}
+                            {isLowest && <span className="tb-badge" style={{background:"#B07A2A18",color:"#B07A2A",fontSize:"0.5rem"}}>LOWEST</span>}
+                            {q.is_selected && <span className="tb-badge" style={{background:"#547C4D18",color:"#547C4D",fontSize:"0.5rem"}}>SELECTED</span>}
                           </div>
                           <div className="text-xs text-tertiary">{q.quotation_number||"—"} · {q.delivery_days||7} days delivery · {q.payment_terms||30} days payment</div>
                         </div>

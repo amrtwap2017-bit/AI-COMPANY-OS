@@ -9,8 +9,8 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const CATEGORY_COLOR = {
-  hvac:"#60A5FA", electrical:"#FBBF24", plumbing:"#34D399",
-  mechanical:"#A78BFA", general:"#94A3B8", fire:"#F87171"
+  hvac:"#5B7C8C", electrical:"#B07A2A", plumbing:"#547C4D",
+  mechanical:"#8D7443", general:"#6D5F53", fire:"#A84A3D"
 };
 
 export default function SuppliersPage() {
@@ -57,10 +57,10 @@ export default function SuppliersPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Total",      value:supps.length, color:"#F1F5F9" },
-              { label:"Active",     value:active,       color:"#34D399" },
-              { label:"Categories", value:cats.length,  color:"#60A5FA" },
-              { label:"Total POs",  value:totalPOs,     color:"#FBBF24" },
+              { label:"Total",      value:supps.length, color:"#221D1A" },
+              { label:"Active",     value:active,       color:"#547C4D" },
+              { label:"Categories", value:cats.length,  color:"#5B7C8C" },
+              { label:"Total POs",  value:totalPOs,     color:"#B07A2A" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -116,7 +116,7 @@ export default function SuppliersPage() {
                 ))}
               </div>
               {filtered.map((s, i) => {
-                const cc = CATEGORY_COLOR[s.category?.toLowerCase()] || "#94A3B8";
+                const cc = CATEGORY_COLOR[s.category?.toLowerCase()] || "#6D5F53";
                 const supplierPOs = pos.filter(p => p.supplier_id === s.id).length;
                 return (
                   <button key={i}
@@ -140,7 +140,7 @@ export default function SuppliersPage() {
                     <div className="text-center text-xs text-secondary truncate px-1">{s.contact_name||s.contact||"—"}</div>
                     <div className="text-center text-xs text-tertiary truncate px-1">{s.email||"—"}</div>
                     <div className="text-center">
-                      <span className="text-sm font-bold" style={{color:supplierPOs>0?"#34D399":"#64748B"}}>{supplierPOs}</span>
+                      <span className="text-sm font-bold" style={{color:supplierPOs>0?"#547C4D":"#64748B"}}>{supplierPOs}</span>
                     </div>
                   </button>
                 );
@@ -156,7 +156,7 @@ export default function SuppliersPage() {
               {cats.map(cat => {
                 const cnt = supps.filter(s => s.category === cat).length;
                 const pct = supps.length > 0 ? (cnt / supps.length) * 100 : 0;
-                const c = CATEGORY_COLOR[cat?.toLowerCase()] || "#94A3B8";
+                const c = CATEGORY_COLOR[cat?.toLowerCase()] || "#6D5F53";
                 return (
                   <div key={cat}>
                     <div className="tb-flex-between mb-1">

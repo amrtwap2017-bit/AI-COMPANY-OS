@@ -18,7 +18,7 @@ export function ExportButton({ data, filename, title }: ExportButtonProps) {
       <button
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600
-          hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors"
+          hover:bg-slate-100 rounded-lg border border-stone-200 transition-colors"
       >
         <Download className="w-3.5 h-3.5" />
         Export
@@ -29,7 +29,7 @@ export function ExportButton({ data, filename, title }: ExportButtonProps) {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl
-            border border-slate-200 shadow-lg z-20 overflow-hidden">
+            border border-stone-200 shadow-lg z-20 overflow-hidden">
             <button
               onClick={() => { exportToCsv(filename, data); setOpen(false); }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm

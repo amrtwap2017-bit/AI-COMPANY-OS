@@ -15,13 +15,13 @@ export default function IntelligencePage() {
   const sigs = toArr(signals?.signals||signals);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Executive · AI</div>
           <h1 className="tb-hero-title">Intelligence Hub</h1>
           <p className="tb-hero-description">Digital twin insights, AI signals, and platform intelligence</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Domains",value:domains.length,color:"#60A5FA"},{label:"Signals",value:sigs.length,color:"#A78BFA"},{label:"Activities",value:activities.length,color:"#F97316"}].map((k,i)=>(
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Domains",value:domains.length,color:"#5B7C8C"},{label:"Signals",value:sigs.length,color:"#8D7443"},{label:"Activities",value:activities.length,color:"#B07A2A"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -33,7 +33,7 @@ export default function IntelligencePage() {
           <div className="tb-grid-4">
             {domains.map((dom,i)=>{
               const hasIssue=(dom.overdue||0)>0||(dom.critical_open||0)>0;
-              const c = hasIssue?"#FBBF24":"#34D399";
+              const c = hasIssue?"#B07A2A":"#547C4D";
               return (
                 <div key={i} className={"tb-domain-card "+(hasIssue?"tb-domain-card--warn":"tb-domain-card--ok")}>
                   <div className="tb-flex-between mb-1"><div className="text-xs font-semibold text-primary">{dom.domain}</div><div className="text-xs font-black" style={{color:c}}>{hasIssue?"⚠":"✓"}</div></div>
@@ -51,7 +51,7 @@ export default function IntelligencePage() {
                 <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-base-alt">
                   <span style={{fontSize:"1rem"}}>🔮</span>
                   <div className="flex-1 min-w-0"><div className="text-xs font-semibold text-primary truncate">{sig.title||sig.message||"AI Signal"}</div></div>
-                  <span className="tb-badge" style={{fontSize:"0.5625rem",color:"#A78BFA"}}>{sig.type||"info"}</span>
+                  <span className="tb-badge" style={{fontSize:"0.5625rem",color:"#8D7443"}}>{sig.type||"info"}</span>
                 </div>
               ))}
               {sigs.length===0 && <div className="text-xs text-tertiary text-center py-4">No active signals</div>}

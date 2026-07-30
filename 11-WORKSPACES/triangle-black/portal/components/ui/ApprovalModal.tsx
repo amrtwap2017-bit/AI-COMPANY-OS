@@ -93,8 +93,8 @@ export function ApprovalModal({
          onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md"
            onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="font-semibold text-slate-800">Review & Approve</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200">
+          <h2 className="font-semibold text-stone-800">Review & Approve</h2>
           <button onClick={onClose} className="text-tertiary hover:text-slate-600">
             <X className="w-5 h-5" />
           </button>
@@ -103,7 +103,7 @@ export function ApprovalModal({
         <div className="px-6 py-4">
           <div className="bg-slate-50 rounded-lg p-3 mb-4">
             <p className="text-xs text-secondary uppercase font-semibold mb-1">{entityType.replace(/_/g," ")}</p>
-            <p className="text-sm font-medium text-slate-800">{entityTitle}</p>
+            <p className="text-sm font-medium text-stone-800">{entityTitle}</p>
             <p className="text-xs text-tertiary mt-1">Current: {currentStatus}</p>
           </div>
 
@@ -115,7 +115,7 @@ export function ApprovalModal({
             onChange={e => setComment(e.target.value)}
             rows={3}
             placeholder="Add a comment or reason..."
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm
+            className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm
                        focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
         </div>

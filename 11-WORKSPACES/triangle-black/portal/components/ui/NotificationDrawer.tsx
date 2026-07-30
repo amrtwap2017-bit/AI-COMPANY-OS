@@ -28,12 +28,12 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
           <motion.div
             initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} exit={{opacity:0,x:20}}
             transition={{duration:0.2, ease:[0.4,0,0.2,1]}}
-            className="fixed top-14 right-4 w-96 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+            className="fixed top-14 right-4 w-96 bg-white rounded-2xl shadow-xl border border-stone-200 z-50 overflow-hidden"
           >
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100">
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-stone-100">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-slate-700" />
-                <span className="font-semibold text-slate-900 text-sm">Notifications</span>
+                <span className="font-semibold text-stone-900 text-sm">Notifications</span>
                 {unread > 0 && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-bold">{unread}</span>}
               </div>
               <div className="flex items-center gap-2">
@@ -56,7 +56,7 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
                       <Icon className="w-4 h-4"/>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                      <div className="text-sm font-semibold text-stone-900 flex items-center gap-2">
                         {n.title}
                         {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"/>}
                       </div>

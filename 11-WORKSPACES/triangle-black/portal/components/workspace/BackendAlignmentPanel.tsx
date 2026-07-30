@@ -15,7 +15,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
   const total = currentFeeds.length;
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
@@ -25,7 +25,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
           <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="rounded-2xl border border-stone-200 bg-slate-50 px-4 py-3">
           <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
             Feed Readiness
           </div>
@@ -41,10 +41,10 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
           {currentFeeds.map((feed, index) => (
             <div
               key={`${feed.label}-${index}`}
-              className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+              className="rounded-2xl border border-stone-100 bg-slate-50 p-4"
             >
               <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-semibold text-slate-900">{feed.label}</div>
+                <div className="text-sm font-semibold text-stone-900">{feed.label}</div>
                 <span
                   className={[
                     "rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide",
@@ -60,13 +60,13 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
             </div>
           ))}
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-sm font-semibold text-slate-900">Related Objects</div>
+          <div className="rounded-2xl border border-stone-100 bg-slate-50 p-4">
+            <div className="text-sm font-semibold text-stone-900">Related Objects</div>
             <div className="mt-3 flex flex-wrap gap-2">
               {relatedObjects.map((item, index) => (
                 <span
                   key={`${item}-${index}`}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700"
+                  className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-slate-700"
                 >
                   {item}
                 </span>
@@ -80,10 +80,10 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
           {targetEndpoints.map((endpoint, index) => (
             <div
               key={`${endpoint.label}-${endpoint.route}-${index}`}
-              className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+              className="rounded-2xl border border-stone-100 bg-slate-50 p-4"
             >
-              <div className="text-sm font-semibold text-slate-900">{endpoint.label}</div>
-              <div className="mt-2 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-700">
+              <div className="text-sm font-semibold text-stone-900">{endpoint.label}</div>
+              <div className="mt-2 rounded-xl border border-stone-200 bg-white px-3 py-2 font-mono text-xs text-slate-700">
                 {endpoint.route}
               </div>
               <div className="mt-2 text-sm leading-6 text-slate-600">{endpoint.purpose}</div>

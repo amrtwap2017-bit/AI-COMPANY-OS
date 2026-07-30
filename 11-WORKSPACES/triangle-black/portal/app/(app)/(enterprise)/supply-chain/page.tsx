@@ -13,14 +13,14 @@ export default function SupplyChainHub() {
   const pos = toArr(poRaw); const prs = toArr(prRaw);
   const inv = toArr(invRaw); const supps = toArr(suppRaw);
   const modules = [
-    { label:"Purchase Orders",    icon:"📦", path:"/supply-chain/purchase-orders",    count:pos.length,  color:"#34D399" },
-    { label:"Purchase Requests",  icon:"📋", path:"/supply-chain/purchase-requests",  count:prs.length,  color:"#60A5FA" },
-    { label:"Inventory",          icon:"📦", path:"/supply-chain/inventory",          count:inv.length,  color:"#FBBF24" },
-    { label:"Suppliers",          icon:"🏭", path:"/supply-chain/suppliers",          count:supps.length,color:"#A78BFA" },
-    { label:"Warehouses",         icon:"🏗️",  path:"/supply-chain/warehouses",         count:null,        color:"#94A3B8" },
-    { label:"Goods Receipts",     icon:"✅", path:"/supply-chain/goods-receipts",     count:null,        color:"#34D399" },
-    { label:"RFQs",               icon:"📝", path:"/supply-chain/rfqs",               count:null,        color:"#60A5FA" },
-    { label:"Stock Levels",       icon:"⚖️",  path:"/supply-chain/stock-levels",       count:null,        color:"#FBBF24" },
+    { label:"Purchase Orders",    icon:"📦", path:"/supply-chain/purchase-orders",    count:pos.length,  color:"#547C4D" },
+    { label:"Purchase Requests",  icon:"📋", path:"/supply-chain/purchase-requests",  count:prs.length,  color:"#5B7C8C" },
+    { label:"Inventory",          icon:"📦", path:"/supply-chain/inventory",          count:inv.length,  color:"#B07A2A" },
+    { label:"Suppliers",          icon:"🏭", path:"/supply-chain/suppliers",          count:supps.length,color:"#8D7443" },
+    { label:"Warehouses",         icon:"🏗️",  path:"/supply-chain/warehouses",         count:null,        color:"#6D5F53" },
+    { label:"Goods Receipts",     icon:"✅", path:"/supply-chain/goods-receipts",     count:null,        color:"#547C4D" },
+    { label:"RFQs",               icon:"📝", path:"/supply-chain/rfqs",               count:null,        color:"#5B7C8C" },
+    { label:"Stock Levels",       icon:"⚖️",  path:"/supply-chain/stock-levels",       count:null,        color:"#B07A2A" },
   ];
   return (
     <div className="min-h-screen bg-base">
@@ -31,10 +31,10 @@ export default function SupplyChainHub() {
           <p className="tb-hero-description">Procurement, inventory, suppliers and logistics</p>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Purchase Orders",  value:pos.length,   color:"#34D399" },
-              { label:"Open PRs",         value:prs.filter(p=>p.status==="pending"||p.status==="open").length, color:"#60A5FA" },
-              { label:"Inventory Items",  value:inv.length,   color:"#FBBF24" },
-              { label:"Suppliers",        value:supps.length, color:"#A78BFA" },
+              { label:"Purchase Orders",  value:pos.length,   color:"#547C4D" },
+              { label:"Open PRs",         value:prs.filter(p=>p.status==="pending"||p.status==="open").length, color:"#5B7C8C" },
+              { label:"Inventory Items",  value:inv.length,   color:"#B07A2A" },
+              { label:"Suppliers",        value:supps.length, color:"#8D7443" },
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>

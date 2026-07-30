@@ -8,7 +8,7 @@ type Entity360HeroProps = {
 
 export function Entity360Hero({ eyebrow, title, subtitle, badges }: Entity360HeroProps) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
       <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500" />
       <div className="p-8">
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
@@ -25,7 +25,7 @@ export function Entity360Hero({ eyebrow, title, subtitle, badges }: Entity360Her
           {badges.map((badge) => (
             <span
               key={badge}
-              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700"
+              className="rounded-full border border-stone-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700"
             >
               {badge}
             </span>

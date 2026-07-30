@@ -7,8 +7,8 @@ import { useRouter, useParams } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-const STATUS_COLOR  = { active:"#34D399", inactive:"#94A3B8", paused:"#FBBF24" };
-const ASSET_SC      = { Operational:"#34D399", "In Fault":"#F87171", "Under Maintenance":"#FBBF24" };
+const STATUS_COLOR  = { active:"#547C4D", inactive:"#6D5F53", paused:"#B07A2A" };
+const ASSET_SC      = { Operational:"#547C4D", "In Fault":"#A84A3D", "Under Maintenance":"#B07A2A" };
 
 export default function PMPlanDetailPage() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function PMPlanDetailPage() {
     </div>
   );
 
-  const sc      = STATUS_COLOR[plan.status] || "#94A3B8";
+  const sc      = STATUS_COLOR[plan.status] || "#6D5F53";
   const now     = new Date();
   const dueDate = plan.next_due_ts ? new Date(plan.next_due_ts) : null;
   const isOverdue = dueDate && dueDate < now;
@@ -46,7 +46,7 @@ export default function PMPlanDetailPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -56,9 +56,9 @@ export default function PMPlanDetailPage() {
                 <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>{plan.status||"—"}</span>
                 <span className="text-secondary mr-2">{plan.plan_type||"—"}</span>
                 {isOverdue
-                  ? <span style={{color:"#F87171"}}>Overdue by {Math.abs(daysUntil)}d</span>
+                  ? <span style={{color:"#A84A3D"}}>Overdue by {Math.abs(daysUntil)}d</span>
                   : daysUntil !== null
-                  ? <span style={{color:daysUntil<7?"#FBBF24":"#94A3B8"}}>Due in {daysUntil}d</span>
+                  ? <span style={{color:daysUntil<7?"#B07A2A":"#6D5F53"}}>Due in {daysUntil}d</span>
                   : null}
               </p>
             </div>
@@ -67,9 +67,9 @@ export default function PMPlanDetailPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Status",    value:plan.status||"—",              color:sc },
-              { label:"Type",      value:plan.plan_type||"—",           color:"#60A5FA" },
-              { label:"Frequency", value:plan.frequency||"—",           color:"#A78BFA" },
-              { label:"Next Due",  value:fmtDate(plan.next_due_ts),     color:isOverdue?"#F87171":daysUntil&&daysUntil<7?"#FBBF24":"#F1F5F9" },
+              { label:"Type",      value:plan.plan_type||"—",           color:"#5B7C8C" },
+              { label:"Frequency", value:plan.frequency||"—",           color:"#8D7443" },
+              { label:"Next Due",  value:fmtDate(plan.next_due_ts),     color:isOverdue?"#A84A3D":daysUntil&&daysUntil<7?"#B07A2A":"#221D1A" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -82,7 +82,7 @@ export default function PMPlanDetailPage() {
 
       <div className="tb-canvas">
         {isOverdue && (
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="flex items-center gap-3">
               <span style={{fontSize:"1.25rem"}}>⚠️</span>
               <span className="text-sm font-semibold text-red-400">
@@ -135,13 +135,13 @@ export default function PMPlanDetailPage() {
                     <div className="text-xs text-tertiary flex items-center gap-2">
                       <span>{plan.asset.category||"—"}</span>
                       <span className="tb-badge" style={{
-                        background:`${ASSET_SC[plan.asset.status]||"#94A3B8"}18`,
-                        color:ASSET_SC[plan.asset.status]||"#94A3B8",
+                        background:`${ASSET_SC[plan.asset.status]||"#6D5F53"}18`,
+                        color:ASSET_SC[plan.asset.status]||"#6D5F53",
                         fontSize:"0.5rem"
                       }}>{plan.asset.status||"—"}</span>
                     </div>
                   </div>
-                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#60A5FA"}}>View →</span>
+                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#5B7C8C"}}>View →</span>
                 </button>
               </div>
             )}
@@ -151,8 +151,8 @@ export default function PMPlanDetailPage() {
                 <div className="tb-section-title">Related Work Orders</div>
                 <div className="space-y-2 mt-2">
                   {recentWOs.map((wo, i) => {
-                    const pc  = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" }[wo.priority] || "#94A3B8";
-                    const wsc = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399" }[wo.status] || "#94A3B8";
+                    const pc  = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" }[wo.priority] || "#6D5F53";
+                    const wsc = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" }[wo.status] || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
@@ -176,10 +176,10 @@ export default function PMPlanDetailPage() {
             <div className="tb-section">
               <div className="tb-section-title">Schedule Status</div>
               <div className="text-center py-4">
-                <div className="text-5xl font-black mb-2" style={{color:isOverdue?"#F87171":daysUntil&&daysUntil<7?"#FBBF24":"#34D399"}}>
+                <div className="text-5xl font-black mb-2" style={{color:isOverdue?"#A84A3D":daysUntil&&daysUntil<7?"#B07A2A":"#547C4D"}}>
                   {isOverdue ? "!" : daysUntil !== null && daysUntil < 7 ? "⚠" : "✓"}
                 </div>
-                <div className="text-sm font-bold" style={{color:isOverdue?"#F87171":"#34D399"}}>
+                <div className="text-sm font-bold" style={{color:isOverdue?"#A84A3D":"#547C4D"}}>
                   {isOverdue ? "OVERDUE" : "ON SCHEDULE"}
                 </div>
                 <div className="text-xs text-tertiary mt-1">

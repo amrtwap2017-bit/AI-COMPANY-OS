@@ -12,14 +12,14 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 function printReport(title, content) {
   const html = `<!DOCTYPE html><html><head><title>${title}</title>
 <style>
-  body{font-family:Arial,sans-serif;font-size:12px;color:#1E293B;padding:32px}
+  body{font-family:Arial,sans-serif;font-size:12px;color:#332C27;padding:32px}
   h1{font-size:22px;font-weight:900;border-bottom:2px solid #E2E8F0;padding-bottom:12px;margin-bottom:20px}
   h2{font-size:16px;font-weight:700;margin:20px 0 8px}
   table{width:100%;border-collapse:collapse;margin-bottom:20px}
   th{background:#F8FAFC;padding:8px 10px;text-align:left;font-size:11px;border-bottom:2px solid #E2E8F0}
-  td{padding:7px 10px;border-bottom:1px solid #F1F5F9;font-size:12px}
+  td{padding:7px 10px;border-bottom:1px solid #221D1A;font-size:12px}
   .kpi{display:inline-block;margin:6px 12px 6px 0;padding:10px 16px;background:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0}
-  .kpi-val{font-size:20px;font-weight:900;color:#0F172A}
+  .kpi-val{font-size:20px;font-weight:900;color:#221D1A}
   .kpi-lbl{font-size:10px;color:#64748B;text-transform:uppercase}
   .header{display:flex;justify-content:space-between;margin-bottom:24px}
   .company{font-size:18px;font-weight:900}
@@ -136,7 +136,7 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -148,10 +148,10 @@ export default function ReportsPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              {label:"WOs Total",     value:woSum.total||0,          color:"#60A5FA"},
-              {label:"Assets",        value:aSum.total||0,           color:"#34D399"},
-              {label:"Active Conts",  value:cSum.active||0,          color:"#A78BFA"},
-              {label:"Critical Open", value:dWO.critical_open||0,    color:dWO.critical_open>0?"#F87171":"#34D399"},
+              {label:"WOs Total",     value:woSum.total||0,          color:"#5B7C8C"},
+              {label:"Assets",        value:aSum.total||0,           color:"#547C4D"},
+              {label:"Active Conts",  value:cSum.active||0,          color:"#8D7443"},
+              {label:"Critical Open", value:dWO.critical_open||0,    color:dWO.critical_open>0?"#A84A3D":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -169,7 +169,7 @@ export default function ReportsPage() {
             {REPORTS.map((r,i)=>(
               <button key={i} onClick={()=>setActiveReport(r.id)}
                 className={"tb-section text-left transition-colors " + (activeReport===r.id?"border-brand bg-brand/5":"")}
-                style={activeReport===r.id?{borderColor:"#2563EB"}:{}}>
+                style={activeReport===r.id?{borderColor:"#5B7C8C"}:{}}>
                 <div style={{fontSize:"1.75rem",marginBottom:8}}>{r.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{r.label}</div>
                 <div className="text-xs text-tertiary">{r.desc}</div>
@@ -192,14 +192,14 @@ export default function ReportsPage() {
             </div>
             <div className="tb-grid-4 mt-4">
               {[
-                {label:"Open WOs",      value:dWO.open_total||0,         color:"#60A5FA"},
-                {label:"Critical WOs",  value:dWO.critical_open||0,      color:dWO.critical_open>0?"#F87171":"#34D399"},
-                {label:"Created Today", value:dWO.created_today||0,      color:"#FBBF24"},
-                {label:"Overdue PMs",   value:dMaint.overdue_pms||0,     color:dMaint.overdue_pms>0?"#F87171":"#34D399"},
-                {label:"Collected",     value:fmtEGP(dFin.collected),    color:"#34D399"},
-                {label:"Pending",       value:fmtEGP(dFin.pending),      color:"#FBBF24"},
-                {label:"Unread Alerts", value:(daily.alerts||[]).length, color:"#A78BFA"},
-                {label:"Due This Week", value:dMaint.due_this_week||0,   color:"#60A5FA"},
+                {label:"Open WOs",      value:dWO.open_total||0,         color:"#5B7C8C"},
+                {label:"Critical WOs",  value:dWO.critical_open||0,      color:dWO.critical_open>0?"#A84A3D":"#547C4D"},
+                {label:"Created Today", value:dWO.created_today||0,      color:"#B07A2A"},
+                {label:"Overdue PMs",   value:dMaint.overdue_pms||0,     color:dMaint.overdue_pms>0?"#A84A3D":"#547C4D"},
+                {label:"Collected",     value:fmtEGP(dFin.collected),    color:"#547C4D"},
+                {label:"Pending",       value:fmtEGP(dFin.pending),      color:"#B07A2A"},
+                {label:"Unread Alerts", value:(daily.alerts||[]).length, color:"#8D7443"},
+                {label:"Due This Week", value:dMaint.due_this_week||0,   color:"#5B7C8C"},
               ].map((k,i)=>(
                 <div key={i} className="bg-base-alt rounded-xl p-3 text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.color}}>{k.value}</div>
@@ -213,7 +213,7 @@ export default function ReportsPage() {
                 <div className="space-y-1">
                   {(daily.alerts||[]).slice(0,5).map((a,i)=>(
                     <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-base-alt">
-                      <span className="text-xs font-bold" style={{color:"#A78BFA"}}>{a.type||"info"}</span>
+                      <span className="text-xs font-bold" style={{color:"#8D7443"}}>{a.type||"info"}</span>
                       <span className="text-xs text-secondary truncate">{a.title}</span>
                     </div>
                   ))}
@@ -234,10 +234,10 @@ export default function ReportsPage() {
             </div>
             <div className="tb-grid-4 mt-4">
               {[
-                {label:"Total",       value:woSum.total||0,                                            color:"#F1F5F9"},
-                {label:"Completed",   value:woSum.completed||0,                                        color:"#34D399"},
-                {label:"Open",        value:woSum.open_count||0,                                       color:"#60A5FA"},
-                {label:"Avg Resolve", value:(Math.round(woSum.avg_resolution_hours||0))+"h",           color:"#FBBF24"},
+                {label:"Total",       value:woSum.total||0,                                            color:"#221D1A"},
+                {label:"Completed",   value:woSum.completed||0,                                        color:"#547C4D"},
+                {label:"Open",        value:woSum.open_count||0,                                       color:"#5B7C8C"},
+                {label:"Avg Resolve", value:(Math.round(woSum.avg_resolution_hours||0))+"h",           color:"#B07A2A"},
               ].map((k,i)=>(
                 <div key={i} className="bg-base-alt rounded-xl p-3 text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.color}}>{k.value}</div>
@@ -252,7 +252,7 @@ export default function ReportsPage() {
                 ))}
               </div>
               {toArr(woReport.recent).slice(0,10).map((w,i)=>{
-                const pc={critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[w.priority]||"#94A3B8";
+                const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[w.priority]||"#6D5F53";
                 return (
                   <div key={i} className="tb-table-row" style={{gridTemplateColumns:"2fr 80px 90px 130px 120px"}}>
                     <div className="text-sm font-medium text-primary truncate pr-4">{w.title||"—"}</div>
@@ -278,10 +278,10 @@ export default function ReportsPage() {
             </div>
             <div className="tb-grid-4 mt-4">
               {[
-                {label:"Total",            value:aSum.total||0,        color:"#F1F5F9"},
-                {label:"Operational",      value:aSum.operational||0,  color:"#34D399"},
-                {label:"In Fault",         value:aSum.faulted||0,      color:aSum.faulted>0?"#F87171":"#34D399"},
-                {label:"Categories",       value:aSum.categories||0,   color:"#60A5FA"},
+                {label:"Total",            value:aSum.total||0,        color:"#221D1A"},
+                {label:"Operational",      value:aSum.operational||0,  color:"#547C4D"},
+                {label:"In Fault",         value:aSum.faulted||0,      color:aSum.faulted>0?"#A84A3D":"#547C4D"},
+                {label:"Categories",       value:aSum.categories||0,   color:"#5B7C8C"},
               ].map((k,i)=>(
                 <div key={i} className="bg-base-alt rounded-xl p-3 text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.color}}>{k.value}</div>
@@ -296,7 +296,7 @@ export default function ReportsPage() {
                 ))}
               </div>
               {toArr(assetRpt.assets).slice(0,15).map((a,i)=>{
-                const sc={"Operational":"#34D399","In Fault":"#F87171","Under Maintenance":"#FBBF24"}[a.status]||"#94A3B8";
+                const sc={"Operational":"#547C4D","In Fault":"#A84A3D","Under Maintenance":"#B07A2A"}[a.status]||"#6D5F53";
                 return (
                   <div key={i} className="tb-table-row" style={{gridTemplateColumns:"2fr 100px 100px 120px 80px",minWidth:550}}>
                     <div className="text-sm font-medium text-primary truncate pr-4">{a.name||"—"}</div>
@@ -322,10 +322,10 @@ export default function ReportsPage() {
             </div>
             <div className="tb-grid-4 mt-4">
               {[
-                {label:"Active",      value:cSum.active||0,                                      color:"#34D399"},
-                {label:"Portfolio",   value:fmtEGP(cSum.active_value),                          color:"#FBBF24"},
-                {label:"Expiring 30d",value:cSum.expiring_30d||0,                               color:cSum.expiring_30d>0?"#F87171":"#34D399"},
-                {label:"Expired",     value:cSum.expired||0,                                    color:"#94A3B8"},
+                {label:"Active",      value:cSum.active||0,                                      color:"#547C4D"},
+                {label:"Portfolio",   value:fmtEGP(cSum.active_value),                          color:"#B07A2A"},
+                {label:"Expiring 30d",value:cSum.expiring_30d||0,                               color:cSum.expiring_30d>0?"#A84A3D":"#547C4D"},
+                {label:"Expired",     value:cSum.expired||0,                                    color:"#6D5F53"},
               ].map((k,i)=>(
                 <div key={i} className="bg-base-alt rounded-xl p-3 text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -340,7 +340,7 @@ export default function ReportsPage() {
                 ))}
               </div>
               {toArr(contRpt.contracts).slice(0,15).map((c,i)=>{
-                const sc={active:"#34D399",expired:"#F87171",pending:"#FBBF24"}[c.status]||"#94A3B8";
+                const sc={active:"#547C4D",expired:"#A84A3D",pending:"#B07A2A"}[c.status]||"#6D5F53";
                 const days = Math.round(c.days_remaining||0);
                 return (
                   <div key={i} className="tb-table-row" style={{gridTemplateColumns:"2fr 90px 120px 110px 80px",minWidth:550}}>
@@ -353,7 +353,7 @@ export default function ReportsPage() {
                     <div className="text-center"><span className="tb-badge" style={{background:sc+"18",color:sc,fontSize:"0.5625rem"}}>{c.status}</span></div>
                     <div className="text-center text-sm font-bold text-emerald-400">{fmtEGP(c.total_value||0)}</div>
                     <div className="text-center text-xs text-tertiary">{fmtDate(c.end_date)}</div>
-                    <div className="text-center text-xs font-bold" style={{color:days<30&&days>0?"#F87171":days<=0?"#94A3B8":"#34D399"}}>{days>0?days+"d":"—"}</div>
+                    <div className="text-center text-xs font-bold" style={{color:days<30&&days>0?"#A84A3D":days<=0?"#6D5F53":"#547C4D"}}>{days>0?days+"d":"—"}</div>
                   </div>
                 );
               })}

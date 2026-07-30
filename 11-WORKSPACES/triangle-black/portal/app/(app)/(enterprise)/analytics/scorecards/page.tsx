@@ -15,10 +15,10 @@ const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 const DarkTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"#1E293B",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-      {label && <div style={{fontSize:"0.75rem",color:"#94A3B8",marginBottom:4}}>{label}</div>}
+    <div style={{background:"#332C27",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"#6D5F53",marginBottom:4}}>{label}</div>}
       {payload.map((p: any, i: number) => (
-        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#F1F5F9"}}>
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#221D1A"}}>
           {p.name}: {typeof p.value === "number" ? p.value.toLocaleString() : p.value}
         </div>
       ))}
@@ -57,26 +57,26 @@ export default function AnalyticsScorecards() {
 
   // WO by status - bar chart
   const woStatusData = [
-    {name:"Open",       value:wos.filter(w=>w.status==="open").length,        fill:"#60A5FA"},
-    {name:"In Progress",value:wos.filter(w=>w.status==="in_progress").length,  fill:"#FBBF24"},
-    {name:"Completed",  value:wos.filter(w=>w.status==="completed").length,    fill:"#34D399"},
-    {name:"Cancelled",  value:wos.filter(w=>w.status==="cancelled").length,    fill:"#94A3B8"},
+    {name:"Open",       value:wos.filter(w=>w.status==="open").length,        fill:"#5B7C8C"},
+    {name:"In Progress",value:wos.filter(w=>w.status==="in_progress").length,  fill:"#B07A2A"},
+    {name:"Completed",  value:wos.filter(w=>w.status==="completed").length,    fill:"#547C4D"},
+    {name:"Cancelled",  value:wos.filter(w=>w.status==="cancelled").length,    fill:"#6D5F53"},
   ];
 
   // WO by priority - bar chart
   const woPriorityData = [
-    {name:"Critical",value:wos.filter(w=>w.priority==="critical").length, fill:"#F87171"},
-    {name:"High",    value:wos.filter(w=>w.priority==="high").length,     fill:"#FB923C"},
-    {name:"Medium",  value:wos.filter(w=>w.priority==="medium").length,   fill:"#FBBF24"},
-    {name:"Low",     value:wos.filter(w=>w.priority==="low").length,      fill:"#94A3B8"},
+    {name:"Critical",value:wos.filter(w=>w.priority==="critical").length, fill:"#A84A3D"},
+    {name:"High",    value:wos.filter(w=>w.priority==="high").length,     fill:"#B07A2A"},
+    {name:"Medium",  value:wos.filter(w=>w.priority==="medium").length,   fill:"#B07A2A"},
+    {name:"Low",     value:wos.filter(w=>w.priority==="low").length,      fill:"#6D5F53"},
   ];
 
   // Invoice status - pie chart
   const invoiceData = [
-    {name:"Paid",      value:inv.filter(i=>i.status==="paid").length,      fill:"#34D399"},
-    {name:"Pending",   value:inv.filter(i=>i.status==="pending").length,   fill:"#FBBF24"},
-    {name:"Overdue",   value:inv.filter(i=>i.status==="overdue").length,   fill:"#F87171"},
-    {name:"Cancelled", value:inv.filter(i=>i.status==="cancelled").length, fill:"#94A3B8"},
+    {name:"Paid",      value:inv.filter(i=>i.status==="paid").length,      fill:"#547C4D"},
+    {name:"Pending",   value:inv.filter(i=>i.status==="pending").length,   fill:"#B07A2A"},
+    {name:"Overdue",   value:inv.filter(i=>i.status==="overdue").length,   fill:"#A84A3D"},
+    {name:"Cancelled", value:inv.filter(i=>i.status==="cancelled").length, fill:"#6D5F53"},
   ].filter(d=>d.value>0);
 
   // Asset by category - bar chart
@@ -92,11 +92,11 @@ export default function AnalyticsScorecards() {
 
   // KPI scorecard data for radial chart
   const kpiData = [
-    {name:"WO Completion",   value:compRate,   fill:"#34D399"},
-    {name:"Invoice Collect", value:collRate,   fill:"#FBBF24"},
-    {name:"Asset Uptime",    value:assetUp,    fill:"#60A5FA"},
-    {name:"PM Compliance",   value:pmCompliance,fill:"#A78BFA"},
-    {name:"Twin Score",      value:score,      fill:"#F97316"},
+    {name:"WO Completion",   value:compRate,   fill:"#547C4D"},
+    {name:"Invoice Collect", value:collRate,   fill:"#B07A2A"},
+    {name:"Asset Uptime",    value:assetUp,    fill:"#5B7C8C"},
+    {name:"PM Compliance",   value:pmCompliance,fill:"#8D7443"},
+    {name:"Twin Score",      value:score,      fill:"#B07A2A"},
   ];
 
   const CHART_STYLE = {background:"transparent"};
@@ -106,7 +106,7 @@ export default function AnalyticsScorecards() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1B30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -115,7 +115,7 @@ export default function AnalyticsScorecards() {
               <p className="tb-hero-description">KPI performance across all operational domains with live charts</p>
             </div>
             <div className={`tb-score-badge ${score>=95?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-              <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{score}</div>
+              <div className="tb-score-value" style={{color:score>=95?"#547C4D":"#B07A2A"}}>{score}</div>
               <div className="tb-score-label">Platform Twin</div>
             </div>
           </div>
@@ -123,12 +123,12 @@ export default function AnalyticsScorecards() {
           {/* KPI strip */}
           <div className="tb-grid-6 mt-6">
             {[
-              {label:"WO Completion",value:`${compRate}%`,  color:compRate>=85?"#34D399":"#FBBF24"},
-              {label:"Collection",   value:`${collRate}%`,  color:collRate>=90?"#34D399":"#FBBF24"},
-              {label:"Asset Uptime", value:`${assetUp}%`,   color:assetUp>=95?"#34D399":"#FBBF24"},
-              {label:"PM Compliance",value:`${pmCompliance}%`,color:pmCompliance>=90?"#34D399":"#FBBF24"},
-              {label:"Revenue",      value:fmtEGP(totalRev),color:"#A78BFA"},
-              {label:"Twin Score",   value:`${score}/100`,  color:score>=95?"#34D399":"#FBBF24"},
+              {label:"WO Completion",value:`${compRate}%`,  color:compRate>=85?"#547C4D":"#B07A2A"},
+              {label:"Collection",   value:`${collRate}%`,  color:collRate>=90?"#547C4D":"#B07A2A"},
+              {label:"Asset Uptime", value:`${assetUp}%`,   color:assetUp>=95?"#547C4D":"#B07A2A"},
+              {label:"PM Compliance",value:`${pmCompliance}%`,color:pmCompliance>=90?"#547C4D":"#B07A2A"},
+              {label:"Revenue",      value:fmtEGP(totalRev),color:"#8D7443"},
+              {label:"Twin Score",   value:`${score}/100`,  color:score>=95?"#547C4D":"#B07A2A"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
@@ -153,7 +153,7 @@ export default function AnalyticsScorecards() {
             <ResponsiveContainer width="100%" height={280}>
               <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={kpiData}>
                 <RadialBar minAngle={15} label={{position:"insideStart",fill:"#fff",fontSize:10}} background clockWise dataKey="value" max={100}/>
-                <Legend iconSize={10} formatter={(value)=><span style={{color:"#94A3B8",fontSize:"0.75rem"}}>{value}</span>}/>
+                <Legend iconSize={10} formatter={(value)=><span style={{color:"#6D5F53",fontSize:"0.75rem"}}>{value}</span>}/>
                 <Tooltip content={<DarkTooltip/>}/>
               </RadialBarChart>
             </ResponsiveContainer>
@@ -243,7 +243,7 @@ export default function AnalyticsScorecards() {
               <XAxis dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
               <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
               <Tooltip content={<DarkTooltip/>}/>
-              <Bar dataKey="value" fill="#F97316" radius={[6,6,0,0]}/>
+              <Bar dataKey="value" fill="#B07A2A" radius={[6,6,0,0]}/>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -260,7 +260,7 @@ export default function AnalyticsScorecards() {
                 <div className="tb-progress tb-progress--md">
                   <div className="tb-progress-bar" style={{background:kpi.fill,width:`${pct}%`}}/>
                 </div>
-                <div className="text-xs mt-2" style={{color:isGood?"#34D399":"#FBBF24"}}>
+                <div className="text-xs mt-2" style={{color:isGood?"#547C4D":"#B07A2A"}}>
                   {isGood?"✓ On target":"↓ Needs attention"}
                 </div>
               </div>

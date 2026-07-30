@@ -20,11 +20,11 @@ const fmtDate = (d) => {
 };
 
 const AGING_COLORS = {
-  "Current":"#34D399","1-30 Days":"#FBBF24",
-  "31-60 Days":"#FB923C","61-90 Days":"#F87171","90+ Days":"#DC2626"
+  "Current":"#547C4D","1-30 Days":"#B07A2A",
+  "31-60 Days":"#B07A2A","61-90 Days":"#A84A3D","90+ Days":"#A84A3D"
 };
 
-function MiniBar({ value, max, color="#60A5FA" }) {
+function MiniBar({ value, max, color="#5B7C8C" }) {
   const pct = max > 0 ? Math.min(100, (value/max)*100) : 0;
   return (
     <div className="h-2 rounded-full bg-base-alt overflow-hidden">
@@ -90,10 +90,10 @@ export default function FinancialDashboardPage() {
           {/* Top KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total Invoiced",value:fmtEGP(rev.total_invoiced),sub:"All time",color:"#60A5FA"},
-              {label:"Collected",value:fmtEGP(rev.total_collected),sub:`${fmtPct(summary.collection_rate_pct)} rate`,color:"#34D399"},
-              {label:"Outstanding",value:fmtEGP(rev.total_outstanding),sub:`${rev.unpaid_count||0} unpaid invoices`,color:(rev.total_outstanding||0)>0?"#FBBF24":"#34D399"},
-              {label:"SOW Pipeline",value:fmtEGP(costs.total_sow_value),sub:`${costs.sow_count||0} documents`,color:"#A78BFA"},
+              {label:"Total Invoiced",value:fmtEGP(rev.total_invoiced),sub:"All time",color:"#5B7C8C"},
+              {label:"Collected",value:fmtEGP(rev.total_collected),sub:`${fmtPct(summary.collection_rate_pct)} rate`,color:"#547C4D"},
+              {label:"Outstanding",value:fmtEGP(rev.total_outstanding),sub:`${rev.unpaid_count||0} unpaid invoices`,color:(rev.total_outstanding||0)>0?"#B07A2A":"#547C4D"},
+              {label:"SOW Pipeline",value:fmtEGP(costs.total_sow_value),sub:`${costs.sow_count||0} documents`,color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.1rem"}}>{k.value}</div>
@@ -116,9 +116,9 @@ export default function FinancialDashboardPage() {
               <div className="tb-section-title">Revenue Overview</div>
               <div className="space-y-3 mt-3">
                 {[
-                  {label:"Total Invoiced",value:Number(rev.total_invoiced||0),color:"#60A5FA"},
-                  {label:"Collected",value:Number(rev.total_collected||0),color:"#34D399"},
-                  {label:"Outstanding",value:Number(rev.total_outstanding||0),color:"#FBBF24"},
+                  {label:"Total Invoiced",value:Number(rev.total_invoiced||0),color:"#5B7C8C"},
+                  {label:"Collected",value:Number(rev.total_collected||0),color:"#547C4D"},
+                  {label:"Outstanding",value:Number(rev.total_outstanding||0),color:"#B07A2A"},
                 ].map((row,i)=>{
                   const max = Number(rev.total_invoiced||1);
                   const pct = Math.min(100,(row.value/max)*100);
@@ -136,7 +136,7 @@ export default function FinancialDashboardPage() {
                 })}
                 <div className="pt-2 border-t border-border flex justify-between text-xs">
                   <span className="text-tertiary">Collection Rate</span>
-                  <span className="font-black" style={{color:Number(summary.collection_rate_pct||0)>70?"#34D399":"#FBBF24"}}>
+                  <span className="font-black" style={{color:Number(summary.collection_rate_pct||0)>70?"#547C4D":"#B07A2A"}}>
                     {fmtPct(summary.collection_rate_pct)}
                   </span>
                 </div>
@@ -222,9 +222,9 @@ export default function FinancialDashboardPage() {
               <div className="tb-section-title">Cost Structure (SOWs)</div>
               <div className="space-y-3 mt-3">
                 {[
-                  {label:"Labor Cost",value:Number(costs.total_labor||0),color:"#60A5FA"},
-                  {label:"Materials Cost",value:Number(costs.total_materials||0),color:"#FBBF24"},
-                  {label:"Overhead & Profit",value:Number(costs.total_overhead_profit||0),color:"#34D399"},
+                  {label:"Labor Cost",value:Number(costs.total_labor||0),color:"#5B7C8C"},
+                  {label:"Materials Cost",value:Number(costs.total_materials||0),color:"#B07A2A"},
+                  {label:"Overhead & Profit",value:Number(costs.total_overhead_profit||0),color:"#547C4D"},
                 ].map((row,i)=>{
                   const total = Number(costs.total_sow_value||1);
                   return (
@@ -246,13 +246,13 @@ export default function FinancialDashboardPage() {
 
             {/* Aged Receivables */}
             <div className="tb-section">
-              <div className="tb-section-title" style={{color:"#FBBF24"}}>⏰ Aged Receivables</div>
+              <div className="tb-section-title" style={{color:"#B07A2A"}}>⏰ Aged Receivables</div>
               {aged.length === 0 ? (
                 <div className="text-center py-4 text-sm text-emerald-400 font-bold">✅ No outstanding invoices</div>
               ) : (
                 <div className="space-y-3 mt-3">
                   {aged.map((bucket,i)=>{
-                    const color = AGING_COLORS[bucket.bucket] || "#94A3B8";
+                    const color = AGING_COLORS[bucket.bucket] || "#6D5F53";
                     return (
                       <div key={i}>
                         <div className="flex justify-between text-xs mb-1">
@@ -287,7 +287,7 @@ export default function FinancialDashboardPage() {
                         <span className="text-secondary">{v.category}</span>
                         <span className="font-bold text-primary">{fmtEGP(v.total_spend)}</span>
                       </div>
-                      <MiniBar value={Number(v.total_spend||0)} max={maxVendor} color="#A78BFA"/>
+                      <MiniBar value={Number(v.total_spend||0)} max={maxVendor} color="#8D7443"/>
                       <div className="text-xs text-tertiary mt-0.5">{v.vendor_count} vendors · {v.po_count} POs</div>
                     </div>
                   ))
@@ -300,9 +300,9 @@ export default function FinancialDashboardPage() {
               <div className="tb-section-title">Cash Flow Summary</div>
               <div className="space-y-2 mt-3">
                 {[
-                  {label:"PO Commitments",value:po.total_po_value||0,color:"#F87171",icon:"↑"},
-                  {label:"Invoice Revenue",value:rev.total_invoiced||0,color:"#34D399",icon:"↓"},
-                  {label:"Net Position",value:(Number(rev.total_invoiced||0)-Number(po.total_po_value||0)),color:"#60A5FA",icon:"="},
+                  {label:"PO Commitments",value:po.total_po_value||0,color:"#A84A3D",icon:"↑"},
+                  {label:"Invoice Revenue",value:rev.total_invoiced||0,color:"#547C4D",icon:"↓"},
+                  {label:"Net Position",value:(Number(rev.total_invoiced||0)-Number(po.total_po_value||0)),color:"#5B7C8C",icon:"="},
                 ].map((row,i)=>(
                   <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-base-alt">
                     <div className="flex items-center gap-2">

@@ -49,7 +49,7 @@ export function DataTable<T extends Record<string, any>>({
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className={"bg-slate-50 border-b border-slate-200 " + (stickyHeader ? "sticky top-0 z-10" : "")}>
+            <tr className={"bg-slate-50 border-b border-stone-200 " + (stickyHeader ? "sticky top-0 z-10" : "")}>
               {columns.map(col => (
                 <th
                   key={col.key}
@@ -98,7 +98,7 @@ export function DataTable<T extends Record<string, any>>({
                 key={row[keyField] ?? idx}
                 onClick={() => onRow?.(row)}
                 className={
-                  "border-b border-slate-100 text-sm transition-colors " +
+                  "border-b border-stone-100 text-sm transition-colors " +
                   (idx % 2 === 0 ? "bg-white" : "bg-slate-50/40") +
                   (onRow ? " cursor-pointer hover:bg-amber-50/60" : " hover:bg-slate-50")
                 }

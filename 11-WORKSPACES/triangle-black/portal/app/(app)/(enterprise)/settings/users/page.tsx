@@ -14,13 +14,13 @@ const fmtDate = (d) => {
   } catch { return "—"; }
 };
 const ROLE_COLORS = {
-  admin: "#F87171",
-  manager: "#FBBF24",
-  agent: "#60A5FA",
-  engineer: "#34D399",
-  finance: "#A78BFA",
-  viewer: "#94A3B8",
-  client: "#FB923C",
+  admin: "#A84A3D",
+  manager: "#B07A2A",
+  agent: "#5B7C8C",
+  engineer: "#547C4D",
+  finance: "#8D7443",
+  viewer: "#6D5F53",
+  client: "#B07A2A",
 };
 
 export default function UserManagementPage() {
@@ -53,17 +53,17 @@ export default function UserManagementPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{ background: "linear-gradient(135deg, #0F172A 0%, #1A0A2E 100%)" }}>
+      <div className="tb-hero" style={{ background: "linear-gradient(135deg, #221D1A 0%, #1A0A2E 100%)" }}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Settings</div>
           <h1 className="tb-hero-title">User Management</h1>
           <p className="tb-hero-description">{users.length} platform users · Role-based access control</p>
           <div className="tb-grid-4 mt-6">
             {[
-              { label: "Total Users", value: users.length, color: "#F1F5F9" },
-              { label: "Admins", value: users.filter((u) => u.role === "admin").length, color: "#F87171" },
-              { label: "Managers", value: users.filter((u) => u.role === "manager").length, color: "#FBBF24" },
-              { label: "Active", value: users.filter((u) => u.is_active).length, color: "#34D399" },
+              { label: "Total Users", value: users.length, color: "#221D1A" },
+              { label: "Admins", value: users.filter((u) => u.role === "admin").length, color: "#A84A3D" },
+              { label: "Managers", value: users.filter((u) => u.role === "manager").length, color: "#B07A2A" },
+              { label: "Active", value: users.filter((u) => u.is_active).length, color: "#547C4D" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi cursor-default">
                 <div className="tb-hero-kpi-value" style={{ color: k.color }}>{k.value}</div>
@@ -84,7 +84,7 @@ export default function UserManagementPage() {
           ) : (
             <div className="space-y-2 mt-3">
               {users.map((u, i) => {
-                const rc = ROLE_COLORS[u.role] || "#94A3B8";
+                const rc = ROLE_COLORS[u.role] || "#6D5F53";
                 const isEditing = editingId === u.id;
                 return (
                   <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-base-alt border border-transparent hover:border-border transition-colors">
@@ -123,7 +123,7 @@ export default function UserManagementPage() {
                           <span className="tb-badge" style={{ background: rc + "18", color: rc, border: "1px solid " + rc + "30", fontSize: "0.55rem" }}>
                             {u.role}
                           </span>
-                          <span className="tb-badge" style={{ background: u.is_active ? "#34D39918" : "#F8717118", color: u.is_active ? "#34D399" : "#F87171", fontSize: "0.5rem" }}>
+                          <span className="tb-badge" style={{ background: u.is_active ? "#547C4D18" : "#A84A3D18", color: u.is_active ? "#547C4D" : "#A84A3D", fontSize: "0.5rem" }}>
                             {u.is_active ? "active" : "inactive"}
                           </span>
                           <button
@@ -144,12 +144,12 @@ export default function UserManagementPage() {
           <div className="tb-section-title">Role Permissions</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
             {[
-              { role: "admin", desc: "Full access — all modules, user management, security audit", color: "#F87171" },
-              { role: "manager", desc: "Approve WOs, contracts, invoices — view all data", color: "#FBBF24" },
-              { role: "agent", desc: "Create and edit WOs, service requests, procurement", color: "#60A5FA" },
-              { role: "engineer", desc: "Log time, update WO status, view assigned work", color: "#34D399" },
-              { role: "finance", desc: "View and process invoices, financial reports", color: "#A78BFA" },
-              { role: "viewer", desc: "Read-only access to all modules", color: "#94A3B8" },
+              { role: "admin", desc: "Full access — all modules, user management, security audit", color: "#A84A3D" },
+              { role: "manager", desc: "Approve WOs, contracts, invoices — view all data", color: "#B07A2A" },
+              { role: "agent", desc: "Create and edit WOs, service requests, procurement", color: "#5B7C8C" },
+              { role: "engineer", desc: "Log time, update WO status, view assigned work", color: "#547C4D" },
+              { role: "finance", desc: "View and process invoices, financial reports", color: "#8D7443" },
+              { role: "viewer", desc: "Read-only access to all modules", color: "#6D5F53" },
             ].map((r, i) => (
               <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-base-alt">
                 <span className="tb-badge flex-shrink-0" style={{ background: r.color + "18", color: r.color, border: "1px solid " + r.color + "30" }}>{r.role}</span>

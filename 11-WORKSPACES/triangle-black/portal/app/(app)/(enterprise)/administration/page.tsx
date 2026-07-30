@@ -26,7 +26,7 @@ export default function AdministrationPage() {
           <h1 className="tb-hero-title">Administration</h1>
           <p className="tb-hero-description">System configuration, users, and platform settings</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Version",value:"2.0.1",color:"#60A5FA"},{label:"Status",value:"Active",color:"#34D399"},{label:"Environment",value:"Production",color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Version",value:"2.0.1",color:"#5B7C8C"},{label:"Status",value:"Active",color:"#547C4D"},{label:"Environment",value:"Production",color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -34,8 +34,8 @@ export default function AdministrationPage() {
       </div>
       <div className="tb-canvas">
         {!is_admin && role && (
-          <div className="tb-section" style={{borderColor:"#FBBF2440",background:"#FBBF2408"}}>
-            <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold" style={{color:"#FBBF24"}}>Read-only access — role: {role}. Admin required for changes.</span></div>
+          <div className="tb-section" style={{borderColor:"#B07A2A40",background:"#B07A2A08"}}>
+            <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold" style={{color:"#B07A2A"}}>Read-only access — role: {role}. Admin required for changes.</span></div>
           </div>
         )}
         <div className="tb-section">

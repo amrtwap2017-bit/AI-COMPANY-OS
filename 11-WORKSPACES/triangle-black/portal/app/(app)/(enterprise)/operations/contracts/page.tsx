@@ -16,12 +16,12 @@ const fmtDate = (d) => {
   } catch { return "—"; }
 };
 const SC = {
-  draft: "#94A3B8",
-  pending_signature: "#FBBF24",
-  active: "#34D399",
-  expired: "#F87171",
-  terminated: "#F87171",
-  renewed: "#A78BFA",
+  draft: "#6D5F53",
+  pending_signature: "#B07A2A",
+  active: "#547C4D",
+  expired: "#A84A3D",
+  terminated: "#A84A3D",
+  renewed: "#8D7443",
 };
 
 export default function ContractsPage() {
@@ -40,7 +40,7 @@ export default function ContractsPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{ background: "linear-gradient(135deg, #0F172A 0%, #0D1A2A 100%)" }}>
+      <div className="tb-hero" style={{ background: "linear-gradient(135deg, #221D1A 0%, #221D1A 100%)" }}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -53,10 +53,10 @@ export default function ContractsPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              { label: "Total", value: contracts.length, color: "#F1F5F9" },
-              { label: "Active", value: activeCount, color: "#34D399" },
-              { label: "Pending Sign", value: pendingCount, color: "#FBBF24" },
-              { label: "Total Value", value: fmtEGP(contracts.reduce((s, c) => s + Number(c.total_value || 0), 0)), color: "#A78BFA" },
+              { label: "Total", value: contracts.length, color: "#221D1A" },
+              { label: "Active", value: activeCount, color: "#547C4D" },
+              { label: "Pending Sign", value: pendingCount, color: "#B07A2A" },
+              { label: "Total Value", value: fmtEGP(contracts.reduce((s, c) => s + Number(c.total_value || 0), 0)), color: "#8D7443" },
             ].map((k, i) => (
               <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{ color: k.color, fontSize: "0.95rem" }}>{k.value}</div>
@@ -111,7 +111,7 @@ export default function ContractsPage() {
                 ))}
               </div>
               {filtered.map((c, i) => {
-                const sc = SC[c.status] || "#94A3B8";
+                const sc = SC[c.status] || "#6D5F53";
                 return (
                   <div key={i} className="tb-table-row" style={{ gridTemplateColumns: "2fr 110px 100px 120px 110px 100px" }}>
                     <div className="min-w-0 pr-4">

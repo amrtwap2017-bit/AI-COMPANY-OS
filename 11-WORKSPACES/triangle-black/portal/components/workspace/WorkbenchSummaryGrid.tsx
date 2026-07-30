@@ -13,7 +13,7 @@ type WorkbenchSummaryGridProps = {
 
 export function WorkbenchSummaryGrid({ title, subtitle, items }: WorkbenchSummaryGridProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
@@ -21,7 +21,7 @@ export function WorkbenchSummaryGrid({ title, subtitle, items }: WorkbenchSummar
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => (
-          <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div key={item.label} className="rounded-2xl border border-stone-200 bg-slate-50 p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.label}
             </div>

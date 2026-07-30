@@ -10,9 +10,9 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR = {
-  pending:"#FBBF24", submitted:"#60A5FA", approved:"#34D399", rejected:"#F87171", cancelled:"#94A3B8"
+  pending:"#B07A2A", submitted:"#5B7C8C", approved:"#547C4D", rejected:"#A84A3D", cancelled:"#6D5F53"
 };
-const URGENCY_COLOR = { urgent:"#F87171", high:"#FB923C", normal:"#94A3B8", low:"rgba(148,163,184,0.4)" };
+const URGENCY_COLOR = { urgent:"#A84A3D", high:"#B07A2A", normal:"#6D5F53", low:"rgba(148,163,184,0.4)" };
 
 const prFields = [
   {key:"title",         label:"Title",         type:"text",     required:true,  placeholder:"e.g. HVAC Filters Restock"},
@@ -53,7 +53,7 @@ export default function PurchaseRequestsPage() {
         successPath="/supply-chain/purchase-requests/"/>
 
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #161208 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #161208 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -68,10 +68,10 @@ export default function PurchaseRequestsPage() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
-              {label:"Pending",   value:pending.length,  color:pending.length>0?"#FBBF24":"#94A3B8", f:"pending",   sub:"awaiting"},
-              {label:"Approved",  value:approved.length, color:"#34D399",                             f:"approved",  sub:"approved"},
-              {label:"Urgent",    value:urgent.length,   color:urgent.length>0?"#F87171":"#94A3B8",  f:"all",       sub:"priority"},
-              {label:"Auto-PR",   value:autoPRs.length,  color:"#A78BFA",                             f:"all",       sub:"system"},
+              {label:"Pending",   value:pending.length,  color:pending.length>0?"#B07A2A":"#6D5F53", f:"pending",   sub:"awaiting"},
+              {label:"Approved",  value:approved.length, color:"#547C4D",                             f:"approved",  sub:"approved"},
+              {label:"Urgent",    value:urgent.length,   color:urgent.length>0?"#A84A3D":"#6D5F53",  f:"all",       sub:"priority"},
+              {label:"Auto-PR",   value:autoPRs.length,  color:"#8D7443",                             f:"all",       sub:"system"},
               {label:"Total",     value:prs.length,      color:"rgba(148,163,184,0.9)",               f:"all",       sub:"all time"},
             ].map((k,i)=>{
               const act=statusF===k.f&&(i<2||(i>=2&&statusF==="all"));
@@ -95,7 +95,7 @@ export default function PurchaseRequestsPage() {
             <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
               {urgent.length} Urgent Purchase Request{urgent.length>1?"s":""} Need Immediate Approval — {urgent.slice(0,2).map(p=>p.title).join(" · ")}
             </div>
-            <button onClick={()=>setUrgencyF("urgent")} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
+            <button onClick={()=>setUrgencyF("urgent")} className="tb-ai-insight-action" style={{color:"#A84A3D",borderColor:"rgba(239,68,68,0.3)"}}>
               Show Urgent
             </button>
           </div>
@@ -137,7 +137,7 @@ export default function PurchaseRequestsPage() {
                 ))}
               </div>
               {filtered.map((pr,i)=>{
-                const sc = STATUS_COLOR[pr.status]||"#94A3B8";
+                const sc = STATUS_COLOR[pr.status]||"#6D5F53";
                 const uc = URGENCY_COLOR[pr.urgency]||"rgba(148,163,184,0.4)";
                 return (
                   <button key={i} onClick={()=>router.push(`/supply-chain/purchase-requests/${pr.id}`)}

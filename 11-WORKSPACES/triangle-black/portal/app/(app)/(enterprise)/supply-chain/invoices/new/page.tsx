@@ -33,7 +33,7 @@ export default function CreateInvoicePage() {
   const handleSubmit = () => createMut.mutate({...form, subtotal:Number(form.subtotal), vat_pct:Number(form.vat_pct), withholding_tax_pct:Number(form.withholding_tax_pct), exchange_rate:Number(form.exchange_rate), po_total:Number(form.po_total), grn_total:Number(form.grn_total)});
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/invoices")} className="tb-btn-secondary">← Invoices</button>
@@ -42,10 +42,10 @@ export default function CreateInvoicePage() {
           <h1 className="tb-hero-title">Supplier Invoice</h1>
           <div className="tb-grid-4 mt-4">
             {[
-              {label:"Subtotal",value:fmtEGP(Number(form.subtotal)||0),color:"#60A5FA"},
-              {label:`VAT (${form.vat_pct}%)`,value:fmtEGP(vat_amount),color:"#A78BFA"},
-              {label:"Total",value:fmtEGP(total),color:"#34D399"},
-              {label:"Net Payable",value:fmtEGP(net_payable),color:"#FBBF24"},
+              {label:"Subtotal",value:fmtEGP(Number(form.subtotal)||0),color:"#5B7C8C"},
+              {label:`VAT (${form.vat_pct}%)`,value:fmtEGP(vat_amount),color:"#8D7443"},
+              {label:"Total",value:fmtEGP(total),color:"#547C4D"},
+              {label:"Net Payable",value:fmtEGP(net_payable),color:"#B07A2A"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>

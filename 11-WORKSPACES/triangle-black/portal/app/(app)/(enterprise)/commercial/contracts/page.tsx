@@ -11,10 +11,10 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  active:            "#34D399",
-  pending_signature: "#FBBF24",
-  expired:           "#F87171",
-  draft:             "#94A3B8",
+  active:            "#547C4D",
+  pending_signature: "#B07A2A",
+  expired:           "#A84A3D",
+  draft:             "#6D5F53",
 };
 
 export default function ContractsPage() {
@@ -49,7 +49,7 @@ export default function ContractsPage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1520 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1520 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -64,11 +64,11 @@ export default function ContractsPage() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
-              {label:"Active",      value:active.length,    color:"#34D399", f:"active",    sub:fmtEGP(totalValue)},
-              {label:"Pending Sign",value:pending.length,   color:"#FBBF24", f:"pending_signature", sub:"awaiting"},
-              {label:"Expiring 30d",value:expiring30.length,color:expiring30.length>0?"#F87171":"#94A3B8", f:"expiring", sub:"urgent"},
-              {label:"Expiring 90d",value:expiring90.length,color:"#60A5FA", f:"expiring", sub:"plan ahead"},
-              {label:"Expired",    value:expired.length,    color:"#94A3B8", f:"expired",  sub:"closed"},
+              {label:"Active",      value:active.length,    color:"#547C4D", f:"active",    sub:fmtEGP(totalValue)},
+              {label:"Pending Sign",value:pending.length,   color:"#B07A2A", f:"pending_signature", sub:"awaiting"},
+              {label:"Expiring 30d",value:expiring30.length,color:expiring30.length>0?"#A84A3D":"#6D5F53", f:"expiring", sub:"urgent"},
+              {label:"Expiring 90d",value:expiring90.length,color:"#5B7C8C", f:"expiring", sub:"plan ahead"},
+              {label:"Expired",    value:expired.length,    color:"#6D5F53", f:"expired",  sub:"closed"},
             ].map((k,i)=>{
               const act=statusF===k.f;
               return (
@@ -88,10 +88,10 @@ export default function ContractsPage() {
         {expiring30.length > 0 && (
           <div className="tb-ai-insight" style={{background:"rgba(245,158,11,0.06)",borderColor:"rgba(245,158,11,0.2)"}}>
             <div className="tb-ai-insight-icon" style={{background:"rgba(245,158,11,0.15)"}}>⏰</div>
-            <div className="tb-ai-insight-text" style={{color:"#FCD34D"}}>
+            <div className="tb-ai-insight-text" style={{color:"#CFA058"}}>
               {expiring30.length} contract{expiring30.length>1?"s":""} expiring within 30 days — {expiring30.slice(0,2).map(c=>c.title||c.id?.slice(0,8)).join(" · ")}
             </div>
-            <button onClick={()=>router.push("/customers/renewals")} className="tb-ai-insight-action" style={{color:"#FBBF24",borderColor:"rgba(245,158,11,0.3)"}}>
+            <button onClick={()=>router.push("/customers/renewals")} className="tb-ai-insight-action" style={{color:"#B07A2A",borderColor:"rgba(245,158,11,0.3)"}}>
               Manage Renewals →
             </button>
           </div>
@@ -128,7 +128,7 @@ export default function ContractsPage() {
                 ))}
               </div>
               {filtered.map((c,i)=>{
-                const sc = STATUS_COLOR[c.status]||"#94A3B8";
+                const sc = STATUS_COLOR[c.status]||"#6D5F53";
                 const daysLeft = c.end_date?Math.ceil((new Date(c.end_date)-Date.now())/86400000):null;
                 const isExpiring = c.status==="active"&&daysLeft!==null&&daysLeft>=0&&daysLeft<=30;
                 const isExpired  = c.status==="expired";

@@ -15,7 +15,7 @@ const fmtDate = (d) => {
 const fmtBool = (v) => v===true||v==="true"||v===1 ? "✅ Yes" : "❌ No";
 
 const CATEGORIES = ["All","Operations","Financial","Procurement","Engineering","Executive"];
-const CAT_COLORS = {Operations:"#34D399",Financial:"#60A5FA",Procurement:"#FBBF24",Engineering:"#A78BFA",Executive:"#F97316"};
+const CAT_COLORS = {Operations:"#547C4D",Financial:"#5B7C8C",Procurement:"#B07A2A",Engineering:"#8D7443",Executive:"#B07A2A"};
 
 function formatCellValue(col, value) {
   if (value === null || value === undefined) return "—";
@@ -93,7 +93,7 @@ export default function ReportsPage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#0D1A30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -138,7 +138,7 @@ export default function ReportsPage() {
                     <div className="text-sm font-semibold text-primary truncate">{report.label}</div>
                     <div className="text-xs text-tertiary mt-0.5">{report.description.slice(0,55)}…</div>
                   </div>
-                  <span className="tb-badge flex-shrink-0" style={{fontSize:"0.45rem",background:(CAT_COLORS[report.category]||"#94A3B8")+"18",color:CAT_COLORS[report.category]||"#94A3B8"}}>
+                  <span className="tb-badge flex-shrink-0" style={{fontSize:"0.45rem",background:(CAT_COLORS[report.category]||"#6D5F53")+"18",color:CAT_COLORS[report.category]||"#6D5F53"}}>
                     {report.category}
                   </span>
                 </div>
@@ -263,11 +263,11 @@ export default function ReportsPage() {
                 {reportData?.operations && reportData?.financial && (
                   <div className="space-y-3">
                     {[
-                      {label:"Operations",data:reportData.operations,color:"#34D399"},
-                      {label:"Financial",data:reportData.financial,color:"#60A5FA"},
-                      {label:"Procurement",data:reportData.procurement,color:"#FBBF24"},
-                      {label:"Assets",data:reportData.assets,color:"#A78BFA"},
-                      {label:"Projects",data:reportData.projects,color:"#F97316"},
+                      {label:"Operations",data:reportData.operations,color:"#547C4D"},
+                      {label:"Financial",data:reportData.financial,color:"#5B7C8C"},
+                      {label:"Procurement",data:reportData.procurement,color:"#B07A2A"},
+                      {label:"Assets",data:reportData.assets,color:"#8D7443"},
+                      {label:"Projects",data:reportData.projects,color:"#B07A2A"},
                     ].map((section,si)=>(
                       <div key={si} className="tb-section">
                         <div className="tb-section-title" style={{color:section.color}}>{section.label}</div>
@@ -307,7 +307,7 @@ export default function ReportsPage() {
                           <thead>
                             <tr style={{borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
                               {columns.map((col,i)=>(
-                                <th key={i} style={{padding:"8px 12px",textAlign:"left",color:"#94A3B8",fontWeight:600,fontSize:"0.625rem",textTransform:"uppercase",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>
+                                <th key={i} style={{padding:"8px 12px",textAlign:"left",color:"#6D5F53",fontWeight:600,fontSize:"0.625rem",textTransform:"uppercase",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>
                                   {formatColumnLabel(col)}
                                 </th>
                               ))}

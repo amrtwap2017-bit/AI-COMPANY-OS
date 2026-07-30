@@ -15,7 +15,7 @@ const PRIORITY_COLORS: Record<string, string> = {
   critical: "text-red-600 bg-red-50 border-red-200",
   high:     "text-amber-600 bg-amber-50 border-amber-200",
   medium:   "text-blue-600 bg-blue-50 border-blue-200",
-  low:      "text-slate-600 bg-slate-50 border-slate-200",
+  low:      "text-slate-600 bg-slate-50 border-stone-200",
 };
 
 export function NotificationBell() {
@@ -42,7 +42,7 @@ export function NotificationBell() {
     <div className="relative">
       <button
         onClick={() => { setIsOpen(!isOpen); if (!isOpen) refetch(); }}
-        className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-800"
+        className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-stone-800"
       >
         <Bell className="w-5 h-5" />
         {badge > 0 && (
@@ -55,10 +55,10 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-10 w-96 bg-white border border-slate-200
+        <div className="absolute right-0 top-10 w-96 bg-white border border-stone-200
                         rounded-xl shadow-xl z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-            <div className="font-medium text-sm text-slate-800">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200">
+            <div className="font-medium text-sm text-stone-800">
               Notifications {badge > 0 && <span className="text-red-600">({badge})</span>}
             </div>
             <button onClick={() => setIsOpen(false)} className="text-tertiary hover:text-slate-600">
@@ -88,7 +88,7 @@ export function NotificationBell() {
             })}
           </div>
 
-          <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 text-xs text-tertiary text-center">
+          <div className="px-4 py-2 bg-slate-50 border-t border-stone-200 text-xs text-tertiary text-center">
             Refreshes every 30s · {list.length} active alerts
           </div>
         </div>

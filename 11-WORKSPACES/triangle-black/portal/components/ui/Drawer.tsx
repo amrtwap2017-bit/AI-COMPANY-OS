@@ -47,13 +47,13 @@ export function Drawer({
         onClick={onClose}
       />
       <div className={
-        "absolute top-0 bottom-0 flex flex-col bg-white shadow-xl border-slate-200 w-full " +
+        "absolute top-0 bottom-0 flex flex-col bg-white shadow-xl border-stone-200 w-full " +
         WIDTHS[width] + " " +
         (side === "right" ? "right-0 border-l" : "left-0 border-r")
       }>
         {(title || onClose) && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
-            {title && <h2 className="text-base font-semibold text-slate-900">{title}</h2>}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 flex-shrink-0">
+            {title && <h2 className="text-base font-semibold text-stone-900">{title}</h2>}
             <button
               onClick={onClose}
               aria-label="Close drawer"
@@ -67,7 +67,7 @@ export function Drawer({
           {children}
         </div>
         {footer && (
-          <div className="px-5 py-4 border-t border-slate-100 bg-slate-50 flex-shrink-0">
+          <div className="px-5 py-4 border-t border-stone-100 bg-slate-50 flex-shrink-0">
             {footer}
           </div>
         )}

@@ -9,8 +9,8 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const PO_STATUS_COLOR = {
-  pending:"#60A5FA", approved:"#A78BFA", ordered:"#FBBF24",
-  received:"#34D399", cancelled:"#F87171", draft:"#94A3B8"
+  pending:"#5B7C8C", approved:"#8D7443", ordered:"#B07A2A",
+  received:"#547C4D", cancelled:"#A84A3D", draft:"#6D5F53"
 };
 
 export default function SupplierDetailPage() {
@@ -66,10 +66,10 @@ export default function SupplierDetailPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Total POs",    value:stats.total_pos||0,       color:"#F1F5F9" },
-              { label:"Total Value",  value:fmtEGP(stats.total_value||0), color:"#34D399" },
-              { label:"Open PRs",     value:stats.total_prs||0,       color:"#FBBF24" },
-              { label:"Category",     value:supplier.category||"—",   color:"#60A5FA" },
+              { label:"Total POs",    value:stats.total_pos||0,       color:"#221D1A" },
+              { label:"Total Value",  value:fmtEGP(stats.total_value||0), color:"#547C4D" },
+              { label:"Open PRs",     value:stats.total_prs||0,       color:"#B07A2A" },
+              { label:"Category",     value:supplier.category||"—",   color:"#5B7C8C" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -120,7 +120,7 @@ export default function SupplierDetailPage() {
                     ))}
                   </div>
                   {pos.map((po, i) => {
-                    const pc = PO_STATUS_COLOR[po.status] || "#94A3B8";
+                    const pc = PO_STATUS_COLOR[po.status] || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/supply-chain/purchase-orders/${po.id}`)}
@@ -147,7 +147,7 @@ export default function SupplierDetailPage() {
                 </div>
                 <div className="space-y-2 mt-3">
                   {prs.map((pr, i) => {
-                    const sc = { pending:"#60A5FA", approved:"#34D399", rejected:"#F87171" }[pr.status] || "#94A3B8";
+                    const sc = { pending:"#5B7C8C", approved:"#547C4D", rejected:"#A84A3D" }[pr.status] || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/supply-chain/purchase-requests/${pr.id}`)}
@@ -173,9 +173,9 @@ export default function SupplierDetailPage() {
               <div className="tb-section-title">Procurement Summary</div>
               <div className="space-y-3">
                 {[
-                  { label:"Total POs",    value:String(stats.total_pos||0),       color:"#F1F5F9" },
-                  { label:"Total Value",  value:fmtEGP(stats.total_value||0),     color:"#34D399" },
-                  { label:"Open PRs",     value:String(stats.total_prs||0),       color:"#FBBF24" },
+                  { label:"Total POs",    value:String(stats.total_pos||0),       color:"#221D1A" },
+                  { label:"Total Value",  value:fmtEGP(stats.total_value||0),     color:"#547C4D" },
+                  { label:"Open PRs",     value:String(stats.total_prs||0),       color:"#B07A2A" },
                 ].map((row, i) => (
                   <div key={i} className="tb-info-row">
                     <span className="tb-info-label">{row.label}</span>

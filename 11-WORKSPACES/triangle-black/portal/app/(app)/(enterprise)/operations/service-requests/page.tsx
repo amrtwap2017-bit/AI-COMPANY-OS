@@ -72,7 +72,7 @@ export default function ServiceRequestsPage() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
-              { label:"Total",       value:srs.length, color:"#F1F5F9" },
+              { label:"Total",       value:srs.length, color:"#221D1A" },
               { label:"Open",        value:open,        color:"#5B7C8C" },
               { label:"In Progress", value:inProgress,  color:"#B07A2A" },
               { label:"Resolved",    value:resolved,    color:"#547C4D" },

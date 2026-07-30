@@ -9,9 +9,9 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  new:"#60A5FA", qualified:"#A78BFA", proposal:"#818CF8",
-  negotiation:"#FBBF24", won:"#34D399", lost:"#F87171",
-  assigned:"#FB923C", converted:"#34D399"
+  new:"#5B7C8C", qualified:"#8D7443", proposal:"#818CF8",
+  negotiation:"#B07A2A", won:"#547C4D", lost:"#A84A3D",
+  assigned:"#B07A2A", converted:"#547C4D"
 };
 
 const PIPELINE_STAGES = ["new","qualified","proposal","negotiation","won"];
@@ -43,7 +43,7 @@ export default function LeadDetailPage() {
     </div>
   );
 
-  const sc        = STATUS_COLOR[lead.status] || "#94A3B8";
+  const sc        = STATUS_COLOR[lead.status] || "#6D5F53";
   const contracts = lead.contracts || [];
   const stageIdx  = PIPELINE_STAGES.indexOf(lead.status);
   const isWon     = lead.status === "won" || lead.status === "converted";
@@ -51,7 +51,7 @@ export default function LeadDetailPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0F28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0F28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -68,9 +68,9 @@ export default function LeadDetailPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Status",       value:(lead.status||"—").toUpperCase(), color:sc },
-              { label:"Score",        value:lead.score||"—",                  color:Number(lead.score||0)>=70?"#34D399":"#FBBF24" },
-              { label:"Value",        value:fmtEGP(lead.estimated_value||lead.value||0), color:"#34D399" },
-              { label:"Contracts",    value:contracts.length,                 color:"#A78BFA" },
+              { label:"Score",        value:lead.score||"—",                  color:Number(lead.score||0)>=70?"#547C4D":"#B07A2A" },
+              { label:"Value",        value:fmtEGP(lead.estimated_value||lead.value||0), color:"#547C4D" },
+              { label:"Contracts",    value:contracts.length,                 color:"#8D7443" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -93,7 +93,7 @@ export default function LeadDetailPage() {
                   {PIPELINE_STAGES.map((stage, i) => {
                     const isPast    = i <= stageIdx || isWon;
                     const isCurrent = i === stageIdx && !isWon;
-                    const c = STATUS_COLOR[stage] || "#94A3B8";
+                    const c = STATUS_COLOR[stage] || "#6D5F53";
                     return (
                       <div key={stage} className="flex items-center flex-1 min-w-0">
                         <div className="flex flex-col items-center flex-1">
@@ -110,7 +110,7 @@ export default function LeadDetailPage() {
                           <div className="text-xs mt-1 text-center capitalize" style={{color:isCurrent?c:"#64748B",fontSize:"0.5625rem"}}>{stage}</div>
                         </div>
                         {i < PIPELINE_STAGES.length - 1 && (
-                          <div style={{height:2,flex:1,background:i<stageIdx||isWon?"#334155":"#1E293B",marginBottom:16}}/>
+                          <div style={{height:2,flex:1,background:i<stageIdx||isWon?"#334155":"#332C27",marginBottom:16}}/>
                         )}
                       </div>
                     );
@@ -157,7 +157,7 @@ export default function LeadDetailPage() {
                 </div>
                 <div className="space-y-2 mt-3">
                   {contracts.map((ct, i) => {
-                    const csc = { active:"#34D399", expired:"#F87171", pending:"#FBBF24" }[ct.status] || "#94A3B8";
+                    const csc = { active:"#547C4D", expired:"#A84A3D", pending:"#B07A2A" }[ct.status] || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/commercial/contracts/${ct.id}`)}
@@ -182,13 +182,13 @@ export default function LeadDetailPage() {
             <div className="tb-section">
               <div className="tb-section-title">Lead Score</div>
               <div className="text-center py-3">
-                <div className="text-5xl font-black mb-1" style={{color:Number(lead.score||0)>=70?"#34D399":"#FBBF24"}}>
+                <div className="text-5xl font-black mb-1" style={{color:Number(lead.score||0)>=70?"#547C4D":"#B07A2A"}}>
                   {lead.score || 0}
                 </div>
                 <div className="text-xs text-tertiary">/ 100</div>
                 <div className="tb-progress tb-progress--md mt-3">
                   <div className="tb-progress-bar" style={{
-                    background:Number(lead.score||0)>=70?"#34D399":"#FBBF24",
+                    background:Number(lead.score||0)>=70?"#547C4D":"#B07A2A",
                     width:`${Math.min(Number(lead.score||0),100)}%`
                   }}/>
                 </div>
@@ -196,7 +196,7 @@ export default function LeadDetailPage() {
             </div>
 
             {isWon && (
-              <div className="tb-section" style={{borderColor:"#34D39940",background:"#34D39908"}}>
+              <div className="tb-section" style={{borderColor:"#547C4D40",background:"#547C4D08"}}>
                 <div className="text-center py-2">
                   <div style={{fontSize:"2rem"}}>🎉</div>
                   <div className="text-sm font-bold text-emerald-400 mt-1">DEAL WON</div>

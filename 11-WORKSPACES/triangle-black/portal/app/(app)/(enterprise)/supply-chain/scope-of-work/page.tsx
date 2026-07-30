@@ -42,7 +42,7 @@ export default function ScopeOfWorkPage() {
                 <button onClick={()=>handleExport("/api/v1/export/scope-of-work")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>⬇ Export CSV</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:sows.length,color:"#F1F5F9"},{label:"Draft",value:sows.filter(s=>s.status==="draft").length,color:"#6D5F53"},{label:"Pending",value:sows.filter(s=>s.status==="pending_approval").length,color:"#B07A2A"},{label:"Approved",value:sows.filter(s=>s.status==="approved").length,color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Total",value:sows.length,color:"#221D1A"},{label:"Draft",value:sows.filter(s=>s.status==="draft").length,color:"#6D5F53"},{label:"Pending",value:sows.filter(s=>s.status==="pending_approval").length,color:"#B07A2A"},{label:"Approved",value:sows.filter(s=>s.status==="approved").length,color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

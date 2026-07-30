@@ -43,8 +43,8 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
          onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
            onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-          <h2 className="font-semibold text-slate-800">Keyboard Shortcuts</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200">
+          <h2 className="font-semibold text-stone-800">Keyboard Shortcuts</h2>
           <button onClick={onClose} className="text-tertiary hover:text-slate-600">
             <X className="w-5 h-5" />
           </button>
@@ -70,7 +70,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className="px-6 py-3 bg-slate-50 border-t border-slate-200">
+        <div className="px-6 py-3 bg-slate-50 border-t border-stone-200">
           <p className="text-xs text-tertiary text-center">
             Press <KeyBadge k="?" /> anytime to show this panel · Press <KeyBadge k="Esc" /> to close
           </p>

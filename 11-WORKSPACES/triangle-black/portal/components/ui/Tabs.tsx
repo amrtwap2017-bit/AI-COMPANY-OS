@@ -55,7 +55,7 @@ export function Tabs({ tabs, active, onChange, variant = "underline", size = "md
   }
 
   return (
-    <div className={"border-b border-slate-200 " + className} role="tablist">
+    <div className={"border-b border-stone-200 " + className} role="tablist">
       <div className="flex items-end gap-0 -mb-px overflow-x-auto scrollbar-none">
         {tabs.map(tab => (
           <button

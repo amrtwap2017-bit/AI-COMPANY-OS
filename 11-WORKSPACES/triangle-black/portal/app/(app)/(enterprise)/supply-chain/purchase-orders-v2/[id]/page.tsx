@@ -7,7 +7,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#60A5FA",sent:"#A78BFA",acknowledged:"#A78BFA",partial:"#FB923C",received:"#34D399",invoiced:"#34D399",paid:"#34D399",cancelled:"#F87171"};
+const SC = {draft:"#6D5F53",pending_approval:"#B07A2A",approved:"#5B7C8C",sent:"#8D7443",acknowledged:"#8D7443",partial:"#B07A2A",received:"#547C4D",invoiced:"#547C4D",paid:"#547C4D",cancelled:"#A84A3D"};
 const EMPTY_LINE = {description:"",unit:"unit",quantity:1,unit_price:0,discount_pct:0,vat_pct:14,notes:""};
 export default function POv2DetailPage() {
   const router = useRouter();
@@ -41,23 +41,23 @@ export default function POv2DetailPage() {
 
     if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading PO…</div></div>;
   if (!po || po.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">PO not found</div></div>;
-  const sc = SC[po.status]||"#94A3B8";
+  const sc = SC[po.status]||"#6D5F53";
   const lines = po.line_items || [];
   const grns = po.grns || [];
   const subtotal = lines.reduce((s,l)=>s+Number(l.total_before_vat||0),0);
   const vatTotal = lines.reduce((s,l)=>s+Number(l.vat_amount||0),0);
   const grandTotal = subtotal + vatTotal;
   const ACTIONS = {
-    draft:[{label:"Submit for Approval",status:"pending_approval",color:"#FBBF24"}],
-    pending_approval:[{label:"✓ Approve",status:"approved",color:"#16A34A"},{label:"✗ Reject",status:"draft",color:"#F87171"}],
+    draft:[{label:"Submit for Approval",status:"pending_approval",color:"#B07A2A"}],
+    pending_approval:[{label:"✓ Approve",status:"approved",color:"#16A34A"},{label:"✗ Reject",status:"draft",color:"#A84A3D"}],
     approved:[{label:"Send to Vendor →",status:"sent",color:"#7C3AED"}],
-    sent:[{label:"Mark Acknowledged",status:"acknowledged",color:"#60A5FA"}],
-    acknowledged:[{label:"Mark Received",status:"received",color:"#34D399"}],
+    sent:[{label:"Mark Acknowledged",status:"acknowledged",color:"#5B7C8C"}],
+    acknowledged:[{label:"Mark Received",status:"received",color:"#547C4D"}],
   };
   const actions = ACTIONS[po.status] || [];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/purchase-orders-v2")} className="tb-btn-secondary">← PO List</button>
@@ -66,7 +66,7 @@ export default function POv2DetailPage() {
               onClick={()=>{ if(window.confirm("Delete this purchase order? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}
               className="tb-btn-secondary"
-              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>
               {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
             </button>
             <div className="flex gap-2 flex-wrap">
@@ -93,10 +93,10 @@ export default function POv2DetailPage() {
           </div>
           <div className="tb-grid-4">
             {[
-              {label:"Line Items",value:lines.length,color:"#60A5FA"},
-              {label:"Subtotal",value:fmtEGP(subtotal),color:"#FBBF24"},
-              {label:"VAT (14%)",value:fmtEGP(vatTotal),color:"#F97316"},
-              {label:"Grand Total",value:fmtEGP(grandTotal),color:"#34D399"},
+              {label:"Line Items",value:lines.length,color:"#5B7C8C"},
+              {label:"Subtotal",value:fmtEGP(subtotal),color:"#B07A2A"},
+              {label:"VAT (14%)",value:fmtEGP(vatTotal),color:"#B07A2A"},
+              {label:"Grand Total",value:fmtEGP(grandTotal),color:"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>

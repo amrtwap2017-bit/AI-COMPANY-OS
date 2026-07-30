@@ -19,13 +19,13 @@ export default function WorkflowLauncherPage() {
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0A1A30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Platform · Workflows</div>
           <h1 className="tb-hero-title">Workflow Launcher</h1>
           <p className="tb-hero-description">Quick-start common platform workflows</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Quick Actions",value:actions.length,color:"#60A5FA"},{label:"Pending",value:total,color:total>0?"#FBBF24":"#34D399"},{label:"Automation",value:"Active",color:"#34D399"},{label:"Status",value:"Ready",color:"#34D399"}].map((k,i)=>(
+            {[{label:"Quick Actions",value:actions.length,color:"#5B7C8C"},{label:"Pending",value:total,color:total>0?"#B07A2A":"#547C4D"},{label:"Automation",value:"Active",color:"#547C4D"},{label:"Status",value:"Ready",color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -50,7 +50,7 @@ export default function WorkflowLauncherPage() {
             <div className="tb-section-title">Pending Automation Actions</div>
             <div className="space-y-2">
               {Object.entries(pending).map(([key,val],i)=>(
-                <div key={i} className="tb-info-row"><span className="tb-info-label capitalize">{key.replace(/_/g," ")}</span><span className="tb-badge" style={{color:"#FBBF24"}}>{String(val)}</span></div>
+                <div key={i} className="tb-info-row"><span className="tb-info-label capitalize">{key.replace(/_/g," ")}</span><span className="tb-badge" style={{color:"#B07A2A"}}>{String(val)}</span></div>
               ))}
             </div>
           </div>

@@ -18,7 +18,7 @@ const fmtRelative = (d) => {
 };
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
-const PC = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399",normal:"#94A3B8"};
+const PC = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D",normal:"#6D5F53"};
 const DOC_ICONS = {sow:"📋",po:"📦",rfq:"📝",quotation_selection:"⚖️"};
 
 export default function MyDayPage() {
@@ -58,10 +58,10 @@ export default function MyDayPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Needs Attention",value:urgentCount,color:urgentCount>0?"#F87171":"#34D399",icon:"🔴"},
-              {label:"Pending Approvals",value:pendingApprovals.length,color:pendingApprovals.length>0?"#FBBF24":"#34D399",icon:"✍️"},
-              {label:"SLA Breaches",value:slaBreaches.length,color:slaBreaches.length>0?"#F87171":"#34D399",icon:"⏱"},
-              {label:"Open WOs",value:ops.open_count||0,color:"#60A5FA",icon:"🔧"},
+              {label:"Needs Attention",value:urgentCount,color:urgentCount>0?"#A84A3D":"#547C4D",icon:"🔴"},
+              {label:"Pending Approvals",value:pendingApprovals.length,color:pendingApprovals.length>0?"#B07A2A":"#547C4D",icon:"✍️"},
+              {label:"SLA Breaches",value:slaBreaches.length,color:slaBreaches.length>0?"#A84A3D":"#547C4D",icon:"⏱"},
+              {label:"Open WOs",value:ops.open_count||0,color:"#5B7C8C",icon:"🔧"},
             ].map((k,i)=>(
   <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="flex items-center gap-2 mb-1"><span>{k.icon}</span></div>
@@ -81,9 +81,9 @@ export default function MyDayPage() {
 
             {/* Pending Approvals */}
             {pendingApprovals.length > 0 && (
-              <div className="tb-section" style={{borderColor:"#FBBF2440",background:"#FBBF2406"}}>
+              <div className="tb-section" style={{borderColor:"#B07A2A40",background:"#B07A2A06"}}>
                 <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#FBBF24"}}>✍️ Pending Approvals ({pendingApprovals.length})</div>
+                  <div className="tb-section-title" style={{marginBottom:0,color:"#B07A2A"}}>✍️ Pending Approvals ({pendingApprovals.length})</div>
                   <button onClick={()=>router.push("/supply-chain/approvals-center")} className="text-xs text-brand">View all →</button>
                 </div>
                 <div className="space-y-2">
@@ -110,14 +110,14 @@ export default function MyDayPage() {
 
             {/* SLA Breaches */}
             {slaBreaches.length > 0 && (
-              <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717106"}}>
+              <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D06"}}>
                 <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#F87171"}}>⏱ SLA Breaches ({slaBreaches.length})</div>
+                  <div className="tb-section-title" style={{marginBottom:0,color:"#A84A3D"}}>⏱ SLA Breaches ({slaBreaches.length})</div>
                   <button onClick={()=>router.push("/operations/sla")} className="text-xs text-brand">SLA Dashboard →</button>
                 </div>
                 <div className="space-y-2">
                   {slaBreaches.map((b,i) => {
-                    const uc = PC[b.urgency] || "#94A3B8";
+                    const uc = PC[b.urgency] || "#6D5F53";
                     return (
                       <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt border border-red-400/15">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:uc}}/>
@@ -126,7 +126,7 @@ export default function MyDayPage() {
                           <div className="text-xs text-tertiary">{b.urgency} · Target: {b.sla_target_hours}h · {b.site_name||"—"}</div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <div className="text-sm font-black" style={{color:"#F87171"}}>{Math.round(b.hours_overdue)}h</div>
+                          <div className="text-sm font-black" style={{color:"#A84A3D"}}>{Math.round(b.hours_overdue)}h</div>
                           <div className="text-xs text-tertiary">overdue</div>
                         </div>
                       </div>
@@ -140,19 +140,19 @@ export default function MyDayPage() {
             {criticalWOs.length > 0 && (
               <div className="tb-section">
                 <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#F87171"}}>⚠ Critical Work Orders</div>
+                  <div className="tb-section-title" style={{marginBottom:0,color:"#A84A3D"}}>⚠ Critical Work Orders</div>
                   <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand">All WOs →</button>
                 </div>
                 <div className="space-y-2">
                   {criticalWOs.map((wo,i)=>(
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:"#F87171"}}/>
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:"#A84A3D"}}/>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-primary truncate">{wo.title}</div>
                         <div className="text-xs text-tertiary">{wo.site_name||"—"} · {wo.technician_name||"Unassigned"}</div>
                       </div>
-                      <span className="tb-badge flex-shrink-0" style={{background:"#F8717118",color:"#F87171",fontSize:"0.45rem"}}>{wo.status?.replace(/_/g," ")}</span>
+                      <span className="tb-badge flex-shrink-0" style={{background:"#A84A3D18",color:"#A84A3D",fontSize:"0.45rem"}}>{wo.status?.replace(/_/g," ")}</span>
                     </button>
                   ))}
                 </div>
@@ -191,12 +191,12 @@ export default function MyDayPage() {
               <div className="tb-section-title">Quick Actions</div>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  {icon:"🔧",label:"New Work Order",path:"/operations/work-orders/new",color:"#F97316"},
-                  {icon:"📋",label:"Dispatch Board",path:"/operations/dispatch",color:"#A78BFA"},
-                  {icon:"📦",label:"Purchase Orders",path:"/supply-chain/purchase-orders-v2",color:"#FBBF24"},
-                  {icon:"📄",label:"Invoices",path:"/supply-chain/invoices",color:"#34D399"},
-                  {icon:"📱",label:"Asset QR Codes",path:"/operations/assets/qr",color:"#FB923C"},
-                  {icon:"📊",label:"Executive",path:"/executive/dashboard",color:"#60A5FA"},
+                  {icon:"🔧",label:"New Work Order",path:"/operations/work-orders/new",color:"#B07A2A"},
+                  {icon:"📋",label:"Dispatch Board",path:"/operations/dispatch",color:"#8D7443"},
+                  {icon:"📦",label:"Purchase Orders",path:"/supply-chain/purchase-orders-v2",color:"#B07A2A"},
+                  {icon:"📄",label:"Invoices",path:"/supply-chain/invoices",color:"#547C4D"},
+                  {icon:"📱",label:"Asset QR Codes",path:"/operations/assets/qr",color:"#B07A2A"},
+                  {icon:"📊",label:"Executive",path:"/executive/dashboard",color:"#5B7C8C"},
                 ].map((a,i)=>(
                   <button key={i} onClick={()=>router.push(a.path)}
                     className="flex items-center gap-2 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
@@ -218,7 +218,7 @@ export default function MyDayPage() {
                   <div className="text-xs text-tertiary text-center py-4">No recent notifications</div>
                 ) : recentNotifs.map((n,i)=>(
                   <div key={i} className="flex items-start gap-2 py-2 border-b border-border">
-                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{background:n.is_read?"#334155":"#60A5FA"}}/>
+                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{background:n.is_read?"#334155":"#5B7C8C"}}/>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs text-primary truncate">{n.title}</div>
                       <div className="text-xs text-tertiary">{fmtRelative(n.created_at)}</div>

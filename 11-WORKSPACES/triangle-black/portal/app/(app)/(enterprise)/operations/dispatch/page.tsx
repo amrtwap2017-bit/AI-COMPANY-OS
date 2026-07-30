@@ -26,7 +26,7 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
   const overdue = isOverdue(wo.due_date);
   return (
     <div className="rounded-xl border border-border transition-all hover:border-brand/40 cursor-pointer"
-         style={{background:"#1E293B",borderLeft:`3px solid ${pc}`}}>
+         style={{background:"#332C27",borderLeft:`3px solid ${pc}`}}>
       <div className="p-3" onClick={()=>onClick(wo.id)}>
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="text-xs font-bold text-primary leading-tight flex-1">{wo.title.slice(0,55)}{wo.title.length>55?"…":""}</div>
@@ -60,7 +60,7 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
         {wo.status !== "completed" && (
           <button onClick={(e)=>{e.stopPropagation();onStatus(wo.id, wo.status==="open"?"in_progress":"completed");}}
             className="text-xs px-2 py-0.5 rounded-lg transition-colors"
-            style={{background:wo.status==="open"?"#FBBF2420":"#34D39920",color:wo.status==="open"?"#B07A2A":"#547C4D"}}>
+            style={{background:wo.status==="open"?"#B07A2A20":"#547C4D20",color:wo.status==="open"?"#B07A2A":"#547C4D"}}>
             {wo.status==="open"?"▶ Start":"✓ Done"}
           </button>
         )}
@@ -121,7 +121,7 @@ export default function DispatchBoardPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -178,7 +178,7 @@ export default function DispatchBoardPage() {
               const wos = board[col] || [];
               return (
                 <div key={col} className="flex flex-col rounded-2xl overflow-hidden border border-border"
-                     style={{background:"#0F172A"}}>
+                     style={{background:"#221D1A"}}>
                   {/* Column Header */}
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border"
                        style={{background:cfg.bg}}>

@@ -13,7 +13,7 @@ export function MobileBottomBar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
       <div className="grid grid-cols-4 gap-2">
         {mobilePrimaryNav.map((item) => {
           const active = isActive(pathname, item.href);

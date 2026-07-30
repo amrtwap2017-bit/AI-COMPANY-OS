@@ -23,8 +23,8 @@ const fmtDateTime = (d) => {
 };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
-const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"#94A3B8" };
+const PRIORITY_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" };
+const STATUS_COLOR   = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D", cancelled:"#6D5F53" };
 
 export default function WorkOrderDetailPage() {
   const router = useRouter();
@@ -33,12 +33,12 @@ export default function WorkOrderDetailPage() {
 
   const { data: wo, isLoading } = useQuery(
     ["wo-detail", id],
-    () => authFetch(`/api/v1/work-orders-v2/${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/work-orders/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 
   const deleteMut = useMutation(
-    () => authFetch(`/api/v1/work-orders-v2/${id}`, { method: "DELETE" }),
+    () => authFetch(`/api/v1/work-orders/${id}`, { method: "DELETE" }),
     { onSuccess: () => router.push("/operations/work-orders") }
   );
 
@@ -59,19 +59,19 @@ export default function WorkOrderDetailPage() {
               onClick={()=>{ if(confirm("Delete this work order? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}
               className="tb-btn-secondary"
-              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>
               {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
             </button>
       </div>
     </div>
   );
 
-  const pc = PRIORITY_COLOR[wo.priority] || "#94A3B8";
-  const sc = STATUS_COLOR[wo.status]   || "#94A3B8";
+  const pc = PRIORITY_COLOR[wo.priority] || "#6D5F53";
+  const sc = STATUS_COLOR[wo.status]   || "#6D5F53";
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1820 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -93,8 +93,8 @@ export default function WorkOrderDetailPage() {
             {[
               { label:"Priority",    value:(wo.priority||"—").toUpperCase(),        color:pc },
               { label:"Status",      value:(wo.status||"—").replace("_"," ").toUpperCase(), color:sc },
-              { label:"Technician",  value:wo.technician?.name || "Unassigned",     color:wo.technician?"#34D399":"#FB923C" },
-              { label:"Due Date",    value:fmtDate(wo.due_date),                    color:"#F1F5F9" },
+              { label:"Technician",  value:wo.technician?.name || "Unassigned",     color:wo.technician?"#547C4D":"#B07A2A" },
+              { label:"Due Date",    value:fmtDate(wo.due_date),                    color:"#221D1A" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -148,7 +148,7 @@ export default function WorkOrderDetailPage() {
                     <div className="text-sm font-semibold text-primary">{wo.asset.name || "—"}</div>
                     <div className="text-xs text-tertiary">{wo.asset.category || "—"} · {wo.asset.status || "—"}</div>
                   </div>
-                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#60A5FA"}}>View →</span>
+                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#5B7C8C"}}>View →</span>
                 </button>
               </div>
             )}
@@ -164,7 +164,7 @@ export default function WorkOrderDetailPage() {
                     <div className="text-sm font-semibold text-primary">{wo.service_request.title || "—"}</div>
                     <div className="text-xs text-tertiary">{wo.service_request.status || "—"} · {fmtDate(wo.service_request.created_at)}</div>
                   </div>
-                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#60A5FA"}}>View →</span>
+                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#5B7C8C"}}>View →</span>
                 </button>
               </div>
             )}
@@ -192,9 +192,9 @@ export default function WorkOrderDetailPage() {
               <div className="tb-section-title">Status Timeline</div>
               <div className="space-y-3">
                 {[
-                  { label:"Created",   date:wo.created_at,  done:true,        color:"#60A5FA" },
-                  { label:"Started",   date:wo.started_at,  done:!!wo.started_at,   color:"#FBBF24" },
-                  { label:"Completed", date:wo.completed_at,done:wo.status==="completed", color:"#34D399" },
+                  { label:"Created",   date:wo.created_at,  done:true,        color:"#5B7C8C" },
+                  { label:"Started",   date:wo.started_at,  done:!!wo.started_at,   color:"#B07A2A" },
+                  { label:"Completed", date:wo.completed_at,done:wo.status==="completed", color:"#547C4D" },
                 ].map((step, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{

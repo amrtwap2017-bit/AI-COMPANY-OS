@@ -42,7 +42,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
       {/* Toggle tab */}
       <button
         onClick={onToggle}
-        className="flex items-center justify-center w-5 bg-slate-100 hover:bg-slate-200 border-l border-slate-200 transition-colors"
+        className="flex items-center justify-center w-5 bg-slate-100 hover:bg-slate-200 border-l border-stone-200 transition-colors"
         title={open ? "Close panel" : "Open context panel"}
       >
         {open
@@ -58,10 +58,10 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
             animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="border-l border-slate-200 bg-white flex flex-col overflow-hidden"
+            className="border-l border-stone-200 bg-white flex flex-col overflow-hidden"
           >
             {/* Tab bar */}
-            <div className="flex border-b border-slate-100 overflow-x-auto flex-shrink-0">
+            <div className="flex border-b border-stone-100 overflow-x-auto flex-shrink-0">
               {TABS.map(tab => {
                 const Icon = tab.icon;
                 const count = badgeCounts[tab.key] || 0;
@@ -118,7 +118,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                           <span className="text-amber-700 text-xs font-bold">{act.actor.charAt(0)}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-slate-800">{act.actor}</div>
+                          <div className="text-xs font-medium text-stone-800">{act.actor}</div>
                           <div className="text-xs text-secondary truncate">{act.action}</div>
                           <div className="text-xs text-tertiary mt-0.5">{act.time}</div>
                         </div>

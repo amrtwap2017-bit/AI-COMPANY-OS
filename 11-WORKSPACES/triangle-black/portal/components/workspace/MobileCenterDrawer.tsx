@@ -67,8 +67,8 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
                   className={[
                     "block rounded-2xl border px-4 py-4 transition",
                     active
-                      ? "border-amber-400/70 bg-slate-900"
-                      : "border-slate-800 bg-slate-900/40",
+                      ? "border-amber-400/70 bg-stone-900"
+                      : "border-slate-800 bg-stone-900/40",
                   ].join(" ")}
                 >
                   <div className="text-base font-semibold">{item.label}</div>
@@ -88,7 +88,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-slate-900"
+                  className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-stone-900"
                 >
                   {item.label}
                 </Link>

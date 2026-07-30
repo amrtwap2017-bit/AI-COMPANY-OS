@@ -16,14 +16,14 @@ const fmtAgo = (d) => {
 };
 
 const TMETA = {
-  work_order_created:      { icon:"🔧", color:"#60A5FA", path:"/operations/work-orders" },
-  work_order_completed:    { icon:"✅", color:"#34D399", path:"/operations/work-orders" },
-  contract_expiring:       { icon:"⏰", color:"#FBBF24", path:"/commercial/contracts" },
-  contract_renewed:        { icon:"🔄", color:"#A78BFA", path:"/commercial/contracts" },
-  purchase_request_created:{ icon:"🛒", color:"#F97316", path:"/supply-chain/purchase-requests" },
+  work_order_created:      { icon:"🔧", color:"#5B7C8C", path:"/operations/work-orders" },
+  work_order_completed:    { icon:"✅", color:"#547C4D", path:"/operations/work-orders" },
+  contract_expiring:       { icon:"⏰", color:"#B07A2A", path:"/commercial/contracts" },
+  contract_renewed:        { icon:"🔄", color:"#8D7443", path:"/commercial/contracts" },
+  purchase_request_created:{ icon:"🛒", color:"#B07A2A", path:"/supply-chain/purchase-requests" },
   lead_created:            { icon:"👤", color:"#EC4899", path:"/commercial/leads" },
-  asset_fault:             { icon:"⚙️",  color:"#F87171", path:"/maintenance/assets" },
-  pm_overdue:              { icon:"📅", color:"#FB923C", path:"/maintenance/pm-plans" },
+  asset_fault:             { icon:"⚙️",  color:"#A84A3D", path:"/maintenance/assets" },
+  pm_overdue:              { icon:"📅", color:"#B07A2A", path:"/maintenance/pm-plans" },
 };
 
 export default function InboxPage() {
@@ -58,7 +58,7 @@ export default function InboxPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#1A0E28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#1A0E28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -72,10 +72,10 @@ export default function InboxPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              { label:"Total",    value:notifs.length,    color:"#F1F5F9" },
-              { label:"Unread",   value:unread.length,    color:unread.length>0?"#FBBF24":"#34D399" },
-              { label:"Critical", value:critical.length,  color:critical.length>0?"#F87171":"#34D399" },
-              { label:"Activity", value:activities.length,color:"#A78BFA" },
+              { label:"Total",    value:notifs.length,    color:"#221D1A" },
+              { label:"Unread",   value:unread.length,    color:unread.length>0?"#B07A2A":"#547C4D" },
+              { label:"Critical", value:critical.length,  color:critical.length>0?"#A84A3D":"#547C4D" },
+              { label:"Activity", value:activities.length,color:"#8D7443" },
             ].map((k,i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -117,7 +117,7 @@ export default function InboxPage() {
             ) : (
               <div className="space-y-1 mt-3">
                 {unread.slice(0, 6).map((n, i) => {
-                  const m = TMETA[n.type] || { icon:"🔔", color:"#A78BFA", path:"/workspace" };
+                  const m = TMETA[n.type] || { icon:"🔔", color:"#8D7443", path:"/workspace" };
                   return (
                     <button key={i} onClick={() => router.push(m.path)}
                       className="w-full flex items-start gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left"

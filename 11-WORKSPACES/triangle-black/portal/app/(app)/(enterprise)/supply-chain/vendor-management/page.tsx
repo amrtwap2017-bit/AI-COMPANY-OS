@@ -38,7 +38,7 @@ export default function VendorManagementPage() {
   );
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1E1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <div>
@@ -51,7 +51,7 @@ export default function VendorManagementPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total",value:vendors.length,color:"#F1F5F9"},
+              {label:"Total",value:vendors.length,color:"#221D1A"},
               {label:"Approved",value:vendors.filter(v=>v.is_approved).length,color:"#547C4D"},
               {label:"Categories",value:cats.length,color:"#5B7C8C"},
               {label:"Avg Rating",value:vendors.length>0?(vendors.reduce((s,v)=>s+(v.rating||0),0)/vendors.length).toFixed(1):0,color:"#B07A2A"},
@@ -91,7 +91,7 @@ export default function VendorManagementPage() {
                       <div className="text-xs" style={{color:"#B07A2A"}}>{STARS(v.rating)} {Number(v.rating||0).toFixed(1)}</div>
                     </div>
                     <div className="flex-shrink-0 text-right">
-                      <span className="tb-badge" style={{background:v.is_approved?"#34D39918":"#94A3B818",color:v.is_approved?"#547C4D":"#6D5F53",fontSize:"0.5rem"}}>
+                      <span className="tb-badge" style={{background:v.is_approved?"#547C4D18":"#6D5F5318",color:v.is_approved?"#547C4D":"#6D5F53",fontSize:"0.5rem"}}>
                         {v.is_approved?"Approved":"Pending"}
                       </span>
                       <div className="text-xs text-tertiary mt-1">{v.vendor_code}</div>

@@ -18,7 +18,7 @@ type EntityContextRailProps = {
 
 export function EntityContextRail({ title, subtitle, sections }: EntityContextRailProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Context Rail
@@ -29,13 +29,13 @@ export function EntityContextRail({ title, subtitle, sections }: EntityContextRa
 
       <div className="mt-5 space-y-4">
         {sections.map((section) => (
-          <div key={section.title} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="text-sm font-semibold text-slate-900">{section.title}</div>
+          <div key={section.title} className="rounded-2xl border border-stone-100 bg-slate-50 p-4">
+            <div className="text-sm font-semibold text-stone-900">{section.title}</div>
             <div className="mt-3 space-y-3">
               {section.items.map((item) => (
-                <div key={item.label} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                <div key={item.label} className="rounded-xl border border-stone-200 bg-white px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="text-sm font-medium text-slate-900">{item.label}</div>
+                    <div className="text-sm font-medium text-stone-900">{item.label}</div>
                     <div className="text-sm font-semibold text-slate-950">{item.value}</div>
                   </div>
                   <div className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</div>

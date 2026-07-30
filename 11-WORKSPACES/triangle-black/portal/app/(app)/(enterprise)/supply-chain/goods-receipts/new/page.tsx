@@ -60,7 +60,7 @@ export default function GRNCreatePage() {
   };
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0A1530 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.back()} className="tb-btn-secondary">← Back</button>
@@ -119,7 +119,7 @@ export default function GRNCreatePage() {
                     </div>
                     <div>
                       <label className="text-xs text-tertiary block mb-1">Rejected</label>
-                      <div className="text-sm font-bold" style={{color:line.rejected_qty>0?"#F87171":"#94A3B8"}}>{line.rejected_qty}</div>
+                      <div className="text-sm font-bold" style={{color:line.rejected_qty>0?"#A84A3D":"#6D5F53"}}>{line.rejected_qty}</div>
                     </div>
                   </div>
                   <div className="mt-2 text-xs text-emerald-400 font-bold">{fmtEGP(line.total_value||0)}</div>

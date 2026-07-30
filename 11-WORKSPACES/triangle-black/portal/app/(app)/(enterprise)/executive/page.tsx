@@ -41,7 +41,7 @@ export default function ExecutivePage() {
   const compRate        = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
   const riskScore       = criticalWOs.length*10+overdueWOs.length*3+expiringContracts.length*5+(d.maintenance?.overdue||0)*2;
   const riskLevel       = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
-  const riskColor       = riskScore===0?"#34D399":riskScore<15?"#60A5FA":riskScore<30?"#FBBF24":"#F87171";
+  const riskColor       = riskScore===0?"#547C4D":riskScore<15?"#5B7C8C":riskScore<30?"#B07A2A":"#A84A3D";
 
   const executiveNav = [
     {label:"Intelligence",  icon:"🧠", path:"/executive/intelligence"},
@@ -59,7 +59,7 @@ export default function ExecutivePage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -71,9 +71,9 @@ export default function ExecutivePage() {
             <div className="flex items-center gap-4">
               {/* Twin score */}
               <div className={`tb-score-badge ${score>=95?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-                <div className="tb-score-value" style={{color:score>=95?"#34D399":"#FBBF24"}}>{score}</div>
+                <div className="tb-score-value" style={{color:score>=95?"#547C4D":"#B07A2A"}}>{score}</div>
                 <div className="tb-score-label">Platform Health</div>
-                <div className="tb-score-sub" style={{color:score>=95?"#34D399":"#FBBF24"}}>{twin?.health_label||"—"}</div>
+                <div className="tb-score-sub" style={{color:score>=95?"#547C4D":"#B07A2A"}}>{twin?.health_label||"—"}</div>
               </div>
               {/* Risk score */}
               <div className={`tb-score-badge ${riskScore===0?"tb-score-badge--success":riskScore<15?"":"tb-score-badge--danger"}`}
@@ -88,12 +88,12 @@ export default function ExecutivePage() {
           {/* KPI strip */}
           <div className="tb-grid-6 mt-6">
             {[
-              {label:"Active Contracts", value:d.commercial?.active_contracts??0,  color:"#34D399", path:"/commercial/contracts"},
-              {label:"Revenue",          value:fmtEGP(totalRevenue),               color:"#FBBF24", path:"/invoices"},
-              {label:"Pending",          value:fmtEGP(pendingRevenue),             color:"#60A5FA", path:"/invoices"},
-              {label:"Critical WOs",     value:criticalWOs.length,                 color:criticalWOs.length>0?"#F87171":"#34D399", path:"/executive/exceptions"},
-              {label:"WO Completion",    value:`${compRate}%`,                     color:compRate>=80?"#34D399":"#FBBF24", path:"/analytics/scorecards"},
-              {label:"Unread Alerts",    value:unreadNotifs.length,               color:"#A78BFA", path:"/inbox"},
+              {label:"Active Contracts", value:d.commercial?.active_contracts??0,  color:"#547C4D", path:"/commercial/contracts"},
+              {label:"Revenue",          value:fmtEGP(totalRevenue),               color:"#B07A2A", path:"/invoices"},
+              {label:"Pending",          value:fmtEGP(pendingRevenue),             color:"#5B7C8C", path:"/invoices"},
+              {label:"Critical WOs",     value:criticalWOs.length,                 color:criticalWOs.length>0?"#A84A3D":"#547C4D", path:"/executive/exceptions"},
+              {label:"WO Completion",    value:`${compRate}%`,                     color:compRate>=80?"#547C4D":"#B07A2A", path:"/analytics/scorecards"},
+              {label:"Unread Alerts",    value:unreadNotifs.length,               color:"#8D7443", path:"/inbox"},
             ].map((k,i)=>(
               <button key={i} onClick={()=>router.push(k.path)} className="tb-hero-kpi text-left">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
@@ -141,7 +141,7 @@ export default function ExecutivePage() {
                   {criticalWOs.slice(0,3).map((w,i)=>(
                     <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
                       className="tb-domain-card tb-domain-card--danger w-full text-left">
-                      <div className="text-label-upper mb-1" style={{color:"#F87171"}}>Critical WO</div>
+                      <div className="text-label-upper mb-1" style={{color:"#A84A3D"}}>Critical WO</div>
                       <div className="text-sm font-semibold text-primary truncate">{w.title}</div>
                     </button>
                   ))}
@@ -150,7 +150,7 @@ export default function ExecutivePage() {
                     return (
                       <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)}
                         className="tb-domain-card tb-domain-card--warn w-full text-left">
-                        <div className="text-label-upper mb-1" style={{color:"#FBBF24"}}>Contract · {days}d left</div>
+                        <div className="text-label-upper mb-1" style={{color:"#B07A2A"}}>Contract · {days}d left</div>
                         <div className="text-sm font-semibold text-primary truncate">{c.title||c.id?.slice(0,16)}</div>
                       </button>
                     );
@@ -195,7 +195,7 @@ export default function ExecutivePage() {
               <div className="tb-grid-4">
                 {(twin?.operational_domains??[]).map((dom,i)=>{
                   const hasIssue=(dom.overdue??0)>0||(dom.critical_open??0)>0||(dom.below_min??0)>0;
-                  const c=hasIssue?"#FBBF24":"#34D399";
+                  const c=hasIssue?"#B07A2A":"#547C4D";
                   return (
                     <div key={i} className={`tb-domain-card ${hasIssue?"tb-domain-card--warn":"tb-domain-card--ok"}`}>
                       <div className="tb-flex-between mb-1">
@@ -220,10 +220,10 @@ export default function ExecutivePage() {
               </div>
               <div className="tb-grid-4 mb-4">
                 {[
-                  {label:"Paid",      count:d.finance?.paid??0,      color:"#34D399"},
-                  {label:"Pending",   count:d.finance?.pending??0,    color:"#FBBF24"},
-                  {label:"Overdue",   count:d.finance?.overdue??0,    color:"#F87171"},
-                  {label:"Cancelled", count:d.finance?.cancelled??0,  color:"#94A3B8"},
+                  {label:"Paid",      count:d.finance?.paid??0,      color:"#547C4D"},
+                  {label:"Pending",   count:d.finance?.pending??0,    color:"#B07A2A"},
+                  {label:"Overdue",   count:d.finance?.overdue??0,    color:"#A84A3D"},
+                  {label:"Cancelled", count:d.finance?.cancelled??0,  color:"#6D5F53"},
                 ].map((s,i)=>(
                   <div key={i} className="bg-base-alt rounded-xl p-3 text-center">
                     <div className="text-2xl font-black" style={{color:s.color}}>{s.count}</div>
@@ -239,7 +239,7 @@ export default function ExecutivePage() {
                 </div>
               </div>
               <div className="flex gap-5 mt-2">
-                {[{label:"Paid",color:"#34D399"},{label:"Pending",color:"#FBBF24"},{label:"Overdue",color:"#F87171"}].map((s,i)=>(
+                {[{label:"Paid",color:"#547C4D"},{label:"Pending",color:"#B07A2A"},{label:"Overdue",color:"#A84A3D"}].map((s,i)=>(
                   <div key={i} className="flex items-center gap-1.5">
                     <div style={{width:7,height:7,borderRadius:"50%",background:s.color}}/>
                     <span className="text-xs text-tertiary">{s.label}</span>

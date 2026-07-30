@@ -27,7 +27,7 @@ export function EntityPill({
   return (
     <Link
       href={buildEntityHref(basePath, entityType, entityId, entityName)}
-      className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+      className="inline-flex rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
     >
       {label}
     </Link>

@@ -12,14 +12,14 @@ export default function GraphPage() {
   const assets = toArr(assetRaw); const wos = toArr(woRaw);
   const score = twin?.health_score||0;
   const nodes = [
-    {type:"Assets",      count:assets.length,              icon:"⚙️",  color:"#60A5FA", path:"/maintenance/assets"},
-    {type:"Work Orders", count:wos.length,                 icon:"🔧", color:"#FBBF24", path:"/operations/work-orders"},
-    {type:"PM Plans",    count:twin?.domains?.maintenance||0,icon:"📅",color:"#A78BFA", path:"/maintenance/pm-plans"},
-    {type:"Twin Score",  count:score,                      icon:"🔷", color:"#34D399", path:"/executive"},
+    {type:"Assets",      count:assets.length,              icon:"⚙️",  color:"#5B7C8C", path:"/maintenance/assets"},
+    {type:"Work Orders", count:wos.length,                 icon:"🔧", color:"#B07A2A", path:"/operations/work-orders"},
+    {type:"PM Plans",    count:twin?.domains?.maintenance||0,icon:"📅",color:"#8D7443", path:"/maintenance/pm-plans"},
+    {type:"Twin Score",  count:score,                      icon:"🔷", color:"#547C4D", path:"/executive"},
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0A1A30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">AI · Knowledge</div>
           <h1 className="tb-hero-title">Knowledge Graph</h1>

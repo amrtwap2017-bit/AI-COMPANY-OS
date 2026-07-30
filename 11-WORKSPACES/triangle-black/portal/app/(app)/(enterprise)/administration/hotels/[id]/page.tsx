@@ -35,7 +35,7 @@ export default function HotelDetailPage() {
             <button onClick={()=>router.push("/administration/hotels")} className="tb-btn-secondary">← Back</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Assets",value:siteAssets.length,color:"#60A5FA"},{label:"Operational",value:siteAssets.filter(a=>a.status==="Operational").length,color:"#34D399"},{label:"In Fault",value:faulted.length,color:faulted.length>0?"#F87171":"#34D399"},{label:"Active Contracts",value:contracts.filter(c=>c.status==="active").length,color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"Total Assets",value:siteAssets.length,color:"#5B7C8C"},{label:"Operational",value:siteAssets.filter(a=>a.status==="Operational").length,color:"#547C4D"},{label:"In Fault",value:faulted.length,color:faulted.length>0?"#A84A3D":"#547C4D"},{label:"Active Contracts",value:contracts.filter(c=>c.status==="active").length,color:"#8D7443"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -55,7 +55,7 @@ export default function HotelDetailPage() {
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Assets</div><button onClick={()=>router.push("/maintenance/assets")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {siteAssets.slice(0,6).map((a,i)=>{
-                const sc={"Operational":"#34D399","In Fault":"#F87171","Under Maintenance":"#FBBF24"}[a.status]||"#94A3B8";
+                const sc={"Operational":"#547C4D","In Fault":"#A84A3D","Under Maintenance":"#B07A2A"}[a.status]||"#6D5F53";
                 return <button key={i} onClick={()=>router.push("/maintenance/assets/"+a.id)} className="tb-action-item w-full justify-between"><div className="flex items-center gap-2 min-w-0"><span>⚙️</span><span className="text-sm text-secondary truncate">{a.name}</span></div><span className="tb-badge" style={{background:sc+"18",color:sc,fontSize:"0.5rem"}}>{a.status}</span></button>;
               })}
               {siteAssets.length===0&&<div className="text-xs text-tertiary text-center py-4">No assets registered for this site</div>}

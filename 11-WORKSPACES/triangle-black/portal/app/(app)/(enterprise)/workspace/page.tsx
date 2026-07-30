@@ -40,12 +40,12 @@ const CENTERS = [
   },
   {
     icon:"🏨", label:"Client Portal",     path:"/client-portal",
-    desc:"Hotel clients — light theme", color:"#059669",
+    desc:"Hotel clients — light theme", color:"#547C4D",
     sub:["Login","/client-portal","Dashboard","/client-portal/dashboard","Raise Request","/client-portal/request"]
   },
   {
     icon:"🏭", label:"Supplier Portal",   path:"/supplier-portal",
-    desc:"Vendors — bids, POs, invoices", color:"#D97706",
+    desc:"Vendors — bids, POs, invoices", color:"#B07A2A",
     sub:["Login","/supplier-portal","Dashboard","/supplier-portal/dashboard","RFQs","/supplier-portal/rfqs"]
   },
 ];
@@ -261,13 +261,13 @@ export default function WorkspacePage() {
               {
                 icon:"🏨", title:"Client Portal",
                 desc:"Hotel clients view their work orders, raise requests, approve SOWs",
-                path:"/client-portal", color:"#059669",
+                path:"/client-portal", color:"#547C4D",
                 hint:"PIN: 1234 | ahmed.fouad@nileplaza.com"
               },
               {
                 icon:"🏭", title:"Supplier Portal",
                 desc:"Vendors submit quotes, view POs, upload invoices, manage documents",
-                path:"/supplier-portal", color:"#D97706",
+                path:"/supplier-portal", color:"#B07A2A",
                 hint:"PIN: 1234 | info@arctic-hvac.com"
               },
             ].map((portal,i)=>(

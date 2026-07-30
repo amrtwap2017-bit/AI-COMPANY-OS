@@ -7,7 +7,7 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const DOC_ICONS = {sow:"📋",rfq:"📝",po:"📦",quotation_selection:"⚖️"};
-const SC = {pending:"#FBBF24",approved:"#34D399",rejected:"#F87171",cancelled:"#94A3B8"};
+const SC = {pending:"#B07A2A",approved:"#547C4D",rejected:"#A84A3D",cancelled:"#6D5F53"};
 export default function ApprovalsCenterPage() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -27,7 +27,7 @@ export default function ApprovalsCenterPage() {
   );
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0A1530 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <div>
@@ -39,10 +39,10 @@ export default function ApprovalsCenterPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total",value:approvals.length,color:"#F1F5F9"},
-              {label:"Pending",value:pending.length,color:pending.length>0?"#FBBF24":"#34D399"},
-              {label:"Approved",value:approvals.filter(a=>a.status==="approved").length,color:"#34D399"},
-              {label:"Rejected",value:approvals.filter(a=>a.status==="rejected").length,color:"#F87171"},
+              {label:"Total",value:approvals.length,color:"#221D1A"},
+              {label:"Pending",value:pending.length,color:pending.length>0?"#B07A2A":"#547C4D"},
+              {label:"Approved",value:approvals.filter(a=>a.status==="approved").length,color:"#547C4D"},
+              {label:"Rejected",value:approvals.filter(a=>a.status==="rejected").length,color:"#A84A3D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -54,8 +54,8 @@ export default function ApprovalsCenterPage() {
       </div>
       <div className="tb-canvas">
         {pending.length > 0 && (
-          <div className="tb-section mb-4" style={{borderColor:"#FBBF2440",background:"#FBBF2408"}}>
-            <div className="tb-section-title" style={{color:"#FBBF24"}}>⚠ Awaiting Your Approval ({pending.length})</div>
+          <div className="tb-section mb-4" style={{borderColor:"#B07A2A40",background:"#B07A2A08"}}>
+            <div className="tb-section-title" style={{color:"#B07A2A"}}>⚠ Awaiting Your Approval ({pending.length})</div>
             <div className="space-y-2 mt-3">
               {pending.map((a,i)=>(
                 <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-base-alt border border-yellow-400/20">
@@ -88,7 +88,7 @@ export default function ApprovalsCenterPage() {
           ) : (
             <div className="space-y-1 mt-3">
               {approvals.map((a,i)=>{
-                const sc = SC[a.status]||"#94A3B8";
+                const sc = SC[a.status]||"#6D5F53";
                 return (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt">
                     <span>{DOC_ICONS[a.document_type]||"📄"}</span>

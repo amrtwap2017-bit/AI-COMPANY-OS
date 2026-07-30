@@ -7,7 +7,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#34D399",rejected:"#F87171",sent_to_client:"#A78BFA"};
+const SC = {draft:"#6D5F53",pending_approval:"#B07A2A",approved:"#547C4D",rejected:"#A84A3D",sent_to_client:"#8D7443"};
 export default function SOWDetailPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -32,7 +32,7 @@ export default function SOWDetailPage() {
 
     if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading SOW…</div></div>;
   if (!sow || sow.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">SOW not found</div></div>;
-  const sc = SC[sow.status] || "#94A3B8";
+  const sc = SC[sow.status] || "#6D5F53";
   const boqItems = sow.boq_items || [];
   const boqTotal = boqItems.reduce((s,i) => s + Number(i.total_amount||0), 0);
   const overhead = boqTotal * (Number(sow.overhead_pct||0)/100);
@@ -40,7 +40,7 @@ export default function SOWDetailPage() {
   const grandTotal = boqTotal + overhead + profit + Number(sow.labor_cost||0);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A12 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/supply-chain/scope-of-work")} className="tb-btn-secondary">← SOW List</button>
@@ -49,14 +49,14 @@ export default function SOWDetailPage() {
               onClick={()=>{ if(window.confirm("Delete this scope of work? This cannot be undone.")) deleteMut.mutate(); }}
               disabled={deleteMut.isLoading}
               className="tb-btn-secondary"
-              style={{borderColor:"#F87171",color:"#F87171",fontSize:"0.75rem"}}>
+              style={{borderColor:"#A84A3D",color:"#A84A3D",fontSize:"0.75rem"}}>
               {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
             </button>
             <div className="flex gap-2">
               {sow.status === "pending_approval" && (
                 <>
                   <button onClick={()=>approveMut.mutate("approve")} className="tb-btn-primary" style={{background:"#16A34A"}}>✓ Approve</button>
-                  <button onClick={()=>approveMut.mutate("reject")} className="tb-btn-secondary" style={{borderColor:"#F87171",color:"#F87171"}}>✗ Reject</button>
+                  <button onClick={()=>approveMut.mutate("reject")} className="tb-btn-secondary" style={{borderColor:"#A84A3D",color:"#A84A3D"}}>✗ Reject</button>
                 </>
               )}
               {sow.status === "approved" && (
@@ -78,10 +78,10 @@ export default function SOWDetailPage() {
           </div>
           <div className="tb-grid-4">
             {[
-              {label:"BOQ Total",value:fmtEGP(boqTotal),color:"#60A5FA"},
-              {label:"Labor Cost",value:fmtEGP(sow.labor_cost||0),color:"#FBBF24"},
-              {label:"Grand Total",value:fmtEGP(sow.total_cost||grandTotal),color:"#34D399"},
-              {label:"Est. Days",value:`${sow.estimated_days||0} days`,color:"#A78BFA"},
+              {label:"BOQ Total",value:fmtEGP(boqTotal),color:"#5B7C8C"},
+              {label:"Labor Cost",value:fmtEGP(sow.labor_cost||0),color:"#B07A2A"},
+              {label:"Grand Total",value:fmtEGP(sow.total_cost||grandTotal),color:"#547C4D"},
+              {label:"Est. Days",value:`${sow.estimated_days||0} days`,color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>

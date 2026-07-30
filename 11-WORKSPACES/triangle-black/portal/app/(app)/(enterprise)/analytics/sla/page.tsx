@@ -14,10 +14,10 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const DarkTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{background:"#1E293B",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
-      {label && <div style={{fontSize:"0.75rem",color:"#94A3B8",marginBottom:4}}>{label}</div>}
+    <div style={{background:"#332C27",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"10px 14px"}}>
+      {label && <div style={{fontSize:"0.75rem",color:"#6D5F53",marginBottom:4}}>{label}</div>}
       {payload.map((p: any, i: number) => (
-        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#F1F5F9"}}>
+        <div key={i} style={{fontSize:"0.875rem",fontWeight:700,color:p.color||"#221D1A"}}>
           {p.name}: {p.value}{p.unit||""}
         </div>
       ))}
@@ -51,7 +51,7 @@ export default function AnalyticsSLA() {
       total:group.length, completed:completed.length,
       breached:breached.length, compliance,
       target:slaTargets[priority],
-      color:priority==="critical"?"#F87171":priority==="high"?"#FB923C":priority==="medium"?"#FBBF24":"#94A3B8",
+      color:priority==="critical"?"#A84A3D":priority==="high"?"#B07A2A":priority==="medium"?"#B07A2A":"#6D5F53",
     };
   });
 
@@ -77,7 +77,7 @@ export default function AnalyticsSLA() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B30 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1B30 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -86,7 +86,7 @@ export default function AnalyticsSLA() {
               <p className="tb-hero-description">Service level agreement compliance by priority — {overall}% overall compliance</p>
             </div>
             <div className={`tb-score-badge ${overall>=90?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-              <div className="tb-score-value" style={{color:overall>=90?"#34D399":"#FBBF24"}}>{overall}%</div>
+              <div className="tb-score-value" style={{color:overall>=90?"#547C4D":"#B07A2A"}}>{overall}%</div>
               <div className="tb-score-label">SLA Compliance</div>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function AnalyticsSLA() {
                 <YAxis domain={[0,100]} tick={AXIS_STYLE} axisLine={false} tickLine={false}
                   tickFormatter={v=>`${v}%`}/>
                 <Tooltip content={<DarkTooltip/>}/>
-                <ReferenceLine y={85} stroke="#F59E0B" strokeDasharray="4 4" label={{value:"Target 85%",fill:"#F59E0B",fontSize:10}}/>
+                <ReferenceLine y={85} stroke="#B9924C" strokeDasharray="4 4" label={{value:"Target 85%",fill:"#B9924C",fontSize:10}}/>
                 <Bar dataKey="compliance" name="Compliance" radius={[6,6,0,0]} unit="%">
                   {complianceChartData.map((e,i)=><Cell key={i} fill={e.color}/>)}
                 </Bar>
@@ -137,8 +137,8 @@ export default function AnalyticsSLA() {
                 <XAxis dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false}/>
                 <Tooltip content={<DarkTooltip/>}/>
-                <Bar dataKey="completed" name="Completed" fill="#34D399" radius={[4,4,0,0]} stackId="a"/>
-                <Bar dataKey="breached"  name="Breached"  fill="#F87171" radius={[4,4,0,0]} stackId="a"/>
+                <Bar dataKey="completed" name="Completed" fill="#547C4D" radius={[4,4,0,0]} stackId="a"/>
+                <Bar dataKey="breached"  name="Breached"  fill="#A84A3D" radius={[4,4,0,0]} stackId="a"/>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -183,7 +183,7 @@ export default function AnalyticsSLA() {
               </div>
               {breachedWOs.map((w,i)=>{
                 const daysOver = Math.floor((now.getTime()-new Date(w.due_date).getTime())/86400000);
-                const pc = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[w.priority]||"#94A3B8";
+                const pc = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[w.priority]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
                     className="tb-table-row" style={{gridTemplateColumns:"1fr 90px 120px 110px"}}>

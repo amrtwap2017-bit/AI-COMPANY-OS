@@ -18,7 +18,7 @@ export function CenterSubNav({ items }: CenterSubNavProps) {
   const pathname = usePathname();
   if (!items || items.length === 0) return null;
   return (
-    <div className="border-b border-slate-200 bg-white sticky top-14 z-20 flex-shrink-0">
+    <div className="border-b border-stone-200 bg-white sticky top-14 z-20 flex-shrink-0">
       <div className="px-4 sm:px-6 flex items-end gap-0 overflow-x-auto scrollbar-none">
         {items.map(item => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");

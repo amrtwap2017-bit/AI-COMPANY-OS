@@ -23,11 +23,11 @@ export default function AssetQRGalleryPage() {
     (filterCat==="all" || a.category===filterCat)
   );
 
-  const CRIT_COLOR = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
+  const CRIT_COLOR = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -43,10 +43,10 @@ export default function AssetQRGalleryPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total Assets",value:assets.length,color:"#F1F5F9"},
-              {label:"Showing",value:filtered.length,color:"#60A5FA"},
-              {label:"Sites",value:sites.length,color:"#34D399"},
-              {label:"Categories",value:cats.length,color:"#A78BFA"},
+              {label:"Total Assets",value:assets.length,color:"#221D1A"},
+              {label:"Showing",value:filtered.length,color:"#5B7C8C"},
+              {label:"Sites",value:sites.length,color:"#547C4D"},
+              {label:"Categories",value:cats.length,color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -80,7 +80,7 @@ export default function AssetQRGalleryPage() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((asset,i)=>{
-              const cc = CRIT_COLOR[asset.criticality] || "#94A3B8";
+              const cc = CRIT_COLOR[asset.criticality] || "#6D5F53";
               return (
                 <div key={i} className="rounded-2xl border border-border overflow-hidden bg-base-alt hover:border-brand/40 transition-all">
                   {/* QR Code Display */}
@@ -106,17 +106,17 @@ export default function AssetQRGalleryPage() {
                     <div className="flex gap-2 mt-3">
                       <a href={asset.qr_url} target="_blank" download
                          className="flex-1 text-center py-2 rounded-xl text-xs font-medium border border-border hover:bg-surface transition-colors"
-                         style={{textDecoration:"none",color:"#94A3B8"}}>
+                         style={{textDecoration:"none",color:"#6D5F53"}}>
                         ↓ QR
                       </a>
                       <a href={`/api/v1/qr/asset/${asset.id}/print-sheet`} target="_blank"
                          className="flex-1 text-center py-2 rounded-xl text-xs font-medium border border-border hover:bg-surface transition-colors"
-                         style={{textDecoration:"none",color:"#94A3B8"}}>
+                         style={{textDecoration:"none",color:"#6D5F53"}}>
                         🖨️ PDF
                       </a>
                       <button onClick={()=>router.push(`/asset/${asset.id}`)}
                         className="flex-1 py-2 rounded-xl text-xs font-medium transition-colors"
-                        style={{background:"#34D39918",color:"#34D399"}}>
+                        style={{background:"#547C4D18",color:"#547C4D"}}>
                         View
                       </button>
                     </div>

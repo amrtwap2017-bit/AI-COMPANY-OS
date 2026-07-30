@@ -1,114 +1,172 @@
-"use client"; // @ts-nocheck
+"use client";
+// @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { Search, X, Loader2 } from "lucide-react";
 
-const TYPE_COLORS: Record<string, string> = {
-  work_orders:     "bg-blue-100 text-blue-700",
-  assets:          "bg-emerald-100 text-emerald-700",
-  leads:           "bg-purple-100 text-purple-700",
-  contracts:       "bg-amber-100 text-amber-700",
-  inventory_items: "bg-orange-100 text-orange-700",
-  technicians:     "bg-cyan-100 text-cyan-700",
-  projects:        "bg-indigo-100 text-indigo-700",
-  hotels:          "bg-rose-100 text-rose-700",
-};
-
 interface SearchResult {
-  type: string; id: string; label: string; meta: string; url: string;
+  type: string;
+  id: string;
+  label: string;
+  meta: string;
+  url: string;
 }
 
-interface Props { isOpen: boolean; onClose: () => void; }
+interface Props {
+  open: boolean;
+  onClose: () => void;
+}
 
-export function CommandPalette({ isOpen, onClose }: Props) {
-  const [query, setQuery]     = useState("");
+const TYPE_STYLES: Record<string, { bg: string; color: string; border: string }> = {
+  work_orders:     { bg: "rgba(91,124,140,0.10)", color: "#5B7C8C", border: "rgba(91,124,140,0.22)" },
+  assets:          { bg: "rgba(84,124,77,0.10)", color: "#547C4D", border: "rgba(84,124,77,0.22)" },
+  leads:           { bg: "rgba(141,116,67,0.10)", color: "#8D7443", border: "rgba(141,116,67,0.22)" },
+  contracts:       { bg: "rgba(185,146,76,0.10)", color: "#B9924C", border: "rgba(185,146,76,0.22)" },
+  inventory_items: { bg: "rgba(176,122,42,0.10)", color: "#B07A2A", border: "rgba(176,122,42,0.22)" },
+  technicians:     { bg: "rgba(84,124,77,0.08)", color: "#547C4D", border: "rgba(84,124,77,0.18)" },
+  projects:        { bg: "rgba(109,95,83,0.10)", color: "#6D5F53", border: "rgba(109,95,83,0.22)" },
+  hotels:          { bg: "rgba(168,74,61,0.10)", color: "#A84A3D", border: "rgba(168,74,61,0.22)" },
+};
+
+export function CommandPalette({ open, onClose }: Props) {
+  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
-  const inputRef              = useRef<HTMLInputElement>(null);
-  const router                = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const { data, isFetching } = useQuery({
     queryKey: ["cmd-search", query],
     queryFn: () => authFetch(`/api/v1/search/quick?q=${encodeURIComponent(query)}`).then(r => r.json()),
-    enabled: query.length >= 2,
+    enabled: open && query.length >= 2,
     staleTime: 5000,
   });
 
   const results: SearchResult[] = data?.results ?? [];
 
   useEffect(() => {
-    if (isOpen) { setQuery(""); setSelected(0); setTimeout(() => inputRef.current?.focus(), 50); }
-  }, [isOpen]);
+    if (open) {
+      setQuery("");
+      setSelected(0);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === "Escape") { onClose(); }
-      if (e.key === "ArrowDown") setSelected(s => Math.min(s + 1, results.length - 1));
-      if (e.key === "ArrowUp")   setSelected(s => Math.max(s - 1, 0));
+      if (!open) return;
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowDown") setSelected(s => Math.min(s + 1, Math.max(results.length - 1, 0)));
+      if (e.key === "ArrowUp") setSelected(s => Math.max(s - 1, 0));
       if (e.key === "Enter" && results[selected]) {
-        router.push(results[selected].url); onClose();
+        router.push(results[selected].url);
+        onClose();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isOpen, results, selected, router, onClose]);
+  }, [open, results, selected, router, onClose]);
 
-  if (!isOpen) return null;
+  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20"
-         onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
-           onClick={e => e.stopPropagation()}>
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
-          <Search className="w-5 h-5 text-tertiary flex-shrink-0" />
+    <div
+      className="fixed inset-0 z-[90] flex items-start justify-center pt-20"
+      style={{ background: "rgba(0,0,0,0.45)" }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl mx-4 overflow-hidden rounded-2xl"
+        style={{
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-b"
+          style={{ borderColor: "var(--color-border)", background: "var(--color-surface-alt)" }}
+        >
+          <Search className="w-5 h-5 flex-shrink-0" style={{ color: "var(--color-text-3)" }} />
           <input
             ref={inputRef}
             value={query}
             onChange={e => { setQuery(e.target.value); setSelected(0); }}
-            placeholder="Search work orders, assets, leads, contracts..."
-            className="flex-1 outline-none text-sm text-slate-800 placeholder-slate-400"
+            placeholder="Search work orders, assets, contracts, technicians..."
+            className="flex-1 outline-none text-sm"
+            style={{ color: "var(--color-text-1)", background: "transparent" }}
           />
-          {isFetching && <Loader2 className="w-4 h-4 text-tertiary animate-spin" />}
-          <button onClick={onClose} className="text-tertiary hover:text-slate-600">
+          {isFetching && <Loader2 className="w-4 h-4 animate-spin" style={{ color: "var(--color-text-3)" }} />}
+          <button
+            onClick={onClose}
+            className="transition-colors"
+            style={{ color: "var(--color-text-3)" }}
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="max-h-96 overflow-y-auto">
-          {results.length > 0 ? results.map((r, i) => (
-            <div
-              key={r.id}
-              onClick={() => { router.push(r.url); onClose(); }}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer border-b border-slate-50
-                ${i === selected ? "bg-blue-50" : "hover:bg-slate-50"}`}
-            >
-              <span className={`px-2 py-0.5 rounded text-xs font-medium flex-shrink-0
-                ${TYPE_COLORS[r.type] ?? "bg-gray-100 text-gray-600"}`}>
-                {r.type.replace(/_/g," ")}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-slate-800 truncate">{r.label}</div>
-                {r.meta && <div className="text-xs text-tertiary truncate">{r.meta}</div>}
-              </div>
+          {query.length < 2 ? (
+            <div className="px-4 py-8 text-center" style={{ color: "var(--color-text-3)" }}>
+              <div style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 4 }}>Global Search</div>
+              <div style={{ fontSize: "0.75rem" }}>Type at least 2 characters to search the platform</div>
             </div>
-          )) : query.length >= 2 && !isFetching ? (
-            <div className="px-4 py-8 text-center text-sm text-tertiary">
-              No results for "{query}"
+          ) : isFetching ? (
+            <div className="px-4 py-8 text-center" style={{ color: "var(--color-text-3)" }}>
+              Searching…
             </div>
-          ) : query.length < 2 ? (
-            <div className="px-4 py-6 text-center text-xs text-tertiary">
-              Type at least 2 characters to search across all entities
+          ) : results.length === 0 ? (
+            <div className="px-4 py-8 text-center" style={{ color: "var(--color-text-3)" }}>
+              No results found for “{query}”
             </div>
-          ) : null}
-        </div>
-
-        <div className="px-4 py-2 bg-slate-50 border-t border-slate-200 flex gap-4 text-xs text-tertiary">
-          <span>↑↓ navigate</span>
-          <span>↵ open</span>
-          <span>esc close</span>
+          ) : (
+            results.map((item, i) => {
+              const s = TYPE_STYLES[item.type] || { bg: "rgba(109,95,83,0.08)", color: "#6D5F53", border: "rgba(109,95,83,0.18)" };
+              const active = i === selected;
+              return (
+                <button
+                  key={item.type + item.id + i}
+                  onClick={() => { router.push(item.url); onClose(); }}
+                  onMouseEnter={() => setSelected(i)}
+                  className="w-full text-left px-4 py-3 border-b transition-colors"
+                  style={{
+                    borderColor: "var(--color-divider)",
+                    background: active ? "var(--color-bg-alt)" : "transparent",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      style={{
+                        background: s.bg,
+                        color: s.color,
+                        border: `1px solid ${s.border}`,
+                        borderRadius: 999,
+                        padding: "2px 10px",
+                        fontSize: "0.625rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.type.replace(/_/g, " ")}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div style={{ color: "var(--color-text-1)", fontSize: "0.875rem", fontWeight: 600 }} className="truncate">
+                        {item.label}
+                      </div>
+                      <div style={{ color: "var(--color-text-3)", fontSize: "0.75rem" }} className="truncate">
+                        {item.meta}
+                      </div>
+                    </div>
+                    <span style={{ color: "var(--color-text-3)", fontSize: "0.75rem" }}>↵</span>
+                  </div>
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

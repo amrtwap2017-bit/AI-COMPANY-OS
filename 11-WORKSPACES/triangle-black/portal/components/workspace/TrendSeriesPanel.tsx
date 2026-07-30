@@ -22,7 +22,7 @@ function maxOf(points: TrendPoint[]) {
 
 export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Trend Layer
@@ -35,8 +35,8 @@ export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelPr
         {series.map((s, idx) => {
           const max = maxOf(s.points);
           return (
-            <div key={`${s.label}-${idx}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-              <div className="text-sm font-semibold text-slate-900">{s.label}</div>
+            <div key={`${s.label}-${idx}`} className="rounded-2xl border border-stone-100 bg-slate-50 p-4">
+              <div className="text-sm font-semibold text-stone-900">{s.label}</div>
 
               {s.points.length === 0 ? (
                 <div className="mt-3 text-sm text-secondary">No trend points available.</div>

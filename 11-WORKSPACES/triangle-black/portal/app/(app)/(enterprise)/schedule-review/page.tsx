@@ -19,13 +19,13 @@ export default function ScheduleReviewPage() {
   const wosDue    = wos.filter(w=>w.due_date&&new Date(w.due_date)>=now&&new Date(w.due_date)<=next7&&w.status!=="completed");
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance · Schedule</div>
           <h1 className="tb-hero-title">Schedule Review</h1>
           <p className="tb-hero-description">Upcoming maintenance and work order schedule</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Overdue PMs",value:overdue.length,color:overdue.length>0?"#F87171":"#34D399"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#FBBF24":"#34D399"},{label:"Due This Month",value:dueMonth.length,color:"#60A5FA"},{label:"WOs Due Soon",value:wosDue.length,color:wosDue.length>0?"#FB923C":"#34D399"}].map((k,i)=>(
+            {[{label:"Overdue PMs",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"Due This Month",value:dueMonth.length,color:"#5B7C8C"},{label:"WOs Due Soon",value:wosDue.length,color:wosDue.length>0?"#B07A2A":"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -33,7 +33,7 @@ export default function ScheduleReviewPage() {
       </div>
       <div className="tb-canvas">
         {overdue.length>0&&(
-          <div className="tb-section" style={{borderColor:"#F8717140",background:"#F8717108"}}>
+          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="flex items-center gap-2"><span>⚠️</span><span className="text-sm font-semibold text-red-400">{overdue.length} PM plan{overdue.length>1?"s":""} overdue</span><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link ml-auto">View →</button></div>
           </div>
         )}
@@ -47,7 +47,7 @@ export default function ScheduleReviewPage() {
                 return (
                   <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                     <div className="flex items-center gap-2 min-w-0"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title||"—"}</span></div>
-                    <span className="text-xs flex-shrink-0" style={{color:"#FBBF24"}}>in {days}d</span>
+                    <span className="text-xs flex-shrink-0" style={{color:"#B07A2A"}}>in {days}d</span>
                   </button>
                 );
               })}
@@ -59,7 +59,7 @@ export default function ScheduleReviewPage() {
               {wosDue.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No WOs due this week</div></div>
               : wosDue.map((wo,i)=>{
                 const days=Math.ceil((new Date(wo.due_date)-now)/86400000);
-                const pc={critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#94A3B8"}[wo.priority]||"#94A3B8";
+                const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[wo.priority]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
                     <div className="flex items-center gap-2 min-w-0"><div className="tb-priority-bar" style={{background:pc}}/><span className="text-sm text-secondary truncate">{wo.title||"—"}</span></div>

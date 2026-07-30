@@ -80,7 +80,7 @@ export function ClientKeyboardHandler({ onOpenSearch }: { onOpenSearch?: () => v
       <KeyboardShortcutsModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
       {gPressed && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2
-                        bg-slate-800 text-white text-sm rounded-lg shadow-xl pointer-events-none">
+                        bg-stone-800 text-white text-sm rounded-lg shadow-xl pointer-events-none">
           G + ? — press shortcut key...
         </div>
       )}

@@ -9,7 +9,7 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR = {
-  Operational:"#34D399", "In Fault":"#F87171", "Under Maintenance":"#FBBF24", Inactive:"#94A3B8"
+  Operational:"#547C4D", "In Fault":"#A84A3D", "Under Maintenance":"#B07A2A", Inactive:"#6D5F53"
 };
 const CAT_ICON = {
   HVAC:"❄️", Electrical:"⚡", Plumbing:"🔧", Elevator:"🛗", Fire:"🔥",
@@ -66,7 +66,7 @@ export default function AssetTreePage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1A1A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -80,11 +80,11 @@ export default function AssetTreePage() {
           </div>
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
-              { label:"Total",          value:assets.length,  color:"#F1F5F9" },
-              { label:"Operational",    value:operational,    color:"#34D399" },
-              { label:"In Fault",       value:faulted,        color:faulted>0?"#F87171":"#34D399" },
-              { label:"Under Maint",    value:underMaint,     color:"#FBBF24" },
-              { label:"Categories",     value:cats.length,    color:"#A78BFA" },
+              { label:"Total",          value:assets.length,  color:"#221D1A" },
+              { label:"Operational",    value:operational,    color:"#547C4D" },
+              { label:"In Fault",       value:faulted,        color:faulted>0?"#A84A3D":"#547C4D" },
+              { label:"Under Maint",    value:underMaint,     color:"#B07A2A" },
+              { label:"Categories",     value:cats.length,    color:"#8D7443" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -151,7 +151,7 @@ export default function AssetTreePage() {
                     {isExpanded && (
                       <div className="divide-y divide-border">
                         {catAssets.map((asset, i) => {
-                          const sc = STATUS_COLOR[asset.status] || "#94A3B8";
+                          const sc = STATUS_COLOR[asset.status] || "#6D5F53";
                           return (
                             <button key={i}
                               onClick={() => router.push(`/maintenance/assets/${asset.id}`)}
@@ -169,7 +169,7 @@ export default function AssetTreePage() {
                                   <span className="tb-badge tb-badge--warning" style={{fontSize:"0.5rem"}}>{asset.active_wos} WO</span>
                                 )}
                                 {asset.pm_count > 0 && (
-                                  <span className="tb-badge" style={{fontSize:"0.5rem",color:"#A78BFA"}}>{asset.pm_count} PM</span>
+                                  <span className="tb-badge" style={{fontSize:"0.5rem",color:"#8D7443"}}>{asset.pm_count} PM</span>
                                 )}
                                 <span className="tb-badge" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`,fontSize:"0.5625rem"}}>
                                   {asset.status||"—"}

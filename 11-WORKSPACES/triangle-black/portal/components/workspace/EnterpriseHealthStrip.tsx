@@ -7,14 +7,14 @@ type EnterpriseHealthStripProps = { title: string; subtitle: string; items: Heal
 const toneMap = {
   success: { card: "border-emerald-200 bg-emerald-50", value: "text-emerald-700", icon: CheckCircle, iconColor: "text-emerald-500" },
   warning: { card: "border-amber-200 bg-amber-50",     value: "text-amber-700",   icon: AlertTriangle, iconColor: "text-amber-500" },
-  neutral: { card: "border-slate-200 bg-slate-50",     value: "text-slate-800",   icon: Activity, iconColor: "text-tertiary" },
+  neutral: { card: "border-stone-200 bg-slate-50",     value: "text-stone-800",   icon: Activity, iconColor: "text-tertiary" },
 };
 
 export function EnterpriseHealthStrip({ title, subtitle, items }: EnterpriseHealthStripProps) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
       <div className="mb-4">
-        <h2 className="text-sm font-bold text-slate-900">{title}</h2>
+        <h2 className="text-sm font-bold text-stone-900">{title}</h2>
         <p className="mt-0.5 text-xs text-secondary">{subtitle}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

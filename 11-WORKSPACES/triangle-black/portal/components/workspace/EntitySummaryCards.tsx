@@ -13,7 +13,7 @@ type EntitySummaryCardsProps = {
 
 export function EntitySummaryCards({ title, subtitle, items }: EntitySummaryCardsProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Entity Summary
@@ -26,7 +26,7 @@ export function EntitySummaryCards({ title, subtitle, items }: EntitySummaryCard
         {items.map((item, index) => (
           <div
             key={`${item.label}-${index}`}
-            className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+            className="rounded-2xl border border-stone-200 bg-slate-50 p-4"
           >
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.label}

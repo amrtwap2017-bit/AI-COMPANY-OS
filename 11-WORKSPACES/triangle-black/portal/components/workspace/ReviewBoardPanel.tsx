@@ -15,12 +15,12 @@ type ReviewBoardPanelProps = {
 function emphasisClasses(emphasis?: ReviewCard["emphasis"]) {
   if (emphasis === "success") return "border-emerald-200 bg-emerald-50";
   if (emphasis === "warning") return "border-amber-200 bg-amber-50";
-  return "border-slate-200 bg-slate-50";
+  return "border-stone-200 bg-slate-50";
 }
 
 export function ReviewBoardPanel({ title, subtitle, items }: ReviewBoardPanelProps) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Review Board
@@ -32,7 +32,7 @@ export function ReviewBoardPanel({ title, subtitle, items }: ReviewBoardPanelPro
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item, index) => (
           <div key={`${item.title}-${index}`} className={"rounded-2xl border p-4 " + emphasisClasses(item.emphasis)}>
-            <div className="text-sm font-semibold text-slate-900">{item.title}</div>
+            <div className="text-sm font-semibold text-stone-900">{item.title}</div>
             <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{item.value}</div>
             <div className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</div>
           </div>

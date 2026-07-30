@@ -3,8 +3,8 @@
 export function SignalStrip({ title, subtitle, items=[] }:any) {
   const tones:any = { warning:"text-amber-600 bg-amber-50", success:"text-emerald-600 bg-emerald-50", neutral:"text-slate-600 bg-slate-50" };
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5">
-      <h3 className="font-semibold text-slate-900 mb-1">{title}</h3>
+    <div className="bg-white rounded-2xl border border-stone-200 p-5">
+      <h3 className="font-semibold text-stone-900 mb-1">{title}</h3>
       {subtitle && <p className="text-xs text-secondary mb-3">{subtitle}</p>}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {items.map((item:any,i:number)=>(

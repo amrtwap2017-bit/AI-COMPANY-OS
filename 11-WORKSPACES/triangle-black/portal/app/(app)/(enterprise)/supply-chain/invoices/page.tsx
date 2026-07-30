@@ -8,11 +8,11 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const SC = {
-  draft:"#94A3B8", submitted:"#60A5FA", matching:"#A78BFA",
-  matched:"#34D399", mismatch:"#F87171", approved:"#34D399",
-  rejected:"#F87171", paid:"#10B981", cancelled:"#94A3B8"
+  draft:"#6D5F53", submitted:"#5B7C8C", matching:"#8D7443",
+  matched:"#547C4D", mismatch:"#A84A3D", approved:"#547C4D",
+  rejected:"#A84A3D", paid:"#547C4D", cancelled:"#6D5F53"
 };
-const MC = { matched:"#34D399", partial:"#FBBF24", mismatch:"#F87171", pending:"#94A3B8" };
+const MC = { matched:"#547C4D", partial:"#B07A2A", mismatch:"#A84A3D", pending:"#6D5F53" };
 export default function InvoicesPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -38,7 +38,7 @@ export default function InvoicesPage() {
   };
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#0D1A2A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <div>
@@ -53,10 +53,10 @@ export default function InvoicesPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Total Invoices",value:dash?.totals?.total||0,color:"#F1F5F9"},
-              {label:"Total Value",value:fmtEGP(dash?.totals?.total_value||0),color:"#60A5FA"},
-              {label:"Outstanding",value:fmtEGP(dash?.totals?.total_outstanding||0),color:"#FBBF24"},
-              {label:"Mismatches",value:dash?.by_status?.mismatch||0,color:(dash?.by_status?.mismatch||0)>0?"#F87171":"#34D399"},
+              {label:"Total Invoices",value:dash?.totals?.total||0,color:"#221D1A"},
+              {label:"Total Value",value:fmtEGP(dash?.totals?.total_value||0),color:"#5B7C8C"},
+              {label:"Outstanding",value:fmtEGP(dash?.totals?.total_outstanding||0),color:"#B07A2A"},
+              {label:"Mismatches",value:dash?.by_status?.mismatch||0,color:(dash?.by_status?.mismatch||0)>0?"#A84A3D":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
@@ -88,8 +88,8 @@ export default function InvoicesPage() {
                 ))}
               </div>
               {invoices.map((inv,i)=>{
-                const sc=SC[inv.status]||"#94A3B8";
-                const mc=MC[inv.match_result]||"#94A3B8";
+                const sc=SC[inv.status]||"#6D5F53";
+                const mc=MC[inv.match_result]||"#6D5F53";
                 const overdue = inv.due_date && new Date(inv.due_date) < new Date() && inv.payment_status !== "paid";
                 return (
                   <div key={i} className="tb-table-row" style={{gridTemplateColumns:"1fr 130px 110px 120px 110px 100px 110px"}}>
@@ -104,8 +104,8 @@ export default function InvoicesPage() {
                       <span className="tb-badge" style={{background:mc+"18",color:mc,border:`1px solid ${mc}30`,fontSize:"0.5rem"}}>{inv.match_result||"pending"}</span>
                     </div>
                     <div className="text-center text-sm font-bold text-primary">{fmtEGP(inv.total_amount||0)}</div>
-                    <div className="text-center text-sm font-bold" style={{color:Number(inv.balance_due||0)>0?"#FBBF24":"#34D399"}}>{fmtEGP(inv.balance_due||0)}</div>
-                    <div className="text-center text-xs" style={{color:overdue?"#F87171":"#94A3B8"}}>{fmtDate(inv.due_date)}</div>
+                    <div className="text-center text-sm font-bold" style={{color:Number(inv.balance_due||0)>0?"#B07A2A":"#547C4D"}}>{fmtEGP(inv.balance_due||0)}</div>
+                    <div className="text-center text-xs" style={{color:overdue?"#A84A3D":"#6D5F53"}}>{fmtDate(inv.due_date)}</div>
                     <div className="text-center">
                       <button onClick={()=>router.push("/supply-chain/invoices/"+inv.id)} className="tb-btn-secondary" style={{fontSize:"0.6rem",padding:"4px 8px"}}>View →</button>
                     </div>

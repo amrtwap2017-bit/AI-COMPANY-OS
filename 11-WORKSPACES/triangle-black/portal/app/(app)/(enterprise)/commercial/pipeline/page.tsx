@@ -5,7 +5,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const STAGES = [{key:"new",label:"New",color:"#60A5FA"},{key:"qualified",label:"Qualified",color:"#A78BFA"},{key:"proposal",label:"Proposal",color:"#818CF8"},{key:"negotiation",label:"Negotiation",color:"#FBBF24"},{key:"won",label:"Won",color:"#34D399"},{key:"lost",label:"Lost",color:"#F87171"}];
+const STAGES = [{key:"new",label:"New",color:"#5B7C8C"},{key:"qualified",label:"Qualified",color:"#8D7443"},{key:"proposal",label:"Proposal",color:"#818CF8"},{key:"negotiation",label:"Negotiation",color:"#B07A2A"},{key:"won",label:"Won",color:"#547C4D"},{key:"lost",label:"Lost",color:"#A84A3D"}];
 export default function PipelinePage() {
   const router = useRouter();
   const { data: leadRaw } = useQuery(["pl-leads"], () => authFetch("/api/v1/leads-portal-v2").then(r=>r.json()));
@@ -16,13 +16,13 @@ export default function PipelinePage() {
   const convRate   = leads.length>0?Math.round(leads.filter(l=>l.status==="won").length/leads.length*100):0;
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0F28 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0F28 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-purple-400 mb-1.5">Commercial</div>
           <h1 className="tb-hero-title">Sales Pipeline</h1>
           <p className="tb-hero-description">{leads.length} leads · {fmtEGP(totalValue)} pipeline value</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Leads",value:leads.length,color:"#F1F5F9"},{label:"Pipeline Value",value:fmtEGP(totalValue),color:"#60A5FA"},{label:"Won Value",value:fmtEGP(wonValue),color:"#34D399"},{label:"Conv. Rate",value:convRate+"%",color:convRate>=20?"#34D399":"#FBBF24"}].map((k,i)=>(
+            {[{label:"Total Leads",value:leads.length,color:"#221D1A"},{label:"Pipeline Value",value:fmtEGP(totalValue),color:"#5B7C8C"},{label:"Won Value",value:fmtEGP(wonValue),color:"#547C4D"},{label:"Conv. Rate",value:convRate+"%",color:convRate>=20?"#547C4D":"#B07A2A"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

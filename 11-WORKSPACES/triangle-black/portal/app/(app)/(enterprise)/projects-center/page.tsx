@@ -11,7 +11,7 @@ const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); }
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
-  active:"#34D399", planning:"#60A5FA", completed:"#94A3B8", on_hold:"#FBBF24", cancelled:"#F87171"
+  active:"#547C4D", planning:"#5B7C8C", completed:"#6D5F53", on_hold:"#B07A2A", cancelled:"#A84A3D"
 };
 
 export default function ProjectsCenterPage() {
@@ -41,7 +41,7 @@ export default function ProjectsCenterPage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1228 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1228 100%)"}}>
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -50,16 +50,16 @@ export default function ProjectsCenterPage() {
               <p className="tb-hero-description">{projects.length} projects · {active.length} active · {fmtEGP(totalBudget)} total budget</p>
             </div>
             <div className={`tb-score-badge ${avgCompletion>=70?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-              <div className="tb-score-value" style={{color:avgCompletion>=70?"#34D399":"#FBBF24"}}>{avgCompletion}%</div>
+              <div className="tb-score-value" style={{color:avgCompletion>=70?"#547C4D":"#B07A2A"}}>{avgCompletion}%</div>
               <div className="tb-score-label">Avg Completion</div>
             </div>
           </div>
           <div className="tb-grid-4 mt-6">
             {[
-              {label:"Active",     value:active.length,    color:"#34D399", f:"active"},
-              {label:"Planning",   value:planning.length,  color:"#60A5FA", f:"planning"},
-              {label:"Completed",  value:completed.length, color:"#94A3B8", f:"completed"},
-              {label:"Total Budget",value:fmtEGP(totalBudget), color:"#A78BFA", f:"all"},
+              {label:"Active",     value:active.length,    color:"#547C4D", f:"active"},
+              {label:"Planning",   value:planning.length,  color:"#5B7C8C", f:"planning"},
+              {label:"Completed",  value:completed.length, color:"#6D5F53", f:"completed"},
+              {label:"Total Budget",value:fmtEGP(totalBudget), color:"#8D7443", f:"all"},
             ].map((k,i)=>{
               const active_f=statusF===k.f;
               return (
@@ -106,12 +106,12 @@ export default function ProjectsCenterPage() {
             {filtered.map((p,i)=>{
               const pct     = Number(p.completion_pct||0);
               const budget  = Number(p.budget||0);
-              const sc      = STATUS_COLOR[p.status]||"#94A3B8";
+              const sc      = STATUS_COLOR[p.status]||"#6D5F53";
               const projWOs = wos.filter(w=>w.contract_id===p.id||w.project_id===p.id);
               const now     = new Date();
               const daysLeft= p.end_date?Math.ceil((new Date(p.end_date)-Date.now())/86400000):null;
               const isOv    = daysLeft!==null&&daysLeft<0&&p.status!=="completed";
-              const barColor= pct>=80?"#34D399":pct>=50?"#60A5FA":"#FBBF24";
+              const barColor= pct>=80?"#547C4D":pct>=50?"#5B7C8C":"#B07A2A";
 
               return (
                 <button key={i} onClick={()=>router.push(`/projects-center/${p.id}`)}

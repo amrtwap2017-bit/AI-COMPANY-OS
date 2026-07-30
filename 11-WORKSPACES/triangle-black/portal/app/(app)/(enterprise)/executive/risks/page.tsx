@@ -21,23 +21,23 @@ export default function RisksPage() {
   const overdueInv  = inv.filter(i=>i.status==="overdue").length;
   const riskScore   = criticalWOs*10+overdueWOs*3+expiringCts*5+overduePMs*2+overdueInv*4;
   const riskLevel   = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
-  const riskColor   = riskScore===0?"#34D399":riskScore<15?"#60A5FA":riskScore<30?"#FBBF24":"#F87171";
+  const riskColor   = riskScore===0?"#547C4D":riskScore<15?"#5B7C8C":riskScore<30?"#B07A2A":"#A84A3D";
   const risks = [
-    {label:"Critical Work Orders", value:criticalWOs, weight:10, color:"#F87171", path:"/operations/work-orders", desc:"Unresolved critical priority work orders"},
-    {label:"Overdue Work Orders",  value:overdueWOs,  weight:3,  color:"#FBBF24", path:"/analytics/sla",           desc:"Work orders past their due date"},
-    {label:"Expiring Contracts",   value:expiringCts, weight:5,  color:"#FBBF24", path:"/commercial/contracts",    desc:"Contracts expiring within 30 days"},
-    {label:"Overdue PM Plans",     value:overduePMs,  weight:2,  color:"#FB923C", path:"/maintenance/pm-plans",    desc:"Preventive maintenance past due"},
-    {label:"Overdue Invoices",     value:overdueInv,  weight:4,  color:"#F87171", path:"/invoices",                desc:"Unpaid invoices past due date"},
+    {label:"Critical Work Orders", value:criticalWOs, weight:10, color:"#A84A3D", path:"/operations/work-orders", desc:"Unresolved critical priority work orders"},
+    {label:"Overdue Work Orders",  value:overdueWOs,  weight:3,  color:"#B07A2A", path:"/analytics/sla",           desc:"Work orders past their due date"},
+    {label:"Expiring Contracts",   value:expiringCts, weight:5,  color:"#B07A2A", path:"/commercial/contracts",    desc:"Contracts expiring within 30 days"},
+    {label:"Overdue PM Plans",     value:overduePMs,  weight:2,  color:"#B07A2A", path:"/maintenance/pm-plans",    desc:"Preventive maintenance past due"},
+    {label:"Overdue Invoices",     value:overdueInv,  weight:4,  color:"#A84A3D", path:"/invoices",                desc:"Unpaid invoices past due date"},
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0A0A 100%)"}}>
+      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0A0A 100%)"}}>
         <div className="tb-hero-inner">
           <div className="text-label-upper text-red-400 mb-1.5">Executive · Risk</div>
           <h1 className="tb-hero-title">Risk Register</h1>
           <p className="tb-hero-description">Platform risk assessment and mitigation status</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Risk Score",value:riskScore,color:riskColor},{label:"Risk Level",value:riskLevel,color:riskColor},{label:"Risk Items",value:risks.filter(r=>r.value>0).length,color:risks.filter(r=>r.value>0).length>0?"#FBBF24":"#34D399"},{label:"Status",value:riskScore===0?"Clear":"Active",color:riskColor}].map((k,i)=>(
+            {[{label:"Risk Score",value:riskScore,color:riskColor},{label:"Risk Level",value:riskLevel,color:riskColor},{label:"Risk Items",value:risks.filter(r=>r.value>0).length,color:risks.filter(r=>r.value>0).length>0?"#B07A2A":"#547C4D"},{label:"Status",value:riskScore===0?"Clear":"Active",color:riskColor}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -58,7 +58,7 @@ export default function RisksPage() {
                       <div className="text-xs text-tertiary">{risk.desc}</div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-4">
-                      <div className="text-xl font-black" style={{color:risk.value>0?risk.color:"#34D399"}}>{risk.value}</div>
+                      <div className="text-xl font-black" style={{color:risk.value>0?risk.color:"#547C4D"}}>{risk.value}</div>
                       <div className="text-xs text-tertiary">×{risk.weight} weight</div>
                     </div>
                   </div>

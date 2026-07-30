@@ -36,7 +36,7 @@ export function MetricCard({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <div className="bg-white rounded-2xl border border-stone-200 p-5">
         <div className="skeleton h-3 w-2/3 mb-4" />
         <div className="skeleton h-8 w-1/2 mb-3" />
         <div className="skeleton h-3 w-3/4" />
@@ -48,7 +48,7 @@ export function MetricCard({
     <div
       onClick={onClick}
       className={
-        "group relative bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-200 " +
+        "group relative bg-white rounded-2xl border border-stone-200 overflow-hidden transition-all duration-200 " +
         (onClick ? "cursor-pointer hover:border-amber-300 hover:shadow-lg hover:-translate-y-0.5" : "hover:shadow-md")
       }
     >
@@ -64,7 +64,7 @@ export function MetricCard({
             </div>
           )}
         </div>
-        <div className="text-[1.75rem] font-bold text-slate-900 leading-none tracking-tight mb-3">
+        <div className="text-[1.75rem] font-bold text-stone-900 leading-none tracking-tight mb-3">
           {value}
         </div>
         <div className="flex items-center gap-2 min-h-[20px]">
