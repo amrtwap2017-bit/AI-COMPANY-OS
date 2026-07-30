@@ -6941,3 +6941,4 @@ def _notify(db, title: str, message: str, notif_type: str = "info", entity_type:
     except Exception:
         try: db.rollback()
         except: pass
+# SPRINT_299_NOTIFICATIONS

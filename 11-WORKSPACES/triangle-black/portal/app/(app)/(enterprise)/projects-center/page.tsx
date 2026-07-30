@@ -2,7 +2,8 @@
 // @ts-nocheck
 import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
@@ -16,6 +17,13 @@ const STATUS_COLOR = {
 
 export default function ProjectsCenterPage() {
   const router = useRouter();
+  const [showNewProject, setShowNewProject] = useState(false);
+  const [newProj, setNewProj] = useState({title:"",description:"",status:"planning",budget:0});
+  const qc = useQueryClient();
+  const createProj = useMutation(
+    (payload) => authFetch("/api/v1/projects/", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
+    { onSuccess: (d) => { if(d.id){toast.success("Project created");setShowNewProject(false);qc.invalidateQueries(["projects-list"]);}else{toast.error("Failed");}}, onError:()=>toast.error("Error") }
+  );
   const [search,   setSearch]   = useState("");
   const [statusF,  setStatusF]  = useState("all");
 
@@ -174,6 +182,28 @@ export default function ProjectsCenterPage() {
           </div>
         </div>
       </div>
+      {showNewProject && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:16,padding:32,width:"100%",maxWidth:500,boxShadow:"0 20px 40px rgba(0,0,0,0.15)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>New Project</div>
+              <button onClick={()=>setShowNewProject(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--color-text-3)",fontSize:"1.25rem"}}>×</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Title *</label><input value={newProj.title} onChange={e=>setNewProj({...newProj,title:e.target.value})} placeholder="Project name" style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/></div>
+              <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Description</label><textarea value={newProj.description} onChange={e=>setNewProj({...newProj,description:e.target.value})} rows={2} placeholder="Project details" style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/></div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Status</label><select value={newProj.status} onChange={e=>setNewProj({...newProj,status:e.target.value})} style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}>{["planning","active","on_hold"].map(s=><option key={s} value={s}>{s}</option>)}</select></div>
+                <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Budget (EGP)</label><input type="number" value={newProj.budget} onChange={e=>setNewProj({...newProj,budget:Number(e.target.value)})} style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/></div>
+              </div>
+              <div style={{display:"flex",gap:8,marginTop:4}}>
+                <button onClick={()=>{if(!newProj.title.trim()){toast.error("Title required");return;}createProj.mutate({...newProj,hotel_id:"tb-default-hotel-000000000001",completion_pct:0});}} disabled={createProj.isLoading} style={{flex:1,background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"12px",color:"#181614",fontWeight:700,cursor:"pointer"}}>{createProj.isLoading?"Creating...":"Create Project"}</button>
+                <button onClick={()=>setShowNewProject(false)} style={{background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"12px 20px",color:"var(--color-text-2)",cursor:"pointer"}}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
