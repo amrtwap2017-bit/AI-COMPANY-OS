@@ -24,8 +24,8 @@ const fmtDateTime = (d) => {
   } catch { return "—"; }
 };
 
-const PRIORITY_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" };
-const STATUS_COLOR   = { open:"#60A5FA", in_progress:"#FBBF24", resolved:"#34D399", closed:"#94A3B8", cancelled:"#64748B" };
+const PRIORITY_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" };
+const STATUS_COLOR   = { open:"#5B7C8C", in_progress:"#B07A2A", resolved:"#547C4D", closed:"#6D5F53", cancelled:"#64748B" };
 
 export default function ServiceRequestsPage() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export default function ServiceRequestsPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B2E 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -73,10 +73,10 @@ export default function ServiceRequestsPage() {
           <div className="tb-grid-4 mt-6" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
             {[
               { label:"Total",       value:srs.length, color:"#F1F5F9" },
-              { label:"Open",        value:open,        color:"#60A5FA" },
-              { label:"In Progress", value:inProgress,  color:"#FBBF24" },
-              { label:"Resolved",    value:resolved,    color:"#34D399" },
-              { label:"Linked WOs",  value:linked,      color:"#A78BFA" },
+              { label:"Open",        value:open,        color:"#5B7C8C" },
+              { label:"In Progress", value:inProgress,  color:"#B07A2A" },
+              { label:"Resolved",    value:resolved,    color:"#547C4D" },
+              { label:"Linked WOs",  value:linked,      color:"#8D7443" },
             ].map((k, i) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -133,8 +133,8 @@ export default function ServiceRequestsPage() {
                 ))}
               </div>
               {filtered.map((sr, i) => {
-                const pc = PRIORITY_COLOR[sr.priority] || "#94A3B8";
-                const sc = STATUS_COLOR[sr.status] || "#94A3B8";
+                const pc = PRIORITY_COLOR[sr.priority] || "#6D5F53";
+                const sc = STATUS_COLOR[sr.status] || "#6D5F53";
                 const linkedWO = wos.find(w => w.id === sr.work_order_id);
                 return (
                   <button key={i}

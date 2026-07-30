@@ -374,8 +374,8 @@ body {
 
 /* ── PAGE HERO (dark header pattern used on 40+ pages) ──────────────── */
 .tb-hero {
-  background: linear-gradient(140deg, #2A231E 0%, #332C27 40%, #3D352F 100%);
-  border-bottom: 1px solid rgba(185,146,76,0.12);
+  background: linear-gradient(140deg, #E8DDD0 0%, #D9C3A9 50%, #C4A98A 100%);
+  border-bottom: 1px solid rgba(185,146,76,0.15);
 }
 .tb-hero-inner {
   max-width: var(--content-max);
@@ -391,13 +391,13 @@ body {
 .tb-hero-title {
   font-size: 2rem;
   font-weight: 900;
-  color: #F3EFE8;
+  color: #221D1A;
   letter-spacing: -0.02em;
   line-height: 1.1;
   margin: 0;
 }
 .tb-hero-description {
-  color: rgba(210,195,175,0.60);
+  color: rgba(34,29,26,0.55);
   font-size: 0.8125rem;
   margin-top: 6px;
   line-height: 1.5;
@@ -408,8 +408,8 @@ body {
   margin-top: 16px;
 }
 .tb-hero-kpi {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(185,146,76,0.12);
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(185,146,76,0.18);
   border-radius: 10px;
   padding: 11px 12px;
   text-align: center;
@@ -423,7 +423,7 @@ body {
 }
 .tb-hero-kpi-label {
   font-size: 0.5625rem;
-  color: rgba(185,165,140,0.55);
+  color: rgba(34,29,26,0.45);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 4px;

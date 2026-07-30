@@ -15,9 +15,9 @@ const fmtDate = (d) => {
   try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); }
   catch { return "—"; }
 };
-const URGENCY_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
-const GRADE_COLORS = {A:"#34D399",B:"#60A5FA",C:"#FBBF24",D:"#F87171"};
-const GRADE_BG = {A:"#0D2A1E",B:"#0D1A2A",C:"#2A1E0D",D:"#2A0D0D"};
+const URGENCY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
+const GRADE_COLORS = {A:"#547C4D",B:"#5B7C8C",C:"#B07A2A",D:"#A84A3D"};
+const GRADE_BG = {A:"rgba(84,124,77,0.08)",B:"rgba(91,124,140,0.08)",C:"rgba(176,122,42,0.08)",D:"rgba(168,74,61,0.08)"};
 
 export default function SLADashboardPage() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function SLADashboardPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0F172A 0%,#1A0D0D 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
@@ -55,8 +55,8 @@ export default function SLADashboardPage() {
             <div className="flex gap-2">
               {breachCount > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{background:"#F8717118",border:"1px solid #F8717140"}}>
-                  <span style={{color:"#F87171",fontSize:"1.2rem"}}>🚨</span>
-                  <span className="text-sm font-black" style={{color:"#F87171"}}>{breachCount} Active Breaches</span>
+                  <span style={{color:"#A84A3D",fontSize:"1.2rem"}}>🚨</span>
+                  <span className="text-sm font-black" style={{color:"#A84A3D"}}>{breachCount} Active Breaches</span>
                 </div>
               )}
               <button onClick={()=>router.push("/operations/service-requests")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>
@@ -67,9 +67,9 @@ export default function SLADashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total Requests",value:overall.total_requests||0,color:"#F1F5F9"},
-              {label:"Resolved",value:overall.resolved||0,color:"#34D399"},
-              {label:"Active Breaches",value:breachCount,color:breachCount>0?"#F87171":"#34D399"},
-              {label:"Avg Resolution",value:overall.avg_resolution_hours?`${Number(overall.avg_resolution_hours).toFixed(1)}h`:"—",color:"#60A5FA"},
+              {label:"Resolved",value:overall.resolved||0,color:"#547C4D"},
+              {label:"Active Breaches",value:breachCount,color:breachCount>0?"#A84A3D":"#547C4D"},
+              {label:"Avg Resolution",value:overall.avg_resolution_hours?`${Number(overall.avg_resolution_hours).toFixed(1)}h`:"—",color:"#5B7C8C"},
             ].map((k,i)=>(
               <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -99,7 +99,7 @@ export default function SLADashboardPage() {
                   {siteSLA.map((site,i)=>{
                     const score = site.sla_score || 0;
                     const grade = site.sla_grade || "D";
-                    const gc = GRADE_COLORS[grade]||"#94A3B8";
+                    const gc = GRADE_COLORS[grade]||"#6D5F53";
                     return (
                       <div key={i} className="p-4 rounded-2xl border border-border"
                            style={{background:GRADE_BG[grade]||"#1E293B"}}>
@@ -118,9 +118,9 @@ export default function SLADashboardPage() {
                         </div>
                         <div className="grid grid-cols-3 gap-2 text-center">
                           {[
-                            {label:"Critical",value:site.critical||0,color:"#F87171"},
-                            {label:"Resolved",value:site.resolved||0,color:"#34D399"},
-                            {label:"Rate",value:`${site.resolution_rate_pct||0}%`,color:"#60A5FA"},
+                            {label:"Critical",value:site.critical||0,color:"#A84A3D"},
+                            {label:"Resolved",value:site.resolved||0,color:"#547C4D"},
+                            {label:"Rate",value:`${site.resolution_rate_pct||0}%`,color:"#5B7C8C"},
                           ].map((stat,si)=>(
                             <div key={si} className="bg-base-alt rounded-xl p-2">
                               <div className="text-sm font-black" style={{color:stat.color}}>{stat.value}</div>
@@ -146,7 +146,7 @@ export default function SLADashboardPage() {
                     ))}
                   </div>
                   {woSLA.map((row,i)=>{
-                    const pc = URGENCY_COLORS[row.priority]||"#94A3B8";
+                    const pc = URGENCY_COLORS[row.priority]||"#6D5F53";
                     const target = (sla?.sla_targets || {critical:8,high:24,medium:48,low:72})[row.priority]||24;
                     const isBreached = Number(row.avg_response_hours||0) > target;
                     return (
@@ -154,11 +154,11 @@ export default function SLADashboardPage() {
                         <span className="tb-badge" style={{background:pc+"18",color:pc}}>{row.priority}</span>
                         <div className="text-center text-sm text-primary">{row.total||0}</div>
                         <div className="text-center text-sm text-secondary">{row.started||0}</div>
-                        <div className="text-center text-sm" style={{color:isBreached?"#F87171":"#34D399"}}>
+                        <div className="text-center text-sm" style={{color:isBreached?"#A84A3D":"#547C4D"}}>
                           {row.avg_response_hours ? fmtHours(row.avg_response_hours) : "—"}
                         </div>
                         <div className="text-center">
-                          <span className="text-sm font-bold" style={{color:Number(row.breached_response||0)>0?"#F87171":"#34D399"}}>
+                          <span className="text-sm font-bold" style={{color:Number(row.breached_response||0)>0?"#A84A3D":"#547C4D"}}>
                             {row.breached_response||0} {Number(row.breached_response||0)>0?"⚠️":"✅"}
                           </span>
                         </div>
@@ -187,10 +187,10 @@ export default function SLADashboardPage() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
-                    {label:"Open",value:site.open_count||0,color:"#60A5FA"},
-                    {label:"In Progress",value:site.in_progress||0,color:"#FBBF24"},
-                    {label:"Resolved",value:site.resolved||0,color:"#34D399"},
-                    {label:"Avg Resolution",value:site.avg_resolution_hours?`${Number(site.avg_resolution_hours).toFixed(1)}h`:"—",color:"#A78BFA"},
+                    {label:"Open",value:site.open_count||0,color:"#5B7C8C"},
+                    {label:"In Progress",value:site.in_progress||0,color:"#B07A2A"},
+                    {label:"Resolved",value:site.resolved||0,color:"#547C4D"},
+                    {label:"Avg Resolution",value:site.avg_resolution_hours?`${Number(site.avg_resolution_hours).toFixed(1)}h`:"—",color:"#8D7443"},
                   ].map((stat,si)=>(
                     <div key={si} className="p-3 rounded-xl bg-base-alt text-center">
                       <div className="text-xl font-black" style={{color:stat.color}}>{stat.value}</div>
@@ -205,13 +205,13 @@ export default function SLADashboardPage() {
 
         {activeTab === "breaches" && (
           <div className="tb-section">
-            <div className="tb-section-title" style={{color:"#F87171"}}>🚨 Active SLA Breaches ({activeBreach.length})</div>
+            <div className="tb-section-title" style={{color:"#A84A3D"}}>🚨 Active SLA Breaches ({activeBreach.length})</div>
             {activeBreach.length === 0 ? (
               <div className="tb-empty mt-4"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No active breaches</div><div className="tb-empty-desc">All service requests are within SLA</div></div>
             ) : (
               <div className="space-y-2 mt-3">
                 {activeBreach.map((item,i)=>{
-                  const uc = URGENCY_COLORS[item.urgency]||"#94A3B8";
+                  const uc = URGENCY_COLORS[item.urgency]||"#6D5F53";
                   const overdue = Number(item.hours_overdue||0);
                   return (
                     <div key={i} className="flex items-center gap-4 p-4 rounded-xl border" style={{background:"#F8717108",borderColor:"#F8717130"}}>
@@ -239,10 +239,10 @@ export default function SLADashboardPage() {
             <div className="tb-section-title">SLA Targets — Triangle Black Standard</div>
             <div className="space-y-3 mt-4">
               {[
-                {priority:"critical",response:2,resolution:8,color:"#F87171",desc:"Safety / Guest impact"},
-                {priority:"high",response:4,resolution:24,color:"#FB923C",desc:"Operations affected"},
-                {priority:"medium",response:8,resolution:48,color:"#FBBF24",desc:"Non-critical issue"},
-                {priority:"low",response:24,resolution:72,color:"#34D399",desc:"Planned / Cosmetic"},
+                {priority:"critical",response:2,resolution:8,color:"#A84A3D",desc:"Safety / Guest impact"},
+                {priority:"high",response:4,resolution:24,color:"#B07A2A",desc:"Operations affected"},
+                {priority:"medium",response:8,resolution:48,color:"#B07A2A",desc:"Non-critical issue"},
+                {priority:"low",response:24,resolution:72,color:"#547C4D",desc:"Planned / Cosmetic"},
               ].map((tier,i)=>(
                 <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-base-alt border border-border">
                   <span className="tb-badge flex-shrink-0" style={{background:tier.color+"18",color:tier.color,fontSize:"0.6rem",minWidth:"70px",textAlign:"center"}}>

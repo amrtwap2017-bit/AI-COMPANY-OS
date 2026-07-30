@@ -68,9 +68,9 @@ export default function TechniciansPage() {
           <div className="tb-grid-4 mt-6">
             {[
               {label:"Total",     value:techs.length,     color:"rgba(148,163,184,0.9)", f:"all"},
-              {label:"Available", value:available.length, color:"#34D399",               f:"available"},
-              {label:"On Duty",   value:busy.length,      color:"#FBBF24",               f:"busy"},
-              {label:"At Capacity",value:atCap.length,   color:atCap.length>0?"#F87171":"#34D399", f:"capacity"},
+              {label:"Available", value:available.length, color:"#547C4D",               f:"available"},
+              {label:"On Duty",   value:busy.length,      color:"#B07A2A",               f:"busy"},
+              {label:"At Capacity",value:atCap.length,   color:atCap.length>0?"#A84A3D":"#547C4D", f:"capacity"},
             ].map((k,i)=>{
               const act=filter===k.f;
               return (
@@ -111,7 +111,7 @@ export default function TechniciansPage() {
               const techWOs   = wos.filter(w=>w.technician_id===t.id);
               const completedWOs = techWOs.filter(w=>w.status==="completed");
               const openWOs   = techWOs.filter(w=>w.status==="open"||w.status==="in_progress");
-              const loadColor = load>=90?"#F87171":load>=70?"#FBBF24":"#34D399";
+              const loadColor = load>=90?"#A84A3D":load>=70?"#B07A2A":"#547C4D";
 
               return (
                 <button key={i} onClick={()=>router.push(`/operations/technicians/${t.id}`)}

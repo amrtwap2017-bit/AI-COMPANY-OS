@@ -7,7 +7,7 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function SitesPage() {
   const router = useRouter();
   const { data: siteRaw, isLoading } = useQuery(["sites-list"], () => authFetch("/api/v1/sites-portal").then(r=>r.json()), { staleTime:60000, refetchOnWindowFocus:false });
-  const { data: assetRaw } = useQuery(["sites-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()), { staleTime:60000, refetchOnWindowFocus:false });
+  const { data: assetRaw } = useQuery(["sites-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()), { staleTime:60000, refetchOnWindowFocus:false });
   const sites = toArr(siteRaw); const assets = toArr(assetRaw);
   return (
     <div className="min-h-screen bg-base">

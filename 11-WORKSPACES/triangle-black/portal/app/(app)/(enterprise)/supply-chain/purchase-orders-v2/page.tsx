@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#60A5FA",sent:"#A78BFA",acknowledged:"#A78BFA",partial:"#FB923C",received:"#34D399",invoiced:"#34D399",paid:"#34D399",cancelled:"#F87171"};
+const SC = {draft:"#6D5F53",pending_approval:"#B07A2A",approved:"#5B7C8C",sent:"#8D7443",acknowledged:"#8D7443",partial:"#B07A2A",received:"#547C4D",invoiced:"#547C4D",paid:"#547C4D",cancelled:"#A84A3D"};
 const handleExport = (url: string) => {
     const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
     const a = document.createElement("a");
@@ -51,9 +51,9 @@ export default function PurchaseOrdersV2Page() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total POs",value:pos.length,color:"#F1F5F9"},
-              {label:"Pending",value:pos.filter(p=>p.status==="pending_approval").length,color:"#FBBF24"},
-              {label:"Approved",value:pos.filter(p=>p.status==="approved").length,color:"#34D399"},
-              {label:"Total Value",value:fmtEGP(pos.reduce((s,p)=>s+Number(p.total_amount||0),0)),color:"#A78BFA"},
+              {label:"Pending",value:pos.filter(p=>p.status==="pending_approval").length,color:"#B07A2A"},
+              {label:"Approved",value:pos.filter(p=>p.status==="approved").length,color:"#547C4D"},
+              {label:"Total Value",value:fmtEGP(pos.reduce((s,p)=>s+Number(p.total_amount||0),0)),color:"#8D7443"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
@@ -89,7 +89,7 @@ export default function PurchaseOrdersV2Page() {
                 ))}
               </div>
               {filtered.map((po,i)=>{
-                const sc = SC[po.status]||"#94A3B8";
+                const sc = SC[po.status]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/supply-chain/purchase-orders-v2/"+po.id)} className="tb-table-row" style={{gridTemplateColumns:"1.5fr 160px 100px 120px 110px"}}>
                     <div className="min-w-0 pr-4">

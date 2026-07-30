@@ -10,32 +10,32 @@ const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const CENTERS = [
   {
     icon:"🔧", label:"Operations",       path:"/operations/work-orders",
-    desc:"Work orders, dispatch, maintenance", color:"#F97316",
+    desc:"Work orders, dispatch, maintenance", color:"#B07A2A",
     sub:["Work Orders","/operations/work-orders","Dispatch Board","/operations/dispatch","Maintenance","/operations/maintenance"]
   },
   {
     icon:"🏗️", label:"Procurement",      path:"/supply-chain/procurement",
-    desc:"P2P: SOW→RFQ→PO→GRN→Invoice", color:"#FBBF24",
+    desc:"P2P: SOW→RFQ→PO→GRN→Invoice", color:"#B07A2A",
     sub:["Vendors","/supply-chain/vendor-management","RFQs","/supply-chain/rfq-management","Purchase Orders","/supply-chain/purchase-orders-v2"]
   },
   {
     icon:"💰", label:"Financial",         path:"/financial",
-    desc:"P&L, invoices, aged receivables", color:"#34D399",
+    desc:"P&L, invoices, aged receivables", color:"#547C4D",
     sub:["P&L Dashboard","/financial","Invoices","/supply-chain/invoices","Reports","/reports"]
   },
   {
     icon:"📊", label:"Reports",           path:"/reports",
-    desc:"12 report types — CSV + PDF", color:"#60A5FA",
+    desc:"12 report types — CSV + PDF", color:"#5B7C8C",
     sub:["Report Center","/reports","Work Orders","/reports","Invoices","/reports"]
   },
   {
     icon:"📅", label:"Maintenance",       path:"/operations/maintenance",
-    desc:"PM scheduler, asset calendar", color:"#A78BFA",
+    desc:"PM scheduler, asset calendar", color:"#8D7443",
     sub:["Schedule","/operations/maintenance","Asset QR","/operations/assets/qr","Assets","/maintenance/assets"]
   },
   {
     icon:"📈", label:"Executive",         path:"/executive/dashboard",
-    desc:"Live KPIs, alerts, decisions", color:"#FB923C",
+    desc:"Live KPIs, alerts, decisions", color:"#B07A2A",
     sub:["Dashboard","/executive/dashboard","Financial P&L","/financial","Notifications","/notifications"]
   },
   {
@@ -51,12 +51,12 @@ const CENTERS = [
 ];
 
 const QUICK_ACTIONS = [
-  {icon:"🔧",label:"New Work Order",    path:"/operations/work-orders/new",   color:"#F97316"},
-  {icon:"🎫",label:"Service Request",   path:"/operations/service-requests",   color:"#60A5FA"},
-  {icon:"📋",label:"Dispatch Board",    path:"/operations/dispatch",            color:"#A78BFA"},
-  {icon:"📦",label:"Purchase Orders",   path:"/supply-chain/purchase-orders-v2",color:"#FBBF24"},
-  {icon:"📄",label:"Invoices",          path:"/supply-chain/invoices",          color:"#34D399"},
-  {icon:"📱",label:"Asset QR Codes",    path:"/operations/assets/qr",          color:"#FB923C"},
+  {icon:"🔧",label:"New Work Order",    path:"/operations/work-orders/new",   color:"#B07A2A"},
+  {icon:"🎫",label:"Service Request",   path:"/operations/service-requests",   color:"#5B7C8C"},
+  {icon:"📋",label:"Dispatch Board",    path:"/operations/dispatch",            color:"#8D7443"},
+  {icon:"📦",label:"Purchase Orders",   path:"/supply-chain/purchase-orders-v2",color:"#B07A2A"},
+  {icon:"📄",label:"Invoices",          path:"/supply-chain/invoices",          color:"#547C4D"},
+  {icon:"📱",label:"Asset QR Codes",    path:"/operations/assets/qr",          color:"#B07A2A"},
 ];
 
 export default function WorkspacePage() {
@@ -98,14 +98,14 @@ export default function WorkspacePage() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const today = new Date().toLocaleDateString("en-GB", {weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
-  const PC = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
-  const SC = {open:"#60A5FA",in_progress:"#FBBF24",completed:"#34D399"};
+  const PC = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
+  const SC = {open:"#5B7C8C",in_progress:"#B07A2A",completed:"#547C4D"};
 
   return (
     <div className="min-h-screen bg-base">
 
       {/* ── HERO ───────────────────────────────────────────────────────── */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0A0F1E 0%,#0D1A2A 40%,#0F1A10 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="mb-6">
             <div className="text-label-upper text-emerald-400 mb-1">Triangle Black Engineering Services</div>
@@ -116,10 +116,10 @@ export default function WorkspacePage() {
           {/* Live KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Open Work Orders",  value:ops.open_count||0,    sub:`${ops.critical_open||0} critical`,   color:"#60A5FA",  path:"/operations/work-orders"},
-              {label:"Outstanding",        value:fmtEGP(invTotals.total_outstanding||0), sub:"invoices payable", color:"#FBBF24",  path:"/supply-chain/invoices"},
-              {label:"Pending Approvals",  value:ops.overdue||0,       sub:"action required",  color:alerts.total_alerts>0?"#F87171":"#34D399", path:"/supply-chain/approvals-center"},
-              {label:"Platform Alerts",    value:alerts.total_alerts||0,sub:`${unreadCount} notifications`,color:alerts.total_alerts>0?"#F87171":"#34D399",path:"/notifications"},
+              {label:"Open Work Orders",  value:ops.open_count||0,    sub:`${ops.critical_open||0} critical`,   color:"#5B7C8C",  path:"/operations/work-orders"},
+              {label:"Outstanding",        value:fmtEGP(invTotals.total_outstanding||0), sub:"invoices payable", color:"#B07A2A",  path:"/supply-chain/invoices"},
+              {label:"Pending Approvals",  value:ops.overdue||0,       sub:"action required",  color:alerts.total_alerts>0?"#A84A3D":"#547C4D", path:"/supply-chain/approvals-center"},
+              {label:"Platform Alerts",    value:alerts.total_alerts||0,sub:`${unreadCount} notifications`,color:alerts.total_alerts>0?"#A84A3D":"#547C4D",path:"/notifications"},
             ].map((k,i)=>(
               <button key={i} onClick={()=>router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.4rem"}}>{k.value}</div>
@@ -196,8 +196,8 @@ export default function WorkspacePage() {
             ) : (
               <div className="space-y-2">
                 {recentWOs.map((wo,i)=>{
-                  const pc = PC[wo.priority]||"#94A3B8";
-                  const sc = SC[wo.status]||"#94A3B8";
+                  const pc = PC[wo.priority]||"#6D5F53";
+                  const sc = SC[wo.status]||"#6D5F53";
                   return (
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)}
                       className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left">
@@ -235,7 +235,7 @@ export default function WorkspacePage() {
             ) : (
               <div className="space-y-2">
                 {recentNotifs.map((notif,i)=>{
-                  const typeColor = notif.type==="alert"?"#F87171":notif.type==="warning"?"#FBBF24":notif.type==="success"?"#34D399":"#60A5FA";
+                  const typeColor = notif.type==="alert"?"#A84A3D":notif.type==="warning"?"#B07A2A":notif.type==="success"?"#547C4D":"#5B7C8C";
                   const typeIcon = notif.type==="alert"?"🚨":notif.type==="warning"?"⚠️":notif.type==="success"?"✅":"ℹ️";
                   return (
                     <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-base-alt"

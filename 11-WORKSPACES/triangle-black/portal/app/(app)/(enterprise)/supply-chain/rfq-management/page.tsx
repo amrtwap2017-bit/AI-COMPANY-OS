@@ -6,7 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const SC = {draft:"#94A3B8",sent:"#60A5FA",responses_received:"#FBBF24",evaluated:"#A78BFA",awarded:"#34D399",cancelled:"#F87171"};
+const SC = {draft:"#6D5F53",sent:"#5B7C8C",responses_received:"#B07A2A",evaluated:"#8D7443",awarded:"#547C4D",cancelled:"#A84A3D"};
 export default function RFQManagementPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -32,9 +32,9 @@ export default function RFQManagementPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total",value:rfqs.length,color:"#F1F5F9"},
-              {label:"Active",value:rfqs.filter(r=>r.status==="sent").length,color:"#60A5FA"},
-              {label:"With Quotes",value:rfqs.filter(r=>r.status==="responses_received").length,color:"#FBBF24"},
-              {label:"Awarded",value:rfqs.filter(r=>r.status==="awarded").length,color:"#34D399"},
+              {label:"Active",value:rfqs.filter(r=>r.status==="sent").length,color:"#5B7C8C"},
+              {label:"With Quotes",value:rfqs.filter(r=>r.status==="responses_received").length,color:"#B07A2A"},
+              {label:"Awarded",value:rfqs.filter(r=>r.status==="awarded").length,color:"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -61,7 +61,7 @@ export default function RFQManagementPage() {
           ) : (
             <div className="space-y-2">
               {filtered.map((r,i)=>{
-                const sc = SC[r.status]||"#94A3B8";
+                const sc = SC[r.status]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/supply-chain/rfq-management/"+r.id)} className="w-full flex items-center gap-4 p-4 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
                     <div className="flex-1 min-w-0">

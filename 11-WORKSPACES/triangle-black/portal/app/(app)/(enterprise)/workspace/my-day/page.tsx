@@ -49,7 +49,7 @@ export default function MyDayPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0A0F1E 0%,#1A0A20 50%,#0A1520 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="mb-4">
             <div className="text-label-upper text-purple-400 mb-1">My Day</div>

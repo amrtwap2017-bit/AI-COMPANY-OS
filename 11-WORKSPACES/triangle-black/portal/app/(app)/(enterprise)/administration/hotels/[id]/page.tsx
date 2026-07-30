@@ -10,8 +10,8 @@ export default function HotelDetailPage() {
   const params = useParams();
   const id = params?.id as string;
   const { data: siteRaw, isLoading } = useQuery(["hotel-d", id], () => authFetch("/api/v1/sites-portal").then(r=>r.json()));
-  const { data: assetRaw } = useQuery(["hotel-d-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()));
-  const { data: ctRaw } = useQuery(["hotel-d-cts"], () => authFetch("/api/v1/contracts-portal").then(r=>r.json()));
+  const { data: assetRaw } = useQuery(["hotel-d-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
+  const { data: ctRaw } = useQuery(["hotel-d-cts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
   const sites = toArr(siteRaw); const assets = toArr(assetRaw); const contracts = toArr(ctRaw);
   const site = sites.find(s=>s.id===id)||sites[0];
   const siteAssets = assets.filter(a=>a.site_id===(site?.id||id));
@@ -24,7 +24,7 @@ export default function HotelDetailPage() {
   );
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B2E 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>

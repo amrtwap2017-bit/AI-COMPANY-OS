@@ -25,7 +25,7 @@ export default function AssetTreePage() {
 
   const { data: assetRaw, isLoading } = useQuery(
     ["tree-assets"],
-    () => authFetch("/api/v1/assets-portal").then(r => r.json()),
+    () => authFetch("/api/v1/assets/").then(r => r.json()),
     { refetchInterval: 60000 }
   );
   const { data: woRaw } = useQuery(["tree-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));

@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function IntegrationEntitiesPage() {
   const router = useRouter();
-  const { data: assetRaw } = useQuery(["ie-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()));
+  const { data: assetRaw } = useQuery(["ie-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
   const { data: woRaw }    = useQuery(["ie-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const { data: contRaw }  = useQuery(["ie-conts"],  () => authFetch("/api/v1/contracts/").then(r=>r.json()));
   const assets = toArr(assetRaw); const wos = toArr(woRaw); const contracts = toArr(contRaw);
   const entities = [
-    {name:"Assets",       count:assets.length,     api:"/api/v1/assets-portal",           icon:"⚙️",  path:"/maintenance/assets"},
+    {name:"Assets",       count:assets.length,     api:"/api/v1/assets/",           icon:"⚙️",  path:"/maintenance/assets"},
     {name:"Work Orders",  count:wos.length,         api:"/api/v1/work-orders/",      icon:"🔧", path:"/operations/work-orders"},
     {name:"Contracts",    count:contracts.length,   api:"/api/v1/contracts/",        icon:"📄", path:"/commercial/contracts"},
     {name:"Leads",        count:null,               api:"/api/v1/leads/",            icon:"👤", path:"/commercial/leads"},
@@ -22,7 +22,7 @@ export default function IntegrationEntitiesPage() {
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B2E 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Integration</div>
           <h1 className="tb-hero-title">Entity Catalog</h1>

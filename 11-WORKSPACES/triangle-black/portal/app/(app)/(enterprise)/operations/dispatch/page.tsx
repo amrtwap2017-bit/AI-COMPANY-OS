@@ -12,17 +12,17 @@ const fmtDate = (d) => {
 };
 const isOverdue = (d) => d && new Date(d) < new Date() && new Date(d).getFullYear() > 1990;
 
-const PRIORITY_COLORS = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
+const PRIORITY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
 const STATUS_CONFIG = {
-  open:        {label:"Open",        color:"#60A5FA", bg:"#1E3A5F"},
-  in_progress: {label:"In Progress", color:"#FBBF24", bg:"#3A2F0E"},
-  completed:   {label:"Completed",   color:"#34D399", bg:"#0D2A1E"},
+  open:        {label:"Open",        color:"#5B7C8C", bg:"#1E3A5F"},
+  in_progress: {label:"In Progress", color:"#B07A2A", bg:"#3A2F0E"},
+  completed:   {label:"Completed",   color:"#547C4D", bg:"#0D2A1E"},
 };
 const COLUMNS = ["open","in_progress","completed"];
 
 function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
   const [showAssign, setShowAssign] = useState(false);
-  const pc = PRIORITY_COLORS[wo.priority] || "#94A3B8";
+  const pc = PRIORITY_COLORS[wo.priority] || "#6D5F53";
   const overdue = isOverdue(wo.due_date);
   return (
     <div className="rounded-xl border border-border transition-all hover:border-brand/40 cursor-pointer"
@@ -39,7 +39,7 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
           <span className="text-xs text-tertiary">⚙️ {wo.type}</span>
         </div>
         <div className="flex items-center justify-between mt-2">
-          <div className="text-xs" style={{color:overdue?"#F87171":"#64748B"}}>
+          <div className="text-xs" style={{color:overdue?"#A84A3D":"#64748B"}}>
             {overdue ? "⚠ Overdue: " : "Due: "}{fmtDate(wo.due_date)}
           </div>
           {wo.technician_name && (
@@ -60,7 +60,7 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
         {wo.status !== "completed" && (
           <button onClick={(e)=>{e.stopPropagation();onStatus(wo.id, wo.status==="open"?"in_progress":"completed");}}
             className="text-xs px-2 py-0.5 rounded-lg transition-colors"
-            style={{background:wo.status==="open"?"#FBBF2420":"#34D39920",color:wo.status==="open"?"#FBBF24":"#34D399"}}>
+            style={{background:wo.status==="open"?"#FBBF2420":"#34D39920",color:wo.status==="open"?"#B07A2A":"#547C4D"}}>
             {wo.status==="open"?"▶ Start":"✓ Done"}
           </button>
         )}
@@ -135,10 +135,10 @@ export default function DispatchBoardPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              {label:"Open",value:totalOpen,color:"#60A5FA"},
-              {label:"In Progress",value:totalIP,color:"#FBBF24"},
-              {label:"Completed",value:counts.completed||0,color:"#34D399"},
-              {label:"Critical",value:critical,color:critical>0?"#F87171":"#34D399"},
+              {label:"Open",value:totalOpen,color:"#5B7C8C"},
+              {label:"In Progress",value:totalIP,color:"#B07A2A"},
+              {label:"Completed",value:counts.completed||0,color:"#547C4D"},
+              {label:"Critical",value:critical,color:critical>0?"#A84A3D":"#547C4D"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>

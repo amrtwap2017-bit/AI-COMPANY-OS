@@ -22,7 +22,7 @@ export default function StockLevelsPage() {
   const filtered = filter==="all" ? enriched : filter==="low" ? lowStock : enriched.filter(s=>!s.is_low);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain</div>
           <h1 className="tb-hero-title">Stock Levels</h1>

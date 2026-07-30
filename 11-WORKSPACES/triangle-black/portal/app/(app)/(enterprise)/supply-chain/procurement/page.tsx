@@ -26,7 +26,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/scope-of-work",
       desc: "BOQ and cost estimates",
       count: null,
-      color: "#60A5FA",
+      color: "#5B7C8C",
     },
     {
       label: "Suppliers",
@@ -34,7 +34,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/suppliers",
       desc: "Approved supplier list",
       count: null,
-      color: "#34D399",
+      color: "#547C4D",
     },
     {
       label: "Purchase Requests",
@@ -42,7 +42,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/purchase-requests",
       desc: "Internal purchase requests",
       count: pr.total || 0,
-      color: "#60A5FA",
+      color: "#5B7C8C",
     },
     {
       label: "RFQs",
@@ -50,7 +50,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/rfqs",
       desc: "Request for quotations",
       count: rfq.open || 0,
-      color: "#A78BFA",
+      color: "#8D7443",
     },
     {
       label: "Purchase Orders",
@@ -58,7 +58,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/purchase-orders",
       desc: "Approved purchase orders",
       count: po.total || 0,
-      color: "#F97316",
+      color: "#B07A2A",
     },
     {
       label: "Goods Receipts",
@@ -66,7 +66,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/goods-receipts",
       desc: "Receive and inspect deliveries",
       count: null,
-      color: "#34D399",
+      color: "#547C4D",
     },
     {
       label: "Inventory",
@@ -74,7 +74,7 @@ export default function ProcurementHub() {
       path: "/supply-chain/inventory",
       desc: "Stock levels and items",
       count: null,
-      color: "#FBBF24",
+      color: "#B07A2A",
     },
     {
       label: "Analytics",
@@ -82,22 +82,22 @@ export default function ProcurementHub() {
       path: "/supply-chain/spend",
       desc: "Spend analytics and KPIs",
       count: null,
-      color: "#94A3B8",
+      color: "#6D5F53",
     },
   ];
 
   const kpis = [
-    { label: "Open PRs", value: pr.pending_approval || 0, color: "#60A5FA" },
-    { label: "Active POs", value: po.total || 0, color: "#F97316" },
-    { label: "Total Spend", value: fmtEGP(po.total_spend || 0), color: "#34D399" },
-    { label: "Open RFQs", value: rfq.open || 0, color: "#A78BFA" },
+    { label: "Open PRs", value: pr.pending_approval || 0, color: "#5B7C8C" },
+    { label: "Active POs", value: po.total || 0, color: "#B07A2A" },
+    { label: "Total Spend", value: fmtEGP(po.total_spend || 0), color: "#547C4D" },
+    { label: "Open RFQs", value: rfq.open || 0, color: "#8D7443" },
   ];
 
   return (
     <div className="min-h-screen bg-base">
       <div
         className="tb-hero"
-        style={{ background: "linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)" }}
+        
       >
         <div className="tb-hero-inner">
           <div className="text-label-upper text-emerald-400 mb-1.5">Supply Chain</div>
@@ -198,7 +198,7 @@ export default function ProcurementHub() {
                   step !== "→"
                     ? {
                         background: "rgba(255,255,255,0.05)",
-                        color: "#94A3B8",
+                        color: "#6D5F53",
                         padding: "4px 8px",
                       }
                     : {}

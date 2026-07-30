@@ -44,7 +44,7 @@ export default function PurchaseRequestDetailPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>

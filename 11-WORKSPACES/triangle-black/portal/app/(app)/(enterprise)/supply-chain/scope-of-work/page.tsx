@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#34D399",rejected:"#F87171",sent_to_client:"#A78BFA"};
+const SC = {draft:"#6D5F53",pending_approval:"#B07A2A",approved:"#547C4D",rejected:"#A84A3D",sent_to_client:"#8D7443"};
 const handleExport = (url: string) => {
     const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
     const a = document.createElement("a");
@@ -30,7 +30,7 @@ export default function ScopeOfWorkPage() {
   const filtered = filter==="all" ? sows : sows.filter(s=>s.status===filter);
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0D1A12 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
@@ -42,7 +42,7 @@ export default function ScopeOfWorkPage() {
                 <button onClick={()=>handleExport("/api/v1/export/scope-of-work")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>⬇ Export CSV</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:sows.length,color:"#F1F5F9"},{label:"Draft",value:sows.filter(s=>s.status==="draft").length,color:"#94A3B8"},{label:"Pending",value:sows.filter(s=>s.status==="pending_approval").length,color:"#FBBF24"},{label:"Approved",value:sows.filter(s=>s.status==="approved").length,color:"#34D399"}].map((k,i)=>(
+            {[{label:"Total",value:sows.length,color:"#F1F5F9"},{label:"Draft",value:sows.filter(s=>s.status==="draft").length,color:"#6D5F53"},{label:"Pending",value:sows.filter(s=>s.status==="pending_approval").length,color:"#B07A2A"},{label:"Approved",value:sows.filter(s=>s.status==="approved").length,color:"#547C4D"}].map((k,i)=>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -72,7 +72,7 @@ export default function ScopeOfWorkPage() {
                 ))}
               </div>
               {filtered.map((s,i)=>{
-                const sc=SC[s.status]||"#94A3B8";
+                const sc=SC[s.status]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/supply-chain/scope-of-work/"+s.id)} className="tb-table-row" style={{gridTemplateColumns:"1fr 90px 100px 120px 110px 100px"}}>
                     <div className="min-w-0 pr-4"><div className="text-sm font-semibold text-primary truncate">{s.title}</div><div className="text-xs text-tertiary">{s.sow_number||"—"}</div></div>

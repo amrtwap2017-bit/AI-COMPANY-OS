@@ -20,7 +20,7 @@ export default function AdministrationPage() {
   ];
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0E1B2E 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Administration</h1>

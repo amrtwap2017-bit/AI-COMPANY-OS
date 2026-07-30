@@ -7,7 +7,7 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function GraphPage() {
   const router = useRouter();
   const { data: twin }    = useQuery(["graph-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: assetRaw} = useQuery(["graph-assets"], () => authFetch("/api/v1/assets-portal").then(r=>r.json()));
+  const { data: assetRaw} = useQuery(["graph-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
   const { data: woRaw }   = useQuery(["graph-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const assets = toArr(assetRaw); const wos = toArr(woRaw);
   const score = twin?.health_score||0;

@@ -52,9 +52,9 @@ export default function VendorManagementPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {label:"Total",value:vendors.length,color:"#F1F5F9"},
-              {label:"Approved",value:vendors.filter(v=>v.is_approved).length,color:"#34D399"},
-              {label:"Categories",value:cats.length,color:"#60A5FA"},
-              {label:"Avg Rating",value:vendors.length>0?(vendors.reduce((s,v)=>s+(v.rating||0),0)/vendors.length).toFixed(1):0,color:"#FBBF24"},
+              {label:"Approved",value:vendors.filter(v=>v.is_approved).length,color:"#547C4D"},
+              {label:"Categories",value:cats.length,color:"#5B7C8C"},
+              {label:"Avg Rating",value:vendors.length>0?(vendors.reduce((s,v)=>s+(v.rating||0),0)/vendors.length).toFixed(1):0,color:"#B07A2A"},
             ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -88,10 +88,10 @@ export default function VendorManagementPage() {
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold text-primary truncate">{v.company_name}</div>
                       <div className="text-xs text-tertiary">{v.category} · {v.city||"—"}</div>
-                      <div className="text-xs" style={{color:"#FBBF24"}}>{STARS(v.rating)} {Number(v.rating||0).toFixed(1)}</div>
+                      <div className="text-xs" style={{color:"#B07A2A"}}>{STARS(v.rating)} {Number(v.rating||0).toFixed(1)}</div>
                     </div>
                     <div className="flex-shrink-0 text-right">
-                      <span className="tb-badge" style={{background:v.is_approved?"#34D39918":"#94A3B818",color:v.is_approved?"#34D399":"#94A3B8",fontSize:"0.5rem"}}>
+                      <span className="tb-badge" style={{background:v.is_approved?"#34D39918":"#94A3B818",color:v.is_approved?"#547C4D":"#6D5F53",fontSize:"0.5rem"}}>
                         {v.is_approved?"Approved":"Pending"}
                       </span>
                       <div className="text-xs text-tertiary mt-1">{v.vendor_code}</div>

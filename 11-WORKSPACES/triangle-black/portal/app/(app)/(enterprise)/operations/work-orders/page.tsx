@@ -25,8 +25,8 @@ const fmtDateTime = (d) => {
   } catch { return "—"; }
 };
 
-const P_COLOR = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"rgba(148,163,184,0.5)" };
-const S_COLOR  = { open:"#60A5FA", in_progress:"#FBBF24", completed:"#34D399", cancelled:"rgba(148,163,184,0.4)" };
+const P_COLOR = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"rgba(148,163,184,0.5)" };
+const S_COLOR  = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D", cancelled:"rgba(148,163,184,0.4)" };
 
 const woFields = [
   { key:"title",         label:"Title",            type:"text",     required:true,  placeholder:"e.g. HVAC Filter Replacement" },
@@ -107,11 +107,11 @@ export default function WorkOrdersPage() {
           <div className="tb-grid-6 mt-6">
             {[
               {label:"Total",      value:wos.length,       color:"rgba(148,163,184,0.9)", f:"all",         pf:"all"},
-              {label:"Open",       value:open.length,      color:"#60A5FA",               f:"open",        pf:"all"},
-              {label:"In Progress",value:inProgress.length,color:"#FBBF24",               f:"in_progress", pf:"all"},
-              {label:"Completed",  value:completed.length, color:"#34D399",               f:"completed",   pf:"all"},
-              {label:"Critical",   value:critical.length,  color:critical.length>0?"#F87171":"#34D399", f:"all",pf:"critical"},
-              {label:"Overdue",    value:overdue.length,   color:overdue.length>0?"#F87171":"#34D399",  f:"all",pf:"all"},
+              {label:"Open",       value:open.length,      color:"#5B7C8C",               f:"open",        pf:"all"},
+              {label:"In Progress",value:inProgress.length,color:"#B07A2A",               f:"in_progress", pf:"all"},
+              {label:"Completed",  value:completed.length, color:"#547C4D",               f:"completed",   pf:"all"},
+              {label:"Critical",   value:critical.length,  color:critical.length>0?"#A84A3D":"#547C4D", f:"all",pf:"critical"},
+              {label:"Overdue",    value:overdue.length,   color:overdue.length>0?"#A84A3D":"#547C4D",  f:"all",pf:"all"},
             ].map((k,i)=>{
               const active=statusF===k.f&&priorityF===k.pf;
               return (
@@ -137,7 +137,7 @@ export default function WorkOrdersPage() {
             <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
               {critical.length} Critical Work Orders Need Immediate Action — {critical.slice(0,2).map(w=>w.title).join(" · ")}
             </div>
-            <button onClick={()=>setPriorityF("critical")} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
+            <button onClick={()=>setPriorityF("critical")} className="tb-ai-insight-action" style={{color:"#A84A3D",borderColor:"rgba(239,68,68,0.3)"}}>
               Show Critical
             </button>
           </div>

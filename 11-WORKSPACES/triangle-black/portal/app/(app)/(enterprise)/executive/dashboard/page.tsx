@@ -85,7 +85,7 @@ export default function ExecutiveDashboardPage() {
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#0A0F1E 0%,#0D1A2A 50%,#0A1520 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between mb-4">
             <div>
