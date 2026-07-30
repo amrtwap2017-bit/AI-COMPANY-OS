@@ -40,7 +40,7 @@ export default function ContractsPage() {
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{ background: "linear-gradient(135deg, #221D1A 0%, #221D1A 100%)" }}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-6">
             <div>
