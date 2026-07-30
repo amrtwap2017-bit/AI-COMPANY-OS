@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
 
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
@@ -60,7 +62,7 @@ export default function CommercialInvoicesPage() {
               <div key={i} style={{fontSize:"0.5625rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.07em",color:"var(--color-text-3)",textAlign:i>0?"center":"left"}}>{h}</div>
             ))}
           </div>
-          {isLoading ? [1,2,3].map(i=><div key={i} style={{height:52,background:"var(--color-bg-alt)",margin:"4px 0",opacity:0.5}}/>)
+          {isLoading ? <TableSkeleton rows={3} />
           : filtered.length===0 ? (
             <div style={{padding:"48px",textAlign:"center",color:"var(--color-text-3)"}}>No invoices found</div>
           ) : filtered.map((inv,i)=>{

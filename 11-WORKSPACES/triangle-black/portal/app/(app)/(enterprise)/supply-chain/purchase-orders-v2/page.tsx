@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -78,7 +80,7 @@ export default function PurchaseOrdersV2Page() {
             <div className="text-sm font-bold text-emerald-400">{fmtEGP(totalValue)}</div>
           </div>
           {isLoading ? (
-            <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+            <div className="space-y-3">{<TableSkeleton rows={3} />}</div>
           ) : filtered.length===0 ? (
             <div className="tb-empty"><div className="tb-empty-icon">📦</div><div className="tb-empty-title">No purchase orders</div></div>
           ) : (

@@ -4,6 +4,7 @@ import DocumentsPanel from "@/components/documents/DocumentsPanel";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { toast } from "@/lib/toast";
 import { useRouter, useParams } from "next/navigation";
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -26,7 +27,7 @@ export default function POv2DetailPage() {
       method:"PATCH", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ status, approved_by: status==="approved"?"amr@triangleblack.com":undefined })
     }).then(r=>r.json()),
-    { onSuccess: () => qc.invalidateQueries(["po-v2-detail", id]) }
+    { onSuccess: () => { toast.success("Purchase order updated"); qc.invalidateQueries(["po-v2-detail", id]); } }
   );
   const addLineMut = useMutation(
     (line) => authFetch(`/api/v1/purchase-orders-v2/${id}/line-items`, {

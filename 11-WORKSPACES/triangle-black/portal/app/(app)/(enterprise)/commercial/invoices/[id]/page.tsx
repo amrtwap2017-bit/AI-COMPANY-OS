@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { toast } from "@/lib/toast";
 import { useRouter, useParams } from "next/navigation";
 
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
@@ -19,11 +20,11 @@ export default function InvoiceDetailPage() {
   );
   const approve = useMutation({
     mutationFn: () => authFetch(`/api/v1/supplier-invoices/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"approve"})}).then(r=>r.json()),
-    onSuccess: () => window.location.reload(),
+    onSuccess: () => { toast.success('Invoice approved'); window.location.reload(); },
   });
   const pay = useMutation({
     mutationFn: () => authFetch(`/api/v1/supplier-invoices/${id}/pay`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount:inv?.total_amount,payment_method:"bank_transfer"})}).then(r=>r.json()),
-    onSuccess: () => window.location.reload(),
+    onSuccess: () => { toast.success('Payment recorded'); window.location.reload(); },
   });
 
   if (isLoading) return <div style={{minHeight:"100vh",background:"var(--color-bg)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--color-text-3)"}}>Loading invoice...</div>;

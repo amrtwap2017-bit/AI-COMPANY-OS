@@ -1,9 +1,8 @@
-"use client"; // @ts-nocheck
-/**
- * Providers - React Query v4 compatible
- */
+"use client";
+// @ts-nocheck
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -35,6 +34,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text-1)",
+            borderRadius: "12px",
+            fontFamily: "var(--font-sans)",
+            fontSize: "0.875rem",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+          },
+          className: "tbdl-toast",
+        }}
+        richColors
+      />
     </QueryClientProvider>
   );
 }

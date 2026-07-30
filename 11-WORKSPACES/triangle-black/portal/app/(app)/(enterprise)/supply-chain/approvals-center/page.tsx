@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -23,7 +24,7 @@ export default function ApprovalsCenterPage() {
       method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({approved_by:"amr@triangleblack.com"})
     }).then(r=>r.json()),
-    { onSuccess: () => qc.invalidateQueries(["approvals-list"]) }
+    { onSuccess: () => { toast.success("Approval recorded"); qc.invalidateQueries(["approvals-list"]); } }
   );
   return (
     <div className="min-h-screen bg-base">

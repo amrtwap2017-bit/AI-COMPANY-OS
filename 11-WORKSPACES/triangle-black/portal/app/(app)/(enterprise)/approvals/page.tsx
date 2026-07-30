@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 
 const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
@@ -32,7 +33,7 @@ export default function ApprovalsPage() {
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({approved_by:"amr@triangleblack.com"})
     }).then(r=>r.json()),
-    onSuccess: () => qc.invalidateQueries(["approvals-all"]),
+    onSuccess: () => { toast.success("Approval recorded successfully"); qc.invalidateQueries(["approvals-all"]); },
   });
 
   return (
