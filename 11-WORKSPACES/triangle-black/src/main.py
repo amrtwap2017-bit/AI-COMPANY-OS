@@ -3808,6 +3808,7 @@ def get_lead_portal_v2(lead_id: str):
 # ── SPRINT 251: UNIVERSAL DELETE ENDPOINTS ────────────────────────────────────
 
 @app.delete("/api/v1/work-orders/{wo_id}", tags=["operations"])
+@app.delete("/api/v1/work-orders-v2/{wo_id}", tags=["operations"])
 def delete_work_order(wo_id: str):
     import os
     from sqlalchemy import text, create_engine

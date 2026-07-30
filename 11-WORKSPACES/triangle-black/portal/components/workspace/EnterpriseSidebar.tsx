@@ -105,17 +105,16 @@ function NavItem({
         className={[
           "flex items-center gap-3 text-sm font-medium transition-all group relative",
           collapsed ? "px-0 py-2.5 justify-center rounded-xl" : "px-3 py-2 rounded-xl",
-          isActive
-            ? "text-white"
-            : "hover:text-white hover:bg-white/5",
+          isActive ? "text-white" : "hover:text-white hover:bg-white/5",
         ].join(" ")}
+        style={{color: isActive ? "#F3EFE8" : "#A89478"}}
       >
         {isActive && !collapsed && (
           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#B9924C"}} />
         )}
         <Icon className={[
           "w-4 h-4 flex-shrink-0",
-          isActive ? "text-amber-400" : color + " group-hover:text-white",
+          isActive ? "text-amber-400" : "group-hover:text-white",
         ].join(" ")} />
         {!collapsed && (
           <>
@@ -198,29 +197,41 @@ function NavAccordion({
 
   return (
     <div>
-      {/* Accordion header */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className={[
-          "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all group relative",
-          anyActive ? "text-white" : "hover:text-white",
-        ].join(" ")}
-      >
+      {/* Accordion header — label navigates, chevron toggles */}
+      <div className={[
+        "w-full flex items-center gap-0 rounded-xl text-sm font-medium transition-all group relative",
+        anyActive ? "text-white" : "",
+      ].join(" ")}>
         {anyActive && (
           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full" style={{background:"#B9924C"}} />
         )}
-        <Icon className={["w-4 h-4 flex-shrink-0", anyActive ? "text-amber-400" : color + " group-hover:text-white"].join(" ")} />
-        <span className="flex-1 text-left truncate">{center.shortLabel || center.label}</span>
-        {center.badge && (
-          <span className={"text-[10px] px-1.5 py-0.5 rounded-md font-bold flex-shrink-0 " + badgeClass(center.badge)}>
-            {center.badge}
-          </span>
-        )}
-        {open
-          ? <ChevronDown className="w-3 h-3 text-tertiary flex-shrink-0 ml-0.5" />
-          : <ChevronRight className="w-3 h-3 text-[#7A6A5C] flex-shrink-0 ml-0.5" />
-        }
-      </button>
+        <Link
+          href={center.href}
+          className={[
+            "flex items-center gap-3 flex-1 px-3 py-2 rounded-l-xl transition-all min-w-0",
+            anyActive ? "text-white" : "hover:text-white hover:bg-white/5",
+          ].join(" ")}
+          style={{color: anyActive ? "#F3EFE8" : "#A89478"}}
+        >
+          <Icon className="w-4 h-4 flex-shrink-0" style={{color: anyActive ? "#B9924C" : "#8C7A69"}} />
+          <span className="flex-1 text-left truncate">{center.shortLabel || center.label}</span>
+          {center.badge && (
+            <span className={"text-[10px] px-1.5 py-0.5 rounded-md font-bold flex-shrink-0 " + badgeClass(center.badge)}>
+              {center.badge}
+            </span>
+          )}
+        </Link>
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="px-2 py-2 hover:text-white transition-colors flex-shrink-0"
+          style={{color:"#6D5F53"}}
+        >
+          {open
+            ? <ChevronDown className="w-3 h-3" />
+            : <ChevronRight className="w-3 h-3" />
+          }
+        </button>
+      </div>
 
       {/* Sub-items */}
       {open && center.children && (
@@ -232,7 +243,7 @@ function NavAccordion({
                 key={child.href}
                 href={child.href}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all"
-                style={childActive ? {color:"#C9A84C",background:"rgba(201,168,76,0.08)",fontWeight:600} : {}}
+                style={childActive ? {color:"#B9924C",background:"rgba(185,146,76,0.08)",fontWeight:600} : {color:"#8C7A69"}}
               >
                 <span className="w-1 h-1 rounded-full flex-shrink-0" style={{background:childActive?"#C9A84C":"#475569"}} />
                 <span className="flex-1 truncate">{child.label}</span>
@@ -336,7 +347,7 @@ export function EnterpriseSidebar() {
               {/* Group label */}
               {!collapsed && (
                 <div className="pb-1 px-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{color:"#8C7A69"}}>
+                  <span style={{fontSize:"0.5625rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#6D5F53"}}>
                     {group.label}
                   </span>
                 </div>

@@ -33,12 +33,12 @@ export default function WorkOrderDetailPage() {
 
   const { data: wo, isLoading } = useQuery(
     ["wo-detail", id],
-    () => authFetch(`/api/v1/work-orders/${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/work-orders-v2/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 
   const deleteMut = useMutation(
-    () => authFetch(`/api/v1/work-orders/${id}`, { method: "DELETE" }),
+    () => authFetch(`/api/v1/work-orders-v2/${id}`, { method: "DELETE" }),
     { onSuccess: () => router.push("/operations/work-orders") }
   );
 
