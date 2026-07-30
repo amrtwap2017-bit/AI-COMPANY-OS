@@ -2,7 +2,8 @@
 // @ts-nocheck
 import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
@@ -31,6 +32,43 @@ export default function ServiceRequestsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [showCreateSR, setShowCreateSR] = useState(false);
+  const [newSR, setNewSR] = useState({title:"",category:"HVAC",urgency:"normal",description:"",submitted_by:"",site_id:""});
+  const [srErrors, setSrErrors] = useState<Record<string,string>>({});
+  const qc = useQueryClient();
+
+  const createSR = useMutation(
+    (payload) => authFetch("/api/v1/service-requests/", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    }).then(r=>r.json()),
+    {
+      onSuccess: (data) => {
+        if (data.id) {
+          toast.success("Service request created successfully");
+          setShowCreateSR(false);
+          setNewSR({title:"",category:"HVAC",urgency:"normal",description:"",submitted_by:"",site_id:""});
+          qc.invalidateQueries(["sr-list"]);
+        } else {
+          toast.error(data.detail || data.error || "Failed to create service request");
+        }
+      },
+      onError: () => toast.error("Connection error — please try again"),
+    }
+  );
+
+  const handleCreateSR = () => {
+    const errors: Record<string,string> = {};
+    if (!newSR.title?.trim()) errors.title = "Title is required";
+    if (!newSR.submitted_by?.trim()) errors.submitted_by = "Requester name is required";
+    if (Object.keys(errors).length > 0) { setSrErrors(errors); toast.error("Please fix the errors"); return; }
+    setSrErrors({});
+    createSR.mutate({
+      ...newSR,
+      hotel_id:"tb-default-hotel-000000000001",
+      status:"open",
+    });
+  };
 
   const { data: srRaw, isLoading } = useQuery(
     ["sr-list"],
@@ -66,7 +104,11 @@ export default function ServiceRequestsPage() {
               <h1 className="tb-hero-title">Service Requests</h1>
               <p className="tb-hero-description">{srs.length} total · {open} open · {linked} linked to work orders</p>
             </div>
-            <button onClick={() => router.push("/operations/work-orders")} className="tb-btn-primary">
+            <button onClick={() => setShowCreateSR(true)}
+                style={{background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"10px 18px",color:"#181614",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>
+                + New Service Request
+              </button>
+              <button onClick={() => router.push("/operations/work-orders")} className="tb-btn-primary">
               + New Work Order
             </button>
           </div>
@@ -223,6 +265,65 @@ export default function ServiceRequestsPage() {
           </div>
         </div>
       </div>
+      {/* Create SR Modal */}
+      {showCreateSR && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:16,padding:32,width:"100%",maxWidth:520,boxShadow:"0 20px 40px rgba(0,0,0,0.15)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>New Service Request</div>
+              <button onClick={()=>setShowCreateSR(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--color-text-3)",fontSize:"1.25rem"}}>×</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div>
+                <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Title *</label>
+                <input value={newSR.title} onChange={e=>setNewSR({...newSR,title:e.target.value})}
+                  placeholder="Describe the issue..."
+                  style={{width:"100%",background:"var(--color-bg-alt)",border:`1px solid ${srErrors.title?"#A84A3D":"var(--color-border)"}`,borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+                {srErrors.title&&<div style={{color:"#A84A3D",fontSize:"0.75rem",marginTop:2}}>{srErrors.title}</div>}
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Category</label>
+                  <select value={newSR.category} onChange={e=>setNewSR({...newSR,category:e.target.value})}
+                    style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}>
+                    {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Other"].map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Urgency</label>
+                  <select value={newSR.urgency} onChange={e=>setNewSR({...newSR,urgency:e.target.value})}
+                    style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}>
+                    {["emergency","critical","high","normal","low"].map(u=><option key={u} value={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Requested By *</label>
+                <input value={newSR.submitted_by} onChange={e=>setNewSR({...newSR,submitted_by:e.target.value})}
+                  placeholder="Name of requester..."
+                  style={{width:"100%",background:"var(--color-bg-alt)",border:`1px solid ${srErrors.submitted_by?"#A84A3D":"var(--color-border)"}`,borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+                {srErrors.submitted_by&&<div style={{color:"#A84A3D",fontSize:"0.75rem",marginTop:2}}>{srErrors.submitted_by}</div>}
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Description</label>
+                <textarea value={newSR.description} onChange={e=>setNewSR({...newSR,description:e.target.value})}
+                  placeholder="Additional details..." rows={3}
+                  style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none",resize:"vertical"}}/>
+              </div>
+              <div style={{display:"flex",gap:8,marginTop:4}}>
+                <button onClick={handleCreateSR} disabled={createSR.isLoading}
+                  style={{flex:1,background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"12px",color:"#181614",fontSize:"0.9375rem",fontWeight:700,cursor:"pointer"}}>
+                  {createSR.isLoading ? "Creating..." : "Create Service Request"}
+                </button>
+                <button onClick={()=>setShowCreateSR(false)}
+                  style={{flex:0,background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"12px 20px",color:"var(--color-text-2)",cursor:"pointer"}}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

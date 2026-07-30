@@ -6915,3 +6915,29 @@ def _audit(db, entity_type, entity_id, action, request=None, old_value=None, new
     except Exception:
         try: db.rollback()
         except: pass
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 298 — AUTO NOTIFICATION TRIGGER
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT_298_AUTO_NOTIF
+
+def _notify(db, title: str, message: str, notif_type: str = "info", entity_type: str = None, entity_id: str = None):
+    """Auto-generate platform notification. Never raises."""
+    try:
+        import uuid
+        from sqlalchemy import text as _nt
+        db.execute(_nt("""
+            INSERT INTO notifications (id, hotel_id, type, title, message, entity_type, entity_id, is_read, created_at)
+            VALUES (:id, 'tb-default-hotel-000000000001', :type, :title, :message, :etype, :eid, false, NOW())
+        """), {
+            "id": str(uuid.uuid4()),
+            "type": notif_type,
+            "title": title[:200],
+            "message": message[:500],
+            "etype": entity_type,
+            "eid": entity_id,
+        })
+        db.commit()
+    except Exception:
+        try: db.rollback()
+        except: pass

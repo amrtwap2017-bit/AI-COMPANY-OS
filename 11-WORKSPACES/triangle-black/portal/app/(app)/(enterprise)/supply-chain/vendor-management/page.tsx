@@ -1,7 +1,8 @@
 "use client";
 // @ts-nocheck
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -26,6 +27,39 @@ export default function VendorManagementPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("all");
+  const [showNewVendor, setShowNewVendor] = useState(false);
+  const [newV, setNewV] = useState({company_name:"",category:"General",contact_person:"",email:"",phone:"",city:"Cairo"});
+  const [vErrors, setVErrors] = useState<Record<string,string>>({});
+  const qc = useQueryClient();
+
+  const createVendor = useMutation(
+    (payload) => authFetch("/api/v1/vendors/", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    }).then(r=>r.json()),
+    {
+      onSuccess: (data) => {
+        if (data.id) {
+          toast.success("Vendor created successfully");
+          setShowNewVendor(false);
+          setNewV({company_name:"",category:"General",contact_person:"",email:"",phone:"",city:"Cairo"});
+          qc.invalidateQueries(["vendors-list"]);
+        } else {
+          toast.error(data.detail || data.error || "Failed to create vendor");
+        }
+      },
+      onError: () => toast.error("Connection error"),
+    }
+  );
+
+  const handleCreateVendor = () => {
+    const errors: Record<string,string> = {};
+    if (!newV.company_name?.trim()) errors.company_name = "Company name is required";
+    if (Object.keys(errors).length > 0) { setVErrors(errors); return; }
+    setVErrors({});
+    const vendorCode = "VND-" + Date.now().toString().slice(-6);
+    createVendor.mutate({...newV, vendor_code: vendorCode, hotel_id:"tb-default-hotel-000000000001", is_approved:false, rating:0});
+  };
   const { data: raw, isLoading } = useQuery(
     ["vendors-list"],
     () => authFetch("/api/v1/vendors/").then(r=>r.json()),
@@ -49,6 +83,10 @@ export default function VendorManagementPage() {
               <p className="tb-hero-description">{vendors.length} vendors · {vendors.filter(v=>v.is_approved).length} approved</p>
             </div>
             <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn-secondary">← Back</button>
+                <button onClick={()=>setShowNewVendor(true)}
+                  style={{background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"10px 18px",color:"#181614",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>
+                  + New Vendor
+                </button>
                 <button onClick={()=>handleExport("/api/v1/export/vendors")} className="tb-btn-secondary" style={{fontSize:"0.75rem"}}>⬇ Export CSV</button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -110,6 +148,65 @@ export default function VendorManagementPage() {
           )}
         </div>
       </div>
+      {showNewVendor && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:16,padding:32,width:"100%",maxWidth:500,boxShadow:"0 20px 40px rgba(0,0,0,0.15)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Add New Vendor</div>
+              <button onClick={()=>setShowNewVendor(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--color-text-3)",fontSize:"1.25rem"}}>×</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div>
+                <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Company Name *</label>
+                <input value={newV.company_name} onChange={e=>setNewV({...newV,company_name:e.target.value})} placeholder="e.g. Arctic HVAC Systems"
+                  style={{width:"100%",background:"var(--color-bg-alt)",border:`1px solid ${vErrors.company_name?"#A84A3D":"var(--color-border)"}`,borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+                {vErrors.company_name&&<div style={{color:"#A84A3D",fontSize:"0.75rem",marginTop:2}}>{vErrors.company_name}</div>}
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Category</label>
+                  <select value={newV.category} onChange={e=>setNewV({...newV,category:e.target.value})}
+                    style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}>
+                    {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Elevator","Other"].map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>City</label>
+                  <input value={newV.city} onChange={e=>setNewV({...newV,city:e.target.value})} placeholder="Cairo"
+                    style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+                </div>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Contact Person</label>
+                <input value={newV.contact_person} onChange={e=>setNewV({...newV,contact_person:e.target.value})} placeholder="Full name"
+                  style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Email</label>
+                  <input value={newV.email} onChange={e=>setNewV({...newV,email:e.target.value})} placeholder="vendor@company.com" type="email"
+                    style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+                </div>
+                <div>
+                  <label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Phone</label>
+                  <input value={newV.phone} onChange={e=>setNewV({...newV,phone:e.target.value})} placeholder="+20-10-..."
+                    style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8,marginTop:4}}>
+                <button onClick={handleCreateVendor} disabled={createVendor.isLoading}
+                  style={{flex:1,background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"12px",color:"#181614",fontSize:"0.9375rem",fontWeight:700,cursor:"pointer"}}>
+                  {createVendor.isLoading ? "Adding..." : "Add Vendor"}
+                </button>
+                <button onClick={()=>setShowNewVendor(false)}
+                  style={{background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"12px 20px",color:"var(--color-text-2)",cursor:"pointer"}}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
