@@ -1485,6 +1485,7 @@ def create_work_order(body: dict):
               "title":f"Work Order Created: {body.get('title','New WO')}",
               "msg":f"Priority: {priority}","eid":wo_id,"now":now})
         db.commit()
+        _notify(db, f"New Work Order: {body.get('title','')}", f"Priority: {priority} — {body.get('title','')}", "info", "work_order", wo_id)
         return {"id":wo_id,"status":"open","priority":priority,"title":body.get("title"),"created_at":now.isoformat()}
 
 

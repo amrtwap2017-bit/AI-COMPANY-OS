@@ -87,6 +87,20 @@ export default function TechniciansPage() {
       </div>
 
       <div className="tb-canvas">
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+          <button onClick={()=>router.push("/operations/work-orders/new")}
+            style={{background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"8px 16px",color:"#181614",fontSize:"0.8125rem",fontWeight:700,cursor:"pointer"}}>
+            + New Work Order
+          </button>
+          <button onClick={()=>router.push("/operations/dispatch")}
+            style={{background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"8px 16px",color:"var(--color-text-2)",fontSize:"0.8125rem",fontWeight:600,cursor:"pointer"}}>
+            📋 Dispatch Board
+          </button>
+          <button onClick={()=>router.push("/operations/time-tracking")}
+            style={{background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"8px 16px",color:"var(--color-text-2)",fontSize:"0.8125rem",fontWeight:600,cursor:"pointer"}}>
+            ⏱ Time Tracking
+          </button>
+        </div>
         <div className="tb-flex-gap-3">
           <div className="tb-search" style={{flex:1,maxWidth:400}}>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search technicians..."
