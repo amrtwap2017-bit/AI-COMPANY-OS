@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function NewWorkOrderPage() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
+  const [errors, setErrors] = useState<Record<string,string>>({});
   const [form, setForm] = useState({
     title:"", description:"", type:"corrective", priority:"medium",
     technician_id:"", site_id:"", asset_id:"",
@@ -26,15 +28,39 @@ export default function NewWorkOrderPage() {
     (payload) => authFetch("/api/v1/work-orders/", {
       method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
     }).then(r=>r.json()),
-    { onSuccess: (data) => { if (data.id) router.push("/operations/work-orders/"+data.id); } }
+    {
+      onSuccess: (data) => {
+        if (data.id) {
+          toast.success("Work order created successfully");
+          router.push("/operations/work-orders/"+data.id);
+        } else {
+          toast.error(data.detail || data.error || "Failed to create work order");
+        }
+      },
+      onError: () => toast.error("Connection error — please try again"),
+    }
   );
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    const newErrors: Record<string,string> = {};
+    if (!form.title?.trim()) newErrors.title = "Title is required";
+    if (form.title?.trim().length < 5) newErrors.title = "Title must be at least 5 characters";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please fix the errors before submitting");
+      return;
+    }
+    setErrors({});
+    createMut.mutate({...form, hotel_id:"tb-default-hotel-000000000001"});
+  };
 
   const PRIORITY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
   const pc = PRIORITY_COLORS[form.priority] || "#6D5F53";
 
   return (
     <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
+      <div className="tb-hero" >
         <div className="tb-hero-inner">
           <div className="tb-flex-between gap-4 mb-4">
             <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn-secondary">← Work Orders</button>
@@ -53,7 +79,14 @@ export default function NewWorkOrderPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="text-xs text-tertiary block mb-1">Title *</label>
-              <input className="tb-input w-full" placeholder="e.g. Emergency HVAC Repair - Tower A" value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/>
+              <input
+                className="tb-input w-full"
+                placeholder="e.g. Emergency HVAC Repair - Tower A"
+                value={form.title}
+                onChange={e=>{ setForm({...form,title:e.target.value}); if(errors.title) setErrors({...errors,title:""}); }}
+                style={errors.title ? {borderColor:"#A84A3D"} : {}}
+              />
+              {errors.title && <div style={{color:"#A84A3D",fontSize:"0.75rem",marginTop:4}}>{errors.title}</div>}
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Type</label>

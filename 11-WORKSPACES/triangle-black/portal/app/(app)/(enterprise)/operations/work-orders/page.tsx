@@ -4,6 +4,7 @@ import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
+import { toast } from "@/lib/toast";
 import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
@@ -39,7 +40,23 @@ const woFields = [
 
 export default function WorkOrdersPage() {
   const router = useRouter();
-  const qc     = useQueryClient();
+  const qc = useQueryClient();
+  const [updatingId, setUpdatingId] = useState<string|null>(null);
+
+  const updateStatusMut = useMutation(
+    ({id, status}: {id:string, status:string}) =>
+      authFetch(`/api/v1/work-orders/${id}/status`, {
+        method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify({status})
+      }).then(r=>r.json()),
+    {
+      onSuccess: (data, vars) => {
+        toast.success(`Status updated to ${vars.status.replace(/_/g," ")}`);
+        qc.invalidateQueries(["work-orders-list"]);
+        setUpdatingId(null);
+      },
+      onError: () => { toast.error("Failed to update status"); setUpdatingId(null); },
+    }
+  );
   const [search,      setSearch]      = useState("");
   const [statusF,     setStatusF]     = useState("all");
   const [priorityF,   setPriorityF]   = useState("all");
@@ -200,6 +217,7 @@ export default function WorkOrdersPage() {
                 const isOverdue=w.due_date&&new Date(w.due_date)<now&&w.status!=="completed";
                 const pc=P_COLOR[w.priority]||"rgba(148,163,184,0.4)";
                 const sc=S_COLOR[w.status]||"rgba(148,163,184,0.4)";
+                const isUpdating = updatingId === w.id;
                 return (
                   <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
                     className={`tb-table-row ${isOverdue?"tb-table-row--danger":""}`}
