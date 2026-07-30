@@ -193,7 +193,7 @@ export function EnterpriseTopbar() {
                 {[{ icon: User, label: "My Profile" }, { icon: Settings, label: "Settings" }].map(item => (
                   <button
                     key={item.label}
-                    onClick={() => { setUserOpen(false); router.push(item.label === "My Profile" ? "/profile" : "/settings"); }}
+                    onClick={() => { setUserOpen(false); router.push(item.label === "My Profile" ? "/settings/profile" : "/settings/users"); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-base-alt transition-colors"
                   >
                     <item.icon className="w-4 h-4 text-tertiary" />

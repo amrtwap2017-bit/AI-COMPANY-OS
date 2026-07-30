@@ -1,228 +1,169 @@
 "use client";
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
-
-const STATUS_COLOR = {
-  active:"#34D399", expired:"#F87171", pending:"#FBBF24",
-  draft:"#94A3B8", cancelled:"#64748B", renewed:"#A78BFA"
+const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d) => {
+  if (!d) return "—";
+  try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); }
+  catch { return "—"; }
 };
-const INV_STATUS_COLOR = {
-  paid:"#34D399", pending:"#FBBF24", overdue:"#F87171", cancelled:"#94A3B8"
-};
+const SC = {active:"#547C4D",pending_signature:"#B07A2A",expired:"#A84A3D",draft:"#6D5F53"};
 
 export default function ContractDetailPage() {
   const router = useRouter();
-  const params = useParams();
-  const id     = params?.id as string;
+  const { id } = useParams();
 
-  const { data: ct, isLoading } = useQuery(
-    ["ct-detail", id],
-    () => authFetch(`/api/v1/contracts-portal${id}`).then(r => r.json()),
+  const { data: contract, isLoading } = useQuery(
+    ["contract-detail", id],
+    () => authFetch(`/api/v1/contracts/${id}`).then(r=>r.json()),
     { enabled: !!id }
   );
 
+  const activate = useMutation({
+    mutationFn: () => authFetch(`/api/v1/contracts/${id}/activate`, {method:"POST"}).then(r=>r.json()),
+    onSuccess: () => window.location.reload(),
+  });
+
   if (isLoading) return (
-    <div className="min-h-screen bg-base flex items-center justify-center">
-      <div className="text-secondary text-sm animate-pulse">Loading contract...</div>
+    <div style={{minHeight:"100vh",background:"var(--color-bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{color:"var(--color-text-3)",fontSize:"0.875rem"}}>Loading contract...</div>
     </div>
   );
 
-  if (!ct || ct.detail) return (
-    <div className="min-h-screen bg-base flex items-center justify-center">
-      <div className="tb-empty">
-        <div className="tb-empty-icon">📄</div>
-        <div className="tb-empty-title">Contract not found</div>
-        <button onClick={() => router.push("/commercial/contracts")} className="tb-btn-primary mt-4">Back</button>
-      </div>
+  if (!contract || contract.error || contract.detail) return (
+    <div style={{minHeight:"100vh",background:"var(--color-bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16}}>
+      <div style={{fontSize:"3rem"}}>📄</div>
+      <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>Contract not found</div>
+      <button onClick={()=>router.push("/commercial/contracts")} style={{background:"rgba(185,146,76,0.1)",border:"1px solid rgba(185,146,76,0.25)",borderRadius:8,padding:"10px 20px",color:"#B9924C",fontSize:"0.875rem",fontWeight:600,cursor:"pointer"}}>
+        ← Back to Contracts
+      </button>
     </div>
   );
 
-  const sc       = STATUS_COLOR[ct.status] || "#94A3B8";
-  const invoices = ct.invoices || [];
-  const wos      = ct.work_orders || [];
-  const totalInv = invoices.reduce((s,i) => s + Number(i.total_amount||0), 0);
-  const paidInv  = invoices.filter(i => i.status === "paid").reduce((s,i) => s + Number(i.total_amount||0), 0);
-  const now      = new Date();
-  const endDate  = ct.end_date ? new Date(ct.end_date) : null;
-  const daysLeft = endDate ? Math.ceil((endDate - now) / 86400000) : null;
+  const sc = SC[contract.status] || "#6D5F53";
 
   return (
-    <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #1A0F28 100%)"}}>
-        <div className="tb-hero-inner">
-          <div className="tb-flex-between gap-6">
+    <div style={{minHeight:"100vh",background:"var(--color-bg)"}}>
+      {/* Hero */}
+      <div style={{background:"linear-gradient(140deg, #2A231E 0%, #332C27 40%, #3D352F 100%)",borderBottom:"1px solid rgba(185,146,76,0.12)",padding:"32px"}}>
+        <div style={{maxWidth:1400,margin:"0 auto"}}>
+          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:24}}>
             <div>
-              <div className="text-label-upper text-purple-400 mb-1.5">Commercial</div>
-              <h1 className="tb-hero-title">{ct.title || `Contract ${id?.slice(0,8)}`}</h1>
-              <p className="tb-hero-description">
-                <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>
-                  {ct.status||"—"}
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <button onClick={()=>router.push("/commercial/contracts")} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:6,padding:"4px 10px",color:"rgba(243,239,232,0.7)",fontSize:"0.75rem",cursor:"pointer"}}>
+                  ← Contracts
+                </button>
+                <span style={{color:"rgba(255,255,255,0.2)"}}>›</span>
+                <span style={{color:"rgba(243,239,232,0.5)",fontSize:"0.75rem",maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{contract.title}</span>
+              </div>
+              <div style={{fontSize:"0.6875rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#B9924C",marginBottom:6}}>Contract</div>
+              <h1 style={{fontSize:"1.75rem",fontWeight:800,color:"#F3EFE8",letterSpacing:"-0.02em",margin:0,maxWidth:600}}>{contract.title}</h1>
+              <div style={{marginTop:8,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{background:`${sc}20`,color:sc,border:`1px solid ${sc}40`,borderRadius:20,padding:"3px 12px",fontSize:"0.6875rem",fontWeight:700,textTransform:"uppercase"}}>
+                  {(contract.status||"").replace(/_/g," ")}
                 </span>
-                {ct.client_name && <span className="text-secondary mr-2">{ct.client_name}</span>}
-                {daysLeft !== null && daysLeft > 0 && (
-                  <span style={{color:daysLeft<30?"#F87171":"#94A3B8"}}>
-                    {daysLeft}d remaining
-                  </span>
+                {contract.renewal_count > 0 && (
+                  <span style={{color:"rgba(178,159,139,0.7)",fontSize:"0.8125rem"}}>Renewal #{contract.renewal_count}</span>
                 )}
-              </p>
+              </div>
             </div>
-            <button onClick={() => router.push("/commercial/contracts")} className="tb-btn-secondary">← Back</button>
+            <div style={{display:"flex",gap:8,flexShrink:0}}>
+              {contract.status === "pending_signature" && (
+                <button onClick={()=>activate.mutate()} disabled={activate.isLoading}
+                  style={{background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"10px 20px",color:"#181614",fontSize:"0.875rem",fontWeight:700,cursor:"pointer"}}>
+                  {activate.isLoading ? "Activating..." : "✓ Activate Contract"}
+                </button>
+              )}
+            </div>
           </div>
-          <div className="tb-grid-4 mt-6">
+
+          {/* KPIs */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginTop:24}}>
             {[
-              { label:"Contract Value", value:fmtEGP(ct.total_value||ct.value||0), color:"#34D399" },
-              { label:"Invoiced",       value:fmtEGP(totalInv),                    color:"#FBBF24" },
-              { label:"Collected",      value:fmtEGP(paidInv),                     color:"#A78BFA" },
-              { label:"Expires",        value:fmtDate(ct.end_date),                color:daysLeft&&daysLeft<30?"#F87171":"#F1F5F9" },
-            ].map((k, i) => (
-              <div key={i} className="tb-hero-kpi">
-                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
-                <div className="tb-hero-kpi-label">{k.label}</div>
+              {label:"Contract Value",value:fmtEGP(contract.total_value),color:"#B9924C"},
+              {label:"Monthly Value",value:fmtEGP(contract.monthly_value),color:"#F3EFE8"},
+              {label:"Duration",value:`${contract.duration_months||"—"} months`,color:"#F3EFE8"},
+              {label:"Period",value:`${fmtDate(contract.start_date)} — ${fmtDate(contract.end_date)}`,color:"#F3EFE8"},
+            ].map((k,i)=>(
+              <div key={i} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(185,146,76,0.12)",borderRadius:10,padding:"12px"}}>
+                <div style={{fontSize:"1.125rem",fontWeight:800,color:k.color,letterSpacing:"-0.02em"}}>{k.value}</div>
+                <div style={{fontSize:"0.5625rem",color:"rgba(185,165,140,0.55)",textTransform:"uppercase",letterSpacing:"0.05em",marginTop:4}}>{k.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="tb-canvas">
-        {daysLeft !== null && daysLeft <= 30 && daysLeft > 0 && (
-          <div className="tb-section" style={{borderColor:"#FBBF2440",background:"#FBBF2408"}}>
-            <div className="flex items-center gap-3">
-              <span style={{fontSize:"1.25rem"}}>⏰</span>
-              <span className="text-sm font-semibold" style={{color:"#FBBF24"}}>
-                Contract expires in {daysLeft} days — {fmtDate(ct.end_date)}
-              </span>
+      {/* Body */}
+      <div style={{maxWidth:1400,margin:"0 auto",padding:"32px",display:"grid",gridTemplateColumns:"2fr 1fr",gap:24}}>
+        <div style={{display:"flex",flexDirection:"column",gap:20}}>
+          {/* Description */}
+          {contract.description && (
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24}}>
+              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Description</div>
+              <p style={{fontSize:"0.875rem",color:"var(--color-text-2)",lineHeight:1.6,margin:0}}>{contract.description}</p>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 space-y-5">
-            <div className="tb-section">
-              <div className="tb-section-title">Contract Details</div>
-              <div className="space-y-1">
-                {[
-                  ["Title",          ct.title || "—"],
-                  ["Client",         ct.client_name || "—"],
-                  ["Type",           ct.contract_type || ct.type || "—"],
-                  ["Status",         ct.status || "—"],
-                  ["Value",          fmtEGP(ct.total_value || ct.value || 0)],
-                  ["Start Date",     fmtDate(ct.start_date)],
-                  ["End Date",       fmtDate(ct.end_date)],
-                  ["Created",        fmtDate(ct.created_at)],
-                ].map(([l, v], i) => (
-                  <div key={i} className="tb-info-row">
-                    <span className="tb-info-label">{l}</span>
-                    <span className="tb-info-value">{v}</span>
-                  </div>
-                ))}
+          {/* Services */}
+          {contract.services && (
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24}}>
+              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Services Included</div>
+              <div style={{fontSize:"0.875rem",color:"var(--color-text-2)",lineHeight:1.6}}>
+                {typeof contract.services === "string" ? contract.services :
+                 Array.isArray(contract.services) ? contract.services.join(", ") :
+                 JSON.stringify(contract.services)}
               </div>
             </div>
+          )}
 
-            {ct.description && (
-              <div className="tb-section">
-                <div className="tb-section-title">Scope of Work</div>
-                <p className="text-sm text-secondary leading-relaxed">{ct.description}</p>
-              </div>
-            )}
+          {/* Notes */}
+          {contract.notes && (
+            <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24}}>
+              <div style={{fontSize:"1rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:12}}>Notes</div>
+              <p style={{fontSize:"0.875rem",color:"var(--color-text-2)",lineHeight:1.6,margin:0}}>{contract.notes}</p>
+            </div>
+          )}
+        </div>
 
-            {invoices.length > 0 && (
-              <div className="tb-section">
-                <div className="tb-section-header">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Invoices ({invoices.length})</div>
-                  <button onClick={() => router.push("/invoices")} className="tb-section-link">All →</button>
-                </div>
-                <div className="tb-table" style={{borderRadius:12,overflow:"hidden",marginTop:12}}>
-                  <div className="tb-table-head" style={{gridTemplateColumns:"1fr 80px 120px 100px"}}>
-                    {["Invoice","Status","Amount","Due"].map((h, i) => (
-                      <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
-                    ))}
-                  </div>
-                  {invoices.map((inv, i) => {
-                    const ic = INV_STATUS_COLOR[inv.status] || "#94A3B8";
-                    return (
-                      <button key={i}
-                        onClick={() => router.push(`/invoices/${inv.id}`)}
-                        className="tb-table-row"
-                        style={{gridTemplateColumns:"1fr 80px 120px 100px"}}>
-                        <div className="text-sm font-medium text-primary truncate pr-4">{inv.invoice_number || inv.id?.slice(0,16)}</div>
-                        <div className="text-center">
-                          <span className="tb-badge" style={{background:`${ic}18`,color:ic,border:`1px solid ${ic}30`,fontSize:"0.5625rem"}}>{inv.status||"—"}</span>
-                        </div>
-                        <div className="text-center text-sm font-bold text-emerald-400">{fmtEGP(inv.total_amount||0)}</div>
-                        <div className="text-center text-xs text-tertiary">{fmtDate(inv.due_date)}</div>
-                      </button>
-                    );
-                  })}
-                </div>
+        {/* Right column */}
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:20}}>
+            <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Contract Details</div>
+            {[
+              {label:"Contract ID",value:contract.id?.slice(0,16)+"..."},
+              {label:"Status",value:(contract.status||"—").replace(/_/g," ")},
+              {label:"Total Value",value:fmtEGP(contract.total_value)},
+              {label:"Monthly Value",value:fmtEGP(contract.monthly_value)},
+              {label:"Duration",value:`${contract.duration_months||"—"} months`},
+              {label:"Start Date",value:fmtDate(contract.start_date)},
+              {label:"End Date",value:fmtDate(contract.end_date)},
+              {label:"Renewals",value:contract.renewal_count||0},
+            ].map((row,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid var(--color-divider)"}}>
+                <span style={{fontSize:"0.75rem",color:"var(--color-text-3)"}}>{row.label}</span>
+                <span style={{fontSize:"0.75rem",fontWeight:600,color:"var(--color-text-1)"}}>{row.value}</span>
               </div>
-            )}
-
-            {wos.length > 0 && (
-              <div className="tb-section">
-                <div className="tb-section-header">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Work Orders ({wos.length})</div>
-                  <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All →</button>
-                </div>
-                <div className="space-y-2 mt-3">
-                  {wos.map((wo, i) => {
-                    const pc = { critical:"#F87171", high:"#FB923C", medium:"#FBBF24", low:"#94A3B8" }[wo.priority] || "#94A3B8";
-                    return (
-                      <button key={i}
-                        onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
-                        className="tb-action-item w-full justify-between">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="tb-priority-bar" style={{background:pc}}/>
-                          <span className="text-sm text-secondary truncate">{wo.title||"—"}</span>
-                        </div>
-                        <span className="tb-badge" style={{fontSize:"0.5625rem",flexShrink:0}}>{wo.status||"—"}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
 
-          <div className="space-y-4">
-            <div className="tb-section">
-              <div className="tb-section-title">Financial Summary</div>
-              <div className="space-y-3">
-                {[
-                  { label:"Contract Value", value:fmtEGP(ct.total_value||0), color:"#F1F5F9" },
-                  { label:"Total Invoiced",  value:fmtEGP(totalInv),          color:"#FBBF24" },
-                  { label:"Total Collected", value:fmtEGP(paidInv),           color:"#34D399" },
-                  { label:"Outstanding",     value:fmtEGP(totalInv-paidInv),  color:totalInv-paidInv>0?"#F87171":"#34D399" },
-                ].map((row, i) => (
-                  <div key={i} className="tb-info-row">
-                    <span className="tb-info-label">{row.label}</span>
-                    <span className="text-sm font-bold" style={{color:row.color}}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="tb-section">
-              <div className="tb-section-title">Quick Actions</div>
-              <div className="space-y-2">
-                {[
-                  { label:"All Contracts", icon:"📄", path:"/commercial/contracts" },
-                  { label:"Leads",         icon:"👤", path:"/commercial/leads" },
-                  { label:"Invoices",      icon:"💰", path:"/invoices" },
-                  { label:"Work Orders",   icon:"🔧", path:"/operations/work-orders" },
-                ].map((a, i) => (
-                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
-                    <span>{a.icon}</span>
-                    <span className="text-sm text-secondary">{a.label}</span>
-                  </button>
-                ))}
-              </div>
+          {/* Actions */}
+          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:20}}>
+            <div style={{fontSize:"0.875rem",fontWeight:700,color:"var(--color-text-1)",marginBottom:14}}>Actions</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {contract.status === "active" && (
+                <button onClick={()=>authFetch(`/api/v1/contracts/${id}/renew`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({})}).then(()=>window.location.reload())}
+                  style={{width:"100%",background:"rgba(185,146,76,0.08)",border:"1px solid rgba(185,146,76,0.22)",borderRadius:8,padding:"10px",color:"#B9924C",fontSize:"0.875rem",fontWeight:600,cursor:"pointer"}}>
+                  🔄 Renew Contract
+                </button>
+              )}
+              <button onClick={()=>router.push("/commercial/contracts")}
+                style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px",color:"var(--color-text-2)",fontSize:"0.875rem",cursor:"pointer"}}>
+                ← All Contracts
+              </button>
             </div>
           </div>
         </div>
