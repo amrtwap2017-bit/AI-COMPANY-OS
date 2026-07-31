@@ -1,0 +1,69 @@
+# ============================================================
+# Triangle Black — Docker Compose
+# Sprint 324 — Program K: DevOps Foundation
+# Usage: docker compose up -d
+# Note: Uses LOCAL PostgreSQL (port 5432) — NOT containerized
+# ============================================================
+
+version: "3.9"
+
+services:
+
+  # ── BACKEND — FastAPI ──────────────────────────────────────
+  tb-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: tb-backend
+    restart: unless-stopped
+    ports:
+      - "8030:8030"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
+      - TRIANGLE_BLACK_DB_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
+      - POSTGRES_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
+      - AI_ENGINE_URL=http://host.docker.internal:11434/api/generate
+      - ENVIRONMENT=production
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./src:/app/src:ro
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8030/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - tb-network
+
+  # ── PORTAL — Next.js ──────────────────────────────────────
+  tb-portal:
+    build:
+      context: ./portal
+      dockerfile: Dockerfile.portal
+    container_name: tb-portal
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      tb-backend:
+        condition: service_healthy
+    networks:
+      - tb-network
+
+networks:
+  tb-network:
+    driver: bridge
+
+# ── USAGE ──────────────────────────────────────────────────
+# Start:   docker compose up -d
+# Stop:    docker compose down
+# Logs:    docker compose logs -f tb-backend
+# Rebuild: docker compose up -d --build
+# Status:  docker compose ps
