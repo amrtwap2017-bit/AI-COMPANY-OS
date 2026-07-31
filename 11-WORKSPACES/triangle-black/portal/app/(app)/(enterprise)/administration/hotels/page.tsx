@@ -29,7 +29,7 @@ export default function HotelsPage() {
           {isLoading ? <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : sites.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">🏨</div><div className="tb-empty-title">No sites configured</div></div>
           : <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            {sites.map((site,i)=>{
+            {sites.map((site: any, i: number)=>{
               const siteAssets = assets.filter((a: any)=>a.site_id===site.id);
               return (
                 <button key={i} onClick={()=>router.push("/administration/hotels/"+site.id)} className="tb-section text-left hover:border-brand transition-colors">

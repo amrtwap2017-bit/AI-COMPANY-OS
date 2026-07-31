@@ -4,7 +4,7 @@ import { useRole } from "@/lib/hooks/useRole";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = ((d: any)) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function AdministrationPage() {
   const router = useRouter();
   const { is_admin, role } = useRole();
