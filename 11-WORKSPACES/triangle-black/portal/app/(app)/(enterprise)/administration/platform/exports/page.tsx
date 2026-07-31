@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 import { useRouter } from "next/navigation";
-const handleExport = (url) => {
+const handleExport = ((url: any)) => {
   const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
   fetch("http://localhost:8030" + url, {headers: {"Authorization": "Bearer " + token}})
     .then(r => r.blob())
