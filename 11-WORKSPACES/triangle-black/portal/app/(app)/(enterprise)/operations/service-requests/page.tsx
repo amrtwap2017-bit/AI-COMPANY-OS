@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { Pagination } from "@/components/ui/Pagination";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => {
@@ -94,6 +95,9 @@ export default function ServiceRequestsPage() {
     return matchSearch && matchStatus;
   });
 
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" >
@@ -174,7 +178,7 @@ export default function ServiceRequestsPage() {
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
-              {filtered.map((sr, i) => {
+              {paged.map((sr, i) => {
                 const pc = PRIORITY_COLOR[sr.priority] || "#6D5F53";
                 const sc = STATUS_COLOR[sr.status] || "#6D5F53";
                 const linkedWO = wos.find(w => w.id === sr.work_order_id);

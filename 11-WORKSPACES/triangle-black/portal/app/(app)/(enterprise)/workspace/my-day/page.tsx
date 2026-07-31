@@ -1,234 +1,286 @@
 "use client";
 // @ts-nocheck
+// Triangle Black — My Day Command Center
+// Sprint 302: Program A — Component Library Adoption
+// Migrated: inline KPIs → KpiCard, inline status → StatusBadge,
+//           inline empty → EmptyState, inline header → PageHeader
+
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => {
-  if (!d) return "";
-  try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return ""; return dt.toLocaleDateString("en-GB"); }
-  catch { return ""; }
-};
-const fmtRelative = (d) => {
-  if (!d) return "";
-  try { const h=Math.floor((Date.now()-new Date(d).getTime())/3600000); return h<1?"just now":h<24?h+"h ago":Math.floor(h/24)+"d ago"; }
-  catch { return ""; }
-};
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+// ── Component Library Imports (Sprint 302 adoption) ──────────────────────────
+import { PageHeader }  from "@/components/ui/PageHeader";
+import { KpiCard }     from "@/components/ui/KpiCard";
+import { MetricCard }  from "@/components/ui/MetricCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState }  from "@/components/ui/EmptyState";
+import { SectionCard } from "@/components/ui/SectionCard";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { DataTable }   from "@/components/ui/DataTable";
 
-const PC = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D",normal:"#6D5F53"};
-const DOC_ICONS = {sow:"📋",po:"📦",rfq:"📝",quotation_selection:"⚖️"};
+// ── Fetch helpers ─────────────────────────────────────────────────────────────
+const fetchMyDay    = () => authFetch("/api/v1/workspace/my-day").then(r => r.json());
+const fetchApprovals = () => authFetch("/api/v1/approval-requests/").then(r => r.json());
+const fetchSLA      = () => authFetch("/api/v1/sla/breaches").then(r => r.json());
+const fetchWOs      = () => authFetch("/api/v1/work-orders/?limit=10&status=open").then(r => r.json());
 
 export default function MyDayPage() {
+  const { user } = useAuth();
   const router = useRouter();
   const qc = useQueryClient();
-  const { user } = useAuth();
 
-  const { data: approvals } = useQuery(["myday-approvals"], () => authFetch("/api/v1/approval-requests/").then(r=>r.json()), {staleTime:30000});
-  const { data: breaches } = useQuery(["myday-breaches"], () => authFetch("/api/v1/sla/breaches").then(r=>r.json()), {staleTime:60000});
-  const { data: execDash } = useQuery(["myday-exec"], () => authFetch("/api/v1/executive/dashboard").then(r=>r.json()), {staleTime:60000});
-  const { data: timeDash } = useQuery(["myday-time"], () => authFetch("/api/v1/time-entries/summary").then(r=>r.json()), {staleTime:60000});
-  const { data: notifs } = useQuery(["myday-notifs"], () => authFetch("/api/v1/platform-notif/?limit=8").then(r=>r.json()), {staleTime:30000});
-  const { data: procDash } = useQuery(["myday-proc"], () => authFetch("/api/v1/procurement/dashboard").then(r=>r.json()), {staleTime:60000});
+  const { data: myDay,     isLoading: loadingMyDay }     = useQuery({ queryKey: ["my-day"],    queryFn: fetchMyDay,    staleTime: 60_000 });
+  const { data: approvals, isLoading: loadingApprovals } = useQuery({ queryKey: ["approvals"], queryFn: fetchApprovals, staleTime: 60_000 });
+  const { data: sla,       isLoading: loadingSLA }       = useQuery({ queryKey: ["sla"],       queryFn: fetchSLA,      staleTime: 60_000 });
+  const { data: wos,       isLoading: loadingWOs }       = useQuery({ queryKey: ["my-wos"],    queryFn: fetchWOs,      staleTime: 60_000 });
 
-  const pendingApprovals = toArr(approvals).filter(a => a.status === "pending");
-  const slaBreaches = toArr(breaches).slice(0, 8);
-  const criticalWOs = (execDash?.operations?.critical_work_orders || []).slice(0, 5);
-  const recentNotifs = (notifs?.notifications || []).slice(0, 5);
-  const ops = execDash?.operations?.work_orders || {};
-  const totalLabor = timeDash?.totals?.total_hours || 0;
-  const laborCost = timeDash?.totals?.total_labor_cost || 0;
+  const approvalList = Array.isArray(approvals) ? approvals : (approvals?.items ?? []);
+  const slaBreaches  = Array.isArray(sla) ? sla : (sla?.breaches ?? []);
+  const woList       = Array.isArray(wos) ? wos : (wos?.items ?? wos?.work_orders ?? []);
+  const pendingCount = approvalList.filter((a: any) => a.status === "pending").length;
+
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, action }: { id: string; action: string }) => {
+      const r = await authFetch(`/api/v1/approval-requests/${id}/${action}`, { method: "POST" });
+      return r.json();
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["approvals"] });
+      toast.success("Action recorded");
+    },
+    onError: () => toast.error("Action failed"),
+  });
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const today = new Date().toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long"});
+  const userName  = user?.name?.split(" ")[0] ?? "there";
 
-  const urgentCount = pendingApprovals.length + slaBreaches.length + criticalWOs.length;
+  // ── Work Orders table columns ─────────────────────────────────────────────
+  const woColumns = [
+    { key: "title",    label: "Work Order", render: (row: any) => (
+      <span className="font-medium text-primary cursor-pointer hover:text-brand"
+            onClick={() => router.push(`/operations/work-orders/${row.id}`)}>
+        {row.title}
+      </span>
+    )},
+    { key: "priority", label: "Priority", render: (row: any) => <StatusBadge status={row.priority ?? "medium"} /> },
+    { key: "status",   label: "Status",   render: (row: any) => <StatusBadge status={row.status} /> },
+    { key: "due_date", label: "Due",      render: (row: any) => row.due_date ? new Date(row.due_date).toLocaleDateString("en-GB") : "—" },
+  ];
+
+  // ── Approvals table columns ───────────────────────────────────────────────
+  const approvalColumns = [
+    { key: "document_type", label: "Type",    render: (row: any) => <span className="capitalize">{(row.document_type ?? "").replace(/_/g, " ")}</span> },
+    { key: "requested_by",  label: "From",    render: (row: any) => row.requested_by ?? "—" },
+    { key: "status",        label: "Status",  render: (row: any) => <StatusBadge status={row.status} /> },
+    { key: "actions",       label: "Actions", render: (row: any) => row.status === "pending" ? (
+      <div style={{ display:"flex", gap:8 }}>
+        <button onClick={() => approveMutation.mutate({ id: row.id, action: "approve" })}
+          className="tb-btn-xs-success">Approve</button>
+        <button onClick={() => approveMutation.mutate({ id: row.id, action: "reject" })}
+          className="tb-btn-xs-danger">Reject</button>
+      </div>
+    ) : null },
+  ];
+
+  if (loadingMyDay && loadingApprovals) {
+    return (
+      <div>
+        <div className="tb-hero">
+          <div className="tb-hero-inner">
+            <p className="tb-hero-title">{greeting}, {userName}</p>
+          </div>
+        </div>
+        <div className="tb-canvas">
+          <LoadingState type="cards" rows={2} cols={4} />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-base">
-      <div className="tb-hero" >
+    <div>
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
+      <div className="tb-hero">
         <div className="tb-hero-inner">
-          <div className="mb-4">
-            <div className="text-label-upper text-purple-400 mb-1">My Day</div>
-            <h1 className="text-2xl font-black text-white mb-1">{greeting}, {user?.name?.split(" ")[0] || "Amr"}</h1>
-            <p className="text-slate-400 text-sm">{today}</p>
+          <div>
+            <p className="tb-hero-title">{greeting}, {userName} 👋</p>
+            <p className="tb-hero-description">
+              {new Date().toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}
+              {pendingCount > 0 && <span style={{ marginLeft:12, color:"#B9924C", fontWeight:600 }}>· {pendingCount} pending approval{pendingCount > 1 ? "s" : ""}</span>}
+            </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              {label:"Needs Attention",value:urgentCount,color:urgentCount>0?"#A84A3D":"#547C4D",icon:"🔴"},
-              {label:"Pending Approvals",value:pendingApprovals.length,color:pendingApprovals.length>0?"#B07A2A":"#547C4D",icon:"✍️"},
-              {label:"SLA Breaches",value:slaBreaches.length,color:slaBreaches.length>0?"#A84A3D":"#547C4D",icon:"⏱"},
-              {label:"Open WOs",value:ops.open_count||0,color:"#5B7C8C",icon:"🔧"},
-            ].map((k,i)=>(
-  <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
-                <div className="flex items-center gap-2 mb-1"><span>{k.icon}</span></div>
-                <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
-                <div className="tb-hero-kpi-label">{k.label}</div>
-              </button>
-            ))}
+
+          {/* ── KPI Strip ─────────────────────────────────────────────────── */}
+          <div className="tb-hero-kpis" style={{ marginTop:24 }}>
+            <KpiCard
+              label="Open Work Orders"
+              value={woList.length}
+              sub="assigned to team"
+              color="amber"
+              icon="🔧"
+              href="/operations/work-orders"
+            />
+            <KpiCard
+              label="Pending Approvals"
+              value={pendingCount}
+              sub="awaiting action"
+              color={pendingCount > 0 ? "red" : "emerald"}
+              icon="✅"
+              status={pendingCount > 0 ? "warn" : "ok"}
+              href="/approvals"
+            />
+            <KpiCard
+              label="SLA Breaches"
+              value={slaBreaches.length}
+              sub="overdue items"
+              color={slaBreaches.length > 0 ? "red" : "emerald"}
+              icon="⚠️"
+              status={slaBreaches.length > 0 ? "critical" : "ok"}
+              href="/operations/sla"
+            />
+            <KpiCard
+              label="Today"
+              value={new Date().toLocaleDateString("en-GB", { day:"numeric", month:"short" })}
+              sub={new Date().toLocaleDateString("en-GB", { weekday:"long" })}
+              color="slate"
+              icon="📅"
+            />
           </div>
         </div>
       </div>
 
+      {/* ── Canvas ────────────────────────────────────────────────────────── */}
       <div className="tb-canvas">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24 }}>
 
-          {/* LEFT: Actions Required */}
-          <div className="space-y-4">
+          {/* ── My Work Orders ──────────────────────────────────────────── */}
+          <SectionCard
+            title="My Work Orders"
+            subtitle="Open items assigned to team"
+            actions={
+              <button onClick={() => router.push("/operations/work-orders")}
+                className="tb-section-link">View All →</button>
+            }
+          >
+            {loadingWOs ? (
+              <LoadingState type="table" rows={5} />
+            ) : woList.length === 0 ? (
+              <EmptyState
+                icon="🔧"
+                title="No open work orders"
+                description="All clear — no open work orders assigned"
+                action={{ label: "Create Work Order", href: "/operations/work-orders/new" }}
+                size="sm"
+              />
+            ) : (
+              <DataTable
+                columns={woColumns}
+                data={woList.slice(0, 8)}
+                onRow={(row) => router.push(`/operations/work-orders/${row.id}`)}
+                keyField="id"
+              />
+            )}
+          </SectionCard>
 
-            {/* Pending Approvals */}
-            {pendingApprovals.length > 0 && (
-              <div className="tb-section" style={{borderColor:"#B07A2A40",background:"#B07A2A06"}}>
-                <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#B07A2A"}}>✍️ Pending Approvals ({pendingApprovals.length})</div>
-                  <button onClick={()=>router.push("/supply-chain/approvals-center")} className="text-xs text-brand">View all →</button>
-                </div>
-                <div className="space-y-2">
-                  {pendingApprovals.map((a,i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt border border-yellow-400/20">
-                      <span style={{fontSize:"1.25rem"}}>{DOC_ICONS[a.document_type]||"📄"}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-primary truncate">{a.title}</div>
-                        <div className="text-xs text-tertiary">{a.document_type?.toUpperCase()} {a.document_number} · {fmtRelative(a.requested_at)}</div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className="text-sm font-black text-emerald-400">{fmtEGP(a.amount)}</div>
-                        <div className="text-xs text-tertiary">{a.currency}</div>
-                      </div>
-                      <button onClick={()=>router.push("/supply-chain/approvals-center")}
-                        className="tb-btn-primary flex-shrink-0" style={{fontSize:"0.65rem",padding:"4px 10px"}}>
-                        Review
-                      </button>
+          {/* ── Pending Approvals ────────────────────────────────────────── */}
+          <SectionCard
+            title="Pending Approvals"
+            subtitle={`${pendingCount} item${pendingCount !== 1 ? "s" : ""} require your action`}
+            actions={
+              <button onClick={() => router.push("/approvals")}
+                className="tb-section-link">View All →</button>
+            }
+          >
+            {loadingApprovals ? (
+              <LoadingState type="table" rows={5} />
+            ) : approvalList.length === 0 ? (
+              <EmptyState
+                icon="✅"
+                title="No pending approvals"
+                description="You are all caught up"
+                size="sm"
+              />
+            ) : (
+              <DataTable
+                columns={approvalColumns}
+                data={approvalList.slice(0, 8)}
+                keyField="id"
+              />
+            )}
+          </SectionCard>
+
+          {/* ── SLA Breaches ─────────────────────────────────────────────── */}
+          <SectionCard
+            title="SLA Breaches"
+            subtitle="Items that have exceeded response time"
+            actions={
+              <button onClick={() => router.push("/operations/sla")}
+                className="tb-section-link">SLA Dashboard →</button>
+            }
+          >
+            {loadingSLA ? (
+              <LoadingState type="list" rows={4} />
+            ) : slaBreaches.length === 0 ? (
+              <EmptyState
+                icon="🎯"
+                title="No SLA breaches"
+                description="All service requests are within SLA targets"
+                size="sm"
+              />
+            ) : (
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {slaBreaches.slice(0, 6).map((b: any) => (
+                  <div key={b.id}
+                    onClick={() => router.push(`/operations/service-requests/${b.id}`)}
+                    style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                             padding:"10px 12px", background:"var(--color-danger-bg)",
+                             border:"1px solid var(--color-danger-border)",
+                             borderRadius:8, cursor:"pointer" }}>
+                    <div>
+                      <p style={{ fontSize:"0.8rem", fontWeight:600, color:"var(--color-text-1)" }}>{b.title}</p>
+                      <p style={{ fontSize:"0.7rem", color:"var(--color-text-2)" }}>
+                        {b.urgency ?? "medium"} · {b.hours_overdue ? `${b.hours_overdue}h overdue` : "overdue"}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SLA Breaches */}
-            {slaBreaches.length > 0 && (
-              <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D06"}}>
-                <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#A84A3D"}}>⏱ SLA Breaches ({slaBreaches.length})</div>
-                  <button onClick={()=>router.push("/operations/sla")} className="text-xs text-brand">SLA Dashboard →</button>
-                </div>
-                <div className="space-y-2">
-                  {slaBreaches.map((b,i) => {
-                    const uc = PC[b.urgency] || "#6D5F53";
-                    return (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt border border-red-400/15">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:uc}}/>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm text-primary truncate">{b.title}</div>
-                          <div className="text-xs text-tertiary">{b.urgency} · Target: {b.sla_target_hours}h · {b.site_name||"—"}</div>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-sm font-black" style={{color:"#A84A3D"}}>{Math.round(b.hours_overdue)}h</div>
-                          <div className="text-xs text-tertiary">overdue</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Critical Work Orders */}
-            {criticalWOs.length > 0 && (
-              <div className="tb-section">
-                <div className="tb-flex-between mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0,color:"#A84A3D"}}>⚠ Critical Work Orders</div>
-                  <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand">All WOs →</button>
-                </div>
-                <div className="space-y-2">
-                  {criticalWOs.map((wo,i)=>(
-                    <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:"#A84A3D"}}/>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-primary truncate">{wo.title}</div>
-                        <div className="text-xs text-tertiary">{wo.site_name||"—"} · {wo.technician_name||"Unassigned"}</div>
-                      </div>
-                      <span className="tb-badge flex-shrink-0" style={{background:"#A84A3D18",color:"#A84A3D",fontSize:"0.45rem"}}>{wo.status?.replace(/_/g," ")}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT: Today Intelligence */}
-          <div className="space-y-4">
-
-            {/* Today Stats */}
-            <div className="tb-section">
-              <div className="tb-section-title">Platform Snapshot</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-base-alt text-center">
-                  <div className="text-lg font-black text-emerald-400">{Math.round(totalLabor)}h</div>
-                  <div className="text-xs text-tertiary">Hours Logged</div>
-                </div>
-                <div className="p-3 rounded-xl bg-base-alt text-center">
-                  <div className="text-lg font-black text-amber-400">{fmtEGP(laborCost)}</div>
-                  <div className="text-xs text-tertiary">Labor Cost</div>
-                </div>
-                <div className="p-3 rounded-xl bg-base-alt text-center">
-                  <div className="text-lg font-black text-blue-400">{procDash?.pos?.total||0}</div>
-                  <div className="text-xs text-tertiary">Active POs</div>
-                </div>
-                <div className="p-3 rounded-xl bg-base-alt text-center">
-                  <div className="text-lg font-black text-purple-400">{procDash?.grns?.total||0}</div>
-                  <div className="text-xs text-tertiary">Deliveries</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="tb-section">
-              <div className="tb-section-title">Quick Actions</div>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  {icon:"🔧",label:"New Work Order",path:"/operations/work-orders/new",color:"#B07A2A"},
-                  {icon:"📋",label:"Dispatch Board",path:"/operations/dispatch",color:"#8D7443"},
-                  {icon:"📦",label:"Purchase Orders",path:"/supply-chain/purchase-orders-v2",color:"#B07A2A"},
-                  {icon:"📄",label:"Invoices",path:"/supply-chain/invoices",color:"#547C4D"},
-                  {icon:"📱",label:"Asset QR Codes",path:"/operations/assets/qr",color:"#B07A2A"},
-                  {icon:"📊",label:"Executive",path:"/executive/dashboard",color:"#5B7C8C"},
-                ].map((a,i)=>(
-                  <button key={i} onClick={()=>router.push(a.path)}
-                    className="flex items-center gap-2 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left border border-transparent hover:border-border">
-                    <span>{a.icon}</span>
-                    <span className="text-xs font-medium text-secondary">{a.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Notifications */}
-            <div className="tb-section">
-              <div className="tb-flex-between mb-3">
-                <div className="tb-section-title" style={{marginBottom:0}}>Notifications</div>
-                <button onClick={()=>router.push("/notifications")} className="text-xs text-brand">View all →</button>
-              </div>
-              <div className="space-y-1.5">
-                {recentNotifs.length === 0 ? (
-                  <div className="text-xs text-tertiary text-center py-4">No recent notifications</div>
-                ) : recentNotifs.map((n,i)=>(
-                  <div key={i} className="flex items-start gap-2 py-2 border-b border-border">
-                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{background:n.is_read?"#334155":"#5B7C8C"}}/>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs text-primary truncate">{n.title}</div>
-                      <div className="text-xs text-tertiary">{fmtRelative(n.created_at)}</div>
-                    </div>
+                    <StatusBadge status={b.status ?? "open"} size="xs" />
                   </div>
                 ))}
               </div>
-            </div>
+            )}
+          </SectionCard>
 
-          </div>
+          {/* ── Quick Actions ─────────────────────────────────────────────── */}
+          <SectionCard title="Quick Actions" subtitle="Common tasks">
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+              {[
+                { label:"New Work Order",    href:"/operations/work-orders/new",        icon:"🔧" },
+                { label:"New Service Request",href:"/operations/service-requests",     icon:"📋" },
+                { label:"Log Time",           href:"/operations/time-tracking",         icon:"⏱️" },
+                { label:"Dispatch Board",     href:"/operations/dispatch",              icon:"📍" },
+                { label:"View All Approvals", href:"/approvals",                        icon:"✅" },
+                { label:"Asset QR Scan",      href:"/operations/assets/qr",            icon:"📷" },
+              ].map(action => (
+                <button key={action.href}
+                  onClick={() => router.push(action.href)}
+                  style={{ display:"flex", alignItems:"center", gap:10, padding:"12px 14px",
+                           background:"var(--color-surface-alt)", border:"1px solid var(--color-border)",
+                           borderRadius:10, cursor:"pointer", textAlign:"left",
+                           fontSize:"0.8rem", fontWeight:500, color:"var(--color-text-1)",
+                           transition:"all 0.15s ease" }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = "#B9924C")}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--color-border)")}>
+                  <span style={{ fontSize:"1.2rem" }}>{action.icon}</span>
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </SectionCard>
+
         </div>
       </div>
     </div>

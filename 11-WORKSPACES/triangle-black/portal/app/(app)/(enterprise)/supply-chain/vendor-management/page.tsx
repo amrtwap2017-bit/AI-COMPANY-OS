@@ -7,6 +7,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
+import { Pagination } from "@/components/ui/Pagination";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 const handleExport = (url: string) => {
@@ -28,6 +29,8 @@ export default function VendorManagementPage() {
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("all");
   const [showNewVendor, setShowNewVendor] = useState(false);
+  const [page,          setPage]          = useState(1);
+  const [pageSize,      setPageSize]      = useState(25);
   const [newV, setNewV] = useState({company_name:"",category:"General",contact_person:"",email:"",phone:"",city:"Cairo"});
   const [vErrors, setVErrors] = useState<Record<string,string>>({});
   const qc = useQueryClient();
@@ -72,6 +75,8 @@ export default function VendorManagementPage() {
     (!search || (v.company_name||"").toLowerCase().includes(search.toLowerCase()) ||
      (v.category||"").toLowerCase().includes(search.toLowerCase()))
   );
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
@@ -107,10 +112,10 @@ export default function VendorManagementPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="tb-flex-between gap-3 flex-wrap mb-4">
-            <input className="tb-search flex-1" placeholder="Search vendors…" value={search} onChange={e=>setSearch(e.target.value)}/>
+            <input className="tb-search flex-1" placeholder="Search vendors…" value={search} onChange={e=>{setSearch(e.target.value); setPage(1);}}/>
             <div className="flex gap-2 flex-wrap">
-              <button onClick={()=>setFilterCat("all")} className={"tb-pill "+(filterCat==="all"?"tb-pill--active":"")}>All</button>
-              {cats.map(c=><button key={c} onClick={()=>setFilterCat(c)} className={"tb-pill "+(filterCat===c?"tb-pill--active":"")}>{c}</button>)}
+              <button onClick={()=>{setFilterCat("all"); setPage(1);}} className={"tb-pill "+(filterCat==="all"?"tb-pill--active":"")}>All</button>
+              {cats.map(c=><button key={c} onClick={()=>{setFilterCat(c); setPage(1);}} className={"tb-pill "+(filterCat===c?"tb-pill--active":"")}>{c}</button>)}
             </div>
           </div>
           {isLoading ? (
@@ -119,7 +124,7 @@ export default function VendorManagementPage() {
             <div className="tb-empty"><div className="tb-empty-icon">🏭</div><div className="tb-empty-title">No vendors found</div></div>
           ) : (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-              {filtered.map((v,i)=>(
+              {paged.map((v,i)=>(
                 <button key={i} onClick={()=>router.push("/supply-chain/vendor-management/"+v.id)} className="tb-section text-left hover:border-brand transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <div className="w-10 h-10 rounded-xl bg-base-alt flex items-center justify-center text-sm font-black text-secondary flex-shrink-0">
@@ -144,6 +149,19 @@ export default function VendorManagementPage() {
                   </div>
                 </button>
               ))}
+            </div>
+          )}
+          {filtered.length > pageSize && (
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--color-border)" }}>
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPage={setPage}
+                total={filtered.length}
+                pageSize={pageSize}
+                onPageSize={(s) => { setPageSize(s); setPage(1); }}
+                pageSizes={[10, 25, 50]}
+              />
             </div>
           )}
         </div>

@@ -9,6 +9,7 @@ import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
 import { CreateModal } from "@/components/ui/CreateModal";
+import { Pagination } from "@/components/ui/Pagination";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => {
@@ -61,6 +62,8 @@ export default function WorkOrdersPage() {
   const [statusF,     setStatusF]     = useState("all");
   const [priorityF,   setPriorityF]   = useState("all");
   const [showCreate,  setShowCreate]  = useState(false);
+  const [page,        setPage]        = useState(1);
+  const [pageSize,    setPageSize]    = useState(25);
 
   const { data: raw, isLoading } = useQuery(
     ["wo-list"],
@@ -75,6 +78,8 @@ export default function WorkOrdersPage() {
     return ms && (statusF==="all"||w.status===statusF) && (priorityF==="all"||w.priority===priorityF);
   });
 
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
   const open       = wos.filter(w=>w.status==="open");
   const inProgress = wos.filter(w=>w.status==="in_progress");
   const completed  = wos.filter(w=>w.status==="completed");
@@ -134,7 +139,7 @@ export default function WorkOrdersPage() {
             ].map((k,i)=>{
               const active=statusF===k.f&&priorityF===k.pf;
               return (
-                <button key={i} onClick={()=>{setStatusF(k.f);setPriorityF(k.pf);}}
+                <button key={i} onClick={()=>{setStatusF(k.f);setPriorityF(k.pf);setPage(1);}}
                   className="tb-hero-kpi"
                   style={{background:active?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${active?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`}}>
                   <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
@@ -168,12 +173,12 @@ export default function WorkOrdersPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{color:"var(--color-text-3)",flexShrink:0}}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search work orders..." style={{background:"transparent",border:"none",outline:"none",flex:1,fontSize:"0.8125rem",color:"var(--color-text-1)"}}/>
+            <input value={search} onChange={e=>{setSearch(e.target.value); setPage(1);}} placeholder="Search work orders..." style={{background:"transparent",border:"none",outline:"none",flex:1,fontSize:"0.8125rem",color:"var(--color-text-1)"}}/>
           </div>
 
           <div className="tb-flex-gap-2">
             {["all","open","in_progress","completed","cancelled"].map(s=>(
-              <button key={s} onClick={()=>setStatusF(s)}
+              <button key={s} onClick={()=>{setStatusF(s);setPage(1);}}
                 className={`tb-pill ${statusF===s?"tb-pill--active":""}`}>
                 {s==="in_progress"?"In Progress":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
@@ -182,7 +187,7 @@ export default function WorkOrdersPage() {
 
           <div className="tb-flex-gap-2">
             {["critical","high","medium"].map(p=>(
-              <button key={p} onClick={()=>setPriorityF(priorityF===p?"all":p)}
+              <button key={p} onClick={()=>{setPriorityF(priorityF===p?"all":p);setPage(1);}}
                 className={`tb-pill ${priorityF===p?"tb-pill--active":""}`}
                 style={priorityF===p?{borderColor:P_COLOR[p],color:P_COLOR[p],background:`${P_COLOR[p]}18`}:{}}>
                 {p.charAt(0).toUpperCase()+p.slice(1)}
@@ -213,7 +218,7 @@ export default function WorkOrdersPage() {
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
-              {filtered.slice(0,60).map((w,i)=>{
+              {paged.map((w,i)=>{
                 const isOverdue=w.due_date&&new Date(w.due_date)<now&&w.status!=="completed";
                 const pc=P_COLOR[w.priority]||"rgba(148,163,184,0.4)";
                 const sc=S_COLOR[w.status]||"rgba(148,163,184,0.4)";
@@ -243,7 +248,19 @@ export default function WorkOrdersPage() {
                   </button>
                 );
               })}
-              {filtered.length>60&&<div className="text-center py-3 text-xs text-tertiary bg-base-alt border-t border-divider">Showing 60 of {filtered.length}</div>}
+              {filtered.length > pageSize && (
+                <div style={{ padding: "16px 0", borderTop: "1px solid var(--color-border)" }}>
+                  <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    onPage={setPage}
+                    total={filtered.length}
+                    pageSize={pageSize}
+                    onPageSize={(s) => { setPageSize(s); setPage(1); }}
+                    pageSizes={[10, 25, 50, 100]}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>
