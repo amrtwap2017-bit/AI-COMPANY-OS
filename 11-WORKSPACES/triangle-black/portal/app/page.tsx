@@ -1,6 +1,5 @@
-// Triangle Black - Root redirect (server-side, no flash)
+// Auto-redirect Sprint 321
 import { redirect } from "next/navigation";
-
-export default function RootPage() {
+export default function Page() {
   redirect("/workspace");
 }

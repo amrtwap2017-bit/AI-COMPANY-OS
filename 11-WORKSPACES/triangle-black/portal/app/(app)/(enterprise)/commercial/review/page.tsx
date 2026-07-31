@@ -1,5 +1,5 @@
-// Server-side redirect — no flash
+// Auto-redirect Sprint 321
 import { redirect } from "next/navigation";
 export default function Page() {
-  redirect("/commercial/command");
+  redirect("/commercial");
 }

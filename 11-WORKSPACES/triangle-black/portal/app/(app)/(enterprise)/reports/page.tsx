@@ -80,7 +80,7 @@ export default function ReportsPage() {
         return s.includes(",") ? `"${s}"` : s;
       }).join(",")
     );
-    const csv = [headers, ...rows].join("\n");
+    const csv = [headers, ...rows].join(String.fromCharCode(10));
     const blob = new Blob([csv], {type:"text/csv"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

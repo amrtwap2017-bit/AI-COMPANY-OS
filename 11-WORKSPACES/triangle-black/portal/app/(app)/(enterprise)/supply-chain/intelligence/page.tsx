@@ -1,6 +1,5 @@
-// Server-side redirect — no flash, instant navigation
+// Auto-redirect Sprint 321
 import { redirect } from "next/navigation";
-
 export default function Page() {
-  redirect("/executive/intelligence");
+  redirect("/supply-chain");
 }
