@@ -7373,3 +7373,73 @@ def _notify(db, title: str, message: str, notif_type: str = "info",
             pass
 
 # ── SPRINT 303B COMPLETE ─────────────────────────────────────
+
+
+# ============================================================
+# SPRINT 325 — PROGRAM F: SAAS FOUNDATION
+# Tenants table created — hotel_id IS the tenant identifier
+# API endpoints for tenant configuration
+# ============================================================
+
+@app.get("/api/v1/tenants/current", tags=["saas"])
+def get_current_tenant(request: Request):
+    """Get current tenant configuration based on hotel_id"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            tenant = db.execute(text("""
+                SELECT t.*, 
+                    json_agg(json_build_object('feature', ff.feature, 'enabled', ff.is_enabled)) as features
+                FROM tenants t
+                LEFT JOIN tenant_feature_flags ff ON ff.tenant_id = t.id
+                WHERE t.is_active = true
+                GROUP BY t.id
+                LIMIT 1
+            """)).fetchone()
+            if not tenant:
+                return {"error": "No tenant configured"}
+            return dict(tenant._mapping)
+        except Exception as e:
+            return {"error": str(e)}
+
+@app.get("/api/v1/tenants/", tags=["saas"])
+def list_tenants(request: Request):
+    """List all tenants — admin only"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT id, name, slug, plan, is_active, hotel_id,
+                       contact_email, city, country, currency, created_at
+                FROM tenants ORDER BY created_at DESC
+            """)).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception as e:
+            return {"error": str(e)}
+
+@app.get("/api/v1/tenants/{tenant_id}/features", tags=["saas"])
+def get_tenant_features(tenant_id: str):
+    """Get feature flags for a tenant"""
+    from sqlalchemy import text, create_engine
+    from sqlalchemy.orm import Session
+    import os
+    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with Session(eng) as db:
+        try:
+            rows = db.execute(text("""
+                SELECT feature, is_enabled, config
+                FROM tenant_feature_flags
+                WHERE tenant_id = :tid
+                ORDER BY feature
+            """), {"tid": tenant_id}).fetchall()
+            return {r.feature: {"enabled": r.is_enabled, "config": r.config} for r in rows}
+        except Exception as e:
+            return {"error": str(e)}
+
+# ── SPRINT 325 COMPLETE ──────────────────────────────────────
