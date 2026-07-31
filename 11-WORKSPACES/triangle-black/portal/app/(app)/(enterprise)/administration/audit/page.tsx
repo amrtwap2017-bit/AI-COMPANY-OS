@@ -5,31 +5,31 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.events || d?.items || d?.data || [];
-const fmtRelative = (d) => {
+const toArr = (d: any) => Array.isArray(d) ? d : d?.events || d?.items || d?.data || [];
+const fmtRelative = (d: any) => {
   if (!d) return "";
   try { const h=Math.floor((Date.now()-new Date(d).getTime())/3600000); return h<1?"just now":h<24?h+"h ago":Math.floor(h/24)+"d ago"; }
   catch { return ""; }
 };
-const fmtDate = (d) => {
+const fmtDate = (d: any) => {
   if (!d) return "";
   try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return ""; return dt.toLocaleString("en-GB",{dateStyle:"short",timeStyle:"short"}); }
   catch { return ""; }
 };
 
-const ACTION_COLORS = {
+const ACTION_COLORS: Record<string, string> = {
   created:"#547C4D", status_changed:"#5B7C8C", approved:"#547C4D",
   selected:"#8D7443", sent_to_vendor:"#B07A2A", accepted:"#547C4D",
   assigned:"#5B7C8C", logged:"#6D5F53", login:"#6D5F53",
   updated:"#B07A2A", deleted:"#A84A3D",
 };
-const ENTITY_ICONS = {
+const ENTITY_ICONS: Record<string, string> = {
   scope_of_work:"📋", rfq_header:"📝", vendor_quotation:"⚖️",
   purchase_order:"📦", goods_receipt:"✅", supplier_invoice:"📄",
   approval_request:"✍️", work_order:"🔧", time_entry:"🕐",
   user:"👤", vendor:"🏭",
 };
-const ENTITY_PATHS = {
+const ENTITY_PATHS: Record<string, string> = {
   scope_of_work:"/supply-chain/scope-of-work/",
   purchase_order:"/supply-chain/purchase-orders-v2/",
   work_order:"/operations/work-orders/",
@@ -55,7 +55,7 @@ export default function AuditTrailPage() {
   const events = toArr(recent);
   const stats = summary?.last_7_days || {};
   const byType = summary?.by_entity_type || [];
-  const entityTypes = [...new Set(events.map(e => e.entity_type))].sort();
+  const entityTypes = [...new Set(events.map((e: any) => e.entity_type))].sort();
 
   return (
     <div className="min-h-screen bg-base">
@@ -92,7 +92,7 @@ export default function AuditTrailPage() {
                   className={"w-full text-left px-3 py-2 rounded-lg text-xs transition-colors " + (filterType==="all" ? "bg-brand/10 text-brand font-bold" : "text-tertiary hover:text-primary hover:bg-base-alt")}>
                   All Events
                 </button>
-                {entityTypes.map(t => (
+                {entityTypes.map((t: any) => (
                   <button key={t} onClick={()=>setFilterType(t)}
                     className={"w-full text-left px-3 py-2 rounded-lg text-xs transition-colors " + (filterType===t ? "bg-brand/10 text-brand font-bold" : "text-tertiary hover:text-primary hover:bg-base-alt")}>
                     {ENTITY_ICONS[t]||"📄"} {t.replace(/_/g," ")}
@@ -105,7 +105,7 @@ export default function AuditTrailPage() {
               <div className="tb-section">
                 <div className="tb-section-title">Activity by Type (7d)</div>
                 <div className="space-y-2 mt-2">
-                  {byType.map((b,i) => (
+                  {byType.map((b: any, i: number) => (
                     <div key={i} className="flex justify-between text-xs py-1 border-b border-border">
                       <span className="text-tertiary">{(b.entity_type||"").replace(/_/g," ")}</span>
                       <span className="font-bold text-secondary">{b.count}</span>
@@ -124,7 +124,7 @@ export default function AuditTrailPage() {
               </div>
 
               {isLoading ? (
-                <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+                <div className="space-y-3">{[1,2,3,4,5].map((i: any) => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
               ) : events.length === 0 ? (
                 <div className="tb-empty">
                   <div className="tb-empty-icon">📜</div>
@@ -133,7 +133,7 @@ export default function AuditTrailPage() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {events.map((e,i) => {
+                  {events.map((e: any,i: number) => {
                     const ac = ACTION_COLORS[e.action] || "#6D5F53";
                     const icon = ENTITY_ICONS[e.entity_type] || "📄";
                     const path = ENTITY_PATHS[e.entity_type];
