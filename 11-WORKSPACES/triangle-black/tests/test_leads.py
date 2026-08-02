@@ -82,8 +82,9 @@ def test_update_lead(client, auth, test_lead_id):
     assert data["priority"] == "high"
 
 
-def test_list_leads_requires_auth(client):
-    res = client.get("/api/v1/leads/")
+def test_list_leads_requires_auth():
+    import requests as _req
+    res = _req.get("http://localhost:8030/api/v1/leads/", timeout=10)
     assert res.status_code == 401
 
 

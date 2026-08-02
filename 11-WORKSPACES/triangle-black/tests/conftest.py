@@ -57,3 +57,8 @@ def client(base_url, auth_headers):
             kwargs.setdefault("timeout", 15)
             return requests.delete(f"{self.base}{path}", **kwargs)
     return Client(base_url, auth_headers)
+
+@pytest.fixture(scope="session")
+def auth(auth_headers):
+    """Alias for auth_headers — some tests use 'auth' fixture name."""
+    return auth_headers

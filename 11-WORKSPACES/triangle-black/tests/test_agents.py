@@ -48,6 +48,7 @@ def test_agent_performance_endpoint(client, auth):
     assert "agent_id" in data or "agent" in data or "name" in data
 
 
-def test_agents_requires_auth(client):
-    res = client.get("/api/v1/agents/")
+def test_agents_requires_auth():
+    import requests as _req
+    res = _req.get("http://localhost:8030/api/v1/agents/", timeout=10)
     assert res.status_code == 401

@@ -75,8 +75,9 @@ def test_mark_all_read_reduces_unread(client, auth):
     assert after["unread_count"] <= before_count
 
 
-def test_notifications_requires_auth(client):
-    res = client.get("/api/v1/notifications/")
+def test_notifications_requires_auth():
+    import requests as _req
+    res = _req.get("http://localhost:8030/api/v1/notifications/", timeout=10)
     assert res.status_code == 401
 
 

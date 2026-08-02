@@ -39,6 +39,7 @@ def test_contract_total_values(client, auth):
     assert total >= 500_000, f"Expected pipeline >= 500k EGP, got {total}"
 
 
-def test_contracts_requires_auth(client):
-    res = client.get("/api/v1/contracts/")
+def test_contracts_requires_auth():
+    import requests as _req
+    res = _req.get("http://localhost:8030/api/v1/contracts/", timeout=10)
     assert res.status_code == 401
