@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/ai-scheduling", tags=["ai-scheduling"])
 
@@ -22,13 +23,14 @@ def _parse_specializations(raw):
         return [s.strip().lower() for s in str(raw).split(",") if s.strip()]
 
 @router.get("/capacity", summary="Technician capacity overview")
-def get_capacity(db: Session = Depends(get_db)):
+def get_capacity(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db)):
     try:
         rows = db.execute(text("""
             SELECT id, name, specializations, max_work_orders,
                    current_work_orders, hotel_id, is_active
             FROM technicians
             WHERE is_active = true
+              AND hotel_id = :hotel_id
             ORDER BY current_work_orders ASC
         """)).fetchall()
     except Exception:
@@ -68,10 +70,9 @@ def get_capacity(db: Session = Depends(get_db)):
     }
 
 @router.post("/recommend-dispatch", summary="AI dispatch recommendation")
-def recommend_dispatch(data: dict, db: Session = Depends(get_db)):
+def recommend_dispatch(data: dict, hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db)):
     wo_type   = (data.get("work_order_type") or data.get("type") or "").lower()
     priority  = (data.get("priority") or "medium").lower()
-    hotel_id  = data.get("hotel_id", "")
 
     try:
         techs = db.execute(text("""
@@ -125,8 +126,8 @@ def recommend_dispatch(data: dict, db: Session = Depends(get_db)):
         "message":      f"Best match: {scored[0]['name']} (score: {scored[0]['score']})",
     }
 
-@router.get("/daily-plan/{hotel_id}", summary="Daily operations plan for hotel")
-def daily_plan(hotel_id: str, db: Session = Depends(get_db)):
+@router.get("/daily-plan", summary="Daily operations plan for hotel")
+def daily_plan(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db)):
     today = datetime.date.today()
 
     try:
