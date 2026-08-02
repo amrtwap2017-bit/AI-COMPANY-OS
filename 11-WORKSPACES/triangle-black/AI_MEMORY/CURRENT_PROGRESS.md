@@ -1,108 +1,50 @@
 # CURRENT_PROGRESS.md — Triangle Black
 
-> Updated: October 2026 | Update this after EVERY sprint completion
+Last Updated: August 2026
 
----
+## Phase 0: AI Software Factory
 
-## Overall Progress
+Status: COMPLETE
+Committed: bf856701
+Files: 72 new files, 3339 insertions
 
-| Phase | Sprints | Status | % Complete |
-|-------|---------|--------|-----------|
-| Phase 0: AI Factory | Factory-1 | 🟢 IN PROGRESS | 50% |
-| Phase 1: Commercial | 001-006 | 🟡 ACTIVE | ~45% |
-| Phase 2: Projects & Ops | 007-012 | ⬜ PENDING | 0% |
-| Phase 3: Financial | 013-018 | ⬜ PENDING | 0% |
-| Phase 4: HR & Cross-Cutting | 019-021 | ⬜ PENDING | 0% |
-| Phase 5: AI Layer | - | ⬜ PENDING | 0% |
-| Phase 6: Digital Twin | - | ⬜ PENDING | 20% |
-| Phase 7: SaaS & White Label | - | ⬜ PENDING | 0% |
+## Security Audit Results
 
----
+hotel_id is the tenant identifier (923 uses)
+get_hotel_id dependency in src/core/tenant.py extracts from JWT
 
-## Sprint Status Board
+Safe routers (using Depends): 24
+Fixed routers (ai_scheduling): 3 endpoints fixed
+Remaining path params: hotels/router.py (intentional admin endpoints)
+DEFAULT_HOTEL fallback: exists in tenant.py as safety net (P2, not P0)
 
-| Sprint | Focus | Backend | API | Portal | Tests | Status |
-|--------|-------|---------|-----|--------|-------|--------|
-| Sprint-000 | Platform Setup | ✅ | ✅ | ✅ | 🟡 | ✅ Complete |
-| Sprint-001 | Commercial CRM | ✅ | ✅ | 🟢 | 🟢 | 🟢 Active |
-| Sprint-002 | Commercial Pipeline | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 Active |
-| Sprint-003 | Commercial Surveys | 🟢 | 🟢 | 🟢 | 🟢 | 🟢 Active |
-| Sprint-004 | Commercial Quotations | ✅ | ✅ | 🟢 | 🟢 | 🟢 Active |
-| Sprint-005 | Commercial Contracts | ✅ | ✅ | 🟢 | 🟢 | 🟢 Active |
-| Sprint-006 | Commercial Portal | ✅ | ✅ | 🟢 | 🟢 | 🟢 Active |
-| Sprint-007 | Project Basics | ✅ | ✅ | 🟢 | 🟢 | 🟢 Complete |
-| Sprint-008 | Project Execution | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-009 | Project Closeout | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-010 | Procurement | ✅ | ✅ | 🟢 | 🟢 | 🟢 Active |
-| Sprint-011 | Supplier Management | ✅ | ✅ | 🟢 | 🟢 | 🟢 Partial |
-| Sprint-012 | Inventory | ✅ | ✅ | 🟢 | 🟢 | 🟢 Partial |
-| Sprint-013 | Financial AR | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-014 | Financial AP | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-015 | Financial GL | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-016 | Maintenance | ✅ | ✅ | 🟢 | 🟢 | 🟢 Partial |
-| Sprint-017 | Documents | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-018 | Executive Intel | ✅ | ✅ | 🟢 | 🟢 | 🟢 Partial |
-| Sprint-019 | HR Basics | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-020 | HR Operations | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
-| Sprint-021 | Cross-Cutting | ✅ | 🟡 | ❌ | ❌ | ⬜ Pending |
+Commits:
+  099f2f99 fix(security): document P0 tenant isolation gaps
+  7331c4f6 fix(docs): correct security model hotel_id is tenant identifier
+  4c9536cd fix(security): P0 hotel isolation in ai_scheduling router
 
----
+## Test Status
 
-## Domain Completion
+Runner: .venv/bin/python -m pytest
+Results: 40 passed, 3 failed, 103 errors
+Errors: import/config issues not code bugs (need conftest fix)
 
-| Domain | Backend | API | Portal | Tests | AI Integration | Overall |
-|--------|---------|-----|--------|-------|---------------|---------|
-| Commercial (CRM) | 100% | 95% | 85% | 45% | 60% | 72.5% |
-| Procurement | 90% | 80% | 70% | 30% | 40% | 58% |
-| Maintenance | 95% | 85% | 65% | 25% | 50% | 71.25% |
-| Projects | 75% | 65% | 45% | 15% | 30% | 53.75% |
-| Inventory | 95% | 85% | 75% | 35% | 40% | 76.25% |
-| Supplier Mgmt | 90% | 80% | 65% | 20% | 40% | 63% |
-| Financial Control | 80% | 70% | 30% | 15% | 20% | 45% |
-| Executive Intel | 90% | 85% | 65% | 20% | 50% | 72.5% |
-| Digital Twin | 45% | 35% | 15% | 0% | 25% | 26.25% |
-| Document Mgmt | 90% | 80% | 65% | 25% | 30% | 71.25% |
-| AI Copilots | 45% | 35% | 25% | 0% | 60% | 37.5% |
-| Human Resources | 50% | 40% | 30% | 10% | 20% | 42.5% |
-| Integrations | 45% | 35% | 25% | 10% | 20% | 26.25% |
-| Mobile | 50% | 45% | 0% | 0% | 0% | 27.5% |
-| Shared Kernel | 95% | 90% | 85% | 35% | 50% | 76.25% |
+Failing tests:
+  test_api_endpoints.py::TestHealth::test_health
+  test_core_apis.py::TestWorkOrders::test_limit_enforced
+  test_twin.py::test_twin_no_critical_open
 
----
+## Sprint Status
 
-## What Was Done Last
+| Sprint | Status | Backend | Portal | Tests |
+|--------|--------|---------|--------|-------|
+| Sprint-000 | Done | Done | Done | Partial |
+| Sprint-001 | Active | Done | Partial | Missing |
+| Sprint-010 | Active | Done | Partial | Missing |
 
-Based on AGENT_HANDOFF.md and HANDOFF_SPRINT400.md:
-- Completed Commercial CRM frontend and tests
-- Expanded Procurement module with new features and bug fixes
-- Continued development of the Digital Twin
-- Progressed on AI Software Factory agents, checklists, and prompts
+## Next Actions
 
----
-
-## What Is Next (Next 3 Actions)
-
-1. **Complete Project Execution & Closeout** (current): Ensure all project-[8D[K
-project-related features are complete.
-2. **Finalize Financial AR & AP Modules** (next sprint): Prepare for revenu[6D[K
-revenue reporting by completing these critical financial modules.
-3. **Develop Mobile Portal Frontend** (sprint after next): Provide access f[1D[K
-for field technicians with a responsive, mobile-friendly interface.
-
----
-
-## Critical Blockers
-
-| Blocker | Impact | Owner | Status |
-|---------|--------|-------|--------|
-| Test coverage ~20% across all modules | Quality risk | QA Agent | Active [K
-|
-| HR domain still lacks detailed implementation | Missing domain functional[10D[K
-functionalities | Backend Agent | Queued Sprint-019 |
-| Financial GL module not started yet | Revenue reporting blocked | Backend[7D[K
-Backend Agent | Queued Sprint-015 |
-
----
-*Update this file after every sprint review. Cross-ref: MASTER_EXECUTION_PL[19D[K
-MASTER_EXECUTION_PLAN.md*
-
+1. Fix 3 failing tests
+2. Fix hotels/router.py undefined hotel_id bug
+3. Fix 103 test errors (conftest issue)
+4. Sprint-001 portal completion
