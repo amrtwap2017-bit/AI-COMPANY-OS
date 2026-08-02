@@ -8,11 +8,20 @@ BASE_URL = "http://localhost:8030"
 
 @pytest.fixture(scope="session")
 def admin_token():
-    """Get admin JWT token for all tests."""
-    r = requests.post(f"{BASE_URL}/api/v1/auth/login",
-        data={"username": "amr@triangleblack.com", "password": "admin123"})
-    assert r.status_code == 200, f"Login failed: {r.text}"
-    return r.json()["access_token"]
+    """Get admin JWT token for all tests. Login once, reuse across all tests."""
+    import time
+    for attempt in range(3):
+        r = requests.post(f"{BASE_URL}/api/v1/auth/login",
+            data={"username": "amr@triangleblack.com", "password": "admin123"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"})
+        if r.status_code == 200:
+            return r.json()["access_token"]
+        if r.status_code == 429:
+            print(f"Rate limited, waiting 65 seconds (attempt {attempt+1}/3)...")
+            time.sleep(65)
+        else:
+            break
+    assert False, f"Login failed after retries: {r.status_code} {r.text}"
 
 @pytest.fixture(scope="session")
 def auth_headers(admin_token):
