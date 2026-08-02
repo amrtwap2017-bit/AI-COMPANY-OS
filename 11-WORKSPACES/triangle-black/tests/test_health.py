@@ -1,3 +1,4 @@
+import requests
 """Tests for health endpoint and basic API availability."""
 
 
@@ -24,6 +25,7 @@ def test_docs_available(client):
     assert res.status_code == 200
 
 
-def test_protected_endpoint_requires_auth(client):
-    res = client.get("/api/v1/leads/")
-    assert res.status_code == 401
+def test_protected_endpoint_requires_auth():
+    """Test without auth headers - client fixture adds auth so we use raw requests."""
+    res = requests.get("http://localhost:8030/api/v1/leads/", timeout=10)
+    assert res.status_code == 401, f"Expected 401 but got {res.status_code}: {res.text[:100]}"

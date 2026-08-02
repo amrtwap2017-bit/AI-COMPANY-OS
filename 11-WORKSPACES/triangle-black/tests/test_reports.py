@@ -22,7 +22,7 @@ def _admin_headers(client):
     """Get auth headers using admin account."""
     r = client.post(
         "/api/v1/auth/login",
-        data={"username": "amr@triangleblack.com", "password": "Admin123!"},
+        data={"username": "amr@triangleblack.com", "password": "admin123"},
         headers={"content-type": "application/x-www-form-urlencoded"},
     )
     token = r.json().get("access_token", "")
