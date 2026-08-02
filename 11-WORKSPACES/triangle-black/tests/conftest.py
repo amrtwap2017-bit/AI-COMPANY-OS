@@ -62,3 +62,8 @@ def client(base_url, auth_headers):
 def auth(auth_headers):
     """Alias for auth_headers — some tests use 'auth' fixture name."""
     return auth_headers
+
+@pytest.fixture(scope="session")
+def headers(auth_headers):
+    """Alias for auth_headers — some tests use 'headers' fixture name."""
+    return auth_headers

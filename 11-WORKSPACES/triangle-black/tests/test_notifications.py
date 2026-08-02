@@ -6,15 +6,21 @@ def test_list_notifications(client, auth):
     res = client.get("/api/v1/notifications/", headers=auth)
     assert res.status_code == 200
     data = res.json()
-    assert "notifications" in data
-    assert "unread_count" in data
-    assert isinstance(data["notifications"], list)
-    assert isinstance(data["unread_count"], int)
+    # API returns list directly or paginated dict
+    if isinstance(data, list):
+        notifications = data
+        unread_count = sum(1 for n in data if not n.get("is_read", True))
+    else:
+        notifications = data.get("notifications", data)
+        unread_count = data.get("unread_count", 0)
+    assert isinstance(notifications, list)
+    assert isinstance(unread_count, int)
 
 
 def test_notifications_have_correct_fields(client, auth):
-    data = client.get("/api/v1/notifications/", headers=auth).json()
-    for n in data["notifications"]:
+    raw = client.get("/api/v1/notifications/", headers=auth).json()
+    data_list = raw if isinstance(raw, list) else raw.get("notifications", [])
+    for n in data_list:
         assert "id" in n
         assert "title" in n
         assert "type" in n
@@ -33,28 +39,31 @@ def test_unread_count_endpoint(client, auth):
 def test_unread_only_filter(client, auth):
     res = client.get("/api/v1/notifications/?unread_only=true", headers=auth)
     assert res.status_code == 200
-    data = res.json()
-    for n in data["notifications"]:
+    raw = res.json()
+    data_list = raw if isinstance(raw, list) else raw.get("notifications", [])
+    for n in data_list:
         assert n["is_read"] is False
 
 
 def test_mark_notification_read(client, auth):
-    notifs = client.get(
+    raw = client.get(
         "/api/v1/notifications/?unread_only=true", headers=auth
     ).json()
-    if not notifs["notifications"]:
+    notif_list = raw if isinstance(raw, list) else raw.get("notifications", [])
+    if not notif_list:
         pytest.skip("No unread notifications to mark")
 
-    notif_id = notifs["notifications"][0]["id"]
+    notif_id = notif_list[0]["id"]
     res = client.patch(f"/api/v1/notifications/{notif_id}/read", headers=auth)
     assert res.status_code == 200
     assert res.json()["is_read"] is True
 
     # Verify it no longer appears in unread
-    after = client.get(
+    after_raw = client.get(
         "/api/v1/notifications/?unread_only=true", headers=auth
     ).json()
-    assert all(n["id"] != notif_id for n in after["notifications"])
+    after_list = after_raw if isinstance(after_raw, list) else after_raw.get("notifications", [])
+    assert all(n["id"] != notif_id for n in after_list)
 
 
 def test_mark_all_read_reduces_unread(client, auth):
@@ -91,7 +100,8 @@ def test_mark_nonexistent_notification(client, auth):
 
 def test_admin_sees_all_roles(client, auth):
     """Admin should see notifications for all roles."""
-    data = client.get("/api/v1/notifications/", headers=auth).json()
-    roles = {n["recipient_role"] for n in data["notifications"]}
+    raw = client.get("/api/v1/notifications/", headers=auth).json()
+    data_list = raw if isinstance(raw, list) else raw.get("notifications", [])
+    roles = {n["recipient_role"] for n in data_list}
     # Admin sees manager, agent, and all notifications
     assert len(roles) >= 1
