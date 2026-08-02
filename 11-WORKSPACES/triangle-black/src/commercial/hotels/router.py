@@ -23,7 +23,6 @@ def create(
     _: User = Depends(require_agent),
 ):
     data = payload.model_dump()
-    data["hotel_id"] = hotel_id
     return HotelRepository(db).create(data)
 
 @router.get("/", response_model=List[HotelResponse])
@@ -33,7 +32,7 @@ def list_all(
     db: Session = Depends(get_db),
     _: User = Depends(require_agent),
 ):
-    return HotelRepository(db).list(skip=skip, limit=limit, hotel_id=hotel_id)
+    return HotelRepository(db).list(skip=skip, limit=limit)
 
 @router.get("/{hotel_id}", response_model=HotelResponse)
 def get(

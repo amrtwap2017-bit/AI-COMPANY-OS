@@ -8,7 +8,7 @@ class TestHealth:
         r = requests.get(f"{BASE}/health", timeout=15)
         assert r.status_code == 200
         d = r.json()
-        assert d.get("db") == "connected"
+        assert d.get("database") == "connected"
 
 class TestAuth:
     def test_login_valid(self):
