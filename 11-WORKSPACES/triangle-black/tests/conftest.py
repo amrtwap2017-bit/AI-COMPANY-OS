@@ -22,3 +22,29 @@ def auth_headers(admin_token):
 @pytest.fixture(scope="session")
 def base_url():
     return BASE_URL
+
+@pytest.fixture(scope="session")
+def client(base_url, auth_headers):
+    """HTTP client wrapper for tests that need client fixture."""
+    import requests
+    class Client:
+        def __init__(self, base, headers):
+            self.base = base
+            self.headers = headers
+        def get(self, path, **kwargs):
+            kwargs.setdefault("headers", self.headers)
+            kwargs.setdefault("timeout", 15)
+            return requests.get(f"{self.base}{path}", **kwargs)
+        def post(self, path, **kwargs):
+            kwargs.setdefault("headers", self.headers)
+            kwargs.setdefault("timeout", 15)
+            return requests.post(f"{self.base}{path}", **kwargs)
+        def patch(self, path, **kwargs):
+            kwargs.setdefault("headers", self.headers)
+            kwargs.setdefault("timeout", 15)
+            return requests.patch(f"{self.base}{path}", **kwargs)
+        def delete(self, path, **kwargs):
+            kwargs.setdefault("headers", self.headers)
+            kwargs.setdefault("timeout", 15)
+            return requests.delete(f"{self.base}{path}", **kwargs)
+    return Client(base_url, auth_headers)
