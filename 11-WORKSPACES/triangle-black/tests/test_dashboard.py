@@ -94,6 +94,7 @@ def test_lead_timeline(client, auth):
     assert isinstance(timeline, list)
 
 
-def test_pipeline_summary_requires_auth(client):
-    res = client.get("/api/v1/actions/pipeline/summary")
+def test_pipeline_summary_requires_auth():
+    import requests as _req
+    res = _req.get("http://localhost:8030/api/v1/actions/pipeline/summary", timeout=10)
     assert res.status_code == 401

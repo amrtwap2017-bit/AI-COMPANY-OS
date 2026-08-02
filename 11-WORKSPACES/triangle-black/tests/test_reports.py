@@ -31,8 +31,9 @@ def _admin_headers(client):
 
 # ── 1. Revenue Trend ──────────────────────────────────────────────────────────
 
-def test_revenue_trend_requires_auth(client):
-    r = client.get("/api/v1/actions/reports/revenue-trend")
+def test_revenue_trend_requires_auth():
+    import requests as _req
+    r = _req.get("http://localhost:8030/api/v1/actions/reports/revenue-trend", timeout=10)
     assert r.status_code == 401
 
 

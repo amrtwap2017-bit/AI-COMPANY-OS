@@ -52,6 +52,7 @@ def test_approved_quotes_exist(client, auth):
     assert len(approved) >= 3, f"Expected 3 approved quotes, got {len(approved)}"
 
 
-def test_quotes_requires_auth(client):
-    res = client.get("/api/v1/quotes/")
+def test_quotes_requires_auth():
+    import requests as _req
+    res = _req.get("http://localhost:8030/api/v1/quotes/", timeout=10)
     assert res.status_code == 401
