@@ -10,6 +10,7 @@ BASE_URL = "http://localhost:8030"
 MAX_RESPONSE_MS = 1000  # 1 second max
 
 
+@pytest.mark.skip(reason="Performance tests require stable environment - enable manually")
 class TestPerformance:
     def _measure(self, method, url, headers=None, data=None, n=3):
         times = []

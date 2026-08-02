@@ -1103,11 +1103,11 @@ def revenue_trend_report(
     # invoices "sent" — use issue_date (confirmed field, no sent_at exists)
     i_sent = (
         db.query(
-            func.to_char(Invoice.issue_date, "YYYY-MM").label("month"),
+            func.to_char(Invoice.due_date, "YYYY-MM").label("month"),
             func.sum(Invoice.total_amount).label("total"),
         )
         .filter(Invoice.status.in_(["sent", "paid"]))
-        .filter(Invoice.issue_date >= cutoff)
+        .filter(Invoice.due_date >= cutoff)
         .group_by("month")
         .all()
     )
@@ -1282,7 +1282,7 @@ def export_invoices_csv(
             inv.amount,
             inv.tax_amount,
             inv.total_amount,
-            str(inv.issue_date or ""),
+            str(inv.due_date or ""),
             str(inv.due_date or ""),
             str(inv.paid_date or ""),
             str(inv.created_at),
