@@ -1,25 +1,29 @@
 # CURRENT_SPRINT.md — Triangle Black
 
-Sprint Goal: SEC-001 tenant isolation audit + Sprint-001 CRM completion
+Sprint Goal: Fix DEFAULT_HOTEL fallback P0 + run tests
 
 ## Status
-Phase 0 AI Factory: COMPLETE
-Now starting: Security audit + domain sprint work
+AI Factory: COMPLETE
+Security audit: COMPLETE (found hotel_id pattern)
+Now: Fix DEFAULT_HOTEL + verify JWT source
+
+## Key Finding
+hotel_id IS the tenant identifier (923 uses)
+tenant_id is not used in code (0 uses)
+Documentation was wrong — now corrected
 
 ## Active Tasks
 
-| ID | Task | Owner | Priority | Status |
-|----|------|-------|----------|--------|
-| SEC-001 | Audit all modules for tenant_id | Security Agent | P0 | Active |
-| SEC-002 | Fix email_notifications tenant_id | Backend Agent | P0 | Active |
-| SEC-003 | Fix email_service tenant_id | Backend Agent | P0 | Active |
-| S001-FE | CRM frontend completion | Frontend Agent | P1 | Next |
-| S001-TST | CRM module tests | Testing Agent | P1 | Next |
+| ID | Task | Priority | Status |
+|----|------|----------|--------|
+| P0-FIX-001 | Remove DEFAULT_HOTEL fallback from all repositories | P0 | Active |
+| P0-FIX-002 | Verify hotel_id comes from JWT not user input | P0 | Active |
+| DEV-001 | Install httpx to fix test import error | P1 | Done |
+| DEV-002 | Run full test suite and report results | P1 | Active |
+| DOC-001 | Update all docs hotel_id vs tenant_id | P2 | Active |
 
 ## Acceptance Criteria
-- Zero P0 security issues in AI_MEMORY/KNOWN_PROBLEMS.md
-- All modules verified for tenant_id
-- Sprint-001 CRM: portal routes complete + tests passing
-
-## Next Sprint
-Security fixes complete then resume Sprint-001
+- Zero DEFAULT_HOTEL fallbacks in repository.py files
+- All hotel_id values sourced from JWT token only
+- Tests run without import errors
+- Test pass rate documented

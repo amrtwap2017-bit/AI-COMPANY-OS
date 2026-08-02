@@ -60,3 +60,26 @@ Full list: run audit script in PROMPTS/Security.md
 | ID | Problem | Resolution | Date |
 |----|---------|-----------|------|
 | B-000 | AI Software Factory missing | Built Phase 0 | Aug 2026 |
+
+---
+
+## CORRECTION — August 2026 Audit Finding
+
+hotel_id IS the tenant identifier in this codebase.
+tenant_id = 0 uses. hotel_id = 923 uses.
+
+The P0 issues were misidentified. Real issues are:
+
+REAL P0:
+  DEFAULT_HOTEL fallback exists in repository.py files
+  If hotel_id not passed, query defaults to tb-default-hotel-000000000001
+  This means any request without hotel_id sees default hotel data
+
+REAL P1:
+  Verify hotel_id comes from JWT token (not user input) in all routers
+  Some routers may accept hotel_id as query param (dangerous)
+
+REAL P2:
+  Field naming inconsistency (hotel_id vs tenant_id)
+  Should rename to tenant_id for clarity in future refactor
+  Do NOT rename now - breaking change - plan as dedicated ADR sprint
