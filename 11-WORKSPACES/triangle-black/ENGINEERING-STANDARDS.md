@@ -293,3 +293,26 @@ Commit format (Conventional Commits):
 - Coding standards: 05-ENGINEERING/FOUNDATION/Coding-Standards.md
 - AI delivery standards: 10-AI/DELIVERY/STANDARDS/
 
+
+---
+
+## CORRECTION — Actual Code Pattern (August 2026)
+
+The pattern used in src/commercial/ is:
+
+  router.py    FastAPI routes — HTTP adapter
+  repository.py  Data access + business logic
+  models.py    SQLAlchemy ORM
+  schemas.py   Pydantic DTOs
+
+NOTE: Most modules do NOT have service.py.
+The repository.py handles both data access and business logic.
+This is a known architecture gap — service layer should be extracted in future.
+
+TENANT_ID ENFORCEMENT:
+Every repository.py function that queries the database MUST include:
+  .filter(Model.tenant_id == tenant_id)
+
+Every router.py endpoint MUST pass tenant_id to repository:
+  tenant_id: str = Depends(get_current_tenant_id)
+  return repo.get_all(db, tenant_id)
