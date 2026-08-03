@@ -1,5 +1,5 @@
-import os
 from __future__ import annotations
+import os
 
 from src.commercial.auth.models import User
 
