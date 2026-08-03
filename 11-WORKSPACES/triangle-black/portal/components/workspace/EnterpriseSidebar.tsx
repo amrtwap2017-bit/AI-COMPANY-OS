@@ -125,6 +125,7 @@ export function EnterpriseSidebar() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarMounted, setSidebarMounted] = useState(false);
   const role = (user?.role || "viewer").toLowerCase();
 
   useEffect(() => { setSidebarMounted(true); }, []);
