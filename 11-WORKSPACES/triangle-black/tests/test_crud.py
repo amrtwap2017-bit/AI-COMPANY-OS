@@ -28,7 +28,7 @@ class TestWorkOrderCRUD:
         """Create WO then verify it appears in list."""
         title = f"Test WO List {uuid.uuid4().hex[:6]}"
         r = requests.post(f"{BASE_URL}/api/v1/work-orders/",
-            json={"title": title, "type": "corrective", "priority": "low", "hotel_id": HOTEL_ID},
+            json={"title": title, "type": "corrective", "priority": "low", "hotel_id": "tb-default-hotel-000000000001", "hotel_id": HOTEL_ID},
             headers=auth_headers)
         assert r.status_code in [200, 201]
         r2 = requests.get(f"{BASE_URL}/api/v1/work-orders/?limit=200", headers=auth_headers)
