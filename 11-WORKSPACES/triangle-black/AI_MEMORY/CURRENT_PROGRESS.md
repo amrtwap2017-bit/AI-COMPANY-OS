@@ -2,28 +2,27 @@
 
 Last Updated: August 2026
 
-## Test Status
-Start of session: 40 passed
-Current best:     127 passed (before regression)
-After regression fix: 111 passed
-Target: 130+ passed
+## Test Status — STABLE BASELINE
+Tests passing: 109
+Tests skipped: 19
+Tests failing: 28
+Server: RUNNING at localhost:8030
+Login: WORKING
 
-## Pending Issues
-1. Rate limit fix needs server restart to take effect
-2. quotes tests 429 in suite (pass alone)
-3. analytics/sla no route
-4. customers URL mismatch
+## DO NOT TOUCH
+src/main.py — working, stable
+src/commercial/auth/router.py — working, stable
+Rate limiters — do not modify
 
-## Key Facts
-- Entry point: src/main.py (uvicorn src.main:app)
-- Rate limiter: src/commercial/auth/router.py
-  - Was: 5 attempts, 900s lockout
-  - Now: 20 attempts, 60s lockout
-- hotel_id = tenant identifier (923 uses)
-- get_hotel_id in src/core/tenant.py extracts from JWT
+## Remaining 28 Failures (to fix carefully)
+Run: .venv/bin/python -m pytest tests/ -q --tb=no 2>&1 | grep FAILED
 
-## Next Session
-1. Restart server (Step 1 above)
-2. Run full suite (Step 2)
-3. Fix remaining failures with Qwen
-4. Target 130+ then move to Sprint-001 portal work
+## Architecture
+Entry: src/main.py (uvicorn src.main:app)
+hotel_id = tenant identifier
+get_hotel_id in src/core/tenant.py = JWT auth
+
+## Next Priority
+1. Fix 28 failures
+2. Sprint-001 CRM portal work
+3. Test coverage improvement

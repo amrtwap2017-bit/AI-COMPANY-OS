@@ -44,7 +44,7 @@ class TestCollections:
         ("/api/v1/analytics/kpis", ["commercial", "operations"]),
         # ("/api/v1/analytics/sla", ["compliance_rate"]),  # route not implemented
         ("/api/v1/actions/dashboard/stats", ["total_leads"]),
-        ("/api/v1/actions/dashboard/stats", ["leads", "contracts"]),
+        ("/api/v1/analytics/trends", ["labels", "revenue"]),
         ("/api/v1/analytics/kpis", ["commercial", "operations"]),
         ("/api/v1/actions/pipeline/summary", []),
     ])
