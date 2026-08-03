@@ -29,8 +29,8 @@ class TestCollections:
         ("/api/v1/assets/", 1),
         ("/api/v1/projects/", 1),
         ("/api/v1/agents/", 1),
-        ("/api/v1/inventory/items/", 1),
-        ("/api/v1/inventory/warehouses/", 1),
+        ("/api/v1/inventory-items/", 1),
+        ("/api/v1/warehouses/", 1),
     ])
     def test_collection_lists(self, headers, ep, min_count):
         r = requests.get(f"{BASE}{ep}", headers=headers, timeout=15)
