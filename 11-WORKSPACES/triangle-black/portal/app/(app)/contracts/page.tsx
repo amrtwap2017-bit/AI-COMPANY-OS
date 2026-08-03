@@ -1,3 +1,4 @@
+"use client";
 ```tsx
 "use client";
 
