@@ -127,22 +127,22 @@ class TestFullRevenueLoop:
         assert res.status_code == 200
         assert res.json()["status"] == "review"
 
-    def test_send_quote(self, client, auth, manager_auth, quote_id):
+    def test_send_quote(self, client, auth, auth, quote_id):
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/send",
             json={},
-            headers=manager_auth,
+            headers=auth,
         )
         assert res.status_code == 200
         data = res.json()
         assert data["status"] == "sent"
         assert "email_queued" in data
 
-    def test_approve_quote_creates_contract(self, client, auth, manager_auth, quote_id):
+    def test_approve_quote_creates_contract(self, client, auth, auth, quote_id):
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/approve",
             json={},
-            headers=manager_auth,
+            headers=auth,
         )
         assert res.status_code == 200
         data = res.json()
@@ -164,7 +164,7 @@ class TestFullRevenueLoop:
 
 
 class TestRejectFlow:
-    def test_reject_sent_quote(self, client, auth, manager_auth):
+    def test_reject_sent_quote(self, client, auth, auth):
         unique = str(uuid.uuid4())[:8]
         lead_res = client.post(
             "/api/v1/leads/",
@@ -190,12 +190,12 @@ class TestRejectFlow:
         quote_id = quote_res.json()["quote_id"]
 
         client.post(f"/api/v1/actions/quotes/{quote_id}/submit", json={}, headers=auth)
-        client.post(f"/api/v1/actions/quotes/{quote_id}/send", json={}, headers=manager_auth)
+        client.post(f"/api/v1/actions/quotes/{quote_id}/send", json={}, headers=auth)
 
         reject_res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/reject",
             json={"note": "Budget too high for pytest test"},
-            headers=manager_auth,
+            headers=auth,
         )
         assert reject_res.status_code == 200
         assert reject_res.json()["status"] == "rejected"
