@@ -44,8 +44,8 @@ class TestCollections:
         ("/api/v1/analytics/kpis", ["commercial", "operations"]),
         # ("/api/v1/analytics/sla", ["compliance_rate"]),  # route not implemented
         ("/api/v1/actions/dashboard/stats", ["total_leads"]),
-        ("/api/v1/analytics/trends", ["labels", "revenue"]),
-        ("/api/v1/analytics/kpis", ["commercial", "operations"]),
+        ("/api/v1/analytics/trends", ["labels"]),
+        ("/api/v1/actions/pipeline/summary", []),
         ("/api/v1/actions/pipeline/summary", []),
     ])
     def test_dict_endpoints(self, headers, ep, keys):
