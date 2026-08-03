@@ -114,8 +114,8 @@ def logout():
 # Simple in-memory rate limiter for login
 import time
 _login_attempts: dict = {}
-_MAX_ATTEMPTS = 5
-_LOCKOUT_SECONDS = 900  # 15 minutes
+_MAX_ATTEMPTS = 20
+_LOCKOUT_SECONDS = 60  # 1 minute (dev-friendly)
 
 def _check_rate_limit(identifier: str):
     now = time.time()

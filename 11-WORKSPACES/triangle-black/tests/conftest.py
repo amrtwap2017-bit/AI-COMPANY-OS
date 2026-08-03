@@ -83,8 +83,3 @@ def manager_auth(base_url):
         time.sleep(65)
     return {}
 
-import time as _time
-
-def pytest_runtest_setup(item):
-    """Add small delay between tests to avoid rate limiting."""
-    _time.sleep(0.3)

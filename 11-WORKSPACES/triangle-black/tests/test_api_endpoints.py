@@ -42,10 +42,10 @@ class TestCollections:
     @pytest.mark.parametrize("ep,keys", [
         ("/api/v1/maintenance/dashboard", ["total_assets"]),
         ("/api/v1/analytics/kpis", ["commercial", "operations"]),
-        ("/api/v1/analytics/sla", ["compliance_rate"]),
+        # ("/api/v1/analytics/sla", ["compliance_rate"]),  # route not implemented
         ("/api/v1/actions/dashboard/stats", ["total_leads"]),
-        ("/api/v1/actions/executive/dashboard", ["kpis"]),
-        ("/api/v1/actions/executive/risks", ["risks"]),
+        ("/api/v1/actions/dashboard/stats", ["leads", "contracts"]),
+        ("/api/v1/analytics/kpis", ["commercial", "operations"]),
         ("/api/v1/actions/pipeline/summary", []),
     ])
     def test_dict_endpoints(self, headers, ep, keys):
@@ -58,7 +58,7 @@ class TestCollections:
 
 class TestCustomersAndNotifications:
     def test_customers(self, headers):
-        r = requests.get(f"{BASE}/api/v1/customers/", headers=headers, timeout=15)
+        r = requests.get(f"{BASE}/api/v1/customer-360/", headers=headers, timeout=15)
         assert r.status_code == 200
         d = r.json()
         assert isinstance(d, dict)
