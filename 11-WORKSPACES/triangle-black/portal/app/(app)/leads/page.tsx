@@ -30,7 +30,13 @@ export default function LeadsPage() {
       if (r.error) {
         setError(r.error);
       } else {
-        setLeads(r.data ?? []);
+        const raw = r.data;
+        const arr = Array.isArray(raw) ? raw
+          : Array.isArray(raw?.data) ? raw.data
+          : Array.isArray(raw?.leads) ? raw.leads
+          : Array.isArray(raw?.results) ? raw.results
+          : [];
+        setLeads(arr);
       }
       setLoading(false);
     }

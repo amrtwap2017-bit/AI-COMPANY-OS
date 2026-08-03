@@ -37,11 +37,16 @@ export default function QuotesPage() {
   useEffect(() => {
     if (!mounted) return;
     async function load() {
-      const r = await tbFetch<Quote[]>("/api/v1/quotes/?limit=100");
+      const r = await tbFetch("/api/v1/quotes/?limit=100");
       if (r.error) {
         setError(r.error);
       } else {
-        setQuotes(Array.isArray(r.data) ? r.data : []);
+        const raw = r.data;
+        const arr = Array.isArray(raw) ? raw
+          : Array.isArray(raw?.data) ? raw.data
+          : Array.isArray(raw?.quotes) ? raw.quotes
+          : [];
+        setQuotes(arr);
       }
       setLoading(false);
     }
