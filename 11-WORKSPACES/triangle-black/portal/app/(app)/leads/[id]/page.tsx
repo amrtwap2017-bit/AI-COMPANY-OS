@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { leadsApi, Lead } from "@/lib/api/leads";
+import { leadsApi } from "@/lib/api/leads";
+import { tbFetch } from "@/lib/api/tb-client";
 
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-100 text-blue-800",
@@ -25,7 +26,7 @@ export default function LeadDetailPage() {
   useEffect(() => {
     if (!id) return;
     async function load() {
-      const r = await leadsApi.get(id);
+      const r = await tbFetch(`/api/v1/leads/${id}`);
       if (r.error) {
         setError(r.error);
       } else {
