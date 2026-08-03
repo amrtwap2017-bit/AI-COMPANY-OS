@@ -1,5 +1,4 @@
 "use client";
-```tsx
 "use client";
 
 import { useRouter } from 'next/navigation';
@@ -80,7 +79,6 @@ key={index}>{contract[col.dataIndex]}</td>)}
 };
 
 export default ContractsPage;
-```
 
 This code snippet is a complete working Next.js page component for displayi[8D[K
 displaying contracts. It includes:
