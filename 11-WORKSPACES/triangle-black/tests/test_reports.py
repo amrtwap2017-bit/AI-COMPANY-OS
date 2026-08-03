@@ -79,8 +79,9 @@ def test_revenue_trend_custom_months(client):
 
 # ── 2. Lead Funnel ────────────────────────────────────────────────────────────
 
-def test_lead_funnel_requires_auth(client):
-    r = client.get("/api/v1/actions/reports/lead-funnel")
+def test_lead_funnel_requires_auth():
+    import requests as _req
+    r = _req.get("http://localhost:8030/api/v1/actions/reports/lead-funnel", timeout=10)
     assert r.status_code in (401, 429), f'Expected 401 or 429, got {r.status_code}'
 
 
@@ -105,8 +106,9 @@ def test_lead_funnel_returns_all_stages(client):
 
 # ── 3. Agent Leaderboard ──────────────────────────────────────────────────────
 
-def test_agent_leaderboard_requires_auth(client):
-    r = client.get("/api/v1/actions/reports/agent-leaderboard")
+def test_agent_leaderboard_requires_auth():
+    import requests as _req
+    r = _req.get("http://localhost:8030/api/v1/actions/reports/agent-leaderboard", timeout=10)
     assert r.status_code in (401, 429), f'Expected 401 or 429, got {r.status_code}'
 
 
@@ -133,8 +135,9 @@ def test_agent_leaderboard_structure(client):
 
 # ── 4. Invoice CSV Export ─────────────────────────────────────────────────────
 
-def test_invoice_csv_requires_auth(client):
-    r = client.get("/api/v1/actions/reports/export/invoices.csv")
+def test_invoice_csv_requires_auth():
+    import requests as _req
+    r = _req.get("http://localhost:8030/api/v1/actions/reports/export/invoices.csv", timeout=10)
     assert r.status_code in (401, 429), f'Expected 401 or 429, got {r.status_code}'
 
 
@@ -154,8 +157,9 @@ def test_invoice_csv_export(client):
 
 # ── 5. Contract CSV Export ────────────────────────────────────────────────────
 
-def test_contract_csv_requires_auth(client):
-    r = client.get("/api/v1/actions/reports/export/contracts.csv")
+def test_contract_csv_requires_auth():
+    import requests as _req
+    r = _req.get("http://localhost:8030/api/v1/actions/reports/export/contracts.csv", timeout=10)
     assert r.status_code in (401, 429), f'Expected 401 or 429, got {r.status_code}'
 
 

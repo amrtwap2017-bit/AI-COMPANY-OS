@@ -67,3 +67,18 @@ def auth(auth_headers):
 def headers(auth_headers):
     """Alias for auth_headers — some tests use 'headers' fixture name."""
     return auth_headers
+
+@pytest.fixture(scope="session")
+def manager_auth(base_url):
+    """Manager auth headers for tests requiring manager role."""
+    import time
+    import requests as _req
+    for _ in range(3):
+        r = _req.post(f"{base_url}/api/v1/auth/login",
+            data={"username": "sara@triangleblack.com", "password": "manager123"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"})
+        if r.status_code == 200:
+            token = r.json().get("access_token", "")
+            return {"Authorization": f"Bearer {token}"}
+        time.sleep(65)
+    return {}

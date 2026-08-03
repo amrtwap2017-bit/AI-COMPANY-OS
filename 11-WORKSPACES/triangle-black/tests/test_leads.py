@@ -73,7 +73,7 @@ def test_get_lead_not_found(client, auth):
 
 def test_update_lead(client, auth, test_lead_id):
     res = client.patch(
-        f"/api/v1/leads/{test_lead_id}",
+        f"/api/v1/actions/leads/{test_lead_id}",
         json={"priority": "high", "notes": "Updated by pytest"},
         headers=auth,
     )
