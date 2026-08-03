@@ -151,12 +151,10 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 _req_counts: dict = defaultdict(list)
-RATE_LIMIT_MAX = 10000
+RATE_LIMIT_MAX = 200
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if os.environ.get("DISABLE_RATE_LIMIT") == "1" or open(".env").read().find("DISABLE_RATE_LIMIT=1") >= 0 if __import__("os").path.exists(".env") else False:
-            return await call_next(request)
         ip = request.client.host if request.client else "unknown"
         now = time.time()
         _req_counts[ip] = [t for t in _req_counts[ip] if t > now - 60]

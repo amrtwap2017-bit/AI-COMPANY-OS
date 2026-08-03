@@ -1,5 +1,4 @@
 from __future__ import annotations
-import os
 
 from src.commercial.auth.models import User
 
@@ -115,12 +114,10 @@ def logout():
 # Simple in-memory rate limiter for login
 import time
 _login_attempts: dict = {}
-_MAX_ATTEMPTS = 20
-_LOCKOUT_SECONDS = 60  # 1 minute (dev-friendly)
+_MAX_ATTEMPTS = 5
+_LOCKOUT_SECONDS = 900  # 15 minutes
 
 def _check_rate_limit(identifier: str):
-    if os.environ.get("DISABLE_RATE_LIMIT") == "1":
-        return
     now = time.time()
     if identifier in _login_attempts:
         attempts, last_time = _login_attempts[identifier]
