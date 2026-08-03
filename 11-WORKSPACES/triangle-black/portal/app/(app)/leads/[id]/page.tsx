@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { leadsApi } from "@/lib/api/leads";
 import { tbFetch } from "@/lib/api/tb-client";
-import { tbFetch } from "@/lib/api/tb-client";
 
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-100 text-blue-800",
