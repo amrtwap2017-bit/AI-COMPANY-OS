@@ -30,8 +30,12 @@ export default function QuotesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     async function load() {
       const r = await tbFetch<Quote[]>("/api/v1/quotes/?limit=100");
       if (r.error) {

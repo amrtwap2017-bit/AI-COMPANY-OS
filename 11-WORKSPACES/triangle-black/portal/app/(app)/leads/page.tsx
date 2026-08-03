@@ -19,8 +19,12 @@ export default function LeadsPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     async function load() {
       const r = await leadsApi.list({ limit: 100 });
       if (r.error) {

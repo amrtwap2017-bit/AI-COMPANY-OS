@@ -127,6 +127,8 @@ export function EnterpriseSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const role = (user?.role || "viewer").toLowerCase();
 
+  useEffect(() => { setSidebarMounted(true); }, []);
+
   useEffect(() => {
     const stored = localStorage.getItem("tb_sidebar_collapsed");
     if (stored === "true") setCollapsed(true);
@@ -253,7 +255,7 @@ export function EnterpriseSidebar() {
         })}
 
         {/* Recent Pages */}
-        {!collapsed && recentPaths.length > 0 && (
+        {sidebarMounted && !collapsed && recentPaths.length > 0 && (
           <div className="pt-4">
             <div className="pb-1 px-3">
               <span style={{fontSize:"0.5625rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#6D5F53"}}>
