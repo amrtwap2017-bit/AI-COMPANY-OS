@@ -84,13 +84,17 @@ def manager_auth(base_url):
     return {}
 
 
+_waited_modules = set()
+
 @pytest.fixture(autouse=True)
 def wait_between_test_files(request):
-    """Wait between test modules to avoid rate limiting."""
+    """Wait once per test module to allow rate limit reset."""
     import time
-    # Only wait at start of new test module
+    global _waited_modules
     if hasattr(request, 'node') and hasattr(request.node, 'fspath'):
         fname = str(request.node.fspath)
-        if any(x in fname for x in ['test_quotes', 'test_notifications', 'test_reports']):
-            time.sleep(1.5)
+        if any(x in fname for x in ['test_quotes', 'test_notifications']):
+            if fname not in _waited_modules:
+                _waited_modules.add(fname)
+                time.sleep(62)
     yield
