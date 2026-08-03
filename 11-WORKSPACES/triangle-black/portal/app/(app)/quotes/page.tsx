@@ -46,7 +46,7 @@ export default function QuotesPage() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [mounted]);
 
   const filtered = statusFilter === "all"
     ? quotes

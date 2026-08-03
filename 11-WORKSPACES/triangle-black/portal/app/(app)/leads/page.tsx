@@ -35,7 +35,7 @@ export default function LeadsPage() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [mounted]);
 
   const filtered = leads.filter((l) => {
     const q = search.toLowerCase();
