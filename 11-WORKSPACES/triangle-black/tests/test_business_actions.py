@@ -127,7 +127,7 @@ class TestFullRevenueLoop:
         assert res.status_code == 200
         assert res.json()["status"] == "review"
 
-    def test_send_quote(self, client, auth, auth, quote_id):
+    def test_send_quote(self, client, auth, quote_id):
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/send",
             json={},
@@ -138,7 +138,7 @@ class TestFullRevenueLoop:
         assert data["status"] == "sent"
         assert "email_queued" in data
 
-    def test_approve_quote_creates_contract(self, client, auth, auth, quote_id):
+    def test_approve_quote_creates_contract(self, client, auth, quote_id):
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/approve",
             json={},
@@ -164,7 +164,7 @@ class TestFullRevenueLoop:
 
 
 class TestRejectFlow:
-    def test_reject_sent_quote(self, client, auth, auth):
+    def test_reject_sent_quote(self, client, auth):
         unique = str(uuid.uuid4())[:8]
         lead_res = client.post(
             "/api/v1/leads/",
