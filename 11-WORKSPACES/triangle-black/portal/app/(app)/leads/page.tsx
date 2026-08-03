@@ -33,7 +33,7 @@ export default function LeadsPage() {
         const raw = r.data;
         const arr = Array.isArray(raw) ? raw
           : Array.isArray(raw?.data) ? raw.data
-          : Array.isArray(raw?.leads) ? raw.leads
+          : Array.isArray(raw?.results) ? raw.results
           : Array.isArray(raw?.results) ? raw.results
           : [];
         setLeads(arr);
@@ -47,9 +47,9 @@ export default function LeadsPage() {
     const q = search.toLowerCase();
     const matchSearch =
       !search ||
-      (l.contact_name ?? "").toLowerCase().includes(q) ||
+      (l.name ?? "").toLowerCase().includes(q) ||
       (l.email ?? "").toLowerCase().includes(q) ||
-      (l.company_name ?? "").toLowerCase().includes(q);
+      (l.company ?? "").toLowerCase().includes(q);
     const matchStatus = statusFilter === "all" || l.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -137,10 +137,10 @@ export default function LeadsPage() {
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">{lead.contact_name}</div>
+                    <div className="font-medium text-gray-900">{lead.name}</div>
                     <div className="text-gray-400 text-xs">{lead.email}</div>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{lead.company_name || "—"}</td>
+                  <td className="px-4 py-3 text-gray-700">{lead.company || "—"}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-700"}`}>
                       {lead.status}

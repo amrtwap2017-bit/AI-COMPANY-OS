@@ -77,8 +77,8 @@ export default function LeadDetailPage() {
 
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{lead.contact_name}</h1>
-          <p className="text-gray-500 mt-1">{lead.company_name}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{lead.name}</h1>
+          <p className="text-gray-500 mt-1">{lead.company}</p>
         </div>
         <div className="flex gap-2 items-center">
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-700"}`}>
