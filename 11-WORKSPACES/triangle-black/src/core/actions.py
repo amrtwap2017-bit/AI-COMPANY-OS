@@ -1266,23 +1266,18 @@ def export_invoices_csv(
 
     writer.writerow([
         "invoice_number", "invoice_id",
-        "title", "status",
-        "amount", "tax_amount", "total_amount",
-        "issue_date", "due_date", "paid_date", "created_at",
+        "status", "total_amount",
+        "due_date", "paid_date", "created_at",
     ])
 
     for inv in invoices:
         writer.writerow([
             inv.invoice_number,
             str(inv.id),
-
-            inv.title or "",
             inv.status,
-            inv.amount,
-            inv.tax_amount,
             inv.total_amount,
             str(inv.due_date or ""),
-            str(inv.due_date or ""),
+            str(inv.paid_date or ""),
             str(inv.paid_date or ""),
             str(inv.created_at),
         ])
