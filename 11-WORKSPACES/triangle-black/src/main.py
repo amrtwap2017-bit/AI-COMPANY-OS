@@ -151,7 +151,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 _req_counts: dict = defaultdict(list)
-RATE_LIMIT_MAX = 200
+RATE_LIMIT_MAX = 10000
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
