@@ -155,6 +155,8 @@ RATE_LIMIT_MAX = 10000
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        if os.environ.get("DISABLE_RATE_LIMIT") == "1":
+            return await call_next(request)
         ip = request.client.host if request.client else "unknown"
         now = time.time()
         _req_counts[ip] = [t for t in _req_counts[ip] if t > now - 60]
