@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional, List
 import uuid, datetime
 
@@ -275,3 +276,169 @@ def get_transition_log(work_order_id: str, db: Session = Depends(get_db)):
         return [row_to_dict(r) for r in rows]
     except Exception:
         return []
+
+
+# ── Sprint-022: Work Order Complete + Auto-Invoice ────────────────────────────
+from datetime import datetime, timedelta
+import uuid as _uuid
+
+
+
+# ── Sprint-022: Work Order Complete + Auto-Invoice ────────────────────────────
+from datetime import datetime as _dt, timedelta as _td
+import uuid as _uuid2
+
+
+@router.post("/{wo_id}/complete", summary="Complete work order and auto-create draft invoice")
+def complete_work_order(wo_id: str, db: Session = Depends(get_db)):
+    """
+    Mark WO as completed. Auto-create a draft invoice (idempotent).
+    No hotel_id required — uses hotel_id from the WO record itself.
+    """
+    from sqlalchemy import text as _t
+
+    # Load WO (no hotel_id filter — WO hotel_id comes from the record)
+    row = None
+    try:
+        row = db.execute(_t(
+            "SELECT CAST(id AS TEXT) as id, hotel_id, title, status "
+            "FROM work_orders WHERE CAST(id AS TEXT) = :wid"
+        ), {"wid": wo_id}).fetchone()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB error: {e}")
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Work order not found")
+
+    wo_hotel = row[1] or "tb-default-hotel-000000000001"
+    wo_status = row[3]
+    inv_num = f"AUTO-{wo_id[:8]}"
+
+    # If already completed — return existing invoice
+    if wo_status == "completed":
+        existing = None
+        try:
+            existing = db.execute(_t(
+                "SELECT id FROM invoices WHERE invoice_number = :n"
+            ), {"n": inv_num}).fetchone()
+        except Exception:
+            pass
+        return {
+            "ok": True, "work_order_id": wo_id, "status": "completed",
+            "invoice_id": existing[0] if existing else None,
+            "invoice_number": inv_num, "message": "Already completed",
+        }
+
+    # Update WO status
+    try:
+        db.execute(_t(
+            "UPDATE work_orders SET status = 'completed', updated_at = NOW() "
+            "WHERE CAST(id AS TEXT) = :wid"
+        ), {"wid": wo_id})
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Update failed: {e}")
+
+    # Auto-create draft invoice (idempotent)
+    inv_id = None
+    try:
+        existing = db.execute(_t(
+            "SELECT id FROM invoices WHERE invoice_number = :n"
+        ), {"n": inv_num}).fetchone()
+        if not existing:
+            inv_id = str(_uuid2.uuid4())
+            due = (_dt.utcnow() + _td(days=30)).date()
+            db.execute(_t(
+                "INSERT INTO invoices (id, hotel_id, invoice_number, total_amount, status, due_date, created_at) "
+                "VALUES (:id, :hid, :num, 0, 'draft', :due, NOW())"
+            ), {"id": inv_id, "hid": wo_hotel, "num": inv_num, "due": due})
+        else:
+            inv_id = existing[0]
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        inv_id = "error"
+
+    return {
+        "ok": True, "work_order_id": wo_id, "status": "completed",
+        "invoice_id": inv_id, "invoice_number": inv_num,
+        "message": "Completed. Draft invoice created.",
+    }
+# ─────────────────────────────────────────────────────────────────────────────
+    # ── 1. Load + validate work order ─────────────────────────────────────────
+    wo_row = db.execute(text("""
+        SELECT id, hotel_id, title, status
+        FROM work_orders
+        WHERE CAST(id AS TEXT) = :wo_id
+    """), {"wo_id": wo_id, "hid": hotel_id}).fetchone()
+
+    if not wo_row:
+        raise HTTPException(status_code=404, detail="Work order not found")
+
+    wo = dict(wo_row._mapping)
+
+    if wo["status"] == "completed":
+        # Already completed — check if invoice exists
+        inv_check = db.execute(text("""
+            SELECT id FROM invoices
+            WHERE hotel_id = :hid
+              AND invoice_number = :inv_num
+        """), {"hid": wo_row_hid, "inv_num": f"AUTO-{wo_id[:8]}"}).fetchone()
+
+        return {
+            "ok": True,
+            "work_order_id": wo_id,
+            "status": "completed",
+            "invoice_id": inv_check[0] if inv_check else None,
+            "message": "Already completed",
+        }
+
+    # ── 2. Update WO status to completed ──────────────────────────────────────
+    db.execute(text("""
+        UPDATE work_orders
+        SET status = 'completed',
+            updated_at = NOW()
+        WHERE CAST(id AS TEXT) = :wo_id
+    """), {"wo_id": wo_id, "hid": hotel_id})
+
+    # ── 3. Auto-create draft invoice (idempotent check) ────────────────────────
+    invoice_number = f"AUTO-{wo_id[:8]}"
+    inv_id = None
+
+    existing = db.execute(text("""
+        SELECT id FROM invoices
+        WHERE hotel_id = :hid AND invoice_number = :inv_num
+    """), {"hid": wo["hotel_id"], "inv_num": invoice_number}).fetchone()
+
+    if not existing:
+        inv_id = str(_uuid.uuid4())
+        due_date = (datetime.utcnow() + timedelta(days=30)).date()
+
+        db.execute(text("""
+            INSERT INTO invoices (
+                id, hotel_id, invoice_number,
+                total_amount, status, due_date, created_at
+            ) VALUES (
+                :id, :hid, :inv_num,
+                0, 'draft', :due_date, NOW()
+            )
+        """), {
+            "id": inv_id,
+            "hid": wo["hotel_id"],
+            "inv_num": invoice_number,
+            "due_date": due_date,
+        })
+    else:
+        inv_id = existing[0]
+
+    db.commit()
+
+    return {
+        "ok": True,
+        "work_order_id": wo_id,
+        "status": "completed",
+        "invoice_id": inv_id,
+        "invoice_number": invoice_number,
+        "message": "Work order completed. Draft invoice created." if not existing else "Work order completed. Invoice already existed.",
+    }
+# ─────────────────────────────────────────────────────────────────────────────
