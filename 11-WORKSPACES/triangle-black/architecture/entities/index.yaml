@@ -1,0 +1,40 @@
+registry: architecture/entities
+source: docs/enterprise-blueprint-v4/02_ENTERPRISE_INFORMATION_ARCHITECTURE.md
+status: Partial
+items:
+  - Company
+  - Organization
+  - Department
+  - Customer
+  - User
+  - Membership
+  - HotelSite
+  - Building
+  - Floor
+  - Area
+  - Contract
+  - Project
+  - Milestone
+  - Asset
+  - MaintenancePlan
+  - ServiceRequest
+  - WorkOrder
+  - Inspection
+  - ServiceReport
+  - Technician
+  - InventoryItem
+  - Warehouse
+  - StockMovement
+  - PurchaseRequest
+  - RFQ
+  - PurchaseOrder
+  - GoodsReceipt
+  - Supplier
+  - Invoice
+  - Payment
+  - Document
+  - Notification
+  - AuditEntry
+  - KPI
+  - AIRecommendation
+  - AIEvidence

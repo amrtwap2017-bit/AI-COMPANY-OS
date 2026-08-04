@@ -1,0 +1,22 @@
+id: analytics
+name: "Analytics"
+status: Partial
+source_paths:
+  - commercial/reporting
+  - dashboard
+  - analytics_kpi
+aggregates: [KPI,Report,ReadModel]
+entities: [KPI,Report,ReadModel]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [analytics_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [AnalyticsCreated, AnalyticsUpdated]
+commands: [CreateAnalytics, UpdateAnalytics, CompleteAnalytics]
+queries: [GetAnalytics, SearchAnalytics]
+read_models: [analytics_summary, analytics_timeline]
+write_models: [analytics_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

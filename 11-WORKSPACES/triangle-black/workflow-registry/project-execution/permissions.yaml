@@ -1,0 +1,10 @@
+workflow_id: project-execution
+name: "project execution"
+status: Partial
+owner: Projects
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [ProjectManager,Engineer,Client,QA]
+compatibility: preserve_existing_routes_and_status_values
+permissions: [project-execution.read, project-execution.write, project-execution.approve, project-execution.admin]
+tenant_scope: mandatory
+

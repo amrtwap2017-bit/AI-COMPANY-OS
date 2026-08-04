@@ -1,0 +1,18 @@
+registry: architecture/services
+status: Partial
+source_paths:
+  - src/application/services
+  - src/core/services
+  - src/core/email_service.py
+  - src/commercial/*/service.py
+services:
+  - {id: identity-service, status: Partial, target: unified_identity_facade}
+  - {id: tenant-context-service, status: Partial, target: organization_site_membership_context}
+  - {id: configuration-service, status: Planned, target: tenant_effective_configuration}
+  - {id: workflow-service, status: Partial, target: versioned_process_engine}
+  - {id: notification-service, status: Partial, target: channel_delivery_facade}
+  - {id: document-service, status: Partial, target: governed_document_storage}
+  - {id: audit-service, status: Partial, target: immutable_audit_and_event_log}
+  - {id: search-service, status: Partial, target: tenant_acl_search_port}
+  - {id: ai-gateway, status: Planned, target: governed_model_and_agent_gateway}
+  - {id: digital-twin-projection, status: Planned, target: outbox_fed_graph_projection}

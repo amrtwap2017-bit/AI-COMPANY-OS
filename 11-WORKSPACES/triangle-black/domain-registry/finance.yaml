@@ -1,0 +1,21 @@
+id: finance
+name: "Finance"
+status: Partial
+source_paths:
+  - commercial/invoices
+  - payment_tracking
+aggregates: [Invoice,Payment,Match]
+entities: [Invoice,Payment,Match]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [finance_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [FinanceCreated, FinanceUpdated]
+commands: [CreateFinance, UpdateFinance, CompleteFinance]
+queries: [GetFinance, SearchFinance]
+read_models: [finance_summary, finance_timeline]
+write_models: [finance_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

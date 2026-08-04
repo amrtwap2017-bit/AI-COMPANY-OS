@@ -1,0 +1,15 @@
+registry: architecture/capabilities
+source: docs/enterprise-blueprint-v4/01_ENTERPRISE_CAPABILITY_MAP.md
+items:
+  - {id: commercial, file: Commercial.yaml, status: Existing}
+  - {id: projects, file: Projects.yaml, status: Partial}
+  - {id: operations, file: Operations.yaml, status: Partial}
+  - {id: maintenance, file: Maintenance.yaml, status: Partial}
+  - {id: procurement, file: Procurement.yaml, status: Partial}
+  - {id: inventory, file: Inventory.yaml, status: Partial}
+  - {id: finance, file: Finance.yaml, status: Partial}
+  - {id: resources, file: Resources.yaml, status: Partial}
+  - {id: executive, file: Executive.yaml, status: Partial}
+  - {id: platform, file: Platform.yaml, status: Partial}
+  - {id: ai, file: AI.yaml, status: Partial}
+  - {id: knowledge, file: Knowledge.yaml, status: Partial}

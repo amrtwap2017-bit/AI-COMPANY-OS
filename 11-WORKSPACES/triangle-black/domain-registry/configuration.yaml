@@ -1,0 +1,20 @@
+id: configuration
+name: "Configuration"
+status: Partial
+source_paths:
+  - portal/lib/platform-config.ts
+aggregates: [PlatformConfig,FeatureFlag,NavigationConfig]
+entities: [PlatformConfig,FeatureFlag,NavigationConfig]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [configuration_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [ConfigurationCreated, ConfigurationUpdated]
+commands: [CreateConfiguration, UpdateConfiguration, CompleteConfiguration]
+queries: [GetConfiguration, SearchConfiguration]
+read_models: [configuration_summary, configuration_timeline]
+write_models: [configuration_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

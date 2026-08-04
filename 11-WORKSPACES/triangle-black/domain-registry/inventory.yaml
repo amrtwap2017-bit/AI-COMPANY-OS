@@ -1,0 +1,22 @@
+id: inventory
+name: "Inventory"
+status: Partial
+source_paths:
+  - commercial/inventory_items
+  - warehouses
+  - stock_movements
+aggregates: [InventoryItem,Warehouse,StockMovement]
+entities: [InventoryItem,Warehouse,StockMovement]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [inventory_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [InventoryCreated, InventoryUpdated]
+commands: [CreateInventory, UpdateInventory, CompleteInventory]
+queries: [GetInventory, SearchInventory]
+read_models: [inventory_summary, inventory_timeline]
+write_models: [inventory_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

@@ -1,0 +1,6 @@
+registry: knowledge/navigation
+status: Partial
+source: navigation
+workspaces: [commercial, projects, operations, maintenance, supply-chain, resources, finance, executive, platform, ai]
+portal_variants: [desktop, mobile, admin, client, supplier, technician, executive]
+page_workflow_mapping: required

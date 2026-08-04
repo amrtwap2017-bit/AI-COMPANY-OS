@@ -1,0 +1,21 @@
+id: resources
+name: "Resources"
+status: Partial
+source_paths:
+  - commercial/technicians
+  - ai_assistant/dispatch_router
+aggregates: [Technician,Crew,Skill,Assignment]
+entities: [Technician,Crew,Skill,Assignment]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [resources_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [ResourcesCreated, ResourcesUpdated]
+commands: [CreateResources, UpdateResources, CompleteResources]
+queries: [GetResources, SearchResources]
+read_models: [resources_summary, resources_timeline]
+write_models: [resources_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

@@ -1,0 +1,18 @@
+id: executive
+name: Executive
+status: Partial
+owner: "CEO/COO"
+source: docs/enterprise-blueprint-v4/01_ENTERPRISE_CAPABILITY_MAP.md
+purpose: "Govern Executive capability through documented APIs, workflows, policy and tenant configuration."
+entities: [KPI,Risk,Portfolio,Report]
+commands: [create, update, submit, approve, reject, complete]
+queries: [list, get, search, summary, history]
+events: [ExecutiveCreated, ExecutiveUpdated, ExecutiveApproved, ExecutiveCompleted]
+policies: [tenant_scope, authorization, audit, lifecycle, segregation_of_duties]
+permissions: [executive.read, executive.write, executive.approve, executive.admin]
+ai_agents: [AI_CEO,AI_Executive_Analyst]
+dependencies: [identity, tenant, configuration, audit, documents, notifications]
+kpis: [cycle_time, quality, cost, adoption, SLA_compliance]
+roadmap: docs/program-management/02_IMPLEMENTATION_ROADMAP.md
+compatibility: preserve_existing_routes_and_modules
+

@@ -1,0 +1,22 @@
+id: procurement
+name: "Procurement"
+status: Partial
+source_paths:
+  - commercial/purchase_requests
+  - purchase_orders
+  - goods_receipts
+aggregates: [PurchaseRequest,RFQ,PurchaseOrder,GoodsReceipt]
+entities: [PurchaseRequest,RFQ,PurchaseOrder,GoodsReceipt]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [procurement_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [ProcurementCreated, ProcurementUpdated]
+commands: [CreateProcurement, UpdateProcurement, CompleteProcurement]
+queries: [GetProcurement, SearchProcurement]
+read_models: [procurement_summary, procurement_timeline]
+write_models: [procurement_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

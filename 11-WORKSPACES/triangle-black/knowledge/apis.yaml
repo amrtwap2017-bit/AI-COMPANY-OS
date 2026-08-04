@@ -1,0 +1,5 @@
+registry: knowledge/apis
+status: Partial
+source: api-registry/index.yaml
+route_count_observed: 590
+compatibility: preserve_api_v1

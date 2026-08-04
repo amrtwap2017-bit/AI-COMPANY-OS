@@ -1,0 +1,10 @@
+workflow_id: contract-to-project
+name: "contract to project"
+status: Partial
+owner: Contracts/Projects
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [CommercialLead,ProjectManager,Finance]
+compatibility: preserve_existing_routes_and_status_values
+permissions: [contract-to-project.read, contract-to-project.write, contract-to-project.approve, contract-to-project.admin]
+tenant_scope: mandatory
+

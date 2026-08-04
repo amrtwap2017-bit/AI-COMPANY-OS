@@ -1,0 +1,11 @@
+workflow_id: inventory-control
+name: "inventory control"
+status: Partial
+owner: Inventory
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Storekeeper,Buyer,Technician]
+compatibility: preserve_existing_routes_and_status_values
+events: [inventory_control_started, inventory_control_updated, inventory_control_completed]
+outbox: required
+replay: required
+

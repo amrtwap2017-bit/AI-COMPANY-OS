@@ -1,0 +1,7 @@
+registry: architecture/events
+status: Planned
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+envelope: [event_id, event_type, schema_version, occurred_at, organization_id, actor_id, correlation_id, aggregate_type, aggregate_id, classification, payload]
+transport: transactional_outbox_to_event_bus
+replay: required
+retention: configurable_by_classification_and_tenant_policy

@@ -1,0 +1,25 @@
+registry: knowledge/services
+status: Partial
+items:
+  - {path: application/lead_service.py, status: Existing}
+  - {path: application/service.py, status: Existing}
+  - {path: application/service/qualification_service.py, status: Existing}
+  - {path: application/services.py, status: Existing}
+  - {path: application/services/activity_service.py, status: Existing}
+  - {path: application/services/assignment_service.py, status: Existing}
+  - {path: application/services/conversion_service.py, status: Existing}
+  - {path: application/services/item_service.py, status: Existing}
+  - {path: application/services/lead_service.py, status: Existing}
+  - {path: application/services/webhook_service.py, status: Existing}
+  - {path: application/services/workload_service.py, status: Existing}
+  - {path: infrastructure/services/task_service.py, status: Existing}
+  - {path: src/application/services/commercial_service.py, status: Existing}
+  - {path: src/application/services/invoice_service.py, status: Existing}
+  - {path: src/application/services/item_service.py, status: Existing}
+  - {path: src/application/services/maintenance_schedule_service.py, status: Existing}
+  - {path: src/application/services/project_management_service.py, status: Existing}
+  - {path: src/commercial/email_notifications/service.py, status: Existing}
+  - {path: src/commercial/email_service/service.py, status: Existing}
+  - {path: src/core/email_service.py, status: Existing}
+  - {path: src/core/services/sprint_plan_service.py, status: Existing}
+  - {path: src/orchestrator/reload_service.py, status: Existing}

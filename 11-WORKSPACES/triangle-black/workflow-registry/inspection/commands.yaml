@@ -1,0 +1,10 @@
+workflow_id: inspection
+name: "inspection"
+status: Partial
+owner: Maintenance/QA
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Inspector,Engineer,Client]
+compatibility: preserve_existing_routes_and_status_values
+commands: [create, submit, approve, reject, assign, complete, cancel]
+idempotency: required_for_mutating_commands
+

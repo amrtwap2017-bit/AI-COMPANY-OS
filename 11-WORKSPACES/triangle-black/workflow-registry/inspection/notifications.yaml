@@ -1,0 +1,11 @@
+workflow_id: inspection
+name: "inspection"
+status: Partial
+owner: Maintenance/QA
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Inspector,Engineer,Client]
+compatibility: preserve_existing_routes_and_status_values
+channels: [in_app, email, webhook]
+template_source: configuration
+retry_and_dead_letter: required
+

@@ -1,0 +1,4 @@
+registry: architecture/decisions
+source: docs/adr
+status: Planned
+required_decisions: [runtime-authority, modular-monolith, clean-architecture, ddd-contexts, cqrs, workflow-engine, tenant-model, identity, authorization, configuration, ai-gateway, digital-twin, migrations, api-governance]

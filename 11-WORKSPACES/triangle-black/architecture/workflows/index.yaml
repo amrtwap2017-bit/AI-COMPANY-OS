@@ -1,0 +1,15 @@
+registry: architecture/workflows
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+items:
+  - lead-to-contract
+  - contract-to-project
+  - project-execution
+  - procurement-to-payment
+  - service-to-resolution
+  - inventory-control
+  - incident-management
+  - inspection
+  - approval
+  - warranty
+  - renewal
+  - ai-review

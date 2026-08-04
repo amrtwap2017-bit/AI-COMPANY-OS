@@ -1,0 +1,22 @@
+id: operations
+name: "Operations"
+status: Partial
+source_paths:
+  - commercial/service_requests
+  - work_orders
+  - service_reports
+aggregates: [ServiceRequest,WorkOrder,ServiceReport]
+entities: [ServiceRequest,WorkOrder,ServiceReport]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [operations_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [OperationsCreated, OperationsUpdated]
+commands: [CreateOperations, UpdateOperations, CompleteOperations]
+queries: [GetOperations, SearchOperations]
+read_models: [operations_summary, operations_timeline]
+write_models: [operations_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

@@ -1,0 +1,12 @@
+registry: architecture/integrations
+source: 07-INTEGRATION/Enterprise-Integration.md
+status: Partial
+principles: [anti_corruption_layer, timeout, circuit_breaker, retry_with_jitter, idempotency, HMAC_webhook, observability, dead_letter]
+systems:
+  - {id: smtp, status: Partial, boundary: email_adapter}
+  - {id: egypt-e-invoice, status: Planned, boundary: finance_acl}
+  - {id: whatsapp-sms, status: Planned, boundary: notification_gateway}
+  - {id: calendar, status: Planned, boundary: scheduling_acl}
+  - {id: cloud-storage, status: Planned, boundary: document_storage_port}
+  - {id: oidc-sso, status: Planned, boundary: identity_provider_adapter}
+  - {id: pms-pos-erp, status: Planned, boundary: integration_gateway}

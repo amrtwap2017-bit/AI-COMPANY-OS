@@ -1,0 +1,10 @@
+workflow_id: approval
+name: "approval"
+status: Partial
+owner: Platform
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Requester,Approver,PolicyResolver]
+compatibility: preserve_existing_routes_and_status_values
+permissions: [approval.read, approval.write, approval.approve, approval.admin]
+tenant_scope: mandatory
+

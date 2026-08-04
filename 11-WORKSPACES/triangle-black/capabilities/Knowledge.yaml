@@ -1,0 +1,18 @@
+id: knowledge
+name: Knowledge
+status: Partial
+owner: "Knowledge Manager"
+source: docs/enterprise-blueprint-v4/01_ENTERPRISE_CAPABILITY_MAP.md
+purpose: "Govern Knowledge capability through documented APIs, workflows, policy and tenant configuration."
+entities: [Document,Taxonomy,KnowledgeItem,Embedding,Evidence]
+commands: [create, update, submit, approve, reject, complete]
+queries: [list, get, search, summary, history]
+events: [KnowledgeCreated, KnowledgeUpdated, KnowledgeApproved, KnowledgeCompleted]
+policies: [tenant_scope, authorization, audit, lifecycle, segregation_of_duties]
+permissions: [knowledge.read, knowledge.write, knowledge.approve, knowledge.admin]
+ai_agents: [AI_Knowledge_Expert]
+dependencies: [identity, tenant, configuration, audit, documents, notifications]
+kpis: [cycle_time, quality, cost, adoption, SLA_compliance]
+roadmap: docs/program-management/02_IMPLEMENTATION_ROADMAP.md
+compatibility: preserve_existing_routes_and_modules
+

@@ -1,0 +1,22 @@
+id: maintenance
+name: "Maintenance & Assets"
+status: Partial
+source_paths:
+  - commercial/assets
+  - maintenance_enterprise
+  - predictive_maintenance
+aggregates: [Asset,MaintenancePlan,Inspection,Warranty]
+entities: [Asset,MaintenancePlan,Inspection,Warranty]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [maintenance_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [MaintenanceAssetsCreated, MaintenanceAssetsUpdated]
+commands: [CreateMaintenanceAssets, UpdateMaintenanceAssets, CompleteMaintenanceAssets]
+queries: [GetMaintenanceAssets, SearchMaintenanceAssets]
+read_models: [maintenance_summary, maintenance_timeline]
+write_models: [maintenance_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

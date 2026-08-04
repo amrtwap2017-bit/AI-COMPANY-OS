@@ -1,0 +1,14 @@
+id: service-request-to-work-order-auto-routi
+source_path: src/service_request_to_work_order_auto_routi/router.py
+status: Existing
+owner: platform-context-owner
+api_prefix: /api/v1
+version: v1
+permission: context.read_or_write
+workflow: register_per_endpoint
+input: typed_schema_or_legacy_adapter
+output: response_model_or_legacy_serializer
+events: domain_events_if_mutating
+tenant_scope: required_for_tenant_data
+compatibility: preserve_route_method_url_and_payload
+

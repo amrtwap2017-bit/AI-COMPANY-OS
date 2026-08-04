@@ -1,0 +1,21 @@
+id: identity
+name: "Identity & Access"
+status: Existing
+source_paths:
+  - core/auth.py
+  - commercial/auth
+aggregates: [User,Membership,Role,Permission]
+entities: [User,Membership,Role,Permission]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [identity_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [IdentityAccessCreated, IdentityAccessUpdated]
+commands: [CreateIdentityAccess, UpdateIdentityAccess, CompleteIdentityAccess]
+queries: [GetIdentityAccess, SearchIdentityAccess]
+read_models: [identity_summary, identity_timeline]
+write_models: [identity_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

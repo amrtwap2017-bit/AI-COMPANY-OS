@@ -1,0 +1,18 @@
+id: projects
+name: Projects
+status: Partial
+owner: "Projects Director"
+source: docs/enterprise-blueprint-v4/01_ENTERPRISE_CAPABILITY_MAP.md
+purpose: "Govern Projects capability through documented APIs, workflows, policy and tenant configuration."
+entities: [Contract,Project,Milestone,Risk,Document]
+commands: [create, update, submit, approve, reject, complete]
+queries: [list, get, search, summary, history]
+events: [ProjectsCreated, ProjectsUpdated, ProjectsApproved, ProjectsCompleted]
+policies: [tenant_scope, authorization, audit, lifecycle, segregation_of_duties]
+permissions: [projects.read, projects.write, projects.approve, projects.admin]
+ai_agents: [AI_Project_Director,AI_Planner]
+dependencies: [identity, tenant, configuration, audit, documents, notifications]
+kpis: [cycle_time, quality, cost, adoption, SLA_compliance]
+roadmap: docs/program-management/02_IMPLEMENTATION_ROADMAP.md
+compatibility: preserve_existing_routes_and_modules
+

@@ -1,0 +1,11 @@
+workflow_id: incident-management
+name: "incident management"
+status: Partial
+owner: Operations/Platform
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Reporter,IncidentCommander,HSE,Executive]
+compatibility: preserve_existing_routes_and_status_values
+timers: acknowledgement, processing, escalation
+policy_source: tenant_configuration
+breach_action: notify_and_audit
+

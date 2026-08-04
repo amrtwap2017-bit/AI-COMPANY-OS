@@ -1,0 +1,6 @@
+registry: architecture/ai
+source: docs/enterprise-blueprint-v4/08_ENTERPRISE_AI_ARCHITECTURE.md
+status: Partial
+agents: [AI_CEO, AI_COO, AI_Procurement_Director, AI_Planner, AI_Scheduler, AI_Maintenance_Director, AI_Project_Director, AI_Executive_Analyst, AI_Knowledge_Expert, AI_Cost_Optimizer]
+registries_required: [agent, prompt, tool, model, memory, knowledge, evaluation, guardrail]
+side_effect_policy: proposal_then_policy_then_human_or_approved_execution

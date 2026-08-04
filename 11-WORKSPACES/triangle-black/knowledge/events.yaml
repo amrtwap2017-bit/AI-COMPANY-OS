@@ -1,0 +1,7 @@
+registry: knowledge/events
+status: Partial
+source: architecture/events/index.yaml
+items:
+  - domain_events_to_be_extracted_from_outbox_catalog
+  - workflow_transition_events
+  - integration_events

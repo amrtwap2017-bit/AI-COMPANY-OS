@@ -1,0 +1,18 @@
+id: ai
+name: AI
+status: Partial
+owner: "AI Product/Governance Owner"
+source: docs/enterprise-blueprint-v4/01_ENTERPRISE_CAPABILITY_MAP.md
+purpose: "Govern AI capability through documented APIs, workflows, policy and tenant configuration."
+entities: [Agent,Prompt,Tool,Model,Memory,Evaluation]
+commands: [create, update, submit, approve, reject, complete]
+queries: [list, get, search, summary, history]
+events: [AICreated, AIUpdated, AIApproved, AICompleted]
+policies: [tenant_scope, authorization, audit, lifecycle, segregation_of_duties]
+permissions: [ai.read, ai.write, ai.approve, ai.admin]
+ai_agents: [All AI agents]
+dependencies: [identity, tenant, configuration, audit, documents, notifications]
+kpis: [cycle_time, quality, cost, adoption, SLA_compliance]
+roadmap: docs/program-management/02_IMPLEMENTATION_ROADMAP.md
+compatibility: preserve_existing_routes_and_modules
+

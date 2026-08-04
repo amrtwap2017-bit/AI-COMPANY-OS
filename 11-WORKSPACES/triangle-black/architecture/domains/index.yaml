@@ -1,0 +1,21 @@
+registry: architecture/domains
+source: docs/enterprise-blueprint-v4/05_ENTERPRISE_DOMAIN_ARCHITECTURE.md
+items:
+  - identity
+  - tenant
+  - configuration
+  - commercial
+  - contracts
+  - projects
+  - operations
+  - maintenance
+  - assets
+  - procurement
+  - inventory
+  - finance
+  - resources
+  - platform-services
+  - analytics
+  - knowledge
+  - ai
+  - digital-twin

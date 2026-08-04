@@ -1,0 +1,21 @@
+id: digital-twin
+name: "Digital Twin"
+status: Partial
+source_paths:
+  - commercial/digital_twin
+  - knowledge_graph
+aggregates: [TwinNode,TwinEdge,Projection]
+entities: [TwinNode,TwinEdge,Projection]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [digital-twin_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [DigitalTwinCreated, DigitalTwinUpdated]
+commands: [CreateDigitalTwin, UpdateDigitalTwin, CompleteDigitalTwin]
+queries: [GetDigitalTwin, SearchDigitalTwin]
+read_models: [digital-twin_summary, digital-twin_timeline]
+write_models: [digital-twin_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

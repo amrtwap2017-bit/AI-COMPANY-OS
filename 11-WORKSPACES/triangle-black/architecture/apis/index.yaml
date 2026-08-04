@@ -1,0 +1,8 @@
+registry: architecture/apis
+source: docs/inventory/07_MACHINE_CATALOG.md
+status: Partial
+compatibility: preserve_all_existing_api_v1_routes
+metadata_required: [owner, permission, tenant_scope, workflow, input_schema, output_schema, events, version, status, deprecation]
+route_count_observed: 590
+response_model_count_observed: 111
+untyped_dictionary_body_count_observed: 121

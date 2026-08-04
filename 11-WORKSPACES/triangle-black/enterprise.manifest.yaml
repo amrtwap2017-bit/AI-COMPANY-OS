@@ -1,0 +1,103 @@
+manifest_version: "5.0"
+status: "architecture-registry"
+generated_from:
+  - docs/enterprise-blueprint-v4
+  - docs/enterprise-transformation-v4
+  - docs/program-management
+  - docs/inventory
+  - 00-ARCHITECT
+  - 02-GOVERNANCE
+  - 03-BUSINESS
+  - 04-DESIGN
+  - 06-DOMAINS
+  - 07-INTEGRATION
+  - 08-OPERATIONS
+  - 10-AI
+authority_note: "Root AGENTS.md, ARCHITECTURE.md, ROADMAP.md, AI_PLATFORM.md, WORKFLOWS.md, DESIGN_SYSTEM.md, VISION.md and SAAS.md are absent in the current checkout; existing governance and enterprise-blueprint-v4 are the interim references."
+platform:
+  name: Triangle Black
+  type: Enterprise AI Operations Platform
+  runtime: FastAPI modular monolith with Next.js portals
+  compatibility: preserve_existing_routes_modules_imports_and_schema
+  tenant_model: transitional_hotel_id_to_organization_site
+  lifecycle: partial
+domains:
+  - commercial
+  - contracts
+  - projects
+  - operations
+  - maintenance
+  - assets
+  - procurement
+  - inventory
+  - finance
+  - resources
+  - platform
+  - identity
+  - tenant
+  - configuration
+  - analytics
+  - knowledge
+  - ai
+  - digital_twin
+capabilities:
+  - Commercial
+  - Projects
+  - Operations
+  - Maintenance
+  - Procurement
+  - Inventory
+  - Finance
+  - Resources
+  - Executive
+  - Platform
+  - AI
+  - Knowledge
+portals:
+  - name: portal
+    path: portal
+    status: Existing
+  - name: client-portal
+    path: client-portal
+    status: Existing
+  - name: admin-portal
+    path: admin-portal
+    status: Existing
+api:
+  prefix: /api/v1
+  framework: FastAPI
+  contract_status: Partial
+events:
+  transport: planned_outbox_event_bus
+  current_status: Partial
+workflows:
+  - lead-to-contract
+  - contract-to-project
+  - project-execution
+  - procurement-to-payment
+  - service-to-resolution
+  - inventory-control
+  - incident-management
+  - inspection
+  - approval
+  - warranty
+  - renewal
+  - ai-review
+configuration:
+  authority: planned_server_managed_tenant_configuration
+  current_reference: portal/lib/platform-config.ts
+deployment:
+  current: Docker Compose plus Nginx and local PostgreSQL assumptions
+  target: reproducible_cloud_ready_modular_platform
+versioning:
+  platform: v5-registry
+  api: v1-compatibility
+lifecycle:
+  existing: preserve
+  partial: migrate_with_adapters
+  planned: implement_after_dependencies
+compatibility:
+  routes: mandatory
+  imports: mandatory
+  database: additive_migration_only
+  deprecation: telemetry_and_adr_required

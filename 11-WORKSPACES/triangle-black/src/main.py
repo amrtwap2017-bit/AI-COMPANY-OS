@@ -310,8 +310,10 @@ app.include_router(cache_router,              prefix=API_PREFIX)
 app.include_router(pagination_router,         prefix=API_PREFIX)
 app.include_router(email_notification_router, prefix=API_PREFIX)
 try:
-    from src.commercial.employees.router import router as employees_router
+    from src.commercial.employee_timesheets.router import router as timesheets_router
+from src.commercial.employees.router import router as employees_router
     app.include_router(employees_router, prefix=API_PREFIX)
+    app.include_router(timesheets_router, prefix="/api/v1")
     print('  OK: employees_router')
 except Exception as e:
     print(f'  WARN employees: {e}')

@@ -1,0 +1,10 @@
+workflow_id: procurement-to-payment
+name: "procurement to payment"
+status: Partial
+owner: Procurement/Finance
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Requester,Approver,Buyer,Supplier,AP]
+compatibility: preserve_existing_routes_and_status_values
+permissions: [procurement-to-payment.read, procurement-to-payment.write, procurement-to-payment.approve, procurement-to-payment.admin]
+tenant_scope: mandatory
+

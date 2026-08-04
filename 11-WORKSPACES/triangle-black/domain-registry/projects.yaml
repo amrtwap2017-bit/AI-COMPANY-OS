@@ -1,0 +1,21 @@
+id: projects
+name: "Projects"
+status: Partial
+source_paths:
+  - commercial/projects
+  - project_management_module
+aggregates: [Project,Milestone,Risk,Resource]
+entities: [Project,Milestone,Risk,Resource]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [projects_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [ProjectsCreated, ProjectsUpdated]
+commands: [CreateProjects, UpdateProjects, CompleteProjects]
+queries: [GetProjects, SearchProjects]
+read_models: [projects_summary, projects_timeline]
+write_models: [projects_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

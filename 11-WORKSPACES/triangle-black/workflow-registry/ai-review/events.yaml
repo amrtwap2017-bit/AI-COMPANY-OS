@@ -1,0 +1,11 @@
+workflow_id: ai-review
+name: "ai review"
+status: Partial
+owner: AI/Platform
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [Requester,Agent,Reviewer,Approver]
+compatibility: preserve_existing_routes_and_status_values
+events: [ai_review_started, ai_review_updated, ai_review_completed]
+outbox: required
+replay: required
+

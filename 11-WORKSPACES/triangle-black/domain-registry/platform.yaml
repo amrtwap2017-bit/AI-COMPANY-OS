@@ -1,0 +1,23 @@
+id: platform
+name: "Platform Services"
+status: Partial
+source_paths:
+  - commercial/documents
+  - notifications
+  - audit_log
+  - global_search
+aggregates: [Document,Notification,Audit,Search]
+entities: [Document,Notification,Audit,Search]
+value_objects: [Identifier, Money, DateRange, Status, TenantScope]
+repositories: [platform_repository]
+use_cases: [create, update, retrieve, search, approve, complete]
+policies: [tenant_scope, authorization, lifecycle, audit]
+events: [PlatformServicesCreated, PlatformServicesUpdated]
+commands: [CreatePlatformServices, UpdatePlatformServices, CompletePlatformServices]
+queries: [GetPlatformServices, SearchPlatformServices]
+read_models: [platform_summary, platform_timeline]
+write_models: [platform_aggregate]
+external_dependencies: [identity, tenant, configuration, documents, notifications]
+migration: adapter_then_vertical_slice
+compatibility: preserve_current_routes_models_and_imports
+

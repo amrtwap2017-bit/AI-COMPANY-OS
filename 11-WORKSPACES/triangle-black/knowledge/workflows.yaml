@@ -1,0 +1,5 @@
+registry: knowledge/workflows
+status: Partial
+source: workflow-registry
+items: [lead-to-contract, contract-to-project, project-execution, procurement-to-payment, service-to-resolution, inventory-control, incident-management, inspection, approval, warranty, renewal, ai-review]
+

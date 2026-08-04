@@ -1,0 +1,10 @@
+workflow_id: contract-to-project
+name: "contract to project"
+status: Partial
+owner: Contracts/Projects
+source: docs/enterprise-blueprint-v4/03_ENTERPRISE_WORKFLOW_ARCHITECTURE.md
+actors: [CommercialLead,ProjectManager,Finance]
+compatibility: preserve_existing_routes_and_status_values
+states: [draft, submitted, in_progress, blocked, approved, rejected, completed, cancelled]
+transitions_require_actor_policy_audit: true
+
