@@ -156,6 +156,9 @@ RATE_LIMIT_MAX = 1000000
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         ip = request.client.host if request.client else "unknown"
+        # Whitelist localhost — never rate-limit test/dev traffic
+        if ip in ("127.0.0.1", "::1", "localhost"):
+            return await call_next(request)
         now = time.time()
         _req_counts[ip] = [t for t in _req_counts[ip] if t > now - 60]
         if len(_req_counts[ip]) >= RATE_LIMIT_MAX:
