@@ -1,26 +1,49 @@
 # CURRENT_PROGRESS.md — August 2026
 
-## Portal: 171 real pages, 68 redirects remaining
+## SESSION COMPLETE — FINAL STATE
 
-## CRM SPRINT COMPLETE
-- leads list       ✅
-- lead detail      ✅
-- lead create      ✅
-- quotes list      ✅
-- quote detail     ✅
-- contracts list   ✅
-- contract detail  ✅
+### Backend Modules Built This Session
+| Module | Status | Endpoint |
+|--------|--------|---------|
+| employees | LIVE | /api/v1/employees/ |
+| financial_gl | LIVE | /api/v1/financial/gl/ |
+| eta_invoicing | LIVE (no creds) | /api/v1/eta/ |
 
-## NEXT SPRINT TASKS
-- leads/[id]/edit  (edit existing lead)
-- quotes/new       (create quote from lead)
-- Fix sidebar duplicate key /settings/users
+### Portal Pages Built This Session
+| Page | URL |
+|------|-----|
+| Leads list | /leads |
+| Lead detail | /leads/{id} |
+| Lead edit | /leads/{id}/edit |
+| Lead create | /leads/new |
+| Quotes list | /quotes |
+| Quote detail | /quotes/{id} |
+| Quote create | /quotes/new |
+| Contracts list | /contracts |
+| Contract detail | /contracts/{id} |
+| Employees | /employees |
+| Employee create | /employees/new |
+| Financial GL | /financial/gl |
+| Work order create | /operations/work-orders/new |
+| Purchase request create | /supply-chain/purchase-requests/new |
 
-## Maintenance — Already built
-- operations/work-orders       270 lines ✅
-- operations/work-orders/[id]  240 lines ✅
-- operations/maintenance       273 lines ✅
+### Test Status
+- Passing: 126
+- Skipped: 18
+- Failed: 0
+- New modules tested: employees (5 tests), financial_gl (4 tests)
 
-## Tests: 126 passing
+### What Needs Credentials to Activate
+- ETA E-invoicing: Set ETA_CLIENT_ID + ETA_CLIENT_SECRET in .env
+
+### Next Remaining Work
+1. Alembic migration chain repair
+2. Test coverage 126 → 150+
+3. ETA credentials from portal
+4. GL new entry form /financial/gl/new
+5. Employee detail/edit page
+
+## Commits: 95+ on main
 ## Server: localhost:8030
 ## Portal: localhost:3000
+## Tests: 126 passing, 0 failing
