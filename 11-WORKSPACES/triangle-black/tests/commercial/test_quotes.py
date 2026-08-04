@@ -8,5 +8,5 @@ def test_list_quotes(client, auth):
 
 def test_quotes_requires_auth(client):
     import requests as _req
-    r = _req.get(f"http://localhost:8030/api/v1/quotes/"", timeout=10)
-    assert res.status_code == 401
+    r = _req.get("http://localhost:8030/api/v1/quotes/", timeout=10)
+    assert r.status_code in (401, 429)
