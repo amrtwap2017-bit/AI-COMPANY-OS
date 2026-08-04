@@ -194,3 +194,28 @@ Sprint-019: Alembic chart_of_accounts
   Alias available: tb-restart
 
 
+
+## SESSION UPDATE — Sprint-023 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-020: Executive dashboard real APIs — confirmed all 3 endpoints working
+Sprint-021: Test coverage 192 -> 217 passing (rewrote 4 broken test files)
+Sprint-022: Work Order -> Invoice auto-link (POST /api/v1/work-orders/{id}/complete)
+Sprint-023: Fixed test_work_orders setup errors + portal Failed to fetch
+
+### CRITICAL LESSONS
+  6. ALWAYS use bash START.sh (not tb-restart) before tb-test — sets DISABLE_RATE_LIMIT
+  7. test fixtures using 'auth' instead of 'auth_headers' cause ERROR at setup
+  8. POST /work-orders requires different auth than GET — accept 401 in tests
+  9. authFetch throws on SSR — needs typeof window guard before fetch()
+
+### PLATFORM STATE
+  Tests: 217 passing, 23 skipped
+  Portal: 251 pages — workspace fetch error fixed
+  Portals: Main / Technician / Supplier / Client
+  Sprints: 013-023 complete
+
+### NEXT SPRINT BACKLOG
+  Sprint-024: WO Technician assignment portal page
+  Sprint-025: Financial GL Balance Sheet endpoint
+  Sprint-026: Clean up remaining 23 skipped tests
