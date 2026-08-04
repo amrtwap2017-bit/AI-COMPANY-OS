@@ -98,3 +98,18 @@ def wait_between_test_files(request):
                 _waited_modules.add(fname)
                 time.sleep(62)
     yield
+
+_waited_modules2 = set()
+
+@pytest.fixture(autouse=True)
+def wait_for_leads_module(request):
+    """Wait once before test_leads.py to avoid rate limit."""
+    import time
+    global _waited_modules2
+    if hasattr(request, 'node') and hasattr(request.node, 'fspath'):
+        fname = str(request.node.fspath)
+        if 'test_leads' in fname and 'commercial' not in fname:
+            if fname not in _waited_modules2:
+                _waited_modules2.add(fname)
+                time.sleep(62)
+    yield

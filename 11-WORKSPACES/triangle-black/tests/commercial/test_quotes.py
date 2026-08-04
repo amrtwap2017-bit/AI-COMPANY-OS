@@ -7,5 +7,6 @@ def test_list_quotes(client, auth):
     assert isinstance(res.json(), list)
 
 def test_quotes_requires_auth(client):
-    res = client.get("/api/v1/quotes/")
+    import requests as _req
+    r = _req.get(f"http://localhost:8030/api/v1/quotes/"", timeout=10)
     assert res.status_code == 401

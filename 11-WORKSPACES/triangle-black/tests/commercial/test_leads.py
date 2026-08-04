@@ -71,5 +71,6 @@ def test_update_lead(client, auth, test_lead_id):
 
 
 def test_leads_requires_auth(client):
-    res = client.get("/api/v1/leads/")
+    import requests as _req
+    r = _req.get(f"http://localhost:8030/api/v1/leads/"", timeout=10)
     assert res.status_code == 401
