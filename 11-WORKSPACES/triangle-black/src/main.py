@@ -321,6 +321,12 @@ try:
     print('  OK: financial_gl_router')
 except Exception as e:
     print(f'  WARN financial_gl: {e}')
+try:
+    from src.commercial.eta_invoicing.router import router as eta_router
+    app.include_router(eta_router, prefix=API_PREFIX)
+    print('  OK: eta_router')
+except Exception as e:
+    print(f'  WARN eta: {e}')
 
 # Inventory & Procurement
 app.include_router(inv_items_router, prefix="/api/v1")
