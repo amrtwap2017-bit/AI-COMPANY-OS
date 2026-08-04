@@ -35,9 +35,13 @@ def get_entry(entry_id: str, hotel_id: str = Depends(get_hotel_id),
 from src.commercial.financial_gl.schemas import (
     AccountCreate, AccountUpdate, AccountOut, AccountListResponse
 )
+from src.commercial.financial_gl.repository import (
+    create_account, get_account, list_accounts, update_account
+)
+
 
 @router.get("/accounts/", response_model=AccountListResponse)
-def list_accounts(
+def list_chart_accounts(
     account_type: str = None,
     is_active: bool = None,
     limit: int = 100,
@@ -45,39 +49,39 @@ def list_accounts(
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
-    total, items = repo.list_accounts(db, hotel_id, account_type, is_active, limit, offset)
+    total, items = list_accounts(db, hotel_id, account_type, is_active, limit, offset)
     return AccountListResponse(count=total, results=items)
 
 
 @router.post("/accounts/", response_model=AccountOut, status_code=201)
-def create_account(
+def create_chart_account(
     data: AccountCreate,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
-    return repo.create_account(db, hotel_id, data)
+    return create_account(db, hotel_id, data)
 
 
 @router.get("/accounts/{account_id}", response_model=AccountOut)
-def get_account(
+def get_chart_account(
     account_id: str,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
-    acc = repo.get_account(db, hotel_id, account_id)
+    acc = get_account(db, hotel_id, account_id)
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")
     return acc
 
 
 @router.patch("/accounts/{account_id}", response_model=AccountOut)
-def update_account(
+def update_chart_account(
     account_id: str,
     data: AccountUpdate,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
-    acc = repo.update_account(db, hotel_id, account_id, data)
+    acc = update_account(db, hotel_id, account_id, data)
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")
     return acc

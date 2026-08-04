@@ -1,7 +1,8 @@
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Float, DateTime, Boolean, Text
+from sqlalchemy import Column, String, Float, DateTime, Boolean, Text, Numeric, Index, TIMESTAMP
+from sqlalchemy.sql import func
 from src.core.base import Base
 
 class JournalEntry(Base):
