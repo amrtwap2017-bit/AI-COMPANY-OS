@@ -146,6 +146,16 @@ export default function LeadDetailPage() {
           </div>
         )}
       </div>
+      <div className="mt-6 flex gap-3">
+        <button onClick={() => router.push(`/quotes/new?lead_id=${id}`)}
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700">
+          Generate Quote
+        </button>
+        <button onClick={() => router.push(`/leads/${id}/edit`)}
+          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200">
+          Edit Lead
+        </button>
+      </div>
     </div>
   );
 }
