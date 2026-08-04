@@ -185,3 +185,12 @@ Sprint-019: Alembic chart_of_accounts
   4. Tests use REAL HTTP to localhost:8030 — server must be running
   5. hotel_id NOT NULL on every table — non-negotiable
 
+### CRITICAL RULE — SERVER RESTART (learned Aug 2026)
+  ALWAYS restart server with DISABLE_RATE_LIMIT=1:
+    DISABLE_RATE_LIMIT=1 .venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8030 > /tmp/tb_server.log 2>&1 &
+  OR use:
+    bash START.sh   (already has DISABLE_RATE_LIMIT=1)
+  NEVER use raw uvicorn without the env var — causes 429 on test suite.
+  Alias available: tb-restart
+
+
