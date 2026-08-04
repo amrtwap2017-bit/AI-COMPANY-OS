@@ -1,143 +1,88 @@
 "use client";
-// @ts-nocheck
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { toast } from "@/lib/toast";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+import { tbFetch } from "@/lib/api/tb-client";
 
 export default function NewWorkOrderPage() {
   const router = useRouter();
-  const today = new Date().toISOString().split("T")[0];
-  const [errors, setErrors] = useState<Record<string,string>>({});
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    title:"", description:"", type:"corrective", priority:"medium",
-    technician_id:"", site_id:"", asset_id:"",
-    due_date: new Date(Date.now()+86400000).toISOString().split("T")[0]
+    title: "", description: "",
+    priority: "medium", type: "corrective",
   });
 
-  const { data: techsRaw } = useQuery(["techs-new"], () => authFetch("/api/v1/technicians/").then(r=>r.json()), {staleTime:60000});
-  const { data: sitesRaw } = useQuery(["sites-new"], () => authFetch("/api/v1/sites/").then(r=>r.json()), {staleTime:60000});
-  const { data: assetsRaw } = useQuery(["assets-new"], () => authFetch("/api/v1/assets/").then(r=>r.json()), {staleTime:60000});
-  const techs = toArr(techsRaw);
-  const sites = toArr(sitesRaw);
-  const assets = toArr(assetsRaw).filter(a => !form.site_id || a.site_id === form.site_id);
+  function set(k: string, v: string) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
 
-  const createMut = useMutation(
-    (payload) => authFetch("/api/v1/work-orders/", {
-      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
-    }).then(r=>r.json()),
-    {
-      onSuccess: (data) => {
-        if (data.id) {
-          toast.success("Work order created successfully");
-          router.push("/operations/work-orders/"+data.id);
-        } else {
-          toast.error(data.detail || data.error || "Failed to create work order");
-        }
-      },
-      onError: () => toast.error("Connection error — please try again"),
-    }
-  );
-
-  const handleSubmit = (e: any) => {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const newErrors: Record<string,string> = {};
-    if (!form.title?.trim()) newErrors.title = "Title is required";
-    if (form.title?.trim().length < 5) newErrors.title = "Title must be at least 5 characters";
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      toast.error("Please fix the errors before submitting");
-      return;
-    }
-    setErrors({});
-    createMut.mutate({...form, hotel_id:"tb-default-hotel-000000000001"});
-  };
-
-  const PRIORITY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
-  const pc = PRIORITY_COLORS[form.priority] || "#6D5F53";
+    setSaving(true);
+    setError(null);
+    const r = await tbFetch("/api/v1/work-orders/", { method: "POST", body: form });
+    if (r.error) { setError(r.error); setSaving(false); return; }
+    router.push("/operations/work-orders");
+  }
 
   return (
-    <div className="min-h-screen bg-base">
-      <div className="tb-hero" >
-        <div className="tb-hero-inner">
-          <div className="tb-flex-between gap-4 mb-4">
-            <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn-secondary">← Work Orders</button>
+    <div className="p-6 max-w-2xl">
+      <button onClick={() => router.push("/operations/work-orders")}
+        className="text-sm text-blue-600 hover:underline mb-4 block">
+        ← Back to Work Orders
+      </button>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">New Work Order</h1>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+      )}
+
+      <form onSubmit={submit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input required value={form.title} onChange={(e) => set("title", e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g. HVAC Filter Replacement - Room 302" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea value={form.description} onChange={(e) => set("description", e.target.value)}
+            rows={3}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Describe the work required..." />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <select value={form.type} onChange={(e) => set("type", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
+              <option value="corrective">Corrective</option>
+              <option value="preventive">Preventive</option>
+              <option value="inspection">Inspection</option>
+            </select>
           </div>
-          <div className="text-label-upper text-emerald-400 mb-1">Create New</div>
-          <h1 className="tb-hero-title">Work Order</h1>
-          <div className="flex items-center gap-3 mt-3">
-            <span className="tb-badge" style={{background:pc+"18",color:pc,border:`1px solid ${pc}30`}}>{form.priority}</span>
-            <span className="tb-badge">{form.type}</span>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select value={form.priority} onChange={(e) => set("priority", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </div>
         </div>
-      </div>
-      <div className="tb-canvas space-y-4">
-        <div className="tb-section space-y-4">
-          <div className="tb-section-title">Work Order Details</div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="text-xs text-tertiary block mb-1">Title *</label>
-              <input
-                className="tb-input w-full"
-                placeholder="e.g. Emergency HVAC Repair - Tower A"
-                value={form.title}
-                onChange={e=>{ setForm({...form,title:e.target.value}); if(errors.title) setErrors({...errors,title:""}); }}
-                style={errors.title ? {borderColor:"#A84A3D"} : {}}
-              />
-              {errors.title && <div style={{color:"#A84A3D",fontSize:"0.75rem",marginTop:4}}>{errors.title}</div>}
-            </div>
-            <div>
-              <label className="text-xs text-tertiary block mb-1">Type</label>
-              <select className="tb-input w-full" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
-                {["corrective","preventive","inspection","installation","emergency"].map(t=><option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-tertiary block mb-1">Priority</label>
-              <select className="tb-input w-full" value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})}>
-                {["critical","high","medium","low"].map(p=><option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-tertiary block mb-1">Site</label>
-              <select className="tb-input w-full" value={form.site_id} onChange={e=>setForm({...form,site_id:e.target.value,asset_id:""})}>
-                <option value="">Select site…</option>
-                {sites.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-tertiary block mb-1">Assign Technician</label>
-              <select className="tb-input w-full" value={form.technician_id} onChange={e=>setForm({...form,technician_id:e.target.value})}>
-                <option value="">Select technician…</option>
-                {techs.map(t=><option key={t.id} value={t.id}>{t.name} ({t.specialization})</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-tertiary block mb-1">Asset (optional)</label>
-              <select className="tb-input w-full" value={form.asset_id} onChange={e=>setForm({...form,asset_id:e.target.value})}>
-                <option value="">Select asset…</option>
-                {assets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-tertiary block mb-1">Due Date *</label>
-              <input type="date" className="tb-input w-full" value={form.due_date} onChange={e=>setForm({...form,due_date:e.target.value})}/>
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs text-tertiary block mb-1">Description</label>
-              <textarea className="tb-input w-full h-24 resize-none" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Describe the work required…"/>
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-3 justify-end pb-8">
-          <button onClick={()=>router.back()} className="tb-btn-secondary">Cancel</button>
-          <button onClick={()=>createMut.mutate(form)} disabled={!form.title||!form.due_date||createMut.isLoading} className="tb-btn-primary">
-            {createMut.isLoading?"Creating…":"Create Work Order →"}
+        <div className="flex gap-3 pt-2">
+          <button type="submit" disabled={saving}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+            {saving ? "Creating..." : "Create Work Order"}
+          </button>
+          <button type="button" onClick={() => router.push("/operations/work-orders")}
+            className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-200">
+            Cancel
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
