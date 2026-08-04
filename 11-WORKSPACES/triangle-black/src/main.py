@@ -315,6 +315,12 @@ try:
     print('  OK: employees_router')
 except Exception as e:
     print(f'  WARN employees: {e}')
+try:
+    from src.commercial.financial_gl.router import router as gl_router
+    app.include_router(gl_router, prefix=API_PREFIX)
+    print('  OK: financial_gl_router')
+except Exception as e:
+    print(f'  WARN financial_gl: {e}')
 
 # Inventory & Procurement
 app.include_router(inv_items_router, prefix="/api/v1")
