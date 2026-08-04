@@ -86,3 +86,85 @@ def update_chart_account(
         raise HTTPException(status_code=404, detail="Account not found")
     return acc
 # ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── Sprint-025: Balance Sheet Report ─────────────────────────────────────────
+from datetime import datetime as _bsdt
+
+
+@router.get("/balance-sheet")
+def get_balance_sheet(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Financial Balance Sheet aggregated from chart_of_accounts.
+    Groups accounts by type: asset, liability, equity, revenue, expense.
+    hotel_id from JWT — tenant-isolated.
+    """
+    from sqlalchemy import text as _t
+
+    TYPES = ["asset", "liability", "equity", "revenue", "expense"]
+    result = {}
+
+    for acc_type in TYPES:
+        try:
+            rows = db.execute(_t("""
+                SELECT account_code, account_name, account_type, is_active
+                FROM chart_of_accounts
+                WHERE hotel_id = :hid
+                  AND account_type = :atype
+                  AND is_active = TRUE
+                ORDER BY account_code
+            """), {"hid": hotel_id, "atype": acc_type}).fetchall()
+
+            accounts = [
+                {
+                    "code":    str(r[0]),
+                    "name":    str(r[1]),
+                    "type":    str(r[2]),
+                    "balance": 0.0,
+                }
+                for r in rows
+            ]
+            result[acc_type] = {
+                "total":    0.0,
+                "count":    len(accounts),
+                "accounts": accounts,
+            }
+        except Exception as e:
+            result[acc_type] = {"total": 0.0, "count": 0, "accounts": [], "error": str(e)}
+
+    # Net income = revenue - expenses
+    try:
+        rev_total  = result.get("revenue", {}).get("total", 0.0)
+        exp_total  = result.get("expense", {}).get("total", 0.0)
+        net_income = round(rev_total - exp_total, 2)
+    except Exception:
+        net_income = 0.0
+
+    # Total assets = assets (simple — no contra accounts)
+    total_assets = result.get("asset", {}).get("total", 0.0)
+    total_liab   = result.get("liability", {}).get("total", 0.0)
+    total_equity = result.get("equity", {}).get("total", 0.0)
+
+    return {
+        "generated_at":   _bsdt.utcnow().isoformat(),
+        "hotel_id":       hotel_id,
+        "assets":         result.get("asset",     {"total": 0, "count": 0, "accounts": []}),
+        "liabilities":    result.get("liability",  {"total": 0, "count": 0, "accounts": []}),
+        "equity":         result.get("equity",     {"total": 0, "count": 0, "accounts": []}),
+        "revenue":        result.get("revenue",    {"total": 0, "count": 0, "accounts": []}),
+        "expenses":       result.get("expense",    {"total": 0, "count": 0, "accounts": []}),
+        "net_income":     net_income,
+        "total_assets":   total_assets,
+        "total_liabilities_equity": round(total_liab + total_equity, 2),
+        "summary": {
+            "asset_count":     result.get("asset",    {}).get("count", 0),
+            "liability_count": result.get("liability", {}).get("count", 0),
+            "equity_count":    result.get("equity",   {}).get("count", 0),
+            "revenue_count":   result.get("revenue",  {}).get("count", 0),
+            "expense_count":   result.get("expense",  {}).get("count", 0),
+        }
+    }
+# ─────────────────────────────────────────────────────────────────────────────
