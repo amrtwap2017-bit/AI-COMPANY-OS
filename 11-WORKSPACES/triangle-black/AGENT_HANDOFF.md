@@ -77,3 +77,65 @@ Sprint-018: Mobile technician portal
 ## COMMITS THIS SESSION: 115+
 ## BUILD GUARD: All passing
 ## TOTAL REPO COMMITS: 750+
+
+## SESSION UPDATE — August 2026
+
+### SPRINTS COMPLETED THIS SESSION
+
+Sprint-013: Employee Timesheets
+  - src/commercial/employee_timesheets/ (models, schemas, repository, router)
+  - Table: employee_timesheets (hotel_id NOT NULL, 4 indexes)
+  - API: GET/POST /api/v1/timesheets/, GET/PATCH/{id}, approve, reject, summary
+  - Portal: /employees/[id] — detail + timesheets tab
+  - Tests: 8 passing
+
+Sprint-014: Employee Edit Portal
+  - portal/app/(app)/employees/[id]/edit/page.tsx
+  - Full PATCH form — name, email, phone, dept, position, status, hire_date
+  - Redirects to /employees/[id] on success
+
+Sprint-015: Alembic Migration Repair
+  - alembic/versions/c4f8a2b1e9d7_add_sprint_tables.py
+  - Tracks: employees, journal_entries, eta_invoices, employee_timesheets
+  - Safe: CREATE TABLE IF NOT EXISTS — zero data loss
+  - downgrade() = no-op (backward compat)
+  - Alembic head: c4f8a2b1e9d7
+
+Sprint-016: Financial GL Chart of Accounts
+  - Extended src/commercial/financial_gl/ (all 4 files)
+  - Table: chart_of_accounts (hotel_id NOT NULL, 3 indexes)
+  - API: GET/POST /api/v1/financial/gl/accounts/
+  - API: GET/PATCH /api/v1/financial/gl/accounts/{id}
+  - Filter by account_type, is_active
+
+Sprint-017: Test Coverage 160 -> 180
+  - tests/commercial/test_financial_gl.py (8 tests)
+  - tests/commercial/test_quotation.py (6 tests)
+  - tests/commercial/test_purchase_orders.py (6 tests)
+
+### CURRENT PLATFORM STATE
+  Tests:         180 passing, 23 skipped
+  Portal pages:  247
+  DB tables:     165
+  Alembic head:  c4f8a2b1e9d7
+  Backend port:  8030
+  Portal port:   3000
+
+### CRITICAL LESSONS LEARNED THIS SESSION
+  1. Server must be RESTARTED after main.py changes — tests hit live HTTP
+  2. Use src.core.base import Base (NOT src.core.database)
+  3. Appending to router.py: use direct function imports not repo.xxx
+  4. Never patch main.py with string replace — use surgical line replacement
+
+### REMAINING SPRINT BACKLOG
+  Sprint-018: Mobile technician portal (/technician-portal/)
+  Sprint-019: ETA e-invoicing credentials + test (invoicing.eta.gov.eg)
+  Sprint-020: Test coverage 180 -> 200+
+  Sprint-021: Executive dashboard real API connections
+  Sprint-022: Alembic migration for chart_of_accounts table
+
+### KNOWN ISSUE
+  chart_of_accounts table exists in DB but NOT yet in Alembic migration
+  (c4f8a2b1e9d7 covers employees/journal_entries/eta_invoices/employee_timesheets)
+  Next session: add chart_of_accounts to Alembic
+
