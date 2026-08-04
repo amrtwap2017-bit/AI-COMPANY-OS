@@ -23,3 +23,45 @@ class JournalEntryResponse(BaseModel):
     created_at: datetime
     class Config:
         from_attributes = True
+
+
+# ── Sprint-016: Chart of Accounts Schemas ────────────────────────────────────
+from typing import Optional, List
+from datetime import datetime
+
+ACCOUNT_TYPES = ["asset", "liability", "equity", "revenue", "expense"]
+
+class AccountCreate(BaseModel):
+    account_code:        str
+    account_name:        str
+    account_type:        str
+    parent_account_code: Optional[str] = None
+    description:         Optional[str] = None
+    is_active:           bool = True
+
+class AccountUpdate(BaseModel):
+    account_name:        Optional[str] = None
+    account_type:        Optional[str] = None
+    parent_account_code: Optional[str] = None
+    description:         Optional[str] = None
+    is_active:           Optional[bool] = None
+
+class AccountOut(BaseModel):
+    id:                  str
+    hotel_id:            str
+    account_code:        str
+    account_name:        str
+    account_type:        str
+    parent_account_code: Optional[str]
+    description:         Optional[str]
+    is_active:           bool
+    created_at:          datetime
+    updated_at:          datetime
+
+    class Config:
+        from_attributes = True
+
+class AccountListResponse(BaseModel):
+    count:   int
+    results: List[AccountOut]
+# ─────────────────────────────────────────────────────────────────────────────
