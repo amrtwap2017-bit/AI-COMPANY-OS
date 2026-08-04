@@ -139,3 +139,49 @@ Sprint-017: Test Coverage 160 -> 180
   (c4f8a2b1e9d7 covers employees/journal_entries/eta_invoices/employee_timesheets)
   Next session: add chart_of_accounts to Alembic
 
+
+## SESSION UPDATE — Sprint-018+019 — August 2026
+
+### SPRINTS COMPLETED
+
+Sprint-018: Mobile Technician Portal
+  - /technician-portal/ (entry + redirect)
+  - /technician-portal/dashboard (stats + active WOs)
+  - /technician-portal/work-orders (list + search + filter)
+  - /technician-portal/work-orders/[id] (detail + status update)
+  - /technician-portal/profile (user info + logout)
+  - Mobile-first dark UI, bottom nav, real API data
+  - Auth: reuses tb_access_token → redirects to /login if missing ✅
+
+Sprint-019: Alembic chart_of_accounts
+  - alembic/versions/d7e9f3a2b8c1_add_chart_of_accounts.py
+  - Alembic head: d7e9f3a2b8c1
+  - ALL sprint tables now fully Alembic-managed
+
+### PLATFORM STATE END OF SESSION
+  Tests:         203 collected, 180 passing, 23 skipped
+  Portal pages:  251
+  DB tables:     165
+  Alembic head:  d7e9f3a2b8c1
+  Commits:       757+
+
+### PORTALS
+  Main:       http://localhost:3000
+  Technician: http://localhost:3000/technician-portal
+  Supplier:   http://localhost:3000/supplier-portal
+  Client:     http://localhost:3000/client-portal
+
+### NEXT SPRINT BACKLOG (priority order)
+  Sprint-020: Executive dashboard real API connections
+  Sprint-021: Test coverage 180 -> 200 passing (203 collected, 23 skipped)
+  Sprint-022: Work order -> Invoice auto-link when WO completed
+  Sprint-023: ETA e-invoicing sandbox (needs invoicing.eta.gov.eg creds)
+  Sprint-024: Technician portal QR code scanner for assets
+
+### CRITICAL RULES REMINDER
+  1. Always restart server after main.py changes
+  2. Base import: from src.core.base import Base (NOT src.core.database)
+  3. Router appends: use direct function imports not repo.xxx
+  4. Tests use REAL HTTP to localhost:8030 — server must be running
+  5. hotel_id NOT NULL on every table — non-negotiable
+
