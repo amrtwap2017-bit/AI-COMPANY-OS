@@ -30,5 +30,6 @@ def test_eta_submit_unconfigured(auth_h):
 
 def test_eta_requires_auth():
     import requests as _req
-    r = _req.get(f"{BASE_URL}/api/v1/eta/status", timeout=10)
+    # /eta/status is public (config check) but /eta/invoices requires auth
+    r = _req.get(f"{BASE_URL}/api/v1/eta/invoices", timeout=10)
     assert r.status_code in (401, 429)
