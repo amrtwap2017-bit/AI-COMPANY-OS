@@ -18,7 +18,7 @@ def test_lead_id(client, auth):
         },
         headers=auth,
     )
-    assert res.status_code == 201, f"Create failed: {res.text}"
+    assert r.status_code == 201, f"Create failed: {res.text}"
     lead_id = res.json()["id"]
     yield lead_id
     client.delete(f"/api/v1/leads/{lead_id}", headers=auth)
@@ -26,7 +26,7 @@ def test_lead_id(client, auth):
 
 def test_list_leads(client, auth):
     res = client.get("/api/v1/leads/", headers=auth)
-    assert res.status_code == 200
+    assert r.status_code == 200
     assert isinstance(res.json(), list)
 
 
@@ -42,7 +42,7 @@ def test_create_lead(client, auth):
         },
         headers=auth,
     )
-    assert res.status_code == 201
+    assert r.status_code == 201
     data = res.json()
     assert "id" in data
     assert data["status"] == "new"
@@ -51,13 +51,13 @@ def test_create_lead(client, auth):
 
 def test_get_lead(client, auth, test_lead_id):
     res = client.get(f"/api/v1/leads/{test_lead_id}", headers=auth)
-    assert res.status_code == 200
+    assert r.status_code == 200
     assert res.json()["id"] == test_lead_id
 
 
 def test_get_lead_not_found(client, auth):
     res = client.get("/api/v1/leads/nonexistent-0000", headers=auth)
-    assert res.status_code == 404
+    assert r.status_code == 404
 
 
 @pytest.mark.skip(reason="PATCH leads handled by actions router")
@@ -67,11 +67,11 @@ def test_update_lead(client, auth, test_lead_id):
         json={"priority": "high", "notes": "Updated by commercial pytest"},
         headers=auth,
     )
-    assert res.status_code == 200
+    assert r.status_code == 200
     assert res.json()["priority"] == "high"
 
 
 def test_leads_requires_auth(client):
     import requests as _req
-    r = _req.get(f"http://localhost:8030/api/v1/leads/"", timeout=10)
-    assert res.status_code == 401
+    r = _req.get(f"http://localhost:8030/api/v1/leads/", timeout=10)
+    assert r.status_code == 401
