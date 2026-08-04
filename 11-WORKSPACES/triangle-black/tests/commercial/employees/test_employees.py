@@ -4,15 +4,8 @@ import pytest
 BASE_URL = "http://localhost:8030"
 
 @pytest.fixture(scope="module")
-def token(base_url):
-    r = requests.post(f"{BASE_URL}/api/v1/auth/login",
-        data={"username": "amr@triangleblack.com", "password": "admin123"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"})
-    return r.json().get("access_token", "")
-
-@pytest.fixture(scope="module")
-def auth_h(token):
-    return {"Authorization": f"Bearer {token}"}
+def auth_h(auth_headers):
+    return auth_headers
 
 def test_employees_list_empty_ok(auth_h):
     r = requests.get(f"{BASE_URL}/api/v1/employees/", headers=auth_h)
