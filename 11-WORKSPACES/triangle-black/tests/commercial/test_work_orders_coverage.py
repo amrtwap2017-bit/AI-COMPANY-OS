@@ -33,6 +33,6 @@ def test_work_orders_status_filter(auth_h):
     assert r.status_code == 200
 
 def test_work_orders_requires_auth():
-    import requests as _req
-    r = _req.get(f"{BASE_URL}/api/v1/work-orders/", timeout=10)
-    assert r.status_code in (401, 429)
+    import requests as _rq
+    _wo_r = _rq.get(f"{BASE_URL}/api/v1/work-orders/", timeout=10)
+    assert _wo_r.status_code in (401, 429)
