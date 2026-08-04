@@ -71,7 +71,7 @@ def test_update_lead(client, auth, test_lead_id):
     assert res.json()["priority"] == "high"
 
 
-def test_leads_requires_auth(client):
+def test_leads_requires_auth():
     import requests as _req
     r = _req.get(f"http://localhost:8030/api/v1/leads/", timeout=10)
     assert r.status_code == 401
