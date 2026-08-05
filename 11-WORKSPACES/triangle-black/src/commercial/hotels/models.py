@@ -15,6 +15,7 @@ from src.core.base import Base
 class Hotel(Base):
     __tablename__ = "hotels"
 
+    hotel_id   = Column(String(36), nullable=True, index=True)
     id         = Column(String(36), primary_key=True,
                         default=lambda: str(uuid.uuid4()))
     name       = Column(String(255), nullable=False)
