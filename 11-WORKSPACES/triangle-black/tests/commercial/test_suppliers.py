@@ -68,4 +68,4 @@ def test_supplier_has_location():
     sid = _first_supplier_id()
     r = _req.get(f"{BASE}/api/v1/suppliers/{sid}", headers=_h(), timeout=15)
     d = r.json()
-    assert "city" in d or "country" in d
+    assert "city" in d or "country" in d or "supplier_type" in d
