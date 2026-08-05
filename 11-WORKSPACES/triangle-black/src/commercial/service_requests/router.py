@@ -85,3 +85,38 @@ def convert_to_work_order(sr_id: str, db: Session = Depends(get_db)):
     db.execute(text("UPDATE service_requests SET status='converted', updated_at=:now WHERE id=:id"), {"now":now,"id":sr_id})
     db.commit()
     return {"work_order_id": wo_id, "service_request_id": sr_id, "status": "converted"}
+
+# ── Sprint-033: Service Request Status Update ─────────────────────────────────
+@router.patch("/{sr_id}", summary="Update service request status")
+def update_service_request(
+    sr_id: str,
+    data: dict,
+    db: Session = Depends(get_db),
+):
+    """Update SR status, urgency, resolution notes."""
+    from sqlalchemy import text as _t
+    try:
+        existing = db.execute(_t(
+            "SELECT id FROM service_requests WHERE id = :sid AND (deleted_at IS NULL OR deleted_at > NOW())"
+        ), {"sid": sr_id}).fetchone()
+        if not existing:
+            raise HTTPException(status_code=404, detail="Service request not found")
+
+        allowed = {"status", "urgency", "resolution_notes", "contact_phone", "resolved_at"}
+        updates = {k: v for k, v in data.items() if k in allowed}
+        if not updates:
+            raise HTTPException(status_code=422, detail="No valid fields to update")
+
+        set_clause = ", ".join(f"{k} = :{k}" for k in updates)
+        updates["sid"] = sr_id
+        db.execute(_t(f"UPDATE service_requests SET {set_clause}, updated_at = NOW() WHERE id = :sid"), updates)
+        db.commit()
+
+        row = db.execute(_t("SELECT * FROM service_requests WHERE id = :sid"), {"sid": sr_id}).fetchone()
+        return dict(row._mapping) if row else {"ok": True, "id": sr_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+# ─────────────────────────────────────────────────────────────────────────────
