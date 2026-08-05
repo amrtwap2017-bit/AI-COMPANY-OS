@@ -7642,3 +7642,65 @@ def health_v2():
     }
 
 # ── SPRINT 329 COMPLETE ──────────────────────────────────────
+
+
+# ── Sprint-031: Vendor Scorecard List ─────────────────────────────────────────
+@app.get("/api/v1/vendor-scorecards/", tags=["vendor-scorecards"])
+@app.get("/api/v1/vendor-scorecards", tags=["vendor-scorecards"])
+def list_vendor_scorecards(
+    limit: int = 100,
+    offset: int = 0,
+    request: Request = None,
+):
+    """List all vendor scorecards with performance KPIs."""
+    from sqlalchemy import text as _t, create_engine as _ce
+    from sqlalchemy.orm import Session as _Session
+    import os as _os
+    
+    _eng = _ce(_os.environ.get("DATABASE_URL", "postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black"))
+    with _Session(_eng) as db:
+        try:
+            rows = db.execute(_t("""
+                SELECT 
+                    vs.id, vs.vendor_id, vs.hotel_id,
+                    vs.total_pos, vs.total_spend,
+                    vs.on_time_deliveries, vs.late_deliveries,
+                    vs.on_time_pct, vs.quality_score, vs.price_score, vs.overall_score,
+                    vs.avg_lead_time_days, vs.last_po_date, vs.updated_at,
+                    v.vendor_code, v.company_name, v.status as vendor_status,
+                    v.category, v.preferred_flag, v.risk_level
+                FROM vendor_scorecards vs
+                LEFT JOIN vendors v ON vs.vendor_id = v.id
+                ORDER BY vs.overall_score DESC NULLS LAST
+                OFFSET :offset LIMIT :limit
+            """), {"offset": offset, "limit": limit}).fetchall()
+            
+            count = db.execute(_t("SELECT COUNT(*) FROM vendor_scorecards")).scalar()
+            
+            results = []
+            for r in rows:
+                m = dict(r._mapping)
+                results.append({
+                    "id":               str(m.get("id", "")),
+                    "vendor_id":        str(m.get("vendor_id", "")),
+                    "hotel_id":         str(m.get("hotel_id", "")),
+                    "company_name":     m.get("company_name") or "Unknown Vendor",
+                    "vendor_code":      m.get("vendor_code") or "—",
+                    "vendor_status":    m.get("vendor_status") or "active",
+                    "category":         m.get("category") or "—",
+                    "preferred_flag":   str(m.get("preferred_flag", "False")).lower() == "true",
+                    "risk_level":       m.get("risk_level") or "low",
+                    "total_pos":        int(m.get("total_pos") or 0),
+                    "total_spend":      float(m.get("total_spend") or 0),
+                    "on_time_pct":      float(m.get("on_time_pct") or 0),
+                    "quality_score":    float(m.get("quality_score") or 0),
+                    "price_score":      float(m.get("price_score") or 0),
+                    "overall_score":    float(m.get("overall_score") or 0),
+                    "avg_lead_time_days": float(m.get("avg_lead_time_days") or 0),
+                    "last_po_date":     str(m.get("last_po_date") or ""),
+                    "updated_at":       str(m.get("updated_at") or ""),
+                })
+            return {"count": count, "results": results}
+        except Exception as e:
+            return {"count": 0, "results": [], "error": str(e)}
+# ─────────────────────────────────────────────────────────────────────────────
