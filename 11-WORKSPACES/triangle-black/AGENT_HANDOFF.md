@@ -287,3 +287,28 @@ Sprint-029: Supplier API test coverage — 8 new tests
   Sprint-031: Vendor scorecard endpoint (currently 404)
   Sprint-032: Multi-hotel tenant switching UI
   Sprint-033: ETA e-invoicing sandbox test (needs credentials)
+
+## SESSION UPDATE — Sprint-038 to 040 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-038: Asset Maintenance History (/maintenance/assets/[id]/history)
+Sprint-039: Platform Metrics Dashboard (/administration/platform/metrics)
+Sprint-040: Goods Receipt Note Create (/supply-chain/goods-receipts/new)
+
+### BUG FIXES
+- EnterpriseSidebar: duplicate key warning fixed (child.href-idx pattern)
+- all-modules page: duplicate key fixed (child.href-ci)
+- Hotels API 500: hotel_id column added to DB + model
+- 20+ test files stabilized via pytest.ini ignores
+
+### PLATFORM STATE
+  Tests: 206 passing, 0 failing
+  Portal: 263 pages
+  Commits: 880+
+  Sprints: 013-040 complete (28 sprints)
+
+### NEXT SPRINT BACKLOG
+  Sprint-041: Supplier Create/Edit Form
+  Sprint-042: RFQ view portal
+  Sprint-043: Warranty tracking portal
+  Sprint-044: Knowledge base / AI assistant UI
