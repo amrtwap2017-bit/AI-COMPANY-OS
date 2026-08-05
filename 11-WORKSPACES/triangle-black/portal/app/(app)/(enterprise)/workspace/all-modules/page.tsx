@@ -68,7 +68,7 @@ export default function AllModulesPage() {
                     <div style={{display:"flex",flexDirection:"column",gap:6,marginTop:14,paddingTop:12,borderTop:"1px solid var(--color-divider)"}}>
                       {center.children.map((child, ci) => (
                         <button
-                          key={child.href}
+                          key={`${child.href}-${ci}`}
                           onClick={()=>router.push(child.href)}
                           style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",background:"transparent",border:"none",cursor:"pointer",textAlign:"left",padding:"4px 0"}}
                         >
