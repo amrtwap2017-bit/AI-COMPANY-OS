@@ -176,3 +176,75 @@ def maintenance_downtime(db: Session = Depends(get_db),
         "SELECT * FROM maintenance_downtime_records ORDER BY created_at DESC LIMIT 50"
     )).fetchall())
     return {"records": r, "total": len(r)}
+
+
+# ── Sprint-030: PM Plan Complete Workflow ─────────────────────────────────────
+from datetime import datetime as _pmdt
+import uuid as _pmuuid
+
+
+@router.post("/pm-plans/{plan_id}/complete")
+def complete_pm_plan(
+    plan_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Mark a PM plan as completed and calculate next due date.
+    Updates status, records completion time, advances schedule.
+    """
+    from sqlalchemy import text as _t
+
+    # Load plan
+    row = None
+    try:
+        row = db.execute(_t("""
+            SELECT id, title, frequency, next_due_date, status, asset_node_id
+            FROM maintenance_plans
+            WHERE id = :pid
+        """), {"pid": plan_id}).fetchone()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB error: {e}")
+
+    if not row:
+        raise HTTPException(status_code=404, detail="PM plan not found")
+
+    plan = dict(row._mapping)
+
+    # Calculate next due date based on frequency
+    freq_map = {
+        "daily":     1,   "weekly":  7,   "monthly":  30,
+        "quarterly": 90,  "yearly":  365, "biannual": 180,
+    }
+    freq = str(plan.get("frequency", "monthly")).lower()
+    days = freq_map.get(freq, 30)
+
+    now = _pmdt.utcnow()
+    next_due = now.replace(microsecond=0)
+    from datetime import timedelta as _tdd
+    next_due = now + _tdd(days=days)
+
+    try:
+        db.execute(_t("""
+            UPDATE maintenance_plans
+            SET status = 'completed',
+                updated_at = NOW(),
+                next_due_date = :next_due,
+                next_due_ts = :next_due
+            WHERE id = :pid
+        """), {"pid": plan_id, "next_due": next_due})
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Update failed: {e}")
+
+    return {
+        "ok":           True,
+        "plan_id":      plan_id,
+        "title":        plan.get("title"),
+        "status":       "completed",
+        "completed_at": now.isoformat(),
+        "next_due":     next_due.isoformat(),
+        "frequency":    freq,
+        "days_until_next": days,
+    }
+# ─────────────────────────────────────────────────────────────────────────────

@@ -1,210 +1,173 @@
 "use client";
 // @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { useRouter, useParams } from "next/navigation";
+// Triangle Black — PM Plan Detail + Complete Workflow
+// Sprint-030: PM Completion
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { tbFetch } from "@/lib/api/tb-client";
+import { toast } from "sonner";
 
-const STATUS_COLOR  = { active:"#547C4D", inactive:"#6D5F53", paused:"#B07A2A" };
-const ASSET_SC      = { Operational:"#547C4D", "In Fault":"#A84A3D", "Under Maintenance":"#B07A2A" };
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDateTime = (d: any) => { try { return new Date(d).toLocaleString("en-GB", { dateStyle:"short", timeStyle:"short" }); } catch { return "—"; } };
+
+const FREQ_LABEL: Record<string, string> = {
+  daily:"Daily", weekly:"Weekly", monthly:"Monthly",
+  quarterly:"Quarterly (90d)", biannual:"Bi-Annual (180d)", yearly:"Annual",
+};
+const STATUS_COLOR: Record<string, string> = {
+  active:    "bg-green-100 text-green-800",
+  completed: "bg-blue-100 text-blue-800",
+  overdue:   "bg-red-100 text-red-800",
+  inactive:  "bg-gray-100 text-gray-600",
+};
 
 export default function PMPlanDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const id     = params?.id as string;
+  const { id }  = useParams();
+  const router  = useRouter();
+  const [mounted, setMounted]     = useState(false);
+  const [plan, setPlan]           = useState<any>(null);
+  const [loading, setLoading]     = useState(true);
+  const [completing, setCompleting] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [result, setResult]       = useState<any>(null);
 
-  const { data: plan, isLoading } = useQuery(
-    ["pm-detail", id],
-    () => authFetch(`/api/v1/maintenance/pm-plans/${id}`).then(r => r.json()),
-    { enabled: !!id }
-  );
+  useEffect(() => { setMounted(true); }, []);
 
-  if (isLoading) return (
-    <div className="min-h-screen bg-base flex items-center justify-center">
-      <div className="text-secondary text-sm animate-pulse">Loading PM plan...</div>
+  useEffect(() => {
+    if (!mounted || !id) return;
+    tbFetch(`/api/v1/maintenance/pm-plans/${id}`)
+      .then(r => r.json())
+      .then(d => { setPlan(d); if (d.status === "completed") setCompleted(true); })
+      .catch(() => toast.error("Failed to load PM plan"))
+      .finally(() => setLoading(false));
+  }, [mounted, id]);
+
+  const handleComplete = async () => {
+    if (!confirm("Mark this PM plan as completed?")) return;
+    setCompleting(true);
+    try {
+      const res = await tbFetch(`/api/v1/maintenance/pm-plans/${id}/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast.success(`✅ Completed! Next due: ${fmtDate(data.next_due)}`);
+        setCompleted(true);
+        setResult(data);
+        setPlan((p: any) => ({ ...p, status: "completed", next_due_ts: data.next_due }));
+      } else {
+        toast.error(data.detail || "Completion failed");
+      }
+    } catch { toast.error("Network error"); }
+    finally { setCompleting(false); }
+  };
+
+  if (!mounted || loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
     </div>
   );
 
   if (!plan || plan.detail) return (
-    <div className="min-h-screen bg-base flex items-center justify-center">
-      <div className="tb-empty">
-        <div className="tb-empty-icon">📅</div>
-        <div className="tb-empty-title">PM Plan not found</div>
-        <button onClick={() => router.push("/maintenance/pm-plans")} className="tb-btn-primary mt-4">Back</button>
-      </div>
+    <div className="p-8 text-center text-gray-500">
+      <p className="text-2xl mb-2">📋</p>
+      <p>PM Plan not found</p>
+      <button onClick={() => router.push("/maintenance/pm-plans")}
+        className="mt-4 text-sm text-gray-400 hover:text-gray-600">← Back to PM Plans</button>
     </div>
   );
 
-  const sc      = STATUS_COLOR[plan.status] || "#6D5F53";
-  const now     = new Date();
-  const dueDate = plan.next_due_ts ? new Date(plan.next_due_ts) : null;
-  const isOverdue = dueDate && dueDate < now;
-  const daysUntil = dueDate ? Math.ceil((dueDate - now) / 86400000) : null;
-  const recentWOs = plan.recent_work_orders || [];
+  const isOverdue = plan.next_due_ts && new Date(plan.next_due_ts) < new Date() && plan.status !== "completed";
 
   return (
-    <div className="min-h-screen bg-base">
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
-        <div className="tb-hero-inner">
-          <div className="tb-flex-between gap-6">
-            <div>
-              <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance</div>
-              <h1 className="tb-hero-title">{plan.title || `PM Plan ${id?.slice(0,8)}`}</h1>
-              <p className="tb-hero-description">
-                <span className="tb-badge mr-2" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>{plan.status||"—"}</span>
-                <span className="text-secondary mr-2">{plan.plan_type||"—"}</span>
-                {isOverdue
-                  ? <span style={{color:"#A84A3D"}}>Overdue by {Math.abs(daysUntil)}d</span>
-                  : daysUntil !== null
-                  ? <span style={{color:daysUntil<7?"#B07A2A":"#6D5F53"}}>Due in {daysUntil}d</span>
-                  : null}
-              </p>
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <button onClick={() => router.push("/maintenance/pm-plans")}
+            className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
+            ← PM Plans
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">{plan.title}</h1>
+          <div className="flex items-center gap-2 mt-2">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[plan.status] || "bg-gray-100 text-gray-600"}`}>
+              {plan.status}
+            </span>
+            {isOverdue && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700">
+                ⚠️ OVERDUE
+              </span>
+            )}
+            <span className="text-xs text-gray-500">{FREQ_LABEL[plan.frequency] || plan.frequency}</span>
+          </div>
+        </div>
+        {!completed && (
+          <button
+            onClick={handleComplete}
+            disabled={completing}
+            className="px-5 py-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+          >
+            {completing ? "Completing..." : "✅ Mark Complete"}
+          </button>
+        )}
+      </div>
+
+      {/* Completion Success Banner */}
+      {result && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <p className="font-semibold text-green-700">✅ PM Plan Completed</p>
+          <p className="text-sm text-green-600 mt-1">
+            Next scheduled maintenance: <strong>{fmtDate(result.next_due)}</strong>
+            <span className="text-green-500 ml-2">({result.days_until_next} days from now)</span>
+          </p>
+        </div>
+      )}
+
+      {/* Plan Details */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+        <h2 className="font-semibold text-gray-900">Plan Details</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            ["Plan Type",    plan.plan_type || "preventive"],
+            ["Frequency",    FREQ_LABEL[plan.frequency] || plan.frequency],
+            ["Status",       plan.status],
+            ["Owner",        plan.owner || "—"],
+            ["Asset Node",   plan.asset_node_id || "—"],
+            ["Next Due",     fmtDate(plan.next_due_ts || plan.next_due_date)],
+            ["Created",      fmtDate(plan.created_at)],
+            ["Last Updated", fmtDate(plan.updated_at)],
+          ].map(([label, value]) => (
+            <div key={label} className="border-b border-gray-50 pb-2">
+              <p className="text-xs text-gray-400">{label}</p>
+              <p className="text-sm font-medium text-gray-900 capitalize mt-0.5">{value}</p>
             </div>
-            <button onClick={() => router.push("/maintenance/pm-plans")} className="tb-btn-secondary">← Back</button>
-          </div>
-          <div className="tb-grid-4 mt-6">
-            {[
-              { label:"Status",    value:plan.status||"—",              color:sc },
-              { label:"Type",      value:plan.plan_type||"—",           color:"#5B7C8C" },
-              { label:"Frequency", value:plan.frequency||"—",           color:"#8D7443" },
-              { label:"Next Due",  value:fmtDate(plan.next_due_ts),     color:isOverdue?"#A84A3D":daysUntil&&daysUntil<7?"#B07A2A":"#221D1A" },
-            ].map((k, i) => (
-              <div key={i} className="tb-hero-kpi">
-                <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
-                <div className="tb-hero-kpi-label">{k.label}</div>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 
-      <div className="tb-canvas">
-        {isOverdue && (
-          <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
-            <div className="flex items-center gap-3">
-              <span style={{fontSize:"1.25rem"}}>⚠️</span>
-              <span className="text-sm font-semibold text-red-400">
-                This PM plan is overdue by {Math.abs(daysUntil)} days — was due {fmtDate(plan.next_due_ts)}
-              </span>
-              <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link ml-auto">Create WO →</button>
-            </div>
+      {/* Notes */}
+      {plan.notes && (
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">📝 Instructions / Notes</h3>
+          <p className="text-sm text-gray-600 leading-relaxed">{plan.notes}</p>
+        </div>
+      )}
+
+      {/* Due Date Visual */}
+      <div className={`rounded-xl p-5 border ${isOverdue ? "bg-red-50 border-red-200" : completed ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+              {completed ? "Completed — Next Due" : isOverdue ? "OVERDUE Since" : "Next Maintenance Due"}
+            </p>
+            <p className={`text-2xl font-bold ${isOverdue ? "text-red-700" : "text-blue-700"}`}>
+              {fmtDate(plan.next_due_ts || plan.next_due_date)}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">{fmtDateTime(plan.next_due_ts || plan.next_due_date)}</p>
           </div>
-        )}
-
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 space-y-5">
-            <div className="tb-section">
-              <div className="tb-section-title">Plan Details</div>
-              <div className="space-y-1">
-                {[
-                  ["Title",       plan.title || "—"],
-                  ["Type",        plan.plan_type || "—"],
-                  ["Status",      plan.status || "—"],
-                  ["Frequency",   plan.frequency || "—"],
-                  ["Owner",       plan.owner || "—"],
-                  ["Next Due",    fmtDate(plan.next_due_ts)],
-                  ["Created",     fmtDate(plan.created_at)],
-                  ["Updated",     fmtDate(plan.updated_at)],
-                ].map(([l, v], i) => (
-                  <div key={i} className="tb-info-row">
-                    <span className="tb-info-label">{l}</span>
-                    <span className="tb-info-value">{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {plan.notes && (
-              <div className="tb-section">
-                <div className="tb-section-title">Notes</div>
-                <p className="text-sm text-secondary leading-relaxed">{plan.notes}</p>
-              </div>
-            )}
-
-            {plan.asset && (
-              <div className="tb-section">
-                <div className="tb-section-title">Linked Asset</div>
-                <button
-                  onClick={() => router.push(`/maintenance/assets/${plan.asset_node_id}`)}
-                  className="tb-action-item w-full justify-start hover:border-brand transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-base-alt flex items-center justify-center text-lg flex-shrink-0">⚙️</div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-primary">{plan.asset.name||"—"}</div>
-                    <div className="text-xs text-tertiary flex items-center gap-2">
-                      <span>{plan.asset.category||"—"}</span>
-                      <span className="tb-badge" style={{
-                        background:`${ASSET_SC[plan.asset.status]||"#6D5F53"}18`,
-                        color:ASSET_SC[plan.asset.status]||"#6D5F53",
-                        fontSize:"0.5rem"
-                      }}>{plan.asset.status||"—"}</span>
-                    </div>
-                  </div>
-                  <span className="tb-badge ml-auto" style={{fontSize:"0.625rem",color:"#5B7C8C"}}>View →</span>
-                </button>
-              </div>
-            )}
-
-            {recentWOs.length > 0 && (
-              <div className="tb-section">
-                <div className="tb-section-title">Related Work Orders</div>
-                <div className="space-y-2 mt-2">
-                  {recentWOs.map((wo, i) => {
-                    const pc  = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" }[wo.priority] || "#6D5F53";
-                    const wsc = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" }[wo.status] || "#6D5F53";
-                    return (
-                      <button key={i}
-                        onClick={() => router.push(`/operations/work-orders/${wo.id}`)}
-                        className="tb-action-item w-full justify-between">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="tb-priority-bar" style={{background:pc}}/>
-                          <span className="text-sm text-secondary truncate">{wo.title||"—"}</span>
-                        </div>
-                        <span className="tb-badge" style={{background:`${wsc}18`,color:wsc,border:`1px solid ${wsc}30`,fontSize:"0.5625rem",flexShrink:0}}>
-                          {(wo.status||"—").replace("_"," ")}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div className="tb-section">
-              <div className="tb-section-title">Schedule Status</div>
-              <div className="text-center py-4">
-                <div className="text-5xl font-black mb-2" style={{color:isOverdue?"#A84A3D":daysUntil&&daysUntil<7?"#B07A2A":"#547C4D"}}>
-                  {isOverdue ? "!" : daysUntil !== null && daysUntil < 7 ? "⚠" : "✓"}
-                </div>
-                <div className="text-sm font-bold" style={{color:isOverdue?"#A84A3D":"#547C4D"}}>
-                  {isOverdue ? "OVERDUE" : "ON SCHEDULE"}
-                </div>
-                <div className="text-xs text-tertiary mt-1">
-                  {isOverdue ? `${Math.abs(daysUntil)} days past due` : daysUntil !== null ? `${daysUntil} days until due` : "—"}
-                </div>
-              </div>
-            </div>
-
-            <div className="tb-section">
-              <div className="tb-section-title">Actions</div>
-              <div className="space-y-2">
-                {[
-                  { label:"All PM Plans",    icon:"📅", path:"/maintenance/pm-plans" },
-                  { label:"Assets",          icon:"⚙️",  path:"/maintenance/assets" },
-                  { label:"Asset Tree",      icon:"🌳", path:"/maintenance/asset-tree" },
-                  { label:"Work Orders",     icon:"🔧", path:"/operations/work-orders" },
-                ].map((a, i) => (
-                  <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
-                    <span>{a.icon}</span>
-                    <span className="text-sm text-secondary">{a.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          <span className="text-4xl">{isOverdue ? "🔴" : completed ? "✅" : "📅"}</span>
         </div>
       </div>
     </div>
