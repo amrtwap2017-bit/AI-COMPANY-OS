@@ -242,3 +242,48 @@ Sprint-026: Rate limiter permanent fix
   Sprint-027: Balance Sheet portal page (/financial/gl/balance-sheet)
   Sprint-028: Asset QR code scanner portal
   Sprint-029: Multi-hotel tenant switching UI
+
+## SESSION UPDATE — Sprint-027 to 029 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-027: Financial GL Balance Sheet portal page (/financial/balance-sheet)
+Sprint-028: Asset QR Scanner Portal
+  - /operations/assets/qr-generator (admin — generate + print QR labels)
+  - /asset/[id] (mobile scan landing — dark UI, asset details + WOs)
+Sprint-029: Supplier API test coverage — 8 new tests
+
+### PLATFORM STATE
+  Tests:        200+ passing, 0 failing
+  Tests collected: 223
+  Portal pages: 255
+  Alembic head: d7e9f3a2b8c1
+  Commits:      785+
+  Sprints:      013-029 complete (17 sprints this session)
+
+### PORTALS (5 total)
+  Main:       http://localhost:3000
+  Technician: http://localhost:3000/technician-portal
+  Supplier:   http://localhost:3000/supplier-portal
+  Client:     http://localhost:3000/client-portal
+  Asset Scan: http://localhost:3000/asset/{id} (QR code landing)
+
+### KEY FEATURES DELIVERED THIS SESSION
+  1. Employee Timesheets (HR domain, 8 API endpoints)
+  2. Employee Edit page
+  3. Alembic migration repair (5 tables tracked)
+  4. Financial GL Chart of Accounts (63 accounts, CRUD)
+  5. Financial GL Balance Sheet report + portal page
+  6. Mobile Technician Portal (5 pages, dark UI, bottom nav)
+  7. Executive Dashboard (confirmed all 3 endpoints working)
+  8. Work Order → Invoice auto-link (/complete endpoint)
+  9. WO Technician Assignment page
+  10. Asset QR Code Generator + Mobile Scan Landing
+  11. Rate limiter permanent fix (localhost whitelisted)
+  12. useAuthFetch SSR guard (portal build fix)
+  13. Test coverage 158 → 200+ (rewrote 4 broken files)
+
+### NEXT SPRINT BACKLOG
+  Sprint-030: PM (Preventive Maintenance) scheduler backend + portal
+  Sprint-031: Vendor scorecard endpoint (currently 404)
+  Sprint-032: Multi-hotel tenant switching UI
+  Sprint-033: ETA e-invoicing sandbox test (needs credentials)
