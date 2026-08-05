@@ -99,7 +99,7 @@ function CenterAccordion({ center, pathname, collapsed }: { center: NavCenter; p
             const active = pathname === child.href || pathname.startsWith(child.href + "/");
             return (
               <Link
-                key={child.href}
+                key={`${child.href}-${idx}`}
                 href={child.href}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all"
                 style={active ? {color:"#B9924C",background:"rgba(185,146,76,0.08)",fontWeight:600} : {color:"#8C7A69"}}
