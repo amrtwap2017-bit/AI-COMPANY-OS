@@ -835,6 +835,28 @@ def list_stock_balances(
         return []
 
 @app.get("/api/v1/suppliers/", tags=["suppliers"])
+
+@app.post("/api/v1/suppliers/", tags=["suppliers"], status_code=201)
+async def create_supplier_main(request: Request):
+    """Create a new supplier — Sprint-041"""
+    from sqlalchemy import text as _t, create_engine as _ce
+    from sqlalchemy.orm import Session as _S
+    import uuid as _u, datetime as _d, os as _os
+    _eng = _ce(_os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black"))
+    with _S(_eng) as db:
+        try:
+            sid = str(_u.uuid4())
+            now = _d.datetime.utcnow()
+            data = await request.json()
+            db.execute(_t("""INSERT INTO suppliers (id,hotel_id,supplier_code,company_name,arabic_name,status,supplier_type,payment_terms,lead_time_days,preferred_flag,risk_level,notes,city,country,phone,email,category,contact_person,credit_limit,blacklisted,is_approved,rating,created_at,updated_at) VALUES (:id,:hid,:code,:cn,:an,:st,:stype,:pt,:ltd,:pf,:rl,:notes,:city,:country,:phone,:email,:cat,:cp,:cl,:bl,:ia,:rating,:ca,:ua)"""),
+                {"id":sid,"hid":data.get("hotel_id","tb-default-hotel-000000000001"),"code":data.get("supplier_code") or f"SUP-{sid[:6].upper()}","cn":data.get("company_name","New Supplier"),"an":data.get("arabic_name",""),"st":data.get("status","active"),"stype":data.get("supplier_type","general"),"pt":data.get("payment_terms","net_30"),"ltd":data.get("lead_time_days",7),"pf":str(data.get("preferred_flag",False)),"rl":data.get("risk_level","low"),"notes":data.get("notes",""),"city":data.get("city",""),"country":data.get("country","Egypt"),"phone":data.get("phone",""),"email":data.get("email",""),"cat":data.get("category","general"),"cp":data.get("contact_person",""),"cl":data.get("credit_limit",0),"bl":str(data.get("blacklisted",False)),"ia":str(data.get("is_approved",False)),"rating":data.get("rating",0),"ca":now,"ua":now})
+            db.commit()
+            return {"id":sid,"company_name":data.get("company_name"),"status":"active","ok":True}
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/v1/suppliers", tags=["suppliers"])
 def list_suppliers(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
     try:
