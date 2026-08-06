@@ -836,27 +836,6 @@ def list_stock_balances(
 
 @app.get("/api/v1/suppliers/", tags=["suppliers"])
 
-@app.post("/api/v1/suppliers/", tags=["suppliers"], status_code=201)
-async def create_supplier_main(request: Request):
-    """Create a new supplier — Sprint-041"""
-    from sqlalchemy import text as _t, create_engine as _ce
-    from sqlalchemy.orm import Session as _S
-    import uuid as _u, datetime as _d, os as _os
-    _eng = _ce(_os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@127.0.0.1:5432/triangle_black"))
-    with _S(_eng) as db:
-        try:
-            sid = str(_u.uuid4())
-            now = _d.datetime.utcnow()
-            data = await request.json()
-            db.execute(_t("""INSERT INTO suppliers (id,hotel_id,supplier_code,company_name,arabic_name,status,supplier_type,payment_terms,lead_time_days,preferred_flag,risk_level,notes,city,country,phone,email,category,contact_person,credit_limit,blacklisted,is_approved,rating,created_at,updated_at) VALUES (:id,:hid,:code,:cn,:an,:st,:stype,:pt,:ltd,:pf,:rl,:notes,:city,:country,:phone,:email,:cat,:cp,:cl,:bl,:ia,:rating,:ca,:ua)"""),
-                {"id":sid,"hid":data.get("hotel_id","tb-default-hotel-000000000001"),"code":data.get("supplier_code") or f"SUP-{sid[:6].upper()}","cn":data.get("company_name","New Supplier"),"an":data.get("arabic_name",""),"st":data.get("status","active"),"stype":data.get("supplier_type","general"),"pt":data.get("payment_terms","net_30"),"ltd":data.get("lead_time_days",7),"pf":str(data.get("preferred_flag",False)),"rl":data.get("risk_level","low"),"notes":data.get("notes",""),"city":data.get("city",""),"country":data.get("country","Egypt"),"phone":data.get("phone",""),"email":data.get("email",""),"cat":data.get("category","general"),"cp":data.get("contact_person",""),"cl":data.get("credit_limit",0),"bl":str(data.get("blacklisted",False)),"ia":str(data.get("is_approved",False)),"rating":data.get("rating",0),"ca":now,"ua":now})
-            db.commit()
-            return {"id":sid,"company_name":data.get("company_name"),"status":"active","ok":True}
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
-
-
 @app.get("/api/v1/suppliers", tags=["suppliers"])
 def list_suppliers(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
     try:
@@ -7859,4 +7838,96 @@ async def client_portal_create_sr(request: Request):
         return {"id": sid, "status": "open", "ok": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@app.post("/api/v1/suppliers/", tags=["suppliers"], status_code=201)
+def create_supplier_sync(payload: dict, db: _Session = _Depends(_get_db)):
+    """Create a new supplier — Sprint-051 fix (sync, proper DI)."""
+    try:
+        import uuid as _u2, datetime as _d2
+        sid = str(_u2.uuid4())
+        now = _d2.datetime.utcnow()
+        db.execute(_text("""
+            INSERT INTO suppliers (id, hotel_id, supplier_code, company_name, arabic_name,
+                status, supplier_type, payment_terms, lead_time_days, preferred_flag,
+                risk_level, notes, city, country, phone, email, category,
+                contact_person, credit_limit, blacklisted, is_approved, rating,
+                created_at, updated_at)
+            VALUES (:id,:hid,:code,:cn,:an,:st,:stype,:pt,:ltd,:pf,:rl,:notes,:city,:country,
+                :phone,:email,:cat,:cp,:cl,:bl,:ia,:rating,:ca,:ua)
+        """), {
+            "id": sid,
+            "hid": payload.get("hotel_id","tb-default-hotel-000000000001"),
+            "code": payload.get("supplier_code") or f"SUP-{sid[:6].upper()}",
+            "cn":   payload.get("company_name","New Supplier"),
+            "an":   payload.get("arabic_name",""),
+            "st":   payload.get("status","active"),
+            "stype":payload.get("supplier_type","general"),
+            "pt":   payload.get("payment_terms","net_30"),
+            "ltd":  payload.get("lead_time_days",7),
+            "pf":   str(payload.get("preferred_flag",False)),
+            "rl":   payload.get("risk_level","low"),
+            "notes":payload.get("notes",""),
+            "city": payload.get("city",""),
+            "country":payload.get("country","Egypt"),
+            "phone":payload.get("phone",""),
+            "email":payload.get("email",""),
+            "cat":  payload.get("category","general"),
+            "cp":   payload.get("contact_person",""),
+            "cl":   payload.get("credit_limit",0),
+            "bl":   str(payload.get("blacklisted",False)),
+            "ia":   str(payload.get("is_approved",False)),
+            "rating":payload.get("rating",0),
+            "ca":   now,
+            "ua":   now,
+        })
+        db.commit()
+        return {"id": sid, "company_name": payload.get("company_name"), "status": "active", "ok": True}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@app.get("/api/v1/knowledge-graph/", tags=["knowledge-graph"])
+@app.get("/api/v1/knowledge-graph", tags=["knowledge-graph"])
+def knowledge_graph_summary(db: _Session = _Depends(_get_db)):
+    """Knowledge graph entity summary."""
+    def c(q):
+        try:
+            r = db.execute(_text(q)).fetchone()
+            return int(list(r)[0] or 0)
+        except: return 0
+    return {
+        "assets":    c("SELECT COUNT(*) FROM assets"),
+        "work_orders": c("SELECT COUNT(*) FROM work_orders"),
+        "suppliers": c("SELECT COUNT(*) FROM suppliers"),
+        "contracts": c("SELECT COUNT(*) FROM contracts"),
+        "projects":  c("SELECT COUNT(*) FROM projects WHERE status IN ('active','in_progress')"),
+        "total_entities": c("SELECT COUNT(*) FROM assets") + c("SELECT COUNT(*) FROM suppliers") + c("SELECT COUNT(*) FROM contracts"),
+    }
+
+@app.get("/api/v1/knowledge-graph/search", tags=["knowledge-graph"])
+def knowledge_graph_search(q: str = "", limit: int = 20, db: _Session = _Depends(_get_db)):
+    """Search across all entities in the knowledge graph."""
+    if not q:
+        return {"results": [], "total": 0}
+    results = []
+    try:
+        # Search assets
+        rows = db.execute(_text("SELECT id, name as label, 'asset' as type, category as meta FROM assets WHERE name ILIKE :q LIMIT 5"), {"q": f"%{q}%"}).fetchall()
+        results.extend([dict(r._mapping) for r in rows])
+        # Search suppliers
+        rows = db.execute(_text("SELECT id, company_name as label, 'supplier' as type, supplier_type as meta FROM suppliers WHERE company_name ILIKE :q LIMIT 5"), {"q": f"%{q}%"}).fetchall()
+        results.extend([dict(r._mapping) for r in rows])
+        # Search work orders
+        rows = db.execute(_text("SELECT id, title as label, 'work_order' as type, status as meta FROM work_orders WHERE title ILIKE :q AND deleted_at IS NULL LIMIT 5"), {"q": f"%{q}%"}).fetchall()
+        results.extend([dict(r._mapping) for r in rows])
+        # Search contracts
+        rows = db.execute(_text("SELECT id, title as label, 'contract' as type, 'contract' as meta FROM contracts WHERE title ILIKE :q LIMIT 5"), {"q": f"%{q}%"}).fetchall()
+        results.extend([dict(r._mapping) for r in rows])
+    except Exception as e:
+        pass
+    return {"results": results[:limit], "total": len(results), "query": q}
 
