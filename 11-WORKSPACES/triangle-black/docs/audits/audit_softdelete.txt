@@ -1,0 +1,62 @@
+Based on the code snippets and table definitions provided in your logs, here is the architectural analysis regarding soft delete capabilities.
+
+### 1. Analysis of Soft Delete Patterns
+
+**Does the system use a consistent pattern?**
+**No.** The system exhibits **mixed patterns**. There are two distinct approaches to handling deleted records visible in the query strings:
+
+*   **Pattern A (Soft Delete via `is_active`):** This is the dominant and most common pattern. Queries frequently filter using `WHERE ... AND is_active = true`. Columns like `deleted_at` appear only as a secondary check or in specific contexts, but logic relies primarily on an active boolean flag.
+    *   *Evidence:* `"SELECT id FROM service_requests WHERE id = :sid AND (deleted_at IS NULL OR deleted_at > NOW())"` vs the overwhelming presence of `.filter(...).is_active == True`.
+*   **Pattern B (Hard Delete / Logical Deletion via `deleted_at`):** Some specific queries explicitly check for a null or past timestamp to determine visibility.
+    *   *Evidence:* `"SELECT id FROM service_requests WHERE ... AND (deleted_at IS NULL OR deleted_at > NOW())"` and `"WHERE t.is_active = true"`.
+
+**Conclusion:** The system is **inconsistent**. While `is_active` is the primary filter for most tables, there are explicit references to a physical soft-delete column (`deleted_at`) in specific queries. This suggests either:
+1.  A legacy migration where some tables were updated to use `deleted_at` while others retained `is_active`.
+2.  Code duplication or refactoring issues where different modules (e.g., API vs. Admin Panel) are using different deletion strategies for the same entity type.
+
+---
+
+### 2. Tables with NO Soft Delete Capability
+
+Based on your list of tables and the absence of any code snippets referencing `deleted_at` columns specifically for these entities, **ALL** listed tables appear to rely solely on an `is_active` boolean flag (or lack a dedicated soft delete column entirely). None of them use a physical `deleted_at` timestamp as their primary deletion mechanism.
+
+However, since the prompt asks which have "NO soft delete capability" and defines severity based on *who* deletes what, I will categorize your specific list into the requested P0/P1/P2 tiers to identify critical data loss risks if these tables are accidentally hard-deleted or lack recovery mechanisms beyond `is_active`.
+
+#### **P0: Tables Users Directly Delete (High Risk)**
+These tables contain core transactional and financial records. If a user can "delete" them without restoring the record, it causes immediate business disruption. In your system, these rely on `is_active`, but if that flag is bypassed or set to False permanently in an admin action:
+
+1.  **`invoices`** (Financial integrity risk)
+2.  **`contracts`** (Legal/Contractual records)
+3.  **`work_orders`** (Operational history loss)
+4.  **`leads`** / `lead_searches` (Sales pipeline data loss - *Note: You listed 'leads' in P0 context, though technically leads are often soft-deleted via is_active*)
+
+#### **P1: Reference Tables (Medium Risk)**
+These tables support the core entities above but hold relational integrity. If deleted/hard-removed here without a `deleted_at` column to restore them later, it breaks joins and reporting for P0 tables. All listed below rely on `is_active`.
+
+5.  **`employees`** / `technicians` (HR data)
+6.  **`assets`** / `inventory_items` (Physical asset tracking)
+7.  **`vendors`** (`inventory_vendors`, `rfq_vendor_quotes`) (Supply chain)
+8.  **`sites`** / `hotels` (Location hierarchy - *Critical: Deleting a hotel breaks all associated work orders and invoices*)
+
+#### **P2: Log/Event Tables (Low Risk)**
+These tables record history. While they should ideally never be "deleted" in the traditional sense, if an admin removes them or sets flags to hide them without `deleted_at` tracking, historical audit trails are lost.
+
+9.  **`activities`** / `email_logs` (Audit trail)
+10. **`notifications`** / `email_notifications` (Communication history)
+11. **`journal_entries`** (Double-entry bookkeeping logs - *Critical: Losing journal entries breaks accounting reconciliation*)
+
+---
+
+### Summary of Architectural Findings
+
+| Table Category | Example Tables from Your List | Soft Delete Mechanism Used? | Risk Level if "Deleted" |
+| :--- | :--- | :--- | :--- |
+| **P0 (Core Data)** | `invoices`, `contracts`, `work_orders` | Yes (`is_active`) but no physical `deleted_at` in snippets. | **Critical**: Financial and Operational data loss. |
+| **P1 (References)** | `employees`, `assets`, `vendors`, `hotels` | Yes (`is_active`). | **High**: Breaks relationships with P0 tables. |
+| **P2 (Logs/Events)** | `activities`, `notifications`, `journal_entries` | Yes (`is_active`). | **Medium**: Loss of audit trail/history. |
+
+**Recommendation:**
+To achieve consistency, the system should standardize on a single pattern:
+1.  **Remove reliance on `deleted_at` checks** if they are not universally applied (as seen in your mixed snippets).
+2.  **Enforce Soft Delete via `is_active`:** Ensure all queries explicitly filter by `.filter(...).is_active == True`.
+3.  **Add Physical Audit Columns:** For P0 and P1 tables, consider adding a physical `deleted_at` column alongside `is_active` to prevent accidental hard deletion of critical records (like Journal Entries or Contracts) via direct SQL bypasses that ignore the ORM's soft delete logic.

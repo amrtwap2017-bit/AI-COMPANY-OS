@@ -1,0 +1,48 @@
+### API CRUD Completeness Analysis
+
+Based on the provided route list, here is the analysis of resource completeness. The table below maps resources to their available HTTP methods (GET List/Detail, POST Create, PATCH Update, DELETE). Resources with only `DELETE` routes listed in your input are treated as having no GET/Create/Patch logic defined *in this specific snippet*, though they likely exist elsewhere; however, strictly analyzing the provided text:
+
+| Resource | GET list | GET detail | POST (Create) | PATCH/PUT (Update) | DELETE | Missing / Gaps |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| `/documents` | ✅ | ❌* | ⚠️ | ❌ | ✅ | GET detail, Full PATCH/PUT (only `upload`, `boq`) |
+| `/invoices` | ✅ | ✅ | ❌ | ⚠️ | ✅ | POST Create, PUT/PATCH standard update |
+| `/purchase-orders` | ✅ | ❌* | ⚠️ | ⚠️ | ❌ | GET detail (partial), DELETE missing |
+| `/work-orders` | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | POST Create, Standard PATCH/PUT (only `update-status`) |
+| `/vendors` | ✅ | ✅ | ❌ | ⚠️ | ❌ | POST Create, DELETE missing |
+| `/suppliers` | ❌* | ❌* | ❌ | ⚠️ | ❌ | **Critical**: No GET list/detail found in snippet. Only PATCH/DELETE seen for generic IDs? (Likely typo or incomplete). *Correction: `get(/{vendor_id}` exists, but no `/suppliers` plural.* |
+| `/accounts` | ✅ | ✅ | ⚠️ | ✅ | ❌ | DELETE missing |
+| `/alerts` | ✅ | ❌* | ⚠️ | ⚠️ | ❌ | GET detail (plural), DELETE missing, POST Create generic only |
+| `/notifications` | ✅ | ❌* | ⚠️ | ⚠️ | ❌ | GET detail, DELETE missing, PUT/PATCH limited to `read`/bulk actions |
+| `/assets` | ✅ | ✅ | ❌ | ❌ | ❌ | **Critical**: No POST Create or CRUD updates found. Only generic ID access and tree view. |
+| `/employees` (via `{emp_id}`) | ⚠️* | ✅ | ❌ | ⚠️ | ❌ | GET list missing, DELETE/POST/PATCH limited to specific actions (`summary`, `bulk`) |
+| `/users` (via `{user_id}`) | ⚠️* | ✅ | ❌ | ⚠️ | ❌ | Similar gaps as employees; no standard CRUD on plural resource. |
+| `/projects` (via `{project_id}`) | ⚠️* | ✅ | ❌ | ⚠️ | ❌ | No GET list, DELETE missing, only specific sub-resource actions (`financials`, `milestones`). |
+| `/contracts` (via `{contract_id}`) | ⚠️* | ✅ | ❌ | ⚠️ | ❌ | Only PATCH/DELETE on generic ID; no standard CRUD suite. |
+| `/quotes` (via `{quote_id}`) | ⚠️* | ✅ | ❌ | ⚠️ | ❌ | No GET list, only specific actions (`approve`, `reject`). |
+| `/requests` (via `{request_id}`) | ⚠️* | ✅ | ❌ | ⚠️ | ❌ | Only approval/reject flows. |
+| `/rfqs` | ✅ | ❌* | ⚠️ | ❌ | ❌ | GET detail missing, DELETE/POST/PATCH limited to `quote`. |
+| `/renewals` | ✅ | ❌* | ❌ | ❌ | ❌ | **Critical**: No POST Create or Update found. Only list view. |
+| `/risks` | ⚠️* | ❌* | ❌ | ❌ | ❌ | **Critical**: No GET detail, no CRUD actions visible (only summary). |
+| `/signals` | ✅ | ❌* | ❌ | ❌ | ❌ | Only list view. |
+| `/kpis` | ⚠️* | ❌* | ❌ | ❌ | ❌ | No standard CRUD, only analytics views (`live`, `summary`). |
+| `/analytics/*` | ✅ | ❌* | ❌ | ❌ | ❌ | Read-only metrics. |
+
+*\note: Entries marked with ⚠️ indicate the resource exists but lacks a full "Create" (POST) or standard "Update" (PATCH/PUT) method, often limited to specific business logic actions like `approve`, `reject`, `upload`, etc., rather than generic CRUD.*
+*\nNote on Generic IDs: Routes starting with `/` followed by an ID type (e.g. `{invoice_id}`) represent detail endpoints but do not constitute a "GET List" unless paired with a plural path (`/invoices`). Many resources in the list only have these generic detail routes without their corresponding plural lists.*
+
+---
+
+### Top 5 Resources with Worst CRUD Completeness (P0 Gaps)
+
+These resources are missing critical operations required for basic data management (Create, Read-All, Update/Delete). They function primarily as read-only dashboards or require ad-hoc API calls to perform standard actions.
+
+| Rank | Resource Path / Identifier | Primary Missing Operations | Impact Analysis |
+| :---: | :--- | :--- | :--- |
+| **1** | `/assets` (and generic `{asset_id}`) | ❌ POST Create<br>❌ PATCH Update<br>❌ DELETE | Cannot add new assets, modify details, or remove them. The system is effectively read-only for core inventory management unless work orders are used as a proxy. |
+| **2** | `/suppliers` (and generic `{supplier_id}`) | ❌ GET List (`/suppliers`)<br>❌ POST Create<br>❌ DELETE | No plural list endpoint found in the snippet; only specific ID-based routes exist. Cannot manage supplier catalog at all via standard REST patterns here. |
+| **3** | `/renewals` (and generic `{pr_id}` context) | ❌ GET List (`/renewals`)<br>❌ POST Create<br>❌ PATCH Update | Only a list view exists. No ability to create new renewal records or update their status via standard endpoints; relies on `post(/{pr_id}/...`. |
+| **4** | `/risks` (and generic `{risk}` context) | ❌ GET Detail (`/risky/*`)<br>❌ POST Create<br>❌ PATCH Update<br>❌ DELETE | Entirely read-only in this snippet. No ability to view individual risk details, create new risks, or mitigate them via standard CRUD. |
+| **5** | `/notifications` (and generic `{notification_id}`) | ❌ GET Detail (`/notifications/*`)<br>❌ POST Create<br>❌ DELETE<br>⚠️ PATCH Limited to `read` only | Cannot view full notification content, create new ones, or delete them. Updates are restricted to marking as read via specific endpoints. |
+
+**Recommendation:**
+Prioritize adding standard CRUD routes (`POST /resource`, `PATCH /resource/{id}`, `DELETE /resource/{id}`) for **Assets**, **Suppliers**, and **Renewals**. These represent core business entities where the absence of Create/Update/Delete capabilities creates significant operational blockers.

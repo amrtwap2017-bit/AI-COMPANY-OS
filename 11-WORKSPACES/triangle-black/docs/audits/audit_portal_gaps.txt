@@ -1,0 +1,74 @@
+Based on the provided Next.js 14 page list, here is the architectural analysis identifying missing pages by domain.
+
+### **Analysis Methodology**
+*   **List Page Pattern:** `/domain/[list-name]/page.tsx` (e.g., `hotels/page.tsx`) OR generic lists like `[id]` or specific entity lists without dynamic IDs in the path segment before `page`. *Note: In Next.js, a list page often shares the same directory as its detail pages if using layout-based routing (`/domain/[...slug]/page.tsx`), but based on your explicit instruction to look for `/domain/page.tsx`, I will identify domains where only static lists exist and no dynamic `[id]` route exists.*
+*   **Detail Page Pattern:** `/domain/[id]/page.tsx`.
+*   **Edit/Create Patterns:** Checked specifically as requested.
+
+---
+
+### **TASK 1: List Exists but NO [id] Detail Page**
+These domains have a list view (e.g., `hotels/page.tsx`) but lack the corresponding dynamic detail route (`[id]/page.tsx`). This is typically an architectural oversight where CRUD operations are missing for entities that should be manageable.
+
+| Domain | Missing Route Pattern | Priority | Reasoning |
+| :--- | :--- | :--- | :--- |
+| **hotels** (Enterprise Admin) | `/administration/hotels/[id]/page.tsx` | P0 | List exists (`/admin/hotels/page.tsx`). No detail view prevents viewing/editing individual hotel data. |
+| **technicians** (Operations) | `/operations/technicians/[id]/page.tsx` | P1 | List exists (`/ops/techs/page.tsx`). While `[id]` edit exists in App, the Operations list lacks a dedicated detail page for deep inspection/history context found elsewhere. |
+| **sites** (Operations) | `/operations/sites/[id]/page.tsx` | P2 | Only `new`, `list`, and specific action routes (`assign`) exist. A general `[id]` view is missing, forcing users to rely on work-order associations for site details. |
+
+*(Note: Domains like **contracts**, **invoices**, **leads** have both list AND detail pages present in the data provided).*
+
+---
+
+### **TASK 2: [id] Detail Exists but NO /edit Page**
+These domains allow viewing a specific item (`[id]/page.tsx`) but lack an explicit edit/create form route. This creates a "Read-Only" experience for entities that require modification.
+
+| Domain | Missing Route Pattern | Priority | Reasoning |
+| :--- | :--- | :--- | :--- |
+| **contracts** (App) | `/[id]/edit/page.tsx` | P0 | Detail exists (`/contracts/[id]`). No edit route found; users cannot modify contract terms directly. |
+| **employees** (App) | `[id]/edit/page.tsx` | N/A | **Correction:** `portal/app/(app)/employees/[id]/edit/page.tsx` **EXISTS**. This domain is complete for Task 2. |
+| **leads** (App) | `/[id]/edit/page.tsx` | P1 | Detail exists (`/leads/[id]`). No explicit edit route found; updates must be done via `new` or other indirect means if they exist elsewhere, but direct editing is missing here. *(Note: Leads have a `[id]/page`, no `[id]/edit`).*
+| **purchase-requests** (App) | `/[id]/edit/page.tsx` | P1 | Detail exists (`/pr/[id]`). No edit route found; users cannot modify existing PRs directly without creating duplicates. |
+| **quotes** (App) | `[id]/edit/page.tsx` | N/A | `portal/app/(app)/quotes/new/page.tsx` exists, but no explicit `/[id]/edit`. However, usually quotes are edited via "New" or specific action buttons if not a full CRUD app. Given the lack of an edit route specifically named as such: **P1**.
+| **technicians** (App) | `[id]/edit/page.tsx` | N/A | `portal/app/(app)/technicians/[id]/page.tsx` exists, but no explicit `/[id]/edit`. Edit functionality might be handled via the Operations domain or work orders. If strictly looking for an edit route: **P1**.
+| **warehouses** (App) | `[id]/edit/page.tsx` | P2 | Detail (`/warehouses/[id]`) exists? Actually, only `/warehouses/page.tsx` is listed in App root. Wait, checking Enterprise... `supply-chain/warehouses/[id]`. In App: Only list. So this doesn't apply to Task 2 for App Warehouses.
+| **assets** (App) | `[id]/edit/page.tsx` | P1 | Detail (`/assets/[id]`) exists. No edit route found. Assets are often managed via Work Orders or Supply Chain, but direct asset editing is missing in the root app layer.
+
+---
+
+### **TASK 3: NO /new/page.tsx Create Form**
+These domains lack an explicit "New" page for creating records of that type. Users may be forced to use a generic form builder (Workflow Designer) or duplicate existing data, which is poor UX.
+
+| Domain | Missing Route Pattern (`/domain/new/page.tsx`) | Priority | Reasoning |
+| :--- | :--- | :--- | :--- |
+| **hotels** (Enterprise Admin) | `/administration/hotels/new/page.tsx` | P0 | List exists, Detail missing. No create form implies hotels cannot be added via UI. |
+| **technicians** (Operations) | `/operations/technicians/new/page.tsx` | P1 | List exists (`ops/techs`). No explicit new page; onboarding likely manual or requires a workflow designer route. |
+| **sites** (Operations) | `/operations/sites/new/page.tsx` | P2 | Only `new-work-order` and `[id]` routes exist for sites in Ops? Actually, no generic site creation form is visible. Sites are usually created via Supply Chain or Operations workflows. |
+| **contracts** (App) | `/[id]/edit` vs New? | N/A | App Contracts have a detail page but no explicit `new`. Creation likely happens via Commercial domain (`commercial/contracts/new`). If strictly looking for an isolated "Contract" new page: Missing in root app context. |
+| **purchase-requests** (App) | `/[id]/edit` vs New? | N/A | App PRs have detail, no edit. No explicit `new`. Creation likely via Supply Chain (`supply-chain/purchase-requests/new`). |
+| **quotes** (App) | `/quotes/new/page.tsx` | P1 | Detail exists. Explicit new page missing. Users must use the Workflow Designer or Commercial domain to create quotes. |
+| **technicians** (App) | `/technicians/new/page.tsx` | N/A | App Technicians have `[id]`, no `new`. Creation likely via HR/Employee flow (`employees`). |
+
+---
+
+### **Summary of Critical Gaps (P0/P1)**
+
+#### **High Priority P0: Missing Detail Pages**
+*   `/administration/hotels/[id]/page.tsx` (Enterprise Admin)
+    *   *Impact:* Cannot view details without creating a new one or using external tools.
+*   `/operations/sites/[id]/page.tsx` (Operations)
+    *   *Impact:* Site management is fragmented; no central detail view for site metadata, history, and status outside of work orders.
+
+#### **High Priority P1: Missing Edit/Create Pages**
+*   `portal/app/(app)/contracts/new/page.tsx` & `/[id]/edit/page.tsx` (App)
+    *   *Impact:* Contract lifecycle is broken; cannot edit or create contracts directly in the App layer without navigating to Commercial.
+*   `portal/app/(app)/purchase-requests/[id]/page.tsx` + Missing Edit/New
+    *   *Impact:* Procurement requests are read-only in the root app, forcing duplication of data entry elsewhere.
+*   `portal/app/(app)/quotes/new/page.tsx` & `/[id]/edit/page.tsx` (App)
+    *   *Impact:* Quoting process is manual; no direct UI for creating or modifying quotes from a list view.
+
+#### **Medium Priority P2: Missing Detail Pages**
+*   `portal/app/(app)/technicians/[id]/page.tsx` + No Edit/New in App Root (Handled by Employees/HR flow) - *Low impact if HR covers it.*
+*   `portal/app/(enterprise)/operations/sites/new/page.tsx` & `[id]` detail.
+
+**Recommendation:** Prioritize implementing the **Hotels Detail Page** and **Contracts Create/Edit Pages**, as these represent core business entities with no UI path for management in their respective domains.

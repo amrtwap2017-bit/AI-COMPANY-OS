@@ -1,0 +1,139 @@
+Hello. As an Enterprise Architect reviewing the `src/commercial/` module structure for this Hotel Engineering SaaS, I have analyzed the provided list against Domain-Driven Design (DDD) principles and industry best practices for facility management systems.
+
+Here is my architectural analysis:
+
+### TASK 1: Grouping into DDD Bounded Contexts
+
+Based on the functional relationships between modules, here are the identified bounded contexts:
+
+**1. Core Infrastructure & Identity (`Infrastructure`)**
+*Handles authentication, global data access, and system-wide utilities.*
+- `auth`: Authentication logic (likely JWT/OAuth).
+- `cache`: Caching layer for performance.
+- `global_search`, `search_filters`: Search capabilities across the domain.
+- `pagination`: Data retrieval pagination logic.
+- `entity_views`: Abstracted views of entities to prevent coupling.
+
+**2. Customer & Tenant Management (`Customer_Tenancy`)**
+*Manages hotels, sites, and customer relationships.*
+- `hotels`, `sites`: Hierarchical location data (Hotel -> Site).
+- `customer360`, `tenant_audit`: Unified customer view and audit trails per tenant.
+- `user_preferences`: Tenant-specific user settings.
+
+**3. Work Management & Operations (`Work_Ops`)**
+*The heart of the system: tracking requests, orders, technicians, and maintenance.*
+- `work_orders`, `service_requests`, `scope_of_work`: Core work definition.
+- `technicians`, `employee_timesheets`: Human resource aspect of operations.
+- `approval_center`, `approval_chain`, `approval_requests`: Workflow governance for changes/approvals.
+- `scheduler`, `ai_scheduling`: Scheduling logic (potentially overlapping with AI context).
+- `activity_tracking`, `performance_audit`: Post-work tracking and compliance.
+
+**4. Supply Chain & Procurement (`Supply_Chain`)**
+*Manages inventory, vendors, purchasing, and logistics.*
+- `inventory_items`, `warehouses`, `stock_balances`, `stock_movements`: Inventory core.
+- `purchase_orders`, `procurement_events`, `rfqs`, `quotation`: Buying process.
+- `vendors`, `suppliers`, `supplier_portal`, `vendor_scorecards`: Vendor management.
+- `goods_receipts`, `warehouse_transfers`, `inventory_alerts`: Logistics execution.
+
+**5. Financial & Billing (`Finance_Billing`)**
+*Handles money, invoices, payments, and reporting.*
+- `invoices`, `payment_tracking`, `eta_invoicing`: Revenue cycle core.
+- `financial_gl`: General ledger integration.
+- `supplier_invoices`: Payables processing.
+
+**6. AI & Intelligence (`AI_Intelligence`)**
+*Machine learning models, predictive analytics, and automation.*
+- `ai_assistant`, `ai_mentor`, `ai_scheduling`, `ai_signals`: Specific AI agents/functions.
+- `predictive_maintenance`: ML model for equipment failure prediction.
+- `analytics_kpi`, `executive_intelligence_platform`, `warehouse_intelligence`, `supply_intelligence`: Aggregated insights and dashboards.
+
+**7. Communication & Notifications (`Communication`)**
+*Handles alerts, emails, and system messaging.*
+- `email_service`, `notifications`, `system_notifications`.
+- `sse_notifications`, `webhook_notifications`: Real-time event delivery (Server-Sent Events).
+- `notification_engine`: Centralized logic for dispatching notifications.
+
+**8. Documentation & Knowledge (`Docs_Knowledge`)**
+*Manages files, reports, and technical knowledge.*
+- `documents`, `pdf_service`, `pdf_export`.
+- `reporting`, `csv_export`.
+- `knowledge_graph`: Structured data relationships (likely for troubleshooting).
+
+---
+
+### TASK 2: Missing Modules for a Complete SaaS
+
+To be considered "complete" in the context of Hotel Engineering, several critical modules are missing from this list. These represent gaps in functionality or domain coverage:
+
+**1. Maintenance & Operations Gaps:**
+- **`asset_registry` / `equipment_catalog`:** While `inventory_items` exists, a dedicated module for defining specific equipment assets (make/model/serial number) with lifecycle management is likely needed to link them to work orders effectively.
+- **spare_parts_management:** Distinct from general inventory; needs logic specifically for ordering parts *during* an active repair vs. stock checking.
+
+**2. Supply Chain Gaps:**
+- `shipping_carriers`, `logistics_tracking`: Missing specific carrier integration and tracking status updates (beyond just "receipt").
+- `contract_management` / `vendor_contracts`: While `contracts` exists, a dedicated module for managing SLAs with vendors is often required alongside the scorecards.
+
+**3. Financial Gaps:**
+- **`tax_calculation`, `currency_conversion`:** Essential for international hotels but missing from the list (only `financial_gl` and `payment_tracking` are present).
+- `recurring_billing`, `subscription_management`: Hotels usually operate on subscription models; this logic is likely buried or missing.
+
+**4. HR & Compliance Gaps:**
+- **`compliance_reports`, `safety_incidents`:** Engineering SaaS requires strict safety reporting (OSHA, local regulations) which seems absent compared to general work tracking.
+- **`training_modules`, `certification_tracking`:** Critical for technicians; currently only `employee_timesheets` is present.
+
+**5. AI & Data Gaps:**
+- **data_pipeline**, `etl_jobs`: While there are analytics modules, the underlying data ingestion and cleaning pipeline modules appear missing (or hidden in `bulk_operations`).
+- **anomaly_detection**: Distinct from general KPIs; specifically for detecting unusual energy usage or equipment behavior.
+
+---
+
+### TASK 3: Naming Inconsistencies & Ambiguities
+
+There are several naming patterns that suggest a lack of strict convention enforcement, which can lead to maintenance issues and API confusion:
+
+1.  **Singular vs. Plural Confusion:**
+    - `inventory_items` (Plural) vs. `stock_balances`, `stock_movements`. The prefix "items" is inconsistent with the rest of the inventory domain. It should likely be unified as `inventory_stock` or similar.
+    - `supplier_invoices` vs. `invoices`: Is this a subset? Or are they separate entities? Naming them similarly suggests potential duplication unless strictly scoped, but it creates ambiguity in API routing.
+
+2.  **Abbreviations & Acronyms:**
+    - `rfqs`, `eta_invoicing`, `gl`. Using acronyms (`rfq` instead of `request_for_quotation`) is risky for external APIs or documentation generation unless strictly enforced as a standard abbreviation list (which appears absent here).
+
+3.  **Redundant Prefixes:**
+    - `approval_center`, `approval_chain`, `approval_requests`: The word "Approval" is repeated three times in adjacent modules. This suggests the logic might be split incorrectly across multiple folders when it could likely reside within a single cohesive module (e.g., `workflow_engine` or `approvals`).
+
+4.  **Semantic Overlap:**
+    - `dashboard`, `pipeline_dashboard`: Why have both? Is "Pipeline" specific to sales/procurement while "Dashboard" is generic? This indicates unclear ownership of reporting views.
+    - `executive_intelligence_platform`, `executive_kpi`, `analytics_platform`: Three modules doing similar high-level aggregation tasks.
+
+5.  **Inconsistent Naming Styles:**
+    - Some use underscores (`eta_invoicing`), others might imply camelCase in internal logic, but the folder names are mostly snake_case. However, mixing nouns and verbs is present: `bulk_operations` (noun) vs `email_service` (service-oriented). A consistent naming strategy (e.g., all Noun-Plural or all Service-Named) would improve readability.
+
+---
+
+### TASK 4: Likely Duplicated or Overlapping Modules
+
+Several modules appear to perform overlapping functions, suggesting refactoring opportunities to reduce technical debt and API surface area complexity.
+
+**1. Notification & Alerting Redundancy:**
+*   **`notifications`, `system_notifications`, `email_alerts`, `email_notifications`, `sse_notifications`, `webhook_notifications`:**
+    *   There are 6 distinct modules handling notifications in various formats (Email, SSE, Webhooks). This is likely an anti-pattern. These should probably be consolidated into a single **`notification_engine`** module that handles the logic and dispatches to specific channels via configuration files or sub-modules (`email_service`, `sse_handler`).
+
+**2. AI & Scheduling Overlap:**
+*   **`ai_scheduling`, `scheduler`:**
+    *   It is unclear if these are distinct. One might be a generic cron-based scheduler, while the other uses ML to optimize schedules. If they both handle "scheduling," there is significant overlap in logic (resource allocation). They should likely be merged into an **`intelligent_scheduler`**.
+
+**3. Inventory & Stock Confusion:**
+*   **`inventory_items`, `stock_balances`, `warehouses`:**
+    *   While logically distinct, the data model here seems fragmented. Often, "Items" and "Balances" are tightly coupled in a single entity or module to avoid N+1 queries when fetching stock levels for an item across warehouses.
+
+**4. Approval & Workflow Redundancy:**
+*   **`approval_center`, `workflow_engine`:**
+    *   These likely handle the same core logic (state machines, approver routing). Unless one is purely UI and the other backend, they are duplicating state management logic. They should be unified under a robust **`workflow_service`**.
+
+**5. Reporting & Analytics Overlap:**
+*   **`reporting`, `analytics_kpi`, `executive_intelligence_platform`:**
+    *   These three modules likely generate similar reports (PDFs, Dashboards). The distinction between "Reporting" and "Analytics/KPI" is often blurred in SaaS products. They should be consolidated into a unified **`business_intel`** or **`reporting_service`**.
+
+**6. Search & Filter Duplication:**
+*   **`global_search`, `search_filters`:**
+    *   These likely duplicate the same search logic with different filters applied. A single, powerful **`full_text_search_engine`** module should handle all query types to ensure consistent indexing and performance optimization across the app.
