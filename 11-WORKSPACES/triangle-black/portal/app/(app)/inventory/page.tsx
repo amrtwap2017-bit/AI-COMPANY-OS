@@ -1,5 +1,6 @@
-// Auto-redirect Sprint 321
+// Sprint-059: Fixed redirect target (was /workspace — Sprint 321 error)
+// Canonical: /supply-chain/inventory
 import { redirect } from "next/navigation";
 export default function Page() {
-  redirect("/workspace");
+  redirect("/supply-chain/inventory");
 }
