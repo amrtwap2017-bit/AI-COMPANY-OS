@@ -7726,3 +7726,27 @@ def list_vendor_scorecards(
         except Exception as e:
             return {"count": 0, "results": [], "error": str(e)}
 # ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.get("/api/v1/inspections/", tags=["inspections"])
+@app.get("/api/v1/inspections", tags=["inspections"])
+def list_inspections(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    """List engineering inspections."""
+    try:
+        rows = db.execute(_text("SELECT * FROM engineering_inspections ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
+
+@app.get("/api/v1/inspections/{insp_id}", tags=["inspections"])
+def get_inspection(insp_id: str, db: _Session = _Depends(_get_db)):
+    try:
+        row = db.execute(_text("SELECT * FROM engineering_inspections WHERE id = :id"), {"id": insp_id}).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Inspection not found")
+        return dict(row._mapping)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
