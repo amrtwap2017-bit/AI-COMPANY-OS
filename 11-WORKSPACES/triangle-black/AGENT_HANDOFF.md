@@ -312,3 +312,23 @@ Sprint-040: Goods Receipt Note Create (/supply-chain/goods-receipts/new)
   Sprint-042: RFQ view portal
   Sprint-043: Warranty tracking portal
   Sprint-044: Knowledge base / AI assistant UI
+
+## SESSION UPDATE — Sprint-041 to 044 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-041: Supplier Create Form (/supply-chain/suppliers/new) + POST endpoint
+Sprint-042: RFQ Detail Portal (/supply-chain/rfqs/[id])
+Sprint-043: Warranty Tracking Dashboard (/maintenance/warranties)
+Sprint-044: AI Signals Dashboard (/ai/signals)
+
+### PLATFORM STATE
+  Tests: 218 passing, 0 failing
+  Portal: 266 pages
+  Commits: 920+
+  Sprints: 013-044 complete (32 sprints)
+
+### NEXT SPRINT BACKLOG
+  Sprint-045: Work Order Bulk Status Update
+  Sprint-046: Inspection checklist portal
+  Sprint-047: Downtime tracking + reports
+  Sprint-048: Customer portal improvements
