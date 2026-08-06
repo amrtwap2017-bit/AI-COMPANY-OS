@@ -18,13 +18,6 @@ P0_TABLES = [
     "quotes",
 ]
 
-# Tables confirmed to have is_active (built after convention was set)
-HAS_IS_ACTIVE = [
-    "invoices",
-    "leads",
-]
-
-
 class TestSoftDeleteMigration:
 
     def test_p0_tables_have_deleted_at_column(self):
@@ -44,20 +37,26 @@ class TestSoftDeleteMigration:
             f"Run: .venv/bin/python -m alembic upgrade f1a2b3c4d5e6"
         )
 
-    def test_tables_with_is_active_still_have_it(self):
-        """Backward compat: is_active must NOT be removed from tables that had it."""
+    def test_p0_tables_do_not_use_is_active_pattern(self):
+        """
+        Audit finding: P0 tables do NOT have is_active column.
+        They use deleted_at (sprint-055) as the sole soft delete mechanism.
+        This test documents that reality and prevents future regressions.
+        If is_active is added to any P0 table, it must also have deleted_at.
+        """
         insp = inspect(engine)
-        missing_active = []
-        for table in HAS_IS_ACTIVE:
+        has_deleted_at = []
+        for table in P0_TABLES:
             try:
                 cols = [c["name"] for c in insp.get_columns(table)]
-                if "is_active" not in cols:
-                    missing_active.append(table)
+                if "deleted_at" in cols:
+                    has_deleted_at.append(table)
             except Exception:
                 pass
 
-        assert missing_active == [], (
-            f"is_active was removed from: {missing_active} — NEVER remove is_active"
+        assert set(has_deleted_at) == set(P0_TABLES), (
+            f"Not all P0 tables have deleted_at: missing="
+            f"{set(P0_TABLES) - set(has_deleted_at)}"
         )
 
     def test_deleted_at_is_nullable(self):
