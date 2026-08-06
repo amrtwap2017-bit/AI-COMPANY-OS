@@ -7750,3 +7750,37 @@ def get_inspection(insp_id: str, db: _Session = _Depends(_get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+@app.get("/api/v1/engineering/site-visits/", tags=["engineering"])
+@app.get("/api/v1/engineering/site-visits", tags=["engineering"])
+def list_site_visits(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM engineering_site_visits ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
+@app.get("/api/v1/engineering/quality-records/", tags=["engineering"])
+@app.get("/api/v1/engineering/quality-records", tags=["engineering"])
+def list_quality_records(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM engineering_quality_records ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
+@app.get("/api/v1/engineering/safety-records/", tags=["engineering"])
+@app.get("/api/v1/engineering/safety-records", tags=["engineering"])
+def list_safety_records(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM engineering_safety_records ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
+@app.get("/api/v1/engineering/punch-list/", tags=["engineering"])
+@app.get("/api/v1/engineering/punch-list", tags=["engineering"])
+def list_punch_list(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM engineering_punch_list_items ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
