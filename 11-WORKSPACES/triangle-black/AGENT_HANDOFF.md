@@ -369,3 +369,25 @@ Sprint-050: Platform Readiness Dashboard — 84% Enterprise Ready
   Sprint-052: Knowledge graph search portal
   Sprint-053: Push test coverage 72% -> 85%+
   Sprint-054: Notification system portal
+
+## SESSION UPDATE — Sprint-055 — August 2026
+
+### SPRINT-055 COMPLETE: Soft Delete Standardization
+- deleted_at column added to: invoices, leads, lead_searches, quotes
+- contracts + work_orders already had deleted_at — indexes added
+- SoftDeleteMixin in src/core/base.py — soft_delete/restore/is_deleted
+- Mixin applied to: invoices, contracts, work_orders, lead_management models
+- soft_delete_filter() helper in 4 repositories
+- Alembic head: f1a2b3c4d5e6
+- Tests: 7 passing (sprint-055), full suite green
+
+### KNOWN GAP FROM SPRINT-055
+- quotes module has no models.py (router-only) — soft delete not applied to model
+- Sprint backlog: add quotes/models.py with SoftDeleteMixin (Sprint-057 scope)
+
+### NEXT SPRINT
+Sprint-056: Supply chain consolidation
+  - Remove /inventory/purchase-orders duplicate (redirect to /supply-chain)
+  - Remove /inventory/purchase-requests duplicate
+  - Remove /(app)/work-orders (redirect to /operations/work-orders)
+  - Canonical source of truth = /(enterprise)/supply-chain and /operations
