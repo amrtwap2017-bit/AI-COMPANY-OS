@@ -9,12 +9,12 @@ Matches actual contracts table in DB (all 17 columns).
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Float, Integer, JSON, Index
-from src.core.base import Base
+from src.core.base import Base, SoftDeleteMixin
 
 DEFAULT_HOTEL = "tb-default-hotel-000000000001"
 
 
-class Contract(Base):
+class Contract(SoftDeleteMixin, Base):
     __tablename__ = "contracts"
 
     id               = Column(String(36), primary_key=True,

@@ -1,9 +1,9 @@
 from datetime import datetime
 from datetime import datetime
 from sqlalchemy import Column, String, Float, DateTime
-from src.core.base import Base
+from src.core.base import Base, SoftDeleteMixin
 
-class Invoice(Base):
+class Invoice(SoftDeleteMixin, Base):
     __tablename__ = "invoices"
     id         = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     hotel_id   = Column(String(36), nullable=False)

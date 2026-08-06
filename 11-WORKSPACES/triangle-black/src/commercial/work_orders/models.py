@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from src.core.base import Base
+from src.core.base import Base, SoftDeleteMixin
 
-class WorkOrder(Base):
+class WorkOrder(SoftDeleteMixin, Base):
     __tablename__ = 'work_orders'
     id = Column(Integer, primary_key=True)
     hotel_id = Column(String(36), nullable=False)

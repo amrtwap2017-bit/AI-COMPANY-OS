@@ -11,6 +11,15 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from .models import Contract
 
+
+def soft_delete_filter(query, model):
+    """Sprint-055: Apply soft delete filter to any query.
+    Usage: query = soft_delete_filter(query, Invoice)
+    """
+    return query.filter(model.deleted_at == None)  # noqa: E711
+
+
+
 DEFAULT_HOTEL = "tb-default-hotel-000000000001"
 
 

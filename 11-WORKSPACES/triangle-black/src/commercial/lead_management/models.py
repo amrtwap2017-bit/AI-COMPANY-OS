@@ -1,9 +1,9 @@
 from datetime import datetime
 import uuid
 from sqlalchemy import Column, String, Integer, Text, DateTime
-from src.core.base import Base
+from src.core.base import Base, SoftDeleteMixin
 
-class Lead(Base):
+class Lead(SoftDeleteMixin, Base):
     __tablename__ = "leads"
     __table_args__ = {"extend_existing": True}
     id         = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

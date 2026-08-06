@@ -2,6 +2,15 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from .models import WorkOrder
 
+
+def soft_delete_filter(query, model):
+    """Sprint-055: Apply soft delete filter to any query.
+    Usage: query = soft_delete_filter(query, Invoice)
+    """
+    return query.filter(model.deleted_at == None)  # noqa: E711
+
+
+
 class WorkOrderRepository:
     def __init__(self, db: Session):
         self.db = db
