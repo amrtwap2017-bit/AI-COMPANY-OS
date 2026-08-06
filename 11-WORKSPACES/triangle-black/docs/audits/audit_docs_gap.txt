@@ -1,66 +1,67 @@
-Based on the architectural documents provided for **Triangle Black**, here is a synthesized summary of the system's core design principles, technology choices, and critical constraints. This overview connects the strategic domain model with the tactical implementation decisions to ensure alignment across your team.
+Based on the provided content, here are the answers to your tasks:
 
----
+### TASK 1: Domains in `06-DOMAINS/` with NO implementation
+**Analysis:** Comparing the domain map (`DOMAIN-MAP.md`) against the implemented modules listed in `IMPLEMENTATION-SEQUENCE.md`, **no domains from the main business logic (Commercial, Project Delivery, Procurement)** have been fully skipped; however, specific sub-modules within those domains are missing. Additionally, two entire top-level bounded contexts appear to be completely unimplemented based on the "BUILT THIS SESSION" list and sequence:
 
-# 🏨 Triangle Black: Architectural Overview & Implementation Guide
+1.  **Domain:** `05-INVENTORY` (Inventory Management)
+    *   *Missing Modules:* Warehouses, Stock Tracking, Consumption, Reservations, Cycle Counting.
+2.  **Domain:** `06-FINANCIAL-CONTROL` (Financial Control - distinct from GL in API list)
+    *   *Missing Modules:* Cost Control, Revenue Analytics, Profitability Reports, Cashflow Management.
 
-## 1. Strategic Foundation
-*   **Domain:** Hospitality Operations (Properties, Reservations, Billing, Housekeeping).
-*   **Core Philosophy:** Domain-Driven Design (DDD) with clear Bounded Contexts to prevent context switching and ensure modularity.
-*   **Ubiquitous Language:** Strict adherence to terms like `Property`, `Unit`, `Folio`, and `Rate Plan` ensures developers share a common mental model.
+*Note: While `07-Maintenance`, `08-Documents`, and `09-Executive Intelligence` are also not explicitly listed as "BUILT THIS SESSION", the Inventory (05) and Financial Control (06) domains represent core operational pillars that have zero specific task items in the active sequence.*
 
-## 2. Technology Stack Summary
-The system is built for rapid development, strong typing, and multi-tenancy using a unified TypeScript ecosystem.
+### TASK 2: What does AGENT_HANDOFF.md say is still missing or next?
+**Quote exactly:**
+> ## WHAT IS MISSING (priority order)
+> 1. Employee timesheet module (POST /api/v1/timesheets/)
 
-| Layer | Choice | Key Constraint/Feature |
-| :--- | :--- | :--- |
-| **Frontend** | Next.js (App Router) | SSR for SEO; BFF API routes to avoid CORS; Middleware for tenant resolution. |
-| **Backend** | NestJS | Modular architecture mirroring DDD contexts; Built-in DI & Event Bus. |
-| **Database** | PostgreSQL 16+ | **Schema-per-tenant** isolation (Primary Strategy); JSONB flexibility. |
-| **ORM** | Prisma | Type-safe queries; Declarative schema migrations per tenant. |
-| **Auth** | JWT + Refresh Tokens | Stateless access tokens (15m) + Opaque/DB-stored refresh tokens (7d). |
-| **Storage** | Local Disk (V1) → S3 Compatible (V2+) | Abstraction layer allows easy migration; Nginx serves static files. |
+*(Note: The document lists this as the single item in "WHAT IS MISSING", implying it is the immediate priority over other backlog items not listed here).*
 
-## 3. Critical Architectural Patterns
+### TASK 3: Top 5 Items in `TASKS/MASTER_BACKLOG.md` that have never been implemented
+**Analysis:** Scanning the status column (`✅ Done`, `⬜ Pending`) and looking for items marked as pending or lacking a "Done" checkmark. The table explicitly marks several AI Factory agents as **Pending**.
 
-### A. Multi-Tenancy Strategy: Schema Per Tenant
-This is the most significant architectural decision for data isolation and security in V1.
-*   **Structure:** One database (`triangle_black`) containing multiple schemas (e.g., `tenant_abc`, `public`).
-*   **Isolation Mechanism:** The application uses a middleware to set `SET search_path` based on the tenant ID extracted from headers or subdomains before executing any query.
-*   **Benefit:** Hard isolation prevents accidental data leakage; backups can be scripted per-schema (`pg_dump schema_name`).
-*   **Risk Mitigation:** Connection pooling (PgBouncer) must handle many schemas carefully to avoid exhaustion under high load.
+1.  **AF-008**: `agents/ specifications (27 agents)`
+    *   Status: ⬜ Pending
+2.  **AF-009**: `CODEX_WORKFLOW.md`
+    *   Status: ⬜ Pending
+3.  **AF-010**: `LOCAL_AI_WORKFLOW.md`
+    *   Status: ⬜ Pending
 
-### B. API Design: RESTful with URL Versioning
-*   **Standard:** `GET /api/v1/{resource}`.
-*   **Tenant Context:** Enforced via headers (`X-Tenant-Id`) or subdomains, not query parameters (to keep URLs clean).
-*   **Versioning:** Explicit `/v1` prefix allows safe evolution of the API without breaking existing clients immediately.
+*Observation:* The provided text cuts off after AF-010, so strictly speaking, only these three are fully visible as "Pending" in the snippet. However, if we look at **Domain Work** items (which have 22 total but none listed with a ✅ Done status in the specific table rows shown), they represent unimplemented domains. If forced to list from the *visible* backlog table specifically:
 
-### C. Domain Boundaries & Communication
-*   **Bounded Contexts:** `Reservation Management`, `Billing`, `Property Config`, and `Housekeeping`.
-*   **Internal Comm:** NestJS's built-in Event Bus (`@nestjs/event-emitter`) is preferred for cross-module domain events (e.g., "Booking Confirmed" triggering a Housekeeping task).
-*   **External Integrations:** REST API exposes capabilities to OTAs, PMS systems, and mobile apps.
+1.  AF-008
+2.  AF-009
+3.  AF-010
 
-## 4. Operational Considerations & Risks
+*(If interpreting "never been implemented" broadly based on the lack of a ✅ Done checkmark in the visible rows, any Domain Work item listed in the summary but not detailed as done counts. However, strictly from the table provided:)*
 
-### ⚠️ Scalability Warning: Schema Per Tenant
-While excellent for V1 (single VPS), this approach has limits as the tenant count grows beyond ~50-100 active schemas per database instance.
-*   **Connection Pool Strain:** Each schema consumes a connection slot in PgBouncer. If you have 200 tenants, you need 200+ connections unless using advanced pooling strategies (like `pgbouncer-pool` or custom logic).
-*   **Migration Overhead:** Running migrations per-schema can become slow if many schemas are updated simultaneously during a release cycle.
-    *   *Recommendation:* Consider batching schema updates or moving to "Row-Level Security" + Single Schema for V2+ once tenant count exceeds capacity limits.
+**Top 5 Visible Pending Items:**
+1. AF-008 (agents/ specifications)
+2. AF-009 (CODEX_WORKFLOW.md)
+3. AF-010 (LOCAL_AI_WORKFLOW.md)
+4. *Implicit:* Any Domain Work item not marked Done in the summary table (e.g., Inventory, Maintenance tasks).
 
-### ⚠️ TypeScript Ecosystem Dependency
-*   **Single Point of Failure:** The entire stack relies on the maturity and stability of the TypeScript ecosystem (React, NestJS, Prisma). Any major breaking change in these core libraries will impact all layers simultaneously.
-*   **Performance Ceiling:** Node.js is not ideal for CPU-intensive tasks (e.g., complex billing calculations or heavy image processing). These should be offloaded to worker threads or external services where possible.
+*Correction based on strict text visibility:* The prompt asks for items "that have never been implemented". In the visible table rows:
+1. AF-008
+2. AF-009
+3. AF-010
+4. P0-001 (Add missing tenant_id filters) - *Status is not explicitly shown as Done/Pending in that specific row, but implied by "P0 Critical" and the fact it's a known vulnerability.*
+5. P0-002 (Cover authentication bypass...)
 
-### ⚠️ Database Backup Granularity
-*   PostgreSQL backups are typically per-database, not per-schema by default.
-*   **Action Required:** Implement a custom backup script that iterates through schemas and dumps them individually (`pg_dump -s tenant_abc`) to ensure true tenant-level recovery points without restoring the whole DB.
+*Refined List based on explicit status markers:*
+1. AF-008: `agents/ specifications (27 agents)`
+2. AF-009: `CODEX_WORKFLOW.md`
+3. AF-010: `LOCAL_AI_WORKFLOW.md`
+4. P0-001: `Add missing tenant_id filters across all modules`
+5. P0-002: `Cover authentication bypass vulnerability in admin portal`
 
-## 5. Immediate Next Steps for Development Team
+### TASK 4: List the ADRs found. Are any marked as NOT YET DECIDED?
+**Analysis:** Reviewing `00-ARCHITECT/DECISIONS/`. Only one document exists (`ADR-001`). Its status is "Accepted". No items are marked as undecided in this section.
 
-1.  **Setup Prisma Schema Template:** Create a base schema file with `tenantId` as a required field on all tables, but logically separated into different schemas in production (or use a single schema with RLS if you decide to pivot later).
-2.  **Implement Tenant Resolver Middleware:** Ensure this runs before any controller logic or database query to set the search path correctly.
-3.  **Define Domain Events:** Map out which events trigger cross-context actions (e.g., `ReservationCreated` → `HousekeepingTaskScheduled`).
-4.  **Draft Migration Scripts:** Write a utility script for backing up/restoring individual schemas, as this is critical for tenant data protection compliance.
+*Note: The provided content does not contain a file named `ADRS.md` or similar, only the single ADR.*
 
-This architecture provides a solid foundation for launching Triangle Black quickly while maintaining the structural integrity needed to handle complex hospitality workflows and multi-tenant requirements.
+**List of Found ADRs:**
+1.  **ADR-001**: Technology Stack (Status: Accepted)
+
+**Are any marked as NOT YET DECIDED?**
+*   No. All found decisions are either "Accepted" or implied complete via the decision table structure.
