@@ -7784,3 +7784,79 @@ def list_punch_list(limit: int = _Query(default=100), db: _Session = _Depends(_g
         return [dict(r._mapping) for r in rows]
     except Exception: return []
 
+
+
+@app.get("/api/v1/client-portal/dashboard", tags=["client-portal"])
+def client_portal_dashboard(db: _Session = _Depends(_get_db)):
+    """Client portal dashboard with key metrics."""
+    def safe(q, p=None):
+        try:
+            r = db.execute(_text(q), p or {}).fetchone()
+            return dict(r._mapping) if r else {}
+        except: return {}
+    def safe_int(q, p=None):
+        try:
+            r = db.execute(_text(q), p or {}).fetchone()
+            return int(list(r)[0] or 0) if r else 0
+        except: return 0
+    return {
+        "open_work_orders":   safe_int("SELECT COUNT(*) FROM work_orders WHERE status IN ('open','in_progress')"),
+        "completed_work_orders": safe_int("SELECT COUNT(*) FROM work_orders WHERE status = 'completed'"),
+        "open_service_requests": safe_int("SELECT COUNT(*) FROM service_requests WHERE status IN ('open','pending')"),
+        "active_contracts":   safe_int("SELECT COUNT(*) FROM contracts"),
+        "total_assets":       safe_int("SELECT COUNT(*) FROM assets"),
+        "pending_approvals":  safe_int("SELECT COUNT(*) FROM work_orders WHERE status = 'open' AND priority = 'critical'"),
+    }
+
+@app.get("/api/v1/client-portal/work-orders", tags=["client-portal"])
+@app.get("/api/v1/client-portal/work-orders/", tags=["client-portal"])
+def client_portal_work_orders(limit: int = _Query(default=20), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("""
+            SELECT id, title, description, status, priority, type,
+                   created_at, updated_at, due_date
+            FROM work_orders
+            WHERE deleted_at IS NULL
+            ORDER BY created_at DESC LIMIT :l
+        """), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
+@app.get("/api/v1/client-portal/projects", tags=["client-portal"])
+@app.get("/api/v1/client-portal/projects/", tags=["client-portal"])
+def client_portal_projects(limit: int = _Query(default=20), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("SELECT * FROM projects ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
+@app.get("/api/v1/client-portal/service-requests", tags=["client-portal"])
+@app.get("/api/v1/client-portal/service-requests/", tags=["client-portal"])
+def client_portal_service_requests(limit: int = _Query(default=20), db: _Session = _Depends(_get_db)):
+    try:
+        rows = db.execute(_text("""
+            SELECT * FROM service_requests
+            WHERE deleted_at IS NULL
+            ORDER BY created_at DESC LIMIT :l
+        """), {"l": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception: return []
+
+@app.post("/api/v1/client-portal/service-requests/", tags=["client-portal"], status_code=201)
+async def client_portal_create_sr(request: Request):
+    """Create service request from client portal."""
+    try:
+        data = await request.json()
+        import uuid as _u, datetime as _d
+        sid = str(_u.uuid4())
+        now = _d.datetime.utcnow()
+        with _Session(_get_db.__wrapped__() if hasattr(_get_db,'__wrapped__') else next(_get_db())) as db:
+            db.execute(_text("""
+                INSERT INTO service_requests (id, hotel_id, title, description, category, urgency, status, submitted_by, contact_phone, created_at, updated_at)
+                VALUES (:id, :hid, :title, :desc, :cat, :urg, 'open', :by, :phone, :ca, :ua)
+            """), {"id":sid,"hid":data.get("hotel_id","tb-default-hotel-000000000001"),"title":data.get("title","Service Request"),"desc":data.get("description",""),"cat":data.get("category","general"),"urg":data.get("urgency","medium"),"by":data.get("submitted_by",""),"phone":data.get("contact_phone",""),"ca":now,"ua":now})
+            db.commit()
+        return {"id": sid, "status": "open", "ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
