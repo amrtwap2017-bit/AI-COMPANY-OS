@@ -8,7 +8,7 @@ import pytest
 
 
 @pytest.fixture(scope="module")
-def revenue_loop_lead(client, auth):
+def revenue_loop_lead(client, auth_headers):
     """Create a fresh lead for revenue loop testing."""
     unique = str(uuid.uuid4())[:8]
     res = client.post(
@@ -22,13 +22,13 @@ def revenue_loop_lead(client, auth):
             "phone": "+201234567890",
             "notes": "HVAC electrical plumbing fire fighting maintenance needed",
         },
-        headers=auth,
+        headers=auth_headers,
     )
     assert res.status_code == 201
     lead_id = res.json()["id"]
     yield lead_id
     try:
-        client.delete(f"/api/v1/leads/{lead_id}", headers=auth)
+        client.delete(f"/api/v1/leads/{lead_id}", headers=auth_headers)
     except Exception:
         pass
 
@@ -37,7 +37,7 @@ class TestQualify:
     def test_qualify_lead(self, client, auth, revenue_loop_lead):
         res = client.post(
             f"/api/v1/actions/leads/{revenue_loop_lead}/qualify",
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         data = res.json()
@@ -48,7 +48,7 @@ class TestQualify:
 
     def test_qualify_updates_lead_status(self, client, auth, revenue_loop_lead):
         lead = client.get(
-            f"/api/v1/leads/{revenue_loop_lead}", headers=auth
+            f"/api/v1/leads/{revenue_loop_lead}", headers=auth_headers
         ).json()
         assert lead["status"] == "qualified"
         assert int(lead["score"]) > 0
@@ -56,7 +56,7 @@ class TestQualify:
     def test_qualify_nonexistent_lead(self, client, auth):
         res = client.post(
             "/api/v1/actions/leads/nonexistent-000/qualify",
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 404
 
@@ -66,7 +66,7 @@ class TestAssign:
         res = client.post(
             f"/api/v1/actions/leads/{revenue_loop_lead}/assign",
             json={},
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         data = res.json()
@@ -76,7 +76,7 @@ class TestAssign:
 
     def test_assign_updates_lead_status(self, client, auth, revenue_loop_lead):
         lead = client.get(
-            f"/api/v1/leads/{revenue_loop_lead}", headers=auth
+            f"/api/v1/leads/{revenue_loop_lead}", headers=auth_headers
         ).json()
         assert lead["status"] == "assigned"
 
@@ -86,7 +86,7 @@ class TestGenerateQuote:
         res = client.post(
             f"/api/v1/actions/leads/{revenue_loop_lead}/quote",
             json={"contract_months": 12},
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         data = res.json()
@@ -97,10 +97,10 @@ class TestGenerateQuote:
         res = client.post(
             f"/api/v1/actions/leads/{revenue_loop_lead}/quote",
             json={"contract_months": 12},
-            headers=auth,
+            headers=auth_headers,
         )
         quote_id = res.json()["quote_id"]
-        quote = client.get(f"/api/v1/quotes/{quote_id}", headers=auth).json()
+        quote = client.get(f"/api/v1/quotes/{quote_id}", headers=auth_headers).json()
         assert quote["status"] == "draft"
         assert len(quote["items"]) > 0
 
@@ -113,7 +113,7 @@ class TestFullRevenueLoop:
         res = client.post(
             f"/api/v1/actions/leads/{revenue_loop_lead}/quote",
             json={"contract_months": 12},
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         return res.json()["quote_id"]
@@ -122,7 +122,7 @@ class TestFullRevenueLoop:
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/submit",
             json={},
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         assert res.json()["status"] == "review"
@@ -131,7 +131,7 @@ class TestFullRevenueLoop:
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/send",
             json={},
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         data = res.json()
@@ -142,7 +142,7 @@ class TestFullRevenueLoop:
         res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/approve",
             json={},
-            headers=auth,
+            headers=auth_headers,
         )
         assert res.status_code == 200
         data = res.json()
@@ -151,14 +151,14 @@ class TestFullRevenueLoop:
         assert data["contract_id"] is not None
 
         contract = client.get(
-            f"/api/v1/contracts/{data['contract_id']}", headers=auth
+            f"/api/v1/contracts/{data['contract_id']}", headers=auth_headers
         ).json()
         assert contract["status"] == "pending_signature"
         assert contract["total_value"] > 0
 
     def test_lead_converted_after_approval(self, client, auth, revenue_loop_lead):
         lead = client.get(
-            f"/api/v1/leads/{revenue_loop_lead}", headers=auth
+            f"/api/v1/leads/{revenue_loop_lead}", headers=auth_headers
         ).json()
         assert lead["status"] in ("converted", "assigned"), f"Unexpected status: {lead['status']}"
 
@@ -175,32 +175,32 @@ class TestRejectFlow:
                 "source": "web",
                 "priority": "low",
             },
-            headers=auth,
+            headers=auth_headers,
         )
         lead_id = lead_res.json()["id"]
 
-        client.post(f"/api/v1/actions/leads/{lead_id}/qualify", headers=auth)
-        client.post(f"/api/v1/actions/leads/{lead_id}/assign", json={}, headers=auth)
+        client.post(f"/api/v1/actions/leads/{lead_id}/qualify", headers=auth_headers)
+        client.post(f"/api/v1/actions/leads/{lead_id}/assign", json={}, headers=auth_headers)
 
         quote_res = client.post(
             f"/api/v1/actions/leads/{lead_id}/quote",
             json={"contract_months": 12},
-            headers=auth,
+            headers=auth_headers,
         )
         quote_id = quote_res.json()["quote_id"]
 
-        client.post(f"/api/v1/actions/quotes/{quote_id}/submit", json={}, headers=auth)
-        client.post(f"/api/v1/actions/quotes/{quote_id}/send", json={}, headers=auth)
+        client.post(f"/api/v1/actions/quotes/{quote_id}/submit", json={}, headers=auth_headers)
+        client.post(f"/api/v1/actions/quotes/{quote_id}/send", json={}, headers=auth_headers)
 
         reject_res = client.post(
             f"/api/v1/actions/quotes/{quote_id}/reject",
             json={"note": "Budget too high for pytest test"},
-            headers=auth,
+            headers=auth_headers,
         )
         assert reject_res.status_code == 200
         assert reject_res.json()["status"] == "rejected"
 
-        lead = client.get(f"/api/v1/leads/{lead_id}", headers=auth).json()
+        lead = client.get(f"/api/v1/leads/{lead_id}", headers=auth_headers).json()
         assert lead["status"] == "lost"
 
-        client.delete(f"/api/v1/leads/{lead_id}", headers=auth)
+        client.delete(f"/api/v1/leads/{lead_id}", headers=auth_headers)

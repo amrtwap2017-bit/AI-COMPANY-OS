@@ -7,7 +7,7 @@ from domain.models.invoice import Invoice
 import pytest
 
 @pytest.fixture(scope='module')
-def test_invoice_id(client, auth):
+def test_invoice_id(client, auth_headers):
     unique = str(uuid.uuid4())[:8]
     res = client.post(
         '/api/v1/invoices/',
@@ -20,20 +20,20 @@ def test_invoice_id(client, auth):
             'vat': 14.0,
             'total': 114.0
         },
-        headers=auth,
+        headers=auth_headers,
     )
     assert res.status_code == 201, f'Create failed: {res.text}'
     invoice_id = res.json()['id']
     yield invoice_id
-    client.delete(f'/api/v1/invoices/{invoice_id}', headers=auth)
+    client.delete(f'/api/v1/invoices/{invoice_id}', headers=auth_headers)
 
 def test_get_invoice_detail(client):
     auth = _admin(client)
-    invoices = client.get('/api/v1/invoices/', headers=auth).json()
+    invoices = client.get('/api/v1/invoices/', headers=auth_headers).json()
     if not invoices:
         pytest.skip('No invoices in DB')
     inv_id = invoices[0]['id']
-    r = client.get(f'/api/v1/invoices/{inv_id}', headers=auth)
+    r = client.get(f'/api/v1/invoices/{inv_id}', headers=auth_headers)
     assert r.status_code == 200
     data = r.json()
     assert 'invoice_number' in data
@@ -42,7 +42,7 @@ def test_get_invoice_detail(client):
 def test_generate_invoice_pdf(client, test_invoice_id):
     auth = _admin(client)
     invoice_id = test_invoice_id
-    res = client.get(f'/api/v1/invoices/{invoice_id}/pdf', headers=auth)
+    res = client.get(f'/api/v1/invoices/{invoice_id}/pdf', headers=auth_headers)
     assert res.status_code == 200
     assert 'application/pdf' in res.headers['Content-Type']
     pdf_path = f'artifacts/invoices/{invoice_id}.pdf'
