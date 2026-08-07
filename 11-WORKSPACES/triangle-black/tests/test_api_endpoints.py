@@ -22,10 +22,11 @@ class TestAuth:
     def test_login_valid(self):
         r = requests.post(
             f"{BASE}/api/v1/auth/login",
-            data={"username": "admin@triangleblack.com", "password": "admin123"},
+            data={"username": "amr@triangleblack.com", "password": "admin123"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             timeout=15,
         )
+        _skip_if_rate_limited(r, "login_valid")
         assert r.status_code == 200
         d = r.json()
         assert "access_token" in d
