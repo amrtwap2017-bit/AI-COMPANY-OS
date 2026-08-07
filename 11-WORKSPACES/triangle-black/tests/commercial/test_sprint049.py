@@ -1,5 +1,8 @@
+import pytest
 """Sprint-049: Alembic Migration + Platform State Tests"""
 import requests as _req
+
+pytestmark = pytest.mark.live_http
 
 BASE = "http://localhost:8030"
 _C = {}

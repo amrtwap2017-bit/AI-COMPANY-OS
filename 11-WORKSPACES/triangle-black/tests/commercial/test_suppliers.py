@@ -1,5 +1,8 @@
+import pytest
 """Sprint-029: Supplier API Tests"""
 import requests as _req
+
+pytestmark = pytest.mark.live_http
 
 BASE = "http://localhost:8030"
 _C = {}

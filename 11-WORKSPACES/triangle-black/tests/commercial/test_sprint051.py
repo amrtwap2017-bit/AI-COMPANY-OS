@@ -1,5 +1,8 @@
+import pytest
 """Sprint-051: Suppliers Fix + Knowledge Graph Tests"""
 import requests as _req, uuid
+
+pytestmark = pytest.mark.live_http
 
 BASE = "http://localhost:8030"
 _C = {}

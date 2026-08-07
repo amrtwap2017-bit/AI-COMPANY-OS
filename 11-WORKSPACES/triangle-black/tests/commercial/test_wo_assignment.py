@@ -1,6 +1,9 @@
+import pytest
 """Sprint-024: Work Order Technician Assignment Tests"""
 import requests as _req
 import uuid
+
+pytestmark = pytest.mark.live_http
 
 BASE = "http://localhost:8030"
 _CACHE = {}

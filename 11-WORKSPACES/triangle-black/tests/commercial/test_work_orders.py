@@ -3,6 +3,8 @@ import pytest
 import requests as _req
 import uuid
 
+pytestmark = pytest.mark.live_http
+
 BASE = "http://localhost:8030"
 
 

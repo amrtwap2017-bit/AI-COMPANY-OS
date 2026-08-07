@@ -113,3 +113,14 @@ def wait_for_leads_module(request):
                 _waited_modules2.add(fname)
                 time.sleep(62)
     yield
+
+
+# Sprint-063: live_http marker registration
+# Tests marked @pytest.mark.live_http require a running server
+# Run isolated: .venv/bin/python -m pytest -m live_http
+# Normal suite excludes them automatically via pytest.ini addopts
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "live_http: marks tests that make real HTTP requests to localhost:8030"
+    )

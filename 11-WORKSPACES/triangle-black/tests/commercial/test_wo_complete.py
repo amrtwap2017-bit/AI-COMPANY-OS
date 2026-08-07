@@ -4,6 +4,8 @@ Self-contained: fetches fresh token per test session to avoid stale JWT.
 import pytest
 import requests as _req
 
+pytestmark = pytest.mark.live_http
+
 BASE = "http://localhost:8030"
 _TOKEN_CACHE = {}
 

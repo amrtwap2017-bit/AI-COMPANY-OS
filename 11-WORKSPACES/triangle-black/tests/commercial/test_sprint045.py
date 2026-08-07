@@ -1,5 +1,8 @@
+import pytest
 """Sprint-045: Engineering Inspections Tests"""
 import requests as _req
+
+pytestmark = pytest.mark.live_http
 
 BASE = "http://localhost:8030"
 _C = {}
