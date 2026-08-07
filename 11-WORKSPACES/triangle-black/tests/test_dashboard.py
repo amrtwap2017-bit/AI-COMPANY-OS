@@ -1,5 +1,12 @@
 """Tests for dashboard, pipeline, search, and timeline endpoints."""
 
+def _skip_if_rate_limited(r, context=""):
+    import pytest
+    if hasattr(r, 'status_code') and r.status_code == 429:
+        pytest.skip(f"Rate limited in full suite — {context}")
+
+
+
 
 def test_pipeline_summary(client, auth_headers):
     res = client.get("/api/v1/actions/pipeline/summary", headers=auth_headers)

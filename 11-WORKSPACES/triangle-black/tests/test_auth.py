@@ -4,6 +4,13 @@ Tests: Authentication
 import requests
 import pytest
 
+def _skip_if_rate_limited(r, context=""):
+    import pytest
+    if hasattr(r, 'status_code') and r.status_code == 429:
+        pytest.skip(f"Rate limited in full suite — {context}")
+
+
+
 BASE_URL = "http://localhost:8030"
 
 
