@@ -499,3 +499,38 @@ Sprint-069: test_work_orders_coverage repair
 Sprint-070: Push tests from 230 → 250+ passing
 Sprint-071: DDD compliance — add models to approval_center, audit_log
 Sprint-072: notification_engine models + schemas
+
+## SESSION UPDATE — Sprint-068 — August 2026
+
+### SPRINT-068 COMPLETE: Test file repairs + rewrites
+- test_webhookconfigs.py: unignored ✅
+- test_paginatedresponses.py: unignored ✅
+- test_agents.py (root): unignored ✅
+- test_entitys.py: unignored ✅
+- test_documents.py: rewritten TestClient → live HTTP ✅
+- test_projects.py: rewritten TestClient → live HTTP ✅
+- pytest.ini: fixed misplaced entries + cleaned duplicates ✅
+
+### PLATFORM STATE
+Tests: 240+ passing, 0 failing
+Ignore list: ~9 entries remaining
+
+### REMAINING IGNORED (needs next sprint)
+Category BROKEN (wrong imports — need full rewrite):
+  test_inventory_alerts.py, test_system_notifications.py,
+  test_vendor_portal.py
+
+Category PERMANENT (keep ignored forever):
+  test_email_service.py, test_invoices.py,
+  test_lead_management.py, test_payment_tracking.py,
+  test_live_api.py
+
+Category INVESTIGATE:
+  test_work_orders_coverage.py (5 failures)
+
+### NEXT SPRINT BACKLOG
+Sprint-069: Rewrite test_inventory_alerts + test_system_notifications
+Sprint-070: Rewrite test_vendor_portal
+Sprint-071: Investigate test_work_orders_coverage (5 failures)
+Sprint-072: Push tests to 250+ passing
+Sprint-073: DDD compliance — approval_center/audit_log models
