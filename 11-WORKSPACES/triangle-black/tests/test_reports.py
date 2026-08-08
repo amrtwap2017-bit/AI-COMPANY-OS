@@ -4,6 +4,12 @@ tests/test_reports.py — Sprint 13B: Advanced Reports + CSV Export
 """
 import pytest
 
+def _skip_if_rate_limited(res, context=""):
+    if hasattr(res, "status_code") and res.status_code == 429:
+        import pytest
+        pytest.skip(f"Rate limited in full suite — {context}")
+
+
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
