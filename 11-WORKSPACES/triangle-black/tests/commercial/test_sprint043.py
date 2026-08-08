@@ -1,3 +1,10 @@
+import pytest
+
+def _skip_if_rate_limited(res, context=""):
+    if hasattr(res, "status_code") and res.status_code == 429:
+        import pytest
+        pytest.skip(f"Rate limited in full suite — {context}")
+
 """Sprint-043: Warranty Tracking Tests"""
 import requests as _req, datetime
 

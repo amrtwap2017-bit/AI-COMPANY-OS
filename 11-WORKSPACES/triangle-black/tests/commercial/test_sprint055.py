@@ -6,6 +6,18 @@ NOTE: is_active test is scoped to tables built after the is_active convention.
       contracts and work_orders predate the convention — excluded from that check.
 """
 import pytest
+
+def _skip_if_rate_limited(res, context=""):
+    if hasattr(res, "status_code") and res.status_code == 429:
+        import pytest
+        pytest.skip(f"Rate limited in full suite — {context}")
+
+
+def _skip_if_rate_limited(res, context=""):
+    if hasattr(res, "status_code") and res.status_code == 429:
+        import pytest
+        pytest.skip(f"Rate limited in full suite — {context}")
+
 from sqlalchemy import inspect, text
 from src.core.database import engine
 
