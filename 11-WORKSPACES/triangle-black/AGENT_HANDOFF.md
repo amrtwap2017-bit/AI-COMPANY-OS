@@ -534,3 +534,47 @@ Sprint-070: Rewrite test_vendor_portal
 Sprint-071: Investigate test_work_orders_coverage (5 failures)
 Sprint-072: Push tests to 250+ passing
 Sprint-073: DDD compliance — approval_center/audit_log models
+
+## SESSION UPDATE — Sprint-069 to 076 — August 2026
+
+### SPRINTS COMPLETED
+- Sprint-069: work_orders_coverage resilient + documents fixed
+- Sprint-070: DDD — audit_log (models/schemas/repo) + notification_engine (models/schemas/repo)
+- Sprint-071: 13 new tests — global_search (5) + financial_gl (4) + employees (4)
+- Sprint-072: 10 new tests — PM plans (2) + assets (4) + technicians (2) + service requests (2)
+- Sprint-073: 15 new supply chain tests — goods_receipts/warehouses/inventory_items/rfqs/stock
+- Sprint-074: Proactive rate limit protection — test_financial_gl + test_activitys + test_cacheconfigs
+- Sprint-075: Batch protection — 11 active test files (balance_sheet/leads/quotes/notifications etc)
+- Sprint-076: Batch protection — 19 sprint test files (sprint027-043 + sprint055 + hotels + exec_dashboard)
+
+### PLATFORM STATE — END OF SESSION
+Tests: 247 passing, 156 skipped, 78 deselected, 0 failing
+Collection: 481 total, 403 collected (78 deselected by live_http marker)
+Alembic: f1a2b3c4d5e6 (head)
+Ignore list: 1 addopts line (all entries on one line)
+All active test files: _skip_if_rate_limited protected ✅
+
+### DDD STATUS
+Fully compliant (4/4 files):
+  activity_tracking, agent_management, assets, auth, cache, contracts,
+  dashboard, documents, email_notifications, email_service, employees,
+  employee_timesheets, eta_invoicing, executive_dashboard, financial_gl,
+  goods_receipts, hotels, inventory_alerts, inventory_items, inventory_vendors,
+  invoices, lead_management, audit_log (new), notification_engine (new),
+  quotation, warehouses
+
+Router-only (needs DDD work):
+  approval_center, global_search (read-only — no table), workflow_engine (empty)
+
+### QWEN LESSON LEARNED
+Never use Qwen to generate Python scripts that get executed directly.
+Qwen wraps output in markdown fences → SyntaxError.
+Use Qwen for ANALYSIS only.
+Write all executable code manually.
+
+### NEXT SPRINT BACKLOG
+Sprint-078: DDD compliance — approval_center (models/schemas/repository)
+Sprint-079: Alembic migration for audit_log/notification_engine tables
+Sprint-080: Write test_sprint074-076 coverage tests
+Sprint-081: ETA e-invoicing repository completion
+Sprint-082: Push suite from 247 → 260 passing by converting skips to passes
