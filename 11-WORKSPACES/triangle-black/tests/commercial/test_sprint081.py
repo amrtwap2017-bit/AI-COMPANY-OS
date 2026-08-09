@@ -44,6 +44,6 @@ class TestWarrantyDDD:
         assert callable(get_all)
 
     def test_warranty_api(self, client, auth_headers):
-        res = client.get("/api/v1/warranty/", headers=auth_headers)
+        res = client.get("/api/v1/warranty/overview", headers=auth_headers)
         _skip_if_rate_limited(res, "warranty_list")
         assert res.status_code in (200, 404)
