@@ -578,3 +578,30 @@ Sprint-079: Alembic migration for audit_log/notification_engine tables
 Sprint-080: Write test_sprint074-076 coverage tests
 Sprint-081: ETA e-invoicing repository completion
 Sprint-082: Push suite from 247 → 260 passing by converting skips to passes
+
+## SESSION UPDATE — Sprint-078 to 084 — August 2026
+
+### SPRINTS COMPLETED
+- Sprint-078: DDD — approval_center (schemas+repository, no table needed)
+- Sprint-079: Alembic migration (platform_audit_log + platform_notifications)
+- Sprint-080: DDD — eta_invoicing repository complete (4/4 files)
+- Sprint-081: DDD — suppliers + warranty (models/schemas/repository)
+- Sprint-082: DDD — user_preferences + procurement_intake + scope_of_work
+- Sprint-083: DDD — approval_chain + approval_requests
+- Sprint-084: Alembic migration (7 DDD tables tracked — b1c2d3e4f5a6)
+
+### DDD COMPLETION STATUS
+All modules that need DDD = COMPLETE
+27 remaining router-only modules = intentionally read-only (no tables)
+
+### PLATFORM STATE — END OF SESSION
+Tests: 272 passing, 169 skipped, 78 deselected, 0 failing
+Alembic head: b1c2d3e4f5a6
+DDD: ALL modules with own tables are now compliant
+
+### NEXT SPRINT BACKLOG
+Sprint-085: AGENT_HANDOFF sync
+Sprint-086: Write test coverage for sprint-081 to 083 new endpoints
+Sprint-087: Scan for any remaining test files that cascade-fail
+Sprint-088: Push 272 → 290 passing (fix rate limit in conftest)
+Sprint-089: Frontend — fix any broken portal API connections
