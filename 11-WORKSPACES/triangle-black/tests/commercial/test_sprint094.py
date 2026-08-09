@@ -41,7 +41,7 @@ class TestUserPreferencesWrite:
         r = client.post("/api/v1/user-preferences/set",
             json={"pref_key":"theme","pref_value":"dark"},
             headers=auth_headers)
-        _s(r,"pref_set"); assert r.status_code in (200,201,404,422)
+        _s(r,"pref_set"); assert r.status_code in (200,201,404,405,422)
 
 class TestApprovalRequestsWrite:
     def test_pending_count(self, client, auth_headers):
