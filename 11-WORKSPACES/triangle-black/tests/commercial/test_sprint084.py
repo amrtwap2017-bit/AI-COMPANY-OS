@@ -12,7 +12,7 @@ class TestSuppliersEndpoints:
     def test_detail(self, client, auth_headers):
         r = client.get("/api/v1/suppliers/?limit=1", headers=auth_headers)
         _s(r,"suppliers_first")
-        items = r.json().get("results", r.json() if isinstance(r.json(),list) else [])
+        data=r.json(); items=data.get("results",data) if isinstance(data,dict) else data
         if not items: pytest.skip("No suppliers")
         r2 = client.get(f"/api/v1/suppliers/{items[0]['id']}", headers=auth_headers)
         _s(r2,"suppliers_detail"); assert r2.status_code==200
