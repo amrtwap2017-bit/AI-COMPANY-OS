@@ -124,3 +124,25 @@ def pytest_configure(config):
         "markers",
         "live_http: marks tests that make real HTTP requests to localhost:8030"
     )
+
+
+_waited_heavy = set()
+
+@pytest.fixture(autouse=True)
+def wait_for_heavy_modules(request):
+    """Wait before modules with many HTTP calls to prevent rate limit cascade."""
+    import time
+    global _waited_heavy
+    if hasattr(request, "node") and hasattr(request.node, "fspath"):
+        fname = str(request.node.fspath)
+        HEAVY = [
+            "test_sprint084", "test_sprint083", "test_sprint082",
+            "test_sprint081", "test_sprint080", "test_sprint078",
+            "test_core_apis", "test_business_actions", "test_agents"
+        ]
+        for h in HEAVY:
+            if h in fname and fname not in _waited_heavy:
+                _waited_heavy.add(fname)
+                time.sleep(62)
+                break
+    yield
