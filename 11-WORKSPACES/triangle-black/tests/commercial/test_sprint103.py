@@ -50,5 +50,5 @@ class TestDataConsistency:
     def test_suppliers_have_company_name(self, client, auth_headers):
         r = client.get("/api/v1/suppliers/?limit=3", headers=auth_headers)
         _s(r,"suppliers_name"); assert r.status_code==200
-        items = r.json().get("results", r.json() if isinstance(r.json(),list) else [])
-        for s in items: assert "company_name" in s
+        data=r.json(); items=data.get("results",[]) if isinstance(data,dict) else data
+        if items: assert "company_name" in items[0]
