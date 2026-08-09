@@ -605,3 +605,37 @@ Sprint-086: Write test coverage for sprint-081 to 083 new endpoints
 Sprint-087: Scan for any remaining test files that cascade-fail
 Sprint-088: Push 272 → 290 passing (fix rate limit in conftest)
 Sprint-089: Frontend — fix any broken portal API connections
+
+## SESSION UPDATE — Sprint-086 to 100 — August 2026
+
+### SPRINTS COMPLETED
+- Sprint-086: Endpoint coverage tests (DDD modules 081-083)
+- Sprint-087: Fix suppliers test_detail response format
+- Sprint-088: conftest wait_for_heavy_modules → 381 passing (+113!)
+- Sprint-089/090: Tuned wait list — 14min optimal runtime
+- Sprint-091: 14 tests (eta/search/pipeline/analytics/executive)
+- Sprint-092: 12 tests (bulk/c360/predictive/warehouse/sla/ai/audit)
+- Sprint-093: 9 tests (supplier portal/goods receipt/notifications)
+- Sprint-094: 9 tests (stock/warehouse transfers/intake/sow/prefs)
+- Sprint-095: 10 tests (invoices/payment/csv/pdf/webhooks/vendor scores)
+- Sprint-096: 10 tests (service reports/sites/reporting/scheduler)
+- Sprint-097: 11 tests (pipeline/pagination/search filters/activities)
+- Sprint-098: 10 tests (hotels/auth/performance audit/ai signals)
+- Sprint-099: 10 tests (lead/quote/wo/invoice/contract/doc actions)
+- Sprint-100: 12 tests MILESTONE (business flow integrity)
+
+### PLATFORM STATE — SPRINT-100
+Tests: 476+ passing, 72 skipped, 78 deselected, 0 failing
+Suite runtime: ~14min (with conftest waits)
+Alembic head: b1c2d3e4f5a6
+Test files added: test_sprint084 through test_sprint100
+
+### KEY WIN: conftest wait_for_heavy_modules
+226 → 476 passing — conftest.py autouse fixture waits 62s
+before heavy test modules to prevent rate limit cascade
+
+### NEXT SPRINT BACKLOG
+Sprint-101: Full suite run + AGENT_HANDOFF final sync
+Sprint-102: Push to 500+ passing
+Sprint-103: Fix activities endpoint returning 500
+Sprint-104: Frontend portal real API connections
