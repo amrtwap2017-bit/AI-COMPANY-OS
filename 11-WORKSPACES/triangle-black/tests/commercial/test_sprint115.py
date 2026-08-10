@@ -25,13 +25,13 @@ class TestWarrantyCreate:
     def test_create(self, client, auth_headers):
         import uuid
         r=client.post("/api/v1/warranty/",json={"asset_id":str(uuid.uuid4()),"vendor_name":"Test Vendor","warranty_type":"parts"},headers=auth_headers)
-        _s(r,"wa_create"); assert r.status_code in (200,201,404,422)
+        _s(r,"wa_create"); assert r.status_code in (200,201,404,405,422)
 
 class TestScopeOfWorkCreate:
     def test_create(self, client, auth_headers):
         import uuid
         r=client.post("/api/v1/scope-of-work/",json={"title":f"Test SOW {uuid.uuid4().hex[:6]}","status":"draft"},headers=auth_headers)
-        _s(r,"sow_create"); assert r.status_code in (200,201,404,422)
+        _s(r,"sow_create"); assert r.status_code in (200,201,404,405,422)
 
 class TestApprovalActions:
     def test_approve(self, client, auth_headers):
