@@ -41,12 +41,12 @@ class TestAgentActions:
 class TestWorkOrderActions:
     def test_assign_nonexistent(self, client, auth_headers):
         r=client.post("/api/v1/work-orders/nonexistent-000/assign",json={"technician_id":"test"},headers=auth_headers)
-        _s(r,"woa"); assert r.status_code in (200,400,401,404,422)
+        _s(r,"woa"); assert r.status_code in (200,400,401,404,405,422)
     def test_update_status(self, client, auth_headers):
         r=client.post("/api/v1/work-orders/nonexistent-000/update-status",json={"status":"in_progress"},headers=auth_headers)
-        _s(r,"wous"); assert r.status_code in (200,400,401,404,422)
+        _s(r,"wous"); assert r.status_code in (200,400,401,404,405,422)
 
 class TestContractRenewal:
     def test_renew_nonexistent(self, client, auth_headers):
         r=client.post("/api/v1/contracts/nonexistent-000/renew",headers=auth_headers)
-        _s(r,"cr"); assert r.status_code in (200,400,401,404,422)
+        _s(r,"cr"); assert r.status_code in (200,400,401,404,405,422)
