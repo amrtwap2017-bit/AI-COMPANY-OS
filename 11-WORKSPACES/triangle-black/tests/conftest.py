@@ -138,7 +138,7 @@ def wait_for_heavy_modules(request):
         HEAVY = [
             "test_sprint084", "test_sprint083", "test_sprint082",
             "test_sprint081", "test_sprint080", "test_sprint078",
-            "test_core_apis","test_business_actions","test_agents","test_sprint100","test_sprint101","test_sprint102","test_sprint103","test_sprint104","test_sprint105","test_sprint106","test_sprint107","test_sprint108","test_sprint109","test_sprint110","test_sprint111","test_sprint112","test_sprint113","test_sprint114","test_sprint115","test_sprint116","test_sprint117","test_sprint118","test_sprint119","test_sprint120","test_sprint121","test_sprint122","test_sprint123","test_sprint124","test_sprint125","test_sprint126","test_sprint127","test_sprint128","test_sprint129","test_sprint130","test_sprint131","test_sprint132","test_sprint133","test_sprint134","test_sprint135","test_sprint137"
+            "test_core_apis","test_business_actions","test_agents","test_sprint100","test_sprint101","test_sprint102","test_sprint103","test_sprint104","test_sprint105","test_sprint106","test_sprint107","test_sprint108","test_sprint109","test_sprint110","test_sprint111","test_sprint112","test_sprint113","test_sprint114","test_sprint115","test_sprint116","test_sprint117","test_sprint118","test_sprint119","test_sprint120","test_sprint121","test_sprint122","test_sprint123","test_sprint124","test_sprint125","test_sprint126","test_sprint127","test_sprint128","test_sprint129","test_sprint130","test_sprint131","test_sprint132","test_sprint133","test_sprint134","test_sprint135","test_sprint137","test_sprint138"
         ]
         for h in HEAVY:
             if h in fname and fname not in _waited_heavy:
