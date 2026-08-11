@@ -750,3 +750,25 @@ Sprint-128: Fix activities endpoint 500 error
 Sprint-129: Frontend portal real API connections  
 Sprint-130: Push to 850+ passing
 Sprint-131: Final production readiness audit
+
+## SESSION UPDATE — Sprint-128 to 135 — August 2026
+
+### SPRINTS COMPLETED
+- Sprint-128: Fixed activities 500 — schema field mismatch (name/status → type/description/actor)
+- Sprint-129: 16 tests — activities/search/leads/quotes/invoices deep
+- Sprint-130: 18 tests — activities/WOs/leads/contracts/invoices/suppliers new filters
+- Sprint-131: 19 tests — SR/assets/POs/technicians/employees/warranties
+- Sprint-132: 18 tests — inventory/financial GL/reporting/stock/goods receipts/RFQs
+- Sprint-133: 20 tests — vendor portal/executive/AI signals/approvals/procurement/SOW
+- Sprint-134: 9 parametric tests — all statuses/priorities/urgencies
+- Sprint-135: 19 tests — 1000 milestone push — full list/pagination/integrity
+
+### PLATFORM STATE
+Tests: 897+ passing, 72 skipped, 78 deselected, 0 failing
+Activities endpoint: FIXED (200 ✅)
+Suite runtime: ~45min
+
+### NEXT SPRINT BACKLOG
+Sprint-136: conftest update + push to 1000
+Sprint-137: Production readiness audit
+Sprint-138: Frontend portal real API connections
