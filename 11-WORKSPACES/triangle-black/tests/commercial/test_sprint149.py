@@ -31,7 +31,7 @@ class TestAllModulesReachable:
     def test_service_requests(self, client, auth_headers):
         r=client.get("/api/v1/service-requests/?limit=1",headers=auth_headers); _s(r,"amr12"); assert r.status_code==200
     def test_search(self, client, auth_headers):
-        r=client.get("/api/v1/search/?q=a",headers=auth_headers); _s(r,"amr13"); assert r.status_code==200
+        r=client.get("/api/v1/search/?q=hotel",headers=auth_headers); _s(r,"amr13"); assert r.status_code==200
     def test_health(self, client, auth_headers):
         r=client.get("/health",headers=auth_headers); _s(r,"amr14"); assert r.status_code==200
 
