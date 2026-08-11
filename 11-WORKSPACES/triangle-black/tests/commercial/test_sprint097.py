@@ -31,7 +31,7 @@ class TestCacheConfigs:
 class TestActivities:
     def test_list(self, client, auth_headers):
         r = client.get("/api/v1/activities/?limit=5", headers=auth_headers)
-        _s(r,"act_list"); assert r.status_code in (200,404,500)
+        _s(r,"act_list"); assert r.status_code in (200,404)
     def test_recent(self, client, auth_headers):
         r = client.get("/api/v1/activities/recent", headers=auth_headers)
         _s(r,"act_recent"); assert r.status_code in (200,404)
