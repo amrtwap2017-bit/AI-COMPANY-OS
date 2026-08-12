@@ -795,3 +795,18 @@ Activities endpoint: FIXED (type/description/actor/lead_id schema)
 All core modules: DDD compliant
 All test files: _skip_if_rate_limited protected
 AGENT_HANDOFF.md: Complete roadmap included
+
+## FINAL VERIFIED STATE — August 2026
+
+### SUITE RESULT (VERIFIED)
+1078 passing, 203 skipped, 78 deselected, 0 failing
+Runtime: ~23min
+Server: bash START.sh required before pytest
+Expected command:
+  bash START.sh
+  .venv/bin/python -m pytest tests/ -q --tb=no | tail -3
+
+### KEY NOTE
+Previous run showed 34 failures because server was not running
+After bash START.sh → 1078 passing, 0 failing
+ALWAYS run bash START.sh before running the test suite
