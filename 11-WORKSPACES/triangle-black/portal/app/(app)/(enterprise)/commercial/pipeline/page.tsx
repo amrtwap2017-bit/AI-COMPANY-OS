@@ -8,7 +8,7 @@ const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
 const STAGES = [{key:"new",label:"New",color:"#5B7C8C"},{key:"qualified",label:"Qualified",color:"#8D7443"},{key:"proposal",label:"Proposal",color:"#818CF8"},{key:"negotiation",label:"Negotiation",color:"#B07A2A"},{key:"won",label:"Won",color:"#547C4D"},{key:"lost",label:"Lost",color:"#A84A3D"}];
 export default function PipelinePage() {
   const router = useRouter();
-  const { data: leadRaw } = useQuery(["pl-leads"], () => authFetch("/api/v1/leads-portal-v2").then(r=>r.json()));
+  const { data: leadRaw } = useQuery(["pl-leads"], () => authFetch("/api/v1/leads/?limit=100").then(r=>r.json()));
   const { data: contRaw } = useQuery(["pl-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
   const leads = toArr(leadRaw); const contracts = toArr(contRaw);
   const totalValue = leads.reduce((s,l)=>s+Number(l.estimated_value||l.value||0),0);
