@@ -274,7 +274,7 @@ export const enterpriseCenters: NavCenter[] = [
     href: "/settings/users",
     children: [
       { label: "User Management",        href: "/settings/users",                  icon: "👥", description: "10 users · role editor" },
-      { label: "Security Audit",         href: "/settings/users",                  icon: "🔒", description: "JWT · RBAC · posture" },
+      { label: "Security Audit",         href: "/administration/audit",             icon: "🔒", description: "JWT · RBAC · posture" },
       { label: "AI Hub",                 href: "/ai",                              icon: "🤖", description: "AI + knowledge graph" },
       { label: "Graph Explorer",         href: "/graph",                           icon: "🕸",  description: "Knowledge graph" },
       { label: "Alerts",                 href: "/alerts",                          icon: "🚨", description: "System alerts" },
