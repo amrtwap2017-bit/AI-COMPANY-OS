@@ -24,7 +24,10 @@ class TestWorkOrders:
     def test_limit_enforced(self, auth_headers):
         r = requests.get(f"{BASE_URL}/api/v1/work-orders/?limit=500", headers=auth_headers)
         _skip_if_rate_limited(r, "wo_limit")
-        assert r.status_code == 422
+        assert r.status_code in (200, 429), f"limit=500 valid (le=1000 now), got {r.status_code}"
+        r2 = requests.get(f"{BASE_URL}/api/v1/work-orders/?limit=5000", headers=auth_headers)
+        _skip_if_rate_limited(r2, "wo_limit_over")
+        assert r2.status_code in (422, 429), f"limit=5000 should be rejected, got {r2.status_code}"
 
     def test_status_filter(self, auth_headers):
         r = requests.get(f"{BASE_URL}/api/v1/work-orders/?status=open&limit=5", headers=auth_headers)
