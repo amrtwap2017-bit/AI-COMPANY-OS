@@ -810,3 +810,36 @@ Expected command:
 Previous run showed 34 failures because server was not running
 After bash START.sh → 1078 passing, 0 failing
 ALWAYS run bash START.sh before running the test suite
+
+## SESSION UPDATE — Sprint-153 to 155 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-153: 5 fixes — nav key, pipeline endpoint, WO limit, leads 500, my-day endpoint
+Sprint-154: 4 fixes — tenant isolation phase1, leads safe_keys, health endpoints, test warning
+Sprint-155: my-day correct tenant isolation — User.hotel_id lookup via JWT sub
+
+### PLATFORM STATE
+Tests:         1078 passing, 203 skipped, 0 failing, 0 warnings
+Alembic:       b1c2d3e4f5a6 (head — unchanged)
+Build Guard:   0 issues all commits
+
+### KEY FIXES THIS SESSION
+- leads?status=cold/warm → was 500 (IndexError on empty list) → now 200 []
+- work-orders?limit=500  → was 422 (le=100 validator) → now 200
+- /api/v1/workspace/my-day → was 404 → now live with real tenant isolation
+- /api/v1/health/ready → new — DB connectivity check
+- /api/v1/health/live  → new — process liveness check
+- leads router → __dict__ replaced with safe_keys whitelist
+- my-day → JWT sub → User.hotel_id lookup (correct tenant mechanism)
+
+### CRITICAL DISCOVERY
+- JWT payload: sub, email, role, type ONLY (no hotel_id)
+- hotel_id resolved by: X-Hotel-ID header → user.hotel_id → DEFAULT_HOTEL_ID
+- DEFAULT_HOTEL_ID = "tb-default-hotel-000000000001"
+- login endpoint: form fields (username/password) NOT JSON
+
+### NEXT SPRINT BACKLOG
+Sprint-156: Add tests for health/ready + health/live + leads cold/warm
+Sprint-157: Scan all other __dict__ usages across routers — apply safe_keys
+Sprint-158: Remove @ts-nocheck from executive/dashboard/page.tsx
+Sprint-159: Observability — structured logging + correlation IDs
