@@ -7935,20 +7935,27 @@ def knowledge_graph_search(q: str = "", limit: int = 20, db: _Session = _Depends
 
 
 
+
 @app.get("/api/v1/workspace/my-day", tags=["workspace"])
 def workspace_my_day(
     request: Request,
     db: _Session = _Depends(_get_db)
 ):
-    """My Day summary — pending items scoped to current tenant"""
+    """My Day summary — pending items scoped to authenticated tenant"""
     from src.core.auth import decode_token as _decode_token
+    from src.commercial.auth.models import User as _User
+    DEFAULT_HID = "tb-default-hotel-000000000001"
     hid = ""
     try:
         auth_header = request.headers.get("authorization", "")
         token = auth_header.replace("Bearer ", "").replace("bearer ", "").strip()
         if token:
             payload = _decode_token(token)
-            hid = payload.get("hotel_id") or ""
+            user_id = payload.get("sub", "")
+            if user_id:
+                user = db.query(_User).filter(_User.id == user_id).first()
+                if user:
+                    hid = getattr(user, "hotel_id", None) or DEFAULT_HID
     except Exception:
         hid = ""
     if not hid:
@@ -7982,21 +7989,3 @@ def workspace_my_day(
     except Exception:
         items = []
     return {"items": items, "count": len(items), "tenant": hid}
-
-
-@app.get("/api/v1/health/ready", tags=["health"])
-def health_ready(db: _Session = _Depends(_get_db)):
-    """Readiness check — verifies DB connection is available"""
-    try:
-        db.execute(_text("SELECT 1"))
-        return {"status": "ready", "database": "connected"}
-    except Exception as e:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail={"status": "not_ready", "database": "disconnected"})
-
-
-@app.get("/api/v1/health/live", tags=["health"])
-def health_live():
-    """Liveness check — verifies process is running"""
-    import time
-    return {"status": "live", "timestamp": int(time.time())}
