@@ -18,4 +18,5 @@ def create_lead(payload: LeadCreate, db: Session = Depends(get_db), hotel_id: st
 def list_leads(name: str = None, status: str = None, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
     lead_repo = LeadRepository(db)
     leads = lead_repo.list_leads(name=name, status=status)
+    if not leads: return []
     return [lead.__dict__ for lead in leads] if hasattr(leads[0], '__dict__') else leads
