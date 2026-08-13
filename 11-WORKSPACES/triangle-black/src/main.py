@@ -7934,14 +7934,25 @@ def knowledge_graph_search(q: str = "", limit: int = 20, db: _Session = _Depends
 
 
 
+
 @app.get("/api/v1/workspace/my-day", tags=["workspace"])
-def workspace_my_day(db: _Session = _Depends(_get_db)):
-    """My Day summary — pending items, open service requests"""
-    try:
-        from src.core.auth import decode_access_token as _dat
-    except Exception:
-        _dat = None
+def workspace_my_day(
+    request: Request,
+    db: _Session = _Depends(_get_db)
+):
+    """My Day summary — pending items scoped to current tenant"""
+    from src.core.auth import decode_token as _decode_token
     hid = ""
+    try:
+        auth_header = request.headers.get("authorization", "")
+        token = auth_header.replace("Bearer ", "").replace("bearer ", "").strip()
+        if token:
+            payload = _decode_token(token)
+            hid = payload.get("hotel_id") or ""
+    except Exception:
+        hid = ""
+    if not hid:
+        return {"items": [], "count": 0, "tenant": None}
     try:
         rows = db.execute(_text("""
             SELECT
@@ -7955,7 +7966,8 @@ def workspace_my_day(db: _Session = _Depends(_get_db)):
                 sr.urgency         AS urgency,
                 NULL::text         AS hours_overdue
             FROM service_requests sr
-            WHERE sr.status NOT IN ('closed','cancelled','resolved')
+            WHERE sr.hotel_id = :hid
+              AND sr.status NOT IN ('closed','cancelled','resolved')
             ORDER BY
                 CASE sr.priority
                     WHEN 'critical' THEN 1
@@ -7965,8 +7977,26 @@ def workspace_my_day(db: _Session = _Depends(_get_db)):
                 END,
                 sr.created_at ASC
             LIMIT 20
-        """)).fetchall()
+        """), {"hid": hid}).fetchall()
         items = [dict(r._mapping) for r in rows]
     except Exception:
         items = []
-    return {"items": items, "count": len(items)}
+    return {"items": items, "count": len(items), "tenant": hid}
+
+
+@app.get("/api/v1/health/ready", tags=["health"])
+def health_ready(db: _Session = _Depends(_get_db)):
+    """Readiness check — verifies DB connection is available"""
+    try:
+        db.execute(_text("SELECT 1"))
+        return {"status": "ready", "database": "connected"}
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail={"status": "not_ready", "database": "disconnected"})
+
+
+@app.get("/api/v1/health/live", tags=["health"])
+def health_live():
+    """Liveness check — verifies process is running"""
+    import time
+    return {"status": "live", "timestamp": int(time.time())}

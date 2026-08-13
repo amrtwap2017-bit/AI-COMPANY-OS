@@ -20,7 +20,7 @@ def test_employee_create(auth_h):
     d = r.json()
     assert d["name"] == "Test Employee"
     assert d["hotel_id"] is not None
-    return d["id"]
+    # id stored implicitly — test function returns None as required by pytest
 
 def test_employee_get(auth_h):
     cr = requests.post(f"{BASE_URL}/api/v1/employees/",
