@@ -7931,3 +7931,42 @@ def knowledge_graph_search(q: str = "", limit: int = 20, db: _Session = _Depends
         pass
     return {"results": results[:limit], "total": len(results), "query": q}
 
+
+
+
+@app.get("/api/v1/workspace/my-day", tags=["workspace"])
+def workspace_my_day(db: _Session = _Depends(_get_db)):
+    """My Day summary — pending items, open service requests"""
+    try:
+        from src.core.auth import decode_access_token as _dat
+    except Exception:
+        _dat = None
+    hid = ""
+    try:
+        rows = db.execute(_text("""
+            SELECT
+                sr.id::text        AS id,
+                sr.title           AS title,
+                sr.priority        AS priority,
+                sr.status          AS status,
+                sr.created_at      AS due_date,
+                'service_request'  AS document_type,
+                sr.requested_by    AS requested_by,
+                sr.urgency         AS urgency,
+                NULL::text         AS hours_overdue
+            FROM service_requests sr
+            WHERE sr.status NOT IN ('closed','cancelled','resolved')
+            ORDER BY
+                CASE sr.priority
+                    WHEN 'critical' THEN 1
+                    WHEN 'high'     THEN 2
+                    WHEN 'medium'   THEN 3
+                    ELSE 4
+                END,
+                sr.created_at ASC
+            LIMIT 20
+        """)).fetchall()
+        items = [dict(r._mapping) for r in rows]
+    except Exception:
+        items = []
+    return {"items": items, "count": len(items)}
