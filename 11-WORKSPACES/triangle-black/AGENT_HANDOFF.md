@@ -894,3 +894,42 @@ Sprint-159: @ts-nocheck removal from executive/dashboard/page.tsx
 Sprint-160: Investigate remaining 78 skipped tests
 Sprint-161: Add login/json tests to test suite
 Sprint-162: Structured logging improvements
+
+## SESSION UPDATE — Sprint-159 to 163 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-159: TBEDS 7.1 — 414 lines of enterprise CSS classes added to globals.css
+Sprint-160: SOW detail — 107 inline styles → TB classes
+Sprint-161: Graph + stock-balances — 94 inline styles → TB classes
+Sprint-162: PO-v2 + technician detail + workspace — 162 inline styles → TB classes
+Sprint-163: QR gallery + profile + GRN detail + contract detail — 172 inline styles → TB classes
+
+### DESIGN SYSTEM MILESTONE
+Total inline styles removed: 535 (from top 10 worst offenders)
+Remaining across all pages: ~2,236 (lower priority pages)
+Suite: 1223 passed, 0 failing — held through all UX sprints
+
+### NEW CSS CLASSES AVAILABLE (TBEDS 7.1)
+tb-hero, tb-hero-inner, tb-hero-title, tb-hero-description
+tb-hero-kpi, tb-hero-kpi-value, tb-hero-kpi-label
+tb-canvas, tb-section, tb-section-title
+tb-grid-2/3/4/5, tb-kpi, tb-kpi-value, tb-kpi-label
+tb-table, tb-table-wrap, tb-btn, tb-btn-primary/secondary/danger/ghost
+tb-badge, tb-badge-success/warning/danger/info/neutral/brand
+tb-input, tb-select, tb-label, tb-form-group, tb-form-grid
+tb-tabs, tb-tab, tb-progress, tb-progress-bar
+tb-steps, tb-step, tb-step-num, tb-step-line
+tb-alert, tb-alert-success/warning/danger/info/critical
+tb-empty, tb-empty-icon/title/desc
+tb-shimmer, tb-shimmer-text/title/block
+tb-action-item, tb-action-bar
+tb-detail-row, tb-detail-key, tb-detail-value
+tb-timeline, tb-timeline-item, tb-timeline-dot
+tb-hover-lift, tb-hover-glow, tb-interactive
+tb-divider
+
+### NEXT SPRINT BACKLOG
+Sprint-164: Fix remaining @ts-nocheck pages (start with executive/dashboard)
+Sprint-165: Scan next 10 worst inline-style pages
+Sprint-166: Add sparklines to KpiCard component
+Sprint-167: Observability — structured logging middleware
