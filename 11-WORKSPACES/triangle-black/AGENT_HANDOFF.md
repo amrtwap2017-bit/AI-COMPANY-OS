@@ -843,3 +843,31 @@ Sprint-156: Add tests for health/ready + health/live + leads cold/warm
 Sprint-157: Scan all other __dict__ usages across routers — apply safe_keys
 Sprint-158: Remove @ts-nocheck from executive/dashboard/page.tsx
 Sprint-159: Observability — structured logging + correlation IDs
+
+## SESSION UPDATE — Sprint-156 to 157 — August 2026
+
+### SPRINTS COMPLETED
+Sprint-156: 20 new tests — health/ready+live, my-day, leads cold/warm, WO limit
+Sprint-157: conftest HEAVY list updated (sprint140-156), correlation ID middleware
+
+### 🏆 MILESTONE: 1223 PASSING
+Tests before: 1078 passed, 223 skipped
+Tests after:  1223 passed, 78 skipped
+Net gain:     +145 tests promoted from skipped → passing
+Runtime:      36min 41sec (longer due to more 62s waits)
+
+### KEY DELIVERIES
+- X-Request-ID correlation ID on ALL responses (middleware)
+- 145 tests unblocked by HEAVY wait list expansion
+- /api/v1/health/ready → {"status":"ready","database":"connected"}
+- /api/v1/health/live  → {"status":"live","timestamp":...}
+
+### PENDING SPRINT-158
+- Login JSON alias (/auth/login/json) — login is in router not @app.post
+  Find: grep -rn "def login" src/commercial/auth/router.py
+- @ts-nocheck on executive/dashboard/page.tsx — TypeScript safety
+- Investigate remaining 78 permanently skipped tests
+
+### CRITICAL RULE LEARNED — DO NOT USE lines[:start] + [block]
+  This TRUNCATES the file — always use lines[:start] + [block] + lines[end:]
+  Or use cat >> append for new endpoints
