@@ -7989,3 +7989,21 @@ def workspace_my_day(
     except Exception:
         items = []
     return {"items": items, "count": len(items), "tenant": hid}
+
+
+@app.get("/api/v1/health/ready", tags=["health"])
+def health_ready(db: _Session = _Depends(_get_db)):
+    """Readiness check — verifies DB connection is available"""
+    try:
+        db.execute(_text("SELECT 1"))
+        return {"status": "ready", "database": "connected"}
+    except Exception:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail={"status": "not_ready", "database": "disconnected"})
+
+
+@app.get("/api/v1/health/live", tags=["health"])
+def health_live():
+    """Liveness check — verifies process is running"""
+    import time
+    return {"status": "live", "timestamp": int(time.time())}
