@@ -1,6 +1,5 @@
 "use client";
 // @ts-nocheck
-"use client";
 import { ExportButton } from "@/components/ui/ExportButton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,177 +8,136 @@ import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
-
-const STATUS_CONFIG = {
-  paid:      {color:"#34D399",bg:"rgba(16,185,129,0.1)",border:"rgba(16,185,129,0.2)"},
-  pending:   {color:"#FBBF24",bg:"rgba(245,158,11,0.1)",border:"rgba(245,158,11,0.2)"},
-  overdue:   {color:"#F87171",bg:"rgba(239,68,68,0.1)",border:"rgba(239,68,68,0.2)"},
-  cancelled: {color:"#94A3B8",bg:"rgba(148,163,184,0.1)",border:"rgba(148,163,184,0.15)"},
-};
+const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function InvoicesPage() {
   const router = useRouter();
-  const [search,  setSearch]  = useState("");
+  const [search, setSearch] = useState("");
   const [statusF, setStatusF] = useState("all");
 
-  const { data: raw, isLoading } = useQuery(
-    ["inv-all"], () => authFetch("/api/v1/invoices/").then(r=>r.json()), {refetchInterval:120000}
-  );
+  const { data: raw, isLoading } = useQuery(["inv-all"],()=>authFetch("/api/v1/invoices/").then(r=>r.json()),{refetchInterval:120000});
   const invoices = toArr(raw);
 
-  const paid      = invoices.filter(i=>i.status==="paid");
-  const pending   = invoices.filter(i=>i.status==="pending");
-  const overdue   = invoices.filter(i=>i.status==="overdue");
+  const paid = invoices.filter(i=>i.status==="paid");
+  const pending = invoices.filter(i=>i.status==="pending");
+  const overdue = invoices.filter(i=>i.status==="overdue");
   const cancelled = invoices.filter(i=>i.status==="cancelled");
-
-  const totalValue   = invoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const paidValue    = paid.reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const totalValue = invoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const paidValue = paid.reduce((s,i)=>s+Number(i.total_amount||0),0);
   const pendingValue = pending.reduce((s,i)=>s+Number(i.total_amount||0),0);
   const overdueValue = overdue.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const collRate     = totalValue>0?Math.round(paidValue/totalValue*100):0;
+  const collRate = totalValue>0?Math.round(paidValue/totalValue*100):0;
 
-  const filtered = invoices.filter(inv => {
+  const filtered = invoices.filter(inv=>{
     const ms = !search||inv.invoice_number?.toLowerCase().includes(search.toLowerCase())||inv.id?.slice(0,8).includes(search);
-    return ms && (statusF==="all"||inv.status===statusF);
-  }).sort((a,b)=>{
-    const o={overdue:0,pending:1,paid:2,cancelled:3};
-    return (o[a.status]??2)-(o[b.status]??2);
-  });
+    return ms&&(statusF==="all"||inv.status===statusF);
+  }).sort((a,b)=>{const o={overdue:0,pending:1,paid:2,cancelled:3};return(o[a.status]??2)-(o[b.status]??2);});
 
-  if (isLoading) return <div className="tb-page"><div className="tb-section animate-pulse" style={{height:60}}/></div>;
+  if (isLoading) return <div className="tb-page"><div className="tb-section tb-shimmer-block" style={{height:60}}/></div>;
 
   return (
     <div className="min-h-screen bg-base">
-      {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #0F172A 0%, #0A1A12 100%)"}}>
+      <div className="tb-hero">
         <div className="tb-hero-inner">
-          <div className="tb-flex-between gap-6">
+          <div className="flex items-start justify-between gap-6 flex-wrap">
             <div>
-              <div className="text-label-upper text-emerald-500 mb-1.5">Finance</div>
+              <div className="text-label-upper text-brand mb-1.5">Finance</div>
               <h1 className="tb-hero-title">Invoice Management</h1>
               <p className="tb-hero-description">{invoices.length} invoices · {collRate}% collection rate · {fmtEGP(pendingValue+overdueValue)} outstanding</p>
             </div>
-            <div className={`tb-score-badge ${collRate>=90?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-              <div className="tb-score-value" style={{color:collRate>=90?"#34D399":"#FBBF24"}}>{collRate}%</div>
-              <div className="tb-score-label">Collection</div>
+            <div className={`tb-section text-center flex-shrink-0 ${collRate>=90?"border-success/30":"border-warning/30"}`} style={{minWidth:"80px"}}>
+              <div className={`text-2xl font-black ${collRate>=90?"text-success":"text-warning"}`}>{collRate}%</div>
+              <div className="text-xs text-tertiary mt-0.5">Collection</div>
             </div>
           </div>
-
-          {/* KPI strip */}
           <div className="tb-grid-4 mt-6">
-            {[
-              {label:"Paid",       value:paid.length,      sub:fmtEGP(paidValue),    color:"#34D399", f:"paid"},
-              {label:"Pending",    value:pending.length,   sub:fmtEGP(pendingValue), color:"#FBBF24", f:"pending"},
-              {label:"Overdue",    value:overdue.length,   sub:fmtEGP(overdueValue), color:overdue.length>0?"#F87171":"#34D399", f:"overdue"},
-              {label:"Cancelled",  value:cancelled.length, sub:"closed",             color:"#94A3B8", f:"cancelled"},
-            ].map((k,i)=>{
-              const act=statusF===k.f;
-              return (
-                <button key={i} onClick={()=>setStatusF(act?"all":k.f)}
-                  className="tb-hero-kpi"
-                  style={{background:act?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${act?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`}}>
-                  <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
-                  <div className="tb-hero-kpi-label">{k.label}</div>
-                  <div className="tb-hero-kpi-label" style={{marginTop:2,color:"rgba(255,255,255,0.3)",fontSize:"0.5rem"}}>{k.sub}</div>
-                </button>
-              );
-            })}
+            {[{label:"Paid",value:paid.length,sub:fmtEGP(paidValue),f:"paid",good:true},{label:"Pending",value:pending.length,sub:fmtEGP(pendingValue),f:"pending"},{label:"Overdue",value:overdue.length,sub:fmtEGP(overdueValue),f:"overdue",danger:overdue.length>0},{label:"Cancelled",value:cancelled.length,sub:"closed",f:"cancelled"}].map((k,i)=>(
+              <button key={i} onClick={()=>setStatusF(statusF===k.f?"all":k.f)} className="tb-hero-kpi cursor-pointer">
+                <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.good?"var(--color-success)":"var(--color-text-inv)"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+                <div className="text-xs opacity-50 mt-0.5" style={{fontSize:"0.5rem"}}>{k.sub}</div>
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="tb-canvas">
-        {/* Revenue progress */}
-        <div className="tb-section">
-          <div className="tb-flex-between mb-3">
+        <div className="tb-section mb-4">
+          <div className="flex justify-between items-center mb-3">
             <div className="text-sm font-semibold text-primary">Revenue Collection</div>
-            <div className="text-sm font-bold text-emerald-500">{fmtEGP(paidValue)} / {fmtEGP(totalValue)}</div>
+            <div className="text-sm font-bold text-success">{fmtEGP(paidValue)} / {fmtEGP(totalValue)}</div>
           </div>
-          <div className="tb-progress tb-progress--lg" style={{height:8}}>
+          <div className="tb-progress" style={{height:8}}>
             <div style={{display:"flex",height:"100%"}}>
-              <div className="tb-progress-bar tb-progress-bar--success" style={{width:`${paidValue/Math.max(totalValue,1)*100}%`}}/>
-              <div className="tb-progress-bar tb-progress-bar--warning" style={{width:`${pendingValue/Math.max(totalValue,1)*100}%`}}/>
-              <div className="tb-progress-bar tb-progress-bar--danger"  style={{width:`${overdueValue/Math.max(totalValue,1)*100}%`}}/>
+              <div className="tb-progress-bar" style={{width:`${paidValue/Math.max(totalValue,1)*100}%`,background:"var(--color-success)"}} />
+              <div className="tb-progress-bar" style={{width:`${pendingValue/Math.max(totalValue,1)*100}%`,background:"var(--color-warning)"}} />
+              <div className="tb-progress-bar" style={{width:`${overdueValue/Math.max(totalValue,1)*100}%`,background:"var(--color-danger)"}} />
             </div>
           </div>
           <div className="flex gap-5 mt-2">
-            {[{label:"Paid",color:"#34D399",value:fmtEGP(paidValue)},{label:"Pending",color:"#FBBF24",value:fmtEGP(pendingValue)},{label:"Overdue",color:"#F87171",value:fmtEGP(overdueValue)}].map((s,i)=>(
+            {[{label:"Paid",color:"var(--color-success)",value:fmtEGP(paidValue)},{label:"Pending",color:"var(--color-warning)",value:fmtEGP(pendingValue)},{label:"Overdue",color:"var(--color-danger)",value:fmtEGP(overdueValue)}].map((s,i)=>(
               <div key={i} className="flex items-center gap-1.5">
-                <div style={{width:8,height:8,borderRadius:"50%",background:s.color}}/>
+                <div className="w-2 h-2 rounded-full" style={{background:s.color}} />
                 <span className="text-xs text-tertiary">{s.label}: {s.value}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {overdue.length > 0 && (
-          <div className="tb-ai-insight" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
-            <div className="tb-ai-insight-icon" style={{background:"rgba(239,68,68,0.15)"}}>💰</div>
-            <div className="tb-ai-insight-text" style={{color:"#FCA5A5"}}>
-              {overdue.length} Overdue Invoices — {fmtEGP(overdueValue)} uncollected. Contact clients immediately.
-            </div>
-            <button onClick={()=>setStatusF("overdue")} className="tb-ai-insight-action" style={{color:"#F87171",borderColor:"rgba(239,68,68,0.3)"}}>
-              Show Overdue
-            </button>
+        {overdue.length>0 && (
+          <div className="tb-alert tb-alert-danger mb-4">
+            <div className="text-lg">💰</div>
+            <div className="flex-1 text-sm">{overdue.length} Overdue Invoices — {fmtEGP(overdueValue)} uncollected. Contact clients immediately.</div>
+            <button onClick={()=>setStatusF("overdue")} className="tb-btn tb-btn-danger tb-btn-sm">Show Overdue</button>
           </div>
         )}
 
-        <div className="tb-flex-gap-3 flex-wrap">
-          <div className="tb-search" style={{maxWidth:320}}>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by invoice number..."
-              style={{background:"transparent",border:"none",outline:"none",flex:1,fontSize:"0.8125rem",color:"var(--color-text-1)"}}/>
-          </div>
-          <div className="tb-flex-gap-2">
+        <div className="flex gap-3 flex-wrap items-center mb-4">
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by invoice number..." className="tb-input" style={{maxWidth:"320px"}} />
+          <div className="tb-tabs border-0 mb-0">
             {["all","overdue","pending","paid","cancelled"].map(s=>(
-              <button key={s} onClick={()=>setStatusF(s)} className={`tb-pill ${statusF===s?"tb-pill--active":""}`}
-                style={statusF===s&&STATUS_CONFIG[s]?{borderColor:STATUS_CONFIG[s].color,color:STATUS_CONFIG[s].color,background:STATUS_CONFIG[s].bg}:{}}>
+              <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
             ))}
           </div>
-          {(search||statusF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");}} className="tb-pill">Clear ×</button>}
+          {(search||statusF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");}} className="tb-btn tb-btn-ghost tb-btn-sm">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} invoices</span>
           <ExportButton data={toArr(raw)} filename="invoices" title="Invoices"/>
         </div>
 
-        <div className="tb-table">
-          {filtered.length === 0 ? (
-            <div className="tb-empty">
-              <div className="tb-empty-icon">💰</div>
-              <div className="tb-empty-title">No invoices found</div>
-            </div>
+        <div className="tb-section">
+          {filtered.length===0 ? (
+            <div className="tb-empty"><div className="tb-empty-icon">💰</div><div className="tb-empty-title">No invoices found</div></div>
           ) : (
-            <>
-              <div className="tb-table-head" style={{gridTemplateColumns:"1fr 150px 140px 130px 120px"}}>
-                {["Invoice","Status","Amount","Due Date","Created"].map((h,i)=>(
-                  <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
-                ))}
-              </div>
-              {filtered.map((inv,i)=>{
-                const sc = STATUS_CONFIG[inv.status]||STATUS_CONFIG.cancelled;
-                const isOv = inv.status==="overdue";
-                return (
-                  <button key={i} onClick={()=>router.push(`/invoices/${inv.id}`)}
-                    className={`tb-table-row ${isOv?"tb-table-row--danger":""}`}
-                    style={{gridTemplateColumns:"1fr 150px 140px 130px 120px"}}>
-                    <div className="min-w-0 pr-4">
-                      <div className="text-sm font-semibold text-primary">{inv.invoice_number||`INV-${inv.id?.slice(0,8)}`}</div>
-                      <div className="text-xs text-tertiary mt-0.5">ID: {inv.id?.slice(0,12)}...</div>
-                    </div>
-                    <div className="text-center">
-                      <span className="tb-badge" style={{background:sc.bg,color:sc.color,border:`1px solid ${sc.border}`,fontSize:"0.625rem"}}>{inv.status||"—"}</span>
-                    </div>
-                    <div className="text-center text-sm font-bold text-primary">{fmtEGP(inv.total_amount)}</div>
-                    <div className={`text-center text-xs ${isOv?"text-red-400 font-bold":"text-secondary"}`}>
-                      {fmtDate(inv.due_date)}
-                      {isOv&&<div style={{fontSize:"0.5rem",textTransform:"uppercase"}}>OVERDUE</div>}
-                    </div>
-                    <div className="text-center text-xs text-tertiary">{fmtDate(inv.created_at)}</div>
-                  </button>
-                );
-              })}
-            </>
+            <div className="tb-table-wrap">
+              <table className="tb-table">
+                <thead><tr><th>Invoice</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"right"}}>Amount</th><th style={{textAlign:"center"}}>Due Date</th><th style={{textAlign:"center"}}>Created</th></tr></thead>
+                <tbody>
+                  {filtered.map((inv,i)=>{
+                    const isOv = inv.status==="overdue";
+                    return (
+                      <tr key={i} onClick={()=>router.push(`/invoices/${inv.id}`)} className="cursor-pointer">
+                        <td>
+                          <div className="text-sm font-semibold text-primary">{inv.invoice_number||`INV-${inv.id?.slice(0,8)}`}</div>
+                          <div className="text-xs text-tertiary mt-0.5">ID: {inv.id?.slice(0,12)}...</div>
+                        </td>
+                        <td className="text-center">
+                          <span className={`tb-badge ${inv.status==="paid"?"tb-badge-success":inv.status==="overdue"?"tb-badge-danger":inv.status==="pending"?"tb-badge-warning":"tb-badge-neutral"}`} style={{fontSize:"10px"}}>{inv.status||"—"}</span>
+                        </td>
+                        <td className="text-right text-sm font-bold text-primary">{fmtEGP(inv.total_amount)}</td>
+                        <td className={`text-center text-xs ${isOv?"text-danger font-bold":"text-secondary"}`}>
+                          {fmtDate(inv.due_date)}
+                          {isOv&&<div style={{fontSize:"0.5rem",textTransform:"uppercase"}}>OVERDUE</div>}
+                        </td>
+                        <td className="text-center text-xs text-tertiary">{fmtDate(inv.created_at)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

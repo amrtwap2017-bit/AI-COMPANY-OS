@@ -9,159 +9,127 @@ import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
-
-const STATUS_COLOR = {
-  active:"#547C4D", planning:"#5B7C8C", completed:"#6D5F53", on_hold:"#B07A2A", cancelled:"#A84A3D"
-};
+const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function ProjectsCenterPage() {
   const router = useRouter();
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProj, setNewProj] = useState({title:"",description:"",status:"planning",budget:0});
+  const [search, setSearch] = useState("");
+  const [statusF, setStatusF] = useState("all");
   const qc = useQueryClient();
+
   const createProj = useMutation(
-    (payload) => authFetch("/api/v1/projects/", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
-    { onSuccess: (d) => { if(d.id){toast.success("Project created");setShowNewProject(false);qc.invalidateQueries(["projects-list"]);}else{toast.error("Failed");}}, onError:()=>toast.error("Error") }
+    (payload)=>authFetch("/api/v1/projects/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
+    {onSuccess:(d)=>{if(d.id){toast.success("Project created");setShowNewProject(false);qc.invalidateQueries(["projects-list"]);}else{toast.error("Failed");}},onError:()=>toast.error("Error")}
   );
-  const [search,   setSearch]   = useState("");
-  const [statusF,  setStatusF]  = useState("all");
 
-  const { data: raw, isLoading } = useQuery(["proj-list"], () => authFetch("/api/v1/projects/").then(r=>r.json()));
-  const { data: woRaw } = useQuery(["proj-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-
+  const { data: raw, isLoading } = useQuery(["proj-list"],()=>authFetch("/api/v1/projects/").then(r=>r.json()));
+  const { data: woRaw } = useQuery(["proj-wos"],()=>authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const projects = toArr(raw);
-  const wos      = toArr(woRaw);
+  const wos = toArr(woRaw);
 
-  const active    = projects.filter(p=>p.status==="active");
-  const planning  = projects.filter(p=>p.status==="planning");
+  const active = projects.filter(p=>p.status==="active");
+  const planning = projects.filter(p=>p.status==="planning");
   const completed = projects.filter(p=>p.status==="completed");
-  const totalBudget  = projects.reduce((s,p)=>s+Number(p.budget||0),0);
-  const avgCompletion= projects.length>0?Math.round(projects.reduce((s,p)=>s+Number(p.completion_pct||0),0)/projects.length):0;
+  const totalBudget = projects.reduce((s,p)=>s+Number(p.budget||0),0);
+  const avgCompletion = projects.length>0?Math.round(projects.reduce((s,p)=>s+Number(p.completion_pct||0),0)/projects.length):0;
 
-  const filtered = projects.filter(p => {
+  const filtered = projects.filter(p=>{
     const ms = !search||p.title?.toLowerCase().includes(search.toLowerCase())||p.name?.toLowerCase().includes(search.toLowerCase());
-    return ms && (statusF==="all"||p.status===statusF);
+    return ms&&(statusF==="all"||p.status===statusF);
   });
 
-  if (isLoading) return <div className="tb-page"><div className="tb-section animate-pulse" style={{height:60}}/></div>;
+  if (isLoading) return <div className="tb-page"><div className="tb-section tb-shimmer-block" style={{height:60}}/></div>;
 
   return (
     <div className="min-h-screen bg-base">
-      {/* HERO */}
-      <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1228 100%)"}}>
+      <div className="tb-hero">
         <div className="tb-hero-inner">
-          <div className="tb-flex-between gap-6">
+          <div className="flex items-start justify-between gap-6 flex-wrap">
             <div>
-              <div className="text-label-upper text-indigo-400 mb-1.5">Projects</div>
+              <div className="text-label-upper text-brand mb-1.5">Projects</div>
               <h1 className="tb-hero-title">Project Portfolio</h1>
               <p className="tb-hero-description">{projects.length} projects · {active.length} active · {fmtEGP(totalBudget)} total budget</p>
             </div>
-            <div className={`tb-score-badge ${avgCompletion>=70?"tb-score-badge--success":"tb-score-badge--warning"}`}>
-              <div className="tb-score-value" style={{color:avgCompletion>=70?"#547C4D":"#B07A2A"}}>{avgCompletion}%</div>
-              <div className="tb-score-label">Avg Completion</div>
+            <div className="tb-section text-center flex-shrink-0" style={{minWidth:"80px"}}>
+              <div className={`text-2xl font-black ${avgCompletion>=70?"text-success":"text-warning"}`}>{avgCompletion}%</div>
+              <div className="text-xs text-tertiary mt-0.5">Avg Completion</div>
             </div>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[
-              {label:"Active",     value:active.length,    color:"#547C4D", f:"active"},
-              {label:"Planning",   value:planning.length,  color:"#5B7C8C", f:"planning"},
-              {label:"Completed",  value:completed.length, color:"#6D5F53", f:"completed"},
-              {label:"Total Budget",value:fmtEGP(totalBudget), color:"#8D7443", f:"all"},
-            ].map((k,i)=>{
-              const active_f=statusF===k.f;
-              return (
-                <button key={i} onClick={()=>setStatusF(active_f&&i<3?"all":k.f)}
-                  className="tb-hero-kpi"
-                  style={{background:active_f?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",border:`1px solid ${active_f?"rgba(255,255,255,0.2)":"rgba(255,255,255,0.08)"}`}}>
-                  <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:i===3?"1rem":"1.375rem"}}>{k.value}</div>
-                  <div className="tb-hero-kpi-label">{k.label}</div>
-                </button>
-              );
-            })}
+            {[{label:"Active",value:active.length,f:"active"},{label:"Planning",value:planning.length,f:"planning"},{label:"Completed",value:completed.length,f:"completed"},{label:"Total Budget",value:fmtEGP(totalBudget),f:"all"}].map((k,i)=>(
+              <button key={i} onClick={()=>setStatusF(statusF===k.f&&i<3?"all":k.f)} className="tb-hero-kpi cursor-pointer">
+                <div className="tb-hero-kpi-value" style={{fontSize:i===3?"1rem":"1.375rem"}}>{k.value}</div>
+                <div className="tb-hero-kpi-label">{k.label}</div>
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="tb-canvas">
-        {/* Search */}
-        <div className="tb-flex-gap-3 flex-wrap">
-          <div className="tb-search" style={{maxWidth:320}}>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search projects..."
-              style={{background:"transparent",border:"none",outline:"none",flex:1,fontSize:"0.8125rem",color:"var(--color-text-1)"}}/>
-          </div>
-          <div className="tb-flex-gap-2">
+        <div className="flex gap-3 flex-wrap items-center mb-4">
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search projects..." className="tb-input" style={{maxWidth:"320px"}} />
+          <div className="tb-tabs border-0 mb-0">
             {["all","active","planning","completed"].map(s=>(
-              <button key={s} onClick={()=>setStatusF(s)} className={`tb-pill ${statusF===s?"tb-pill--active":""}`}>
+              <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
             ))}
           </div>
           <span className="text-xs text-tertiary ml-auto">{filtered.length} projects</span>
-              <ExportButton data={toArr(raw)} filename="projects" title="Projects"/>
+          <ExportButton data={toArr(raw)} filename="projects" title="Projects"/>
+          <button onClick={()=>setShowNewProject(true)} className="tb-btn tb-btn-primary">+ New Project</button>
         </div>
 
-        {/* Project cards */}
-        {filtered.length === 0 ? (
-          <div className="tb-section">
-            <div className="tb-empty">
-              <div className="tb-empty-icon">🏗️</div>
-              <div className="tb-empty-title">No projects found</div>
-            </div>
-          </div>
+        {filtered.length===0 ? (
+          <div className="tb-section"><div className="tb-empty"><div className="tb-empty-icon">🏗️</div><div className="tb-empty-title">No projects found</div></div></div>
         ) : (
           <div className="tb-grid-3">
             {filtered.map((p,i)=>{
-              const pct     = Number(p.completion_pct||0);
-              const budget  = Number(p.budget||0);
-              const sc      = STATUS_COLOR[p.status]||"#6D5F53";
+              const pct = Number(p.completion_pct||0);
+              const budget = Number(p.budget||0);
               const projWOs = wos.filter(w=>w.contract_id===p.id||w.project_id===p.id);
-              const now     = new Date();
-              const daysLeft= p.end_date?Math.ceil((new Date(p.end_date)-Date.now())/86400000):null;
-              const isOv    = daysLeft!==null&&daysLeft<0&&p.status!=="completed";
-              const barColor= pct>=80?"#547C4D":pct>=50?"#5B7C8C":"#B07A2A";
-
+              const daysLeft = p.end_date?Math.ceil((new Date(p.end_date)-Date.now())/86400000):null;
+              const isOv = daysLeft!==null&&daysLeft<0&&p.status!=="completed";
+              const barColor = pct>=80?"var(--color-success)":pct>=50?"var(--color-info)":"var(--color-warning)";
               return (
                 <button key={i} onClick={()=>router.push(`/projects-center/${p.id}`)}
-                  className="tb-section text-left hover:border-brand transition-colors group">
-                  <div className="tb-flex-between mb-4">
+                  className="tb-section text-left tb-hover-lift cursor-pointer">
+                  <div className="flex justify-between mb-4">
                     <div className="flex-1 min-w-0 pr-3">
-                      <div className="text-sm font-bold text-primary group-hover:text-brand truncate">{p.title||p.name||p.id}</div>
-                      <div className="text-xs text-tertiary mt-1 line-clamp-1">{p.description||"—"}</div>
+                      <div className="text-sm font-bold text-primary truncate">{p.title||p.name||p.id}</div>
+                      <div className="text-xs text-tertiary mt-0.5 truncate">{p.description||"—"}</div>
                     </div>
-                    <span className="tb-badge flex-shrink-0" style={{background:`${sc}18`,color:sc,border:`1px solid ${sc}30`}}>{p.status||"—"}</span>
+                    <span className={`tb-badge flex-shrink-0 ${p.status==="active"?"tb-badge-success":p.status==="completed"?"tb-badge-neutral":p.status==="on_hold"?"tb-badge-warning":"tb-badge-info"}`}>{p.status||"—"}</span>
                   </div>
-
-                  {/* Completion */}
                   <div className="mb-4">
-                    <div className="tb-flex-between text-xs mb-1.5">
+                    <div className="flex justify-between text-xs mb-1.5">
                       <span className="text-secondary">Completion</span>
                       <span className="font-bold" style={{color:barColor}}>{pct}%</span>
                     </div>
                     <div className="tb-progress"><div className="tb-progress-bar" style={{background:barColor,width:`${Math.min(pct,100)}%`}}/></div>
                   </div>
-
-                  {/* Metrics */}
                   <div className="tb-grid-3 mb-4">
-                    <div className="text-center bg-base-alt rounded-lg p-2">
-                      <div className="text-xs font-black text-purple-400">{fmtEGP(budget)}</div>
+                    <div className="text-center bg-surface-alt rounded-lg p-2">
+                      <div className="text-xs font-black text-brand">{fmtEGP(budget)}</div>
                       <div className="text-xs text-tertiary mt-0.5">Budget</div>
                     </div>
-                    <div className="text-center bg-base-alt rounded-lg p-2">
-                      <div className="text-xs font-black text-blue-400">{projWOs.length}</div>
+                    <div className="text-center bg-surface-alt rounded-lg p-2">
+                      <div className="text-xs font-black text-info">{projWOs.length}</div>
                       <div className="text-xs text-tertiary mt-0.5">Work Orders</div>
                     </div>
-                    <div className="text-center bg-base-alt rounded-lg p-2">
-                      <div className={`text-xs font-black ${isOv?"text-red-400":daysLeft!==null&&daysLeft<=30?"text-amber-400":"text-emerald-400"}`}>
+                    <div className="text-center bg-surface-alt rounded-lg p-2">
+                      <div className={`text-xs font-black ${isOv?"text-danger":daysLeft!==null&&daysLeft<=30?"text-warning":"text-success"}`}>
                         {daysLeft!==null?(isOv?`${Math.abs(daysLeft)}d over`:`${daysLeft}d`):"—"}
                       </div>
                       <div className="text-xs text-tertiary mt-0.5">{isOv?"Overdue":"Remaining"}</div>
                     </div>
                   </div>
-
-                  <div className="tb-flex-between text-xs text-tertiary">
+                  <div className="flex justify-between text-xs text-tertiary">
                     <span>Start: {fmtDate(p.start_date)}</span>
-                    <span className={isOv?"text-red-400 font-semibold":""}>End: {fmtDate(p.end_date)}</span>
+                    <span className={isOv?"text-danger font-semibold":""}>End: {fmtDate(p.end_date)}</span>
                   </div>
                 </button>
               );
@@ -169,9 +137,8 @@ export default function ProjectsCenterPage() {
           </div>
         )}
 
-        {/* Sub-nav */}
         <div className="tb-section">
-          <div className="text-label-upper text-tertiary mb-4">Project Views</div>
+          <div className="tb-section-title">Project Views</div>
           <div className="tb-grid-4">
             {[{label:"List View",icon:"📋",path:"/projects-center/list"},{label:"Timeline",icon:"📅",path:"/projects-center/timeline"},{label:"Actions",icon:"⚡",path:"/projects-center/actions"},{label:"Review",icon:"📊",path:"/projects-center/review"}].map((a,i)=>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
@@ -182,23 +149,40 @@ export default function ProjectsCenterPage() {
           </div>
         </div>
       </div>
+
       {showNewProject && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-          <div style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:16,padding:32,width:"100%",maxWidth:500,boxShadow:"0 20px 40px rgba(0,0,0,0.15)"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <div style={{fontSize:"1.125rem",fontWeight:700,color:"var(--color-text-1)"}}>New Project</div>
-              <button onClick={()=>setShowNewProject(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--color-text-3)",fontSize:"1.25rem"}}>×</button>
+        <div onClick={()=>setShowNewProject(false)} className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-5" style={{backdropFilter:"blur(4px)"}}>
+          <div onClick={e=>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-lg font-bold text-primary">New Project</h2>
+              <button onClick={()=>setShowNewProject(false)} className="tb-btn-ghost text-xl px-2">×</button>
             </div>
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Title *</label><input value={newProj.title} onChange={e=>setNewProj({...newProj,title:e.target.value})} placeholder="Project name" style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/></div>
-              <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Description</label><textarea value={newProj.description} onChange={e=>setNewProj({...newProj,description:e.target.value})} rows={2} placeholder="Project details" style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/></div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-                <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Status</label><select value={newProj.status} onChange={e=>setNewProj({...newProj,status:e.target.value})} style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}>{["planning","active","on_hold"].map(s=><option key={s} value={s}>{s}</option>)}</select></div>
-                <div><label style={{display:"block",fontSize:"0.75rem",color:"var(--color-text-3)",marginBottom:4,fontWeight:600,textTransform:"uppercase"}}>Budget (EGP)</label><input type="number" value={newProj.budget} onChange={e=>setNewProj({...newProj,budget:Number(e.target.value)})} style={{width:"100%",background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"10px 12px",fontSize:"0.875rem",color:"var(--color-text-1)",outline:"none"}}/></div>
+            <div className="flex flex-col gap-3">
+              <div className="tb-form-group">
+                <label className="tb-label">Title <span className="text-danger">*</span></label>
+                <input value={newProj.title} onChange={e=>setNewProj({...newProj,title:e.target.value})} placeholder="Project name" className="tb-input" />
               </div>
-              <div style={{display:"flex",gap:8,marginTop:4}}>
-                <button onClick={()=>{if(!newProj.title.trim()){toast.error("Title required");return;}createProj.mutate({...newProj,hotel_id:"tb-default-hotel-000000000001",completion_pct:0});}} disabled={createProj.isLoading} style={{flex:1,background:"linear-gradient(135deg,#8F6F3D,#B9924C)",border:"none",borderRadius:8,padding:"12px",color:"#181614",fontWeight:700,cursor:"pointer"}}>{createProj.isLoading?"Creating...":"Create Project"}</button>
-                <button onClick={()=>setShowNewProject(false)} style={{background:"var(--color-bg-alt)",border:"1px solid var(--color-border)",borderRadius:8,padding:"12px 20px",color:"var(--color-text-2)",cursor:"pointer"}}>Cancel</button>
+              <div className="tb-form-group">
+                <label className="tb-label">Description</label>
+                <textarea value={newProj.description} onChange={e=>setNewProj({...newProj,description:e.target.value})} rows={2} placeholder="Project details" className="tb-input" style={{resize:"none"}} />
+              </div>
+              <div className="tb-form-grid">
+                <div className="tb-form-group">
+                  <label className="tb-label">Status</label>
+                  <select value={newProj.status} onChange={e=>setNewProj({...newProj,status:e.target.value})} className="tb-select">
+                    {["planning","active","on_hold"].map(s=><option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="tb-form-group">
+                  <label className="tb-label">Budget (EGP)</label>
+                  <input type="number" value={newProj.budget} onChange={e=>setNewProj({...newProj,budget:Number(e.target.value)})} className="tb-input" />
+                </div>
+              </div>
+              <div className="tb-action-bar mt-1">
+                <button onClick={()=>{if(!newProj.title.trim()){toast.error("Title required");return;}createProj.mutate({...newProj,hotel_id:"tb-default-hotel-000000000001",completion_pct:0});}} disabled={createProj.isLoading} className="tb-btn tb-btn-primary flex-1 justify-center">
+                  {createProj.isLoading?"Creating...":"Create Project"}
+                </button>
+                <button onClick={()=>setShowNewProject(false)} className="tb-btn tb-btn-secondary">Cancel</button>
               </div>
             </div>
           </div>
