@@ -138,7 +138,17 @@ def wait_for_heavy_modules(request):
         HEAVY = [
             "test_sprint084", "test_sprint083", "test_sprint082",
             "test_sprint081", "test_sprint080", "test_sprint078",
-            "test_core_apis","test_business_actions","test_agents","test_sprint078","test_sprint079","test_sprint080","test_sprint100","test_sprint105","test_sprint110","test_sprint115","test_sprint120","test_sprint125","test_sprint130","test_sprint135","test_sprint139"
+            "test_core_apis","test_business_actions","test_agents",
+            "test_sprint078","test_sprint079","test_sprint080",
+            "test_sprint100","test_sprint105","test_sprint110",
+            "test_sprint115","test_sprint120","test_sprint125",
+            "test_sprint130","test_sprint135","test_sprint139",
+            "test_sprint140","test_sprint141","test_sprint142",
+            "test_sprint143","test_sprint144","test_sprint145",
+            "test_sprint146","test_sprint147","test_sprint148",
+            "test_sprint149","test_sprint150","test_sprint151",
+            "test_sprint152","test_sprint153","test_sprint154",
+            "test_sprint155","test_sprint156"
         ]
         for h in HEAVY:
             if h in fname and fname not in _waited_heavy:

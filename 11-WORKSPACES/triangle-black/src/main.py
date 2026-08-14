@@ -119,6 +119,18 @@ except ImportError:
     RATE_LIMITING = False
     print("INFO: slowapi not installed — rate limiting disabled")
 
+import uuid as _uuid
+from starlette.middleware.base import BaseHTTPMiddleware as _BaseHTTPMiddleware
+from starlette.requests import Request as _MWRequest
+
+class _CorrelationIDMiddleware(_BaseHTTPMiddleware):
+    async def dispatch(self, request: _MWRequest, call_next):
+        req_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())[:8]
+        request.state.request_id = req_id
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = req_id
+        return response
+
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform — Multi-Hotel",
@@ -126,6 +138,8 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+app.add_middleware(_CorrelationIDMiddleware)
+
 
 
 # ── SPRINT 237: REQUEST ID MIDDLEWARE ─────────────────────────────────────────
