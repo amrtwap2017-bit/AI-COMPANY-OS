@@ -27,7 +27,6 @@ export default function SOWDetailPage() {
   const [rfqForm, setRFQForm] = useState({ ...EMPTY_RFQ });
   const [rfqErrors, setRFQErrors] = useState({});
 
-  // ── DATA ──────────────────────────────────────────────────
   const { data: sow, isLoading } = useQuery({
     queryKey: ["sow-detail", id],
     queryFn: () => authFetch(`/api/v1/scope-of-work/${id}`).then(r => r.json()),
@@ -35,7 +34,6 @@ export default function SOWDetailPage() {
     enabled: !!id,
   });
 
-  // ── APPROVE / REJECT ──────────────────────────────────────
   const approveMut = useMutation({
     mutationFn: (action) =>
       authFetch(`/api/v1/scope-of-work/${id}/approve`, {
@@ -54,7 +52,6 @@ export default function SOWDetailPage() {
     onError: () => toast.error("Network error"),
   });
 
-  // ── DELETE ────────────────────────────────────────────────
   const deleteMut = useMutation({
     mutationFn: () =>
       authFetch(`/api/v1/scope-of-work/v2/${id}`, { method: "DELETE" }),
@@ -65,7 +62,6 @@ export default function SOWDetailPage() {
     onError: () => toast.error("Delete failed"),
   });
 
-  // ── CREATE RFQ ────────────────────────────────────────────
   const createRFQ = useMutation({
     mutationFn: (payload) =>
       authFetch("/api/v1/rfq/", {
@@ -126,20 +122,19 @@ export default function SOWDetailPage() {
     });
   };
 
-  // ── LOADING / ERROR STATES ────────────────────────────────
   if (isLoading) return (
-    <div style={{ minHeight: "100vh", background: "var(--color-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ color: "var(--color-text-3)", fontSize: 14 }}>Loading SOW...</div>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="text-tertiary text-sm">Loading SOW...</div>
     </div>
   );
 
   if (!sow || sow.error) return (
-    <div style={{ minHeight: "100vh", background: "var(--color-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 48, marginBottom: 12 }}>📄</div>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--color-text-1)", marginBottom: 20 }}>SOW not found</div>
+    <div className="min-h-screen bg-base flex items-center justify-center">
+      <div className="tb-empty">
+        <div className="tb-empty-icon">📄</div>
+        <div className="tb-empty-title">SOW not found</div>
         <button onClick={() => router.push("/supply-chain/scope-of-work")}
-          style={{ background: "linear-gradient(135deg,#8F6F3D,#B9924C)", color: "#181614", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer" }}>
+          className="tb-btn tb-btn-primary mt-4">
           Back to SOWs
         </button>
       </div>
@@ -155,113 +150,69 @@ export default function SOWDetailPage() {
   const canApprove = sow.status === "pending_approval";
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--color-bg)" }}>
+    <div className="min-h-screen bg-base">
 
       {/* ── HERO ──────────────────────────────────────────── */}
       <div className="tb-hero">
         <div className="tb-hero-inner">
-          <div className="tb-hero-content">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#B9924C", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
-                Supply Chain · Scope of Work
-              </div>
+              <div className="text-label-upper text-brand mb-1.5">Supply Chain · Scope of Work</div>
               <h1 className="tb-hero-title">{sow.sow_number}</h1>
-              <p style={{ color: "var(--color-text-2)", fontSize: 13, marginTop: 4, maxWidth: 500 }}>
-                {(sow.title || "").slice(0, 80)}
-              </p>
+              <p className="tb-hero-description">{(sow.title || "").slice(0, 80)}</p>
             </div>
-            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <div className="tb-action-bar">
               <StatusBadge status={sow.status || "draft"} />
-
-              {/* Create RFQ — only when approved */}
               {isApproved && (
-                <button
-                  onClick={openRFQModal}
-                  style={{
-                    background: "linear-gradient(135deg,#8F6F3D,#B9924C)",
-                    color: "#181614", border: "none", borderRadius: 10,
-                    padding: "10px 20px", fontWeight: 700, fontSize: 14,
-                    cursor: "pointer", whiteSpace: "nowrap"
-                  }}
-                >
+                <button onClick={openRFQModal} className="tb-btn tb-btn-primary">
                   + Create RFQ
                 </button>
               )}
-
-              {/* Approve / Reject */}
               {canApprove && (
                 <>
-                  <button
-                    onClick={() => approveMut.mutate("approve")}
+                  <button onClick={() => approveMut.mutate("approve")}
                     disabled={approveMut.isLoading}
-                    style={{
-                      background: "#547C4D", color: "#fff", border: "none",
-                      borderRadius: 8, padding: "8px 16px", fontWeight: 700,
-                      fontSize: 13, cursor: "pointer"
-                    }}
-                  >
+                    className="tb-btn tb-btn-primary">
                     ✓ Approve
                   </button>
-                  <button
-                    onClick={() => approveMut.mutate("reject")}
+                  <button onClick={() => approveMut.mutate("reject")}
                     disabled={approveMut.isLoading}
-                    style={{
-                      background: "#A84A3D", color: "#fff", border: "none",
-                      borderRadius: 8, padding: "8px 16px", fontWeight: 700,
-                      fontSize: 13, cursor: "pointer"
-                    }}
-                  >
+                    className="tb-btn tb-btn-danger">
                     ✗ Reject
                   </button>
                 </>
               )}
-
-              {/* PDF Export */}
-              <a
-                href={`/api/v1/pdf/scope-of-work/${id}`}
+              <a href={`/api/v1/pdf/scope-of-work/${id}`}
                 target="_blank" rel="noopener noreferrer"
-                style={{
-                  background: "none", border: "1px solid var(--color-border)",
-                  color: "var(--color-text-2)", borderRadius: 8,
-                  padding: "8px 14px", fontSize: 13, cursor: "pointer",
-                  fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4
-                }}
-              >
+                className="tb-btn tb-btn-secondary">
                 📄 PDF
               </a>
-
-              <button
-                onClick={() => router.push("/supply-chain/scope-of-work")}
-                style={{
-                  background: "none", border: "1px solid var(--color-border)",
-                  color: "var(--color-text-2)", borderRadius: 8,
-                  padding: "8px 14px", fontSize: 13, cursor: "pointer", fontWeight: 600
-                }}
-              >
+              <button onClick={() => router.push("/supply-chain/scope-of-work")}
+                className="tb-btn tb-btn-secondary">
                 ← Back
               </button>
             </div>
           </div>
 
-          <div className="tb-hero-kpis">
+          <div className="tb-grid-4 mt-6">
             <div className="tb-hero-kpi">
               <div className="tb-hero-kpi-value">{boqItems.length}</div>
               <div className="tb-hero-kpi-label">BOQ Items</div>
             </div>
             <div className="tb-hero-kpi">
-              <div className="tb-hero-kpi-value" style={{ color: "#B9924C", fontSize: 15 }}>
+              <div className="tb-hero-kpi-value text-brand" style={{fontSize:"15px"}}>
                 {fmtEGP(grandTotal || sow.total_cost || 0)}
               </div>
               <div className="tb-hero-kpi-label">Total Value</div>
             </div>
             <div className="tb-hero-kpi">
-              <div className="tb-hero-kpi-value" style={{ fontSize: 14 }}>
+              <div className="tb-hero-kpi-value" style={{fontSize:"14px"}}>
                 {fmtDate(sow.created_at)}
               </div>
               <div className="tb-hero-kpi-label">Created</div>
             </div>
             <div className="tb-hero-kpi">
-              <div className="tb-hero-kpi-value" style={{ fontSize: 14 }}>
+              <div className="tb-hero-kpi-value" style={{fontSize:"14px"}}>
                 {sow.prepared_by?.split("@")[0] || "—"}
               </div>
               <div className="tb-hero-kpi-label">Prepared By</div>
@@ -274,21 +225,14 @@ export default function SOWDetailPage() {
       <div className="tb-canvas">
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 4, marginBottom: 20, borderBottom: "1px solid var(--color-border)" }}>
+        <div className="tb-tabs">
           {[
-            { key: "boq", label: `BOQ Items (${boqItems.length})` },
+            { key: "boq",     label: `BOQ Items (${boqItems.length})` },
             { key: "details", label: "SOW Details" },
             { key: "actions", label: "Actions" },
           ].map(t => (
             <button key={t.key} onClick={() => setActiveTab(t.key)}
-              style={{
-                padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer",
-                background: "none", border: "none",
-                color: activeTab === t.key ? "#B9924C" : "var(--color-text-3)",
-                borderBottom: activeTab === t.key ? "2px solid #B9924C" : "2px solid transparent",
-                marginBottom: -1
-              }}
-            >
+              className={`tb-tab ${activeTab === t.key ? "active" : ""}`}>
               {t.label}
             </button>
           ))}
@@ -297,133 +241,152 @@ export default function SOWDetailPage() {
         {/* ── TAB: BOQ ITEMS ────────────────────────────── */}
         {activeTab === "boq" && (
           <div className="tb-section">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h2 className="tb-section-title" style={{ margin: 0 }}>Bill of Quantities</h2>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#B9924C" }}>{fmtEGP(boqTotal)}</span>
+            <div className="flex justify-between items-center mb-4">
+              <div className="tb-section-title" style={{margin:0}}>Bill of Quantities</div>
+              <span className="text-sm font-bold text-brand">{fmtEGP(boqTotal)}</span>
             </div>
             {boqItems.length === 0 ? (
-              <EmptyState icon="📋" title="No BOQ items" description="No bill of quantities items defined for this SOW" />
+              <EmptyState icon="📋" title="No BOQ items"
+                description="No bill of quantities items defined for this SOW" />
             ) : (
-              <>
-                <div style={{ overflowX: "auto" }}>
-                  <table className="tb-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr className="tb-table-header">
-                        <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--color-text-3)" }}>#</th>
-                        <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--color-text-3)" }}>DESCRIPTION</th>
-                        <th style={{ padding: "10px 14px", textAlign: "center", fontSize: 11, fontWeight: 600, color: "var(--color-text-3)" }}>QTY</th>
-                        <th style={{ padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--color-text-3)" }}>UNIT</th>
-                        <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "var(--color-text-3)" }}>UNIT PRICE</th>
-                        <th style={{ padding: "10px 14px", textAlign: "right", fontSize: 11, fontWeight: 600, color: "var(--color-text-3)" }}>TOTAL</th>
+              <div className="tb-table-wrap">
+                <table className="tb-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Description</th>
+                      <th style={{textAlign:"center"}}>QTY</th>
+                      <th>Unit</th>
+                      <th style={{textAlign:"right"}}>Unit Price</th>
+                      <th style={{textAlign:"right"}}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {boqItems.map((item, i) => (
+                      <tr key={item.id || i}>
+                        <td className="text-tertiary font-semibold text-xs">{i + 1}</td>
+                        <td>
+                          <div className="font-semibold text-primary text-sm">
+                            {item.description || item.item_name || "—"}
+                          </div>
+                          {item.specification && (
+                            <div className="text-tertiary text-xs mt-0.5">
+                              {item.specification.slice(0, 60)}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-center font-bold text-primary">{item.quantity || "—"}</td>
+                        <td className="text-secondary text-sm">{item.unit || "unit"}</td>
+                        <td className="text-right text-secondary text-sm">
+                          {item.unit_price ? fmtEGP(item.unit_price) : "—"}
+                        </td>
+                        <td className="text-right font-bold text-brand text-sm">
+                          {item.total_amount ? fmtEGP(item.total_amount) : "—"}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {boqItems.map((item, i) => (
-                        <tr key={item.id || i} className="tb-table-row">
-                          <td style={{ padding: "10px 14px", fontSize: 12, color: "var(--color-text-3)", fontWeight: 600 }}>{i + 1}</td>
-                          <td style={{ padding: "10px 14px" }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-1)" }}>{item.description || item.item_name || "—"}</div>
-                            {item.specification && <div style={{ fontSize: 11, color: "var(--color-text-3)", marginTop: 2 }}>{item.specification.slice(0, 60)}</div>}
-                          </td>
-                          <td style={{ padding: "10px 14px", textAlign: "center", fontSize: 14, fontWeight: 700, color: "var(--color-text-1)" }}>{item.quantity || "—"}</td>
-                          <td style={{ padding: "10px 14px", fontSize: 13, color: "var(--color-text-2)" }}>{item.unit || "unit"}</td>
-                          <td style={{ padding: "10px 14px", textAlign: "right", fontSize: 13, color: "var(--color-text-2)" }}>{item.unit_price ? fmtEGP(item.unit_price) : "—"}</td>
-                          <td style={{ padding: "10px 14px", textAlign: "right", fontSize: 13, fontWeight: 700, color: "#B9924C" }}>{item.total_amount ? fmtEGP(item.total_amount) : "—"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ borderTop: "2px solid var(--color-border)" }}>
-                        <td colSpan={5} style={{ padding: "12px 14px", textAlign: "right", fontSize: 13, fontWeight: 700, color: "var(--color-text-2)" }}>BOQ Subtotal</td>
-                        <td style={{ padding: "12px 14px", textAlign: "right", fontSize: 14, fontWeight: 800, color: "#B9924C" }}>{fmtEGP(boqTotal)}</td>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-default">
+                      <td colSpan={5} className="text-right font-bold text-secondary text-sm p-3">
+                        BOQ Subtotal
+                      </td>
+                      <td className="text-right font-extrabold text-brand p-3">{fmtEGP(boqTotal)}</td>
+                    </tr>
+                    {sow.overhead_pct > 0 && (
+                      <tr>
+                        <td colSpan={5} className="text-right text-tertiary text-xs p-2">
+                          Overhead ({sow.overhead_pct}%)
+                        </td>
+                        <td className="text-right text-secondary text-xs p-2">{fmtEGP(overhead)}</td>
                       </tr>
-                      {sow.overhead_pct > 0 && (
-                        <tr>
-                          <td colSpan={5} style={{ padding: "6px 14px", textAlign: "right", fontSize: 12, color: "var(--color-text-3)" }}>Overhead ({sow.overhead_pct}%)</td>
-                          <td style={{ padding: "6px 14px", textAlign: "right", fontSize: 12, color: "var(--color-text-2)" }}>{fmtEGP(overhead)}</td>
-                        </tr>
-                      )}
-                      {sow.profit_margin_pct > 0 && (
-                        <tr>
-                          <td colSpan={5} style={{ padding: "6px 14px", textAlign: "right", fontSize: 12, color: "var(--color-text-3)" }}>Profit Margin ({sow.profit_margin_pct}%)</td>
-                          <td style={{ padding: "6px 14px", textAlign: "right", fontSize: 12, color: "var(--color-text-2)" }}>{fmtEGP(profit)}</td>
-                        </tr>
-                      )}
-                      {sow.labor_cost > 0 && (
-                        <tr>
-                          <td colSpan={5} style={{ padding: "6px 14px", textAlign: "right", fontSize: 12, color: "var(--color-text-3)" }}>Labor Cost</td>
-                          <td style={{ padding: "6px 14px", textAlign: "right", fontSize: 12, color: "var(--color-text-2)" }}>{fmtEGP(sow.labor_cost)}</td>
-                        </tr>
-                      )}
-                      <tr style={{ borderTop: "1px solid var(--color-border)", background: "rgba(185,146,76,0.05)" }}>
-                        <td colSpan={5} style={{ padding: "12px 14px", textAlign: "right", fontSize: 14, fontWeight: 800, color: "var(--color-text-1)" }}>Grand Total</td>
-                        <td style={{ padding: "12px 14px", textAlign: "right", fontSize: 16, fontWeight: 900, color: "#B9924C" }}>{fmtEGP(grandTotal)}</td>
+                    )}
+                    {sow.profit_margin_pct > 0 && (
+                      <tr>
+                        <td colSpan={5} className="text-right text-tertiary text-xs p-2">
+                          Profit Margin ({sow.profit_margin_pct}%)
+                        </td>
+                        <td className="text-right text-secondary text-xs p-2">{fmtEGP(profit)}</td>
                       </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </>
+                    )}
+                    {sow.labor_cost > 0 && (
+                      <tr>
+                        <td colSpan={5} className="text-right text-tertiary text-xs p-2">Labor Cost</td>
+                        <td className="text-right text-secondary text-xs p-2">{fmtEGP(sow.labor_cost)}</td>
+                      </tr>
+                    )}
+                    <tr className="border-t border-default bg-brand/5">
+                      <td colSpan={5} className="text-right font-extrabold text-primary p-3">
+                        Grand Total
+                      </td>
+                      <td className="text-right font-black text-brand p-3 text-base">
+                        {fmtEGP(grandTotal)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             )}
           </div>
         )}
 
         {/* ── TAB: DETAILS ──────────────────────────────── */}
         {activeTab === "details" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="tb-grid-2">
             <div className="tb-section">
-              <h2 className="tb-section-title">SOW Information</h2>
+              <div className="tb-section-title">SOW Information</div>
               {[
-                ["SOW Number",     sow.sow_number],
-                ["Title",          sow.title],
-                ["Status",         sow.status],
-                ["Type",           sow.sow_type || sow.type || "standard"],
-                ["Currency",       sow.currency || "EGP"],
-                ["Total Cost",     sow.total_cost ? fmtEGP(sow.total_cost) : "—"],
-                ["Labor Cost",     sow.labor_cost ? fmtEGP(sow.labor_cost) : "—"],
-                ["Overhead %",     sow.overhead_pct ? `${sow.overhead_pct}%` : "—"],
-                ["Profit Margin %",sow.profit_margin_pct ? `${sow.profit_margin_pct}%` : "—"],
-                ["Validity Days",  sow.validity_days ? `${sow.validity_days} days` : "—"],
-                ["Prepared By",    sow.prepared_by || "—"],
-                ["Approved By",    sow.approved_by || "—"],
-                ["Approved At",    fmtDate(sow.approved_at)],
-                ["Created",        fmtDate(sow.created_at)],
-              ].map(([label, value], i, arr) => (
-                <div key={i} style={{
-                  display: "flex", justifyContent: "space-between", padding: "8px 0",
-                  borderBottom: i < arr.length - 1 ? "1px solid var(--color-border)" : "none"
-                }}>
-                  <span style={{ fontSize: 12, color: "var(--color-text-3)" }}>{label}</span>
-                  <span style={{ fontSize: 12, color: "var(--color-text-1)", fontWeight: 500, textAlign: "right", maxWidth: "60%" }}>
+                ["SOW Number",      sow.sow_number],
+                ["Title",           sow.title],
+                ["Status",          sow.status],
+                ["Type",            sow.sow_type || sow.type || "standard"],
+                ["Currency",        sow.currency || "EGP"],
+                ["Total Cost",      sow.total_cost ? fmtEGP(sow.total_cost) : "—"],
+                ["Labor Cost",      sow.labor_cost ? fmtEGP(sow.labor_cost) : "—"],
+                ["Overhead %",      sow.overhead_pct ? `${sow.overhead_pct}%` : "—"],
+                ["Profit Margin %", sow.profit_margin_pct ? `${sow.profit_margin_pct}%` : "—"],
+                ["Validity Days",   sow.validity_days ? `${sow.validity_days} days` : "—"],
+                ["Prepared By",     sow.prepared_by || "—"],
+                ["Approved By",     sow.approved_by || "—"],
+                ["Approved At",     fmtDate(sow.approved_at)],
+                ["Created",         fmtDate(sow.created_at)],
+              ].map(([label, value], i) => (
+                <div key={i} className="tb-detail-row">
+                  <span className="tb-detail-key">{label}</span>
+                  <span className="tb-detail-value">
                     {label === "Status" ? <StatusBadge status={value} /> : value}
                   </span>
                 </div>
               ))}
             </div>
+
             <div className="tb-section">
-              <h2 className="tb-section-title">Description & Scope</h2>
+              <div className="tb-section-title">Description & Scope</div>
               {sow.description && (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-3)", marginBottom: 8, textTransform: "uppercase" }}>Description</div>
-                  <p style={{ fontSize: 13, color: "var(--color-text-2)", lineHeight: 1.6 }}>{sow.description}</p>
+                <div className="mb-4">
+                  <div className="text-label-upper text-tertiary mb-2">Description</div>
+                  <p className="text-sm text-secondary leading-relaxed">{sow.description}</p>
                 </div>
               )}
               {sow.scope_details && (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-3)", marginBottom: 8, textTransform: "uppercase" }}>Scope Details</div>
-                  <p style={{ fontSize: 13, color: "var(--color-text-2)", lineHeight: 1.6 }}>{sow.scope_details}</p>
+                <div className="mb-4">
+                  <div className="text-label-upper text-tertiary mb-2">Scope Details</div>
+                  <p className="text-sm text-secondary leading-relaxed">{sow.scope_details}</p>
                 </div>
               )}
               {sow.exclusions && (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "var(--color-text-3)", marginBottom: 8, textTransform: "uppercase" }}>Exclusions</div>
-                  <p style={{ fontSize: 13, color: "var(--color-text-2)", lineHeight: 1.6 }}>{sow.exclusions}</p>
+                <div className="mb-4">
+                  <div className="text-label-upper text-tertiary mb-2">Exclusions</div>
+                  <p className="text-sm text-secondary leading-relaxed">{sow.exclusions}</p>
                 </div>
               )}
               {sow.client_name && (
-                <div style={{ marginTop: 16, padding: "12px", background: "rgba(185,146,76,0.06)", borderRadius: 8, border: "1px solid rgba(185,146,76,0.15)" }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#B9924C", marginBottom: 6, textTransform: "uppercase" }}>Client</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--color-text-1)" }}>{sow.client_name}</div>
-                  {sow.client_email && <div style={{ fontSize: 12, color: "var(--color-text-3)", marginTop: 2 }}>{sow.client_email}</div>}
+                <div className="mt-4 p-3 bg-brand/5 rounded-lg border border-brand/20">
+                  <div className="text-label-upper text-brand mb-1.5">Client</div>
+                  <div className="font-bold text-primary text-sm">{sow.client_name}</div>
+                  {sow.client_email && (
+                    <div className="text-tertiary text-xs mt-1">{sow.client_email}</div>
+                  )}
                 </div>
               )}
             </div>
@@ -432,83 +395,53 @@ export default function SOWDetailPage() {
 
         {/* ── TAB: ACTIONS ──────────────────────────────── */}
         {activeTab === "actions" && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="tb-grid-2">
             <div className="tb-section">
-              <h2 className="tb-section-title">Workflow Actions</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="tb-section-title">Workflow Actions</div>
+              <div className="flex flex-col gap-3">
                 {isApproved && (
-                  <button
-                    onClick={openRFQModal}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 10,
-                      padding: "14px 16px", borderRadius: 10, cursor: "pointer",
-                      background: "linear-gradient(135deg,#8F6F3D,#B9924C)",
-                      border: "none", color: "#181614", fontWeight: 700, fontSize: 14
-                    }}
-                  >
-                    <span style={{ fontSize: 18 }}>📋</span>
-                    <div style={{ textAlign: "left" }}>
+                  <button onClick={openRFQModal} className="tb-btn tb-btn-primary tb-btn-lg">
+                    <span>📋</span>
+                    <div className="text-left">
                       <div>Create RFQ from this SOW</div>
-                      <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.7 }}>Start procurement process</div>
+                      <div className="text-xs font-normal opacity-70">Start procurement process</div>
                     </div>
                   </button>
                 )}
                 {canApprove && (
                   <>
-                    <button
-                      onClick={() => approveMut.mutate("approve")}
+                    <button onClick={() => approveMut.mutate("approve")}
                       disabled={approveMut.isLoading}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 10,
-                        padding: "14px 16px", borderRadius: 10, cursor: "pointer",
-                        background: "#547C4D", border: "none", color: "#fff", fontWeight: 700, fontSize: 14
-                      }}
-                    >
+                      className="tb-btn tb-btn-primary tb-btn-lg">
                       <span>✓</span> Approve SOW
                     </button>
-                    <button
-                      onClick={() => approveMut.mutate("reject")}
+                    <button onClick={() => approveMut.mutate("reject")}
                       disabled={approveMut.isLoading}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 10,
-                        padding: "14px 16px", borderRadius: 10, cursor: "pointer",
-                        background: "#A84A3D", border: "none", color: "#fff", fontWeight: 700, fontSize: 14
-                      }}
-                    >
+                      className="tb-btn tb-btn-danger tb-btn-lg">
                       <span>✗</span> Reject SOW
                     </button>
                   </>
                 )}
-                <a
-                  href={`/api/v1/pdf/scope-of-work/${id}`}
+                <a href={`/api/v1/pdf/scope-of-work/${id}`}
                   target="_blank" rel="noopener noreferrer"
-                  style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    padding: "12px 16px", borderRadius: 10, cursor: "pointer",
-                    background: "var(--color-surface-alt)", border: "1px solid var(--color-border)",
-                    color: "var(--color-text-2)", fontWeight: 600, fontSize: 13, textDecoration: "none"
-                  }}
-                >
+                  className="tb-btn tb-btn-secondary">
                   <span>📄</span> Export PDF
                 </a>
               </div>
             </div>
+
             <div className="tb-section">
-              <h2 className="tb-section-title">Danger Zone</h2>
-              <p style={{ fontSize: 13, color: "var(--color-text-3)", marginBottom: 16 }}>
+              <div className="tb-section-title">Danger Zone</div>
+              <p className="text-sm text-tertiary mb-4">
                 Deleting a SOW is permanent. Linked BOQ items will also be removed.
               </p>
               <button
                 onClick={() => {
-                  if (window.confirm("Delete this SOW? This cannot be undone.")) deleteMut.mutate();
+                  if (window.confirm("Delete this SOW? This cannot be undone."))
+                    deleteMut.mutate();
                 }}
                 disabled={deleteMut.isLoading}
-                style={{
-                  padding: "10px 20px", borderRadius: 8, cursor: "pointer",
-                  background: "rgba(168,74,61,0.1)", border: "1px solid rgba(168,74,61,0.3)",
-                  color: "#A84A3D", fontWeight: 700, fontSize: 13
-                }}
-              >
+                className="tb-btn tb-btn-danger">
                 {deleteMut.isLoading ? "Deleting..." : "🗑 Delete SOW"}
               </button>
             </div>
@@ -518,149 +451,130 @@ export default function SOWDetailPage() {
 
       {/* ── CREATE RFQ MODAL ──────────────────────────────── */}
       {showCreateRFQ && (
-        <div
-          onClick={() => setShowCreateRFQ(false)}
-          style={{
-            position: "fixed", inset: 0, zIndex: 1000,
-            background: "rgba(15,13,11,0.65)", backdropFilter: "blur(4px)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 24
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: "var(--color-surface)", borderRadius: 16,
-              border: "1px solid var(--color-border)",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
-              width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto"
-            }}
-          >
+        <div onClick={() => setShowCreateRFQ(false)}
+          className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-6"
+          style={{backdropFilter:"blur(4px)"}}>
+          <div onClick={e => e.stopPropagation()}
+            className="tb-section w-full shadow-xl"
+            style={{maxWidth:"520px",maxHeight:"90vh",overflowY:"auto",borderRadius:"16px"}}>
+
             {/* Modal Header */}
-            <div style={{
-              padding: "20px 24px 16px",
-              borderBottom: "1px solid var(--color-border)",
-              display: "flex", justifyContent: "space-between", alignItems: "center"
-            }}>
+            <div className="flex justify-between items-start pb-4 mb-4 border-b border-default">
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--color-text-1)", margin: 0 }}>
-                  Create RFQ from SOW
-                </h2>
-                <p style={{ fontSize: 12, color: "var(--color-text-3)", marginTop: 4 }}>
+                <h2 className="text-lg font-bold text-primary">Create RFQ from SOW</h2>
+                <p className="text-xs text-tertiary mt-1">
                   Linked to {sow.sow_number} · Pre-filled from SOW data
                 </p>
               </div>
               <button onClick={() => setShowCreateRFQ(false)}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-text-3)", fontSize: 20, padding: 4 }}>
-                ✕
-              </button>
+                className="tb-btn-ghost text-xl px-2">✕</button>
             </div>
 
-            {/* Modal Body */}
-            <div style={{ padding: "20px 24px" }}>
-
-              {/* SOW Reference badge */}
-              <div style={{
-                background: "rgba(185,146,76,0.08)", border: "1px solid rgba(185,146,76,0.2)",
-                borderRadius: 8, padding: "10px 14px", marginBottom: 20,
-                display: "flex", alignItems: "center", gap: 10
-              }}>
-                <span style={{ fontSize: 16 }}>🔗</span>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#B9924C" }}>Linked to SOW</div>
-                  <div style={{ fontSize: 12, color: "var(--color-text-2)" }}>{sow.sow_number} — {(sow.title || "").slice(0, 50)}</div>
+            {/* SOW Reference badge */}
+            <div className="flex items-center gap-3 p-3 bg-brand/5 border border-brand/20 rounded-lg mb-5">
+              <span className="text-lg">🔗</span>
+              <div>
+                <div className="text-xs font-bold text-brand">Linked to SOW</div>
+                <div className="text-xs text-secondary">
+                  {sow.sow_number} — {(sow.title || "").slice(0, 50)}
                 </div>
               </div>
+            </div>
 
-              {/* Title */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>
-                  RFQ Title <span style={{ color: "#A84A3D" }}>*</span>
+            {/* Title */}
+            <div className="tb-form-group mb-4">
+              <label className="tb-label">
+                RFQ Title <span className="text-danger">*</span>
+              </label>
+              <input value={rfqForm.title}
+                onChange={e => setF("title", e.target.value)}
+                className="tb-input"
+                style={rfqErrors.title ? {borderColor:"var(--color-danger)"} : {}} />
+              {rfqErrors.title && (
+                <p className="text-xs text-danger mt-1">{rfqErrors.title}</p>
+              )}
+            </div>
+
+            {/* RFQ Type + Currency */}
+            <div className="tb-form-grid mb-4">
+              <div className="tb-form-group">
+                <label className="tb-label">RFQ Type</label>
+                <select value={rfqForm.rfq_type}
+                  onChange={e => setF("rfq_type", e.target.value)}
+                  className="tb-select">
+                  {["open","closed","direct"].map(t => (
+                    <option key={t} value={t}>
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="tb-form-group">
+                <label className="tb-label">Currency</label>
+                <select value={rfqForm.currency}
+                  onChange={e => setF("currency", e.target.value)}
+                  className="tb-select">
+                  {["EGP","USD","EUR","AED"].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Budget + Deadline */}
+            <div className="tb-form-grid mb-4">
+              <div className="tb-form-group">
+                <label className="tb-label">Total Budget</label>
+                <input type="number" value={rfqForm.total_budget}
+                  onChange={e => setF("total_budget", e.target.value)}
+                  placeholder="0.00" min="0"
+                  className="tb-input" />
+              </div>
+              <div className="tb-form-group">
+                <label className="tb-label">
+                  Submission Deadline <span className="text-danger">*</span>
                 </label>
-                <input
-                  value={rfqForm.title}
-                  onChange={e => setF("title", e.target.value)}
-                  style={{
-                    width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14,
-                    border: `1px solid ${rfqErrors.title ? "#A84A3D" : "var(--color-border)"}`,
-                    background: "var(--color-surface)", color: "var(--color-text-1)", boxSizing: "border-box"
-                  }}
-                />
-                {rfqErrors.title && <p style={{ fontSize: 12, color: "#A84A3D", marginTop: 4 }}>{rfqErrors.title}</p>}
+                <input type="date" value={rfqForm.submission_deadline}
+                  onChange={e => setF("submission_deadline", e.target.value)}
+                  className="tb-input"
+                  style={rfqErrors.submission_deadline ? {borderColor:"var(--color-danger)"} : {}} />
+                {rfqErrors.submission_deadline && (
+                  <p className="text-xs text-danger mt-1">{rfqErrors.submission_deadline}</p>
+                )}
               </div>
+            </div>
 
-              {/* RFQ Type + Currency */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>RFQ Type</label>
-                  <select value={rfqForm.rfq_type} onChange={e => setF("rfq_type", e.target.value)}
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14, border: "1px solid var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-1)" }}>
-                    {["open", "closed", "direct"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>Currency</label>
-                  <select value={rfqForm.currency} onChange={e => setF("currency", e.target.value)}
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14, border: "1px solid var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-1)" }}>
-                    {["EGP", "USD", "EUR", "AED"].map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
+            {/* Delivery Location */}
+            <div className="tb-form-group mb-4">
+              <label className="tb-label">Delivery Location</label>
+              <input value={rfqForm.delivery_location}
+                onChange={e => setF("delivery_location", e.target.value)}
+                placeholder="e.g. Nile Plaza Hotel — Basement Store"
+                className="tb-input" />
+            </div>
 
-              {/* Budget + Deadline */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>Total Budget</label>
-                  <input type="number" value={rfqForm.total_budget} onChange={e => setF("total_budget", e.target.value)}
-                    placeholder="0.00" min="0"
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14, border: "1px solid var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-1)", boxSizing: "border-box" }} />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>
-                    Submission Deadline <span style={{ color: "#A84A3D" }}>*</span>
-                  </label>
-                  <input type="date" value={rfqForm.submission_deadline} onChange={e => setF("submission_deadline", e.target.value)}
-                    style={{
-                      width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14,
-                      border: `1px solid ${rfqErrors.submission_deadline ? "#A84A3D" : "var(--color-border)"}`,
-                      background: "var(--color-surface)", color: "var(--color-text-1)", boxSizing: "border-box"
-                    }} />
-                  {rfqErrors.submission_deadline && <p style={{ fontSize: 12, color: "#A84A3D", marginTop: 4 }}>{rfqErrors.submission_deadline}</p>}
-                </div>
-              </div>
+            {/* Notes */}
+            <div className="tb-form-group mb-6">
+              <label className="tb-label">Notes</label>
+              <textarea value={rfqForm.notes}
+                onChange={e => setF("notes", e.target.value)}
+                placeholder="Additional notes for vendors..."
+                rows={3}
+                className="tb-input"
+                style={{resize:"vertical",fontFamily:"inherit"}} />
+            </div>
 
-              {/* Delivery Location */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>Delivery Location</label>
-                <input value={rfqForm.delivery_location} onChange={e => setF("delivery_location", e.target.value)}
-                  placeholder="e.g. Nile Plaza Hotel — Basement Store"
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14, border: "1px solid var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-1)", boxSizing: "border-box" }} />
-              </div>
-
-              {/* Notes */}
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--color-text-2)", marginBottom: 6 }}>Notes</label>
-                <textarea value={rfqForm.notes} onChange={e => setF("notes", e.target.value)}
-                  placeholder="Additional notes for vendors..."
-                  rows={3}
-                  style={{ width: "100%", padding: "9px 12px", borderRadius: 8, fontSize: 14, border: "1px solid var(--color-border)", background: "var(--color-surface)", color: "var(--color-text-1)", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }} />
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button onClick={() => { setShowCreateRFQ(false); setRFQErrors({}); }}
-                  style={{ padding: "10px 20px", borderRadius: 8, fontSize: 14, cursor: "pointer", background: "none", border: "1px solid var(--color-border)", color: "var(--color-text-2)", fontWeight: 600 }}>
-                  Cancel
-                </button>
-                <button onClick={handleCreateRFQ} disabled={createRFQ.isLoading}
-                  style={{
-                    padding: "10px 24px", borderRadius: 8, fontSize: 14, fontWeight: 700,
-                    cursor: createRFQ.isLoading ? "not-allowed" : "pointer",
-                    background: createRFQ.isLoading ? "var(--color-border)" : "linear-gradient(135deg,#8F6F3D,#B9924C)",
-                    color: "#181614", border: "none"
-                  }}>
-                  {createRFQ.isLoading ? "Creating..." : "Create RFQ"}
-                </button>
-              </div>
+            {/* Actions */}
+            <div className="tb-action-bar justify-end">
+              <button onClick={() => { setShowCreateRFQ(false); setRFQErrors({}); }}
+                className="tb-btn tb-btn-secondary">
+                Cancel
+              </button>
+              <button onClick={handleCreateRFQ}
+                disabled={createRFQ.isLoading}
+                className="tb-btn tb-btn-primary">
+                {createRFQ.isLoading ? "Creating..." : "Create RFQ"}
+              </button>
             </div>
           </div>
         </div>
