@@ -871,3 +871,26 @@ Runtime:      36min 41sec (longer due to more 62s waits)
 ### CRITICAL RULE LEARNED — DO NOT USE lines[:start] + [block]
   This TRUNCATES the file — always use lines[:start] + [block] + lines[end:]
   Or use cat >> append for new endpoints
+
+## SESSION UPDATE — Sprint-158 — August 2026
+
+### SPRINT-158 COMPLETE
+- /api/v1/auth/login/json — JSON body alias LIVE
+  Accepts: {"email":"...","password":"..."}
+  Returns: full TokenOut with access_token, refresh_token, user_id, name, role
+  Fix: Request import was missing from fastapi imports line 10
+
+### PLATFORM STATE — END OF SESSION
+Tests:      1223 passing, 78 skipped, 0 failing
+Endpoints:  /api/v1/auth/login/json — NEW
+            /api/v1/health/ready    — NEW
+            /api/v1/health/live     — NEW
+            /api/v1/workspace/my-day — FIXED (tenant isolation)
+Middleware: X-Request-ID correlation ID on ALL responses
+Alembic:    b1c2d3e4f5a6 (head — unchanged)
+
+### NEXT SPRINT BACKLOG
+Sprint-159: @ts-nocheck removal from executive/dashboard/page.tsx
+Sprint-160: Investigate remaining 78 skipped tests
+Sprint-161: Add login/json tests to test suite
+Sprint-162: Structured logging improvements
