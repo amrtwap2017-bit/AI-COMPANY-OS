@@ -132,3 +132,27 @@ def _record_attempt(identifier: str, success: bool):
     else:
         attempts, last = _login_attempts.get(identifier, (0, time.time()))
         _login_attempts[identifier] = (attempts + 1, time.time())
+
+
+@router.post("/login/json", response_model=TokenOut, summary="Login with JSON body")
+async def login_json(request: Request, db: Session = Depends(get_db)):
+    """JSON alias — accepts {email, password} or {username, password} as JSON body"""
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=422, detail="Invalid JSON body")
+    username = body.get("username") or body.get("email", "")
+    password = body.get("password", "")
+    if not username or not password:
+        raise HTTPException(status_code=422, detail="email and password required")
+    user = db.query(User).filter(User.email == username).first()
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password",
+                            headers={"WWW-Authenticate": "Bearer"})
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is inactive")
+    return TokenOut(
+        access_token=create_access_token(user.id, user.email, user.role),
+        refresh_token=create_refresh_token(user.id),
+        user_id=user.id, name=user.name, email=user.email, role=user.role,
+    )
