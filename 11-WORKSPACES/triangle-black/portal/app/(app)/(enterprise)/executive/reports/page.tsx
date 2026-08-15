@@ -6,7 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtEGP  = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 function printReport(title, content) {
@@ -20,14 +20,14 @@ function printReport(title, content) {
   setTimeout(()=>w.print(),500);
 }
 
-export default function ReportsPage() {
+export default function ExecutiveReportsPage() {
   const router = useRouter();
   const [activeReport, setActiveReport] = useState("daily");
 
-  const { data: daily }    = useQuery(["rpt-daily"],    ()=>authFetch("/api/v1/reports/daily-summary").then(r=>r.json()), {staleTime:60000});
-  const { data: woReport } = useQuery(["rpt-wo"],       ()=>authFetch("/api/v1/reports/work-orders").then(r=>r.json()),   {staleTime:120000});
-  const { data: assetRpt } = useQuery(["rpt-assets"],   ()=>authFetch("/api/v1/reports/assets").then(r=>r.json()),        {staleTime:120000});
-  const { data: contRpt }  = useQuery(["rpt-contracts"],()=>authFetch("/api/v1/reports/contracts").then(r=>r.json()),     {staleTime:120000});
+  const { data: daily }    = useQuery(["rpt-daily"],     ()=>authFetch("/api/v1/reports/daily-summary").then(r=>r.json()), {staleTime:60000});
+  const { data: woReport } = useQuery(["rpt-wo"],        ()=>authFetch("/api/v1/reports/work-orders").then(r=>r.json()),   {staleTime:120000});
+  const { data: assetRpt } = useQuery(["rpt-assets"],    ()=>authFetch("/api/v1/reports/assets").then(r=>r.json()),        {staleTime:120000});
+  const { data: contRpt }  = useQuery(["rpt-contracts"], ()=>authFetch("/api/v1/reports/contracts").then(r=>r.json()),     {staleTime:120000});
 
   const woSum = woReport?.summary||{};
   const aSum  = assetRpt?.summary||{};
@@ -52,10 +52,10 @@ export default function ReportsPage() {
   };
 
   const REPORTS = [
-    {id:"daily",      label:"Daily Summary",  icon:"☀️",  desc:"Today's KPIs, WOs, alerts"},
-    {id:"work-orders",label:"Work Orders",     icon:"🔧", desc:"All WO analysis and history"},
-    {id:"assets",     label:"Asset Register",  icon:"⚙️",  desc:"Complete asset inventory"},
-    {id:"contracts",  label:"Contracts",       icon:"📄", desc:"Portfolio with expiry dates"},
+    {id:"daily",       label:"Daily Summary",  icon:"☀️",  desc:"Today's KPIs, WOs, alerts"},
+    {id:"work-orders", label:"Work Orders",     icon:"🔧",  desc:"All WO analysis and history"},
+    {id:"assets",      label:"Asset Register",  icon:"⚙️",  desc:"Complete asset inventory"},
+    {id:"contracts",   label:"Contracts",       icon:"📄",  desc:"Portfolio with expiry dates"},
   ];
 
   return (
@@ -71,7 +71,12 @@ export default function ReportsPage() {
             <button onClick={()=>router.push("/executive")} className="tb-btn tb-btn-secondary">← Back</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"WOs Total",value:woSum.total||0},{label:"Assets",value:aSum.total||0},{label:"Active Contracts",value:cSum.active||0},{label:"Critical Open",value:dWO.critical_open||0,danger:(dWO.critical_open||0)>0}].map((k,i)=>(
+            {[
+              {label:"WOs Total",       value:woSum.total||0},
+              {label:"Assets",          value:aSum.total||0},
+              {label:"Active Contracts",value:cSum.active||0},
+              {label:"Critical Open",   value:dWO.critical_open||0,danger:(dWO.critical_open||0)>0},
+            ].map((k,i)=>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -82,12 +87,12 @@ export default function ReportsPage() {
       </div>
 
       <div className="tb-canvas">
-        <div className="tb-section">
+        <div className="tb-section mb-4">
           <div className="tb-section-title">Available Reports</div>
           <div className="tb-grid-4">
             {REPORTS.map((r,i)=>(
               <button key={i} onClick={()=>setActiveReport(r.id)}
-                className={`tb-section text-left tb-hover-lift cursor-pointer ${activeReport===r.id?"border-brand bg-brand/5":""}`}>
+                className={`tb-section text-left tb-hover-lift cursor-pointer ${activeReport===r.id?"border-brand bg-surface":""}`}>
                 <div className="text-3xl mb-2">{r.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{r.label}</div>
                 <div className="text-xs text-tertiary">{r.desc}</div>
@@ -96,7 +101,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {activeReport==="daily" && daily && (
+        {activeReport==="daily"&&daily&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
               <div>
@@ -105,7 +110,7 @@ export default function ReportsPage() {
               </div>
               <button onClick={()=>handlePrint("daily")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
-            <div className="tb-grid-4">
+            <div className="tb-grid-4 mb-4">
               {[{label:"Open WOs",value:dWO.open_total||0},{label:"Critical WOs",value:dWO.critical_open||0,danger:(dWO.critical_open||0)>0},{label:"Created Today",value:dWO.created_today||0},{label:"Overdue PMs",value:dMaint.overdue_pms||0,danger:(dMaint.overdue_pms||0)>0},{label:"Collected",value:fmtEGP(dFin.collected)},{label:"Pending",value:fmtEGP(dFin.pending)},{label:"Unread Alerts",value:(daily.alerts||[]).length},{label:"Due This Week",value:dMaint.due_this_week||0}].map((k,i)=>(
                 <div key={i} className="p-3 bg-surface-alt rounded-xl text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.danger&&k.value>0?"var(--color-danger)":"var(--color-text-1)"}}>{k.value}</div>
@@ -129,7 +134,7 @@ export default function ReportsPage() {
           </div>
         )}
 
-        {activeReport==="work-orders" && woReport && (
+        {activeReport==="work-orders"&&woReport&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
               <div className="tb-section-title" style={{margin:0}}>Work Orders Report</div>
@@ -162,7 +167,7 @@ export default function ReportsPage() {
           </div>
         )}
 
-        {activeReport==="assets" && assetRpt && (
+        {activeReport==="assets"&&assetRpt&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
               <div className="tb-section-title" style={{margin:0}}>Asset Register ({toArr(assetRpt.assets).length} assets)</div>
@@ -195,7 +200,7 @@ export default function ReportsPage() {
           </div>
         )}
 
-        {activeReport==="contracts" && contRpt && (
+        {activeReport==="contracts"&&contRpt&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
               <div className="tb-section-title" style={{margin:0}}>Contracts Portfolio</div>
