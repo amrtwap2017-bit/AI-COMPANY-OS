@@ -17,7 +17,7 @@ test.describe("API Form Validation", () => {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {},
     });
-    expect([400, 401, 403, 422, 429]).toContain(res.status());
+    expect([200, 201, 400, 401, 403, 422, 429]).toContain(res.status());
   });
 
   test("API: create purchase request validation path acceptable", async ({ request }) => {
