@@ -8069,3 +8069,15 @@ def health_live():
     """Liveness check — verifies process is running"""
     import time
     return {"status": "live", "timestamp": int(time.time())}
+
+# ── Sprint-197: Cache Status Endpoint ─────────────────────────────────────────
+@app.get("/api/v1/cache/status", tags=["system"])
+async def cache_status_endpoint():
+    from src.core.cache import cache_status
+    return cache_status()
+
+@app.post("/api/v1/cache/invalidate/{hotel_id}", tags=["system"])
+async def invalidate_hotel_cache(hotel_id: str):
+    from src.core.cache import cache_invalidate_hotel
+    cache_invalidate_hotel(hotel_id)
+    return {"status": "invalidated", "hotel_id": hotel_id}
