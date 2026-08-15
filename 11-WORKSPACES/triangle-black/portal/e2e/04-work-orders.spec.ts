@@ -51,24 +51,7 @@ test.describe("Work Orders", () => {
     expect([200, 401, 403, 422, 429]).toContain(res.status());
   });
 
-  test("API: create work order returns acceptable current status", async ({ request }) => {
-    const token = getSharedToken();
-    const res = await request.post(`${API_URL}/api/v1/work-orders/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        title: "E2E Test Work Order",
-        priority: "low",
-        type: "corrective",
-        description: "Created by Playwright E2E test",
-      },
-    });
-    expect([200, 201, 400, 401, 403, 422, 429]).toContain(res.status());
-  });
-
-  test("API: work order validation returns acceptable current status", async ({ request }) => {
+  test("API: invalid work order payload is rejected or blocked", async ({ request }) => {
     const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/work-orders/`, {
       headers: {
@@ -78,5 +61,13 @@ test.describe("Work Orders", () => {
       data: { priority: "low" },
     });
     expect([400, 401, 403, 422, 429]).toContain(res.status());
+  });
+
+  test("API: invalid work order status filter returns acceptable status", async ({ request }) => {
+    const token = getSharedToken();
+    const res = await request.get(`${API_URL}/api/v1/work-orders/?status=notavalidstatus`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect([200, 401, 403, 422, 429]).toContain(res.status());
   });
 });

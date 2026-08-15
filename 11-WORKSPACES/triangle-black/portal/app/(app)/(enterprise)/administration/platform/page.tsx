@@ -31,9 +31,9 @@ const STATUS_META = {
 export default function PlatformHealthPage() {
   const router = useRouter();
 
-  const { data: health } = useQuery({ queryKey:["platform-health"], queryFn:()=>fetch("http://localhost:8030/api/v1/health/detailed").then(r=>r.json()), staleTime:30000, refetchInterval:60000 });
+  const { data: health } = useQuery({ queryKey:["platform-health"], queryFn:()=>fetch("/api/v1/health/detailed").then(r=>r.json()), staleTime:30000, refetchInterval:60000 });
   const { data: summary, isLoading } = useQuery({ queryKey:["platform-summary"], queryFn:()=>authFetch("/api/v1/platform/summary").then(r=>r.json()), staleTime:30000 });
-  const { data: tenant } = useQuery({ queryKey:["tenant-current"], queryFn:()=>fetch("http://localhost:8030/api/v1/tenants/current").then(r=>r.json()), staleTime:60000 });
+  const { data: tenant } = useQuery({ queryKey:["tenant-current"], queryFn:()=>fetch("/api/v1/tenants/current").then(r=>r.json()), staleTime:60000 });
   const { data: auditRaw } = useQuery({ queryKey:["platform-audit-recent"], queryFn:()=>authFetch("/api/v1/security/audit").then(r=>r.json()), staleTime:30000 });
 
   const checks = health?.checks || {};

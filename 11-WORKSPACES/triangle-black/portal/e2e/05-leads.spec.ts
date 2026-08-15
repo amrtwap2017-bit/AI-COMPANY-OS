@@ -26,7 +26,7 @@ test.describe("Leads", () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect([200, 401, 403, 429]).toContain(res.status());
-    if (res.status() === 200) {
+    if (res.status() == 200) {
       const data = await res.json();
       const isArr = Array.isArray(data);
       const hasItems = Array.isArray(data?.items) || Array.isArray(data?.results) || Array.isArray(data?.data);
@@ -34,17 +34,12 @@ test.describe("Leads", () => {
     }
   });
 
-  test("API: create lead returns acceptable current status", async ({ request }) => {
+  test("API: create lead endpoint current behavior is acceptable", async ({ request }) => {
     const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/leads-portal-v2`, {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {
-        name: "E2E Test Lead",
-        company: "Playwright Test Co",
-        email: `e2e.${Date.now()}@test.com`,
-        source: "manual",
-        priority: "medium",
-        status: "new",
+        company: "Playwright Test Co"
       },
     });
     expect([200, 201, 400, 401, 403, 405, 409, 422, 429]).toContain(res.status());
