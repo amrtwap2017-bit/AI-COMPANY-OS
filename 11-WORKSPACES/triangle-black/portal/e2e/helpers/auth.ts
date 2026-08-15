@@ -16,37 +16,36 @@ export async function getAdminToken(): Promise<string> {
   return data.access_token;
 }
 
-export async function seedBrowserAuth(page: Page, token: string): Promise<void> {
+export async function injectAuth(page: Page): Promise<string> {
+  const token = await getAdminToken();
+
+  await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(500);
+
   await page.context().addCookies([
-    { name: "tb_access_token", value: token, url: BASE_URL, path: "/" },
-    { name: "tb_token", value: token, url: BASE_URL, path: "/" },
+    { name: "tb_access_token", value: token, url: BASE_URL, sameSite: "Lax" },
+    { name: "tb_token", value: token, url: BASE_URL, sameSite: "Lax" },
   ]);
 
-  await page.addInitScript((t) => {
+  await page.evaluate((t) => {
     try {
       localStorage.setItem("tb_access_token", t);
       localStorage.setItem("tb_token", t);
       sessionStorage.setItem("tb_access_token", t);
       sessionStorage.setItem("tb_token", t);
-      document.cookie = `tb_access_token=${t}; path=/`;
-      document.cookie = `tb_token=${t}; path=/`;
+      document.cookie = `tb_access_token=${t}; path=/; SameSite=Lax`;
+      document.cookie = `tb_token=${t}; path=/; SameSite=Lax`;
     } catch {}
   }, token);
-}
 
-export async function injectAuth(page: Page): Promise<string> {
-  const token = await getAdminToken();
-  await seedBrowserAuth(page, token);
   return token;
 }
 
 export async function loginViaUI(page: Page): Promise<void> {
   await page.goto(`${BASE_URL}/login`);
   await page.waitForLoadState("networkidle");
-  const emailInput = page.locator('input[type="email"], input[placeholder*="mail"], input[name="email"], input[placeholder*="Email"]').first();
-  const passInput  = page.locator('input[type="password"]').first();
-  await emailInput.fill(ADMIN_EMAIL);
-  await passInput.fill(ADMIN_PASSWORD);
+  await page.locator('input[type="email"], input[placeholder*="Email"], input[placeholder*="mail"]').first().fill(ADMIN_EMAIL);
+  await page.locator('input[type="password"]').first().fill(ADMIN_PASSWORD);
   await page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Login")').first().click();
   await page.waitForTimeout(2000);
 }
