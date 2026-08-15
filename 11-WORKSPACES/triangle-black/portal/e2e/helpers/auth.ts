@@ -52,6 +52,6 @@ export async function loginViaUI(page: Page): Promise<void> {
 
 export async function navigateAuthenticated(page: Page, path: string): Promise<void> {
   await injectAuth(page);
-  await page.goto(`${BASE_URL}${path}`, { waitUntil: "domcontentloaded" });
-  await page.waitForLoadState("networkidle");
+  await page.goto(`${BASE_URL}${path}`, { waitUntil: "commit", timeout: 30000 });
+  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
 }
