@@ -5,7 +5,14 @@ export const ADMIN_PASSWORD = "admin123";
 export const BASE_URL       = "http://localhost:3000";
 export const API_URL        = "http://localhost:8030";
 
+export function getSharedToken(): string {
+  const token = process.env.E2E_TOKEN;
+  if (!token) throw new Error("E2E_TOKEN not set — global setup must run first");
+  return token;
+}
+
 export async function getAdminToken(): Promise<string> {
+  if (process.env.E2E_TOKEN) return process.env.E2E_TOKEN;
   const res = await fetch(`${API_URL}/api/v1/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -17,14 +24,14 @@ export async function getAdminToken(): Promise<string> {
 }
 
 export async function injectAuth(page: Page): Promise<string> {
-  const token = await getAdminToken();
+  const token = getSharedToken();
 
   await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(300);
 
   await page.context().addCookies([
     { name: "tb_access_token", value: token, url: BASE_URL, sameSite: "Lax" },
-    { name: "tb_token", value: token, url: BASE_URL, sameSite: "Lax" },
+    { name: "tb_token",        value: token, url: BASE_URL, sameSite: "Lax" },
   ]);
 
   await page.evaluate((t) => {

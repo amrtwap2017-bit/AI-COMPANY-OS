@@ -1,18 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { navigateAuthenticated, API_URL, ADMIN_EMAIL, ADMIN_PASSWORD } from "./helpers/auth";
-
-let token = "";
-test.beforeAll(async ({ request }) => {
-  const res = await request.post(`${API_URL}/api/v1/auth/login`, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    data: `username=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}`,
-  });
-  token = (await res.json()).access_token;
-});
+import { navigateAuthenticated, API_URL, getSharedToken } from "./helpers/auth";
 
 test.describe("Search", () => {
 
   test("API: global search returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/search/?q=hotel&limit=5`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -20,6 +12,7 @@ test.describe("Search", () => {
   });
 
   test("API: quick search returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/search/quick?q=work`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -27,6 +20,7 @@ test.describe("Search", () => {
   });
 
   test("API: search with empty query returns 200 or 422", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/search/?q=`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -34,6 +28,7 @@ test.describe("Search", () => {
   });
 
   test("API: search response has results structure", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/search/?q=maintenance&limit=3`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -66,7 +61,8 @@ test.describe("Search", () => {
     }
   });
 
-  test("API: assets search by name returns 200", async ({ request }) => {
+  test("API: assets search returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/assets/?limit=5`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -74,6 +70,7 @@ test.describe("Search", () => {
   });
 
   test("API: technicians search returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/technicians/`, {
       headers: { Authorization: `Bearer ${token}` },
     });

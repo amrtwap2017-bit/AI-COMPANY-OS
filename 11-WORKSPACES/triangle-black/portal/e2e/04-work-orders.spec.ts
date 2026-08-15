@@ -1,15 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { navigateAuthenticated, API_URL, ADMIN_EMAIL, ADMIN_PASSWORD } from "./helpers/auth";
-
-let token = "";
-test.beforeAll(async ({ request }) => {
-  const res = await request.post(`${API_URL}/api/v1/auth/login`, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    data: `username=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}`,
-  });
-  const data = await res.json();
-  token = data.access_token;
-});
+import { navigateAuthenticated, API_URL, getSharedToken } from "./helpers/auth";
 
 test.describe("Work Orders", () => {
 
@@ -30,6 +20,7 @@ test.describe("Work Orders", () => {
   });
 
   test("API: list work orders returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -37,6 +28,7 @@ test.describe("Work Orders", () => {
   });
 
   test("API: work orders response has expected structure", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/?limit=5`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -46,6 +38,7 @@ test.describe("Work Orders", () => {
   });
 
   test("API: filter by status open returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/?status=open`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -53,6 +46,7 @@ test.describe("Work Orders", () => {
   });
 
   test("API: filter by priority critical returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/?priority=critical`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -60,11 +54,9 @@ test.describe("Work Orders", () => {
   });
 
   test("API: create work order returns 200 or 201", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/work-orders/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {
         title: "E2E Test Work Order",
         priority: "low",
@@ -76,11 +68,9 @@ test.describe("Work Orders", () => {
   });
 
   test("API: work order with no title returns error", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/work-orders/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: { priority: "low" },
     });
     expect([400, 422]).toContain(res.status());

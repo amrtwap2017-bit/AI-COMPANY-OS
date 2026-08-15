@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { navigateAuthenticated, BASE_URL } from "./helpers/auth";
+import { navigateAuthenticated } from "./helpers/auth";
 
 test.describe("Navigation", () => {
 

@@ -1,14 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { navigateAuthenticated, API_URL, ADMIN_EMAIL, ADMIN_PASSWORD } from "./helpers/auth";
-
-let token = "";
-test.beforeAll(async ({ request }) => {
-  const res = await request.post(`${API_URL}/api/v1/auth/login`, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    data: `username=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}`,
-  });
-  token = (await res.json()).access_token;
-});
+import { navigateAuthenticated, API_URL, getSharedToken } from "./helpers/auth";
 
 test.describe("Leads", () => {
 
@@ -23,6 +14,7 @@ test.describe("Leads", () => {
   });
 
   test("API: list leads returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/leads-portal-v2`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -30,6 +22,7 @@ test.describe("Leads", () => {
   });
 
   test("API: leads response is array or has items", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/leads-portal-v2`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -40,11 +33,9 @@ test.describe("Leads", () => {
   });
 
   test("API: create lead returns 200 or 201", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/leads-portal-v2`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {
         name: "E2E Test Lead",
         company: "Playwright Test Co",
@@ -58,6 +49,7 @@ test.describe("Leads", () => {
   });
 
   test("API: leads filter by status new returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/leads-portal-v2?status=new`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -65,22 +57,21 @@ test.describe("Leads", () => {
   });
 
   test("API: leads filter by status won returns 200", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/leads-portal-v2?status=won`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect([200, 422]).toContain(res.status());
   });
 
-  test("API: qualify action returns 200 or 404 when no leads", async ({ request }) => {
+  test("API: qualify action returns acceptable status", async ({ request }) => {
+    const token = getSharedToken();
     const listRes = await request.get(`${API_URL}/api/v1/leads-portal-v2`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await listRes.json();
     const items = Array.isArray(data) ? data : data?.items || data?.results || [];
-    if (items.length === 0) {
-      expect(true).toBeTruthy();
-      return;
-    }
+    if (items.length === 0) { expect(true).toBeTruthy(); return; }
     const id = items[0].id;
     const res = await request.post(`${API_URL}/api/v1/actions/leads/${id}/qualify`, {
       headers: { Authorization: `Bearer ${token}` },

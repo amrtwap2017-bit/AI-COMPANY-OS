@@ -1,45 +1,30 @@
 import { test, expect } from "@playwright/test";
-import { navigateAuthenticated, API_URL, ADMIN_EMAIL, ADMIN_PASSWORD } from "./helpers/auth";
-
-let token = "";
-test.beforeAll(async ({ request }) => {
-  const res = await request.post(`${API_URL}/api/v1/auth/login`, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    data: `username=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}`,
-  });
-  token = (await res.json()).access_token;
-});
+import { API_URL, getSharedToken } from "./helpers/auth";
 
 test.describe("API Form Validation", () => {
 
   test("API: create work order missing title returns 422", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/work-orders/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: { priority: "high" },
     });
     expect([400, 422]).toContain(res.status());
   });
 
   test("API: create service request missing required fields returns error", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/service-requests/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {},
     });
     expect([400, 422]).toContain(res.status());
   });
 
   test("API: create purchase request returns 200 or 201", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/purchase-requests-portal`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {
         title: "E2E Purchase Request Test",
         department: "Engineering",
@@ -51,11 +36,9 @@ test.describe("API Form Validation", () => {
   });
 
   test("API: create lead with valid data returns 200 or 201", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.post(`${API_URL}/api/v1/leads-portal-v2`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       data: {
         name: `E2E Lead ${Date.now()}`,
         company: "Test Corp",
@@ -68,7 +51,8 @@ test.describe("API Form Validation", () => {
     expect([200, 201]).toContain(res.status());
   });
 
-  test("API: create lead with duplicate email returns 200 or 400", async ({ request }) => {
+  test("API: create lead with duplicate email acceptable", async ({ request }) => {
+    const token = getSharedToken();
     const email = `dup${Date.now()}@test.com`;
     await request.post(`${API_URL}/api/v1/leads-portal-v2`, {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -81,7 +65,8 @@ test.describe("API Form Validation", () => {
     expect([200, 201, 400, 409, 422]).toContain(res.status());
   });
 
-  test("API: invalid status on work order returns 422", async ({ request }) => {
+  test("API: invalid status on work order returns 200 or 422", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/?status=notavalidstatus`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -89,6 +74,7 @@ test.describe("API Form Validation", () => {
   });
 
   test("API: pagination limit=1 returns max 1 item", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/?limit=1`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -99,6 +85,7 @@ test.describe("API Form Validation", () => {
   });
 
   test("API: pagination limit=0 returns 200 or 422", async ({ request }) => {
+    const token = getSharedToken();
     const res = await request.get(`${API_URL}/api/v1/work-orders/?limit=0`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -108,10 +95,8 @@ test.describe("API Form Validation", () => {
   test("login form has email and password inputs", async ({ page }) => {
     await page.goto("http://localhost:3000/login");
     await page.waitForLoadState("networkidle");
-    const emailInput = page.locator('input[type="email"]').first();
-    const passInput  = page.locator('input[type="password"]').first();
-    await expect(emailInput).toBeVisible();
-    await expect(passInput).toBeVisible();
+    await expect(page.locator('input[type="email"]').first()).toBeVisible();
+    await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
 
   test("login form submit button is enabled by default", async ({ page }) => {
