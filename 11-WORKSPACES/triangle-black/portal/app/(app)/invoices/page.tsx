@@ -6,34 +6,36 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function InvoicesPage() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const [search,  setSearch]  = useState("");
   const [statusF, setStatusF] = useState("all");
 
-  const { data: raw, isLoading } = useQuery(["inv-all"],()=>authFetch("/api/v1/invoices/").then(r=>r.json()),{refetchInterval:120000});
+  const { data: raw, isLoading } = useQuery(
+    ["inv-all"],()=>authFetch("/api/v1/invoices/").then(r=>r.json()),{refetchInterval:120000}
+  );
   const invoices = toArr(raw);
 
-  const paid = invoices.filter(i=>i.status==="paid");
-  const pending = invoices.filter(i=>i.status==="pending");
-  const overdue = invoices.filter(i=>i.status==="overdue");
+  const paid      = invoices.filter(i=>i.status==="paid");
+  const pending   = invoices.filter(i=>i.status==="pending");
+  const overdue   = invoices.filter(i=>i.status==="overdue");
   const cancelled = invoices.filter(i=>i.status==="cancelled");
-  const totalValue = invoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const paidValue = paid.reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const totalValue   = invoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const paidValue    = paid.reduce((s,i)=>s+Number(i.total_amount||0),0);
   const pendingValue = pending.reduce((s,i)=>s+Number(i.total_amount||0),0);
   const overdueValue = overdue.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const collRate = totalValue>0?Math.round(paidValue/totalValue*100):0;
+  const collRate     = totalValue>0?Math.round(paidValue/totalValue*100):0;
 
   const filtered = invoices.filter(inv=>{
     const ms = !search||inv.invoice_number?.toLowerCase().includes(search.toLowerCase())||inv.id?.slice(0,8).includes(search);
     return ms&&(statusF==="all"||inv.status===statusF);
   }).sort((a,b)=>{const o={overdue:0,pending:1,paid:2,cancelled:3};return(o[a.status]??2)-(o[b.status]??2);});
 
-  if (isLoading) return <div className="tb-page"><div className="tb-section tb-shimmer-block" style={{height:60}}/></div>;
+  if (isLoading) return <div className="tb-canvas"><div className="tb-shimmer-block" style={{height:60}}/></div>;
 
   return (
     <div className="min-h-screen bg-base">
@@ -51,7 +53,12 @@ export default function InvoicesPage() {
             </div>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Paid",value:paid.length,sub:fmtEGP(paidValue),f:"paid",good:true},{label:"Pending",value:pending.length,sub:fmtEGP(pendingValue),f:"pending"},{label:"Overdue",value:overdue.length,sub:fmtEGP(overdueValue),f:"overdue",danger:overdue.length>0},{label:"Cancelled",value:cancelled.length,sub:"closed",f:"cancelled"}].map((k,i)=>(
+            {[
+              {label:"Paid",      value:paid.length,      sub:fmtEGP(paidValue),    f:"paid",      good:true},
+              {label:"Pending",   value:pending.length,   sub:fmtEGP(pendingValue), f:"pending"},
+              {label:"Overdue",   value:overdue.length,   sub:fmtEGP(overdueValue), f:"overdue",   danger:overdue.length>0},
+              {label:"Cancelled", value:cancelled.length, sub:"closed",             f:"cancelled"},
+            ].map((k,i)=>(
               <button key={i} onClick={()=>setStatusF(statusF===k.f?"all":k.f)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.good?"var(--color-success)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -70,22 +77,22 @@ export default function InvoicesPage() {
           </div>
           <div className="tb-progress" style={{height:8}}>
             <div style={{display:"flex",height:"100%"}}>
-              <div className="tb-progress-bar" style={{width:`${paidValue/Math.max(totalValue,1)*100}%`,background:"var(--color-success)"}} />
-              <div className="tb-progress-bar" style={{width:`${pendingValue/Math.max(totalValue,1)*100}%`,background:"var(--color-warning)"}} />
-              <div className="tb-progress-bar" style={{width:`${overdueValue/Math.max(totalValue,1)*100}%`,background:"var(--color-danger)"}} />
+              <div className="tb-progress-bar" style={{width:`${paidValue/Math.max(totalValue,1)*100}%`,background:"var(--color-success)"}}/>
+              <div className="tb-progress-bar" style={{width:`${pendingValue/Math.max(totalValue,1)*100}%`,background:"var(--color-warning)"}}/>
+              <div className="tb-progress-bar" style={{width:`${overdueValue/Math.max(totalValue,1)*100}%`,background:"var(--color-danger)"}}/>
             </div>
           </div>
           <div className="flex gap-5 mt-2">
             {[{label:"Paid",color:"var(--color-success)",value:fmtEGP(paidValue)},{label:"Pending",color:"var(--color-warning)",value:fmtEGP(pendingValue)},{label:"Overdue",color:"var(--color-danger)",value:fmtEGP(overdueValue)}].map((s,i)=>(
               <div key={i} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{background:s.color}} />
+                <div className="w-2 h-2 rounded-full" style={{background:s.color}}/>
                 <span className="text-xs text-tertiary">{s.label}: {s.value}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {overdue.length>0 && (
+        {overdue.length>0&&(
           <div className="tb-alert tb-alert-danger mb-4">
             <div className="text-lg">💰</div>
             <div className="flex-1 text-sm">{overdue.length} Overdue Invoices — {fmtEGP(overdueValue)} uncollected. Contact clients immediately.</div>
@@ -94,7 +101,8 @@ export default function InvoicesPage() {
         )}
 
         <div className="flex gap-3 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by invoice number..." className="tb-input" style={{maxWidth:"320px"}} />
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by invoice number..."
+            className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
             {["all","overdue","pending","paid","cancelled"].map(s=>(
               <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
@@ -113,7 +121,15 @@ export default function InvoicesPage() {
           ) : (
             <div className="tb-table-wrap">
               <table className="tb-table">
-                <thead><tr><th>Invoice</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"right"}}>Amount</th><th style={{textAlign:"center"}}>Due Date</th><th style={{textAlign:"center"}}>Created</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Invoice</th>
+                    <th style={{textAlign:"center"}}>Status</th>
+                    <th style={{textAlign:"right"}}>Amount</th>
+                    <th style={{textAlign:"center"}}>Due Date</th>
+                    <th style={{textAlign:"center"}}>Created</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {filtered.map((inv,i)=>{
                     const isOv = inv.status==="overdue";
@@ -124,12 +140,14 @@ export default function InvoicesPage() {
                           <div className="text-xs text-tertiary mt-0.5">ID: {inv.id?.slice(0,12)}...</div>
                         </td>
                         <td className="text-center">
-                          <span className={`tb-badge ${inv.status==="paid"?"tb-badge-success":inv.status==="overdue"?"tb-badge-danger":inv.status==="pending"?"tb-badge-warning":"tb-badge-neutral"}`} style={{fontSize:"10px"}}>{inv.status||"—"}</span>
+                          <span className={`tb-badge ${inv.status==="paid"?"tb-badge-success":inv.status==="overdue"?"tb-badge-danger":inv.status==="pending"?"tb-badge-warning":"tb-badge-neutral"}`} style={{fontSize:"10px"}}>
+                            {inv.status||"—"}
+                          </span>
                         </td>
                         <td className="text-right text-sm font-bold text-primary">{fmtEGP(inv.total_amount)}</td>
                         <td className={`text-center text-xs ${isOv?"text-danger font-bold":"text-secondary"}`}>
                           {fmtDate(inv.due_date)}
-                          {isOv&&<div style={{fontSize:"0.5rem",textTransform:"uppercase"}}>OVERDUE</div>}
+                          {isOv&&<div className="text-danger font-bold" style={{fontSize:"0.5rem",textTransform:"uppercase"}}>OVERDUE</div>}
                         </td>
                         <td className="text-center text-xs text-tertiary">{fmtDate(inv.created_at)}</td>
                       </tr>
