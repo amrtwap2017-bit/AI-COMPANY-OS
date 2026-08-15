@@ -33,8 +33,7 @@ export default function ScopeOfWorkPage() {
   );
 
   const handleExport = () => {
-    const token = localStorage.getItem("tb_access_token")||"";
-    fetch("http://localhost:8030/api/v1/export/scope-of-work",{headers:{"Authorization":"Bearer "+token}}).then(r=>r.blob()).then(blob=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="scope-of-work.csv";a.click();});
+    import("@/lib/hooks/useAuthFetch").then(m => m.authFetch("/api/v1/export/scope-of-work")).then(r=>r.blob()).then(blob=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="scope-of-work.csv";a.click();});
   };
 
   const columns = [

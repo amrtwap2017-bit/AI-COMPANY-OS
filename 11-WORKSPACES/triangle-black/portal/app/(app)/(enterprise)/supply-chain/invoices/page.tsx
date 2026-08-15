@@ -24,10 +24,7 @@ export default function InvoicesPage() {
   const { data: dash } = useQuery(["invoice-dash"], () => authFetch("/api/v1/supplier-invoices/dashboard").then(r=>r.json()), { staleTime: 60000 });
   const invoices = toArr(raw);
   const handleExport = (url: string) => {
-    const token = localStorage.getItem("tb_token") || localStorage.getItem("tb_access_token") || "";
-    const a = document.createElement("a");
-    a.href = "http://localhost:8030" + url + "?token=" + token;
-    fetch("http://localhost:8030" + url, {headers: {"Authorization": "Bearer " + token}})
+    import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(url))
       .then(r => r.blob())
       .then(blob => {
         const dl = document.createElement("a");

@@ -10,8 +10,7 @@ import { Pagination } from "@/components/ui/Pagination";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 const handleExport = (url) => {
-  const token = localStorage.getItem("tb_token")||localStorage.getItem("tb_access_token")||"";
-  fetch("http://localhost:8030"+url,{headers:{"Authorization":"Bearer "+token}})
+  import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(url))
     .then(r=>r.blob()).then(blob=>{const dl=document.createElement("a");dl.href=URL.createObjectURL(blob);dl.download=url.split("/").pop()+"_"+new Date().toISOString().slice(0,10)+".csv";dl.click();});
 };
 

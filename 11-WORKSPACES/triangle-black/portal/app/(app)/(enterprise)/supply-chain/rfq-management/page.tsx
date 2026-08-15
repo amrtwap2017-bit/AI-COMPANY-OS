@@ -17,7 +17,7 @@ export default function RFQManagementPage() {
   const qc = useQueryClient();
 
   const createRFQ = useMutation(
-    (payload)=>fetch("http://localhost:8030/api/v1/rfq/",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+(localStorage.getItem("tb_token")||"")},body:JSON.stringify(payload)}).then(r=>r.json()),
+    (payload)=>import("@/lib/hooks/useAuthFetch").then(m=>m.authFetch("/api/v1/rfq/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})).then(r=>r.json()),
     {onSuccess:(d)=>{if(d.id||d.rfq_number){toast.success("RFQ created successfully");setShowNewRFQ(false);qc.invalidateQueries(["rfq-list"]);}else{toast.error(d.detail||"Failed to create RFQ");}},onError:()=>toast.error("Connection error")}
   );
 
