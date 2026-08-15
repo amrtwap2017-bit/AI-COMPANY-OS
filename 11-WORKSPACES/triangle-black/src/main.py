@@ -167,18 +167,63 @@ from fastapi.responses import JSONResponse
 _req_counts: dict = defaultdict(list)
 RATE_LIMIT_MAX = 1000000
 
+# Per-tenant rate limiting config
+import os as _os_rl
+# Set ENABLE_TENANT_RATE_LIMIT=1 in production to activate per-hotel limits
+_TENANT_RL_MAX    = int(_os_rl.environ.get("TENANT_RATE_LIMIT_MAX", "500"))
+_TENANT_RL_WINDOW = 60  # seconds
+_tenant_rl_store: dict = defaultdict(list)
+
+def _extract_hotel_key(request: Request) -> str:
+    # Try hotel_id from header first, then from JWT sub
+    hotel_header = request.headers.get("X-Hotel-ID")
+    if hotel_header:
+        return f"hotel:{hotel_header}"
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64, json as _json
+            parts = auth[7:].split(".")
+            if len(parts) == 3:
+                pad = parts[1] + "=" * (-len(parts[1]) % 4)
+                payload = _json.loads(base64.urlsafe_b64decode(pad))
+                sub = payload.get("sub", "")
+                if sub:
+                    return f"user:{sub}"
+        except Exception:
+            pass
+    return f"ip:{request.client.host if request.client else 'unknown'}"
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         ip = request.client.host if request.client else "unknown"
         # Whitelist localhost — never rate-limit test/dev traffic
         if ip in ("127.0.0.1", "::1", "localhost"):
-            return await call_next(request)
+            response = await call_next(request)
+            response.headers["X-RateLimit-Limit"] = str(RATE_LIMIT_MAX)
+            response.headers["X-RateLimit-Remaining"] = str(RATE_LIMIT_MAX)
+            response.headers["X-RateLimit-Bypass"] = "localhost"
+            return response
+        # Global limit check (kept very high for backwards compat)
         now = time.time()
         _req_counts[ip] = [t for t in _req_counts[ip] if t > now - 60]
         if len(_req_counts[ip]) >= RATE_LIMIT_MAX:
             return JSONResponse(status_code=429,
                 content={"detail": f"Rate limit: {RATE_LIMIT_MAX} req/min exceeded"})
         _req_counts[ip].append(now)
+        # Per-tenant rate limiting (production hardening)
+        if _os_rl.environ.get("ENABLE_TENANT_RATE_LIMIT") == "1":
+            tenant_key = _extract_hotel_key(request)
+            _tenant_rl_store[tenant_key] = [
+                t for t in _tenant_rl_store[tenant_key] if t > now - _TENANT_RL_WINDOW
+            ]
+            if len(_tenant_rl_store[tenant_key]) >= _TENANT_RL_MAX:
+                return JSONResponse(
+                    status_code=429,
+                    headers={"X-RateLimit-TenantKey": tenant_key},
+                    content={"detail": f"Tenant rate limit exceeded. Max {_TENANT_RL_MAX} req/min."}
+                )
+            _tenant_rl_store[tenant_key].append(now)
         response = await call_next(request)
         remaining = max(0, RATE_LIMIT_MAX - len(_req_counts[ip]))
         response.headers["X-RateLimit-Limit"] = str(RATE_LIMIT_MAX)
@@ -573,6 +618,9 @@ _RL_MAX    = 120  # requests per window per IP
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     ip  = (request.client.host if request.client else "unknown")
+    # Whitelist localhost for tests and local development
+    if ip in ("127.0.0.1", "::1", "localhost"):
+        return await call_next(request)
     now = _time.time()
     _rl_store[ip] = [t for t in _rl_store[ip] if t > now - _RL_WINDOW]
     if len(_rl_store[ip]) >= _RL_MAX:
