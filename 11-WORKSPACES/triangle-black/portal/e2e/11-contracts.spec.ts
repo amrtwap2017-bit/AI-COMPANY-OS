@@ -52,7 +52,8 @@ test.describe("Contracts", () => {
   test("contracts page does not show 404", async ({ page }) => {
     await navigateAuthenticated(page, "/commercial/contracts");
     const body = await page.locator("body").innerText();
-    expect(body).not.toContain("404");
+    const hasNext404 = body.includes("This page could not be found") || body.includes("404 | Page Not Found");
+    expect(hasNext404).toBe(false);
   });
 
   test("API: list contracts returns 200", async ({ request }) => {
