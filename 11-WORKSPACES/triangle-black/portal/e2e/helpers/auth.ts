@@ -16,13 +16,27 @@ export async function getAdminToken(): Promise<string> {
   return data.access_token;
 }
 
+export async function seedBrowserAuth(page: Page, token: string): Promise<void> {
+  await page.context().addCookies([
+    { name: "tb_access_token", value: token, url: BASE_URL, path: "/" },
+    { name: "tb_token", value: token, url: BASE_URL, path: "/" },
+  ]);
+
+  await page.addInitScript((t) => {
+    try {
+      localStorage.setItem("tb_access_token", t);
+      localStorage.setItem("tb_token", t);
+      sessionStorage.setItem("tb_access_token", t);
+      sessionStorage.setItem("tb_token", t);
+      document.cookie = `tb_access_token=${t}; path=/`;
+      document.cookie = `tb_token=${t}; path=/`;
+    } catch {}
+  }, token);
+}
+
 export async function injectAuth(page: Page): Promise<string> {
   const token = await getAdminToken();
-  await page.goto(`${BASE_URL}/login`);
-  await page.evaluate((t) => {
-    localStorage.setItem("tb_access_token", t);
-    localStorage.setItem("tb_token", t);
-  }, token);
+  await seedBrowserAuth(page, token);
   return token;
 }
 
@@ -34,11 +48,11 @@ export async function loginViaUI(page: Page): Promise<void> {
   await emailInput.fill(ADMIN_EMAIL);
   await passInput.fill(ADMIN_PASSWORD);
   await page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Login")').first().click();
-  await page.waitForURL(/workspace|dashboard|\/$/i, { timeout: 10000 }).catch(() => {});
+  await page.waitForTimeout(2000);
 }
 
 export async function navigateAuthenticated(page: Page, path: string): Promise<void> {
   await injectAuth(page);
-  await page.goto(`${BASE_URL}${path}`);
+  await page.goto(`${BASE_URL}${path}`, { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle");
 }

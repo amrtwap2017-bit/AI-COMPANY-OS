@@ -34,8 +34,7 @@ test.describe("Authentication", () => {
   test("unauthenticated access redirects to login", async ({ page }) => {
     await page.goto(`${BASE_URL}/operations/work-orders`);
     await page.waitForTimeout(2000);
-    const url = page.url();
-    expect(url).toContain("/login");
+    expect(page.url()).toContain("/login");
   });
 
   test("backend login API returns token", async ({ page }) => {
@@ -52,17 +51,30 @@ test.describe("Authentication", () => {
 
   test("inject auth and reach protected page", async ({ page }) => {
     await injectAuth(page);
-    await page.goto(`${BASE_URL}/operations/work-orders`);
-    await page.waitForTimeout(2000);
-    const url = page.url();
-    expect(url).not.toContain("/login");
+    await page.goto(`${BASE_URL}/operations/work-orders`, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(2500);
+    expect(page.url()).not.toContain("/login");
+    await expect(page.locator("h1").first()).toBeVisible();
   });
 
-  test("localStorage contains token after inject", async ({ page }) => {
+  test("inject auth seeds cookies and storage", async ({ page }) => {
     await injectAuth(page);
-    const token = await page.evaluate(() => localStorage.getItem("tb_access_token") || localStorage.getItem("tb_token"));
+    await page.goto(`${BASE_URL}/login`);
+    await page.waitForTimeout(1000);
+
+    const token = await page.evaluate(() =>
+      localStorage.getItem("tb_access_token") ||
+      localStorage.getItem("tb_token") ||
+      sessionStorage.getItem("tb_access_token") ||
+      sessionStorage.getItem("tb_token")
+    );
+
+    const cookies = await page.context().cookies();
+    const hasAccessCookie = cookies.some(c => c.name === "tb_access_token");
+    const hasTokenCookie  = cookies.some(c => c.name === "tb_token");
+
     expect(token).toBeTruthy();
-    expect(typeof token).toBe("string");
+    expect(hasAccessCookie || hasTokenCookie).toBeTruthy();
   });
 
   test("health check endpoint is reachable", async ({ page }) => {
