@@ -129,7 +129,7 @@ test.describe("User Journeys — UI", () => {
     await page.waitForTimeout(2000);
     const table = page.locator("table").first();
     const tableCount = await table.count();
-    const emptyState = page.locator(".tb-empty, text=No leads").first();
+    const emptyState = page.locator(".tb-empty").or(page.locator("text=No leads")).first();
     const emptyCount = await emptyState.count();
     expect(tableCount > 0 || emptyCount > 0).toBeTruthy();
   });
