@@ -1058,3 +1058,36 @@ Run single E2E file:
   4. Check current inline style count:
      grep -rn "style={{" portal/app --include="*.tsx" 2>/dev/null | wc -l
      Expected: ~1224
+
+## SESSION UPDATE — Sprint-195 to 196 — August 2026
+
+### Sprint-195: Per-Tenant Rate Limiting
+- _extract_hotel_key() extracts hotel_id from JWT or X-Hotel-ID header
+- _tenant_rl_store per-tenant request counter dict
+- ENABLE_TENANT_RATE_LIMIT=1 env var activates in production
+- TENANT_RATE_LIMIT_MAX=500 default (configurable)
+- localhost whitelist with informative rate-limit headers
+- Sprint-76 middleware localhost whitelist added (was missing)
+- 6 new tests: tests/commercial/test_sprint195_tenant_rate_limit.py
+
+### Sprint-196: Direct Fetch Anti-Pattern Elimination
+- ZERO remaining direct fetch("http://localhost:8030/...") calls in portal
+- Fixed 5 pages that bypassed authFetch:
+  - supply-chain/invoices/page.tsx
+  - supply-chain/vendor-management/page.tsx
+  - supply-chain/scope-of-work/page.tsx
+  - supply-chain/rfq-management/page.tsx
+  - administration/platform/exports/page.tsx
+  - administration/platform/page.tsx (fixed Sprint-192)
+- All replaced with import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(...))
+
+### PRODUCTION ACTIVATION
+Per-tenant rate limiting is OFF by default (safe for tests).
+To enable in production:
+  ENABLE_TENANT_RATE_LIMIT=1 TENANT_RATE_LIMIT_MAX=300 uvicorn ...
+
+### NEXT SPRINT BACKLOG (updated)
+  Sprint-197: Redis cache integration for high-traffic endpoints
+  Sprint-198: Add E2E tests for PM plans, technicians, service request detail
+  Sprint-199: Structured logging with correlation IDs
+  Sprint-200: Feature flags system
