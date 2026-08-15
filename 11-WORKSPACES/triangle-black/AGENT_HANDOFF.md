@@ -959,3 +959,102 @@ Server must be restarted before running full test suite if runtime > 4 hours
 Command: pkill -f "uvicorn src.main" && sleep 2 && DISABLE_RATE_LIMIT=1 .venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8030 > /tmp/tb_server.log 2>&1 &
 53 failures appeared after 9h runtime — all resolved by restart
 1223 confirmed passing after restart
+
+## SESSION UPDATE — Sprint-174 to 194 — August 2026
+
+### SESSION SUMMARY
+This session focused on:
+1. UX Cleanup (sprints 174-179): Removed ~1012 inline styles across 40+ portal pages
+2. E2E Testing (sprints 180-193): Installed Playwright and built 133 passing E2E tests
+
+### 🏆 VERIFIED BASELINE — AUGUST 2026
+- Backend pytest: 1223 passed, 78 skipped, 78 deselected, 0 failed
+- E2E Playwright: 133 passed, 0 failed, 0 flaky
+- Total verified tests: 1356
+- Runtime: backend ~37min, E2E ~3min17s
+
+### CRITICAL OPERATIONAL RULES (UPDATED)
+1. ALWAYS restart backend with DISABLE_RATE_LIMIT=1 before running pytest
+2. ALWAYS run bash START.sh before full test suite
+3. Backend must be FRESH (not running 4+ hours) for pytest to pass cleanly
+4. E2E tests require both backend (8030) AND portal (3000) running
+
+### START COMMANDS
+Backend only:
+  pkill -f "uvicorn src.main" 2>/dev/null; sleep 2 && DISABLE_RATE_LIMIT=1 .venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8030 > /tmp/tb_server.log 2>&1 &
+
+Full stack:
+  bash START.sh
+
+Run backend tests:
+  .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+
+Run E2E tests (portal must be running):
+  cd portal && npx playwright test e2e/ --reporter=list
+
+Run single E2E file:
+  cd portal && npx playwright test e2e/01-auth.spec.ts --reporter=list
+
+### E2E TEST FILES (portal/e2e/)
+  01-auth.spec.ts          — 9 tests: login, token injection, health checks
+  02-pages.spec.ts         — 10 tests: protected page loads
+  03-api-contracts.spec.ts — 13 tests: API endpoint contracts
+  04-work-orders.spec.ts   — 7 tests: work orders API + UI
+  05-leads.spec.ts         — 7 tests: leads API + UI
+  06-navigation.spec.ts    — 10 tests: navigation between pages
+  07-search.spec.ts        — 8 tests: search API + UI
+  08-forms.spec.ts         — 9 tests: form validation
+  09-user-journeys.spec.ts — 16 tests: login form, modals, tables, back nav
+  10-assets.spec.ts        — 13 tests: assets page + API
+  11-contracts.spec.ts     — 15 tests: contracts page + API
+  12-purchase-requests.spec.ts — 15 tests: PR page + modal + API
+
+### E2E ARCHITECTURE
+  helpers/global-setup.ts  — gets ONE token at session start, sets process.env.E2E_TOKEN
+  helpers/auth.ts          — injectAuth() seeds cookies + localStorage + sessionStorage
+  playwright.config.ts     — single chromium worker, 30s navigation timeout, commit wait
+
+### UX CLEANUP RESULTS (sprints 174-179)
+  Session start: ~2236 inline styles
+  Session end:   ~1224 inline styles
+  Removed:       ~1012 inline styles
+  Pages cleaned: 40+ pages converted to TBEDS 7.1 classes
+
+### KNOWN REMAINING UX ISSUES
+  Intentionally skipped (dark theme — must stay):
+    - login/page.tsx (18 inline styles)
+    - client-portal/page.tsx (18 inline styles)
+    - supplier-portal/page.tsx (18 inline styles)
+    - supplier-portal/dashboard/page.tsx (16 inline styles)
+  Irreducible dynamic values:
+    - invoices/page.tsx (17 — multi-segment progress bars)
+    - supply-chain/inventory/page.tsx (15 — dynamic progress bars)
+    - executive/dashboard/page.tsx (22 — chart colors)
+    - executive/page.tsx (21 — chart colors)
+    - graph/page.tsx (23 — chart colors)
+
+### KNOWN DIRECT-FETCH ANTI-PATTERNS (needs future fix)
+  These pages still use raw fetch("http://localhost:8030/...") instead of authFetch:
+    - supply-chain/invoices/page.tsx
+    - supply-chain/vendor-management/page.tsx
+    - supply-chain/scope-of-work/page.tsx
+    - supply-chain/rfq-management/page.tsx
+    - administration/platform/exports/page.tsx
+  NOTE: administration/platform/page.tsx was FIXED this session (Sprint-192)
+
+### NEXT SPRINT BACKLOG
+  Sprint-195: Per-tenant rate limiting (CRITICAL — prevents one hotel from DoS-ing others)
+  Sprint-196: Fix remaining direct localhost fetch patterns in supply-chain pages
+  Sprint-197: Run Qwen analysis on next enterprise gap priorities
+  Sprint-198: Add E2E tests for PM plans, technicians, service request detail
+  Sprint-199: Redis cache integration for high-traffic endpoints
+
+### NEXT AGENT — START HERE
+  1. bash START.sh
+  2. cd portal && npx playwright test e2e/ --reporter=list 2>&1 | tail -5
+     Expected: 133 passed, 0 failed
+  3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+     Expected: 1223 passed, 78 skipped, 78 deselected, 0 failed
+  4. Check current inline style count:
+     grep -rn "style={{" portal/app --include="*.tsx" 2>/dev/null | wc -l
+     Expected: ~1224
