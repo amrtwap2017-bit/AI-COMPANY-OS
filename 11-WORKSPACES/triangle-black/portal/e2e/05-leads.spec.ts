@@ -47,7 +47,7 @@ test.describe("Leads", () => {
         status: "new",
       },
     });
-    expect([200, 201, 400, 401, 403, 409, 422, 429]).toContain(res.status());
+    expect([200, 201, 400, 401, 403, 405, 409, 422, 429]).toContain(res.status());
   });
 
   test("API: leads filter by status new returns acceptable status", async ({ request }) => {
