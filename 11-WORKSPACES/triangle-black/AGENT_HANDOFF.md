@@ -953,3 +953,9 @@ Suite verified: 1223 passing, 0 failing
 Sprint-170: Next 5 worst pages
 Sprint-171: Continue UX upgrade
 Sprint-172: Test suite checkpoint (every 5 sprints)
+
+## CRITICAL OPERATIONAL NOTE — August 2026
+Server must be restarted before running full test suite if runtime > 4 hours
+Command: pkill -f "uvicorn src.main" && sleep 2 && DISABLE_RATE_LIMIT=1 .venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8030 > /tmp/tb_server.log 2>&1 &
+53 failures appeared after 9h runtime — all resolved by restart
+1223 confirmed passing after restart
