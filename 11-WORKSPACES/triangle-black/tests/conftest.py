@@ -147,6 +147,12 @@ def wait_for_heavy_modules(request):
             "test_sprint143","test_sprint144","test_sprint145",
             "test_sprint146","test_sprint147","test_sprint148",
             "test_sprint149","test_sprint150","test_sprint151",
+            "test_sprint152","test_sprint153","test_sprint154","test_sprint155",
+            "test_sprint156","test_sprint157","test_sprint158","test_sprint159",
+            "test_sprint216_audit","test_sprint217_wo_audit",
+            "test_sprint222_security_headers","test_sprint223_sql_safety",
+            "test_sprint224_secrets_scan","test_sprint225_login_rate_limit",
+            "test_sprint226_cors_jwt",
             "test_sprint152","test_sprint153","test_sprint154",
             "test_sprint155","test_sprint156"
         ]
