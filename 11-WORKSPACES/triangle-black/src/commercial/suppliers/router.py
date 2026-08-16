@@ -54,6 +54,14 @@ def create_supplier(data: dict, db: Session = Depends(get_db)):
             "updated_at": now,
         })
         db.commit()
+        try:
+            audit_create(db, "supplier", sid,
+                         hotel_id=hotel_id,
+                         metadata={"company_name": data.get("company_name"),
+                                   "status": data.get("status", "active"),
+                                   "category": data.get("category")})
+        except Exception:
+            pass
         return {"id": sid, "company_name": data.get("company_name"), "status": "active", "ok": True}
     except Exception as e:
         db.rollback()

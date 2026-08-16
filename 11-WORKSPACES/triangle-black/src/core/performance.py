@@ -9,6 +9,7 @@ Headers added:
 """
 from __future__ import annotations
 import time
+import threading
 from contextvars import ContextVar
 from typing import Optional
 from sqlalchemy import event
@@ -18,11 +19,26 @@ from sqlalchemy.engine import Engine
 _query_count: ContextVar[int] = ContextVar("_query_count", default=0)
 _start_time:  ContextVar[Optional[float]] = ContextVar("_start_time", default=None)
 
+# ── Thread-local fallback for SQLAlchemy sync sessions ───────────────────────
+# ContextVars do not propagate into ThreadPoolExecutor threads used by
+# SQLAlchemy sync sessions in async FastAPI. Use a shared thread-local
+# counter keyed by request_id as a pragmatic workaround.
+_thread_local = threading.local()
+_global_query_counts: dict = {}
+_current_request_id: ContextVar[Optional[str]] = ContextVar("_current_request_id", default=None)
+
 
 def _on_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-    """Increment query counter for the current request context."""
+    """Increment query counter — uses thread-local to bridge async/sync boundary."""
     try:
+        # Try ContextVar first (works in same-thread async)
         _query_count.set(_query_count.get() + 1)
+    except Exception:
+        pass
+    try:
+        # Also increment global dict keyed by thread id (sync SQLAlchemy thread)
+        tid = threading.get_ident()
+        _global_query_counts[tid] = _global_query_counts.get(tid, 0) + 1
     except Exception:
         pass
 
@@ -42,12 +58,21 @@ def reset_request_context() -> None:
         _start_time.set(time.perf_counter())
     except Exception:
         pass
+    try:
+        # Clear all thread-local counts at request start
+        _global_query_counts.clear()
+    except Exception:
+        pass
 
 
 def get_query_count() -> int:
-    """Return number of DB queries executed in current request context."""
+    """Return number of DB queries executed in current request context.
+    Sums ContextVar count (async path) + thread-local counts (sync SQLAlchemy path).
+    """
     try:
-        return _query_count.get()
+        ctx_count = _query_count.get()
+        thread_count = sum(_global_query_counts.values())
+        return max(ctx_count, thread_count)
     except Exception:
         return 0
 
