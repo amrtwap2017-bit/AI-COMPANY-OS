@@ -3,8 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-export default function SupplyChainHub() {
+function SupplyChainHubInner() {
   const router = useRouter();
   const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r=>r.json()));
   const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r=>r.json()));
@@ -62,5 +63,14 @@ export default function SupplyChainHub() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function SupplyChainHub(props: any) {
+  return (
+    <FeatureGate feature="supply_chain">
+      <SupplyChainHubInner {...props} />
+    </FeatureGate>
   );
 }

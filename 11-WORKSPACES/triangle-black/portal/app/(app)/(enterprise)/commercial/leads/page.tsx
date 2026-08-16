@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { CreateModal } from "@/components/ui/CreateModal";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -24,7 +25,7 @@ const leadFields = [
   {key:"priority",label:"Priority",  type:"select", required:false, defaultValue:"medium", options:[{label:"High",value:"high"},{label:"Medium",value:"medium"},{label:"Low",value:"low"}]},
 ];
 
-export default function LeadsPage() {
+function LeadsPageInner() {
   const router = useRouter();
   const [search,     setSearch]     = useState("");
   const [statusF,    setStatusF]    = useState("all");
@@ -161,5 +162,14 @@ export default function LeadsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function LeadsPage(props: any) {
+  return (
+    <FeatureGate feature="commercial">
+      <LeadsPageInner {...props} />
+    </FeatureGate>
   );
 }

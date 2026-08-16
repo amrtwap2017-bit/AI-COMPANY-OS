@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
@@ -14,7 +15,7 @@ const STATUS_COLOR = {
   active:"#547C4D", pending_signature:"#B07A2A", expired:"#A84A3D", draft:"#6D5F53",
 };
 
-export default function ContractsPage() {
+function ContractsPageInner() {
   const router = useRouter();
   const [search,  setSearch]  = useState("");
   const [statusF, setStatusF] = useState("all");
@@ -156,5 +157,14 @@ export default function ContractsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function ContractsPage(props: any) {
+  return (
+    <FeatureGate feature="commercial">
+      <ContractsPageInner {...props} />
+    </FeatureGate>
   );
 }

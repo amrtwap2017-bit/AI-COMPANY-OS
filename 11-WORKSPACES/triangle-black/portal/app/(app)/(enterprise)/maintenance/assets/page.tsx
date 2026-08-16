@@ -6,13 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const CRIT_COLOR = {critical:"var(--color-danger)",high:"var(--color-warning)",medium:"var(--color-warning)",low:"var(--color-text-3)"};
 
-export default function AssetsPage() {
+function AssetsPageInner() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [catF, setCatF] = useState("all");
@@ -142,5 +143,14 @@ export default function AssetsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function AssetsPage(props: any) {
+  return (
+    <FeatureGate feature="maintenance">
+      <AssetsPageInner {...props} />
+    </FeatureGate>
   );
 }
