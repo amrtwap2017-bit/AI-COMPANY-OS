@@ -26,6 +26,18 @@ def list_assets(
     limit:    int = Query(default=50, le=200),
     db: Session = Depends(get_db),
 ):
+    # Sprint-198: Cache-aside for assets list (TTL=300s, assets change rarely)
+    try:
+        from src.core.cache import cache_get, cache_set, make_cache_key
+        _hid = hotel_id or "tb-default-hotel-000000000001"
+        _ck = make_cache_key("assets", _hid,
+            category=category, status=status, skip=skip, limit=limit)
+        cached = cache_get(_ck)
+        if cached is not None:
+            return cached
+    except Exception:
+        _ck = None
+
     q = "SELECT * FROM assets WHERE 1=1"
     params: dict = {}
     if hotel_id: q += " AND hotel_id = :hotel_id"; params["hotel_id"] = hotel_id
@@ -34,7 +46,16 @@ def list_assets(
     q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
     params["limit"] = limit; params["skip"] = skip
     rows = db.execute(text(q), params).fetchall()
-    return [row_to_dict(r) for r in rows]
+    result = [row_to_dict(r) for r in rows]
+
+    try:
+        if _ck:
+            from src.core.cache import cache_set
+            cache_set(_ck, result, ttl=300)
+    except Exception:
+        pass
+
+    return result
 
 
 @router.get("", summary="List assets")

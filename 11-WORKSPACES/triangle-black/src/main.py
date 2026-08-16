@@ -3859,6 +3859,16 @@ async def record_payment(invoice_id: str, request: Request):
 @app.get("/api/v1/leads-portal-v2", tags=["commercial"], include_in_schema=False)
 def leads_portal_v2(limit: int = 100):
     """Public leads list for portal pages"""
+    # Sprint-198: Cache-aside for leads list (TTL=60s)
+    try:
+        from src.core.cache import cache_get, cache_set, make_cache_key
+        _ck = make_cache_key("leads", "tb-default-hotel-000000000001", limit=limit)
+        cached = cache_get(_ck)
+        if cached is not None:
+            return cached
+    except Exception:
+        _ck = None
+
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3871,7 +3881,14 @@ def leads_portal_v2(limit: int = 100):
                 FROM leads
                 ORDER BY created_at DESC LIMIT :l
             """), {"l": limit}).fetchall()
-            return [dict(r._mapping) for r in rows]
+            result = [dict(r._mapping) for r in rows]
+            try:
+                if _ck:
+                    from src.core.cache import cache_set
+                    cache_set(_ck, result, ttl=60)
+            except Exception:
+                pass
+            return result
         except Exception as e:
             db.rollback()
             return []

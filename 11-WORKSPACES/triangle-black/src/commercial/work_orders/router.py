@@ -28,6 +28,19 @@ def list_work_orders(
     limit:         int = Query(default=50, ge=1, le=1000),
     db: Session = Depends(get_db),
 ):
+    # Sprint-198: Cache-aside for work-orders list
+    try:
+        from src.core.cache import cache_get, cache_set, make_cache_key
+        _hid = hotel_id or "tb-default-hotel-000000000001"
+        _ck = make_cache_key("work-orders", _hid,
+            status=status, priority=priority,
+            technician_id=technician_id, skip=skip, limit=limit)
+        cached = cache_get(_ck)
+        if cached is not None:
+            return cached
+    except Exception:
+        _ck = None
+
     q = "SELECT * FROM work_orders WHERE 1=1"
     params: dict = {}
     if hotel_id:      q += " AND hotel_id = :hotel_id";           params["hotel_id"]      = hotel_id
@@ -37,7 +50,16 @@ def list_work_orders(
     q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
     params["limit"] = limit; params["skip"] = skip
     rows = db.execute(text(q), params).fetchall()
-    return [row_to_dict(r) for r in rows]
+    result = [row_to_dict(r) for r in rows]
+
+    try:
+        if _ck:
+            from src.core.cache import cache_set
+            cache_set(_ck, result, ttl=60)
+    except Exception:
+        pass
+
+    return result
 
 
 @router.get("", summary="List work orders")
