@@ -8187,3 +8187,27 @@ async def login_rate_limit_middleware(request: Request, call_next):
 
     _login_attempts[ip].append(now)
     return await call_next(request)
+
+
+# ── Sprint-229: Performance Baseline Middleware ────────────────────────────────
+from src.core.performance import setup_query_tracking, reset_request_context, get_query_count, get_elapsed_ms as _get_ms
+from src.core.database import engine as _perf_engine
+try:
+    setup_query_tracking(_perf_engine)
+except Exception:
+    pass
+
+@app.middleware("http")
+async def performance_tracking_middleware(request: Request, call_next):
+    """Track DB query count and response time per request."""
+    try:
+        reset_request_context()
+    except Exception:
+        pass
+    response = await call_next(request)
+    try:
+        response.headers["X-DB-Query-Count"]  = str(get_query_count())
+        response.headers["X-Response-Time-Ms"] = str(_get_ms())
+    except Exception:
+        pass
+    return response
