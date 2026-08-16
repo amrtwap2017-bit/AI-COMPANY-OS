@@ -3,11 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-export default function AnalyticsHub() {
+function AnalyticsHubInner() {
   const router = useRouter();
   const { data: dash }     = useQuery(["an-dash"],   () => authFetch("/api/v1/executive/dashboard").then(r=>r.json()), {refetchInterval:60000});
   const { data: twin }     = useQuery(["an-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
@@ -147,5 +148,14 @@ export default function AnalyticsHub() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function AnalyticsHub(props: any) {
+  return (
+    <FeatureGate feature="analytics">
+      <AnalyticsHubInner {...props} />
+    </FeatureGate>
   );
 }

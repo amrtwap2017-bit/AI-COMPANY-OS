@@ -6,12 +6,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
-export default function ProjectsCenterPage() {
+function ProjectsCenterPageInner() {
   const router = useRouter();
   const [showNewProject, setShowNewProject] = useState(false);
   const [newProj, setNewProj] = useState({title:"",description:"",status:"planning",budget:0});
@@ -189,5 +190,14 @@ export default function ProjectsCenterPage() {
         </div>
       )}
     </div>
+  );
+}
+
+
+export default function ProjectsCenterPage(props: any) {
+  return (
+    <FeatureGate feature="projects">
+      <ProjectsCenterPageInner {...props} />
+    </FeatureGate>
   );
 }

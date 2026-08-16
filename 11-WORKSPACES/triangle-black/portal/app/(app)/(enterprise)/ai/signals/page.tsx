@@ -6,8 +6,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";
+import { FeatureGate } from "@/components/ui/FeatureGate";
 
-export default function AISignalsPage() {
+function AISignalsPageInner() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [summary, setSummary] = useState<any>(null);
@@ -89,5 +90,14 @@ export default function AISignalsPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+
+export default function AISignalsPage(props: any) {
+  return (
+    <FeatureGate feature="ai_assistant">
+      <AISignalsPageInner {...props} />
+    </FeatureGate>
   );
 }
