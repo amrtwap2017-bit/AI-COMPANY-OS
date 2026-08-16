@@ -127,8 +127,20 @@ class _CorrelationIDMiddleware(_BaseHTTPMiddleware):
     async def dispatch(self, request: _MWRequest, call_next):
         req_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())[:8]
         request.state.request_id = req_id
+        # Sprint-199: inject request_id into log context
+        try:
+            from src.core.logging_config import set_log_context, clear_log_context
+            hotel_hdr = request.headers.get("X-Hotel-ID", "")
+            set_log_context(request_id=req_id, hotel_id=hotel_hdr)
+        except Exception:
+            pass
         response = await call_next(request)
         response.headers["X-Request-ID"] = req_id
+        try:
+            from src.core.logging_config import clear_log_context
+            clear_log_context()
+        except Exception:
+            pass
         return response
 
 app = FastAPI(
