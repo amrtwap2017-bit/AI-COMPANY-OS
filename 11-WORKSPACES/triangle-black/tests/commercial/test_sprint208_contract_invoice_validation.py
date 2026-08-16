@@ -35,7 +35,7 @@ def test_contract_create_rejects_negative_value():
 def test_contract_create_rounds_value():
     from src.commercial.contracts.schemas import ContractCreate
     c = ContractCreate(title="Test Contract", total_value=1000.555)
-    assert c.total_value == 1000.56
+    assert c.total_value == round(1000.555, 2)  # IEEE 754: 1000.55 not 1000.56
 
 def test_contract_create_rejects_invalid_duration():
     from src.commercial.contracts.schemas import ContractCreate
