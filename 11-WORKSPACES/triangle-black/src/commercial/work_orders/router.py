@@ -6,6 +6,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import Optional, List
 import uuid, datetime
+from src.core.audit import audit_create, audit_update, audit_delete
 
 router = APIRouter(prefix="/work-orders", tags=["work-orders"])
 
@@ -114,6 +115,12 @@ def create_work_order(data: dict, db: Session = Depends(get_db)):
         "updated_at":   now,
     })
     db.commit()
+    try:
+        audit_create(db, "work_order", wo_id,
+                     hotel_id=data.get("hotel_id"),
+                     metadata={"title": data.get("title"), "priority": data.get("priority"), "type": data.get("type")})
+    except Exception:
+        pass
     return get_work_order(wo_id, db)
 
 @router.patch("/{work_order_id}", summary="Update work order")
@@ -126,12 +133,21 @@ def update_work_order(work_order_id: str, data: dict, db: Session = Depends(get_
     updates["id"] = work_order_id
     db.execute(text(f"UPDATE work_orders SET {set_clause} WHERE id = :id"), updates)
     db.commit()
+    try:
+        audit_update(db, "work_order", work_order_id,
+                     new_value={k: v for k, v in data.items() if k in allowed and v is not None})
+    except Exception:
+        pass
     return get_work_order(work_order_id, db)
 
 @router.delete("/{work_order_id}", status_code=204, summary="Delete work order")
 def delete_work_order(work_order_id: str, db: Session = Depends(get_db)):
     db.execute(text("DELETE FROM work_orders WHERE id = :id"), {"id": work_order_id})
     db.commit()
+    try:
+        audit_delete(db, "work_order", work_order_id)
+    except Exception:
+        pass
 
 @router.get("/{work_order_id}/history", summary="Work order history")
 def work_order_history(work_order_id: str, db: Session = Depends(get_db)):
