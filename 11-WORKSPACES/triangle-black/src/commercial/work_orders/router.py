@@ -480,3 +480,104 @@ def complete_work_order(wo_id: str, db: Session = Depends(get_db)):
         "message": "Work order completed. Draft invoice created." if not existing else "Work order completed. Invoice already existed.",
     }
 # ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── Sprint-235: WO → Service Report → Close (Reference Vertical Slice) ────────
+@router.post("/{wo_id}/close", summary="Close work order with service report")
+def close_work_order(wo_id: str, db: Session = Depends(get_db)):
+    """
+    Close a completed work order. Creates a service report record.
+    Part of the SR→WO→ServiceReport→Close reference vertical slice.
+    Emits workflow transition + audit event.
+    """
+    import uuid as _uuid_235
+    import datetime as _dt_235
+    from sqlalchemy import text as _t235
+
+    row = db.execute(_t235(
+        "SELECT id, hotel_id, title, status FROM work_orders WHERE id = :id"
+    ), {"id": wo_id}).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Work order not found")
+
+    wo = dict(row._mapping)
+    hotel_id = wo.get("hotel_id", "tb-default-hotel-000000000001")
+    now = _dt_235.datetime.utcnow()
+
+    if wo.get("status") == "closed":
+        return {"ok": True, "work_order_id": wo_id, "status": "closed",
+                "message": "Already closed"}
+
+    # Update WO status to closed
+    db.execute(_t235("""
+        UPDATE work_orders
+        SET status='closed', completed_at=:now, updated_at=:now
+        WHERE id=:id
+    """), {"now": now, "id": wo_id})
+
+    # Create service report record (non-blocking — table may not exist)
+    service_report_id = None
+    try:
+        service_report_id = str(_uuid_235.uuid4())
+        db.execute(_t235("""
+            INSERT INTO service_reports
+            (id, hotel_id, work_order_id, status, closed_at, created_at, updated_at)
+            VALUES (:id, :hotel_id, :wo_id, 'completed', :now, :now, :now)
+        """), {
+            "id":       service_report_id,
+            "hotel_id": hotel_id,
+            "wo_id":    wo_id,
+            "now":      now,
+        })
+    except Exception:
+        service_report_id = None
+
+    db.commit()
+
+    # Workflow transition: completed → closed (non-blocking)
+    wf_transitioned = False
+    try:
+        from src.commercial.workflow_engine.engine import TriangleWorkflowEngine
+        wf_engine = TriangleWorkflowEngine(entity_type="work_order")
+        # Find active workflow instance for this WO
+        inst_row = db.execute(_t235("""
+            SELECT id, current_state FROM workflow_instances
+            WHERE entity_id = :eid AND entity_type = 'work_order'
+              AND status = 'active'
+            ORDER BY created_at DESC LIMIT 1
+        """), {"eid": wo_id}).fetchone()
+
+        if inst_row:
+            inst = dict(inst_row._mapping)
+            ok, _ = wf_engine.execute_transition(
+                db=db,
+                instance_id=inst["id"],
+                from_state=inst.get("current_state", "completed"),
+                to_state="closed",
+                entity_type="work_order",
+                entity_id=wo_id,
+                hotel_id=hotel_id,
+                notes="Closed via close endpoint",
+            )
+            wf_transitioned = ok
+    except Exception:
+        pass
+
+    # Audit the closure (non-blocking)
+    try:
+        audit_action(db, "work_order", wo_id, "CLOSED",
+                     hotel_id=hotel_id,
+                     metadata={"service_report_id": service_report_id,
+                               "wf_transitioned": wf_transitioned})
+    except Exception:
+        pass
+
+    return {
+        "ok":                True,
+        "work_order_id":     wo_id,
+        "status":            "closed",
+        "service_report_id": service_report_id,
+        "wf_transitioned":   wf_transitioned,
+        "closed_at":         now.isoformat(),
+    }
