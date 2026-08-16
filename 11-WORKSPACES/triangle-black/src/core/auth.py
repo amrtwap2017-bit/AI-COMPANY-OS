@@ -15,7 +15,15 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.commercial.auth.models import User
 
-SECRET_KEY = os.environ.get("TB_SECRET_KEY", "triangle-black-secret-key-change-in-production")
+import secrets as _secrets_226
+_fallback_key = _secrets_226.token_hex(32)  # random per process — forces env var in production
+SECRET_KEY = os.environ.get("TB_SECRET_KEY") or _fallback_key
+if not os.environ.get("TB_SECRET_KEY"):
+    import logging as _logging_226
+    _logging_226.getLogger("tb.auth").warning(
+        "[security] TB_SECRET_KEY env var not set — using random per-process key. "
+        "All tokens will be invalidated on restart. Set TB_SECRET_KEY in production."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8
 REFRESH_TOKEN_EXPIRE_DAYS = 30
