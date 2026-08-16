@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useFeatureFlags } from "@/lib/hooks/useFeatureFlags";
 import { enterpriseCenters, navGroups } from "./nav";
 import type { NavCenter } from "./nav";
 import { PRIMARY_BY_ROLE, ROLE_LABELS, START_HERE_BY_ROLE } from "@/lib/role-navigation";
@@ -151,11 +152,31 @@ export function EnterpriseSidebar() {
   const primaryKeys = PRIMARY_BY_ROLE[role] || PRIMARY_BY_ROLE.viewer;
   const startHere = START_HERE_BY_ROLE[role] || START_HERE_BY_ROLE.viewer;
 
+  // Sprint-202: Feature flag to nav key mapping
+  const { isEnabled } = useFeatureFlags();
+  const NAV_TO_FLAG: Record<string, string> = {
+    "operations":      "operations",
+    "maintenance":     "maintenance",
+    "supply-chain":    "supply_chain",
+    "commercial":      "commercial",
+    "analytics":       "analytics",
+    "projects-center": "projects",
+    "ai":              "ai_assistant",
+  };
+
   const filteredGroups = useMemo(() => {
     return navGroups
-      .map(g => ({ ...g, items: g.items.filter(k => primaryKeys.includes(k)) }))
+      .map(g => ({
+        ...g,
+        items: g.items.filter(k => {
+          if (!primaryKeys.includes(k)) return false;
+          const flagKey = NAV_TO_FLAG[k];
+          if (flagKey && !isEnabled(flagKey)) return false;
+          return true;
+        })
+      }))
       .filter(g => g.items.length > 0);
-  }, [primaryKeys]);
+  }, [primaryKeys, isEnabled]);
 
   const recentPaths = useMemo(() => {
     if (typeof window === "undefined") return [];
