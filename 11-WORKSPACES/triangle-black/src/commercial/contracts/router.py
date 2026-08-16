@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from src.core.auth import require_agent, require_manager
+from src.core.audit import audit_create, audit_update, audit_action
 
 from src.commercial.auth.models import User
 
@@ -81,7 +82,14 @@ def create(
 ):
     data = payload.model_dump()
     data["hotel_id"] = hotel_id
-    return ContractRepository(db).create(data)
+    result = ContractRepository(db).create(data)
+    try:
+        audit_create(db, "contract", result.id if hasattr(result, "id") else str(result),
+                     hotel_id=hotel_id,
+                     metadata={"title": data.get("title"), "status": data.get("status", "pending_signature")})
+    except Exception:
+        pass
+    return result
 
 @router.get("/", response_model=List[ContractResponse])
 def list_all(
@@ -118,6 +126,12 @@ def update(
     )
     if not obj:
         raise HTTPException(status_code=404, detail="Contract not found")
+    try:
+        audit_update(db, "contract", contract_id,
+                     hotel_id=hotel_id,
+                     new_value=payload.model_dump(exclude_none=True))
+    except Exception:
+        pass
     return obj
 
 @router.delete("/{contract_id}", status_code=204)
@@ -167,7 +181,12 @@ def activate(
 
     db.commit()
     db.refresh(contract)
-
+    try:
+        audit_action(db, "contract", contract_id, "ACTIVATE",
+                     hotel_id=hotel_id,
+                     metadata={"start_date": str(contract.start_date), "end_date": str(contract.end_date)})
+    except Exception:
+        pass
     return contract
 
 # ── RENEW ─────────────────────────────────────────────────────────────────────
