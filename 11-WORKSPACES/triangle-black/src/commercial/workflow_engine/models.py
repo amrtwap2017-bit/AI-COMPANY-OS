@@ -60,6 +60,7 @@ class WorkflowInstance(Base):
     """
     Tracks one running workflow — one per entity per active workflow.
     Links back to the entity via entity_type + entity_id (no FK to allow flexibility).
+    Pre-existing table — hotel_id added via Sprint-230 migration.
     """
     __tablename__ = "workflow_instances"
 
