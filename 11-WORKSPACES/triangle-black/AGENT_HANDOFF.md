@@ -1178,3 +1178,35 @@ To enable in production:
    Expected: 160 passed, 0 failed
 3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
    Expected: 1395 passed, 30 skipped, 0 failed
+
+## SESSION UPDATE — Sprint-211 to 220 — August 2026
+
+### Schema Validation Hardening (Sprints 211-214)
+- Lead schemas: status/priority/source enum + score bounds + email format
+- PurchaseOrder: vendor_id + non-negative amounts + status enum
+- ServiceRequest: title length + urgency enum + status enum
+- InventoryItem: item_code uppercase + type/UOM enum + VAT bounds
+- GoodsReceipt: warehouse_id required + status enum
+- Quotation: title length + status enum + total rounding
+- Warehouse: code uppercase + type enum + name length
+- Fix: 'web' added to lead sources for backwards compatibility (sprint 215)
+- Total validation tests: 153 across 16 entity schemas
+
+### Audit Trail System (Sprints 216-220)
+- src/core/audit.py: audit_create/update/action/delete helper
+- Never raises — safe to call from any router
+- Injected into: work_orders, assets, contracts, leads create/update
+- Audit events stored in platform_audit_log table with hotel_id scope
+- 10 audit helper tests (sprint 216) + 7 WO audit tests (sprint 217)
+
+### NEXT AGENT — START HERE
+1. bash START.sh (server must be restarted after schema changes)
+2. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+   Expected: ~1480+ passing, 0 failing
+3. cd portal && npx playwright test e2e/ --reporter=list 2>&1 | tail -5
+   Expected: 160 passed, 0 failed
+
+### CRITICAL: Server restart required before pytest
+The schema hardening in sprints 206-214 changed validation behavior.
+If server is running with old code, tests that send "web" source will fail.
+Always restart server before running full test suite.
