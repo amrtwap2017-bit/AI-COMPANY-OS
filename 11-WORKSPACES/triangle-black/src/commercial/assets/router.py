@@ -5,6 +5,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from typing import Optional
 import uuid, datetime
+from src.core.audit import audit_create, audit_update
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
@@ -126,6 +127,12 @@ def create_asset(data: dict, db: Session = Depends(get_db)):
         "updated_at":           now,
     })
     db.commit()
+    try:
+        audit_create(db, "asset", asset_id,
+                     hotel_id=data.get("hotel_id"),
+                     metadata={"name": data.get("name"), "category": data.get("category"), "criticality": data.get("criticality")})
+    except Exception:
+        pass
     return get_asset(asset_id, db)
 
 @router.patch("/{asset_id}", summary="Update asset")
@@ -138,6 +145,11 @@ def update_asset(asset_id: str, data: dict, db: Session = Depends(get_db)):
     updates["id"] = asset_id
     db.execute(text(f"UPDATE assets SET {set_clause} WHERE id = :id"), updates)
     db.commit()
+    try:
+        audit_update(db, "asset", asset_id,
+                     new_value={k: v for k, v in data.items() if k in allowed and v is not None})
+    except Exception:
+        pass
     return get_asset(asset_id, db)
 
 @router.get("/{asset_id}/work-orders", summary="Asset work orders")
