@@ -8110,3 +8110,25 @@ async def invalidate_hotel_cache(hotel_id: str):
     from src.core.cache import cache_invalidate_hotel
     cache_invalidate_hotel(hotel_id)
     return {"status": "invalidated", "hotel_id": hotel_id}
+
+# ── Sprint-201: Feature Flags API ─────────────────────────────────────────────
+@app.get("/api/v1/features/", tags=["saas"])
+async def get_current_features(request: Request):
+    """Return feature flags for the current session hotel."""
+    from src.core.feature_flags import get_all_flags
+    hotel_id = getattr(request.state, "hotel_id", None) or "tb-default-hotel-000000000001"
+    flags = get_all_flags(hotel_id)
+    return {
+        "hotel_id": hotel_id,
+        "flags": flags,
+        "total": len(flags),
+        "enabled_count": sum(1 for v in flags.values() if v),
+    }
+
+@app.post("/api/v1/features/invalidate", tags=["saas"])
+async def invalidate_feature_cache(request: Request):
+    """Invalidate feature flag cache for current hotel."""
+    from src.core.feature_flags import invalidate_flags
+    hotel_id = getattr(request.state, "hotel_id", None) or "tb-default-hotel-000000000001"
+    invalidate_flags(hotel_id)
+    return {"status": "invalidated", "hotel_id": hotel_id}
