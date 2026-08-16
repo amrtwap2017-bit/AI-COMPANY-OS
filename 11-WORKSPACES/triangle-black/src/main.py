@@ -8144,3 +8144,39 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     return response
+
+# ── Sprint-225: Login Rate Limiting (Brute Force Protection) ───────────────────
+import time as _time_225
+from collections import defaultdict as _defaultdict_225
+
+_login_attempts: dict = _defaultdict_225(list)
+_LOGIN_MAX_ATTEMPTS = 5    # per window
+_LOGIN_WINDOW_SECONDS = 60  # 1 minute
+
+@app.middleware("http")
+async def login_rate_limit_middleware(request: Request, call_next):
+    """Tight rate limit on login endpoints to prevent brute force."""
+    path = request.url.path
+    is_login = path in ("/api/v1/auth/login", "/api/v1/client/login", "/api/v1/supplier/login")
+
+    if not is_login or request.method != "POST":
+        return await call_next(request)
+
+    ip = request.client.host if request.client else "unknown"
+
+    # Whitelist localhost for tests and dev
+    if ip in ("127.0.0.1", "::1", "localhost"):
+        return await call_next(request)
+
+    now = _time_225.time()
+    _login_attempts[ip] = [t for t in _login_attempts[ip] if t > now - _LOGIN_WINDOW_SECONDS]
+
+    if len(_login_attempts[ip]) >= _LOGIN_MAX_ATTEMPTS:
+        return JSONResponse(
+            status_code=429,
+            headers={"Retry-After": "60", "X-RateLimit-Login": "exceeded"},
+            content={"detail": f"Too many login attempts. Try again in 60 seconds.", "code": "LOGIN_RATE_LIMITED"}
+        )
+
+    _login_attempts[ip].append(now)
+    return await call_next(request)
