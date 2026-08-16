@@ -1091,3 +1091,51 @@ To enable in production:
   Sprint-198: Add E2E tests for PM plans, technicians, service request detail
   Sprint-199: Structured logging with correlation IDs
   Sprint-200: Feature flags system
+
+## SESSION UPDATE — Sprint-197 to 200 — August 2026
+
+### Sprint-197: Cache Layer
+- src/core/cache.py — Redis+memory hybrid cache
+- make_cache_key() hotel_id-scoped cache keys
+- Graceful Redis fallback to in-memory TTL dict
+- /api/v1/cache/status and /api/v1/cache/invalidate/{hotel_id} endpoints
+- 10 new tests
+
+### Sprint-198: Cache Applied to Endpoints
+- /api/v1/work-orders/ — TTL 60s
+- /api/v1/assets/ — TTL 300s
+- /api/v1/leads-portal-v2 — TTL 60s
+- 8 new tests
+
+### Sprint-199: Structured Logging
+- src/core/logging_config.py — JSON formatter with ContextVar
+- set_log_context(request_id, hotel_id, actor) per-request
+- _CorrelationIDMiddleware now injects into log context
+- LOG_FORMAT=json env var for production activation
+- 8 new tests
+
+### Sprint-200: E2E Expansion
+- 13-detail-pages.spec.ts — PM plans, technicians, service requests, WO detail, asset detail
+- 14-dashboard.spec.ts — workspace, executive dashboard, analytics, health, inbox, notifications
+- 160 E2E tests passing total
+- Runtime: ~4m14s
+
+### VERIFIED BASELINE — August 2026 (post sprint 200)
+- Backend pytest: 1223 passing, 78 skipped, 0 failing
+- E2E Playwright: 160 passing, 0 failing
+- Total verified tests: 1383
+- Backend new tests this session: 32
+
+### NEXT AGENT — START HERE
+1. bash START.sh
+2. cd portal && npx playwright test e2e/ --reporter=list 2>&1 | tail -5
+   Expected: 160 passed, 0 failed
+3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+   Expected: 1223 passed, 78 skipped, 0 failed
+
+### NEXT SPRINT BACKLOG
+  Sprint-201: Feature flags system (NEXT_PUBLIC_FF_ env vars + backend toggle)
+  Sprint-202: E2E tests for invoices detail, leads detail, contracts detail
+  Sprint-203: Audit trail improvements — structured audit events
+  Sprint-204: Performance baseline measurement (DB query count, response times)
+  Sprint-205: Docker compose upgrade with Redis service
