@@ -6,7 +6,7 @@ from datetime import datetime
 
 VALID_LEAD_STATUSES   = {"new", "qualified", "proposal", "negotiation", "won", "lost", "cold", "warm", "hot"}
 VALID_LEAD_PRIORITIES = {"critical", "high", "medium", "low"}
-VALID_LEAD_SOURCES    = {"manual", "referral", "website", "exhibition", "cold_call", "social_media", "partner", "other"}
+VALID_LEAD_SOURCES    = {"manual", "referral", "website", "web", "exhibition", "cold_call", "social_media", "partner", "other"}
 
 class LeadCreate(BaseModel):
     name:      str            = Field(..., min_length=2, max_length=200)
