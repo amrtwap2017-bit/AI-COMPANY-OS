@@ -24,8 +24,14 @@ services:
       - POSTGRES_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
       - AI_ENGINE_URL=http://host.docker.internal:11434/api/generate
       - ENVIRONMENT=production
+      - REDIS_URL=redis://tb-redis:6379/0
+      - ENABLE_TENANT_RATE_LIMIT=1
+      - TENANT_RATE_LIMIT_MAX=500
     env_file:
       - .env
+    depends_on:
+      tb-redis:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -37,6 +43,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    networks:
+      - tb-network
+
+
+  # ── REDIS — Cache + Feature Flags (Sprint-205) ───────────────
+  tb-redis:
+    image: redis:7-alpine
+    container_name: tb-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - tb-network
 
@@ -53,6 +76,8 @@ services:
       - NODE_ENV=production
     depends_on:
       tb-backend:
+        condition: service_healthy
+      tb-redis:
         condition: service_healthy
     networks:
       - tb-network

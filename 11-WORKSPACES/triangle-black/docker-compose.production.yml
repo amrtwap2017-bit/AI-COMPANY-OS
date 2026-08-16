@@ -20,6 +20,22 @@ services:
       timeout: 5s
       retries: 5
 
+
+  redis:
+    image: redis:7-alpine
+    container_name: tb-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-tb_redis_secret}
+    volumes:
+      - tb_redis_data:/data
+    networks:
+      - tb-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-tb_redis_secret}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   api:
     build:
       context: .
@@ -29,6 +45,9 @@ services:
     environment:
       TRIANGLE_BLACK_DB_URL: postgresql+psycopg2://ai:ai123@postgres:5432/triangle_black
       JWT_SECRET:            ${JWT_SECRET}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-tb_redis_secret}@redis:6379/0
+      ENABLE_TENANT_RATE_LIMIT: ${ENABLE_TENANT_RATE_LIMIT:-1}
+      TENANT_RATE_LIMIT_MAX: ${TENANT_RATE_LIMIT_MAX:-500}
       SMTP_ENABLED:          ${SMTP_ENABLED:-false}
       SMTP_HOST:             ${SMTP_HOST:-}
       SMTP_PORT:             ${SMTP_PORT:-587}
@@ -36,6 +55,8 @@ services:
       SMTP_PASSWORD:         ${SMTP_PASSWORD:-}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - tb-net
@@ -85,6 +106,7 @@ services:
       - tb-net
 
 volumes:
+  tb_redis_data:
   tb_postgres_data:
 
 networks:
