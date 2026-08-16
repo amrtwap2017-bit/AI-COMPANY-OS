@@ -8132,3 +8132,15 @@ async def invalidate_feature_cache(request: Request):
     hotel_id = getattr(request.state, "hotel_id", None) or "tb-default-hotel-000000000001"
     invalidate_flags(hotel_id)
     return {"status": "invalidated", "hotel_id": hotel_id}
+
+# ── Sprint-222: Security Headers Middleware ────────────────────────────────────
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
+    return response
