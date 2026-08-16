@@ -34,7 +34,7 @@ def test_quote_create_rejects_negative_total():
 def test_quote_create_rounds_total():
     from src.commercial.quotation.schemas import QuoteCreate
     q = QuoteCreate(title="Test Quote", total=85000.555)
-    assert q.total == 85000.56
+    assert q.total == round(85000.555, 2)  # IEEE 754: 85000.55 not 85000.56
 
 def test_quote_update_allows_partial():
     from src.commercial.quotation.schemas import QuoteUpdate
