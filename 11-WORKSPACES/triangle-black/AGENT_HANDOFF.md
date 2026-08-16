@@ -1210,3 +1210,59 @@ To enable in production:
 The schema hardening in sprints 206-214 changed validation behavior.
 If server is running with old code, tests that send "web" source will fail.
 Always restart server before running full test suite.
+
+## SESSION UPDATE — Sprint-227 to 231 — August 2026
+
+### VERIFIED BASELINE
+- Backend pytest: 1579 passed, 30 skipped, 78 deselected, 0 failed
+- Runtime: 44min 20s (longer — 11 new HEAVY entries in conftest)
+- Alembic head: c2d3e4f5a6b7
+
+### WHAT WAS BUILT
+Sprint-227: conftest HEAVY update — 11 new module entries (sprint152-159 + 216-226)
+Sprint-228: Audit injection — invoices + employees + POs + suppliers (16 call points total)
+Sprint-229: Performance baseline middleware — X-DB-Query-Count + X-Response-Time-Ms
+  - src/core/performance.py — ContextVar + threading.local dual counter
+  - Thread-local fallback for SQLAlchemy sync/async boundary
+Sprint-230: Workflow engine foundation
+  - src/commercial/workflow_engine/engine.py — TriangleWorkflowEngine class
+  - src/commercial/workflow_engine/models.py — 3 SQLAlchemy models
+  - Alembic c2d3e4f5a6b7 — workflow_definitions (new) + hotel_id added to existing tables
+  - DISCOVERY: workflow_instances + workflow_transitions pre-existed without hotel_id
+  - Safe ALTER TABLE added hotel_id to both pre-existing tables
+Sprint-231: SR→WO reference vertical slice
+  - POST /api/v1/service-requests/{id}/generate-work-order — NEW endpoint
+  - POST /api/v1/service-requests/{id}/convert-to-wo — ENHANCED with workflow + audit
+  - Creates WO + workflow_instance + 2 audit events in one atomic flow
+
+### CRITICAL DISCOVERIES
+1. Pre-existing workflow tables (9 tables) existed from early main.py schema
+   WITHOUT hotel_id — migration safely added hotel_id via ALTER TABLE
+2. workflow_instances had different column names: current_state_key (not current_state)
+   engine.py uses INSERT with new column names — works with new rows only
+3. Performance middleware X-DB headers present on all responses
+   X-DB-Query-Count may show 0 in async context (thread boundary — documented)
+
+### AUDIT INJECTION STATUS (16 call points)
+Routers with audit: work_orders, assets, contracts, leads, invoices, employees,
+                    purchase_orders, suppliers
+
+### WORKFLOW ENGINE STATUS
+TriangleWorkflowEngine: can_transition, execute_transition, create_instance
+Built-in maps: work_order + service_request
+Tables: workflow_definitions (new) + workflow_instances/transitions (enhanced)
+State: Runs ALONGSIDE existing router status management — does NOT replace
+
+### NEXT AGENT — START HERE
+1. cd ~/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+2. bash START.sh
+3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+   Expected: 1579+ passed, 0 failed
+4. cd portal && npx playwright test e2e/ --reporter=list 2>&1 | tail -5
+
+### NEXT SPRINT BACKLOG
+Sprint-232: WO complete → Service Report → Close + notifications
+Sprint-233: E2E tests for invoice/lead/contract detail (15,16,17.spec.ts)
+Sprint-234: AGENT_HANDOFF sync
+Sprint-235: Push to 1620+ passing
+Sprint-236: Push to 1650+ passing

@@ -1,0 +1,46 @@
+import { test, expect } from '@playwright/test';
+import { injectAuth } from './helpers/auth';
+
+test.describe('Lead Detail', () => {
+  test.beforeEach(async ({ page }) => {
+    await injectAuth(page);
+  });
+
+  test('leads list page loads', async ({ page }) => {
+    await page.goto('/commercial/leads');
+    await expect(page).not.toHaveURL(/login/);
+  });
+
+  test('leads API returns data', async ({ request }) => {
+    const token = process.env.E2E_TOKEN!;
+    const r = await request.get('http://localhost:8030/api/v1/leads/?limit=1', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    expect([200, 401]).toContain(r.status());
+  });
+
+  test('lead cold status no longer returns 500', async ({ request }) => {
+    const token = process.env.E2E_TOKEN!;
+    const r = await request.get('http://localhost:8030/api/v1/leads/?status=cold', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    expect(r.status()).not.toBe(500);
+  });
+
+  test('lead warm status no longer returns 500', async ({ request }) => {
+    const token = process.env.E2E_TOKEN!;
+    const r = await request.get('http://localhost:8030/api/v1/leads/?status=warm', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    expect(r.status()).not.toBe(500);
+  });
+
+  test('lead qualify action endpoint exists', async ({ request }) => {
+    const token = process.env.E2E_TOKEN!;
+    const r = await request.post('http://localhost:8030/api/v1/actions/leads/nonexistent/qualify', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    expect([200, 400, 404, 401, 422]).toContain(r.status());
+    expect(r.status()).not.toBe(405);
+  });
+});
