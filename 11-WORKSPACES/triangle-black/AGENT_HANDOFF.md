@@ -1139,3 +1139,42 @@ To enable in production:
   Sprint-203: Audit trail improvements — structured audit events
   Sprint-204: Performance baseline measurement (DB query count, response times)
   Sprint-205: Docker compose upgrade with Redis service
+
+## SESSION UPDATE — Sprint-201 to 210 — August 2026
+
+### Feature Flags System (Sprints 201-204)
+- src/core/feature_flags.py — backend enforcement with TTL cache
+- /api/v1/features/ endpoint — returns all flags per hotel
+- portal/lib/hooks/useFeatureFlags.ts — React hook
+- portal/components/ui/FeatureGate.tsx — page-level gating
+- EnterpriseSidebar now filters nav by feature flags
+- 8 pages gated: ai/signals, analytics, projects-center, agents, commercial/leads, commercial/contracts, supply-chain hub, maintenance/assets
+- 11 backend tests
+
+### Docker Compose Redis (Sprint 205)
+- redis:7-alpine service in both docker-compose.yml and production.yml
+- Health checks, memory limits, named volumes
+- START.sh auto-detects Redis and sets REDIS_URL
+- 10 Docker compose validation tests
+
+### API Input Validation Hardening (Sprints 206-209)
+- WorkOrder schemas: priority/status/type enum + title length validation
+- Asset schemas: criticality/frequency enum + name validation
+- Contract schemas: status enum + financial value bounds + duration limits
+- Invoice schemas: status enum + amount bounds + invoice number validation
+- Employee schemas: email/phone format + salary bounds + status enum
+- Supplier schemas: status/risk_level enum + rating bounds + email validation
+- 72 new validation tests
+
+### VERIFIED BASELINE — August 2026 (post sprint 210)
+- Backend pytest: 1395 passed, 30 skipped, 78 deselected, 0 failed
+- E2E Playwright: 160 passed, 0 failed
+- Total verified tests: 1555
+- New tests added this session: 72 validation + 32 production safety + 160 E2E = 264
+
+### NEXT AGENT — START HERE
+1. bash START.sh
+2. cd portal && npx playwright test e2e/ --reporter=list 2>&1 | tail -5
+   Expected: 160 passed, 0 failed
+3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+   Expected: 1395 passed, 30 skipped, 0 failed
