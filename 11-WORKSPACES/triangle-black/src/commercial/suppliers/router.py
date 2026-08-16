@@ -1,5 +1,7 @@
 
 
+from src.core.audit import audit_create, audit_update
+
 # ── Sprint-041: Supplier Create ───────────────────────────────────────────────
 @router.post("/", status_code=201, summary="Create supplier")
 def create_supplier(data: dict, db: Session = Depends(get_db)):

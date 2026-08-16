@@ -27,7 +27,16 @@ def create(
 ):
     data = payload.model_dump()
     data["hotel_id"] = hotel_id
-    return PurchaseOrderRepository(db).create(data)
+    result = PurchaseOrderRepository(db).create(data)
+    try:
+        audit_create(db, "purchase_order",
+                     result.id if hasattr(result, "id") else str(result),
+                     hotel_id=hotel_id,
+                     metadata={"vendor_id": data.get("vendor_id"),
+                               "total_amount": data.get("total_amount")})
+    except Exception:
+        pass
+    return result
 
 @router.get("/", response_model=List[PurchaseOrderResponse])
 def list_all(
@@ -64,6 +73,11 @@ def update(
     )
     if not obj:
         raise HTTPException(status_code=404, detail="PurchaseOrder not found")
+    try:
+        audit_update(db, "purchase_order", po_id, hotel_id=hotel_id,
+                     new_value=payload.model_dump(exclude_none=True))
+    except Exception:
+        pass
     return obj
 
 @router.delete("/{po_id}", status_code=204)

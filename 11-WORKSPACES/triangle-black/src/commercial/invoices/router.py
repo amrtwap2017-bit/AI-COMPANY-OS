@@ -33,7 +33,15 @@ def create_invoice(
 ):
     invoice_data = payload.dict()
     invoice_data["hotel_id"] = hotel_id
-    return InvoiceRepository(db).create_invoice(invoice_data)
+    result = InvoiceRepository(db).create_invoice(invoice_data)
+    try:
+        audit_create(db, "invoice", result.id if hasattr(result, "id") else str(result),
+                     hotel_id=hotel_id,
+                     metadata={"total_amount": invoice_data.get("total_amount"),
+                               "status": invoice_data.get("status", "unpaid")})
+    except Exception:
+        pass
+    return result
 
 @router.get("/payment-summary", summary="Overall invoice payment summary")
 def payment_summary(db: Session = Depends(get_db)):

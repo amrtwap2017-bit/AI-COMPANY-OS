@@ -26,7 +26,15 @@ def create_employee(
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
-    return EmployeeRepository(db).create(payload.model_dump(exclude_none=True), hotel_id)
+    result = EmployeeRepository(db).create(payload.model_dump(exclude_none=True), hotel_id)
+    try:
+        audit_create(db, "employee", result.id if hasattr(result, "id") else str(result),
+                     hotel_id=hotel_id,
+                     metadata={"name": getattr(result, "name", None),
+                               "department": getattr(result, "department", None)})
+    except Exception:
+        pass
+    return result
 
 @router.get("/{emp_id}", response_model=EmployeeResponse)
 def get_employee(
@@ -47,6 +55,11 @@ def update_employee(
 ):
     obj = EmployeeRepository(db).update(emp_id, payload.model_dump(exclude_none=True), hotel_id)
     if not obj: raise HTTPException(404, "Employee not found")
+    try:
+        audit_update(db, "employee", emp_id, hotel_id=hotel_id,
+                     new_value=payload.model_dump(exclude_none=True))
+    except Exception:
+        pass
     return obj
 
 @router.delete("/{emp_id}", status_code=204)
@@ -57,3 +70,7 @@ def delete_employee(
 ):
     if not EmployeeRepository(db).delete(emp_id, hotel_id):
         raise HTTPException(404, "Employee not found")
+    try:
+        audit_delete(db, "employee", emp_id, hotel_id=hotel_id)
+    except Exception:
+        pass
