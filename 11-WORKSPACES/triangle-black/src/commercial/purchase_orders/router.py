@@ -14,6 +14,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from .schemas import PurchaseOrderCreate, PurchaseOrderUpdate, PurchaseOrderResponse
 from .repository import PurchaseOrderRepository
+from src.core.audit import audit_create, audit_update
 
 router = APIRouter(prefix="/purchase-orders", tags=["purchase-orders"])
 

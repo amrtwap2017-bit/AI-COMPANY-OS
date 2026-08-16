@@ -6,6 +6,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from .repository import EmployeeRepository
 from .schemas import EmployeeCreate, EmployeeUpdate, EmployeeResponse
+from src.core.audit import audit_create, audit_update, audit_delete
 
 router = APIRouter(prefix="/employees", tags=["employees"])
 

@@ -8,6 +8,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.invoices.schemas import InvoiceCreate, InvoiceUpdate, InvoiceResponse
 from src.commercial.invoices.repository import InvoiceRepository
+from src.core.audit import audit_create, audit_update, audit_delete
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
