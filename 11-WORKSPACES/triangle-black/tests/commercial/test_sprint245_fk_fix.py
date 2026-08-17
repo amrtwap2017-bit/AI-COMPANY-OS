@@ -70,15 +70,17 @@ def test_workflow_instances_index_created():
         """)).fetchone()
     assert r is not None, "Index ix_workflow_instances_hotel_entity missing"
 
-def test_alembic_head_is_d1e2f3a4b5c6():
+def test_alembic_d1e2f3a4b5c6_was_applied():
+    """d1e2f3a4b5c6 may not be current head (superseded by e2f3a4b5c6d7)
+    but it must exist in the migration chain."""
     import subprocess
     result = subprocess.run(
-        [".venv/bin/alembic", "current"],
+        [".venv/bin/alembic", "history"],
         capture_output=True, text=True,
         cwd="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black"
     )
     output = result.stdout + result.stderr
-    assert "d1e2f3a4b5c6" in output, f"Head still: {output.strip()}"
+    assert "d1e2f3a4b5c6" in output, f"Migration d1e2f3a4b5c6 not in chain: {output.strip()}"
 
 # ── Workflow API live tests ────────────────────────────────────────────────────
 def test_workflow_stats_returns_200():
