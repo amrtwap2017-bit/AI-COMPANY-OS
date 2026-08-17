@@ -585,3 +585,59 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
         "wf_transitioned":   wf_transitioned,
         "closed_at":         now.isoformat(),
     }
+
+
+@router.get("/sla-breached")
+def get_sla_breached_work_orders(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+    limit: int = 50,
+    skip: int = 0
+):
+    """Return all work orders with SLA breach — T-003"""
+    try:
+        from datetime import datetime as _dt
+        from sqlalchemy import text as _text
+        rows = db.execute(_text(
+            """SELECT id, title, status, sla_hours, sla_breach_at,
+                      sla_breached, sla_status, priority, hotel_id
+               FROM work_orders
+               WHERE hotel_id = :hid
+                 AND sla_breached = TRUE
+                 AND deleted_at IS NULL
+               ORDER BY sla_breach_at ASC
+               LIMIT :lim OFFSET :sk"""
+        ), {"hid": hotel_id, "lim": limit, "sk": skip}).fetchall()
+        results = [dict(r._mapping) for r in rows]
+        return {"count": len(results), "results": results, "hotel_id": hotel_id}
+    except Exception as e:
+        return {"count": 0, "results": [], "hotel_id": hotel_id, "error": str(e)}
+
+
+@router.get("/sla-summary")
+def get_sla_summary(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """SLA compliance summary — T-003"""
+    try:
+        from sqlalchemy import text as _text
+        row = db.execute(_text(
+            """SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN sla_status = 'met' THEN 1 ELSE 0 END) AS met,
+                SUM(CASE WHEN sla_status = 'breached' THEN 1 ELSE 0 END) AS breached,
+                SUM(CASE WHEN sla_status = 'on_track' THEN 1 ELSE 0 END) AS on_track,
+                ROUND(
+                    100.0 * SUM(CASE WHEN sla_status = 'met' THEN 1 ELSE 0 END)
+                    / NULLIF(COUNT(*), 0), 1
+                ) AS compliance_pct
+               FROM work_orders
+               WHERE hotel_id = :hid AND deleted_at IS NULL"""
+        ), {"hid": hotel_id}).fetchone()
+        d = dict(row._mapping) if row else {}
+        d["hotel_id"] = hotel_id
+        return d
+    except Exception as e:
+        return {"hotel_id": hotel_id, "error": str(e)}
+

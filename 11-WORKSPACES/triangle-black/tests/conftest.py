@@ -159,7 +159,7 @@ def wait_for_heavy_modules(request):
             "test_sprint238_gap_coverage","test_sprint240_workflow_api","test_sprint241_column_fix"
             "test_sprint242_workflow_integration",
             "test_sprint243_performance_profile",
-            "test_sprint244_push1650",
+            "test_sprint244_push1650","test_sprint_t003_sla",
             "test_sprint245_fk_fix",
             "test_sprint246_hydration_fix",
             "test_sprint247_248_dashboard_stats",
