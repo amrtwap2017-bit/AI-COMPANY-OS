@@ -225,24 +225,54 @@ def workflow_stats(
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
-    """Return workflow KPIs — active/completed/failed counts per entity type."""
-    def safe(q: str, params: dict = None) -> int:
-        try:
-            row = db.execute(text(q), params or {}).fetchone()
-            return int(row[0]) if row else 0
-        except Exception:
-            return 0
+    """Return workflow KPIs — single aggregated SQL query (Sprint-248 optimization)."""
+    try:
+        row = db.execute(text("""
+            SELECT
+                COUNT(*)                                                        AS total_instances,
+                SUM(CASE WHEN status = 'active'       THEN 1 ELSE 0 END)       AS active_instances,
+                SUM(CASE WHEN status = 'completed'    THEN 1 ELSE 0 END)       AS completed_instances,
+                SUM(CASE WHEN status = 'failed'       THEN 1 ELSE 0 END)       AS failed_instances,
+                SUM(CASE WHEN entity_type='work_order'       THEN 1 ELSE 0 END) AS work_order_instances,
+                SUM(CASE WHEN entity_type='service_request'  THEN 1 ELSE 0 END) AS sr_instances
+            FROM workflow_instances
+            WHERE hotel_id = :hotel_id
+        """), {"hotel_id": hotel_id}).fetchone()
 
-    p = {"hotel_id": hotel_id}
-    return {
-        "hotel_id":              hotel_id,
-        "total_instances":       safe("SELECT count(*) FROM workflow_instances WHERE hotel_id=:hotel_id", p),
-        "active_instances":      safe("SELECT count(*) FROM workflow_instances WHERE hotel_id=:hotel_id AND status='active'", p),
-        "completed_instances":   safe("SELECT count(*) FROM workflow_instances WHERE hotel_id=:hotel_id AND status='completed'", p),
-        "failed_instances":      safe("SELECT count(*) FROM workflow_instances WHERE hotel_id=:hotel_id AND status='failed'", p),
-        "total_transitions":     safe("SELECT count(*) FROM workflow_transitions WHERE hotel_id=:hotel_id", p),
-        "total_definitions":     safe("SELECT count(*) FROM workflow_definitions WHERE hotel_id=:hotel_id", p),
-        "work_order_instances":  safe("SELECT count(*) FROM workflow_instances WHERE hotel_id=:hotel_id AND entity_type='work_order'", p),
-        "sr_instances":          safe("SELECT count(*) FROM workflow_instances WHERE hotel_id=:hotel_id AND entity_type='service_request'", p),
-        "generated_at":          _now().isoformat(),
-    }
+        d = dict(row._mapping) if row else {}
+
+        try:
+            transitions = db.execute(text(
+                "SELECT COUNT(*) FROM workflow_transitions WHERE hotel_id = :h"
+            ), {"h": hotel_id}).fetchone()
+            total_transitions = int(transitions[0]) if transitions else 0
+        except Exception:
+            total_transitions = 0
+
+        try:
+            definitions = db.execute(text(
+                "SELECT COUNT(*) FROM workflow_definitions WHERE hotel_id = :h"
+            ), {"h": hotel_id}).fetchone()
+            total_definitions = int(definitions[0]) if definitions else 0
+        except Exception:
+            total_definitions = 0
+
+        return {
+            "hotel_id":             hotel_id,
+            "total_instances":      int(d.get("total_instances") or 0),
+            "active_instances":     int(d.get("active_instances") or 0),
+            "completed_instances":  int(d.get("completed_instances") or 0),
+            "failed_instances":     int(d.get("failed_instances") or 0),
+            "total_transitions":    total_transitions,
+            "total_definitions":    total_definitions,
+            "work_order_instances": int(d.get("work_order_instances") or 0),
+            "sr_instances":         int(d.get("sr_instances") or 0),
+            "generated_at":         _now().isoformat(),
+        }
+    except Exception as e:
+        return {
+            "hotel_id": hotel_id, "total_instances": 0, "active_instances": 0,
+            "completed_instances": 0, "failed_instances": 0, "total_transitions": 0,
+            "total_definitions": 0, "work_order_instances": 0, "sr_instances": 0,
+            "generated_at": _now().isoformat(), "error": str(e),
+        }
