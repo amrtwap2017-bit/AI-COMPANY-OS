@@ -21,7 +21,7 @@ def row_to_dict(row):
 
 @router.get("/", summary="List work orders")
 def list_work_orders(
-    hotel_id:      Optional[str] = None,
+    hotel_id:      str = Depends(get_hotel_id),
     status:        Optional[str] = None,
     priority:      Optional[str] = None,
     technician_id: Optional[str] = None,
@@ -44,7 +44,9 @@ def list_work_orders(
 
     q = "SELECT * FROM work_orders WHERE 1=1"
     params: dict = {}
-    if hotel_id:      q += " AND hotel_id = :hotel_id";           params["hotel_id"]      = hotel_id
+    # hotel_id always present from JWT (Sprint-249B tenant isolation)
+    q += " AND hotel_id = :hotel_id"
+    params["hotel_id"] = hotel_id
     if status:        q += " AND status = :status";               params["status"]        = status
     if priority:      q += " AND priority = :priority";           params["priority"]      = priority
     if technician_id: q += " AND technician_id = :technician_id"; params["technician_id"] = technician_id
@@ -65,7 +67,7 @@ def list_work_orders(
 
 @router.get("", summary="List work orders")
 def list_work_orders_root(
-    hotel_id:      Optional[str] = None,
+    hotel_id:      str = Depends(get_hotel_id),
     status:        Optional[str] = None,
     priority:      Optional[str] = None,
     technician_id: Optional[str] = None,
@@ -75,7 +77,9 @@ def list_work_orders_root(
 ):
     q = "SELECT * FROM work_orders WHERE 1=1"
     params: dict = {}
-    if hotel_id:      q += " AND hotel_id = :hotel_id";           params["hotel_id"]      = hotel_id
+    # hotel_id always present from JWT (Sprint-249B tenant isolation)
+    q += " AND hotel_id = :hotel_id"
+    params["hotel_id"] = hotel_id
     if status:        q += " AND status = :status";               params["status"]        = status
     if priority:      q += " AND priority = :priority";           params["priority"]      = priority
     if technician_id: q += " AND technician_id = :technician_id"; params["technician_id"] = technician_id
