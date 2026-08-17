@@ -542,7 +542,7 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
         wf_engine = TriangleWorkflowEngine(entity_type="work_order")
         # Find active workflow instance for this WO
         inst_row = db.execute(_t235("""
-            SELECT id, current_state FROM workflow_instances
+            SELECT id, current_state_key FROM workflow_instances
             WHERE entity_id = :eid AND entity_type = 'work_order'
               AND status = 'active'
             ORDER BY created_at DESC LIMIT 1
@@ -553,7 +553,7 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
             ok, _ = wf_engine.execute_transition(
                 db=db,
                 instance_id=inst["id"],
-                from_state=inst.get("current_state", "completed"),
+                from_state=inst.get("current_state_key", "completed"),
                 to_state="closed",
                 entity_type="work_order",
                 entity_id=wo_id,

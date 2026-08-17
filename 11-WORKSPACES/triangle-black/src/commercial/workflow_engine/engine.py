@@ -141,7 +141,7 @@ class TriangleWorkflowEngine:
             # Step 2 — Update instance current state
             db.execute(text("""
                 UPDATE workflow_instances
-                SET current_state = :to_state, updated_at = :now
+                SET current_state_key = :to_state, updated_at = :now
                 WHERE id = :instance_id
             """), {"to_state": to_state, "now": now, "instance_id": instance_id})
 
@@ -211,21 +211,21 @@ class TriangleWorkflowEngine:
             now = _now()
             db.execute(text("""
                 INSERT INTO workflow_instances
-                (id, hotel_id, definition_id, entity_type, entity_id,
-                 current_state, status, started_by, created_at, updated_at)
+                (id, hotel_id, template_id, entity_type, entity_id,
+                 current_state_key, status, created_by, created_at, updated_at)
                 VALUES
-                (:id, :hotel_id, :definition_id, :entity_type, :entity_id,
-                 :current_state, 'active', :started_by, :created_at, :updated_at)
+                (:id, :hotel_id, :template_id, :entity_type, :entity_id,
+                 :current_state_key, 'active', :created_by, :created_at, :updated_at)
             """), {
-                "id":            instance_id,
-                "hotel_id":      hotel_id,
-                "definition_id": definition_id,
-                "entity_type":   entity_type,
-                "entity_id":     entity_id,
-                "current_state": initial_state,
-                "started_by":    started_by,
-                "created_at":    now,
-                "updated_at":    now,
+                "id":                instance_id,
+                "hotel_id":          hotel_id or "tb-default-hotel-000000000001",
+                "template_id":       definition_id,
+                "entity_type":       entity_type,
+                "entity_id":         entity_id,
+                "current_state_key": initial_state,
+                "created_by":        started_by,
+                "created_at":        now,
+                "updated_at":        now,
             })
             db.commit()
             return instance_id, "ok"
