@@ -157,6 +157,13 @@ def wait_for_heavy_modules(request):
             "test_sprint230_workflow_engine","test_sprint231_sr_wo_slice",
             "test_sprint235_wo_close","test_sprint236_coverage",
             "test_sprint238_gap_coverage","test_sprint240_workflow_api","test_sprint241_column_fix"
+            "test_sprint242_workflow_integration",
+            "test_sprint243_performance_profile",
+            "test_sprint244_push1650",
+            "test_sprint245_fk_fix",
+            "test_sprint246_hydration_fix",
+            "test_sprint247_248_dashboard_stats",
+            "test_sprint249_indexes_isolation",
         ]
         for h in HEAVY:
             if h in fname and fname not in _waited_heavy:
