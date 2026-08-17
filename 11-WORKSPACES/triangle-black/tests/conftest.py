@@ -155,7 +155,8 @@ def wait_for_heavy_modules(request):
             "test_sprint226_cors_jwt",
             "test_sprint228_audit_injection","test_sprint229_performance",
             "test_sprint230_workflow_engine","test_sprint231_sr_wo_slice",
-            "test_sprint235_wo_close","test_sprint236_coverage"
+            "test_sprint235_wo_close","test_sprint236_coverage",
+            "test_sprint238_gap_coverage","test_sprint240_workflow_api","test_sprint241_column_fix"
         ]
         for h in HEAVY:
             if h in fname and fname not in _waited_heavy:
