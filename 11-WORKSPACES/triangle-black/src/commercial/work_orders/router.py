@@ -531,6 +531,17 @@ def complete_work_order(wo_id: str, db: Session = Depends(get_db)):
 
     db.commit()
 
+    # Emit domain event to outbox (T-006)
+    try:
+        emit_event(db=db, hotel_id=wo["hotel_id"],
+                   event_type=EventType.WO_COMPLETED,
+                   aggregate_type="work_order",
+                   aggregate_id=wo_id,
+                   payload={"status": "completed", "invoice_id": inv_id},
+                   actor=wo["hotel_id"])
+    except Exception:
+        pass
+
     return {
         "ok": True,
         "work_order_id": wo_id,
@@ -566,17 +577,6 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
     now = _dt_235.datetime.utcnow()
 
     if wo.get("status") == "closed":
-
-    # Emit domain event to outbox (T-006)
-    try:
-        emit_event(db=db, hotel_id=hotel_id,
-                   event_type=EventType.WO_COMPLETED,
-                   aggregate_type="work_order",
-                   aggregate_id=work_order_id,
-                   payload={"status": "completed"},
-                   actor=hotel_id)
-    except Exception:
-        pass
         return {"ok": True, "work_order_id": wo_id, "status": "closed",
                 "message": "Already closed"}
 
@@ -605,6 +605,17 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
         service_report_id = None
 
     db.commit()
+
+    # Emit domain event to outbox (T-006)
+    try:
+        emit_event(db=db, hotel_id=hotel_id,
+                   event_type=EventType.WO_CLOSED,
+                   aggregate_type="work_order",
+                   aggregate_id=wo_id,
+                   payload={"status": "closed", "service_report_id": service_report_id},
+                   actor=hotel_id)
+    except Exception:
+        pass
 
     # Workflow transition: completed → closed (non-blocking)
     wf_transitioned = False
