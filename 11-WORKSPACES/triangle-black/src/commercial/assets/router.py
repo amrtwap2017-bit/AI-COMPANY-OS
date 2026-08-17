@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
 from src.core.audit import audit_create, audit_update
@@ -20,7 +21,7 @@ def row_to_dict(row):
 
 @router.get("/", summary="List assets")
 def list_assets(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     category: Optional[str] = None,
     status:   Optional[str] = None,
     skip:     int = 0,
@@ -41,7 +42,9 @@ def list_assets(
 
     q = "SELECT * FROM assets WHERE 1=1"
     params: dict = {}
-    if hotel_id: q += " AND hotel_id = :hotel_id"; params["hotel_id"] = hotel_id
+    # hotel_id always from JWT (Sprint-252)
+    q += " AND hotel_id = :hotel_id"
+    params["hotel_id"] = hotel_id
     if category: q += " AND category = :category"; params["category"] = category
     if status:   q += " AND status = :status";     params["status"]   = status
     q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
@@ -61,7 +64,7 @@ def list_assets(
 
 @router.get("", summary="List assets")
 def list_assets_root(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     category: Optional[str] = None,
     status:   Optional[str] = None,
     skip:     int = 0,
@@ -70,7 +73,9 @@ def list_assets_root(
 ):
     q = "SELECT * FROM assets WHERE 1=1"
     params: dict = {}
-    if hotel_id: q += " AND hotel_id = :hotel_id"; params["hotel_id"] = hotel_id
+    # hotel_id always from JWT (Sprint-252)
+    q += " AND hotel_id = :hotel_id"
+    params["hotel_id"] = hotel_id
     if category: q += " AND category = :category"; params["category"] = category
     if status:   q += " AND status = :status";     params["status"]   = status
     q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
@@ -79,10 +84,12 @@ def list_assets_root(
     return [row_to_dict(r) for r in rows]
 
 @router.get("/tree", summary="Asset hierarchy tree")
-def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db)):
+def asset_tree(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db)):
     q = "SELECT * FROM assets WHERE 1=1"
     params: dict = {}
-    if hotel_id: q += " AND hotel_id = :hotel_id"; params["hotel_id"] = hotel_id
+    # hotel_id always from JWT (Sprint-252)
+    q += " AND hotel_id = :hotel_id"
+    params["hotel_id"] = hotel_id
     q += " ORDER BY category, name"
     rows = db.execute(text(q), params).fetchall()
     assets = [row_to_dict(r) for r in rows]

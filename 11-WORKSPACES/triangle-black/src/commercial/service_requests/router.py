@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
 
@@ -22,7 +23,7 @@ def row_to_dict(row):
 
 @router.get("/", summary="List service requests")
 def list_service_requests(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     status:   Optional[str] = None,
     skip:     int = 0,
     limit:    int = Query(default=50, le=200),
@@ -30,7 +31,9 @@ def list_service_requests(
 ):
     q = "SELECT * FROM service_requests WHERE 1=1"
     params: dict = {}
-    if hotel_id: q += " AND hotel_id = :hotel_id"; params["hotel_id"] = hotel_id
+    # hotel_id always from JWT (Sprint-252)
+    q += " AND hotel_id = :hotel_id"
+    params["hotel_id"] = hotel_id
     if status:   q += " AND status = :status";     params["status"]   = status
     q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
     params["limit"] = limit; params["skip"] = skip

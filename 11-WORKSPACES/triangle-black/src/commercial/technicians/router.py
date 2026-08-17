@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
 
@@ -19,7 +20,7 @@ def row_to_dict(row):
 
 @router.get("/", summary="List technicians")
 def list_technicians(
-    hotel_id:  Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     is_active: Optional[bool] = None,
     skip:      int = 0,
     limit:     int = Query(default=50, le=200),
@@ -37,7 +38,7 @@ def list_technicians(
 
 @router.get("", summary="List technicians")
 def list_technicians_root(
-    hotel_id:  Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     is_active: Optional[bool] = None,
     skip:      int = 0,
     limit:     int = Query(default=50, le=200),

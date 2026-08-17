@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional
 import datetime
 
@@ -20,7 +21,7 @@ def rows(result): return [row_to_dict(r) for r in result]
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 @router.get("/kpis", summary="Cross-center KPIs")
-def analytics_kpis(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def analytics_kpis(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     total_leads       = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id"), h).scalar() or 0
@@ -50,7 +51,7 @@ def analytics_kpis(hotel_id: Optional[str] = None, db: Session = Depends(get_db)
     }
 
 @router.get("/scorecards", summary="Enterprise scorecards")
-def analytics_scorecards(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def analytics_scorecards(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     kpi_rows = rows(db.execute(text("SELECT * FROM kpi_snapshots ORDER BY created_at DESC LIMIT 20")).fetchall())
@@ -65,7 +66,7 @@ def analytics_scorecards(hotel_id: Optional[str] = None, db: Session = Depends(g
     return {"scorecards": scorecards, "snapshots": kpi_rows[:10]}
 
 @router.get("/sla", summary="SLA metrics")
-def analytics_sla(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def analytics_sla(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     total_wos     = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id"), h).scalar() or 1
@@ -82,7 +83,7 @@ def analytics_sla(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
     }
 
 @router.get("/trends", summary="Trend data for charts")
-def analytics_trends(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def analytics_trends(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     monthly_leads = rows(db.execute(text(

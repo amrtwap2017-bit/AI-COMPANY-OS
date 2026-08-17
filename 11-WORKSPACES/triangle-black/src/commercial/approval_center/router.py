@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from src.core.auth import get_current_user
 from src.commercial.auth.models import User
 
@@ -30,7 +31,7 @@ def rows(result):
 
 @router.get("/", summary="Unified approval queue")
 def approval_queue(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -81,7 +82,7 @@ def approval_queue(
 
 @router.get("", summary="Unified approval queue (no-slash alias)")
 def approval_queue_noslash(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -90,7 +91,7 @@ def approval_queue_noslash(
 
 @router.get("/count", summary="Pending approval count")
 def approval_count(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

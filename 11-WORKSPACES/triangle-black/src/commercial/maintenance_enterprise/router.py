@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
 
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/maintenance", tags=["maintenance"])
 
 # ── Dashboard ─────────────────────────────────────────────────
 @router.get("/dashboard", summary="Maintenance dashboard KPIs")
-def maintenance_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def maintenance_dashboard(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     total_assets  = db.execute(text("SELECT COUNT(*) FROM assets WHERE hotel_id=:hotel_id"), h).scalar() or 0
@@ -114,7 +115,7 @@ def maintenance_schedule(db: Session = Depends(get_db),
 
 # ── Asset Tree ────────────────────────────────────────────────
 @router.get("/asset-tree", summary="Hierarchical asset tree")
-def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def asset_tree(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = hotel_id or "tb-default-hotel-000000000001"
     asset_rows = rows(db.execute(text(
@@ -130,7 +131,7 @@ def asset_tree(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
 
 # ── Intelligence ──────────────────────────────────────────────
 @router.get("/intelligence", summary="Maintenance intelligence summary")
-def maintenance_intelligence(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def maintenance_intelligence(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     critical = rows(db.execute(text(
@@ -150,7 +151,7 @@ def maintenance_intelligence(hotel_id: Optional[str] = None, db: Session = Depen
 
 # ── Actions ───────────────────────────────────────────────────
 @router.get("/actions", summary="Maintenance action items")
-def maintenance_actions(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def maintenance_actions(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     open_wos = rows(db.execute(text(
@@ -160,7 +161,7 @@ def maintenance_actions(hotel_id: Optional[str] = None, db: Session = Depends(ge
 
 # ── Costs Review ──────────────────────────────────────────────
 @router.get("/costs", summary="Maintenance costs review")
-def maintenance_costs(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def maintenance_costs(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     cost_rows = rows(db.execute(text(
         "SELECT * FROM maintenance_cost_records ORDER BY created_at DESC LIMIT 50"

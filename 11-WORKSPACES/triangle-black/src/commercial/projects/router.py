@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
 
@@ -22,7 +23,7 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 @router.get("/", summary="List projects")
 def list_projects(
-    hotel_id: Optional[str] = None,
+    hotel_id: str = Depends(get_hotel_id),
     status:   Optional[str] = None,
     skip:     int = 0,
     limit:    int = Query(default=50, le=200),
@@ -40,7 +41,7 @@ def list_projects(
 
 
 @router.get("/dashboard", summary="Projects dashboard")
-def projects_dashboard(hotel_id: Optional[str] = None, db: Session = Depends(get_db),
+def projects_dashboard(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     h = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
     total     = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id"), h).scalar() or 0
