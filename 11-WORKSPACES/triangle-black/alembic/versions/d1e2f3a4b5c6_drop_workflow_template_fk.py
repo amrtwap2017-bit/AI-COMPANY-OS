@@ -20,58 +20,38 @@ depends_on = None
 def upgrade():
     conn = op.get_bind()
 
-    # Drop FK constraint if it exists
-    conn.execute(sa.text("""
-        DO $$
-        BEGIN
-            IF EXISTS (
-                SELECT 1 FROM pg_constraint
-                WHERE conname = 'workflow_instances_template_id_fkey'
-                AND conrelid = 'workflow_instances'::regclass
-            ) THEN
-                ALTER TABLE workflow_instances
-                DROP CONSTRAINT workflow_instances_template_id_fkey;
-                RAISE NOTICE 'Dropped workflow_instances_template_id_fkey';
-            ELSE
-                RAISE NOTICE 'Constraint not found — already clean';
-            END IF;
-        END $$;
-    """))
+    # 1. Drop FK constraint — check first to be idempotent
+    fk = conn.execute(sa.text("""
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'workflow_instances_template_id_fkey'
+        AND conrelid = 'workflow_instances'::regclass
+    """)).fetchone()
 
-    # Also add hotel_id index on workflow_instances if missing
-    conn.execute(sa.text("""
-        DO $$
-        BEGIN
-            IF NOT EXISTS (
-                SELECT 1 FROM pg_indexes
-                WHERE tablename = 'workflow_instances'
-                AND indexname = 'ix_workflow_instances_hotel_entity'
-            ) THEN
-                CREATE INDEX ix_workflow_instances_hotel_entity
-                ON workflow_instances (hotel_id, entity_type, entity_id);
-                RAISE NOTICE 'Created hotel_entity index';
-            END IF;
-        END $$;
-    """))
+    if fk:
+        conn.execute(sa.text(
+            "ALTER TABLE workflow_instances "
+            "DROP CONSTRAINT workflow_instances_template_id_fkey"
+        ))
+        print("Dropped workflow_instances_template_id_fkey")
+    else:
+        print("FK not found — already clean")
 
-    # Add hotel_id index on workflow_transitions if missing
-    conn.execute(sa.text("""
-        DO $$
-        BEGIN
-            IF NOT EXISTS (
-                SELECT 1 FROM pg_indexes
-                WHERE tablename = 'workflow_transitions'
-                AND indexname = 'ix_workflow_transitions_hotel_instance'
-            ) THEN
-                CREATE INDEX ix_workflow_transitions_hotel_instance
-                ON workflow_transitions (hotel_id, instance_id);
-                RAISE NOTICE 'Created transitions hotel_instance index';
-            END IF;
-        END $$;
-    """))
+    # 2. Add composite index on workflow_instances (hotel_id exists — confirmed)
+    idx = conn.execute(sa.text("""
+        SELECT 1 FROM pg_indexes
+        WHERE indexname = 'ix_workflow_instances_hotel_entity'
+    """)).fetchone()
+
+    if not idx:
+        conn.execute(sa.text(
+            "CREATE INDEX ix_workflow_instances_hotel_entity "
+            "ON workflow_instances (hotel_id, entity_type, entity_id)"
+        ))
+        print("Created ix_workflow_instances_hotel_entity")
+    else:
+        print("Index ix_workflow_instances_hotel_entity already exists")
 
 
 def downgrade():
-    # No-op — re-adding the FK would require seeding workflow_templates
-    # which is intentionally not done
+    # No-op — re-adding FK would require seeding workflow_templates
     pass

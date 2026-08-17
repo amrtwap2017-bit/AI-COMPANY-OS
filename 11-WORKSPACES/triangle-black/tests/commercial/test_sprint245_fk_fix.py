@@ -18,37 +18,37 @@ def _s(r, ctx=""):
     if hasattr(r, "status_code") and r.status_code == 429:
         import pytest; pytest.skip(f"Rate limited — {ctx}")
 
-# ── Migration file exists ─────────────────────────────────────────────────────
+# ── Migration file integrity ───────────────────────────────────────────────────
 def test_fk_migration_file_exists():
     p = SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py"
-    assert p.exists(), "Migration file missing"
+    assert p.exists()
 
 def test_fk_migration_has_correct_revision():
-    p = SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py"
-    text = p.read_text()
+    text = (SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py").read_text()
     assert "d1e2f3a4b5c6" in text
     assert "c2d3e4f5a6b7" in text
     assert "down_revision" in text
 
 def test_fk_migration_drops_constraint():
-    p = SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py"
-    text = p.read_text()
+    text = (SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py").read_text()
     assert "workflow_instances_template_id_fkey" in text
     assert "DROP CONSTRAINT" in text
 
-def test_fk_migration_has_safe_do_block():
-    p = SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py"
-    text = p.read_text()
-    assert "IF EXISTS" in text
-    assert "DO $$" in text
+def test_fk_migration_is_idempotent():
+    text = (SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py").read_text()
+    assert "IF EXISTS" in text or "fetchone()" in text
 
 def test_fk_migration_downgrade_is_noop():
-    p = SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py"
-    text = p.read_text()
+    text = (SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py").read_text()
     assert "def downgrade" in text
     assert "pass" in text
 
-# ── DB constraint gone ────────────────────────────────────────────────────────
+def test_fk_migration_creates_index():
+    text = (SRC / "alembic/versions/d1e2f3a4b5c6_drop_workflow_template_fk.py").read_text()
+    assert "ix_workflow_instances_hotel_entity" in text
+    assert "CREATE INDEX" in text
+
+# ── DB state after migration ──────────────────────────────────────────────────
 def test_fk_constraint_removed_from_db():
     from src.core.database import engine
     from sqlalchemy import text
@@ -60,21 +60,27 @@ def test_fk_constraint_removed_from_db():
         """)).fetchall()
     assert len(r) == 0, f"FK still exists: {r}"
 
-def test_workflow_indexes_created():
+def test_workflow_instances_index_created():
     from src.core.database import engine
     from sqlalchemy import text
     with engine.connect() as conn:
         r = conn.execute(text("""
-            SELECT indexname FROM pg_indexes
-            WHERE indexname IN (
-                'ix_workflow_instances_hotel_entity',
-                'ix_workflow_transitions_hotel_instance'
-            )
-        """)).fetchall()
-    names = [x[0] for x in r]
-    assert "ix_workflow_instances_hotel_entity" in names
+            SELECT 1 FROM pg_indexes
+            WHERE indexname = 'ix_workflow_instances_hotel_entity'
+        """)).fetchone()
+    assert r is not None, "Index ix_workflow_instances_hotel_entity missing"
 
-# ── Workflow stats now accurate ───────────────────────────────────────────────
+def test_alembic_head_is_d1e2f3a4b5c6():
+    import subprocess
+    result = subprocess.run(
+        [".venv/bin/alembic", "current"],
+        capture_output=True, text=True,
+        cwd="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black"
+    )
+    output = result.stdout + result.stderr
+    assert "d1e2f3a4b5c6" in output, f"Head still: {output.strip()}"
+
+# ── Workflow API live tests ────────────────────────────────────────────────────
 def test_workflow_stats_returns_200():
     r = requests.get(f"{BASE}/api/v1/workflow/stats", headers=_h(), timeout=5)
     _s(r, "wf-stats")
@@ -87,7 +93,7 @@ def test_workflow_stats_numeric_values():
         d = r.json()
         for field in ["total_instances", "active_instances",
                       "total_transitions", "total_definitions"]:
-            assert isinstance(d[field], int), f"{field} not int"
+            assert isinstance(d[field], int)
             assert d[field] >= 0
 
 def test_sr_generate_wo_returns_200():
@@ -113,13 +119,3 @@ def test_workflow_instances_list_works():
     d = r.json()
     assert "results" in d
     assert isinstance(d["results"], list)
-
-def test_alembic_head_is_d1e2f3a4b5c6():
-    import subprocess
-    result = subprocess.run(
-        [".venv/bin/alembic", "current"],
-        capture_output=True, text=True,
-        cwd="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black"
-    )
-    output = result.stdout + result.stderr
-    assert "d1e2f3a4b5c6" in output, f"Unexpected head: {output}"
