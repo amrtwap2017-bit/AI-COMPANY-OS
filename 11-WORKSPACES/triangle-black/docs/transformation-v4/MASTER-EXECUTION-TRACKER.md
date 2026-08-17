@@ -9,7 +9,7 @@ Last updated: August 2026
 | T-001 | DONE | Audit + gap register + sprint backlog | LOW | 0 | NONE |
 | T-002 | DONE | Workflow engine admin API | LOW | 12 | NONE |
 | T-003 | DONE | SLA tracking on work orders | MEDIUM | 14 | T-001 |
-| T-004 | OPEN | Security test suite | HIGH | 20 | T-001 |
+| T-004 | DONE | Security test suite | HIGH | 20 | T-001 |
 | T-005 | OPEN | Application service layer (SR+WO) | MEDIUM | 12 | T-003 |
 | T-006 | OPEN | Event outbox foundation | HIGH | 10 | T-005 |
 | T-007 | OPEN | Executive read models | MEDIUM | 10 | T-006 |
@@ -36,5 +36,5 @@ Last updated: August 2026
 | Testing Quality | 65/100 | ↑ (1606 backend + 181 E2E) |
 | Commercial Readiness | 15/100 | → (no demo tenant) |
 
-## Next Sprint: T-004 — Security Test Suite
+## Next Sprint: T-005 — Application Service Layer
 **Awaiting GO signal.**
