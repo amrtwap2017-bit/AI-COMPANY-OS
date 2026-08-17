@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 import { ExportButton } from "@/components/ui/ExportButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
@@ -19,9 +19,11 @@ function AssetsPageInner() {
   const [catF, setCatF] = useState("all");
   const [critF, setCritF] = useState("all");
 
+  const [mounted, setMounted] = useState(false)
   const { data: raw, isLoading } = useQuery(["assets-list"],()=>authFetch("/api/v1/assets/").then(r=>r.json()),{refetchInterval:120000});
   const { data: twin } = useQuery(["assets-twin"],()=>authFetch("/api/v1/twin/state").then(r=>r.json()));
 
+  useEffect(() => { setMounted(true) }, [])
   const assets = toArr(raw);
   const now = new Date();
   const cats = [...new Set(assets.map(a=>a.category||"Other"))].sort();
@@ -39,7 +41,7 @@ function AssetsPageInner() {
     return ms&&(catF==="all"||(a.category||"Other")===catF)&&(critF==="all"||a.criticality===critF);
   });
 
-  if (isLoading) return <div className="tb-page"><div className="tb-section tb-shimmer-block" style={{height:60}}/></div>;
+  if (!mounted) return null
 
   return (
     <div className="min-h-screen bg-base">

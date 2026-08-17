@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -6,7 +7,9 @@ import { useRouter } from "next/navigation";
 import { FeatureGate } from "@/components/ui/FeatureGate";
 const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 function SupplyChainHubInner() {
+  const [mounted, setMounted] = useState(false)
   const router = useRouter();
+  useEffect(() => { setMounted(true) }, [])
   const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r=>r.json()));
   const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r=>r.json()));
   const { data: invRaw } = useQuery(["sc-hub-inv"], () => authFetch("/api/v1/inventory-items-portal").then(r=>r.json()));
@@ -23,6 +26,7 @@ function SupplyChainHubInner() {
     { label:"RFQs",               icon:"📝", path:"/supply-chain/rfqs",               count:null,        color:"#5B7C8C" },
     { label:"Stock Levels",       icon:"⚖️",  path:"/supply-chain/stock-levels",       count:null,        color:"#B07A2A" },
   ];
+  if (!mounted) return null
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" >

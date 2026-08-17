@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
@@ -9,7 +10,9 @@ const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results ||
 const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 function AnalyticsHubInner() {
+  const [mounted, setMounted] = useState(false)
   const router = useRouter();
+  useEffect(() => { setMounted(true) }, [])
   const { data: dash }     = useQuery(["an-dash"],   () => authFetch("/api/v1/executive/dashboard").then(r=>r.json()), {refetchInterval:60000});
   const { data: twin }     = useQuery(["an-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
   const { data: woRaw }    = useQuery(["an-wos"],    () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
@@ -62,6 +65,7 @@ function AnalyticsHubInner() {
     ]},
   ];
 
+  if (!mounted) return null
   return (
     <div className="min-h-screen bg-base">
       {/* HERO */}
