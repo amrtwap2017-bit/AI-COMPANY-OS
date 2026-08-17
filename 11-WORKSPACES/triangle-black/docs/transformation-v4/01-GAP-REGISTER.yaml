@@ -1,0 +1,5 @@
+POST /api/v1/service-requests/{id}/generate-work-order – Creates a Work Order linked to an existing Service Request and triggers workflow transition from SR to WO state, logging audit entry and notifying stakeholders of the order creation.
+
+GET /api/v1/work-orders/{id} – Retrieves current Work Order status for validation before completion; if incomplete or invalid, blocks the next step while recording access in platform_audit_log.
+
+POST /api/v1/work-orders/{id}/complete – Finalizes the service by generating a Service Report and transitioning state from WO to Closed, emitting audit logs confirming closure reason and sending notifications of job completion to all relevant parties including client and internal teams.
