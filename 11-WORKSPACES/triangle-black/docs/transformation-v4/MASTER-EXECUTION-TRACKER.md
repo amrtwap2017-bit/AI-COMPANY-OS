@@ -14,7 +14,7 @@ Last updated: August 2026
 | T-006 | DONE | Event outbox foundation | HIGH | 14 | T-005 |
 | T-007 | DONE | Executive read models | MEDIUM | 10 | T-006 |
 | T-008 | DONE | E2E vertical slice UI test | LOW | 8 | T-002 |
-| T-009 | OPEN | Organization_id migration | HIGH | 10 | T-004 |
+| T-009 | DONE | Organization_id migration | HIGH | 10 | T-004 |
 | T-010 | OPEN | AI Gateway foundation | MEDIUM | 10 | T-006 |
 | T-011 | OPEN | Digital Twin projection | HIGH | 8 | T-006 |
 | T-012 | OPEN | Demo tenant + seed data | LOW | 5 | T-009 |
