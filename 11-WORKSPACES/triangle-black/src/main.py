@@ -8235,3 +8235,10 @@ try:
     print("  OK: workflow_engine_router")
 except Exception as _wf_err:
     print(f"  WARN workflow_engine_router: {_wf_err}")
+
+try:
+    from src.commercial.ai_gateway.router import router as ai_gateway_router
+    app.include_router(ai_gateway_router)
+    print("  OK: ai_gateway_router")
+except Exception as _aig_err:
+    print(f"  WARN ai_gateway_router: {_aig_err}")
