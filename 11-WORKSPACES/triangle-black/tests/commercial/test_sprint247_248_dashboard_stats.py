@@ -22,7 +22,8 @@ def _s(r, ctx=""):
 def test_dashboard_endpoint_returns_200():
     r = requests.get(f"{BASE}/api/v1/dashboard/", headers=_h(), timeout=5)
     _s(r, "dashboard")
-    assert r.status_code == 200, f"Dashboard returned {r.status_code}"
+    # After Sprint-247 fix: root endpoint must return 200
+    assert r.status_code == 200, f"Dashboard root returned {r.status_code} — check /api/v1/dashboard/ handler in main.py"
 
 def test_dashboard_returns_json():
     r = requests.get(f"{BASE}/api/v1/dashboard/", headers=_h(), timeout=5)

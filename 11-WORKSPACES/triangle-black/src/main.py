@@ -1097,6 +1097,21 @@ def create_wo_from_sr(sr_id: str, data: dict = {}):
         except Exception as e:
             return {"error": str(e)}
 
+@app.get("/api/v1/dashboard/", tags=["dashboard"])
+def dashboard_root():
+    """Dashboard root — returns navigation map for all dashboard endpoints."""
+    return {
+        "status": "operational",
+        "message": "Triangle Black Dashboard API",
+        "endpoints": {
+            "summary":   "/api/v1/dashboard/summary",
+            "executive": "/api/v1/executive/dashboard",
+            "my_day":    "/api/v1/workspace/my-day",
+            "financial": "/api/v1/financial/dashboard",
+            "sla":       "/api/v1/sla/dashboard",
+        }
+    }
+
 @app.get("/api/v1/dashboard/summary", tags=["dashboard"])
 @app.get("/api/v1/dashboard/summary/", tags=["dashboard"])
 def get_dashboard_summary():
