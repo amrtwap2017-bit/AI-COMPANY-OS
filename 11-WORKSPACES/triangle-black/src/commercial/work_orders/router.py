@@ -6,6 +6,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import Optional, List
 import uuid, datetime
+from src.core.events import emit_event, EventType
 from src.core.audit import audit_create, audit_update, audit_delete
 
 router = APIRouter(prefix="/work-orders", tags=["work-orders"])
@@ -565,6 +566,17 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
     now = _dt_235.datetime.utcnow()
 
     if wo.get("status") == "closed":
+
+    # Emit domain event to outbox (T-006)
+    try:
+        emit_event(db=db, hotel_id=hotel_id,
+                   event_type=EventType.WO_COMPLETED,
+                   aggregate_type="work_order",
+                   aggregate_id=work_order_id,
+                   payload={"status": "completed"},
+                   actor=hotel_id)
+    except Exception:
+        pass
         return {"ok": True, "work_order_id": wo_id, "status": "closed",
                 "message": "Already closed"}
 
