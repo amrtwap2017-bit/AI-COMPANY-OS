@@ -8211,3 +8211,12 @@ async def performance_tracking_middleware(request: Request, call_next):
     except Exception:
         pass
     return response
+
+
+# ── Sprint-240: Workflow Engine Admin API ─────────────────────────────────────
+try:
+    from src.commercial.workflow_engine.router import router as workflow_engine_router
+    app.include_router(workflow_engine_router, prefix="/api/v1")
+    print("  OK: workflow_engine_router")
+except Exception as _wf_err:
+    print(f"  WARN workflow_engine_router: {_wf_err}")
