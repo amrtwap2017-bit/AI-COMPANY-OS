@@ -1,5 +1,220 @@
-POST /api/v1/service-requests/{id}/generate-work-order – Creates a Work Order linked to an existing Service Request and triggers workflow transition from SR to WO state, logging audit entry and notifying stakeholders of the order creation.
+gaps:
+  - id: GAP-001
+    category: TENANCY
+    domain: Identity
+    current_state: hotel_id is the only tenant boundary on all tables
+    target_state: organization_id + site_id with hotel_id as compat field
+    risk: P1
+    priority: P1
+    effort: L
+    recommended_action: Add organization_id column via Alembic migration with hotel_id compatibility
+    status: OPEN
 
-GET /api/v1/work-orders/{id} – Retrieves current Work Order status for validation before completion; if incomplete or invalid, blocks the next step while recording access in platform_audit_log.
+  - id: GAP-002
+    category: ARCHITECTURE
+    domain: Operations
+    current_state: Routers call repositories directly with business logic inline
+    target_state: Application service layer between router and repository
+    risk: P1
+    priority: P1
+    effort: L
+    recommended_action: Extract ApplicationService classes for SR and WO domains first
+    status: OPEN
 
-POST /api/v1/work-orders/{id}/complete – Finalizes the service by generating a Service Report and transitioning state from WO to Closed, emitting audit logs confirming closure reason and sending notifications of job completion to all relevant parties including client and internal teams.
+  - id: GAP-003
+    category: ARCHITECTURE
+    domain: Platform
+    current_state: No event outbox — notifications are direct DB writes with no async feed
+    target_state: platform_events outbox table with dispatcher to consumers
+    risk: P1
+    priority: P1
+    effort: M
+    recommended_action: Create platform_events table and EventDispatcher service
+    status: OPEN
+
+  - id: GAP-004
+    category: WORKFLOW
+    domain: Operations
+    current_state: Work orders have no sla_hours or sla_breach_at fields
+    target_state: SLA tracking with breach detection and escalation events
+    risk: P1
+    priority: P1
+    effort: M
+    recommended_action: Add sla_hours + sla_breach_at to work_orders via Alembic
+    status: OPEN
+
+  - id: GAP-005
+    category: DOMAIN
+    domain: Finance
+    current_state: Invoice model referenced in multiple domain modules
+    target_state: Single canonical Invoice aggregate in finance domain
+    risk: P2
+    priority: P2
+    effort: L
+    recommended_action: Audit all Invoice references and establish finance domain ownership
+    status: OPEN
+
+  - id: GAP-006
+    category: WORKFLOW
+    domain: Platform
+    current_state: Workflow engine admin API added Sprint-240 — instance detail missing
+    target_state: Full CRUD admin API for definitions + instance detail + transition history
+    risk: P2
+    priority: P2
+    effort: S
+    recommended_action: Add GET /workflow/instances/{id} + GET /workflow/instances/{id}/transitions
+    status: OPEN
+
+  - id: GAP-007
+    category: SECURITY
+    domain: Platform
+    current_state: No automated security test suite — OWASP/tenant isolation unverified
+    target_state: Automated security tests covering auth boundary, IDOR, tenant isolation
+    risk: P1
+    priority: P1
+    effort: M
+    recommended_action: Create tests/security/ directory with tenant isolation and auth boundary tests
+    status: OPEN
+
+  - id: GAP-008
+    category: SECURITY
+    domain: Frontend
+    current_state: supply-chain/invoices + vendor-management use raw fetch() — bypass authFetch
+    target_state: All portal pages use authFetch exclusively
+    risk: P2
+    priority: P2
+    effort: S
+    recommended_action: Audit remaining raw fetch() calls and replace with authFetch pattern
+    status: OPEN
+
+  - id: GAP-009
+    category: ARCHITECTURE
+    domain: Analytics
+    current_state: Dashboard queries hit OLTP tables directly via routers
+    target_state: Governed read models for executive/analytics views
+    risk: P2
+    priority: P2
+    effort: L
+    recommended_action: Create read_models/ directory with materialized KPI projections
+    status: OPEN
+
+  - id: GAP-010
+    category: DIGITAL_TWIN
+    domain: Platform
+    current_state: graph/page.tsx is a placeholder — no event projection exists
+    target_state: Event-driven graph projection from domain events
+    risk: P3
+    priority: P3
+    effort: XL
+    recommended_action: Build after event outbox is stable (depends on GAP-003)
+    status: OPEN
+
+  - id: GAP-011
+    category: AI
+    domain: Platform
+    current_state: AI calls scattered in individual routers with no central governance
+    target_state: Single AI Gateway with tenant context, cost tracking, audit, evaluation
+    risk: P2
+    priority: P2
+    effort: L
+    recommended_action: Create src/commercial/ai_gateway/ as governed AI entry point
+    status: OPEN
+
+  - id: GAP-012
+    category: ARCHITECTURE
+    domain: Platform
+    current_state: All reads and writes in same repository — no CQRS separation
+    target_state: Read repositories separate from write repositories for high-traffic domains
+    risk: P3
+    priority: P3
+    effort: L
+    recommended_action: Implement after read models are established (depends on GAP-009)
+    status: OPEN
+
+  - id: GAP-013
+    category: ARCHITECTURE
+    domain: Platform
+    current_state: src/main.py is 7000+ lines with all routers registered inline
+    target_state: Router registration via domain packages with bounded context separation
+    risk: P2
+    priority: P2
+    effort: XL
+    recommended_action: Extract router groups incrementally — do not rewrite at once
+    status: OPEN
+
+  - id: GAP-014
+    category: TESTING
+    domain: Operations
+    current_state: E2E spec-18 covers workflow API but not full UI SR→WO→close flow
+    target_state: Full E2E UI test for SR creation through closure via portal
+    risk: P2
+    priority: P2
+    effort: M
+    recommended_action: Create spec-19-vertical-slice.spec.ts with Playwright UI flow
+    status: OPEN
+
+  - id: GAP-015
+    category: TESTING
+    domain: Platform
+    current_state: No migration tests — schema changes not verified for backward compat
+    target_state: Automated migration tests that verify rollback and data preservation
+    risk: P2
+    priority: P2
+    effort: M
+    recommended_action: Create tests/migrations/ with Alembic upgrade/downgrade verification
+    status: OPEN
+
+  - id: GAP-016
+    category: TESTING
+    domain: Platform
+    current_state: No contract tests — frontend/backend API contract not enforced
+    target_state: Schema-validated contract tests for all critical API endpoints
+    risk: P2
+    priority: P2
+    effort: M
+    recommended_action: Create tests/contracts/ using response schema validation
+    status: OPEN
+
+  - id: GAP-017
+    category: PERFORMANCE
+    domain: Platform
+    current_state: Performance budgets defined in tests but no enforcement gates
+    target_state: SLO enforcement in CI with p50/p95/p99 budgets per endpoint
+    risk: P2
+    priority: P2
+    effort: M
+    recommended_action: Add performance gate to Build Guard for critical endpoints
+    status: OPEN
+
+  - id: GAP-018
+    category: UX
+    domain: Frontend
+    current_state: Feature flags gate 8 pages but sidebar nav shows all items regardless
+    target_state: Sidebar dynamically renders based on active feature flags per tenant
+    risk: P2
+    priority: P2
+    effort: S
+    recommended_action: Wire useFeatureFlags hook to EnterpriseSidebar nav filter
+    status: OPEN
+
+  - id: GAP-019
+    category: SAAS
+    domain: Platform
+    current_state: No demo tenant or seed data — cannot demonstrate platform to customers
+    target_state: tb-demo-hotel seed script with realistic operational data
+    risk: P1
+    priority: P1
+    effort: M
+    recommended_action: Create scripts/seed_demo_tenant.py with 30 days of operational data
+    status: OPEN
+
+  - id: GAP-020
+    category: RELIABILITY
+    domain: Platform
+    current_state: No documented backup/restore procedure or disaster recovery test
+    target_state: Automated backup verification + documented restore runbook
+    risk: P1
+    priority: P1
+    effort: M
+    recommended_action: Create docs/operations/BACKUP-RESTORE.md + backup verification script
+    status: OPEN
