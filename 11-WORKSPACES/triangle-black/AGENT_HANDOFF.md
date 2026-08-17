@@ -1266,3 +1266,54 @@ Sprint-233: E2E tests for invoice/lead/contract detail (15,16,17.spec.ts)
 Sprint-234: AGENT_HANDOFF sync
 Sprint-235: Push to 1620+ passing
 Sprint-236: Push to 1650+ passing
+
+## SESSION UPDATE — Sprint-232 to 238 — August 2026
+
+### VERIFIED BASELINE (post sprint-236)
+- Backend pytest: 1579+ passed, 0 failed (expect 1620+ after sprint-238)
+- E2E Playwright: 174 passed, 1 flaky (timing — not code bug), 0 failed
+- Alembic head: c2d3e4f5a6b7
+
+### COMPLETE VERTICAL SLICE DELIVERED
+SR → generate-work-order → WO created → workflow_instance created
+  → complete WO → auto-invoice created
+  → close WO → service_report created → workflow transition executed → audit event
+
+All 4 stages emit audit events. All non-blocking (try/except).
+
+### WO CLOSE ENDPOINT
+POST /api/v1/work-orders/{id}/close
+Returns: {ok, work_order_id, status, service_report_id, wf_transitioned, closed_at}
+- Finds active workflow_instance for WO
+- Executes completed→closed transition via TriangleWorkflowEngine
+- Emits CLOSED audit event to platform_audit_log
+- Creates service_report row (non-blocking — table may not exist)
+
+### E2E SPECS ADDED
+portal/e2e/15-invoice-detail.spec.ts — 5 tests
+portal/e2e/16-lead-detail.spec.ts    — 5 tests
+portal/e2e/17-contract-detail.spec.ts — 5 tests
+Total E2E: 174 passing (was 160)
+
+### NEXT AGENT — START HERE
+1. cd ~/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+2. bash START.sh
+3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+   Expected: 1620+ passed, 0 failed
+4. cd portal && npx playwright test e2e/ --reporter=list 2>&1 | tail -5
+   Expected: 174 passed, 0 failed, 1 flaky (acceptable)
+
+### CRITICAL OPERATIONAL RULES (updated)
+- ALWAYS use bash START.sh — starts both backend (8030) AND portal (3000)
+- E2E navigation tests require portal running on :3000
+- Server must be FRESH — restart if running >4 hours before full pytest
+- TB_SECRET_KEY env var: if not set, random key used (tokens invalid on restart)
+
+### NEXT SPRINT BACKLOG
+Sprint-239: AGENT_HANDOFF sync (this entry)
+Sprint-240: SaaS/multi-tenancy improvements — organization_id migration plan
+Sprint-241: Feature flags UI integration (backend ready — portal needs wiring)
+Sprint-242: Redis cache integration test (START.sh auto-detects)
+Sprint-243: E2E for WO complete→close flow (spec 18)
+Sprint-244: Workflow engine admin API (GET /api/v1/workflow/instances)
+Sprint-245: Performance profiling — identify top 5 slow endpoints
