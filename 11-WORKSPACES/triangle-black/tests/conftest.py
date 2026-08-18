@@ -159,7 +159,7 @@ def wait_for_heavy_modules(request):
             "test_sprint238_gap_coverage","test_sprint240_workflow_api","test_sprint241_column_fix"
             "test_sprint242_workflow_integration",
             "test_sprint243_performance_profile",
-            "test_sprint244_push1650","test_sprint_t003_sla","test_tenant_isolation","test_auth_boundary","test_sprint_t005_services","test_sprint_t006_events","test_sprint_t007_readmodels","test_sprint_t009_tenancy","test_sprint_t010_ai_gateway","test_sprint_t011_digital_twin","test_sprint_t012_demo_tenant","test_sprint_t015_platform_status","test_sprint_t016_backup_restore","test_sprint_t017_coverage_push","test_sprint_t018_router_registry","test_sprint_t019_sla_breach_events","test_sprint_t020_procurement_readmodel",
+            "test_sprint244_push1650","test_sprint_t003_sla","test_tenant_isolation","test_auth_boundary","test_sprint_t005_services","test_sprint_t006_events","test_sprint_t007_readmodels","test_sprint_t009_tenancy","test_sprint_t010_ai_gateway","test_sprint_t011_digital_twin","test_sprint_t012_demo_tenant","test_sprint_t015_platform_status","test_sprint_t016_backup_restore","test_sprint_t017_coverage_push","test_sprint_t018_router_registry","test_sprint_t019_sla_breach_events","test_sprint_t020_procurement_readmodel","test_sprint_t021_ai_gateway_adoption",
             "test_sprint245_fk_fix",
             "test_sprint246_hydration_fix",
             "test_sprint247_248_dashboard_stats",

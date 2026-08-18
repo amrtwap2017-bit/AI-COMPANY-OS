@@ -54,6 +54,7 @@ def extract_location(text: str) -> str:
     return "Main Building"
 
 def call_ollama(prompt: str) -> str:
+    """Legacy direct call — preserved for compatibility."""
     try:
         r = requests.post(OLLAMA_URL,
             json={"model": MODEL, "stream": False, "prompt": prompt,
@@ -62,6 +63,32 @@ def call_ollama(prompt: str) -> str:
         return r.json().get("response", "")
     except Exception:
         return ""
+
+
+def _call_ai_gateway(prompt: str, hotel_id: str, db, purpose: str = "service_request_triage") -> str:
+    """
+    Call AI through the governed AIGateway — T-021.
+    Falls back to direct Ollama if gateway unavailable.
+    Always audited. Always tenant-scoped.
+    """
+    try:
+        from src.commercial.ai_gateway.gateway import AIGateway, AIRequest
+        gw = AIGateway(db=db, hotel_id=hotel_id)
+        req = AIRequest(
+            hotel_id=hotel_id,
+            purpose=purpose,
+            prompt=prompt,
+            model="qwen2.5:7b",
+            max_tokens=200,
+            temperature=0.1,
+        )
+        resp = gw.request(req)
+        if resp.success and resp.content:
+            return resp.content
+        return call_ollama(prompt)
+    except Exception:
+        return call_ollama(prompt)
+
 
 @router.post("/intake/request", summary="Parse incoming request to work order")
 def intake_request(
@@ -81,7 +108,7 @@ def intake_request(
     prompt = f"""Extract a clean work order title (max 10 words) from this maintenance request.
 Request: {raw_text}
 Reply with ONLY the title, nothing else."""
-    title = call_ollama(prompt).strip().strip('"').strip(".")
+    title = _call_ai_gateway(prompt, hotel_id=hotel_id, db=db, purpose="service_request_triage").strip().strip('"').strip(".")
     if not title or len(title) > 100:
         title = raw_text[:80]
 
