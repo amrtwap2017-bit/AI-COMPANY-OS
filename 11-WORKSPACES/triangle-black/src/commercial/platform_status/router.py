@@ -191,3 +191,16 @@ def get_sla_breach_summary(
         return get_breach_summary(db=db, hotel_id=hotel_id)
     except Exception as e:
         return {"hotel_id": hotel_id, "error": str(e)}
+
+@router.get("/procurement")
+def get_procurement_dashboard(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Procurement KPI read model — T-020"""
+    try:
+        from src.commercial.executive_dashboard.procurement_read_models import ProcurementReadModel
+        rm = ProcurementReadModel(db=db, hotel_id=hotel_id)
+        return rm.get_full_procurement_dashboard()
+    except Exception as e:
+        return {"hotel_id": hotel_id, "error": str(e)}
