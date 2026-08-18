@@ -204,3 +204,16 @@ def get_procurement_dashboard(
         return rm.get_full_procurement_dashboard()
     except Exception as e:
         return {"hotel_id": hotel_id, "error": str(e)}
+
+@router.get("/assets")
+def get_asset_dashboard(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Asset and maintenance KPI read model — T-022"""
+    try:
+        from src.commercial.executive_dashboard.asset_read_models import AssetReadModel
+        rm = AssetReadModel(db=db, hotel_id=hotel_id)
+        return rm.get_full_asset_dashboard()
+    except Exception as e:
+        return {"hotel_id": hotel_id, "error": str(e)}
