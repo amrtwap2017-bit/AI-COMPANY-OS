@@ -8228,24 +8228,38 @@ async def performance_tracking_middleware(request: Request, call_next):
     return response
 
 
-# ── Sprint-240: Workflow Engine Admin API ─────────────────────────────────────
-try:
-    from src.commercial.workflow_engine.router import router as workflow_engine_router
-    app.include_router(workflow_engine_router, prefix="/api/v1")
-    print("  OK: workflow_engine_router")
-except Exception as _wf_err:
-    print(f"  WARN workflow_engine_router: {_wf_err}")
+# ── T-018: Safe Optional Router Registration Seam ─────────────────────────────
+def register_optional_router(import_path: str, router_attr: str = "router", prefix: str | None = "/api/v1", label: str | None = None):
+    """Safely import and register optional routers without fragile inline try blocks."""
+    try:
+        from importlib import import_module
+        module = import_module(import_path)
+        router = getattr(module, router_attr)
+        if prefix is None:
+            app.include_router(router)
+        else:
+            app.include_router(router, prefix=prefix)
+        print(f"  OK: {label or import_path}")
+    except Exception as _router_err:
+        print(f"  WARN {label or import_path}: {_router_err}")
 
-try:
-    from src.commercial.ai_gateway.router import router as ai_gateway_router
-    app.include_router(ai_gateway_router)
-    print("  OK: ai_gateway_router")
-except Exception as _aig_err:
-    print(f"  WARN ai_gateway_router: {_aig_err}")
+register_optional_router(
+    "src.commercial.workflow_engine.router",
+    router_attr="router",
+    prefix="/api/v1",
+    label="workflow_engine_router",
+)
 
-try:
-    from src.commercial.platform_status.router import router as platform_status_router
-    app.include_router(platform_status_router)
-    print("  OK: platform_status_router")
-except Exception as _ps_err:
-    print(f"  WARN platform_status: {_ps_err}")
+register_optional_router(
+    "src.commercial.ai_gateway.router",
+    router_attr="router",
+    prefix=None,
+    label="ai_gateway_router",
+)
+
+register_optional_router(
+    "src.commercial.platform_status.router",
+    router_attr="router",
+    prefix=None,
+    label="platform_status_router",
+)
