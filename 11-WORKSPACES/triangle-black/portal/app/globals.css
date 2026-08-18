@@ -1428,3 +1428,72 @@ body {
 .tb-timeline-title   { font-size: 0.8125rem; font-weight: 600; color: var(--color-text-1); }
 .tb-timeline-meta    { font-size: 0.75rem; color: var(--color-text-3); margin-top: 2px; }
 
+/* ══════════════════════════════════════════════════════════════
+   TRIANGLE BLACK — DUAL THEME SYSTEM
+   theme="obsidian" → Obsidian Command (luxury dark)
+   theme="ivory"    → Ivory Operations (warm light, default)
+   Sidebar stays graphite in BOTH themes — permanent command layer
+   ══════════════════════════════════════════════════════════════ */
+
+/* OBSIDIAN COMMAND — Full luxury dark */
+[data-theme="obsidian"],
+[data-theme="warm-dark"],
+[data-theme="cool-dark"] {
+  --color-bg:              #111111;
+  --color-bg-alt:          #1C1C1E;
+  --color-surface:         #1C1C1E;
+  --color-surface-alt:     #2E2E2C;
+  --color-surface-raised:  #3A3A38;
+  --color-text-1:          #F9F9F7;
+  --color-text-2:          #9B9B96;
+  --color-text-3:          #6B6B66;
+  --color-text-disabled:   #4A4A47;
+  --color-text-inv:        #111111;
+  --color-border:          #2E2E2C;
+  --color-border-hover:    #4A4A47;
+  --color-divider:         #1C1C1E;
+  --color-topbar:          #1C1C1E;
+  --color-topbar-border:   #2E2E2C;
+  --color-topbar-text:     #F9F9F7;
+  --color-overlay:         rgba(0,0,0,0.6);
+  /* Sidebar stays graphite — same in both themes */
+  --color-sidebar:             #111111;
+  --color-sidebar-hover:       rgba(255,255,255,0.06);
+  --color-sidebar-active:      rgba(185,146,76,0.15);
+  --color-sidebar-border:      rgba(255,255,255,0.06);
+  --color-sidebar-text:        #6B6B66;
+  --color-sidebar-text-active: #F9F9F7;
+  --color-sidebar-accent:      #B9924C;
+}
+
+/* IVORY OPERATIONS — Warm light enterprise (default) */
+[data-theme="ivory"],
+[data-theme="light"],
+[data-theme="corporate"],
+:root:not([data-theme]) {
+  --color-bg:              #F4F4F2;
+  --color-bg-alt:          #EEEEED;
+  --color-surface:         #FFFFFF;
+  --color-surface-alt:     #F9F9F7;
+  --color-surface-raised:  #FFFFFF;
+  --color-text-1:          #111111;
+  --color-text-2:          #4A4A47;
+  --color-text-3:          #6B6B66;
+  --color-text-disabled:   #A8A8A3;
+  --color-text-inv:        #F9F9F7;
+  --color-border:          #E8E8E5;
+  --color-border-hover:    #D0D0CC;
+  --color-divider:         #F4F4F2;
+  --color-topbar:          #FFFFFF;
+  --color-topbar-border:   #E8E8E5;
+  --color-topbar-text:     #111111;
+  --color-overlay:         rgba(0,0,0,0.4);
+  /* Sidebar stays graphite — same in both themes */
+  --color-sidebar:             #1C1C1E;
+  --color-sidebar-hover:       rgba(255,255,255,0.06);
+  --color-sidebar-active:      rgba(185,146,76,0.12);
+  --color-sidebar-border:      rgba(255,255,255,0.08);
+  --color-sidebar-text:        #9B9B96;
+  --color-sidebar-text-active: #F9F9F7;
+  --color-sidebar-accent:      #B9924C;
+}

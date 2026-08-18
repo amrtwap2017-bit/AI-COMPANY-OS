@@ -4,13 +4,14 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, ChevronDown, Zap, User, LogOut, Settings, Search } from "lucide-react";
+import { Bell, ChevronDown, Zap, User, LogOut, Settings, Search, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { tokenManager } from "@/lib/auth/token-manager";
 import { enterpriseCenters } from "./nav";
 import { CommandBar } from "@/components/ui/CommandBar";
 import { NotificationDrawer } from "@/components/ui/NotificationDrawer";
+import { useTheme } from "@/lib/hooks/useTheme";
 
 export function EnterpriseTopbar() {
   const [signalSummary, setSignalSummary] = useState({ critical: 0, high: 0, total: 0 });
@@ -45,7 +46,8 @@ export function EnterpriseTopbar() {
     }
   }, []);
 
-  const [cmdOpen, setCmdOpen] = useState(false);
+  const { theme, toggleTheme, isDark } = useTheme();
+    const [cmdOpen, setCmdOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 

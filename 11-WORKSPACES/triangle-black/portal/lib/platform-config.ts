@@ -22,10 +22,12 @@ export type IndustryPackage =
   | 'energy';
 
 export type ThemePreset =
-  | 'warm-dark'    // Desert Premium — current target
-  | 'cool-dark'    // Midnight Blue — original
-  | 'light'        // Executive Light
-  | 'corporate';   // Corporate Grey
+  | 'obsidian'     // Obsidian Command — luxury dark
+  | 'ivory'        // Ivory Operations — warm light
+  | 'warm-dark'    // LEGACY: maps to obsidian
+  | 'light'        // LEGACY: maps to ivory
+  | 'cool-dark'    // LEGACY: maps to obsidian
+  | 'corporate';   // LEGACY: maps to ivory
 
 export interface PlatformConfig {
   // ── Identity ─────────────────────────────────────────────────────────
