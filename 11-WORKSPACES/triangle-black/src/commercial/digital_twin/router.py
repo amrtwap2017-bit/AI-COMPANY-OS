@@ -160,3 +160,82 @@ def get_twin_state(db: Session = Depends(get_db)):
              "expiring_30": _safe_int(contracts.get("expiring_30"))},
         ],
     }
+
+# ── T-023: Digital Twin Graph Query API ───────────────────────────────────────
+from src.core.tenant import get_hotel_id
+
+@router.get("/graph/stats")
+def get_twin_graph_stats(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Twin graph statistics for this tenant — T-023"""
+    try:
+        from src.commercial.digital_twin.projector import TwinQuery
+        tq = TwinQuery(db=db, hotel_id=hotel_id)
+        return tq.get_stats()
+    except Exception as e:
+        return {"hotel_id": hotel_id, "error": str(e)}
+
+
+@router.get("/graph/node/{entity_type}/{entity_id}")
+def get_twin_node(
+    entity_type: str,
+    entity_id: str,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Fetch a single twin node by entity type and ID — T-023"""
+    try:
+        from src.commercial.digital_twin.projector import TwinQuery
+        tq = TwinQuery(db=db, hotel_id=hotel_id)
+        node = tq.get_node(entity_type=entity_type, entity_id=entity_id)
+        if not node:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Twin node not found")
+        return node
+    except Exception as e:
+        return {"hotel_id": hotel_id, "entity_type": entity_type,
+                "entity_id": entity_id, "error": str(e)}
+
+
+@router.get("/graph/impact/{entity_type}/{entity_id}")
+def get_twin_impact(
+    entity_type: str,
+    entity_id: str,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Get all entities connected to this entity in the twin graph — T-023"""
+    try:
+        from src.commercial.digital_twin.projector import TwinQuery
+        tq = TwinQuery(db=db, hotel_id=hotel_id)
+        return tq.get_impact(entity_type=entity_type, entity_id=entity_id)
+    except Exception as e:
+        return {"hotel_id": hotel_id, "entity_type": entity_type,
+                "entity_id": entity_id, "connected_count": 0, "edges": [], "error": str(e)}
+
+
+@router.post("/graph/project/{entity_type}/{entity_id}")
+def project_twin_event(
+    entity_type: str,
+    entity_id: str,
+    data: dict,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Manually project an entity event into the twin graph — T-023"""
+    try:
+        from src.commercial.digital_twin.projector import TwinProjector
+        tp = TwinProjector(db=db, hotel_id=hotel_id)
+        event = {
+            "event_type": data.get("event_type", f"{entity_type}.updated"),
+            "aggregate_id": entity_id,
+            "aggregate_type": entity_type,
+            "payload": data.get("payload", {}),
+        }
+        success = tp.project_event(event)
+        return {"ok": success, "hotel_id": hotel_id,
+                "entity_type": entity_type, "entity_id": entity_id}
+    except Exception as e:
+        return {"ok": False, "hotel_id": hotel_id, "error": str(e)}
