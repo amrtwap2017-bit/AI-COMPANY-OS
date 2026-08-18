@@ -2675,7 +2675,7 @@ def change_password(request: Request, current_password: str, new_password: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    from src.core.auth import verify_password, hash_password
+    from src.core.auth import get_current_user,  verify_password, hash_password
 
     auth = request.headers.get("Authorization", "")
     token = auth.replace("Bearer ", "").strip()
