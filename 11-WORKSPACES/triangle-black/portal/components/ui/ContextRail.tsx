@@ -92,7 +92,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                 <div className="p-3 space-y-3">
                   {aiInsights.length === 0 ? (
                     <div className="text-center py-8">
-                      <Zap className="w-6 h-6 text-slate-300 mx-auto mb-2" />
+                      <Zap className="w-6 h-6 text-tertiary mx-auto mb-2" />
                       <div className="text-xs text-tertiary">No AI insights yet</div>
                     </div>
                   ) : aiInsights.map((item, i) => (
@@ -108,7 +108,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                 <div className="divide-y divide-slate-50">
                   {activities.length === 0 ? (
                     <div className="text-center py-8">
-                      <Activity className="w-6 h-6 text-slate-300 mx-auto mb-2" />
+                      <Activity className="w-6 h-6 text-tertiary mx-auto mb-2" />
                       <div className="text-xs text-tertiary">No recent activity</div>
                     </div>
                   ) : activities.map((act, i) => (

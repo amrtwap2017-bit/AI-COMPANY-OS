@@ -27,7 +27,7 @@ export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelPr
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Trend Layer
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 

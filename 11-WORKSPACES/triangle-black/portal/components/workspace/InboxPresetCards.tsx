@@ -20,7 +20,7 @@ export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsP
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Inbox Presets
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -28,7 +28,7 @@ export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsP
         {presets.map((preset, index) => (
           <div key={`${preset.title}-${index}`} className="rounded-2xl border border-border bg-base-alt p-5">
             <div className="flex items-start justify-between gap-3">
-              <div className="text-base font-semibold text-slate-950">{preset.title}</div>
+              <div className="text-base font-semibold text-primary">{preset.title}</div>
               <span className="rounded-full border border-border bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
                 {preset.audience}
               </span>

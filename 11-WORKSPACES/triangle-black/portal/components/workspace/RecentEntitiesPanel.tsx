@@ -24,7 +24,7 @@ export function RecentEntitiesPanel() {
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Workspace Memory
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">Recent Entities</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">Recent Entities</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">
           Continue where you left off across customers, contracts, work orders, and vendors.
         </p>

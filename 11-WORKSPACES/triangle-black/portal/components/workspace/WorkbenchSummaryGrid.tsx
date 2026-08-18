@@ -15,7 +15,7 @@ export function WorkbenchSummaryGrid({ title, subtitle, items }: WorkbenchSummar
   return (
     <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -25,7 +25,7 @@ export function WorkbenchSummaryGrid({ title, subtitle, items }: WorkbenchSummar
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.label}
             </div>
-            <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">
               {item.value}
             </div>
             <div className="mt-2 text-sm leading-6 text-secondary">

@@ -14,7 +14,7 @@ export function Entity360Hero({ eyebrow, title, subtitle, badges }: Entity360Her
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           {eyebrow}
         </div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-primary sm:text-4xl">
           {title}
         </h1>
         <p className="mt-3 max-w-4xl text-base leading-7 text-secondary">

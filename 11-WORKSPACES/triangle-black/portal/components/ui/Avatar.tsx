@@ -50,7 +50,7 @@ export function Avatar({ name, src, size = "md", online, className = "" }: Avata
         )}
       </div>
       {online !== undefined && (
-        <span className={"absolute bottom-0 right-0 rounded-full border-2 border-white " + INDICATOR[size] + " " + (online ? "bg-emerald-500" : "bg-slate-300")} />
+        <span className={"absolute bottom-0 right-0 rounded-full border-2 border-white " + INDICATOR[size] + " " + (online ? "bg-emerald-500" : "bg-base-alt")} />
       )}
     </div>
   );

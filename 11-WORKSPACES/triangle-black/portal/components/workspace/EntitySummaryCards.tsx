@@ -18,7 +18,7 @@ export function EntitySummaryCards({ title, subtitle, items }: EntitySummaryCard
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Entity Summary
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -31,7 +31,7 @@ export function EntitySummaryCards({ title, subtitle, items }: EntitySummaryCard
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {item.label}
             </div>
-            <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">
               {item.value}
             </div>
             <div className="mt-2 text-sm leading-6 text-secondary">

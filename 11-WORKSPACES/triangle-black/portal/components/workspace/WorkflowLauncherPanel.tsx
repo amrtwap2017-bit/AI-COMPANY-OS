@@ -16,7 +16,7 @@ export function WorkflowLauncherPanel({ title, subtitle, workflows=[] }:any) {
                 <div className="flex items-center gap-1 mt-2">
                   {wf.stages.map((s:string,j:number)=>(<>
                     <span key={j} className="text-[9px] bg-surface-alt px-1.5 py-0.5 rounded">{s}</span>
-                    {j<wf.stages.length-1 && <span className="text-slate-300 text-[9px]">→</span>}
+                    {j<wf.stages.length-1 && <span className="text-tertiary text-[9px]">→</span>}
                   </>))}
                 </div>
               )}

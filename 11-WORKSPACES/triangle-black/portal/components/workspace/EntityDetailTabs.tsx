@@ -23,7 +23,7 @@ export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProp
   return (
     <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 

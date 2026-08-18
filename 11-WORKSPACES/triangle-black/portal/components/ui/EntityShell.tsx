@@ -46,7 +46,7 @@ export function EntityShell({
               <ArrowLeft className="w-3.5 h-3.5" />
               {backLabel || "Back"}
             </Link>
-            <span className="text-slate-300">/</span>
+            <span className="text-tertiary">/</span>
             <span className="text-xs text-tertiary bg-surface-alt px-2 py-0.5 rounded-md font-medium">{entityType}</span>
             {entityCode && <span className="text-xs text-tertiary">{entityCode}</span>}
           </div>

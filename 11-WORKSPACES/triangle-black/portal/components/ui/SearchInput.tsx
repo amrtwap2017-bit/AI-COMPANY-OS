@@ -34,7 +34,7 @@ export function SearchInput({ label, className = "", onClear, value, showHint, o
           <X className="w-3 h-3" />
         </button>
       ) : showHint ? (
-        <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-300 border border-border rounded px-1.5 py-0.5 pointer-events-none">/</kbd>
+        <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-tertiary border border-border rounded px-1.5 py-0.5 pointer-events-none">/</kbd>
       ) : null}
     </div>
   );

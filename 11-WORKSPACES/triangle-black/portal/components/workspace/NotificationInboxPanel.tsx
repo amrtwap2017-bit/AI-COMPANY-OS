@@ -47,7 +47,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Notification Inbox
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -62,7 +62,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-slate-950">{item.title}</div>
+                    <div className="text-sm font-semibold text-primary">{item.title}</div>
                     <div className="mt-1 text-xs uppercase tracking-wide text-secondary">
                       {item.type} {item.unread ? "• unread" : "• read"}
                     </div>

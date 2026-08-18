@@ -27,7 +27,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Enterprise Scorecards
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -35,8 +35,8 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
         {items.map((item, index) => (
           <div key={`${item.title}-${index}`} className={"rounded-2xl border p-5 " + toneClasses(item.tone)}>
             <div className="flex items-start justify-between gap-3">
-              <div className="text-base font-semibold text-slate-950">{item.title}</div>
-              <div className="text-3xl font-semibold tracking-tight text-slate-950">{item.score}</div>
+              <div className="text-base font-semibold text-primary">{item.title}</div>
+              <div className="text-3xl font-semibold tracking-tight text-primary">{item.score}</div>
             </div>
 
             <div className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">

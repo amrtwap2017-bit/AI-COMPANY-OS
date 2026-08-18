@@ -19,15 +19,15 @@ export function EscalationLane({ title, subtitle, items }: EscalationLaneProps) 
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Escalation Hub
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item, index) => (
           <div key={`${item.lane}-${index}`} className="rounded-2xl border border-border bg-base-alt p-4">
-            <div className="text-sm font-semibold text-slate-950">{item.lane}</div>
-            <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{item.count}</div>
+            <div className="text-sm font-semibold text-primary">{item.lane}</div>
+            <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">{item.count}</div>
             <div className="mt-2 text-xs uppercase tracking-wide text-secondary">{item.owner}</div>
             <div className="mt-2 text-sm leading-6 text-secondary">{item.detail}</div>
           </div>

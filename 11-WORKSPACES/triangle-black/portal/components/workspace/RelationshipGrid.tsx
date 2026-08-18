@@ -16,7 +16,7 @@ export function RelationshipGrid({ title, subtitle, items }: RelationshipGridPro
   return (
     <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm text-secondary">{subtitle}</p>
       </div>
 
@@ -25,7 +25,7 @@ export function RelationshipGrid({ title, subtitle, items }: RelationshipGridPro
           <div key={item.title} className="rounded-2xl border border-border bg-base-alt p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="text-sm font-semibold text-primary">{item.title}</div>
-              <div className="text-2xl font-semibold tracking-tight text-slate-950">{item.value}</div>
+              <div className="text-2xl font-semibold tracking-tight text-primary">{item.value}</div>
             </div>
 
             <div className="mt-3 text-sm leading-6 text-secondary">{item.detail}</div>

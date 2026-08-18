@@ -19,7 +19,7 @@ export function CenterPlaceholderPage({ eyebrow, title, subtitle, bullets, actio
               <Clock className="w-2.5 h-2.5" /> Coming Soon
             </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl">{title}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-7 text-secondary">{subtitle}</p>
         </div>
       </section>

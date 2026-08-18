@@ -28,7 +28,7 @@ export function ExceptionDashboardPanel({ title, subtitle, items }: ExceptionDas
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Exception Dashboard
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -41,7 +41,7 @@ export function ExceptionDashboardPanel({ title, subtitle, items }: ExceptionDas
           items.map((item, index) => (
             <div key={`${item.title}-${index}`} className={"rounded-2xl border p-4 " + severityClasses(item.severity)}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm font-semibold text-slate-950">{item.title}</div>
+                <div className="text-sm font-semibold text-primary">{item.title}</div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-full border border-border bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
                     {item.domain}

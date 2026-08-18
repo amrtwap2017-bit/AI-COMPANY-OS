@@ -29,7 +29,7 @@ export function PinnedEntitiesPanel() {
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Workspace Favorites
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">Pinned Entities</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">Pinned Entities</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">
           Keep your most important objects one click away.
         </p>

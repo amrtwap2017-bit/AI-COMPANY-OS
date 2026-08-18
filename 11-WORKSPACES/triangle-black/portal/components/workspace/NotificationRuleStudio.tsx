@@ -27,7 +27,7 @@ export function NotificationRuleStudio({ title, subtitle, rows }: NotificationRu
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Notification Rules Studio
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 

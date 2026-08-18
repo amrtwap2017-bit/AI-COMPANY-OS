@@ -24,7 +24,7 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
   return (
     <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -32,7 +32,7 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
         {groups.map((group) => (
           <div key={group.title} className="rounded-2xl border border-border bg-base-alt p-4">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-semibold text-slate-950">{group.title}</div>
+              <div className="text-sm font-semibold text-primary">{group.title}</div>
               <div className="text-xs uppercase tracking-wide text-secondary">{group.countLabel}</div>
             </div>
 

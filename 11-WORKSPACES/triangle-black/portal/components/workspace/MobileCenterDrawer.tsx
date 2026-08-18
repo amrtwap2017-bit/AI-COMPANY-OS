@@ -35,16 +35,16 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
 
       <div
         className={[
-          "absolute left-0 top-0 h-full w-[88vw] max-w-sm bg-sidebar text-slate-100 shadow-2xl transition-transform",
+          "absolute left-0 top-0 h-full w-[88vw] max-w-sm bg-sidebar text-inverse shadow-2xl transition-transform",
           open ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
-        <div className="border-b border-slate-800 px-5 py-5">
+        <div className="border-b border-sidebar-border px-5 py-5">
           <div className="flex items-center justify-between gap-3">
             <BrandMark />
             <button
               onClick={onClose}
-              className="rounded-xl border border-slate-800 px-3 py-2 text-sm text-slate-300"
+              className="rounded-xl border border-sidebar-border px-3 py-2 text-sm text-tertiary"
             >
               Close
             </button>
@@ -67,8 +67,8 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
                   className={[
                     "block rounded-2xl border px-4 py-4 transition",
                     active
-                      ? "border-amber-400/70 bg-stone-900"
-                      : "border-slate-800 bg-stone-900/40",
+                      ? "border-amber-400/70 bg-sidebar"
+                      : "border-sidebar-border bg-sidebar/40",
                   ].join(" ")}
                 >
                   <div className="text-base font-semibold">{item.label}</div>
@@ -88,7 +88,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-stone-900"
+                  className="block rounded-xl px-3 py-2 text-sm text-tertiary hover:bg-sidebar"
                 >
                   {item.label}
                 </Link>

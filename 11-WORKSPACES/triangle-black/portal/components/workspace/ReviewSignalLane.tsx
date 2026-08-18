@@ -31,14 +31,14 @@ export function ReviewSignalLane({ title, subtitle, columns }: ReviewSignalLaneP
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Review Intelligence
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-4">
         {columns.map((column, index) => (
           <div key={`${column.title}-${index}`} className="rounded-2xl border border-border bg-base-alt p-4">
-            <div className="text-base font-semibold text-slate-950">{column.title}</div>
+            <div className="text-base font-semibold text-primary">{column.title}</div>
             <div className="mt-1 text-sm text-secondary">{column.subtitle}</div>
 
             <div className="mt-4 space-y-3">
@@ -46,7 +46,7 @@ export function ReviewSignalLane({ title, subtitle, columns }: ReviewSignalLaneP
                 <div key={`${item.label}-${itemIndex}`} className={"rounded-xl border p-3 " + toneClasses(item.tone)}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="text-sm font-medium text-primary">{item.label}</div>
-                    <div className="text-xl font-semibold tracking-tight text-slate-950">{item.value}</div>
+                    <div className="text-xl font-semibold tracking-tight text-primary">{item.value}</div>
                   </div>
                   <div className="mt-2 text-sm leading-6 text-secondary">{item.detail}</div>
                 </div>

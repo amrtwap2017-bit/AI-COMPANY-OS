@@ -110,7 +110,7 @@ export function EntityContextDrawer() {
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
                 Entity Context
               </div>
-              <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+              <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">
                 {name || entity}
               </div>
               <div className="mt-2 text-sm text-secondary">
@@ -160,7 +160,7 @@ export function EntityContextDrawer() {
           </section>
 
           <section className="rounded-3xl border border-border bg-white p-5">
-            <div className="text-lg font-semibold text-slate-950">Suggested Navigation</div>
+            <div className="text-lg font-semibold text-primary">Suggested Navigation</div>
             <div className="mt-4 space-y-3">
               {suggestions.map((item) => (
                 <Link
@@ -176,7 +176,7 @@ export function EntityContextDrawer() {
           </section>
 
           <section className="rounded-3xl border border-border bg-white p-5">
-            <div className="text-lg font-semibold text-slate-950">Context Clues</div>
+            <div className="text-lg font-semibold text-primary">Context Clues</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-divider bg-base-alt p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">

@@ -13,7 +13,7 @@ export function ObjectJourneyRibbon({ title, subtitle, steps=[] }:any) {
               <p className="text-xs font-bold">{step.label}</p>
               {step.detail && <p className="text-[10px] opacity-75">{step.detail}</p>}
             </div>
-            {i<steps.length-1 && <span className="text-slate-300 text-sm">→</span>}
+            {i<steps.length-1 && <span className="text-tertiary text-sm">→</span>}
           </div>
         ))}
       </div>

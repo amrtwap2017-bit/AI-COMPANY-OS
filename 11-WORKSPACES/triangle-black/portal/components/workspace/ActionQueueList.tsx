@@ -25,7 +25,7 @@ export function ActionQueueList({ title, subtitle, items }: ActionQueueListProps
   return (
     <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -35,7 +35,7 @@ export function ActionQueueList({ title, subtitle, items }: ActionQueueListProps
             <div className={"rounded-2xl border p-4 " + toneClasses(item.tone)}>
               <div className="flex items-start justify-between gap-3">
                 <div className="text-sm font-semibold text-primary">{item.title}</div>
-                <div className="text-2xl font-semibold tracking-tight text-slate-950">{item.value}</div>
+                <div className="text-2xl font-semibold tracking-tight text-primary">{item.value}</div>
               </div>
               <div className="mt-2 text-sm leading-6 text-secondary">{item.detail}</div>
             </div>

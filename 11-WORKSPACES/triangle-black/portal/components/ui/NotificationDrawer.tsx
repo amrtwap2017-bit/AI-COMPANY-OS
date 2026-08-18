@@ -44,7 +44,7 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
             <div className="max-h-96 overflow-y-auto divide-y divide-slate-50">
               {notifications.length === 0 ? (
                 <div className="py-12 text-center">
-                  <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2"/>
+                  <Bell className="w-8 h-8 text-tertiary mx-auto mb-2"/>
                   <div className="text-sm font-medium text-primary">All caught up!</div>
                   <div className="text-xs text-tertiary mt-1">No new notifications</div>
                 </div>

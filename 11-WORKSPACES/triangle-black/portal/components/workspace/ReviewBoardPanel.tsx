@@ -25,7 +25,7 @@ export function ReviewBoardPanel({ title, subtitle, items }: ReviewBoardPanelPro
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Review Board
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
@@ -33,7 +33,7 @@ export function ReviewBoardPanel({ title, subtitle, items }: ReviewBoardPanelPro
         {items.map((item, index) => (
           <div key={`${item.title}-${index}`} className={"rounded-2xl border p-4 " + emphasisClasses(item.emphasis)}>
             <div className="text-sm font-semibold text-primary">{item.title}</div>
-            <div className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{item.value}</div>
+            <div className="mt-2 text-3xl font-semibold tracking-tight text-primary">{item.value}</div>
             <div className="mt-2 text-sm leading-6 text-secondary">{item.detail}</div>
           </div>
         ))}

@@ -51,7 +51,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
             {eyebrow}
           </div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-primary sm:text-4xl">
             {title}
           </h1>
           <p className="mt-3 max-w-3xl text-base leading-7 text-secondary">
@@ -76,7 +76,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
           <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-950">Operational Queues</h2>
+                <h2 className="text-lg font-semibold text-primary">Operational Queues</h2>
                 <p className="mt-1 text-sm text-secondary">Actionable now</p>
               </div>
             </div>
@@ -85,7 +85,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
               {queues.map((item) => (
                 <div key={item.title} className="rounded-2xl border border-divider bg-base-alt p-4">
                   <div className="text-sm font-semibold text-primary">{item.title}</div>
-                  <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{item.value}</div>
+                  <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">{item.value}</div>
                   <div className="mt-2 text-sm leading-6 text-secondary">{item.detail}</div>
                 </div>
               ))}
@@ -94,7 +94,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
 
           <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
             <div>
-              <h2 className="text-lg font-semibold text-slate-950">Activity Timeline</h2>
+              <h2 className="text-lg font-semibold text-primary">Activity Timeline</h2>
               <p className="mt-1 text-sm text-secondary">Latest cross-functional activity</p>
             </div>
 
@@ -120,7 +120,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
         <div className="space-y-6">
           <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
             <div>
-              <h2 className="text-lg font-semibold text-slate-950">AI and Business Insights</h2>
+              <h2 className="text-lg font-semibold text-primary">AI and Business Insights</h2>
               <p className="mt-1 text-sm text-secondary">Decision support</p>
             </div>
 
@@ -136,7 +136,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
 
           <div className="rounded-3xl border border-border bg-white p-6 shadow-sm">
             <div>
-              <h2 className="text-lg font-semibold text-slate-950">Quick Actions</h2>
+              <h2 className="text-lg font-semibold text-primary">Quick Actions</h2>
               <p className="mt-1 text-sm text-secondary">Workspace accelerators</p>
             </div>
 

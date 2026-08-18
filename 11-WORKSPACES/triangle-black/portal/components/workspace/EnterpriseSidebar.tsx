@@ -41,11 +41,11 @@ const ICONS: Record<string, any> = {
 function badgeClass(badge: string): string {
   if (badge === "AI")    return "bg-stone-700/40 text-stone-300";
   if (badge === "Live")  return "bg-stone-700/30 text-stone-200";
-  if (badge === "OPS")   return "bg-stone-800/60 text-stone-300";
-  if (badge === "CRM")   return "bg-stone-800/60 text-stone-300";
-  if (badge === "SCM")   return "bg-stone-800/60 text-stone-300";
-  if (badge === "ENG")   return "bg-stone-800/60 text-stone-300";
-  return "bg-stone-800/50 text-tertiary";
+  if (badge === "OPS")   return "bg-sidebar/60 text-stone-300";
+  if (badge === "CRM")   return "bg-sidebar/60 text-stone-300";
+  if (badge === "SCM")   return "bg-sidebar/60 text-stone-300";
+  if (badge === "ENG")   return "bg-sidebar/60 text-stone-300";
+  return "bg-sidebar/50 text-tertiary";
 }
 
 function CenterAccordion({ center, pathname, collapsed }: { center: NavCenter; pathname: string; collapsed: boolean }) {

@@ -21,7 +21,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
             Backend Alignment
           </div>
-          <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
+          <h2 className="mt-2 text-lg font-semibold text-primary">{title}</h2>
           <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
         </div>
 
@@ -29,7 +29,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
           <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
             Feed Readiness
           </div>
-          <div className="mt-2 text-lg font-semibold text-slate-950">
+          <div className="mt-2 text-lg font-semibold text-primary">
             {connected} / {total}
           </div>
         </div>
@@ -37,7 +37,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-4">
-          <div className="text-sm font-semibold text-slate-950">Current Feed Status</div>
+          <div className="text-sm font-semibold text-primary">Current Feed Status</div>
           {currentFeeds.map((feed, index) => (
             <div
               key={`${feed.label}-${index}`}
@@ -76,7 +76,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm font-semibold text-slate-950">Target Endpoint Contract</div>
+          <div className="text-sm font-semibold text-primary">Target Endpoint Contract</div>
           {targetEndpoints.map((endpoint, index) => (
             <div
               key={`${endpoint.label}-${endpoint.route}-${index}`}

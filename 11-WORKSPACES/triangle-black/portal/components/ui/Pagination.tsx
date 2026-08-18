@@ -59,7 +59,7 @@ export function Pagination({
 
           {getPages().map((p, i) =>
             p === 0 ? (
-              <span key={"ellipsis-" + i} className="px-2 text-slate-300">…</span>
+              <span key={"ellipsis-" + i} className="px-2 text-tertiary">…</span>
             ) : (
               <button
                 key={p}

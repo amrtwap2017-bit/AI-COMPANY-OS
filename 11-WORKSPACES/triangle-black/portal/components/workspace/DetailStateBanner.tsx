@@ -14,7 +14,7 @@ export function DetailStateBanner({ title, subtitle, state, source }: DetailStat
           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
             Entity Focus State
           </div>
-          <div className="mt-2 text-lg font-semibold text-slate-950">{title}</div>
+          <div className="mt-2 text-lg font-semibold text-primary">{title}</div>
           <div className="mt-2 text-sm leading-6 text-secondary">{subtitle}</div>
         </div>
 
@@ -23,14 +23,14 @@ export function DetailStateBanner({ title, subtitle, state, source }: DetailStat
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               State
             </div>
-            <div className="mt-2 text-sm font-semibold text-slate-950">{state}</div>
+            <div className="mt-2 text-sm font-semibold text-primary">{state}</div>
           </div>
 
           <div className="rounded-2xl border border-border bg-base-alt px-4 py-3">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               Source
             </div>
-            <div className="mt-2 text-sm font-semibold text-slate-950">{source}</div>
+            <div className="mt-2 text-sm font-semibold text-primary">{source}</div>
           </div>
         </div>
       </div>

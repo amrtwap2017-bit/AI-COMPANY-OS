@@ -17,7 +17,7 @@ const COLORS: Record<string, string> = {
   emerald: "bg-emerald-500",
   blue:    "bg-blue-500",
   red:     "bg-red-500",
-  slate:   "bg-slate-400",
+  slate:   "bg-base-alt",
 };
 
 const HEIGHTS: Record<string, string> = {

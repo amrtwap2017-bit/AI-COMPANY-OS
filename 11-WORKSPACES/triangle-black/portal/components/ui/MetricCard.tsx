@@ -24,7 +24,7 @@ const colorMap: Record<string, { icon: string; bar: string; trend_up: string; tr
   green:   { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
   emerald: { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
   red:     { icon: "bg-red-50 text-red-600",         bar: "bg-red-500",     trend_up: "text-red-600 bg-red-50",         trend_down: "text-emerald-600 bg-emerald-50" },
-  slate:   { icon: "bg-surface-alt text-secondary",    bar: "bg-slate-400",   trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  slate:   { icon: "bg-surface-alt text-secondary",    bar: "bg-base-alt",   trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
   purple:  { icon: "bg-purple-50 text-purple-600",   bar: "bg-purple-500",  trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
 };
 

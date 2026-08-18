@@ -14,7 +14,7 @@ export function LinkedScenarioPanel({ title, subtitle, scenarios=[] }:any) {
               <div className="flex items-center gap-1 flex-wrap mt-3">
                 {s.chain.map((c:string,j:number)=>(<>
                   <span key={j} className="text-[10px] bg-white border border-border px-2 py-0.5 rounded font-medium text-secondary">{c}</span>
-                  {j<s.chain.length-1 && <span className="text-slate-300 text-[10px]">→</span>}
+                  {j<s.chain.length-1 && <span className="text-tertiary text-[10px]">→</span>}
                 </>))}
               </div>
             )}
