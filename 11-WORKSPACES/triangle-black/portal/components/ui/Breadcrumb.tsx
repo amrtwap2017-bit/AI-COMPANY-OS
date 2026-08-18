@@ -139,9 +139,9 @@ export function Breadcrumb({ className = "" }: { className?: string }) {
 
       {crumbs.map((crumb, i) => (
         <span key={i} className="flex items-center gap-1">
-          <ChevronRight className="w-3 h-3 text-slate-600" />
+          <ChevronRight className="w-3 h-3 text-secondary" />
           {crumb.last ? (
-            <span className="text-slate-300 font-medium truncate max-w-[200px]">
+            <span className="text-tertiary font-medium truncate max-w-[200px]">
               {crumb.label}
             </span>
           ) : (

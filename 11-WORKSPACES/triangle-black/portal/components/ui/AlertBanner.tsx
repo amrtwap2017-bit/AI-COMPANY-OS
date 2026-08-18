@@ -14,10 +14,10 @@ interface Props {
 
 const config = {
   info:    { icon: Info,          bg: "bg-blue-50",    border: "border-blue-200",    text: "text-blue-800",    icon_color: "text-blue-500"    },
-  success: { icon: CheckCircle,   bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-800", icon_color: "text-emerald-500" },
-  warning: { icon: AlertTriangle, bg: "bg-amber-50",   border: "border-amber-200",   text: "text-amber-800",   icon_color: "text-amber-500"   },
-  error:   { icon: XCircle,       bg: "bg-red-50",     border: "border-red-200",     text: "text-red-800",     icon_color: "text-red-500"     },
-  neutral: { icon: Lightbulb,     bg: "bg-slate-50",   border: "border-stone-200",   text: "text-slate-700",   icon_color: "text-tertiary"   },
+  success: { icon: CheckCircle,   bg: "bg-success-bg", border: "border-success-border", text: "text-success-text", icon_color: "text-success" },
+  warning: { icon: AlertTriangle, bg: "bg-warning-bg", border: "border-warning-border", text: "text-warning-text", icon_color: "text-warning" },
+  error:   { icon: XCircle,       bg: "bg-danger-bg", border: "border-danger-border", text: "text-danger-text", icon_color: "text-danger" },
+  neutral: { icon: Lightbulb,     bg: "bg-base-alt",   border: "border-border",      text: "text-primary",     icon_color: "text-tertiary"   },
 };
 
 export function AlertBanner({
