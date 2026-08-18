@@ -39,33 +39,33 @@
   --color-brand-border: rgba(185,146,76,0.22);
 
   /* ── BACKGROUNDS — Premium warm cream ──────────────────── */
-  --color-bg:              #FAF8F5;  /* Body — warm cream, not cold white */
-  --color-bg-alt:          #F3EFE8;  /* Alt bg — warm stone 50 */
+  --color-bg:              #F4F4F2;  /* Body — refined warm neutral */
+  --color-bg-alt:          #EEEEED;  /* Alt bg — subtle neutral */
   --color-surface:         #FFFFFF;  /* Card — clean white */
   --color-surface-alt:     #FAF8F5;  /* Elevated — warm cream */
   --color-surface-raised:  #FFFFFF;  /* Highest card */
   --color-overlay:         rgba(34,29,26,0.50);
 
   /* ── SIDEBAR — Premium matte obsidian (always dark) ──────── */
-  --color-sidebar:             #0F0D0B;
-  --color-sidebar-hover:       rgba(185,146,76,0.06);
-  --color-sidebar-active:      rgba(185,146,76,0.10);
-  --color-sidebar-border:      rgba(185,146,76,0.06);
-  --color-sidebar-text:        #6D5F53;
-  --color-sidebar-text-active: #F3EFE8;
+  --color-sidebar:             #1C1C1E;  /* Graphite command — neutral not brown */
+  --color-sidebar-hover:       rgba(255,255,255,0.06);  /* Neutral hover */
+  --color-sidebar-active:      rgba(185,146,76,0.12);  /* Bronze active */
+  --color-sidebar-border:      rgba(255,255,255,0.08);  /* Neutral border */
+  --color-sidebar-text:        #9B9B96;  /* Neutral secondary text */
+  --color-sidebar-text-active: #F9F9F7;  /* Near white active */
   --color-sidebar-accent:      #B9924C;
 
   /* ── TOPBAR — Sandy warm header ──────────────────────────── */
   --color-topbar:        #FFFFFF;
-  --color-topbar-border: #E8E0D4;
-  --color-topbar-text:   #221D1A;
+  --color-topbar-border: #E8E8E5;  /* Neutral border */
+  --color-topbar-text:   #111111;  /* Deep charcoal */
 
   /* ── TEXT — Dark warm hierarchy on light background ─────── */
-  --color-text-1:       #221D1A;  /* Primary — warm near-black */
-  --color-text-2:       #6D5F53;  /* Secondary — warm stone */
-  --color-text-3:       #B29F8B;  /* Tertiary — light stone */
-  --color-text-disabled:#D3C5B4;  /* Disabled */
-  --color-text-inv:     #F3EFE8;  /* On dark/bronze backgrounds */
+  --color-text-1:       #111111;  /* Primary — deep charcoal */
+  --color-text-2:       #4A4A47;  /* Secondary — neutral charcoal */
+  --color-text-3:       #6B6B66;  /* Tertiary — neutral gray */
+  --color-text-disabled:#A8A8A3;  /* Disabled — neutral */
+  --color-text-inv:     #F9F9F7;  /* On dark backgrounds */
   --color-text-brand:   #B9924C;  /* Bronze text */
 
   /* ── BORDERS — Warm sand ─────────────────────────────────── */
@@ -153,8 +153,8 @@
   --color-surface-alt:     #332C27;
   --color-surface-raised:  #3D352F;
   --color-overlay:         rgba(0,0,0,0.80);
-  --color-topbar:          #D9C3A9;
-  --color-topbar-border:   #C4A98A;
+  --color-topbar:          #1C1C1E;  /* Graphite topbar in dark */
+  --color-topbar-border:   #2E2E2C;  /* Neutral border in dark */
   --color-text-1:          #F3EFE8;
   --color-text-2:          #B29F8B;
   --color-text-3:          #6D5F53;
@@ -391,7 +391,7 @@ body {
 .tb-hero-title {
   font-size: 2rem;
   font-weight: 900;
-  color: #221D1A;
+  color: #111111;
   letter-spacing: -0.02em;
   line-height: 1.1;
   margin: 0;
@@ -1023,7 +1023,7 @@ body {
 
 /* ── HERO BANNER — Page top sections ─────────────────────── */
 .tb-hero {
-  background: linear-gradient(135deg, #221D1A 0%, #1A1310 100%);
+  background: linear-gradient(135deg, #1C1C1E 0%, #111111 100%);
   padding: 32px var(--page-padding) 28px;
   border-bottom: 1px solid var(--color-border);
 }
