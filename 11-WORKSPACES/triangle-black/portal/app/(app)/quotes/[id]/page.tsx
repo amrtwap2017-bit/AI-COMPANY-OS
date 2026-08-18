@@ -67,7 +67,7 @@ export default function QuoteDetailPage() {
       </button>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{quote.title || `Quote ${id?.slice(0,8)}`}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{quote.title || `Quote ${id?.slice(0,8)}`}</h1>
           <p className="text-gray-500 text-sm mt-1">{quote.description}</p>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[quote.status] || "bg-gray-100 text-gray-700"}`}>
@@ -78,17 +78,17 @@ export default function QuoteDetailPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-400 uppercase">Total</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{(quote.total || 0).toLocaleString()} EGP</p>
+          <p className="text-2xl font-bold text-[var(--color-text-1)] mt-1">{(quote.total || 0).toLocaleString()} EGP</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-400 uppercase">Valid Until</p>
-          <p className="text-lg font-medium text-gray-900 mt-1">
+          <p className="text-lg font-medium text-[var(--color-text-1)] mt-1">
             {quote.validity_date ? new Date(quote.validity_date).toLocaleDateString() : "—"}
           </p>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-400 uppercase">Items</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{(quote.items || []).length}</p>
+          <p className="text-2xl font-bold text-[var(--color-text-1)] mt-1">{(quote.items || []).length}</p>
         </div>
       </div>
 
@@ -106,10 +106,10 @@ export default function QuoteDetailPage() {
             <tbody className="divide-y divide-gray-100">
               {quote.items.map((item: any, i: number) => (
                 <tr key={i}>
-                  <td className="px-4 py-2 text-gray-900">{item.service}</td>
+                  <td className="px-4 py-2 text-[var(--color-text-1)]">{item.service}</td>
                   <td className="px-4 py-2 text-gray-600">{item.qty} {item.unit}</td>
                   <td className="px-4 py-2 text-gray-600">{(item.unit_price || 0).toLocaleString()}</td>
-                  <td className="px-4 py-2 font-medium text-gray-900">{(item.total || 0).toLocaleString()}</td>
+                  <td className="px-4 py-2 font-medium text-[var(--color-text-1)]">{(item.total || 0).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

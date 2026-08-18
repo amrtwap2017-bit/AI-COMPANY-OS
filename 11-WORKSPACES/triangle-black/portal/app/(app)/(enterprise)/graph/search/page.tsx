@@ -47,14 +47,14 @@ export default function KnowledgeGraphSearchPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Knowledge Graph</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Knowledge Graph</h1>
         <p className="text-gray-500 text-sm mt-1">Search assets, suppliers, contracts, work orders</p>
       </div>
       {summary && (
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
           {[["Assets",summary.assets||0,"🏭"],["Work Orders",summary.work_orders||0,"🔧"],["Suppliers",summary.suppliers||0,"🏢"],["Contracts",summary.contracts||0,"📋"],["Projects",summary.projects||0,"🏗️"],["Total",summary.total_entities||0,"🔗"]].map(([l,v,i])=>(
             <div key={l} className="bg-white border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-lg">{i}</p><p className="text-lg font-bold text-gray-900">{v}</p>
+              <p className="text-lg">{i}</p><p className="text-lg font-bold text-[var(--color-text-1)]">{v}</p>
               <p className="text-xs text-gray-400">{l}</p>
             </div>
           ))}
@@ -65,7 +65,7 @@ export default function KnowledgeGraphSearchPage() {
           onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&search(query)}
           className="flex-1 border border-gray-300 rounded-xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" autoFocus />
         <button onClick={()=>search(query)} disabled={loading||!query.trim()}
-          className="px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50">
+          className="px-6 py-3 bg-[var(--color-bg)] text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50">
           {loading?"...":"Search"}
         </button>
       </div>
@@ -90,7 +90,7 @@ export default function KnowledgeGraphSearchPage() {
               className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer hover:shadow-sm ${TYPE_COLOR[r.type]||"bg-gray-50 border-gray-200"}`}>
               <span className="text-2xl">{TYPE_ICON[r.type]||"📌"}</span>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 truncate">{r.label}</p>
+                <p className="font-semibold text-[var(--color-text-1)] truncate">{r.label}</p>
                 <p className="text-xs text-gray-500 capitalize">{r.type?.replace("_"," ")}{r.meta&&` · ${r.meta}`}</p>
               </div>
               <span className="text-gray-400">›</span>

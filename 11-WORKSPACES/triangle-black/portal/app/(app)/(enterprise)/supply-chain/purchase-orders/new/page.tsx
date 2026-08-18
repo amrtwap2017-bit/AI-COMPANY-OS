@@ -91,14 +91,14 @@ export default function PurchaseOrderNewPage() {
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
           ← Purchase Orders
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">New Purchase Order</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">New Purchase Order</h1>
         <p className="text-gray-500 text-sm mt-1">Create a new PO for a supplier</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Supplier + Status */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Order Details</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">Order Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Supplier *</label>
@@ -141,7 +141,7 @@ export default function PurchaseOrderNewPage() {
         {/* Line Items */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">Line Items</h2>
+            <h2 className="font-semibold text-[var(--color-text-1)]">Line Items</h2>
             <button type="button" onClick={addLine}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add Line</button>
           </div>
@@ -197,7 +197,7 @@ export default function PurchaseOrderNewPage() {
             </div>
             <div className="flex justify-between text-base font-bold border-t border-gray-200 pt-2">
               <span>Total</span>
-              <span className="text-gray-900">EGP {total.toLocaleString("en", {minimumFractionDigits:2})}</span>
+              <span className="text-[var(--color-text-1)]">EGP {total.toLocaleString("en", {minimumFractionDigits:2})}</span>
             </div>
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function PurchaseOrderNewPage() {
         {/* Actions */}
         <div className="flex gap-3">
           <button type="submit" disabled={saving}
-            className="flex-1 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            className="flex-1 py-3 bg-[var(--color-bg)] text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
             {saving ? "Creating..." : "Create Purchase Order"}
           </button>
           <button type="button" onClick={() => router.push("/supply-chain/purchase-orders")}

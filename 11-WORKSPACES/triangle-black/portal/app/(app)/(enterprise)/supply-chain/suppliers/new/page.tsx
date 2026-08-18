@@ -73,14 +73,14 @@ export default function SupplierNewPage() {
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
           ← Suppliers
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">New Supplier</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">New Supplier</h1>
         <p className="text-gray-500 text-sm mt-1">Register a new supplier in the system</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Company Info */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Company Information</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">Company Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="block text-xs font-medium text-gray-700 mb-1">Company Name (English) *</label>
@@ -130,7 +130,7 @@ export default function SupplierNewPage() {
 
         {/* Contact */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Contact Information</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">Contact Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Contact Person</label>
@@ -157,7 +157,7 @@ export default function SupplierNewPage() {
 
         {/* Commercial Terms */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Commercial Terms</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">Commercial Terms</h2>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Terms</label>
@@ -204,7 +204,7 @@ export default function SupplierNewPage() {
 
         <div className="flex gap-3">
           <button type="submit" disabled={saving}
-            className="flex-1 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            className="flex-1 py-3 bg-[var(--color-bg)] text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
             {saving ? "Creating..." : "✅ Create Supplier"}
           </button>
           <button type="button" onClick={() => router.push("/supply-chain/suppliers")}

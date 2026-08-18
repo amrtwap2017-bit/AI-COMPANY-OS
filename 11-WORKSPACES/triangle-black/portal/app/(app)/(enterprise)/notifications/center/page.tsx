@@ -60,7 +60,7 @@ export default function NotificationsCenterPage() {
     <div className="p-6 max-w-3xl mx-auto space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Notifications</h1>
           <p className="text-gray-500 text-sm mt-1">
             {notifs.length} total · {unread > 0 ? `${unread} unread` : "all read"}
           </p>
@@ -101,7 +101,7 @@ export default function NotificationsCenterPage() {
                   <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[type] || "🔔"}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`text-sm font-semibold text-gray-900 ${isUnread ? "" : "font-normal"}`}>
+                      <p className={`text-sm font-semibold text-[var(--color-text-1)] ${isUnread ? "" : "font-normal"}`}>
                         {n.title || n.message || n.content || "Notification"}
                       </p>
                       {isUnread && (

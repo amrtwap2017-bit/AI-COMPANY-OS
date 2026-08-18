@@ -57,7 +57,7 @@ export default function MaintenanceReportsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Maintenance Reports</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Maintenance Reports</h1>
           <p className="text-gray-500 text-sm mt-1">Downtime · Costs · Work Items · Performance</p>
         </div>
         <button onClick={() => router.push("/maintenance")}
@@ -79,7 +79,7 @@ export default function MaintenanceReportsPage() {
               <span>{k.icon}</span>
               <p className="text-xs text-gray-500">{k.label}</p>
             </div>
-            <p className="text-xl font-bold text-gray-900">{k.value}</p>
+            <p className="text-xl font-bold text-[var(--color-text-1)]">{k.value}</p>
           </div>
         ))}
       </div>
@@ -95,7 +95,7 @@ export default function MaintenanceReportsPage() {
           ].map(t => (
             <button key={t.key} onClick={() => setActiveTab(t.key as any)}
               className={`py-2 px-1 border-b-2 text-sm font-medium transition-colors ${
-                activeTab===t.key ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"
+                activeTab===t.key ? "border-gray-900 text-[var(--color-text-1)]" : "border-transparent text-gray-500 hover:text-gray-700"
               }`}>
               {t.label}
             </button>
@@ -107,7 +107,7 @@ export default function MaintenanceReportsPage() {
       {activeTab === "overview" && (
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-            <h3 className="font-semibold text-gray-900">Maintenance Dashboard</h3>
+            <h3 className="font-semibold text-[var(--color-text-1)]">Maintenance Dashboard</h3>
             {[
               ["Total Assets",       dashboard?.total_assets || 0],
               ["Open Work Orders",   dashboard?.open_work_orders || 0],
@@ -118,12 +118,12 @@ export default function MaintenanceReportsPage() {
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between text-sm border-b border-gray-50 py-1.5">
                 <span className="text-gray-500">{label}</span>
-                <span className="font-semibold text-gray-900">{value}</span>
+                <span className="font-semibold text-[var(--color-text-1)]">{value}</span>
               </div>
             ))}
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-            <h3 className="font-semibold text-gray-900">Quick Navigation</h3>
+            <h3 className="font-semibold text-[var(--color-text-1)]">Quick Navigation</h3>
             <div className="space-y-3">
               {[
                 { label:"PM Schedule",      path:"/maintenance/pm-schedule",  icon:"📅" },
@@ -162,7 +162,7 @@ export default function MaintenanceReportsPage() {
               <tbody className="divide-y divide-gray-100">
                 {dtData.map((r: any, i: number) => (
                   <tr key={r.id||i} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{r.asset_node_id || r.asset || "—"}</td>
+                    <td className="px-4 py-3 font-medium text-[var(--color-text-1)]">{r.asset_node_id || r.asset || "—"}</td>
                     <td className="px-4 py-3 text-gray-600">{r.reason || r.cause || "—"}</td>
                     <td className="px-4 py-3 font-semibold text-red-600">{r.hours || r.duration_hours || "—"}h</td>
                     <td className="px-4 py-3 text-gray-500">{fmtDate(r.start_time || r.started_at)}</td>
@@ -194,7 +194,7 @@ export default function MaintenanceReportsPage() {
               <tbody className="divide-y divide-gray-100">
                 {costData.map((r: any, i: number) => (
                   <tr key={r.id||i} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{r.title || r.description || "—"}</td>
+                    <td className="px-4 py-3 font-medium text-[var(--color-text-1)]">{r.title || r.description || "—"}</td>
                     <td className="px-4 py-3 capitalize text-gray-600">{r.cost_type || r.type || "—"}</td>
                     <td className="px-4 py-3 font-semibold text-blue-600">{fmtEGP(r.amount || r.cost)}</td>
                     <td className="px-4 py-3 capitalize text-gray-600">{r.status || "—"}</td>
@@ -225,7 +225,7 @@ export default function MaintenanceReportsPage() {
               <tbody className="divide-y divide-gray-100">
                 {wiData.map((r: any, i: number) => (
                   <tr key={r.id||i} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900 max-w-48 truncate">{r.title || r.description || "—"}</td>
+                    <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-48 truncate">{r.title || r.description || "—"}</td>
                     <td className="px-4 py-3 capitalize text-gray-600">{r.type || r.work_type || "—"}</td>
                     <td className="px-4 py-3 capitalize text-gray-600">{r.status || "—"}</td>
                     <td className="px-4 py-3 capitalize text-gray-600">{r.priority || "—"}</td>

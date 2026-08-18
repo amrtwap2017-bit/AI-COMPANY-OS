@@ -84,7 +84,7 @@ export default function AssetQRGeneratorPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Asset QR Codes</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Asset QR Codes</h1>
           <p className="text-gray-500 text-sm mt-1">
             Generate and print QR codes for field technicians · {assets.length} assets
           </p>
@@ -101,7 +101,7 @@ export default function AssetQRGeneratorPage() {
       {selected && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-gray-200 rounded-xl p-6 text-center space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">{selected.name}</h2>
+            <h2 className="text-lg font-bold text-[var(--color-text-1)]">{selected.name}</h2>
             <img
               src={QR_API(assetUrl(selected.id))}
               alt={`QR for ${selected.name}`}
@@ -110,12 +110,12 @@ export default function AssetQRGeneratorPage() {
             />
             <p className="text-xs text-gray-400 break-all">{assetUrl(selected.id)}</p>
             <button onClick={() => handlePrint(selected)}
-              className="w-full py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+              className="w-full py-2.5 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
               🖨️ Print QR Label
             </button>
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-gray-900">Asset Details</h3>
+            <h3 className="font-semibold text-[var(--color-text-1)]">Asset Details</h3>
             {[
               ["Name",        selected.name],
               ["Serial No.",  selected.serial_number || "—"],
@@ -128,7 +128,7 @@ export default function AssetQRGeneratorPage() {
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between text-sm border-b border-gray-50 pb-2">
                 <span className="text-gray-500">{label}</span>
-                <span className="font-medium text-gray-900 text-right max-w-48 truncate">{value}</span>
+                <span className="font-medium text-[var(--color-text-1)] text-right max-w-48 truncate">{value}</span>
               </div>
             ))}
           </div>
@@ -153,7 +153,7 @@ export default function AssetQRGeneratorPage() {
                   className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all">
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{asset.name}</p>
+                      <p className="font-medium text-[var(--color-text-1)] truncate">{asset.name}</p>
                       <p className="text-xs text-gray-500 mt-0.5 truncate">{asset.serial_number || "No serial"}</p>
                       <p className="text-xs text-gray-400 truncate">{asset.location_description || "No location"}</p>
                     </div>
@@ -163,7 +163,7 @@ export default function AssetQRGeneratorPage() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => setSelected(asset)}
-                      className="flex-1 py-2 bg-gray-900 text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition-colors">
+                      className="flex-1 py-2 bg-[var(--color-bg)] text-white rounded-lg text-xs font-medium hover:bg-gray-700 transition-colors">
                       View QR
                     </button>
                     <button onClick={() => handlePrint(asset)}

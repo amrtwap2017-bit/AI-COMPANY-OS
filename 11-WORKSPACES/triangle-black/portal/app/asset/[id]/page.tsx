@@ -11,7 +11,7 @@ const STATUS_COLOR: Record<string, string> = {
   operational: "bg-green-900 text-green-300",
   maintenance: "bg-yellow-900 text-yellow-300",
   offline:     "bg-red-900 text-red-300",
-  decommissioned: "bg-gray-800 text-gray-400",
+  decommissioned: "bg-[var(--color-surface)] text-gray-400",
 };
 const CRIT_COLOR: Record<string, string> = {
   critical: "text-red-400", high: "text-orange-400",
@@ -65,7 +65,7 @@ export default function AssetScanPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-8">
       {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 px-4 py-5">
+      <div className="bg-[var(--color-bg)] border-b border-gray-800 px-4 py-5">
         <div className="flex items-center gap-3 mb-1">
           <span className="text-2xl">🏭</span>
           <div>
@@ -74,7 +74,7 @@ export default function AssetScanPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 mt-2">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[asset.status] || "bg-gray-800 text-gray-400"}`}>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[asset.status] || "bg-[var(--color-surface)] text-gray-400"}`}>
             {asset.status || "unknown"}
           </span>
           {asset.criticality && (
@@ -87,7 +87,7 @@ export default function AssetScanPage() {
 
       <div className="px-4 py-5 space-y-5 max-w-sm mx-auto">
         {/* Asset Details */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800">
+        <div className="bg-[var(--color-bg)] border border-gray-800 rounded-xl divide-y divide-gray-800">
           {[
             ["Location",    asset.location_description],
             ["Model",       asset.model],
@@ -114,7 +114,7 @@ export default function AssetScanPage() {
           </button>
           <button
             onClick={() => router.push(`/operations/work-orders/new`)}
-            className="bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl text-sm font-medium text-center transition-colors"
+            className="bg-[var(--color-surface)] hover:bg-gray-700 text-white py-3 rounded-xl text-sm font-medium text-center transition-colors"
           >
             ➕ New Work Order
           </button>
@@ -122,7 +122,7 @@ export default function AssetScanPage() {
 
         {/* Notes */}
         {asset.notes && (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div className="bg-[var(--color-bg)] border border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-500 mb-2">Notes</p>
             <p className="text-sm text-gray-300">{asset.notes}</p>
           </div>
@@ -136,7 +136,7 @@ export default function AssetScanPage() {
               {workOrders.slice(0, 3).map((wo: any) => (
                 <button key={wo.id}
                   onClick={() => router.push(`/technician-portal/work-orders/${wo.id}`)}
-                  className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-left hover:border-gray-600 transition-colors">
+                  className="w-full bg-[var(--color-bg)] border border-gray-800 rounded-xl px-4 py-3 text-left hover:border-gray-600 transition-colors">
                   <p className="text-sm font-medium text-white truncate">
                     {wo.title || wo.description || `WO-${wo.id?.slice(0,8)}`}
                   </p>

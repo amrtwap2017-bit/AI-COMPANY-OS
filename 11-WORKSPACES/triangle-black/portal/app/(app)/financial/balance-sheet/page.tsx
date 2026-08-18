@@ -55,8 +55,8 @@ function AccountSection({ sectionKey, data, defaultOpen = false }: { sectionKey:
               {accounts.map((acc: any, i: number) => (
                 <tr key={`${acc.code}-${i}`} className="hover:bg-gray-50">
                   <td className="px-5 py-2.5 font-mono text-xs text-gray-500">{acc.code}</td>
-                  <td className="px-5 py-2.5 text-gray-900">{acc.name}</td>
-                  <td className="px-5 py-2.5 text-right font-medium text-gray-900">{fmtEGP(acc.balance || 0)}</td>
+                  <td className="px-5 py-2.5 text-[var(--color-text-1)]">{acc.name}</td>
+                  <td className="px-5 py-2.5 text-right font-medium text-[var(--color-text-1)]">{fmtEGP(acc.balance || 0)}</td>
                 </tr>
               ))}
             </tbody>
@@ -140,7 +140,7 @@ export default function BalanceSheetPage() {
             <span className="text-gray-300">/</span>
             <span className="text-sm text-gray-700 font-medium">Balance Sheet</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Balance Sheet</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Balance Sheet</h1>
           {genAt && <p className="text-xs text-gray-400 mt-1">Generated: {genAt}</p>}
         </div>
         <button

@@ -85,7 +85,7 @@ export default function RFQDetailPage() {
             className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
             ← RFQs
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{rfq.title || rfq.rfq_number}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{rfq.title || rfq.rfq_number}</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className="font-mono text-sm text-gray-500">{rfq.rfq_number}</span>
             <span className="text-gray-300">·</span>
@@ -102,7 +102,7 @@ export default function RFQDetailPage() {
             </button>
           )}
           <button onClick={() => router.push(`/supply-chain/rfq-management/${id}`)}
-            className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700">
+            className="px-4 py-2 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700">
             Manage Quotes
           </button>
         </div>
@@ -118,7 +118,7 @@ export default function RFQDetailPage() {
         ].map(k => (
           <div key={k.label} className={`${k.color} border border-gray-200 rounded-xl p-4`}>
             <p className="text-xs text-gray-500">{k.label}</p>
-            <p className="text-lg font-bold text-gray-900 mt-1 capitalize">{k.value}</p>
+            <p className="text-lg font-bold text-[var(--color-text-1)] mt-1 capitalize">{k.value}</p>
           </div>
         ))}
       </div>
@@ -126,7 +126,7 @@ export default function RFQDetailPage() {
       {/* Details */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-          <h2 className="font-semibold text-gray-900">RFQ Details</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">RFQ Details</h2>
           {[
             ["RFQ Number",    rfq.rfq_number],
             ["Title",         rfq.title],
@@ -137,7 +137,7 @@ export default function RFQDetailPage() {
           ].filter(([,v])=>v).map(([label, value]) => (
             <div key={label} className="flex justify-between text-sm border-b border-gray-50 py-1.5">
               <span className="text-gray-400">{label}</span>
-              <span className="text-gray-900 font-medium text-right max-w-48 truncate">{value}</span>
+              <span className="text-[var(--color-text-1)] font-medium text-right max-w-48 truncate">{value}</span>
             </div>
           ))}
           {rfq.notes && (
@@ -150,14 +150,14 @@ export default function RFQDetailPage() {
 
         {/* Line Items */}
         <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h2 className="font-semibold text-gray-900 mb-3">Required Items ({lines.length})</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)] mb-3">Required Items ({lines.length})</h2>
           {lines.length === 0 ? (
             <p className="text-gray-400 text-sm">No line items defined</p>
           ) : (
             <div className="space-y-2">
               {lines.map((line: any, i: number) => (
                 <div key={i} className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-sm font-medium text-gray-900">{line.description || line.item_name || `Item ${i+1}`}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-1)]">{line.description || line.item_name || `Item ${i+1}`}</p>
                   <div className="flex gap-4 mt-1 text-xs text-gray-500">
                     {line.quantity && <span>Qty: {line.quantity}</span>}
                     {line.unit && <span>Unit: {line.unit}</span>}

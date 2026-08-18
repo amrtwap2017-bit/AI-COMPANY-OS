@@ -72,7 +72,7 @@ export default function VendorScorecardPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vendor Scorecards</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Vendor Scorecards</h1>
           <p className="text-gray-500 text-sm mt-1">
             Performance KPIs for {scorecards.length} vendors
           </p>
@@ -96,7 +96,7 @@ export default function VendorScorecardPage() {
               <span className="text-lg">{kpi.icon}</span>
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{kpi.label}</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-1)]">{kpi.value}</p>
           </div>
         ))}
       </div>
@@ -137,7 +137,7 @@ export default function VendorScorecardPage() {
                 <tr key={s.id} className="hover:bg-gray-50 cursor-pointer"
                   onClick={() => router.push(`/supply-chain/vendors/${s.vendor_id}`)}>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900 truncate max-w-40">{s.company_name}</p>
+                    <p className="font-medium text-[var(--color-text-1)] truncate max-w-40">{s.company_name}</p>
                     {s.preferred_flag && <span className="text-xs text-blue-500">⭐ Preferred</span>}
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.vendor_code}</td>

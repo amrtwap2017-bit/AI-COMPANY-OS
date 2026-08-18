@@ -31,7 +31,7 @@ export default function NewEmployeePage() {
       <button onClick={() => router.push("/employees")} className="text-sm text-blue-600 hover:underline mb-4 block">
         ← Back to Employees
       </button>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">New Employee</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-text-1)] mb-6">New Employee</h1>
       {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
       <form onSubmit={submit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
         <div className="grid grid-cols-2 gap-4">

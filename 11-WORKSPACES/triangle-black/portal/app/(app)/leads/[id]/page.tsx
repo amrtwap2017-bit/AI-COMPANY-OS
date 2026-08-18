@@ -78,7 +78,7 @@ export default function LeadDetailPage() {
 
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{lead.name}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{lead.name}</h1>
           <p className="text-gray-500 mt-1">{lead.company}</p>
         </div>
         <div className="flex gap-2 items-center">
@@ -98,9 +98,9 @@ export default function LeadDetailPage() {
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact</h2>
           <div className="space-y-2 text-sm">
-            <div><span className="text-gray-400">Email: </span><span className="text-gray-900">{lead.email || "—"}</span></div>
-            <div><span className="text-gray-400">Phone: </span><span className="text-gray-900">{lead.phone || "—"}</span></div>
-            <div><span className="text-gray-400">Source: </span><span className="text-gray-900 capitalize">{lead.source || "—"}</span></div>
+            <div><span className="text-gray-400">Email: </span><span className="text-[var(--color-text-1)]">{lead.email || "—"}</span></div>
+            <div><span className="text-gray-400">Phone: </span><span className="text-[var(--color-text-1)]">{lead.phone || "—"}</span></div>
+            <div><span className="text-gray-400">Source: </span><span className="text-[var(--color-text-1)] capitalize">{lead.source || "—"}</span></div>
           </div>
         </div>
 

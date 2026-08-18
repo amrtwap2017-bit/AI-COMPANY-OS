@@ -84,9 +84,9 @@ export default function PlatformReadinessPage() {
     <div className="p-6 max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
-        <h1 className="text-3xl font-bold text-gray-900">Platform Readiness Assessment</h1>
+        <h1 className="text-3xl font-bold text-[var(--color-text-1)]">Platform Readiness Assessment</h1>
         <p className="text-gray-500">Triangle Black Enterprise SaaS — August 2026</p>
-        <div className="inline-flex items-center gap-3 bg-gray-900 text-white px-6 py-3 rounded-2xl">
+        <div className="inline-flex items-center gap-3 bg-[var(--color-bg)] text-white px-6 py-3 rounded-2xl">
           <span className="text-4xl font-black">{overall}</span>
           <div className="text-left">
             <p className="text-xs text-gray-400">Overall Score</p>
@@ -106,7 +106,7 @@ export default function PlatformReadinessPage() {
         ].map(s => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4 text-center">
             <p className="text-2xl mb-1">{s.icon}</p>
-            <p className="text-2xl font-black text-gray-900">{s.value}</p>
+            <p className="text-2xl font-black text-[var(--color-text-1)]">{s.value}</p>
             <p className="text-xs text-gray-500 mt-1">{s.label}</p>
           </div>
         ))}
@@ -114,7 +114,7 @@ export default function PlatformReadinessPage() {
 
       {/* Score Breakdown */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-        <h2 className="font-bold text-gray-900 text-lg">Score Breakdown</h2>
+        <h2 className="font-bold text-[var(--color-text-1)] text-lg">Score Breakdown</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
           {[
             { label:"API Coverage",     score:scores.api_coverage,    note:"75+ modules, 200+ endpoints" },
@@ -139,11 +139,11 @@ export default function PlatformReadinessPage() {
 
       {/* Platform Capabilities */}
       <div className="space-y-4">
-        <h2 className="font-bold text-gray-900 text-lg">Platform Capabilities</h2>
+        <h2 className="font-bold text-[var(--color-text-1)] text-lg">Platform Capabilities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {PLATFORM_CAPABILITIES.map(cat => (
             <div key={cat.category} className="bg-white border border-gray-200 rounded-xl p-4">
-              <p className="font-semibold text-gray-900 mb-3">{cat.category}</p>
+              <p className="font-semibold text-[var(--color-text-1)] mb-3">{cat.category}</p>
               <div className="space-y-1.5">
                 {cat.items.map(item => (
                   <div key={item} className="flex items-center gap-2 text-xs text-gray-600">
@@ -159,7 +159,7 @@ export default function PlatformReadinessPage() {
 
       {/* System Health */}
       <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <h2 className="font-bold text-gray-900 text-lg mb-4">Live System Health</h2>
+        <h2 className="font-bold text-[var(--color-text-1)] text-lg mb-4">Live System Health</h2>
         <div className="grid grid-cols-3 gap-4">
           {[
             { label:"Backend API", version:"v3.0.0", status:"operational" },
@@ -171,7 +171,7 @@ export default function PlatformReadinessPage() {
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-xs font-medium text-green-700 uppercase">{s.status}</span>
               </div>
-              <p className="font-semibold text-gray-900">{s.label}</p>
+              <p className="font-semibold text-[var(--color-text-1)]">{s.label}</p>
               <p className="text-xs text-gray-500">{s.version}</p>
             </div>
           ))}

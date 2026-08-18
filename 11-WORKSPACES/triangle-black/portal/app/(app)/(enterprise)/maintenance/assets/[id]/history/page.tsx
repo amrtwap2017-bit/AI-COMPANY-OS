@@ -80,7 +80,7 @@ export default function AssetHistoryPage() {
             className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
             ← Assets
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{asset.name}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{asset.name}</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-gray-500">{asset.category}</span>
             <span className="text-gray-300">·</span>
@@ -97,7 +97,7 @@ export default function AssetHistoryPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => router.push(`/operations/work-orders/new`)}
-            className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+            className="px-4 py-2 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
             + Work Order
           </button>
         </div>
@@ -113,7 +113,7 @@ export default function AssetHistoryPage() {
         ].map(k => (
           <div key={k.label} className={`${k.color} border border-gray-200 rounded-xl p-4`}>
             <p className="text-xs text-gray-500">{k.label}</p>
-            <p className="text-xl font-bold text-gray-900 mt-1 capitalize">{k.value}</p>
+            <p className="text-xl font-bold text-[var(--color-text-1)] mt-1 capitalize">{k.value}</p>
           </div>
         ))}
       </div>
@@ -143,7 +143,7 @@ export default function AssetHistoryPage() {
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className={`py-2 px-1 border-b-2 text-sm font-medium transition-colors ${
-                tab === t.key ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"
+                tab === t.key ? "border-gray-900 text-[var(--color-text-1)]" : "border-transparent text-gray-500 hover:text-gray-700"
               }`}>
               {t.label}
             </button>
@@ -155,7 +155,7 @@ export default function AssetHistoryPage() {
       {tab === "info" && (
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-3">
-            <h3 className="font-semibold text-gray-900">Asset Details</h3>
+            <h3 className="font-semibold text-[var(--color-text-1)]">Asset Details</h3>
             {[
               ["Name",             asset.name],
               ["Category",         asset.category],
@@ -170,12 +170,12 @@ export default function AssetHistoryPage() {
             ].filter(([,v])=>v).map(([label, value]) => (
               <div key={label} className="flex justify-between text-sm border-b border-gray-50 py-1.5">
                 <span className="text-gray-400">{label}</span>
-                <span className="font-medium text-gray-900 text-right max-w-48 truncate capitalize">{value}</span>
+                <span className="font-medium text-[var(--color-text-1)] text-right max-w-48 truncate capitalize">{value}</span>
               </div>
             ))}
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-3">
-            <h3 className="font-semibold text-gray-900">Maintenance Schedule</h3>
+            <h3 className="font-semibold text-[var(--color-text-1)]">Maintenance Schedule</h3>
             {[
               ["Last Maintenance",  fmtDate(asset.last_maintenance_date)],
               ["Next Maintenance",  fmtDate(asset.next_maintenance_date)],
@@ -183,7 +183,7 @@ export default function AssetHistoryPage() {
             ].filter(([,v])=>v && v !== "—").map(([label, value]) => (
               <div key={label} className="flex justify-between text-sm border-b border-gray-50 py-1.5">
                 <span className="text-gray-400">{label}</span>
-                <span className="font-medium text-gray-900">{value}</span>
+                <span className="font-medium text-[var(--color-text-1)]">{value}</span>
               </div>
             ))}
             {asset.notes && (
@@ -214,7 +214,7 @@ export default function AssetHistoryPage() {
                 {workOrders.map((wo:any) => (
                   <tr key={wo.id} className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => router.push(`/operations/work-orders/${wo.id}`)}>
-                    <td className="px-4 py-3 font-medium text-gray-900 max-w-48 truncate">
+                    <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-48 truncate">
                       {wo.title || wo.description || `WO-${wo.id?.slice(0,8)}`}
                     </td>
                     <td className={`px-4 py-3 text-sm font-medium ${PRIORITY_COLOR[wo.priority] || "text-gray-500"}`}>
@@ -251,7 +251,7 @@ export default function AssetHistoryPage() {
                   className={`bg-white border rounded-xl p-4 cursor-pointer hover:shadow-sm transition-all ${isOverdue ? "border-red-200 bg-red-50" : "border-gray-200"}`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">{plan.title}</p>
+                      <p className="font-medium text-[var(--color-text-1)]">{plan.title}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{plan.plan_type} · {plan.frequency} · {plan.owner}</p>
                     </div>
                     <div className="text-right">

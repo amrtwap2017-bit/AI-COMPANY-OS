@@ -100,14 +100,14 @@ export default function GoodsReceiptNewPage() {
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
           ← Goods Receipts
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">New Goods Receipt Note</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">New Goods Receipt Note</h1>
         <p className="text-gray-500 text-sm mt-1">Record received goods against a Purchase Order</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* PO Selection */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Receipt Details</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">Receipt Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Purchase Order *</label>
@@ -173,7 +173,7 @@ export default function GoodsReceiptNewPage() {
         {/* Line Items */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">Received Items</h2>
+            <h2 className="font-semibold text-[var(--color-text-1)]">Received Items</h2>
             <button type="button" onClick={addLine}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add Item</button>
           </div>
@@ -218,7 +218,7 @@ export default function GoodsReceiptNewPage() {
         {/* Actions */}
         <div className="flex gap-3">
           <button type="submit" disabled={saving}
-            className="flex-1 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            className="flex-1 py-3 bg-[var(--color-bg)] text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
             {saving ? "Creating GRN..." : "✅ Create Goods Receipt Note"}
           </button>
           <button type="button" onClick={() => router.push("/supply-chain/goods-receipts")}

@@ -87,7 +87,7 @@ export default function PMSchedulePage() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">PM Schedule</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">PM Schedule</h1>
           <p className="text-gray-500 text-sm mt-1">
             {plans.length} plans · {totalOverdue} overdue · {totalWeek} due this week
           </p>
@@ -100,7 +100,7 @@ export default function PMSchedulePage() {
           <div className="flex border border-gray-200 rounded-lg overflow-hidden">
             {(["calendar","list"] as const).map(v => (
               <button key={v} onClick={() => setView(v)}
-                className={`px-3 py-2 text-sm font-medium capitalize transition-colors ${view===v ? "bg-gray-900 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
+                className={`px-3 py-2 text-sm font-medium capitalize transition-colors ${view===v ? "bg-[var(--color-bg)] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
                 {v === "calendar" ? "📅 Groups" : "☰ List"}
               </button>
             ))}
@@ -120,7 +120,7 @@ export default function PMSchedulePage() {
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag)}
             className={`${k.color} border rounded-xl p-3 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
             <p className="text-xs text-gray-500 font-medium">{k.label}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{k.value}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-1)] mt-1">{k.value}</p>
           </button>
         ))}
       </div>
@@ -131,7 +131,7 @@ export default function PMSchedulePage() {
           {groups.filter(g => g.plans.length > 0 || g.tag === "overdue").map(group => (
             <div key={group.tag} className={`border rounded-xl overflow-hidden ${group.color}`}>
               <div className="flex items-center justify-between px-5 py-3 border-b border-current border-opacity-20">
-                <h2 className="font-semibold text-gray-900">{group.label}</h2>
+                <h2 className="font-semibold text-[var(--color-text-1)]">{group.label}</h2>
                 <span className="text-sm text-gray-500">{group.plans.length} plans</span>
               </div>
               {group.plans.length === 0 ? (
@@ -147,7 +147,7 @@ export default function PMSchedulePage() {
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <span className="text-xl shrink-0">{FREQ_ICON[plan.frequency] || "📋"}</span>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{plan.title}</p>
+                          <p className="text-sm font-medium text-[var(--color-text-1)] truncate">{plan.title}</p>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {plan.plan_type} · {plan.frequency} · {plan.owner || "Unassigned"}
                           </p>
@@ -187,7 +187,7 @@ export default function PMSchedulePage() {
                   return (
                     <tr key={p.id} className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => router.push(`/maintenance/pm-plans/${p.id}`)}>
-                      <td className="px-4 py-3 font-medium text-gray-900 max-w-56 truncate">{p.title}</td>
+                      <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-56 truncate">{p.title}</td>
                       <td className="px-4 py-3 capitalize text-gray-600">{p.plan_type}</td>
                       <td className="px-4 py-3">
                         <span className="text-xs">{FREQ_ICON[p.frequency]} {p.frequency}</span>

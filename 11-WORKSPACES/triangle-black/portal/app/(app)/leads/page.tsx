@@ -77,7 +77,7 @@ export default function LeadsPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Leads</h1>
           <p className="text-sm text-gray-500 mt-1">{leads.length} total</p>
         </div>
         <button
@@ -137,7 +137,7 @@ export default function LeadsPage() {
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">{lead.name}</div>
+                    <div className="font-medium text-[var(--color-text-1)]">{lead.name}</div>
                     <div className="text-gray-400 text-xs">{lead.email}</div>
                   </td>
                   <td className="px-4 py-3 text-gray-700">{lead.company || "—"}</td>

@@ -73,7 +73,7 @@ export default function WorkOrderAssignPage() {
         >
           ← Back to Work Order
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Assign Technician</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Assign Technician</h1>
         <p className="text-gray-500 text-sm mt-1">
           {wo?.title || `Work Order ${id?.slice(0,8)}`}
         </p>
@@ -88,7 +88,7 @@ export default function WorkOrderAssignPage() {
               {currentTech.name?.[0] || "T"}
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">{currentTech.name}</p>
+              <p className="text-sm font-medium text-[var(--color-text-1)]">{currentTech.name}</p>
               <p className="text-xs text-gray-500">{currentTech.email || currentTech.phone || "—"}</p>
             </div>
           </div>
@@ -109,7 +109,7 @@ export default function WorkOrderAssignPage() {
           ].map(([label, value]) => (
             <div key={label}>
               <span className="text-gray-500 text-xs">{label}</span>
-              <p className="font-medium text-gray-900 capitalize">{value || "—"}</p>
+              <p className="font-medium text-[var(--color-text-1)] capitalize">{value || "—"}</p>
             </div>
           ))}
         </div>
@@ -117,7 +117,7 @@ export default function WorkOrderAssignPage() {
 
       {/* Technician Selector */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-        <p className="text-sm font-semibold text-gray-900">Select Technician</p>
+        <p className="text-sm font-semibold text-[var(--color-text-1)]">Select Technician</p>
 
         {technicians.length === 0 ? (
           <p className="text-gray-400 text-sm">No technicians available</p>
@@ -134,16 +134,16 @@ export default function WorkOrderAssignPage() {
                 }`}
               >
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm shrink-0 ${
-                  selectedTech === tech.id ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"
+                  selectedTech === tech.id ? "bg-[var(--color-bg)] text-white" : "bg-gray-100 text-gray-600"
                 }`}>
                   {tech.name?.[0] || "T"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{tech.name}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-1)] truncate">{tech.name}</p>
                   <p className="text-xs text-gray-500 truncate">{tech.email || tech.phone || tech.department || "—"}</p>
                 </div>
                 {selectedTech === tech.id && (
-                  <span className="text-gray-900 text-lg shrink-0">✓</span>
+                  <span className="text-[var(--color-text-1)] text-lg shrink-0">✓</span>
                 )}
               </button>
             ))}
@@ -155,7 +155,7 @@ export default function WorkOrderAssignPage() {
           <button
             onClick={handleAssign}
             disabled={assigning || !selectedTech}
-            className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="flex-1 py-2.5 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
             {assigning ? "Assigning..." : "Confirm Assignment"}
           </button>

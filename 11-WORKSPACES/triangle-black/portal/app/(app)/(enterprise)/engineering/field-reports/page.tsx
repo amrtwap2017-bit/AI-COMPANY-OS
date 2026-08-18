@@ -26,7 +26,7 @@ function RecordCard({ record, section }: { record: any; section: string }) {
     <div className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-gray-900 truncate">{title}</p>
+          <p className="font-medium text-[var(--color-text-1)] truncate">{title}</p>
           <p className="text-xs text-gray-500 mt-0.5">{person} · {fmtDate(date)}</p>
         </div>
         {status !== "—" && (
@@ -84,7 +84,7 @@ export default function EngineeringFieldReportsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Engineering Field Reports</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Engineering Field Reports</h1>
           <p className="text-gray-500 text-sm mt-1">Site visits, quality, safety and punch list data</p>
         </div>
         <div className="flex gap-2">
@@ -109,7 +109,7 @@ export default function EngineeringFieldReportsPage() {
               <span className="text-xl">{s.icon}</span>
               <p className="text-xs text-gray-500 font-medium">{s.label}</p>
             </div>
-            <p className="text-3xl font-bold text-gray-900">{(data[s.key]||[]).length}</p>
+            <p className="text-3xl font-bold text-[var(--color-text-1)]">{(data[s.key]||[]).length}</p>
           </button>
         ))}
       </div>
@@ -118,7 +118,7 @@ export default function EngineeringFieldReportsPage() {
       <div>
         <div className="flex items-center gap-3 mb-4">
           <span className="text-2xl">{activeSection.icon}</span>
-          <h2 className="font-semibold text-gray-900">{activeSection.label}</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">{activeSection.label}</h2>
           <span className="text-sm text-gray-400">({activeRecords.length} records)</span>
         </div>
 

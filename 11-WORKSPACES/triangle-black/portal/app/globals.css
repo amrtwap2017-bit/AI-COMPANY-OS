@@ -20,62 +20,70 @@
    ONE accent color. ONE identity. Configurable per customer.
 ════════════════════════════════════════════════════════════ */
 
+
+/* ══════════════════════════════════════════════════════════════
+   TRIANGLE BLACK DESIGN LANGUAGE — TBDL 2.0
+   Luxury Engineering. Quiet Confidence. Operational Excellence.
+
+   IVORY OPERATIONS  → 100% Sandy warm creamy luxury light
+   OBSIDIAN COMMAND  → Deep luxury dark — gold, purple, creamy
+   ONE brand soul. TWO expressions.
+══════════════════════════════════════════════════════════════ */
+
 :root {
-  /* ════════════════════════════════════════════════════════
-     TRIANGLE BLACK DESIGN LANGUAGE — TBDL 2.0
-     "Luxury Engineering. Quiet Confidence. Operational Excellence."
+  /* ── BRAND — Champagne Gold ─────────────────────────────── */
+  --color-brand:          #C4954A;
+  --color-brand-hover:    #B0853D;
+  --color-brand-light:    rgba(196,149,74,0.10);
+  --color-brand-mid:      #D4A85C;
+  --color-brand-muted:    rgba(196,149,74,0.06);
+  --color-brand-border:   rgba(196,149,74,0.25);
+  --color-brand-glow:     rgba(196,149,74,0.15);
 
-     IVORY OPERATIONS: Warm parchment luxury — sandy premium light
-     OBSIDIAN COMMAND: Deep warm luxury dark — premium engineering
-     ONE brand color: Champagne Gold #C4954A
-  ════════════════════════════════════════════════════════ */
+  /* ── IVORY OPERATIONS — Sandy warm creamy light ──────────── */
+  --color-bg:             #FAF8F4;
+  --color-bg-alt:         #F2EDE4;
+  --color-bg-deep:        #EAE2D6;
+  --color-surface:        #FFFFFF;
+  --color-surface-alt:    #FBF9F6;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-warm:   #F7F2EA;
+  --color-overlay:        rgba(20,18,16,0.45);
 
-  /* ── BRAND — Champagne Gold (refined from bronze) ──────── */
-  --color-brand:        #C4954A;
-  --color-brand-hover:  #B0853D;
-  --color-brand-light:  rgba(196,149,74,0.10);
-  --color-brand-mid:    #D4A85C;
-  --color-brand-muted:  rgba(196,149,74,0.06);
-  --color-brand-border: rgba(196,149,74,0.25);
+  /* ── SIDEBAR — Sandy warm light (NO dark in light mode) ──── */
+  --color-sidebar:              #F2EDE4;
+  --color-sidebar-hover:        rgba(196,149,74,0.10);
+  --color-sidebar-active:       rgba(196,149,74,0.18);
+  --color-sidebar-border:       #E2D9CF;
+  --color-sidebar-text:         #6B5D4F;
+  --color-sidebar-text-active:  #2C1810;
+  --color-sidebar-accent:       #C4954A;
+  --color-sidebar-header:       #F7F2EA;
 
-  /* ── IVORY OPERATIONS — Warm parchment light ─────────── */
-  --color-bg:              #F7F4EF;
-  --color-bg-alt:          #EFE9E0;
-  --color-surface:         #FFFFFF;
-  --color-surface-alt:     #FBF9F6;
-  --color-surface-raised:  #FFFFFF;
-  --color-overlay:         rgba(20,18,16,0.55);
+  /* ── TOPBAR — Ivory warm ─────────────────────────────────── */
+  --color-topbar:         #FFFFFF;
+  --color-topbar-border:  #EDE5D8;
+  --color-topbar-text:    #2C1810;
 
-  /* ── SIDEBAR — Always deep luxury graphite ──────────── */
-  --color-sidebar:             #18150F;
-  --color-sidebar-hover:       rgba(196,149,74,0.08);
-  --color-sidebar-active:      rgba(196,149,74,0.14);
-  --color-sidebar-border:      rgba(196,149,74,0.08);
-  --color-sidebar-text:        #8A7E6E;
-  --color-sidebar-text-active: #F5EFE6;
-  --color-sidebar-accent:      #C4954A;
+  /* ── TEXT — Warm ink hierarchy ────────────────────────────── */
+  --color-text-1:         #2C1810;
+  --color-text-2:         #4A3728;
+  --color-text-3:         #7A6558;
+  --color-text-4:         #A8998A;
+  --color-text-disabled:  #C4B8AA;
+  --color-text-inv:       #FAF8F4;
+  --color-text-brand:     #C4954A;
+  --color-text-on-dark:   #F5EFE6;
 
-  /* ── TOPBAR — Ivory light bar ────────────────────────── */
-  --color-topbar:        #FFFFFF;
-  --color-topbar-border: #EDE5D8;
-  --color-topbar-text:   #1A1714;
+  /* ── BORDERS — Sandy warm ─────────────────────────────────── */
+  --color-border:         #E2D9CF;
+  --color-border-hover:   #CEC3B6;
+  --color-border-focus:   #C4954A;
+  --color-border-strong:  #B8ADA0;
+  --color-divider:        #EDE5D8;
+  --color-divider-soft:   #F2ECE4;
 
-  /* ── TEXT — Warm ink hierarchy ───────────────────────── */
-  --color-text-1:       #1A1714;
-  --color-text-2:       #4A4238;
-  --color-text-3:       #7A6E62;
-  --color-text-disabled:#B8ADA0;
-  --color-text-inv:     #F5EFE6;
-  --color-text-brand:   #C4954A;
-
-  /* ── BORDERS — Refined sandy warm ────────────────────── */
-  --color-border:        #E2D9CF;
-  --color-border-hover:  #CEC3B6;
-  --color-border-focus:  #C4954A;
-  --color-border-strong: #B8ADA0;
-  --color-divider:       #EDE5D8;
-
-  /* ── STATUS — Professional vivid semantic ─────────────── */
+  /* ── STATUS COLORS ────────────────────────────────────────── */
   --color-success:        #16A34A;
   --color-success-bg:     #F0FDF4;
   --color-success-border: #BBF7D0;
@@ -101,7 +109,7 @@
   --color-ai-border:      rgba(196,149,74,0.22);
   --color-ai-text:        #B0853D;
 
-  /* ── OPERATIONAL STATUS ───────────────────────────────── */
+  /* ── OPERATIONAL STATUS ────────────────────────────────────── */
   --color-status-operational: #16A34A;
   --color-status-fault:       #DC2626;
   --color-status-maintenance: #D97706;
@@ -112,121 +120,171 @@
   --color-status-cancelled:   #9CA3AF;
   --color-status-overdue:     #DC2626;
 
-  /* ── SPACING ──────────────────────────────────────────── */
+  /* ── PURPLE ACCENT — Light mode soft ───────────────────────── */
+  --color-purple:         #7C3AED;
+  --color-purple-bg:      rgba(124,58,237,0.07);
+  --color-purple-border:  rgba(124,58,237,0.20);
+  --color-purple-text:    #6D28D9;
+
+  /* ── SPACING ───────────────────────────────────────────────── */
   --space-1:  4px;  --space-2:  8px;  --space-3:  12px;
   --space-4:  16px; --space-5:  20px; --space-6:  24px;
   --space-8:  32px; --space-10: 40px; --space-12: 48px;
   --space-16: 64px;
 
-  /* ── BORDER RADIUS ────────────────────────────────────── */
-  --radius-sm:   4px;   --radius-md:   6px;   --radius-lg:   10px;
-  --radius-xl:   14px;  --radius-2xl:  18px;  --radius-full: 9999px;
+  /* ── RADIUS ────────────────────────────────────────────────── */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
 
-  /* ── SHADOWS — Warm depth ──────────────────────────────── */
-  --shadow-none: none;
-  --shadow-sm:   0 1px 3px rgba(20,18,16,0.08);
-  --shadow-md:   0 4px 12px rgba(20,18,16,0.10), 0 1px 3px rgba(20,18,16,0.06);
-  --shadow-lg:   0 12px 32px rgba(20,18,16,0.12), 0 4px 8px rgba(20,18,16,0.06);
-  --shadow-xl:   0 20px 48px rgba(20,18,16,0.14), 0 8px 16px rgba(20,18,16,0.08);
+  /* ── SHADOWS — Warm sandy ──────────────────────────────────── */
+  --shadow-sm:  0 1px 3px rgba(44,24,16,0.08);
+  --shadow-md:  0 4px 16px rgba(44,24,16,0.10);
+  --shadow-lg:  0 8px 32px rgba(44,24,16,0.12);
+  --shadow-xl:  0 16px 48px rgba(44,24,16,0.14);
+  --shadow-brand: 0 4px 20px rgba(196,149,74,0.20);
 
-  /* ── ANIMATION ────────────────────────────────────────── */
-  --duration-fast: 100ms;  --duration-base: 160ms;  --duration-slow: 280ms;
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-enter:    cubic-bezier(0, 0, 0.2, 1);
-  --ease-exit:     cubic-bezier(0.4, 0, 1, 1);
+  /* ── TYPOGRAPHY ────────────────────────────────────────────── */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', monospace;
+  --text-xs:    0.75rem;
+  --text-sm:    0.875rem;
+  --text-base:  1rem;
+  --text-lg:    1.125rem;
+  --text-xl:    1.25rem;
+  --text-2xl:   1.5rem;
+  --text-3xl:   1.875rem;
+  --text-4xl:   2.25rem;
 
-  /* ── TYPOGRAPHY ───────────────────────────────────────── */
-  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
-
-  /* ── ACTION TOKENS ────────────────────────────────────── */
-  --color-action-primary:         #C4954A;
-  --color-action-primary-hover:   #B0853D;
-  --color-action-primary-text:    #FFFFFF;
-  --color-action-secondary:       #FFFFFF;
-  --color-action-secondary-hover: #FBF9F6;
-  --color-action-secondary-text:  #1A1714;
-  --color-action-ghost-hover:     rgba(20,18,16,0.05);
-  --color-action-ghost-text:      #4A4238;
-  --color-action-danger:          #DC2626;
-  --color-action-danger-hover:    #B91C1C;
-  --color-action-danger-text:     #FFFFFF;
-
-  /* ── EXTENDED STATUS TOKENS ───────────────────────────── */
-  --color-purple-bg:    #F5F3FF;
-  --color-purple-text:  #7C3AED;
-  --color-purple-border:#DDD6FE;
-  --color-orange-bg:    #FFF7ED;
-  --color-orange-text:  #C2410C;
-  --color-orange-border:#FED7AA;
-  --color-indigo-bg:    #EEF2FF;
-  --color-indigo-text:  #4338CA;
-  --color-indigo-border:#C7D2FE;
-
-  /* ── KPI COLORS ───────────────────────────────────────── */
-  --color-kpi-blue:     #2563EB;
-  --color-kpi-green:    #16A34A;
-  --color-kpi-amber:    #D97706;
-  --color-kpi-red:      #DC2626;
-  --color-kpi-purple:   #7C3AED;
-  --color-kpi-orange:   #EA580C;
-  --color-kpi-neutral:  #7A6E62;
-  /* ── LAYOUT ──────────────────────────────────────────────── */
-  --sidebar-width: 240px; --sidebar-collapsed: 64px;
-  --topbar-height: 56px;  --content-max: 1400px;
-  --page-padding: 24px;
+  /* ── TRANSITIONS ───────────────────────────────────────────── */
+  --transition-fast:   150ms ease;
+  --transition-base:   200ms ease;
+  --transition-slow:   300ms ease;
+  --transition-spring: 400ms cubic-bezier(0.34,1.56,0.64,1);
 }
 
-/* ── OBSIDIAN COMMAND — Deep warm luxury dark ──────────────── */
+/* ══════════════════════════════════════════════════════════════
+   OBSIDIAN COMMAND — Luxury Dark Theme
+   Deep charcoal + Gold + Purple + Creamy warmth
+══════════════════════════════════════════════════════════════ */
 .dark {
-  --color-bg:              #141210;
-  --color-bg-alt:          #1E1B18;
-  --color-surface:         #1E1B18;
-  --color-surface-alt:     #272320;
-  --color-surface-raised:  #312D29;
-  --color-topbar:          #1E1B18;
-  --color-topbar-border:   #2E2A26;
-  --color-topbar-text:     #F5EFE6;
-  --color-text-1:          #F5EFE6;
-  --color-text-2:          #C4B9AC;
-  --color-text-3:          #8A7E6E;
-  --color-text-disabled:   #5A5048;
-  --color-text-inv:        #141210;
-  --color-border:          #2E2A26;
-  --color-border-hover:    #3E3830;
-  --color-border-strong:   #5A5048;
-  --color-divider:         #1E1B18;
-  --color-overlay:         rgba(0,0,0,0.70);
-  --color-action-secondary:       #272320;
-  --color-action-secondary-hover: #312D29;
-  --color-action-secondary-text:  #F5EFE6;
-  --color-action-ghost-hover:     rgba(245,239,230,0.06);
-  --color-action-ghost-text:      #C4B9AC;
-  /* Status in dark — keep vivid */
-  --color-success-bg:     rgba(22,163,74,0.15);
-  --color-success-border: rgba(22,163,74,0.30);
-  --color-warning-bg:     rgba(217,119,6,0.15);
-  --color-warning-border: rgba(217,119,6,0.30);
-  --color-danger-bg:      rgba(220,38,38,0.15);
-  --color-danger-border:  rgba(220,38,38,0.30);
-  --color-info-bg:        rgba(37,99,235,0.15);
-  --color-info-border:    rgba(37,99,235,0.30);
-  --color-purple-bg:      rgba(124,58,237,0.15);
-  --color-purple-border:  rgba(124,58,237,0.30);
-  --color-orange-bg:      rgba(234,88,12,0.15);
-  --color-orange-border:  rgba(234,88,12,0.30);
-  --color-indigo-bg:      rgba(67,56,202,0.15);
-  --color-indigo-border:  rgba(67,56,202,0.30);
+  /* ── BRAND — Luxury Gold ──────────────────────────────────── */
+  --color-brand:          #D4A85C;
+  --color-brand-hover:    #E0B86A;
+  --color-brand-light:    rgba(212,168,92,0.12);
+  --color-brand-mid:      #C9A84C;
+  --color-brand-muted:    rgba(212,168,92,0.08);
+  --color-brand-border:   rgba(212,168,92,0.30);
+  --color-brand-glow:     rgba(212,168,92,0.20);
+
+  /* ── BACKGROUNDS — Deep luxury ────────────────────────────── */
+  --color-bg:             #0F0E0C;
+  --color-bg-alt:         #161412;
+  --color-bg-deep:        #0A0908;
+  --color-surface:        #1C1917;
+  --color-surface-alt:    #211F1C;
+  --color-surface-raised: #252220;
+  --color-surface-warm:   #1A1815;
+  --color-overlay:        rgba(0,0,0,0.65);
+
+  /* ── SIDEBAR — Deep luxury with gold ─────────────────────── */
+  --color-sidebar:              #12100E;
+  --color-sidebar-hover:        rgba(212,168,92,0.10);
+  --color-sidebar-active:       rgba(212,168,92,0.16);
+  --color-sidebar-border:       rgba(212,168,92,0.08);
+  --color-sidebar-text:         #8A7E70;
+  --color-sidebar-text-active:  #FAF8F4;
+  --color-sidebar-accent:       #D4A85C;
+  --color-sidebar-header:       #0F0E0C;
+
+  /* ── TOPBAR — Dark luxury ─────────────────────────────────── */
+  --color-topbar:         #1C1917;
+  --color-topbar-border:  rgba(212,168,92,0.12);
+  --color-topbar-text:    #FAF8F4;
+
+  /* ── TEXT — Creamy warm hierarchy ────────────────────────── */
+  --color-text-1:         #FAF8F4;
+  --color-text-2:         #E8DCC8;
+  --color-text-3:         #B8A898;
+  --color-text-4:         #8A7E70;
+  --color-text-disabled:  #5A5048;
+  --color-text-inv:       #0F0E0C;
+  --color-text-brand:     #D4A85C;
+  --color-text-on-dark:   #FAF8F4;
+
+  /* ── BORDERS — Subtle warm dark ──────────────────────────── */
+  --color-border:         rgba(212,168,92,0.14);
+  --color-border-hover:   rgba(212,168,92,0.25);
+  --color-border-focus:   #D4A85C;
+  --color-border-strong:  rgba(212,168,92,0.35);
+  --color-divider:        rgba(212,168,92,0.10);
+  --color-divider-soft:   rgba(212,168,92,0.06);
+
+  /* ── STATUS COLORS — Vivid on dark ───────────────────────── */
+  --color-success:        #22C55E;
+  --color-success-bg:     rgba(34,197,94,0.10);
+  --color-success-border: rgba(34,197,94,0.25);
+  --color-success-text:   #4ADE80;
+
+  --color-warning:        #F59E0B;
+  --color-warning-bg:     rgba(245,158,11,0.10);
+  --color-warning-border: rgba(245,158,11,0.25);
+  --color-warning-text:   #FCD34D;
+
+  --color-danger:         #EF4444;
+  --color-danger-bg:      rgba(239,68,68,0.10);
+  --color-danger-border:  rgba(239,68,68,0.25);
+  --color-danger-text:    #FCA5A5;
+
+  --color-info:           #60A5FA;
+  --color-info-bg:        rgba(96,165,250,0.10);
+  --color-info-border:    rgba(96,165,250,0.25);
+  --color-info-text:      #93C5FD;
+
+  --color-ai:             #D4A85C;
+  --color-ai-bg:          rgba(212,168,92,0.10);
+  --color-ai-border:      rgba(212,168,92,0.25);
+  --color-ai-text:        #E0B86A;
+
+  /* ── PURPLE ACCENT — Luxury dark ─────────────────────────── */
+  --color-purple:         #8B5CF6;
+  --color-purple-bg:      rgba(139,92,246,0.12);
+  --color-purple-border:  rgba(139,92,246,0.28);
+  --color-purple-text:    #A78BFA;
+
+  /* ── GOLD ACCENT SCALE ────────────────────────────────────── */
+  --color-gold-bright:    #FFD700;
+  --color-gold-mid:       #D4A85C;
+  --color-gold-deep:      #B8960C;
+  --color-gold-muted:     rgba(212,168,92,0.15);
+
+  /* ── BRONZE ACCENT ────────────────────────────────────────── */
+  --color-bronze:         #CD7F32;
+  --color-bronze-bg:      rgba(205,127,50,0.10);
+  --color-bronze-text:    #E8A060;
+
+  /* ── SHADOWS — Rich dark depth ────────────────────────────── */
+  --shadow-sm:  0 1px 4px rgba(0,0,0,0.30);
+  --shadow-md:  0 4px 20px rgba(0,0,0,0.40);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.50);
+  --shadow-xl:  0 16px 64px rgba(0,0,0,0.60);
+  --shadow-brand: 0 4px 24px rgba(212,168,92,0.25);
+
+  /* ── OPERATIONAL STATUS — Dark vivid ─────────────────────── */
+  --color-status-operational: #22C55E;
+  --color-status-fault:       #EF4444;
+  --color-status-maintenance: #F59E0B;
+  --color-status-offline:     #6B7280;
+  --color-status-critical:    #EF4444;
+  --color-status-pending:     #F59E0B;
+  --color-status-completed:   #22C55E;
+  --color-status-cancelled:   #6B7280;
+  --color-status-overdue:     #EF4444;
 }
 
-/* ══ V8 ENTERPRISE UTILITIES ══════════════════════════════════════════════ */
-/* These replace inline styles across all 192 pages */
-
-/* ── PAGE HERO (dark header pattern used on 40+ pages) ──────────────── */
-.tb-hero {
-  background: linear-gradient(140deg, #E8DDD0 0%, #D9C3A9 50%, #C4A98A 100%);
-  border-bottom: 1px solid rgba(185,146,76,0.15);
-}
 .tb-hero-inner {
   max-width: var(--content-max);
   margin: 0 auto;
@@ -1362,4 +1420,414 @@
   --color-sidebar-text:        #8A7E6E;
   --color-sidebar-text-active: #F5EFE6;
   --color-sidebar-accent:      #C4954A;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR — Theme-aware (Sandy light / Obsidian dark)
+══════════════════════════════════════════════════════════════ */
+.tb-sidebar {
+  background: var(--color-sidebar);
+  border-right: 1px solid var(--color-sidebar-border);
+  color: var(--color-sidebar-text);
+  transition: background var(--transition-base), border-color var(--transition-base);
+}
+.tb-sidebar-item {
+  color: var(--color-sidebar-text);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  padding: var(--space-2) var(--space-3);
+}
+.tb-sidebar-item:hover {
+  background: var(--color-sidebar-hover);
+  color: var(--color-sidebar-text-active);
+}
+.tb-sidebar-item.active {
+  background: var(--color-sidebar-active);
+  color: var(--color-sidebar-text-active);
+  font-weight: 600;
+}
+.tb-sidebar-icon {
+  color: var(--color-sidebar-accent);
+  opacity: 0.85;
+}
+.tb-sidebar-header {
+  background: var(--color-sidebar-header);
+  border-bottom: 1px solid var(--color-sidebar-border);
+  padding: var(--space-4) var(--space-4);
+}
+.tb-sidebar-brand {
+  color: var(--color-brand);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.tb-sidebar-section-label {
+  color: var(--color-text-4);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: var(--space-3) var(--space-3) var(--space-1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOPBAR — Theme-aware
+══════════════════════════════════════════════════════════════ */
+.tb-topbar {
+  background: var(--color-topbar);
+  border-bottom: 1px solid var(--color-topbar-border);
+  color: var(--color-topbar-text);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK LUXURY ACCENTS — Gold + Purple + Bronze
+══════════════════════════════════════════════════════════════ */
+.dark .tb-accent-gold {
+  color: var(--color-gold-mid);
+  border-color: var(--color-gold-mid);
+}
+.dark .tb-accent-purple {
+  color: var(--color-purple-text);
+  background: var(--color-purple-bg);
+  border-color: var(--color-purple-border);
+}
+.dark .tb-accent-bronze {
+  color: var(--color-bronze-text);
+  background: var(--color-bronze-bg);
+}
+.dark .tb-glow-gold {
+  box-shadow: 0 0 20px var(--color-brand-glow),
+              0 4px 24px rgba(0,0,0,0.40);
+}
+.dark .tb-glow-purple {
+  box-shadow: 0 0 20px rgba(139,92,246,0.20),
+              0 4px 24px rgba(0,0,0,0.40);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KPI CARDS — Theme adaptive
+══════════════════════════════════════════════════════════════ */
+.tb-kpi {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+.tb-kpi:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-hover);
+}
+.tb-kpi-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+  line-height: 1.2;
+}
+.tb-kpi-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: var(--space-1);
+}
+.tb-kpi-brand {
+  border-top: 3px solid var(--color-brand);
+}
+.tb-kpi-gold {
+  border-top: 3px solid var(--color-gold-mid, var(--color-brand));
+}
+.tb-kpi-purple {
+  border-top: 3px solid var(--color-purple);
+}
+.dark .tb-kpi {
+  box-shadow: var(--shadow-md);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HERO — Full sandy warm light / obsidian dark
+══════════════════════════════════════════════════════════════ */
+.tb-hero {
+  background: linear-gradient(135deg, var(--color-bg-deep) 0%, var(--color-bg-alt) 100%);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-8) var(--space-8);
+}
+.dark .tb-hero {
+  background: linear-gradient(135deg, var(--color-bg-deep) 0%, var(--color-bg-alt) 50%, var(--color-surface) 100%);
+  border-bottom: 1px solid var(--color-divider);
+}
+.tb-hero-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+  letter-spacing: -0.02em;
+}
+.tb-hero-description {
+  font-size: var(--text-sm);
+  color: var(--color-text-3);
+  margin-top: var(--space-1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BUTTONS — Sandy light + Luxury dark
+══════════════════════════════════════════════════════════════ */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.tb-btn-primary {
+  background: var(--color-brand);
+  color: #FFFFFF;
+  border-color: var(--color-brand);
+}
+.tb-btn-primary:hover {
+  background: var(--color-brand-hover);
+  border-color: var(--color-brand-hover);
+  box-shadow: var(--shadow-brand);
+}
+.tb-btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  border-color: var(--color-border);
+}
+.tb-btn-secondary:hover {
+  background: var(--color-surface-warm);
+  border-color: var(--color-border-hover);
+}
+.tb-btn-ghost {
+  background: transparent;
+  color: var(--color-text-2);
+  border-color: transparent;
+}
+.tb-btn-ghost:hover {
+  background: var(--color-brand-muted);
+  color: var(--color-text-brand);
+}
+.tb-btn-danger {
+  background: var(--color-danger);
+  color: #FFFFFF;
+  border-color: var(--color-danger);
+}
+.tb-btn-danger:hover {
+  opacity: 0.90;
+}
+.dark .tb-btn-secondary {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border);
+}
+.dark .tb-btn-secondary:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-hover);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BADGES — Status indicators
+══════════════════════════════════════════════════════════════ */
+.tb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.tb-badge-success  { background: var(--color-success-bg);  color: var(--color-success-text);  border-color: var(--color-success-border); }
+.tb-badge-warning  { background: var(--color-warning-bg);  color: var(--color-warning-text);  border-color: var(--color-warning-border); }
+.tb-badge-danger   { background: var(--color-danger-bg);   color: var(--color-danger-text);   border-color: var(--color-danger-border); }
+.tb-badge-info     { background: var(--color-info-bg);     color: var(--color-info-text);     border-color: var(--color-info-border); }
+.tb-badge-brand    { background: var(--color-brand-light); color: var(--color-text-brand);    border-color: var(--color-brand-border); }
+.tb-badge-neutral  { background: var(--color-bg-alt);      color: var(--color-text-3);        border-color: var(--color-border); }
+.tb-badge-gold     { background: var(--color-gold-muted, var(--color-brand-light)); color: var(--color-brand); border-color: var(--color-brand-border); }
+.tb-badge-purple   { background: var(--color-purple-bg);   color: var(--color-purple-text);   border-color: var(--color-purple-border); }
+
+/* ══════════════════════════════════════════════════════════════
+   TABLES — Enterprise data density
+══════════════════════════════════════════════════════════════ */
+.tb-table { width: 100%; border-collapse: collapse; }
+.tb-table thead tr {
+  background: var(--color-bg-alt);
+  border-bottom: 2px solid var(--color-border);
+}
+.tb-table thead th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.tb-table tbody tr {
+  border-bottom: 1px solid var(--color-divider);
+  transition: background var(--transition-fast);
+}
+.tb-table tbody tr:hover {
+  background: var(--color-surface-warm);
+}
+.dark .tb-table tbody tr:hover {
+  background: var(--color-surface-alt);
+}
+.tb-table tbody td {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-2);
+}
+.tb-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARDS & SURFACES
+══════════════════════════════════════════════════════════════ */
+.tb-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+.tb-card-warm {
+  background: var(--color-surface-warm);
+  border: 1px solid var(--color-divider-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+}
+.dark .tb-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+.tb-canvas {
+  background: var(--color-bg);
+  min-height: 100vh;
+}
+.tb-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.tb-section-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INPUTS & FORMS
+══════════════════════════════════════════════════════════════ */
+.tb-input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-1);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+.tb-input:hover { border-color: var(--color-border-hover); }
+.tb-input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px var(--color-brand-light);
+}
+.dark .tb-input {
+  background: var(--color-surface-alt);
+}
+.tb-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-2);
+  display: block;
+  margin-bottom: var(--space-1);
+}
+.tb-select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-1);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EMPTY / LOADING / ERROR STATES
+══════════════════════════════════════════════════════════════ */
+.tb-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: var(--space-16) var(--space-8);
+  text-align: center; gap: var(--space-3);
+}
+.tb-empty-icon { color: var(--color-text-disabled); }
+.tb-empty-title {
+  font-size: var(--text-base); font-weight: 600;
+  color: var(--color-text-2);
+}
+.tb-empty-desc {
+  font-size: var(--text-sm); color: var(--color-text-3);
+  max-width: 360px;
+}
+.tb-shimmer {
+  background: linear-gradient(90deg,
+    var(--color-bg-alt) 25%,
+    var(--color-divider) 50%,
+    var(--color-bg-alt) 75%);
+  background-size: 200% 100%;
+  animation: tb-shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+@keyframes tb-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.tb-shimmer-text  { height: 14px; width: 100%; }
+.tb-shimmer-title { height: 20px; width: 60%; }
+.tb-shimmer-block { height: 80px; width: 100%; }
+
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT UTILITIES
+══════════════════════════════════════════════════════════════ */
+.tb-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+.tb-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+.tb-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.tb-grid-kpi { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-4); }
+@media (max-width: 768px) {
+  .tb-grid-2, .tb-grid-3, .tb-grid-4 { grid-template-columns: 1fr; }
+  .tb-hero { padding: var(--space-5) var(--space-4); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+══════════════════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

@@ -55,7 +55,7 @@ export default function ContractDetailPage() {
 
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{contract.title}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{contract.title}</h1>
           <p className="text-gray-500 text-sm mt-1">{contract.description}</p>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[contract.status] || "bg-gray-100 text-gray-700"}`}>
@@ -66,19 +66,19 @@ export default function ContractDetailPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-400 uppercase">Total Value</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
+          <p className="text-2xl font-bold text-[var(--color-text-1)] mt-1">
             {(contract.total_value || 0).toLocaleString()} EGP
           </p>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-400 uppercase">Start Date</p>
-          <p className="text-lg font-medium text-gray-900 mt-1">
+          <p className="text-lg font-medium text-[var(--color-text-1)] mt-1">
             {contract.start_date ? new Date(contract.start_date).toLocaleDateString() : "—"}
           </p>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-xs text-gray-400 uppercase">End Date</p>
-          <p className="text-lg font-medium text-gray-900 mt-1">
+          <p className="text-lg font-medium text-[var(--color-text-1)] mt-1">
             {contract.end_date ? new Date(contract.end_date).toLocaleDateString() : "—"}
           </p>
         </div>
@@ -101,10 +101,10 @@ export default function ContractDetailPage() {
             <tbody className="divide-y divide-gray-100">
               {contract.services.map((s: any, i: number) => (
                 <tr key={i}>
-                  <td className="px-4 py-2 text-gray-900">{s.service}</td>
+                  <td className="px-4 py-2 text-[var(--color-text-1)]">{s.service}</td>
                   <td className="px-4 py-2 text-gray-600">{s.qty} {s.unit}</td>
                   <td className="px-4 py-2 text-gray-600">{(s.unit_price || 0).toLocaleString()}</td>
-                  <td className="px-4 py-2 font-medium text-gray-900">{(s.total || 0).toLocaleString()}</td>
+                  <td className="px-4 py-2 font-medium text-[var(--color-text-1)]">{(s.total || 0).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

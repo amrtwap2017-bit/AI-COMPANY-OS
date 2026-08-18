@@ -61,7 +61,7 @@ export default function EditLeadPage() {
       <button onClick={() => router.push(`/leads/${id}`)} className="text-sm text-blue-600 hover:underline mb-4 block">
         ← Back to Lead
       </button>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Lead</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-text-1)] mb-6">Edit Lead</h1>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>

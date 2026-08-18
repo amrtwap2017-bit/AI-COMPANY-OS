@@ -96,7 +96,7 @@ export default function ServiceRequestEditPage() {
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
           ← Back to Request
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Update Service Request</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Update Service Request</h1>
         <p className="text-gray-500 text-sm mt-1">{sr.title || sr.category || `SR-${id?.slice(0,8)}`}</p>
       </div>
 
@@ -131,14 +131,14 @@ export default function ServiceRequestEditPage() {
         ].filter(([,v])=>v).map(([label, value]) => (
           <div key={label} className="flex justify-between text-sm py-1 border-b border-gray-50">
             <span className="text-gray-400">{label}</span>
-            <span className="text-gray-800 font-medium text-right max-w-64 truncate">{value}</span>
+            <span className="text-[var(--color-text-1)] font-medium text-right max-w-64 truncate">{value}</span>
           </div>
         ))}
       </div>
 
       {/* Update Form */}
       <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
-        <h2 className="font-semibold text-gray-900">Update Request</h2>
+        <h2 className="font-semibold text-[var(--color-text-1)]">Update Request</h2>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -180,7 +180,7 @@ export default function ServiceRequestEditPage() {
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saving}
-            className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            className="flex-1 py-2.5 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
             {saving ? "Saving..." : "Update Request"}
           </button>
           <button type="button" onClick={() => router.push(`/operations/service-requests/${id}`)}

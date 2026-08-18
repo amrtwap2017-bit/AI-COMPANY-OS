@@ -90,7 +90,7 @@ export default function PMPlanDetailPage() {
             className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
             ← PM Plans
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{plan.title}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{plan.title}</h1>
           <div className="flex items-center gap-2 mt-2">
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[plan.status] || "bg-gray-100 text-gray-600"}`}>
               {plan.status}
@@ -127,7 +127,7 @@ export default function PMPlanDetailPage() {
 
       {/* Plan Details */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-        <h2 className="font-semibold text-gray-900">Plan Details</h2>
+        <h2 className="font-semibold text-[var(--color-text-1)]">Plan Details</h2>
         <div className="grid grid-cols-2 gap-4">
           {[
             ["Plan Type",    plan.plan_type || "preventive"],
@@ -141,7 +141,7 @@ export default function PMPlanDetailPage() {
           ].map(([label, value]) => (
             <div key={label} className="border-b border-gray-50 pb-2">
               <p className="text-xs text-gray-400">{label}</p>
-              <p className="text-sm font-medium text-gray-900 capitalize mt-0.5">{value}</p>
+              <p className="text-sm font-medium text-[var(--color-text-1)] capitalize mt-0.5">{value}</p>
             </div>
           ))}
         </div>

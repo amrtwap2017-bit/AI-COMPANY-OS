@@ -94,7 +94,7 @@ export default function InvoicePaymentPage() {
           ← Invoice
         </button>
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Record Payment</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Record Payment</h1>
           <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLOR[invoice.status] || "bg-gray-100 text-gray-600"}`}>
             {invoice.status}
           </span>
@@ -108,7 +108,7 @@ export default function InvoicePaymentPage() {
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
-            { label:"Invoice Total",  value:fmtEGP(invoice.total_amount), color:"text-gray-900" },
+            { label:"Invoice Total",  value:fmtEGP(invoice.total_amount), color:"text-[var(--color-text-1)]" },
             { label:"Total Paid",     value:fmtEGP(totalPaid),            color:"text-green-600" },
             { label:"Outstanding",    value:fmtEGP(outstanding),          color:outstanding>0?"text-red-600":"text-green-600" },
           ].map(k => (
@@ -133,7 +133,7 @@ export default function InvoicePaymentPage() {
       {/* Record Payment Form */}
       {outstanding > 0 && (
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Record New Payment</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">Record New Payment</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Amount (EGP) *</label>
@@ -192,7 +192,7 @@ export default function InvoicePaymentPage() {
       {/* Payment History */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900">Payment History ({payments.length})</h3>
+          <h3 className="font-semibold text-[var(--color-text-1)]">Payment History ({payments.length})</h3>
         </div>
         {payments.length === 0 ? (
           <div className="px-5 py-8 text-center text-gray-400 text-sm">No payments recorded yet</div>

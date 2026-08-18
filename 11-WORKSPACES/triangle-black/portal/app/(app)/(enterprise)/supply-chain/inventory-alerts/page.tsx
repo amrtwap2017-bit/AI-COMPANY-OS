@@ -88,7 +88,7 @@ export default function InventoryAlertsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventory Alerts</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Inventory Alerts</h1>
           <p className="text-gray-500 text-sm mt-1">
             {stocks.length} stock locations · {critical} critical · {low} low stock
           </p>
@@ -116,7 +116,7 @@ export default function InventoryAlertsPage() {
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag as any)}
             className={`${k.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
             <p className="text-xs text-gray-500 font-medium">{k.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{k.value}</p>
+            <p className="text-3xl font-bold text-[var(--color-text-1)] mt-1">{k.value}</p>
           </button>
         ))}
       </div>
@@ -147,7 +147,7 @@ export default function InventoryAlertsPage() {
                 return (
                   <tr key={s.id} className={`hover:bg-gray-50 ${level === "critical" ? "bg-red-50" : level === "low" ? "bg-yellow-50" : ""}`}>
                     <td className="px-4 py-3"><AlertBadge level={level} /></td>
-                    <td className="px-4 py-3 font-medium text-gray-900 max-w-40 truncate">
+                    <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-40 truncate">
                       {s.item_name || s.item_id || "—"}
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.item_code || s.item_id?.slice(0,8) || "—"}</td>

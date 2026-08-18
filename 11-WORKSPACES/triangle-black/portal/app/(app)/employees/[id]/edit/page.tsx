@@ -92,7 +92,7 @@ export default function EmployeeEditPage() {
         >
           ← Back to Employee
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Employee</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Edit Employee</h1>
         <p className="text-gray-500 text-sm mt-1">Update employee information</p>
       </div>
 
@@ -199,7 +199,7 @@ export default function EmployeeEditPage() {
         <div className="flex gap-3 pt-2">
           <button
             type="submit" disabled={saving}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="px-6 py-2 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

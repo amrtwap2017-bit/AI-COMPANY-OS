@@ -103,14 +103,14 @@ export default function ContractRenewPage() {
           className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
           ← Back to Contract
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Renew Contract</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Renew Contract</h1>
         <p className="text-gray-500 text-sm mt-1">Create a renewal for this contract</p>
       </div>
 
       {/* Current Contract */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">{contract.title}</h2>
+          <h2 className="font-semibold text-[var(--color-text-1)]">{contract.title}</h2>
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[contract.status] || "bg-gray-100 text-gray-600"}`}>
             {contract.status || "active"}
           </span>
@@ -123,7 +123,7 @@ export default function ContractRenewPage() {
           ].map(([label, value]) => (
             <div key={label}>
               <p className="text-xs text-gray-400">{label}</p>
-              <p className="font-medium text-gray-900 mt-0.5">{value}</p>
+              <p className="font-medium text-[var(--color-text-1)] mt-0.5">{value}</p>
             </div>
           ))}
         </div>
@@ -131,7 +131,7 @@ export default function ContractRenewPage() {
 
       {/* Renewal Form */}
       <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
-        <h2 className="font-semibold text-gray-900">Renewal Details</h2>
+        <h2 className="font-semibold text-[var(--color-text-1)]">Renewal Details</h2>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -188,7 +188,7 @@ export default function ContractRenewPage() {
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saving}
-            className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
+            className="flex-1 py-2.5 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors">
             {saving ? "Creating Renewal..." : "🔄 Create Contract Renewal"}
           </button>
           <button type="button" onClick={() => router.push(`/commercial/contracts/${id}`)}

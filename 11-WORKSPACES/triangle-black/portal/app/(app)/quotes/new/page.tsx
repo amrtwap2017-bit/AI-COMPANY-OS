@@ -31,7 +31,7 @@ export default function NewQuotePage() {
       <button onClick={() => router.push("/leads")} className="text-sm text-blue-600 hover:underline mb-4 block">
         ← Back to Leads
       </button>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Quotation</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-text-1)] mb-2">Create Quotation</h1>
       <p className="text-gray-500 text-sm mb-6">
         Generate a quotation for this lead based on their requirements.
       </p>

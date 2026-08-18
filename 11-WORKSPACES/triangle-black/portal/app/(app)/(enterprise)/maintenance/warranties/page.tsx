@@ -106,7 +106,7 @@ export default function WarrantyTrackingPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Warranty Tracking</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Warranty Tracking</h1>
           <p className="text-gray-500 text-sm mt-1">
             {assets.length} assets · {counts.expired} expired · {counts.expiring_soon} expiring soon
           </p>
@@ -129,7 +129,7 @@ export default function WarrantyTrackingPage() {
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag as any)}
             className={`${k.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
             <p className="text-xs text-gray-500 font-medium">{k.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{k.value}</p>
+            <p className="text-3xl font-bold text-[var(--color-text-1)] mt-1">{k.value}</p>
           </button>
         ))}
       </div>
@@ -167,7 +167,7 @@ export default function WarrantyTrackingPage() {
                 <tr key={asset.id}
                   onClick={() => router.push(`/maintenance/assets/${asset.id}/history`)}
                   className={`hover:bg-gray-50 cursor-pointer ${ws==="expired" ? "bg-red-50" : ws==="expiring_soon" ? "bg-yellow-50" : ""}`}>
-                  <td className="px-4 py-3 font-medium text-gray-900 max-w-40 truncate">{asset.name}</td>
+                  <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-40 truncate">{asset.name}</td>
                   <td className="px-4 py-3 text-gray-600 capitalize">{asset.category || "—"}</td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{asset.serial_number || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{asset.manufacturer || "—"}</td>

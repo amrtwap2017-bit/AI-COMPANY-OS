@@ -80,7 +80,7 @@ export default function QuotesPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quotations</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Quotations</h1>
           <p className="text-sm text-gray-500 mt-1">{quotes.length} total</p>
         </div>
         <button
@@ -128,7 +128,7 @@ export default function QuotesPage() {
                   onClick={() => router.push(`/quotes/${q.id}`)}
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
                 >
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-4 py-3 font-medium text-[var(--color-text-1)]">
                     {q.title || `Quote ${q.id.slice(0, 8)}`}
                   </td>
                   <td className="px-4 py-3">
@@ -136,7 +136,7 @@ export default function QuotesPage() {
                       {q.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-900 font-medium">
+                  <td className="px-4 py-3 text-[var(--color-text-1)] font-medium">
                     {q.total ? q.total.toLocaleString() : "—"}
                   </td>
                   <td className="px-4 py-3 text-gray-500">

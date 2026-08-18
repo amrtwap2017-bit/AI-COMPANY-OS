@@ -36,7 +36,7 @@ function AISignalsPageInner() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Signals</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">AI Signals</h1>
           <p className="text-gray-500 text-sm mt-1">Real-time AI alerts · {lastRefresh && `Updated ${lastRefresh}`}</p>
         </div>
         <button onClick={loadData} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">↻ Refresh</button>
@@ -52,7 +52,7 @@ function AISignalsPageInner() {
           ].map(k => (
             <div key={k.label} className={`${k.color} border rounded-xl p-4`}>
               <p className="text-xs text-gray-500">{k.label}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{k.value}</p>
+              <p className="text-3xl font-bold text-[var(--color-text-1)] mt-1">{k.value}</p>
             </div>
           ))}
         </div>
@@ -62,7 +62,7 @@ function AISignalsPageInner() {
         <div className="flex items-center gap-3">
           <span className="text-2xl">🤖</span>
           <div>
-            <p className="font-medium text-gray-900">Triangle Black AI Engine</p>
+            <p className="font-medium text-[var(--color-text-1)]">Triangle Black AI Engine</p>
             <p className="text-xs text-gray-500">Monitoring operations · Qwen 2.5 · Real-time analysis</p>
           </div>
         </div>
@@ -84,7 +84,7 @@ function AISignalsPageInner() {
               <span className="text-xl">{item.icon}</span>
               <p className="text-sm font-medium text-gray-700">{item.label}</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{item.count}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-1)]">{item.count}</p>
             <p className="text-xs text-gray-400 mt-1">signals detected</p>
           </button>
         ))}

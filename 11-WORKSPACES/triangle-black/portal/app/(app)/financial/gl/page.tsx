@@ -33,7 +33,7 @@ export default function GLPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">General Ledger</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-1)]">General Ledger</h1>
         <button onClick={() => router.push("/financial/gl/new")}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
           + New Entry
@@ -44,7 +44,7 @@ export default function GLPage() {
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <p className="text-xs text-gray-400 uppercase">Total Entries</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{summary.total_entries}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-1)] mt-1">{summary.total_entries}</p>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <p className="text-xs text-gray-400 uppercase">Total Debit</p>
@@ -85,7 +85,7 @@ export default function GLPage() {
                 <tr key={e.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono text-xs text-gray-600">{e.entry_number}</td>
                   <td className="px-4 py-3 text-gray-600">{new Date(e.entry_date).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-gray-900">{e.description || "—"}</td>
+                  <td className="px-4 py-3 text-[var(--color-text-1)]">{e.description || "—"}</td>
                   <td className="px-4 py-3 text-green-600 font-medium">{(e.total_debit || 0).toLocaleString()}</td>
                   <td className="px-4 py-3 text-red-600 font-medium">{(e.total_credit || 0).toLocaleString()}</td>
                   <td className="px-4 py-3">

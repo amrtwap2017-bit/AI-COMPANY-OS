@@ -70,7 +70,7 @@ export default function InspectionsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Engineering Inspections</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Engineering Inspections</h1>
           <p className="text-gray-500 text-sm mt-1">
             {inspections.length} inspections · {counts.failed} failed · {counts.pending} pending
           </p>
@@ -93,7 +93,7 @@ export default function InspectionsPage() {
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag)}
             className={`${k.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
             <p className="text-xs text-gray-500 font-medium">{k.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{k.value}</p>
+            <p className="text-3xl font-bold text-[var(--color-text-1)] mt-1">{k.value}</p>
           </button>
         ))}
       </div>
@@ -127,7 +127,7 @@ export default function InspectionsPage() {
                       {STATUS_ICON[insp.status] || "📋"} {insp.status || "—"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900 max-w-48 truncate">
+                  <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-48 truncate">
                     {insp.title || insp.inspection_type || `INS-${insp.id?.slice(0,8)}`}
                   </td>
                   <td className="px-4 py-3 text-gray-600 capitalize">{insp.inspection_type || insp.type || "—"}</td>

@@ -19,7 +19,7 @@ function MetricCard({ label, value, sub, color="bg-gray-50", icon="" }: any) {
         {icon && <span className="text-xl">{icon}</span>}
         <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{label}</p>
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <p className="text-2xl font-bold text-[var(--color-text-1)]">{value}</p>
       {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
     </div>
   );
@@ -88,7 +88,7 @@ export default function PlatformMetricsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Platform Metrics</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Platform Metrics</h1>
           <p className="text-gray-500 text-sm mt-1">
             Real-time health for Triangle Black · {kpiSummary?.period || "Current Period"}
           </p>
@@ -150,7 +150,7 @@ export default function PlatformMetricsPage() {
                 <span>{s.icon}</span>
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{s.label}</p>
               </div>
-              <p className="text-lg font-bold text-gray-900 capitalize">{s.status}</p>
+              <p className="text-lg font-bold text-[var(--color-text-1)] capitalize">{s.status}</p>
               <p className="text-xs text-gray-400 mt-1">{s.value}</p>
             </div>
           ))}

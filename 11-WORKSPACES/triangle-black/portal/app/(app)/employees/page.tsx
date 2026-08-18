@@ -52,7 +52,7 @@ export default function EmployeesPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Employees</h1>
           <p className="text-sm text-gray-500 mt-1">{employees.length} total</p>
         </div>
         <button onClick={() => router.push("/employees/new")}
@@ -80,7 +80,7 @@ export default function EmployeesPage() {
                   {emp.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{emp.name}</p>
+                  <p className="font-medium text-[var(--color-text-1)]">{emp.name}</p>
                   <p className="text-sm text-gray-500">{emp.position || "—"}</p>
                 </div>
               </div>

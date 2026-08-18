@@ -107,7 +107,7 @@ export default function EmployeeDetailPage() {
           <button onClick={() => router.back()} className="text-sm text-gray-500 hover:text-gray-700 mb-2 flex items-center gap-1">
             ← Back
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{employee.full_name || employee.name || "Employee"}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{employee.full_name || employee.name || "Employee"}</h1>
           <p className="text-gray-500">{employee.position || employee.job_title} · {employee.department}</p>
         </div>
         <button
@@ -126,7 +126,7 @@ export default function EmployeeDetailPage() {
               key={t}
               onClick={() => setTab(t)}
               className={`py-2 px-1 border-b-2 text-sm font-medium capitalize transition-colors ${
-                tab === t ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"
+                tab === t ? "border-gray-900 text-[var(--color-text-1)]" : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               {t === "timesheets" ? `Timesheets (${timesheets.length})` : t}
@@ -139,7 +139,7 @@ export default function EmployeeDetailPage() {
       {tab === "info" && (
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-            <h2 className="font-semibold text-gray-900">Personal Information</h2>
+            <h2 className="font-semibold text-[var(--color-text-1)]">Personal Information</h2>
             {[
               ["Email",      employee.email],
               ["Phone",      employee.phone],
@@ -150,13 +150,13 @@ export default function EmployeeDetailPage() {
             ].map(([label, value]) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-500">{label}</span>
-                <span className="font-medium text-gray-900">{value || "—"}</span>
+                <span className="font-medium text-[var(--color-text-1)]">{value || "—"}</span>
               </div>
             ))}
           </div>
           {summary && (
             <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-              <h2 className="font-semibold text-gray-900">Timesheet Summary</h2>
+              <h2 className="font-semibold text-[var(--color-text-1)]">Timesheet Summary</h2>
               {[
                 ["Total Entries",   summary.total_entries],
                 ["Total Hours",     `${summary.total_hours}h`],
@@ -167,7 +167,7 @@ export default function EmployeeDetailPage() {
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between text-sm">
                   <span className="text-gray-500">{label}</span>
-                  <span className="font-medium text-gray-900">{value}</span>
+                  <span className="font-medium text-[var(--color-text-1)]">{value}</span>
                 </div>
               ))}
             </div>
@@ -179,10 +179,10 @@ export default function EmployeeDetailPage() {
       {tab === "timesheets" && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-gray-900">Timesheet Entries</h2>
+            <h2 className="font-semibold text-[var(--color-text-1)]">Timesheet Entries</h2>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700"
+              className="px-4 py-2 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium hover:bg-gray-700"
             >
               + Add Entry
             </button>
@@ -225,7 +225,7 @@ export default function EmployeeDetailPage() {
               </div>
               <div className="col-span-2 flex gap-3">
                 <button type="submit" disabled={submitting}
-                  className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+                  className="px-4 py-2 bg-[var(--color-bg)] text-white rounded-lg text-sm font-medium disabled:opacity-50">
                   {submitting ? "Saving..." : "Save Entry"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
