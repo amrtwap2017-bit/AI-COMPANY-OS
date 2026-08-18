@@ -7,6 +7,7 @@ from src.core.tenant import get_hotel_id
 from typing import Optional, List
 import uuid, datetime
 from src.core.events import emit_event, EventType
+from src.core.sla_scanner import scan_and_emit_sla_breaches
 from src.core.audit import audit_create, audit_update, audit_delete
 
 router = APIRouter(prefix="/work-orders", tags=["work-orders"])
@@ -99,6 +100,11 @@ def get_sla_breached_work_orders(
 ):
     """Return all work orders with SLA breach — T-003"""
     try:
+        # Auto-scan for new breaches before returning list (T-019)
+        try:
+            scan_and_emit_sla_breaches(db=db, hotel_id=hotel_id, actor="auto_scan")
+        except Exception:
+            pass
         from sqlalchemy import text as _text
         rows = db.execute(_text(
             """SELECT id, title, status, sla_hours, sla_breach_at,

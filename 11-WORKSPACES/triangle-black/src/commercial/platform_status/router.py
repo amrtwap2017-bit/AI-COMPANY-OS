@@ -161,3 +161,33 @@ def _operations_stats(db: Session, hotel_id: str) -> dict:
         }
     except Exception as e:
         return {"status": "unknown", "error": str(e)}
+
+@router.post("/sla-scan")
+def trigger_sla_scan(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Manually trigger SLA breach scan for this tenant.
+    Marks newly breached WOs and emits WO_SLA_BREACHED events.
+    T-019
+    """
+    try:
+        from src.core.sla_scanner import scan_and_emit_sla_breaches
+        result = scan_and_emit_sla_breaches(db=db, hotel_id=hotel_id, actor="manual_scan")
+        return result
+    except Exception as e:
+        return {"hotel_id": hotel_id, "error": str(e)}
+
+
+@router.get("/sla-breach-summary")
+def get_sla_breach_summary(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """SLA breach state summary for this tenant. T-019"""
+    try:
+        from src.core.sla_scanner import get_breach_summary
+        return get_breach_summary(db=db, hotel_id=hotel_id)
+    except Exception as e:
+        return {"hotel_id": hotel_id, "error": str(e)}
