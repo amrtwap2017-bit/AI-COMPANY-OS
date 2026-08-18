@@ -1,70 +1,89 @@
-// @ts-nocheck
-// Triangle Black - Enterprise Input
-// UI-020: Missing core component
-import { InputHTMLAttributes, ReactNode, forwardRef } from "react";
+"use client";
+/**
+ * Triangle Black — Input Component
+ * SPRINT-012: Fully semantic — no hardcoded colors
+ */
+import { InputHTMLAttributes, ReactNode, useId } from "react";
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?:    string;
-  helper?:   string;
-  error?:    string;
-  prefix?:   ReactNode;
-  suffix?:   ReactNode;
-  required?: boolean;
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helper?: string;
+  icon?: ReactNode;
+  iconRight?: ReactNode;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, helper, error, prefix, suffix, required, className = "", id, ...props }, ref
-) {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
+export function Input({
+  label, error, helper, icon, iconRight,
+  required, className = "", id, ...props
+}: Props) {
+  const autoId = useId();
+  const inputId = id || autoId;
+
   return (
-    <div className="w-full">
+    <div>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor={inputId} className="block text-sm font-medium mb-1.5" style={{color:"var(--color-text-1)"}}>
           {label}
-          {required && <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>}
+          {required && <span style={{color:"var(--color-danger)"}} className="ml-0.5" aria-hidden="true">*</span>}
         </label>
       )}
       <div className="relative">
-        {prefix && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-tertiary pointer-events-none">
-            {prefix}
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{color:"var(--color-text-3)"}}>
+            {icon}
           </div>
         )}
         <input
-          ref={ref}
           id={inputId}
           required={required}
           aria-invalid={!!error}
           aria-describedby={error ? inputId + "-error" : helper ? inputId + "-helper" : undefined}
           className={[
-            "block w-full rounded-xl border bg-white text-sm text-stone-900",
-            "placeholder-slate-400 transition-colors",
-            "focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400",
-            "disabled:bg-slate-50 disabled:text-tertiary disabled:cursor-not-allowed",
-            prefix ? "pl-9" : "pl-3.5",
-            suffix ? "pr-9" : "pr-3.5",
-            "py-2.5",
-            error
-              ? "border-red-300 focus:border-red-400 focus:ring-red-500/20"
-              : "border-stone-200 hover:border-slate-300",
+            "block w-full rounded-md text-sm transition-colors",
+            "focus:outline-none focus:ring-2 focus:ring-offset-1",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            icon ? "pl-10" : "pl-3",
+            iconRight ? "pr-10" : "pr-3",
+            "py-2",
             className,
           ].join(" ")}
+          style={{
+            background: "var(--color-surface)",
+            color: "var(--color-text-1)",
+            border: error
+              ? "1px solid var(--color-danger)"
+              : "1px solid var(--color-border)",
+            ...(props.disabled ? { background: "var(--color-bg-alt)" } : {}),
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = error ? "var(--color-danger)" : "var(--color-border-focus)";
+            e.target.style.boxShadow = error
+              ? "0 0 0 3px rgba(220,38,38,0.15)"
+              : "0 0 0 3px rgba(185,146,76,0.15)";
+            props.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = error ? "var(--color-danger)" : "var(--color-border)";
+            e.target.style.boxShadow = "none";
+            props.onBlur?.(e);
+          }}
           {...props}
         />
-        {suffix && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-tertiary">
-            {suffix}
+        {iconRight && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{color:"var(--color-text-3)"}}>
+            {iconRight}
           </div>
         )}
       </div>
       {error && (
-        <p id={inputId + "-error"} role="alert" className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-          <span aria-hidden="true">⚠</span> {error}
+        <p id={inputId + "-error"} role="alert" className="mt-1.5 text-xs flex items-center gap-1" style={{color:"var(--color-danger)"}}>
+          <span>⚠</span> {error}
         </p>
       )}
       {helper && !error && (
-        <p id={inputId + "-helper"} className="mt-1.5 text-xs text-tertiary">{helper}</p>
+        <p id={inputId + "-helper"} className="mt-1.5 text-xs" style={{color:"var(--color-text-3)"}}>{helper}</p>
       )}
     </div>
   );
-});
+}

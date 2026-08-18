@@ -49,7 +49,7 @@ export function DataTable<T extends Record<string, any>>({
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className={"bg-slate-50 border-b border-stone-200 " + (stickyHeader ? "sticky top-0 z-10" : "")}>
+            <tr className={"border-b " + (stickyHeader ? "sticky top-0 z-10" : "")}>
               {columns.map(col => (
                 <th
                   key={col.key}
@@ -58,7 +58,7 @@ export function DataTable<T extends Record<string, any>>({
                   className={
                     "px-4 py-3 text-[11px] font-semibold text-secondary uppercase tracking-wider " +
                     (col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left") +
-                    (col.sortable ? " cursor-pointer select-none hover:text-slate-700 hover:bg-slate-100 transition-colors" : "")
+                    (col.sortable ? " cursor-pointer select-none hover:opacity-80 transition-colors" : "")
                   }
                 >
                   <span className="inline-flex items-center gap-1">
@@ -66,9 +66,9 @@ export function DataTable<T extends Record<string, any>>({
                     {col.sortable && (
                       sortKey === col.key
                         ? sortDir === "asc"
-                          ? <ChevronUp className="w-3 h-3 text-amber-500" />
-                          : <ChevronDown className="w-3 h-3 text-amber-500" />
-                        : <ChevronsUpDown className="w-3 h-3 text-slate-300" />
+                          ? <ChevronUp className="w-3 h-3 text-brand" />
+                          : <ChevronDown className="w-3 h-3 text-brand" />
+                        : <ChevronsUpDown className="w-3 h-3 text-tertiary" />
                     )}
                   </span>
                 </th>
@@ -77,7 +77,7 @@ export function DataTable<T extends Record<string, any>>({
           </thead>
           <tbody>
             {loading && Array.from({ length: 6 }).map((_, i) => (
-              <tr key={i} className={"border-b border-slate-50 " + (i % 2 === 0 ? "bg-white" : "bg-slate-50/40")}>
+              <tr key={i} className={"border-b border-slate-50 " + (i % 2 === 0 ? "bg-white" : "/40")}>
                 {columns.map(col => (
                   <td key={col.key} className="px-4 py-3.5">
                     <div className="skeleton h-3.5 rounded" style={{ width: (50 + (i * 13) % 40) + "%" }} />
@@ -99,19 +99,19 @@ export function DataTable<T extends Record<string, any>>({
                 onClick={() => onRow?.(row)}
                 className={
                   "border-b border-stone-100 text-sm transition-colors " +
-                  (idx % 2 === 0 ? "bg-white" : "bg-slate-50/40") +
-                  (onRow ? " cursor-pointer hover:bg-amber-50/60" : " hover:bg-slate-50")
+                  (idx % 2 === 0 ? "bg-white" : "/40") +
+                  (onRow ? " cursor-pointer hover:bg-amber-50/60" : " hover:")
                 }
               >
                 {columns.map(col => (
                   <td
                     key={col.key}
                     className={
-                      "px-4 py-3.5 text-slate-700 " +
+                      "px-4 py-3.5 text-primary " +
                       (col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "")
                     }
                   >
-                    {col.render ? col.render(row) : (row[col.key] ?? <span className="text-slate-300">—</span>)}
+                    {col.render ? col.render(row) : (row[col.key] ?? <span className="text-tertiary">—</span>)}
                   </td>
                 ))}
               </tr>
