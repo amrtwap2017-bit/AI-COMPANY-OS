@@ -36,16 +36,16 @@ def test_composite_index_migration_idempotent():
 
 def test_alembic_head_is_e2f3a4b5c6d7():
     import subprocess
+
     result = subprocess.run(
         [".venv/bin/alembic", "current"],
-        capture_output=True, text=True,
-        cwd="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black"
+        capture_output=True,
+        text=True,
+        cwd="/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black",
     )
-    output = result.stdout + result.stderr
-    # Head moves forward with each migration — accept any valid head
-assert len(output.strip()) >= 12, f"No alembic head found: {output.strip()}"
-
-# ── Sprint-249A: DB indexes exist ────────────────────────────────────────────
+    output = ((result.stdout or "") + (result.stderr or "")).strip()
+    assert "(head)" in output, f"No alembic head found: {output}"
+    assert len(output) >= 12, f"No alembic output found: {output}"
 def test_hotel_status_composite_index_exists():
     from src.core.database import engine
     from sqlalchemy import text
