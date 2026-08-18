@@ -138,6 +138,16 @@ export function EnterpriseTopbar() {
             AI
           </Link>
 
+            {/* Theme toggle — Obsidian Command / Ivory Operations */}
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors hover:opacity-80"
+              style={{color:"var(--color-topbar-text)"}}
+              aria-label={isDark ? "Switch to Ivory Operations" : "Switch to Obsidian Command"}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
           {/* User menu */}
           <div className="relative">
             <button
