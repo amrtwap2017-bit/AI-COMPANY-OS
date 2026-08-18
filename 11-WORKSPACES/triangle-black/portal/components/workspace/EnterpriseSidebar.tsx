@@ -39,12 +39,12 @@ const ICONS: Record<string, any> = {
 };
 
 function badgeClass(badge: string): string {
-  if (badge === "AI")    return "bg-stone-700/40 text-stone-300";
-  if (badge === "Live")  return "bg-stone-700/30 text-stone-200";
-  if (badge === "OPS")   return "bg-sidebar/60 text-stone-300";
-  if (badge === "CRM")   return "bg-sidebar/60 text-stone-300";
-  if (badge === "SCM")   return "bg-sidebar/60 text-stone-300";
-  if (badge === "ENG")   return "bg-sidebar/60 text-stone-300";
+  if (badge === "AI")    return "bg-sidebar-hover text-sidebar-text";
+  if (badge === "Live")  return "bg-sidebar-hover text-sidebar-text";
+  if (badge === "OPS")   return "bg-sidebar-hover text-sidebar-text";
+  if (badge === "CRM")   return "bg-sidebar-hover text-sidebar-text";
+  if (badge === "SCM")   return "bg-sidebar-hover text-sidebar-text";
+  if (badge === "ENG")   return "bg-sidebar-hover text-sidebar-text";
   return "bg-sidebar/50 text-tertiary";
 }
 

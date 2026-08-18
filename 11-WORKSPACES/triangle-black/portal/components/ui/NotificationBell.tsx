@@ -77,7 +77,7 @@ export function NotificationBell() {
               const colorClass = PRIORITY_COLORS[n.priority] ?? PRIORITY_COLORS.low;
               return (
                 <div key={n.id}
-                     className={`flex gap-3 px-4 py-3 border-b border-slate-50 ${colorClass} border-l-4 border-l-current`}>
+                     className={`flex gap-3 px-4 py-3 border-b border-divider ${colorClass} border-l-4 border-l-current`}>
                   <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold">{n.title}</div>

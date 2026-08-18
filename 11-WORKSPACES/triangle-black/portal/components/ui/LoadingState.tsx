@@ -67,7 +67,7 @@ export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex gap-4 px-4 py-3.5 border-b border-slate-50">
+        <div key={i} className="flex gap-4 px-4 py-3.5 border-b border-divider">
           {Array.from({ length: cols }).map((_, j) => (
             <div key={j} className="skeleton h-4 flex-1" style={{ opacity: 1 - j * 0.1 }} />
           ))}

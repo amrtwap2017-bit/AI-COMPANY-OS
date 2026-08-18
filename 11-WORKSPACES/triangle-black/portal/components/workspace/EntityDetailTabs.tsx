@@ -38,7 +38,7 @@ export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProp
               className={[
                 "rounded-full border px-4 py-2 text-sm font-medium transition",
                 selected
-                  ? "border-slate-950 bg-sidebar text-white"
+                  ? "border-brand bg-sidebar text-inverse"
                   : "border-border bg-base-alt text-primary hover:border-border hover:bg-white",
               ].join(" ")}
             >
