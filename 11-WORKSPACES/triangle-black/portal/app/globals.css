@@ -139,6 +139,35 @@
   --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
+  /* ── EXTENDED SEMANTIC TOKENS — for components ──────── */
+  --color-action-primary:         #B9924C;
+  --color-action-primary-hover:   #A88446;
+  --color-action-primary-text:    #FFFFFF;
+  --color-action-secondary:       #FFFFFF;
+  --color-action-secondary-hover: #F4F4F2;
+  --color-action-secondary-text:  #111111;
+  --color-action-ghost-hover:     rgba(0,0,0,0.05);
+  --color-action-ghost-text:      #4A4A47;
+  --color-action-danger:          #DC2626;
+  --color-action-danger-hover:    #B91C1C;
+  --color-action-danger-text:     #FFFFFF;
+  --color-purple-bg:    #F5F3FF;
+  --color-purple-text:  #6D28D9;
+  --color-purple-border:#DDD6FE;
+  --color-orange-bg:    #FFF7ED;
+  --color-orange-text:  #C2410C;
+  --color-orange-border:#FED7AA;
+  --color-indigo-bg:    #EEF2FF;
+  --color-indigo-text:  #4338CA;
+  --color-indigo-border:#C7D2FE;
+  --color-kpi-blue:     #3B82F6;
+  --color-kpi-green:    #22C55E;
+  --color-kpi-amber:    #F59E0B;
+  --color-kpi-red:      #EF4444;
+  --color-kpi-purple:   #8B5CF6;
+  --color-kpi-orange:   #F97316;
+  --color-kpi-neutral:  #6B6B66;
+
   /* ── LAYOUT ──────────────────────────────────────────────── */
   --sidebar-width: 240px; --sidebar-collapsed: 64px;
   --topbar-height: 56px;  --content-max: 1400px;

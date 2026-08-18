@@ -1,51 +1,95 @@
-// @ts-nocheck
+"use client";
+/**
+ * Triangle Black — Button Component
+ * SPRINT-011: Fully semantic — no hardcoded colors
+ * All variants use CSS custom properties from globals.css
+ */
 import { ReactNode, ButtonHTMLAttributes } from "react";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary"|"secondary"|"ghost"|"danger"|"success";
-  size?: "xs"|"sm"|"md"|"lg";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "success";
+  size?: "xs" | "sm" | "md" | "lg";
   icon?: ReactNode;
   iconRight?: ReactNode;
   loading?: boolean;
   children: ReactNode;
 }
 
-const variants = {
-  primary:   "bg-amber-700 text-white hover:bg-amber-800 border border-amber-700 shadow-sm",
-  secondary: "bg-white text-slate-700 hover:bg-slate-50 border border-stone-200 shadow-sm",
-  ghost:     "bg-transparent text-slate-600 hover:bg-slate-100 border border-transparent",
-  danger:    "bg-red-600 text-white hover:bg-red-700 border border-red-600 shadow-sm",
-  success:   "bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-600 shadow-sm",
+const VARIANT_STYLES: Record<string, React.CSSProperties> = {
+  primary: {
+    background: "var(--color-action-primary)",
+    color: "var(--color-action-primary-text)",
+    border: "1px solid var(--color-action-primary)",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+  },
+  secondary: {
+    background: "var(--color-action-secondary)",
+    color: "var(--color-action-secondary-text)",
+    border: "1px solid var(--color-border)",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+  },
+  ghost: {
+    background: "transparent",
+    color: "var(--color-action-ghost-text)",
+    border: "1px solid transparent",
+  },
+  danger: {
+    background: "var(--color-action-danger)",
+    color: "var(--color-action-danger-text)",
+    border: "1px solid var(--color-action-danger)",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+  },
+  success: {
+    background: "var(--color-success)",
+    color: "#FFFFFF",
+    border: "1px solid var(--color-success)",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+  },
 };
 
-const sizes = {
-  xs: "px-2.5 py-1 text-xs rounded-lg gap-1",
-  sm: "px-3 py-1.5 text-sm rounded-lg gap-1.5",
-  md: "px-4 py-2 text-sm rounded-xl gap-2",
-  lg: "px-5 py-2.5 text-base rounded-xl gap-2",
+const SIZE_CLASSES: Record<string, string> = {
+  xs: "px-2.5 py-1 text-xs rounded gap-1",
+  sm: "px-3 py-1.5 text-sm rounded-md gap-1.5",
+  md: "px-4 py-2 text-sm rounded-md gap-2",
+  lg: "px-5 py-2.5 text-base rounded-lg gap-2",
 };
 
-export function Button({ variant="secondary", size="sm", icon, iconRight, loading, children, className="", disabled, ...props }: Props) {
+export function Button({
+  variant = "secondary",
+  size = "sm",
+  icon,
+  iconRight,
+  loading,
+  children,
+  className = "",
+  disabled,
+  style,
+  ...props
+}: Props) {
   return (
     <button
       {...props}
       disabled={disabled || loading}
+      style={{ ...VARIANT_STYLES[variant], ...style }}
       className={`
-        inline-flex items-center justify-center font-medium transition-all 
-        disabled:opacity-50 disabled:cursor-not-allowed 
-        active:scale-[0.98] active:shadow-sm
-        ${variants[variant]} ${sizes[size]} ${className}
+        inline-flex items-center justify-center font-medium transition-all
+        disabled:opacity-50 disabled:cursor-not-allowed
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-focus)] focus-visible:ring-offset-1
+        active:scale-[0.98]
+        ${SIZE_CLASSES[size]} ${className}
       `}
     >
       {loading ? (
-        <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0 mr-2" />
+        <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" />
       ) : icon ? (
         <span className="flex-shrink-0">{icon}</span>
       ) : null}
-      
+
       <span className="truncate">{children}</span>
-      
-      {iconRight && !loading && <span className="flex-shrink-0">{iconRight}</span>}
+
+      {iconRight && !loading && (
+        <span className="flex-shrink-0">{iconRight}</span>
+      )}
     </button>
   );
 }

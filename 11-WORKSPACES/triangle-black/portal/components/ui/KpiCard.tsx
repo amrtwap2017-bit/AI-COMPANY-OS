@@ -1,3 +1,4 @@
+import React from "react";
 "use client";
 // @ts-nocheck
 // Triangle Black — Enterprise KPI Card v2.0
@@ -21,16 +22,16 @@ interface KpiCardProps {
   status?: KpiStatus;
 }
 
-const COLOR_MAP: Record<KpiColor, string> = {
-  blue:    "text-blue-500",
-  emerald: "text-emerald-500",
-  amber:   "text-amber-500",
-  red:     "text-red-500",
-  purple:  "text-purple-500",
-  orange:  "text-orange-500",
-  cyan:    "text-cyan-500",
-  slate:   "text-secondary",
-  brand:   "text-brand",
+const COLOR_MAP: Record<KpiColor, React.CSSProperties> = {
+  blue:    { color: "var(--color-kpi-blue)" },
+  emerald: { color: "var(--color-kpi-green)" },
+  amber:   { color: "var(--color-kpi-amber)" },
+  red:     { color: "var(--color-kpi-red)" },
+  purple:  { color: "var(--color-kpi-purple)" },
+  orange:  { color: "var(--color-kpi-orange)" },
+  cyan:    { color: "var(--color-kpi-blue)" },
+  slate:   { color: "var(--color-text-2)" },
+  brand:   { color: "var(--color-brand)" },
 };
 
 const STATUS_RING: Record<KpiStatus, string> = {

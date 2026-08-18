@@ -9,7 +9,7 @@ const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   in_progress:    { label: "In Progress",    cls: "bg-warning-bg text-warning-text border border-warning-border" },
   completed:      { label: "Completed",      cls: "bg-success-bg text-success-text border border-success-border" },
   cancelled:      { label: "Cancelled",      cls: "bg-base-alt text-tertiary border border-border" },
-  assigned:       { label: "Assigned",       cls: "bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800" },
+  assigned:       { label: "Assigned",       cls: "bg-[var(--color-purple-bg)] text-[var(--color-purple-text)] border border-[var(--color-purple-border)]" },
 
   // ── Contracts ─────────────────────────────────────────
   active:              { label: "Active",             cls: "bg-success-bg text-success-text border border-success-border" },
@@ -30,15 +30,15 @@ const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
 
   // ── Leads ─────────────────────────────────────────────
   new:            { label: "New",            cls: "bg-info-bg text-info-text border border-info-border" },
-  qualified:      { label: "Qualified",      cls: "bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800" },
-  proposal:       { label: "Proposal",       cls: "bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800" },
+  qualified:      { label: "Qualified",      cls: "bg-[var(--color-purple-bg)] text-[var(--color-purple-text)] border border-[var(--color-purple-border)]" },
+  proposal:       { label: "Proposal",       cls: "bg-[var(--color-indigo-bg)] text-[var(--color-indigo-text)] border border-[var(--color-indigo-border)]" },
   negotiation:    { label: "Negotiation",    cls: "bg-warning-bg text-warning-text border border-warning-border" },
   won:            { label: "Won ✓",          cls: "bg-success-bg text-success-text border border-success-border font-semibold" },
   lost:           { label: "Lost",           cls: "bg-danger-bg text-danger-text border border-danger-border" },
 
   // ── Priority ──────────────────────────────────────────
   critical:       { label: "Critical",       cls: "bg-danger text-inverse border border-danger font-bold" },
-  high:           { label: "High",           cls: "bg-orange-100 text-orange-700 border border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800" },
+  high:           { label: "High",           cls: "bg-[var(--color-orange-bg)] text-[var(--color-orange-text)] border border-[var(--color-orange-border)]" },
   medium:         { label: "Medium",         cls: "bg-warning-bg text-warning-text border border-warning-border" },
   low:            { label: "Low",            cls: "bg-base-alt text-secondary border border-border" },
 
