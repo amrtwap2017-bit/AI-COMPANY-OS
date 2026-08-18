@@ -8242,3 +8242,10 @@ try:
     print("  OK: ai_gateway_router")
 except Exception as _aig_err:
     print(f"  WARN ai_gateway_router: {_aig_err}")
+
+try:
+    from src.commercial.platform_status.router import router as platform_status_router
+    app.include_router(platform_status_router)
+    print("  OK: platform_status_router")
+except Exception as _ps_err:
+    print(f"  WARN platform_status: {_ps_err}")
