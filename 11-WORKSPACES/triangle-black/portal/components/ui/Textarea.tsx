@@ -19,7 +19,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
     <div className="w-full">
       {label && (
         <div className="flex items-center justify-between mb-1.5">
-          <label htmlFor={textareaId} className="text-sm font-medium text-slate-700">
+          <label htmlFor={textareaId} className="text-sm font-medium text-primary">
             {label}
             {props.required && <span className="text-red-500 ml-0.5">*</span>}
           </label>
@@ -36,14 +36,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         value={value}
         aria-invalid={!!error}
         className={[
-          "block w-full rounded-xl border bg-white text-sm text-stone-900",
+          "block w-full rounded-xl border bg-white text-sm text-primary",
           "placeholder-slate-400 transition-colors resize-y min-h-[100px]",
           "px-3.5 py-2.5",
           "focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400",
-          "disabled:bg-slate-50 disabled:text-tertiary disabled:cursor-not-allowed",
+          "disabled:bg-base-alt disabled:text-tertiary disabled:cursor-not-allowed",
           error
             ? "border-red-300 focus:border-red-400 focus:ring-red-500/20"
-            : "border-stone-200 hover:border-slate-300",
+            : "border-border hover:border-border",
           className,
         ].join(" ")}
         {...props}

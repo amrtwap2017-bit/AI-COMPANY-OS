@@ -17,18 +17,18 @@ type EntityActionDockProps = {
 function toneClasses(tone?: DockAction["tone"]) {
   if (tone === "success") return "border-emerald-200 bg-emerald-50";
   if (tone === "warning") return "border-amber-200 bg-amber-50";
-  return "border-stone-200 bg-slate-50";
+  return "border-border bg-base-alt";
 }
 
 export function EntityActionDock({ title, subtitle, actions }: EntityActionDockProps) {
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Action Dock
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
+        <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
       <div className="mt-5 space-y-3">
@@ -36,10 +36,10 @@ export function EntityActionDock({ title, subtitle, actions }: EntityActionDockP
           <Link
             key={action.href + action.title}
             href={action.href}
-            className={"block rounded-2xl border p-4 transition hover:border-slate-300 hover:bg-white " + toneClasses(action.tone)}
+            className={"block rounded-2xl border p-4 transition hover:border-border hover:bg-white " + toneClasses(action.tone)}
           >
             <div className="text-sm font-semibold text-slate-950">{action.title}</div>
-            <div className="mt-2 text-sm leading-6 text-slate-600">{action.detail}</div>
+            <div className="mt-2 text-sm leading-6 text-secondary">{action.detail}</div>
           </Link>
         ))}
       </div>

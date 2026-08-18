@@ -24,19 +24,19 @@ export function PinnedEntitiesPanel() {
   }
 
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Workspace Favorites
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">Pinned Entities</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-secondary">
           Keep your most important objects one click away.
         </p>
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-stone-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
+        <div className="mt-5 rounded-2xl border border-dashed border-border bg-base-alt px-4 py-8 text-sm text-secondary">
           No pinned entities yet. Use the context drawer to pin important records.
         </div>
       ) : (
@@ -44,19 +44,19 @@ export function PinnedEntitiesPanel() {
           {items.map((item, index) => (
             <div
               key={item.entityType + item.entityId + item.entityName + index}
-              className="rounded-2xl border border-stone-100 bg-slate-50 px-4 py-4"
+              className="rounded-2xl border border-divider bg-base-alt px-4 py-4"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-stone-900">{item.entityName || item.entityType}</div>
+                  <div className="text-sm font-semibold text-primary">{item.entityName || item.entityType}</div>
                   <div className="mt-1 text-xs uppercase tracking-wide text-secondary">{item.entityType}</div>
-                  <div className="mt-2 text-sm text-slate-600">{item.href}</div>
+                  <div className="mt-2 text-sm text-secondary">{item.href}</div>
                 </div>
 
                 <div className="flex gap-2">
                   <Link
                     href={item.href}
-                    className="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                    className="rounded-full border border-border bg-white px-3 py-2 text-xs font-medium text-primary"
                   >
                     Open
                   </Link>

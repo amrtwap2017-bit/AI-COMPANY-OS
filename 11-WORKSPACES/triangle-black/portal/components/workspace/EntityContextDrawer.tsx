@@ -101,10 +101,10 @@ export function EntityContextDrawer() {
 
   return (
     <div className="fixed inset-0 z-[85] pointer-events-auto">
-      <div className="absolute inset-0 bg-slate-950/45" onClick={closeDrawer} />
+      <div className="absolute inset-0 bg-sidebar/45" onClick={closeDrawer} />
 
-      <div className="absolute right-0 top-0 h-full w-[96vw] max-w-lg overflow-y-auto border-l border-stone-200 bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 border-b border-stone-100 bg-white/95 px-6 py-5 backdrop-blur">
+      <div className="absolute right-0 top-0 h-full w-[96vw] max-w-lg overflow-y-auto border-l border-border bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 border-b border-divider bg-white/95 px-6 py-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
@@ -113,14 +113,14 @@ export function EntityContextDrawer() {
               <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
                 {name || entity}
               </div>
-              <div className="mt-2 text-sm text-slate-600">
+              <div className="mt-2 text-sm text-secondary">
                 Type: {entity} {id ? `• ID: ${id}` : ""}
               </div>
             </div>
 
             <button
               onClick={closeDrawer}
-              className="rounded-2xl border border-stone-200 px-4 py-2 text-sm text-slate-700"
+              className="rounded-2xl border border-border px-4 py-2 text-sm text-primary"
             >
               Close
             </button>
@@ -134,7 +134,7 @@ export function EntityContextDrawer() {
                 "rounded-full border px-3 py-2 text-xs font-medium",
                 pinned
                   ? "border-amber-200 bg-amber-50 text-amber-800"
-                  : "border-stone-200 bg-slate-50 text-slate-700",
+                  : "border-border bg-base-alt text-primary",
               ].join(" ")}
             >
               {pinned ? "Pinned" : "Pin to Workspace"}
@@ -142,7 +142,7 @@ export function EntityContextDrawer() {
 
             <Link
               href="/workspace"
-              className="rounded-full border border-stone-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700"
+              className="rounded-full border border-border bg-base-alt px-3 py-2 text-xs font-medium text-primary"
             >
               Open Workspace Hub
             </Link>
@@ -150,45 +150,45 @@ export function EntityContextDrawer() {
         </div>
 
         <div className="space-y-6 p-6">
-          <section className="rounded-3xl border border-stone-200 bg-slate-50 p-5">
+          <section className="rounded-3xl border border-border bg-base-alt p-5">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               Why this matters
             </div>
-            <div className="mt-3 text-sm leading-7 text-slate-700">
+            <div className="mt-3 text-sm leading-7 text-primary">
               This drawer lets users move through enterprise relationships without losing context. It now also supports pinning important objects and building a persistent workspace memory.
             </div>
           </section>
 
-          <section className="rounded-3xl border border-stone-200 bg-white p-5">
+          <section className="rounded-3xl border border-border bg-white p-5">
             <div className="text-lg font-semibold text-slate-950">Suggested Navigation</div>
             <div className="mt-4 space-y-3">
               {suggestions.map((item) => (
                 <Link
                   key={item.href + item.label}
                   href={item.href}
-                  className="block rounded-2xl border border-stone-100 bg-slate-50 px-4 py-4 transition hover:border-stone-200 hover:bg-white"
+                  className="block rounded-2xl border border-divider bg-base-alt px-4 py-4 transition hover:border-border hover:bg-white"
                 >
-                  <div className="text-sm font-semibold text-stone-900">{item.label}</div>
+                  <div className="text-sm font-semibold text-primary">{item.label}</div>
                   <div className="mt-2 text-xs text-secondary">{item.href}</div>
                 </Link>
               ))}
             </div>
           </section>
 
-          <section className="rounded-3xl border border-stone-200 bg-white p-5">
+          <section className="rounded-3xl border border-border bg-white p-5">
             <div className="text-lg font-semibold text-slate-950">Context Clues</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-stone-100 bg-slate-50 p-4">
+              <div className="rounded-2xl border border-divider bg-base-alt p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
                   Current Path
                 </div>
-                <div className="mt-2 text-sm text-stone-800">{pathname}</div>
+                <div className="mt-2 text-sm text-primary">{pathname}</div>
               </div>
-              <div className="rounded-2xl border border-stone-100 bg-slate-50 p-4">
+              <div className="rounded-2xl border border-divider bg-base-alt p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
                   Context Payload
                 </div>
-                <div className="mt-2 text-sm text-stone-800">
+                <div className="mt-2 text-sm text-primary">
                   {entity} {id ? `• ${id}` : ""} {name ? `• ${name}` : ""}
                 </div>
               </div>

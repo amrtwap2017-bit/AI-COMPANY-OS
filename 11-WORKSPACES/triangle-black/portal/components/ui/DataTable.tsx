@@ -98,7 +98,7 @@ export function DataTable<T extends Record<string, any>>({
                 key={row[keyField] ?? idx}
                 onClick={() => onRow?.(row)}
                 className={
-                  "border-b border-stone-100 text-sm transition-colors " +
+                  "border-b border-divider text-sm transition-colors " +
                   (idx % 2 === 0 ? "bg-white" : "/40") +
                   (onRow ? " cursor-pointer hover:bg-amber-50/60" : " hover:")
                 }

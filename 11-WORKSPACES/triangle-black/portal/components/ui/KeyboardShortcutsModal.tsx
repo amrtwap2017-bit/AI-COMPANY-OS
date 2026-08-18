@@ -28,8 +28,8 @@ interface Props {
 function KeyBadge({ k }: { k: string }) {
   return (
     <span className="inline-flex items-center justify-center min-w-8 h-7 px-2
-                     bg-slate-100 border border-slate-300 rounded text-xs font-mono
-                     font-semibold text-slate-700 shadow-sm">
+                     bg-surface-alt border border-border rounded text-xs font-mono
+                     font-semibold text-primary shadow-sm">
       {k}
     </span>
   );
@@ -43,9 +43,9 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
          onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
            onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-200">
-          <h2 className="font-semibold text-stone-800">Keyboard Shortcuts</h2>
-          <button onClick={onClose} className="text-tertiary hover:text-slate-600">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="font-semibold text-primary">Keyboard Shortcuts</h2>
+          <button onClick={onClose} className="text-tertiary hover:text-secondary">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -54,7 +54,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
           <div className="space-y-3">
             {SHORTCUTS.map((s, i) => (
               <div key={i} className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">{s.description}</span>
+                <span className="text-sm text-secondary">{s.description}</span>
                 <div className="flex items-center gap-1">
                   {s.keys.map((k, j) => (
                     <span key={j} className="flex items-center gap-1">
@@ -70,7 +70,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className="px-6 py-3 bg-slate-50 border-t border-stone-200">
+        <div className="px-6 py-3 bg-base-alt border-t border-border">
           <p className="text-xs text-tertiary text-center">
             Press <KeyBadge k="?" /> anytime to show this panel · Press <KeyBadge k="Esc" /> to close
           </p>

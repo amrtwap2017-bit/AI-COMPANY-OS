@@ -12,13 +12,13 @@ const severityMap = {
 
 export function AIInsightPanel({ title, subtitle, insights }: AIInsightPanelProps) {
   return (
-    <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
           <Zap className="w-3.5 h-3.5 text-amber-600" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-stone-900">{title}</h2>
+          <h2 className="text-sm font-bold text-primary">{title}</h2>
           <p className="text-xs text-secondary">{subtitle}</p>
         </div>
       </div>
@@ -33,8 +33,8 @@ export function AIInsightPanel({ title, subtitle, insights }: AIInsightPanelProp
                   <Icon className="w-3 h-3" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-stone-900">{item.title}</div>
-                  <p className="mt-1 text-xs text-slate-600 leading-relaxed">{item.detail}</p>
+                  <div className="text-sm font-semibold text-primary">{item.title}</div>
+                  <p className="mt-1 text-xs text-secondary leading-relaxed">{item.detail}</p>
                   {item.recommendation && (
                     <div className={`mt-2 text-xs font-semibold ${s.rec}`}>→ {item.recommendation}</div>
                   )}

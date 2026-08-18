@@ -29,14 +29,14 @@ export function StatusFilterTabs({ tabs, active, onChange, className = "" }: Sta
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all " +
             (active === tab.value
               ? "bg-amber-600 text-white shadow-sm"
-              : "text-secondary hover:text-slate-700 hover:bg-slate-100")
+              : "text-secondary hover:text-primary hover:bg-surface-alt")
           }
         >
           {tab.label}
           {tab.count !== undefined && (
             <span className={
               "px-1.5 py-0.5 rounded-full text-[9px] font-bold " +
-              (active === tab.value ? "bg-white/25 text-white" : "bg-slate-200 text-slate-600")
+              (active === tab.value ? "bg-white/25 text-white" : "bg-surface-alt text-secondary")
             }>
               {tab.count}
             </span>

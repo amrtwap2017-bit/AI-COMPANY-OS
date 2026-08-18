@@ -36,14 +36,14 @@ export function Progress({
     <div className={"w-full " + className}>
       {(label || showValue) && (
         <div className="flex items-center justify-between mb-1.5">
-          {label && <span className="text-xs font-medium text-slate-600">{label}</span>}
+          {label && <span className="text-xs font-medium text-secondary">{label}</span>}
           {showValue && (
-            <span className="text-xs font-semibold text-slate-700">{Math.round(pct)}%</span>
+            <span className="text-xs font-semibold text-primary">{Math.round(pct)}%</span>
           )}
         </div>
       )}
       <div
-        className={"w-full bg-slate-100 rounded-full overflow-hidden " + HEIGHTS[size]}
+        className={"w-full bg-surface-alt rounded-full overflow-hidden " + HEIGHTS[size]}
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}

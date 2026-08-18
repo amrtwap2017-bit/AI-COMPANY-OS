@@ -43,21 +43,21 @@ export function Drawer({
   return (
     <div className="fixed inset-0 z-[60] flex" role="dialog" aria-modal="true">
       <div
-        className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-sidebar/50 backdrop-blur-sm"
         onClick={onClose}
       />
       <div className={
-        "absolute top-0 bottom-0 flex flex-col bg-white shadow-xl border-stone-200 w-full " +
+        "absolute top-0 bottom-0 flex flex-col bg-white shadow-xl border-border w-full " +
         WIDTHS[width] + " " +
         (side === "right" ? "right-0 border-l" : "left-0 border-r")
       }>
         {(title || onClose) && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 flex-shrink-0">
-            {title && <h2 className="text-base font-semibold text-stone-900">{title}</h2>}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-divider flex-shrink-0">
+            {title && <h2 className="text-base font-semibold text-primary">{title}</h2>}
             <button
               onClick={onClose}
               aria-label="Close drawer"
-              className="p-1.5 rounded-lg text-tertiary hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-lg text-tertiary hover:text-secondary hover:bg-surface-alt transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -67,7 +67,7 @@ export function Drawer({
           {children}
         </div>
         {footer && (
-          <div className="px-5 py-4 border-t border-stone-100 bg-slate-50 flex-shrink-0">
+          <div className="px-5 py-4 border-t border-divider bg-base-alt flex-shrink-0">
             {footer}
           </div>
         )}

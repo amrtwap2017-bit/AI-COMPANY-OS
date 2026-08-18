@@ -19,19 +19,19 @@ export function RecentEntitiesPanel() {
   }, []);
 
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Workspace Memory
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">Recent Entities</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-secondary">
           Continue where you left off across customers, contracts, work orders, and vendors.
         </p>
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-stone-200 bg-slate-50 px-4 py-8 text-sm text-secondary">
+        <div className="mt-5 rounded-2xl border border-dashed border-border bg-base-alt px-4 py-8 text-sm text-secondary">
           No recent entities yet. Open entity context drawers to build your workspace memory.
         </div>
       ) : (
@@ -40,13 +40,13 @@ export function RecentEntitiesPanel() {
             <Link
               key={item.entityType + item.entityId + item.entityName + index}
               href={item.href}
-              className="block rounded-2xl border border-stone-100 bg-slate-50 px-4 py-4 transition hover:border-stone-200 hover:bg-white"
+              className="block rounded-2xl border border-divider bg-base-alt px-4 py-4 transition hover:border-border hover:bg-white"
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm font-semibold text-stone-900">{item.entityName || item.entityType}</div>
+                <div className="text-sm font-semibold text-primary">{item.entityName || item.entityType}</div>
                 <div className="text-xs uppercase tracking-wide text-secondary">{item.entityType}</div>
               </div>
-              <div className="mt-2 text-sm text-slate-600">Target: {item.href}</div>
+              <div className="mt-2 text-sm text-secondary">Target: {item.href}</div>
               <div className="mt-1 text-xs text-secondary">Context: {item.contextPath || "—"}</div>
             </Link>
           ))}

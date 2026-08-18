@@ -20,7 +20,7 @@ export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
     return (
       <div className={"grid gap-4 " + (GRID[cols] || GRID[4])}>
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl border border-stone-200 p-5">
+          <div key={i} className="bg-white rounded-2xl border border-border p-5">
             <div className="h-3 skeleton w-2/3 mb-3" />
             <div className="h-8 skeleton w-1/2 mb-2" />
             <div className="h-3 skeleton w-3/4" />
@@ -34,7 +34,7 @@ export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
     return (
       <div className="space-y-2">
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-stone-200">
+          <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-border">
             <div className="skeleton w-10 h-10 rounded-xl flex-shrink-0" />
             <div className="flex-1 space-y-2">
               <div className="skeleton h-4 w-2/3" />
@@ -54,7 +54,7 @@ export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
         <div className="skeleton h-4 w-1/2" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-stone-200 p-5">
+            <div key={i} className="bg-white rounded-2xl border border-border p-5">
               <div className="skeleton h-3 w-2/3 mb-3" />
               <div className="skeleton h-7 w-1/2" />
             </div>
@@ -65,7 +65,7 @@ export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-stone-200">
+    <div className="overflow-hidden rounded-2xl border border-border">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex gap-4 px-4 py-3.5 border-b border-slate-50">
           {Array.from({ length: cols }).map((_, j) => (

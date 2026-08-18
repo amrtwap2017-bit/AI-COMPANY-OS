@@ -27,7 +27,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
     >
       <div
         className={[
-          "absolute inset-0 bg-slate-950/50 transition",
+          "absolute inset-0 bg-sidebar/50 transition",
           open ? "opacity-100" : "opacity-0",
         ].join(" ")}
         onClick={onClose}
@@ -35,7 +35,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
 
       <div
         className={[
-          "absolute left-0 top-0 h-full w-[88vw] max-w-sm bg-slate-950 text-slate-100 shadow-2xl transition-transform",
+          "absolute left-0 top-0 h-full w-[88vw] max-w-sm bg-sidebar text-slate-100 shadow-2xl transition-transform",
           open ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >

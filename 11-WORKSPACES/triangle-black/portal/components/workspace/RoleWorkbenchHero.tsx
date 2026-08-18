@@ -2,9 +2,9 @@
 "use client";
 export function RoleWorkbenchHero({ eyebrow, title, subtitle, badges=[] }:any) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-6 mb-2">
+    <div className="bg-white rounded-2xl border border-border p-6 mb-2">
       {eyebrow && <p className="text-xs font-semibold uppercase tracking-wider text-amber-600 mb-2">{eyebrow}</p>}
-      <h1 className="text-2xl font-bold text-stone-900">{title}</h1>
+      <h1 className="text-2xl font-bold text-primary">{title}</h1>
       {subtitle && <p className="text-sm text-secondary mt-1 max-w-2xl">{subtitle}</p>}
       {badges.length>0 && (
         <div className="flex flex-wrap gap-2 mt-3">

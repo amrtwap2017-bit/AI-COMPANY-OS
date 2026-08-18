@@ -17,18 +17,18 @@ type EnterpriseScorecardGridProps = {
 function toneClasses(tone?: ScorecardItem["tone"]) {
   if (tone === "success") return "border-emerald-200 bg-emerald-50";
   if (tone === "warning") return "border-amber-200 bg-amber-50";
-  return "border-stone-200 bg-slate-50";
+  return "border-border bg-base-alt";
 }
 
 export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseScorecardGridProps) {
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Enterprise Scorecards
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
+        <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -43,7 +43,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
               {item.status}
             </div>
 
-            <div className="mt-3 text-sm leading-6 text-slate-700">
+            <div className="mt-3 text-sm leading-6 text-primary">
               {item.detail}
             </div>
 
@@ -51,7 +51,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
               {item.signals.map((signal, signalIndex) => (
                 <span
                   key={`${signal}-${signalIndex}`}
-                  className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-slate-700"
+                  className="rounded-full border border-border bg-white px-3 py-1 text-xs text-primary"
                 >
                   {signal}
                 </span>

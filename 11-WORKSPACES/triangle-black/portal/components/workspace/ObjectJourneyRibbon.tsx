@@ -1,10 +1,10 @@
 // @ts-nocheck
 "use client";
 export function ObjectJourneyRibbon({ title, subtitle, steps=[] }:any) {
-  const tones:any = { success:"bg-emerald-100 text-emerald-700", warning:"bg-amber-100 text-amber-700", neutral:"bg-slate-100 text-slate-600" };
+  const tones:any = { success:"bg-emerald-100 text-emerald-700", warning:"bg-amber-100 text-amber-700", neutral:"bg-surface-alt text-secondary" };
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-5">
-      <h3 className="font-semibold text-stone-900 mb-1">{title}</h3>
+    <div className="bg-white rounded-2xl border border-border p-5">
+      <h3 className="font-semibold text-primary mb-1">{title}</h3>
       {subtitle && <p className="text-xs text-secondary mb-4">{subtitle}</p>}
       <div className="flex items-start gap-2 flex-wrap">
         {steps.map((step:any,i:number)=>(

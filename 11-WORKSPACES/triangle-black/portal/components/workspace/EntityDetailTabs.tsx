@@ -21,10 +21,10 @@ export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProp
   const current = tabs.find((tab) => tab.key === active) || tabs[0];
 
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
         <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
+        <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -38,8 +38,8 @@ export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProp
               className={[
                 "rounded-full border px-4 py-2 text-sm font-medium transition",
                 selected
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-stone-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white",
+                  ? "border-slate-950 bg-sidebar text-white"
+                  : "border-border bg-base-alt text-primary hover:border-border hover:bg-white",
               ].join(" ")}
             >
               {tab.label}
@@ -49,9 +49,9 @@ export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProp
       </div>
 
       {current ? (
-        <div className="mt-5 rounded-2xl border border-stone-100 bg-slate-50 p-4">
-          <div className="text-sm font-semibold text-stone-900">{current.label}</div>
-          <div className="mt-2 text-sm leading-6 text-slate-600">{current.description}</div>
+        <div className="mt-5 rounded-2xl border border-divider bg-base-alt p-4">
+          <div className="text-sm font-semibold text-primary">{current.label}</div>
+          <div className="mt-2 text-sm leading-6 text-secondary">{current.description}</div>
         </div>
       ) : null}
     </section>

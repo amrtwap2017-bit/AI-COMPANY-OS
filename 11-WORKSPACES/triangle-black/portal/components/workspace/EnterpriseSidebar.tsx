@@ -45,7 +45,7 @@ function badgeClass(badge: string): string {
   if (badge === "CRM")   return "bg-stone-800/60 text-stone-300";
   if (badge === "SCM")   return "bg-stone-800/60 text-stone-300";
   if (badge === "ENG")   return "bg-stone-800/60 text-stone-300";
-  return "bg-stone-800/50 text-stone-400";
+  return "bg-stone-800/50 text-tertiary";
 }
 
 function CenterAccordion({ center, pathname, collapsed }: { center: NavCenter; pathname: string; collapsed: boolean }) {

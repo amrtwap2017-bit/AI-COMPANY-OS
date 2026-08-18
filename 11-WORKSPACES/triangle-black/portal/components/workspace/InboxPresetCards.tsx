@@ -15,37 +15,37 @@ type InboxPresetCardsProps = {
 
 export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsProps) {
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
       <div>
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
           Inbox Presets
         </div>
         <h2 className="mt-2 text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
+        <p className="mt-2 text-sm leading-6 text-secondary">{subtitle}</p>
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {presets.map((preset, index) => (
-          <div key={`${preset.title}-${index}`} className="rounded-2xl border border-stone-200 bg-slate-50 p-5">
+          <div key={`${preset.title}-${index}`} className="rounded-2xl border border-border bg-base-alt p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="text-base font-semibold text-slate-950">{preset.title}</div>
-              <span className="rounded-full border border-stone-200 bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+              <span className="rounded-full border border-border bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
                 {preset.audience}
               </span>
             </div>
 
-            <div className="mt-3 text-sm leading-6 text-slate-700">{preset.detail}</div>
+            <div className="mt-3 text-sm leading-6 text-primary">{preset.detail}</div>
 
             <div className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
               Default View
             </div>
-            <div className="mt-2 text-sm text-stone-800">{preset.defaultView}</div>
+            <div className="mt-2 text-sm text-primary">{preset.defaultView}</div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               {preset.filters.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs text-slate-700"
+                  className="rounded-full border border-border bg-white px-3 py-1 text-xs text-primary"
                 >
                   {item}
                 </span>

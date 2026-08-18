@@ -24,7 +24,7 @@ const colorMap: Record<string, { icon: string; bar: string; trend_up: string; tr
   green:   { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
   emerald: { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
   red:     { icon: "bg-red-50 text-red-600",         bar: "bg-red-500",     trend_up: "text-red-600 bg-red-50",         trend_down: "text-emerald-600 bg-emerald-50" },
-  slate:   { icon: "bg-slate-100 text-slate-600",    bar: "bg-slate-400",   trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
+  slate:   { icon: "bg-surface-alt text-secondary",    bar: "bg-slate-400",   trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
   purple:  { icon: "bg-purple-50 text-purple-600",   bar: "bg-purple-500",  trend_up: "text-emerald-600 bg-emerald-50", trend_down: "text-red-600 bg-red-50" },
 };
 
@@ -36,7 +36,7 @@ export function MetricCard({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border border-stone-200 p-5">
+      <div className="bg-white rounded-2xl border border-border p-5">
         <div className="skeleton h-3 w-2/3 mb-4" />
         <div className="skeleton h-8 w-1/2 mb-3" />
         <div className="skeleton h-3 w-3/4" />
@@ -48,7 +48,7 @@ export function MetricCard({
     <div
       onClick={onClick}
       className={
-        "group relative bg-white rounded-2xl border border-stone-200 overflow-hidden transition-all duration-200 " +
+        "group relative bg-white rounded-2xl border border-border overflow-hidden transition-all duration-200 " +
         (onClick ? "cursor-pointer hover:border-amber-300 hover:shadow-lg hover:-translate-y-0.5" : "hover:shadow-md")
       }
     >
@@ -64,7 +64,7 @@ export function MetricCard({
             </div>
           )}
         </div>
-        <div className="text-[1.75rem] font-bold text-stone-900 leading-none tracking-tight mb-3">
+        <div className="text-[1.75rem] font-bold text-primary leading-none tracking-tight mb-3">
           {value}
         </div>
         <div className="flex items-center gap-2 min-h-[20px]">
@@ -80,7 +80,7 @@ export function MetricCard({
             </span>
           )}
           {trend === "stable" && (
-            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md text-secondary bg-slate-50">
+            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md text-secondary bg-base-alt">
               <Minus className="w-3 h-3" /> Stable
             </span>
           )}
