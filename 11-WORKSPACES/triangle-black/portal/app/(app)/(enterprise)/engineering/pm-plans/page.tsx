@@ -35,7 +35,7 @@ export default function EngineeringPMPlansPage() {
             {pms.slice(0,8).map((pm: any, i: any) =>{
               const due = pm.next_due_ts?new Date(pm.next_due_ts):null;
               const isOverdue = due&&due<now;
-              const daysUntil = due?Math.ceil((due-now)/86400000):null;
+              const daysUntil = due?Math.ceil((due.getTime() - now.getTime())/86400000):null;
               const c = isOverdue?"#A84A3D":daysUntil!==null&&daysUntil<=7?"#B07A2A":"#547C4D";
               return (
                 <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
