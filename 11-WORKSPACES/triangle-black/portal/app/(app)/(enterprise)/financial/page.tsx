@@ -92,7 +92,7 @@ export default function FinancialDashboardPage() {
                   {label:"Total Invoiced", value:Number(rev.total_invoiced||0),  color:"#5B7C8C"},
                   {label:"Collected",      value:Number(rev.total_collected||0),  color:"#547C4D"},
                   {label:"Outstanding",    value:Number(rev.total_outstanding||0),color:"#B07A2A"},
-                ].map((row,i)=>{
+                ].map((row: any, i: any) =>{
                   const max = Number(rev.total_invoiced||1);
                   const pct = Math.min(100,(row.value/max)*100);
                   return (
@@ -191,7 +191,7 @@ export default function FinancialDashboardPage() {
                   {label:"Labor Cost",           value:Number(costs.total_labor||0),            color:"#5B7C8C"},
                   {label:"Materials Cost",        value:Number(costs.total_materials||0),        color:"#B07A2A"},
                   {label:"Overhead & Profit",     value:Number(costs.total_overhead_profit||0),  color:"#547C4D"},
-                ].map((row,i)=>{
+                ].map((row: any, i: any) =>{
                   const total = Number(costs.total_sow_value||1);
                   return (
                     <div key={i}>
@@ -262,7 +262,7 @@ export default function FinancialDashboardPage() {
                   {label:"PO Commitments",  value:po.total_po_value||0,                                              color:"var(--color-danger)",  icon:"↑"},
                   {label:"Invoice Revenue", value:rev.total_invoiced||0,                                             color:"var(--color-success)", icon:"↓"},
                   {label:"Net Position",    value:(Number(rev.total_invoiced||0)-Number(po.total_po_value||0)),       color:"var(--color-info)",    icon:"="},
-                ].map((row,i)=>(
+                ].map((row: any, i: any) =>(
                   <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-surface-alt">
                     <div className="flex items-center gap-2">
                       <span className="font-black" style={{color:row.color}}>{row.icon}</span>

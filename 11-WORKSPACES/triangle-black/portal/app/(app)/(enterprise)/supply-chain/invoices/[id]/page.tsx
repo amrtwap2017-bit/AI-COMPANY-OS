@@ -116,7 +116,7 @@ export default function InvoiceDetailPage() {
         {activeTab==="overview" && (
           <div className="tb-section">
             <div className="tb-section-title">Invoice Details</div>
-            {[["Invoice No.",inv.invoice_number],["Vendor Invoice",inv.vendor_invoice_number],["Vendor",inv.vendor_name],["Invoice Date",fmtDate(inv.invoice_date)],["Due Date",fmtDate(inv.due_date)],["Currency",inv.currency||"EGP"],["Subtotal",fmtEGP(inv.subtotal||0)],[`VAT (${inv.vat_pct||14}%)`,fmtEGP(inv.vat_amount||0)],["Total Amount",fmtEGP(inv.total_amount||0)],["Net Payable",fmtEGP(inv.net_payable||0)],["Amount Paid",fmtEGP(inv.amount_paid||0)],["Balance Due",fmtEGP(inv.balance_due||0)],["Approved By",inv.approved_by],["Notes",inv.notes]].map((row,i)=>row[1]&&(
+            {[["Invoice No.",inv.invoice_number],["Vendor Invoice",inv.vendor_invoice_number],["Vendor",inv.vendor_name],["Invoice Date",fmtDate(inv.invoice_date)],["Due Date",fmtDate(inv.due_date)],["Currency",inv.currency||"EGP"],["Subtotal",fmtEGP(inv.subtotal||0)],[`VAT (${inv.vat_pct||14}%)`,fmtEGP(inv.vat_amount||0)],["Total Amount",fmtEGP(inv.total_amount||0)],["Net Payable",fmtEGP(inv.net_payable||0)],["Amount Paid",fmtEGP(inv.amount_paid||0)],["Balance Due",fmtEGP(inv.balance_due||0)],["Approved By",inv.approved_by],["Notes",inv.notes]].map((row: any, i: any) =>row[1]&&(
               <div key={i} className="tb-detail-row">
                 <span className="tb-detail-key">{row[0]}</span>
                 <span className="tb-detail-value">{row[1]}</span>
@@ -187,7 +187,7 @@ export default function InvoiceDetailPage() {
           <div className="tb-section">
             <div className="tb-section-title">3-Way Match Details</div>
             <div className="flex flex-col gap-3 mt-3">
-              {[{label:"Invoice Amount",value:inv.total_amount||0,color:"var(--color-info)"},{label:"PO Amount",value:inv.po_total||0,color:"var(--color-brand)"},{label:"GRN Amount",value:inv.grn_total||0,color:"var(--color-warning)"}].map((row,i)=>(
+              {[{label:"Invoice Amount",value:inv.total_amount||0,color:"var(--color-info)"},{label:"PO Amount",value:inv.po_total||0,color:"var(--color-brand)"},{label:"GRN Amount",value:inv.grn_total||0,color:"var(--color-warning)"}].map((row: any, i: any) =>(
                 <div key={i} className="flex items-center gap-4 p-3 bg-surface-alt rounded-lg">
                   <div className="w-3 h-3 rounded-full flex-shrink-0" style={{background:row.color}} />
                   <div className="flex-1 text-sm text-secondary">{row.label}</div>

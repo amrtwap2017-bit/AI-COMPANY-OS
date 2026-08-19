@@ -117,7 +117,7 @@ export default function VendorDetailPage() {
               {label:"Approved By",value:vendor.approved_by},
               {label:"Approved At",value:fmtDate(vendor.approved_at)},
               {label:"Notes",value:vendor.notes},
-            ].map((row,i)=>row.value&&(
+            ].map((row: any, i: any) =>row.value&&(
               <div key={i} className="flex gap-4 py-2 border-b border-border">
                 <span className="text-xs text-tertiary w-36 flex-shrink-0">{row.label}</span>
                 <span className="text-sm text-primary">{row.value}</span>
@@ -150,7 +150,7 @@ export default function VendorDetailPage() {
               {label:"Bank Name",value:vendor.bank_name},
               {label:"Account No.",value:vendor.bank_account},
               {label:"IBAN",value:vendor.bank_iban},
-            ].map((row,i)=>(
+            ].map((row: any, i: any) =>(
               <div key={i} className="flex gap-4 py-2 border-b border-border">
                 <span className="text-xs text-tertiary w-36 flex-shrink-0">{row.label}</span>
                 <span className="text-sm text-primary">{row.value||"Not provided"}</span>

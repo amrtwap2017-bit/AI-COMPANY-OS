@@ -95,7 +95,7 @@ export default function SupplierProfilePage() {
                   {label:"Payment Terms",value:`${profile?.payment_terms||30} days`},
                   {label:"Contact",value:profile?.contact_person||"—"},
                   {label:"Email",value:profile?.email||"—"},
-                ].map((row,i)=>(
+                ].map((row: any, i: any) =>(
                   <div key={i} className="p-2">
                     <div className="text-xs text-slate-400">{row.label}</div>
                     <div className="text-sm font-medium text-white mt-0.5">{row.value||"—"}</div>

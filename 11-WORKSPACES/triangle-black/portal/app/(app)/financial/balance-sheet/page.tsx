@@ -187,7 +187,7 @@ export default function BalanceSheetPage() {
       {/* Account Sections */}
       <div className="space-y-4">
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Account Breakdown</h2>
-        {["assets", "liabilities", "equity", "revenue", "expenses"].map((key, i) => (
+        {["assets", "liabilities", "equity", "revenue", "expenses"].map((key: any, i: any) => (
           <AccountSection
             key={key}
             sectionKey={key}

@@ -105,7 +105,7 @@ export default function SLADashboardPage() {
                   <table className="tb-table">
                     <thead><tr><th>Priority</th><th style={{textAlign:"center"}}>Total</th><th style={{textAlign:"center"}}>Started</th><th style={{textAlign:"center"}}>Avg Response</th><th style={{textAlign:"center"}}>Breached</th></tr></thead>
                     <tbody>
-                      {woSLA.map((row,i)=>{
+                      {woSLA.map((row: any, i: any) =>{
                         const target = (sla?.sla_targets||{critical:8,high:24,medium:48,low:72})[row.priority]||24;
                         const isBreached = Number(row.avg_response_hours||0)>target;
                         return (

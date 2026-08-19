@@ -147,7 +147,7 @@ export function CreateModal({
               {error && (
                 <div style={{background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:10,padding:"10px 14px",fontSize:"0.8125rem",color:"#F87171"}}>{error}</div>
               )}
-              {fields.map((field) => (
+              {fields.map((field: any) => (
                 <div key={field.key}>
                   <label style={{display:"block",fontSize:"0.6875rem",fontWeight:600,color:"var(--color-text-2)",textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>
                     {field.label}{field.required && <span style={{color:"var(--color-danger)",marginLeft:3}}>*</span>}

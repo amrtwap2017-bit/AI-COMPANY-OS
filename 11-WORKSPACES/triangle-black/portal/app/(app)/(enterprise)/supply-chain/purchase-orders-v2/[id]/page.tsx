@@ -222,7 +222,7 @@ export default function POv2DetailPage() {
               {label:"Approved At",     value:fmtDate(po.approved_at)},
               {label:"Terms",           value:po.terms_conditions},
               {label:"Internal Notes",  value:po.internal_notes},
-            ].map((row,i)=>row.value&&(
+            ].map((row: any, i: any) =>row.value&&(
               <div key={i} className="tb-detail-row">
                 <span className="tb-detail-key">{row.label}</span>
                 <span className="tb-detail-value">{row.value}</span>

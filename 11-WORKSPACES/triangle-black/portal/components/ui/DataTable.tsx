@@ -93,7 +93,7 @@ export function DataTable<T extends Record<string, any>>({
                 </td>
               </tr>
             )}
-            {!loading && sorted.map((row, idx) => (
+            {!loading && sorted.map((row: any, idx: any) => (
               <tr
                 key={row[keyField] ?? idx}
                 onClick={() => onRow?.(row)}

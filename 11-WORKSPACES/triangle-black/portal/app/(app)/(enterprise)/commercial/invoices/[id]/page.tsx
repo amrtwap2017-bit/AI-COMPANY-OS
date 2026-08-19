@@ -95,7 +95,7 @@ export default function InvoiceDetailPage() {
                 {label:"PO Total",value:fmtEGP(inv.po_total||0)},
                 {label:"GRN Total",value:fmtEGP(inv.grn_total||0)},
                 {label:"Variance",value:`${inv.match_variance_pct||0}%`,warn:Number(inv.match_variance_pct||0)>5},
-              ].map((row,i)=>(
+              ].map((row: any, i: any) =>(
                 <div key={i} className="tb-detail-row">
                   <span className="tb-detail-key">{row.label}</span>
                   <span className="tb-detail-value font-bold" style={{color:row.warn?"var(--color-danger)":"var(--color-success)"}}>{row.value}</span>

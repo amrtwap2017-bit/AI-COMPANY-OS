@@ -144,7 +144,7 @@ export default function RFQDetailPage() {
               {label:"Terms",value:rfq.terms_conditions},
               {label:"Prepared By",value:rfq.prepared_by},
               {label:"Created",value:fmtDate(rfq.created_at)},
-            ].map((row,i)=>row.value&&(
+            ].map((row: any, i: any) =>row.value&&(
               <div key={i} className="flex gap-4 py-2 border-b border-border">
                 <span className="text-xs text-tertiary w-36 flex-shrink-0">{row.label}</span>
                 <span className="text-sm text-primary">{row.value}</span>

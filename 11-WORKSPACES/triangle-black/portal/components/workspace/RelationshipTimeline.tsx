@@ -27,7 +27,7 @@ export function RelationshipTimeline({ title, subtitle, events }: RelationshipTi
       </div>
 
       <div className="mt-5 space-y-4">
-        {events.map((event) => (
+        {events.map((event: any) => (
           <div key={event.time + event.title} className="flex gap-4">
             <div className={"mt-2 h-3 w-3 rounded-full " + dotClasses(event.tone)} />
             <div className="min-w-0 flex-1 rounded-2xl border border-divider bg-base-alt p-4">

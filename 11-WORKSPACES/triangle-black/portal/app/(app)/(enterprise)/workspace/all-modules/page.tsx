@@ -10,12 +10,12 @@ export default function AllModulesPage() {
 
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return navGroups.map(group => {
+    return navGroups.map((group: any) => {
       const centers = group.items
         .map((key: any) => enterpriseCenters.find((c: any) => c.key === key))
         .filter(Boolean)
         .map(center => {
-          const children = (center.children || []).filter(child =>
+          const children = (center.children || []).filter((child: any) =>
             !q ||
             center.label.toLowerCase().includes(q) ||
             child.label.toLowerCase().includes(q) ||
@@ -49,7 +49,7 @@ export default function AllModulesPage() {
 
       <div className="tb-canvas">
         <div className="flex flex-col gap-6">
-          {groups.map((group, gi) => (
+          {groups.map((group: any, gi: any) => (
             <div key={group.label} className="tb-section">
               <div className="text-label-upper text-brand mb-3">{group.label}</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
@@ -67,7 +67,7 @@ export default function AllModulesPage() {
                     </button>
                     {center.children?.length > 0 && (
                       <div className="flex flex-col gap-1.5 mt-3.5 pt-3 border-t border-divider">
-                        {center.children.map((child, ci) => (
+                        {center.children.map((child: any, ci: any) => (
                           <button
                             key={`${child.href}-${ci}`}
                             onClick={()=>router.push(child.href)}

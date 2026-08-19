@@ -155,7 +155,7 @@ export default function ExecutiveDashboardPage() {
             <div className="tb-section">
               <div className="tb-section-title">Financial Snapshot</div>
               <div className="flex flex-col gap-0">
-                {[{label:"Total Invoiced",value:fmtEGP(inv.total_value||0)},{label:"Collected",value:fmtEGP(inv.collected||0),good:true},{label:"Outstanding",value:fmtEGP(inv.outstanding||0),warn:(inv.outstanding||0)>0},{label:"Overdue Invoices",value:`${inv.overdue_count||0} invoices`,danger:(inv.overdue_count||0)>0}].map((row,i)=>(
+                {[{label:"Total Invoiced",value:fmtEGP(inv.total_value||0)},{label:"Collected",value:fmtEGP(inv.collected||0),good:true},{label:"Outstanding",value:fmtEGP(inv.outstanding||0),warn:(inv.outstanding||0)>0},{label:"Overdue Invoices",value:`${inv.overdue_count||0} invoices`,danger:(inv.overdue_count||0)>0}].map((row: any, i: any) =>(
                   <div key={i} className="tb-detail-row">
                     <span className="tb-detail-key">{row.label}</span>
                     <span className="tb-detail-value font-bold" style={{color:row.danger?"var(--color-danger)":row.warn?"var(--color-warning)":row.good?"var(--color-success)":"var(--color-text-1)"}}>{row.value}</span>
@@ -187,7 +187,7 @@ export default function ExecutiveDashboardPage() {
 
             <div className="tb-section">
               <div className="tb-section-title">Projects</div>
-              {[{label:"Active",value:proj.active||0},{label:"Total Budget",value:fmtEGP(proj.total_budget||0)},{label:"Avg Progress",value:`${Math.round(proj.avg_completion||0)}%`}].map((row,i)=>(
+              {[{label:"Active",value:proj.active||0},{label:"Total Budget",value:fmtEGP(proj.total_budget||0)},{label:"Avg Progress",value:`${Math.round(proj.avg_completion||0)}%`}].map((row: any, i: any) =>(
                 <div key={i} className="tb-detail-row">
                   <span className="tb-detail-key">{row.label}</span>
                   <span className="tb-detail-value">{row.value}</span>
@@ -263,7 +263,7 @@ export default function ExecutiveDashboardPage() {
               <button onClick={()=>router.push("/supply-chain/procurement")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">P2P Hub →</button>
             </div>
             <div className="flex flex-col gap-0">
-              {[{label:"Active SOWs",value:proc.sow?.total||0,sub:`${proc.sow?.pending||0} pending`},{label:"Active RFQs",value:proc.rfqs?.total||0,sub:`${proc.rfqs?.with_quotes||0} with quotes`},{label:"Purchase Orders",value:proc.pos?.total||0,sub:fmtEGP(poSpend)+" value"},{label:"Goods Received",value:proc.grns?.total||0,sub:"deliveries"},{label:"Approved Vendors",value:proc.vendors?.approved||0,sub:`of ${proc.vendors?.total||0} total`}].map((row,i)=>(
+              {[{label:"Active SOWs",value:proc.sow?.total||0,sub:`${proc.sow?.pending||0} pending`},{label:"Active RFQs",value:proc.rfqs?.total||0,sub:`${proc.rfqs?.with_quotes||0} with quotes`},{label:"Purchase Orders",value:proc.pos?.total||0,sub:fmtEGP(poSpend)+" value"},{label:"Goods Received",value:proc.grns?.total||0,sub:"deliveries"},{label:"Approved Vendors",value:proc.vendors?.approved||0,sub:`of ${proc.vendors?.total||0} total`}].map((row: any, i: any) =>(
                 <div key={i} className="tb-detail-row">
                   <div><span className="tb-detail-key">{row.label}</span><div className="text-xs text-tertiary">{row.sub}</div></div>
                   <span className="text-xl font-black text-primary">{row.value}</span>

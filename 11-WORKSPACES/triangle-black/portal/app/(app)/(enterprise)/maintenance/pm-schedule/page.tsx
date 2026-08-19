@@ -62,7 +62,7 @@ export default function PMSchedulePage() {
   ];
 
   const filtered = plans.filter((p: any) => filter === "all" || classify(p) === filter);
-  filtered.forEach(p => {
+  filtered.forEach((p: any) => {
     const tag = classify(p);
     const g = groups.find((g: any) => g.tag === tag);
     if (g) g.plans.push(p);
@@ -127,7 +127,7 @@ export default function PMSchedulePage() {
       {/* Calendar Groups View */}
       {view === "calendar" && (
         <div className="space-y-5">
-          {groups.filter((g: any) => g.plans.length > 0 || g.tag === "overdue").map(group => (
+          {groups.filter((g: any) => g.plans.length > 0 || g.tag === "overdue").map((group: any) => (
             <div key={group.tag} className={`border rounded-xl overflow-hidden ${group.color}`}>
               <div className="flex items-center justify-between px-5 py-3 border-b border-current border-opacity-20">
                 <h2 className="font-semibold text-[var(--color-text-1)]">{group.label}</h2>

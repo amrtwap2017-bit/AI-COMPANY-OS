@@ -128,7 +128,7 @@ export default function AnalyticsCostsPage() {
                 <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false} tickFormatter={fmtK} width={70} />
                 <Tooltip content={<WarmTooltip />} />
                 <Bar dataKey="value" radius={[6,6,0,0]}>
-                  {revenueData.map((entry,i)=><Cell key={i} fill={entry.fill} />)}
+                  {revenueData.map((entry: any, i: any) =><Cell key={i} fill={entry.fill} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

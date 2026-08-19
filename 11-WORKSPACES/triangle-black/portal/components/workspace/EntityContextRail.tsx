@@ -28,7 +28,7 @@ export function EntityContextRail({ title, subtitle, sections }: EntityContextRa
       </div>
 
       <div className="mt-5 space-y-4">
-        {sections.map((section) => (
+        {sections.map((section: any) => (
           <div key={section.title} className="rounded-2xl border border-divider bg-base-alt p-4">
             <div className="text-sm font-semibold text-primary">{section.title}</div>
             <div className="mt-3 space-y-3">

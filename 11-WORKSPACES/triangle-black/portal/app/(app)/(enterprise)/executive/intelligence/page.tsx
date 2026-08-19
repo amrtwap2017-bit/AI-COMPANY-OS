@@ -31,7 +31,7 @@ export default function IntelligencePage() {
         <div className="tb-section">
           <div className="tb-section-title">Domain Health</div>
           <div className="tb-grid-4">
-            {domains.map((dom,i)=>{
+            {domains.map((dom: any, i: any) =>{
               const hasIssue=(dom.overdue||0)>0||(dom.critical_open||0)>0;
               const c = hasIssue?"#B07A2A":"#547C4D";
               return (

@@ -36,7 +36,7 @@ export default function CommandPage() {
         </div>
       </div>
       <div className="tb-canvas">
-        {commands.map((section,i)=>(
+        {commands.map((section: any, i: any) =>(
           <div key={i} className="tb-section">
             <div className="text-label-upper text-tertiary mb-4">{section.section}</div>
             <div className="tb-grid-4">

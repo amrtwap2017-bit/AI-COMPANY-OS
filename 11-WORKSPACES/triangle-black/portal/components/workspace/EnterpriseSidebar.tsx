@@ -96,7 +96,7 @@ function CenterAccordion({ center, pathname, collapsed }: { center: NavCenter; p
 
       {open && center.children && center.children.length > 0 && (
         <div className="ml-4 mt-0.5 mb-1 pl-3 border-l border-transparent space-y-0.5">
-          {center.children.map(child => {
+          {center.children.map((child: any) => {
             const active = pathname === child.href || pathname.startsWith(child.href + "/");
             return (
               <Link
@@ -255,7 +255,7 @@ export function EnterpriseSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
-        {filteredGroups.map((group, gi) => {
+        {filteredGroups.map((group: any, gi: any) => {
           const centers = group.items.map((k: any) => centerMap[k]).filter(Boolean);
           if (centers.length === 0) return null;
           return (

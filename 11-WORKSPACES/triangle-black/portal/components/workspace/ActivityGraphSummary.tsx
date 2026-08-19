@@ -20,7 +20,7 @@ export function ActivityGraphSummary({ title, subtitle, nodes }: ActivityGraphSu
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {nodes.map((node) => (
+        {nodes.map((node: any) => (
           <div key={node.label} className="rounded-2xl border border-border bg-base-alt p-4">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary">
               {node.label}

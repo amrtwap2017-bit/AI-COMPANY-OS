@@ -29,7 +29,7 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
       </div>
 
       <div className="mt-5 grid gap-6 xl:grid-cols-2">
-        {groups.map((group) => (
+        {groups.map((group: any) => (
           <div key={group.title} className="rounded-2xl border border-border bg-base-alt p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold text-primary">{group.title}</div>
@@ -42,7 +42,7 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
               </div>
             ) : (
               <div className="mt-4 space-y-3">
-                {group.records.map((record, index) => (
+                {group.records.map((record: any, index: any) => (
                   <div key={record.title + index} className="rounded-2xl border border-divider bg-white px-4 py-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div className="text-sm font-semibold text-primary">{record.title}</div>

@@ -40,7 +40,7 @@ export default function AnalyticsTrends() {
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   const woByMonth = {};
-  wos.forEach(w => {
+  wos.forEach((w: any) => {
     if (!w.created_at) return;
     const date = new Date(w.created_at);
     const key  = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;

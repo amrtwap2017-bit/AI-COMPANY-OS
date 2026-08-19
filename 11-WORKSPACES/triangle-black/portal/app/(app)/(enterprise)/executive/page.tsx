@@ -144,7 +144,7 @@ export default function ExecutivePage() {
                 <button onClick={()=>router.push("/executive/intelligence")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Intelligence →</button>
               </div>
               <div className="tb-grid-4">
-                {(twin?.operational_domains??[]).map((dom,i)=>{
+                {(twin?.operational_domains??[]).map((dom: any, i: any) =>{
                   const hasIssue=(dom.overdue??0)>0||(dom.critical_open??0)>0||(dom.below_min??0)>0;
                   return (
                     <div key={i} className={`tb-section cursor-pointer ${hasIssue?"border-warning/30 bg-warning/5":"border-success/20 bg-success/5"}`}>

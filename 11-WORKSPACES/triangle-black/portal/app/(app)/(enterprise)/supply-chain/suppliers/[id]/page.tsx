@@ -176,7 +176,7 @@ export default function SupplierDetailPage() {
                   { label:"Total POs",    value:String(stats.total_pos||0),       color:"#221D1A" },
                   { label:"Total Value",  value:fmtEGP(stats.total_value||0),     color:"#547C4D" },
                   { label:"Open PRs",     value:String(stats.total_prs||0),       color:"#B07A2A" },
-                ].map((row, i) => (
+                ].map((row: any, i: any) => (
                   <div key={i} className="tb-info-row">
                     <span className="tb-info-label">{row.label}</span>
                     <span className="text-sm font-bold" style={{color:row.color}}>{row.value}</span>

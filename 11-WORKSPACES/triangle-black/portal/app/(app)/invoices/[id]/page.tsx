@@ -159,7 +159,7 @@ export default function InvoiceDetailPage() {
                     {label:"Subtotal",value:fmtEGP(subtot),bold:false},
                     {label:"VAT 14%", value:fmtEGP(tax),   bold:false},
                     {label:"TOTAL",   value:fmtEGP(amount), bold:true},
-                  ].map((row,i)=>(
+                  ].map((row: any, i: any) =>(
                     <div key={i} className={`flex justify-between py-1 ${row.bold?"border-t border-default pt-3 mt-2":""}`}>
                       <span className={`text-sm ${row.bold?"font-black text-primary":"text-secondary"}`}>{row.label}</span>
                       <span className={`text-sm ${row.bold?"font-black text-success":"text-primary"}`}>{row.value}</span>

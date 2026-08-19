@@ -254,7 +254,7 @@ export default function ReportsPage() {
                       {label:"Procurement",data:reportData.procurement,color:"#B07A2A"},
                       {label:"Assets",     data:reportData.assets,     color:"#8D7443"},
                       {label:"Projects",   data:reportData.projects,   color:"#B07A2A"},
-                    ].map((section,si)=>(
+                    ].map((section: any, si: any) =>(
                       <div key={si} className="tb-section">
                         <div className="tb-section-title" style={{color:section.color}}>{section.label}</div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
@@ -299,7 +299,7 @@ export default function ReportsPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {reportRows.map((row,ri)=>(
+                            {reportRows.map((row: any, ri: any) =>(
                               <tr key={ri} className="hover:bg-surface-alt transition-colors">
                                 {columns.map((col,ci)=>(
                                   <td key={ci} className="text-xs" style={{maxWidth:"200px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>

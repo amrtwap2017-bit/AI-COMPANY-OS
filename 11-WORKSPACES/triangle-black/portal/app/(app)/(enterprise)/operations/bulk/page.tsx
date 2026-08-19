@@ -30,7 +30,7 @@ export default function BulkOperationsPage() {
   const toggle = (id) => { const next=new Set(selected); next.has(id)?next.delete(id):next.add(id); setSelected(next); };
 
   const bulkStatusMut = useMutation({
-    mutationFn: async()=>{ const ids=Array.from(selected); await Promise.all(ids.map(id=>authFetch(`/api/v1/work-orders/${id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:bulkStatus})}))); },
+    mutationFn: async()=>{ const ids=Array.from(selected); await Promise.all(ids.map((id: any) =>authFetch(`/api/v1/work-orders/${id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:bulkStatus})}))); },
     onSuccess:()=>{ toast.success(`Updated ${selected.size} work orders to ${bulkStatus}`); qc.invalidateQueries(["bulk-wos"]); setSelected(new Set()); },
     onError:()=>toast.error("Bulk update failed"),
   });

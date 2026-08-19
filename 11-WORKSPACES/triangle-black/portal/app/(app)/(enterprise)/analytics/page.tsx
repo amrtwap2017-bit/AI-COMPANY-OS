@@ -99,7 +99,7 @@ function AnalyticsHubInner() {
       <div className="tb-canvas">
         {/* KPI sections */}
         <div className="tb-grid-2">
-          {kpiGroups.map((group,gi)=>(
+          {kpiGroups.map((group: any, gi: any) =>(
             <div key={gi} className="tb-section">
               <div className="tb-section-header">
                 <div>
@@ -137,7 +137,7 @@ function AnalyticsHubInner() {
             <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Full report →</button>
           </div>
           <div className="tb-grid-8">
-            {(twin?.operational_domains??[]).map((dom,i)=>{
+            {(twin?.operational_domains??[]).map((dom: any, i: any) =>{
               const hasIssue=(dom.overdue??0)>0||(dom.critical_open??0)>0||(dom.below_min??0)>0;
               const c=hasIssue?"#B07A2A":"#547C4D";
               return (

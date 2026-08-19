@@ -42,7 +42,7 @@ export function NotificationRuleStudio({ title, subtitle, rows }: NotificationRu
             <div className="px-4 py-3">Status</div>
           </div>
 
-          {rows.map((row, index) => (
+          {rows.map((row: any, index: any) => (
             <div
               key={`${row.event}-${row.owner}-${index}`}
               className="grid grid-cols-[1.2fr_0.9fr_1fr_0.7fr_1.6fr_0.8fr] gap-0 border-b border-divider last:border-b-0"
