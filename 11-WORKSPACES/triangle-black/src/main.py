@@ -21,6 +21,7 @@ Triangle Black — Main FastAPI Application v1.4.0
 Hotel Engineering Platform — Multi-hotel tenant isolation
 """
 from src.commercial.executive_intelligence.router import router as executive_intelligence_router
+from src.commercial.ai_gateway.router import router as ai_gateway_router
 from fastapi import Depends, FastAPI, Form, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -375,6 +376,7 @@ def list_user_roles(_admin: str = Depends(require_admin)):
 API_PREFIX = "/api/v1"
 
 app.include_router(executive_intelligence_router, prefix="/api/v1")
+app.include_router(ai_gateway_router, prefix="/api/v1")
 app.include_router(leads_router,         prefix=API_PREFIX + "/leads")
 app.include_router(agents_router,        prefix=API_PREFIX)
 app.include_router(pipeline_router,      prefix=API_PREFIX)
