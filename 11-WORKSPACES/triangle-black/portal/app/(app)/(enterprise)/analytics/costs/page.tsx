@@ -49,7 +49,7 @@ export default function AnalyticsCostsPage() {
   const allInvoices = toArr(invRaw);
 
   const filteredInvoices = useMemo(()=>{
-    let from=null, to=new Date();
+    let from: Date|null=null, to: Date=new Date();
     if (datePreset==="custom"&&customFrom) { from=new Date(customFrom); if(customTo) to=new Date(customTo); }
     else { const range=getPresetRange(datePreset); from=range.from; to=range.to; }
     if (!from) return allInvoices;
