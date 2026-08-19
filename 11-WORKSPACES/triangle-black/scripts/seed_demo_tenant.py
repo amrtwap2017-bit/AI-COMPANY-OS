@@ -1,169 +1,186 @@
+#!/usr/bin/env python3
+"""
+T-012: Commercial Demo Tenant Seed Script
+Creates a realistic demo hotel with 30 days of operational data.
+Usage: python scripts/seed_demo_tenant.py
+"""
 import sys
 import uuid
+import random
 from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.database import engine
-from sqlalchemy import text
+DEMO_HOTEL_ID = "tb-demo-hotel-000000000001"
+DEMO_EMAIL    = "demo@triangleblack.com"
+DEMO_PASSWORD = "demo123"
 
-DEMO_HOTEL = "tb-demo-hotel-000000000001"
-NOW = datetime.utcnow()
+def get_db():
+    from src.core.database import SessionLocal
+    return SessionLocal()
 
-def uid():
-    return str(uuid.uuid4())
+def rdate(days_back=30):
+    return datetime.utcnow() - timedelta(
+        days=random.randint(0, days_back),
+        hours=random.randint(0, 23)
+    )
 
-def already_seeded(conn):
-    row = conn.execute(text("SELECT COUNT(*) FROM assets WHERE hotel_id = :hid"), {"hid": DEMO_HOTEL}).fetchone()
-    return int(row[0]) > 0
+def seed_hotel(db):
+    from sqlalchemy import text
+    db.execute(text("""
+        INSERT INTO hotels (id, name, location, is_active, created_at)
+        VALUES (:id, :name, :loc, TRUE, :now)
+        ON CONFLICT (id) DO UPDATE SET name = :name
+    """), {"id": DEMO_HOTEL_ID, "name": "Grand Sands Hotel — Demo",
+           "loc": "Sharm El-Sheikh, Egypt", "now": datetime.utcnow()})
+    db.commit()
+    print("OK hotel")
 
-def seed_assets(conn):
-    assets = [
-        (uid(), "HVAC",        "Main AHU Unit 1",         "Carrier",   "30XA-200",  "AHU-001",  "critical", "operational"),
-        (uid(), "HVAC",        "Chiller Unit A",           "Trane",     "CGAX-060",  "CH-001",   "critical", "operational"),
-        (uid(), "HVAC",        "Cooling Tower CT-1",       "Baltimore", "VTL-100",   "CT-001",   "high",     "operational"),
-        (uid(), "Electrical",  "Main LV Panel MDB-1",      "Schneider", "Prisma G",  "EL-001",   "critical", "operational"),
-        (uid(), "Electrical",  "Emergency Generator G1",   "Cummins",   "C550D5",    "GEN-001",  "critical", "operational"),
-        (uid(), "Electrical",  "UPS System UPS-1",         "APC",       "SRT10KXLI", "UPS-001",  "high",     "operational"),
-        (uid(), "Plumbing",    "Boiler System BL-1",       "Riello",    "RS-100",    "BL-001",   "high",     "operational"),
-        (uid(), "Plumbing",    "Water Pump Station WP-1",  "Grundfos",  "CM5-6",     "WP-001",   "medium",   "operational"),
-        (uid(), "Fire Safety", "Fire Alarm Panel FAP-1",   "Notifier",  "AFP-400",   "FA-001",   "critical", "operational"),
-        (uid(), "Elevator",    "Elevator EL-1",            "Otis",      "Gen2",      "ELV-001",  "high",     "operational"),
-        (uid(), "HVAC",        "Fan Coil Unit FCU-101",    "Daikin",    "FWF01ATN",  "FCU-101",  "low",      "operational"),
-        (uid(), "HVAC",        "Fan Coil Unit FCU-201",    "Daikin",    "FWF01ATN",  "FCU-201",  "low",      "operational"),
-        (uid(), "Electrical",  "DB Panel Floor 1",         "Schneider", "iC60N",     "DB-F01",   "medium",   "operational"),
-        (uid(), "Plumbing",    "Pool Water Treatment",     "Hayward",   "C12002",    "PWT-001",  "medium",   "operational"),
-        (uid(), "Electrical",  "Solar PV System SL-1",     "SMA",       "Sunny Boy", "SL-001",   "medium",   "operational"),
+def seed_assets(db):
+    from sqlalchemy import text
+    rows = [
+        ("HVAC-CHR-001", "Main Chiller Unit",             "HVAC",       "critical"),
+        ("HVAC-AHU-001", "AHU — Lobby",                   "HVAC",       "high"),
+        ("HVAC-AHU-002", "AHU — Pool Area",               "HVAC",       "high"),
+        ("HVAC-FCU-001", "FCU — Floors 1-5",              "HVAC",       "medium"),
+        ("HVAC-FCU-002", "FCU — Floors 6-10",             "HVAC",       "medium"),
+        ("ELEC-GEN-001", "Main Generator 500kVA",          "Electrical", "critical"),
+        ("ELEC-GEN-002", "Backup Generator 250kVA",        "Electrical", "critical"),
+        ("ELEC-MDB-001", "Main Distribution Board",        "Electrical", "critical"),
+        ("ELEC-UPS-001", "UPS System — IT Room",           "Electrical", "high"),
+        ("PLMB-BWH-001", "Boiler Water Heater",            "Plumbing",   "high"),
+        ("PLMB-STP-001", "Sewage Treatment Plant",         "Plumbing",   "high"),
+        ("PLMB-PMP-001", "Domestic Water Pump",            "Plumbing",   "medium"),
+        ("POOL-FLT-001", "Pool Filtration System",         "Pool",       "high"),
+        ("POOL-CHL-001", "Pool Chlorination System",       "Pool",       "medium"),
+        ("ELEV-001",     "Passenger Elevator — Tower A",   "Elevator",   "critical"),
+        ("ELEV-002",     "Passenger Elevator — Tower B",   "Elevator",   "critical"),
+        ("ELEV-003",     "Service Elevator",               "Elevator",   "high"),
+        ("FIRE-PMP-001", "Fire Pump — Main",               "Fire Safety","critical"),
+        ("FIRE-PNL-001", "Fire Alarm Panel",               "Fire Safety","critical"),
+        ("KITCH-REF-001","Kitchen Refrigeration Unit",     "Kitchen",    "high"),
+        ("KITCH-EXT-001","Kitchen Exhaust System",         "Kitchen",    "medium"),
     ]
-    for a in assets:
-        conn.execute(text("""
-            INSERT INTO assets
-            (id, hotel_id, site_id, category, name, manufacturer, model,
-             serial_number, criticality, status, created_at, updated_at,
-             installation_date, next_maintenance_date)
-            VALUES (:id, :hid, :sid, :cat, :name, :mfr, :model,
-                    :sn, :crit, :status, :now, :now, :inst, :next)
-        """), {
-            "id": a[0], "hid": DEMO_HOTEL, "sid": "site-sharm-main",
-            "cat": a[1], "name": a[2], "mfr": a[3], "model": a[4],
-            "sn": a[5], "crit": a[6], "status": a[7],
-            "now": NOW,
-            "inst": NOW - timedelta(days=730),
-            "next": NOW + timedelta(days=30),
-        })
-    print("  Seeded " + str(len(assets)) + " assets")
-    return {a[2]: a[0] for a in assets}
+    for aid, name, cat, crit in rows:
+        db.execute(text("""
+            INSERT INTO assets (id, hotel_id, name, category, criticality, status, created_at, updated_at)
+            VALUES (:id, :hid, :name, :cat, :crit, 'active', :now, :now)
+            ON CONFLICT (id) DO NOTHING
+        """), {"id": aid, "hid": DEMO_HOTEL_ID, "name": name,
+               "cat": cat, "crit": crit, "now": datetime.utcnow()})
+    db.commit()
+    print(f"OK {len(rows)} assets")
+    return [r[0] for r in rows]
 
-def seed_suppliers(conn):
-    suppliers = [
-        (uid(), "SUP-001", "Carrier Egypt",           "HVAC",        "approved", "low"),
-        (uid(), "SUP-002", "Schneider Electric Egypt", "Electrical",  "approved", "low"),
-        (uid(), "SUP-003", "Grundfos Egypt",           "Plumbing",    "approved", "medium"),
-        (uid(), "SUP-004", "Cummins Middle East",      "Generator",   "approved", "low"),
-        (uid(), "SUP-005", "Otis Egypt",               "Elevator",    "approved", "low"),
-        (uid(), "SUP-006", "Gulf Facilities Co",       "General",     "approved", "medium"),
-        (uid(), "SUP-007", "Sharm HVAC Services",      "HVAC",        "approved", "low"),
-        (uid(), "SUP-008", "Red Sea Electrical Ltd",   "Electrical",  "approved", "medium"),
-        (uid(), "SUP-009", "Delta Plumbing Solutions", "Plumbing",    "approved", "low"),
-        (uid(), "SUP-010", "Safety Systems Egypt",     "Fire Safety", "approved", "low"),
+def seed_work_orders(db, asset_ids):
+    from sqlalchemy import text
+    sla = {"critical": 4, "high": 8, "medium": 24, "low": 72}
+    wos = [
+        ("Chiller preventive maintenance",        "preventive",  "medium",   "completed"),
+        ("AHU filter replacement",                "preventive",  "medium",   "completed"),
+        ("Generator monthly load test",           "preventive",  "high",     "completed"),
+        ("Elevator annual inspection",            "corrective",  "critical", "completed"),
+        ("Pool pump bearing replacement",         "corrective",  "high",     "completed"),
+        ("Fire alarm false trigger check",        "corrective",  "critical", "completed"),
+        ("Boiler descaling service",              "preventive",  "medium",   "completed"),
+        ("UPS battery capacity test",             "corrective",  "high",     "completed"),
+        ("Kitchen exhaust deep cleaning",         "preventive",  "medium",   "completed"),
+        ("Main MDB thermal imaging scan",         "preventive",  "critical", "completed"),
+        ("Chiller condenser tube cleaning",       "preventive",  "high",     "open"),
+        ("AHU drive belt replacement",            "corrective",  "medium",   "open"),
+        ("Generator fuel system inspection",      "preventive",  "high",     "in_progress"),
+        ("Elevator door sensor calibration",      "corrective",  "high",     "assigned"),
+        ("Pool water chemistry rebalancing",      "corrective",  "medium",   "open"),
+        ("Sewage pump seal replacement",          "preventive",  "medium",   "open"),
+        ("Fire pump monthly function test",       "preventive",  "critical", "in_progress"),
+        ("Kitchen refrigeration coil cleaning",   "preventive",  "medium",   "open"),
+        ("UPS full load bank test",               "preventive",  "high",     "open"),
+        ("FCU drain pan deep clean",              "preventive",  "low",      "open"),
     ]
-    for s in suppliers:
-        conn.execute(text("""
-            INSERT INTO suppliers
-            (id, supplier_code, company_name, status, supplier_type,
-             risk_level, preferred_flag, hotel_id, rating, is_approved,
-             category, created_at, updated_at)
-            VALUES (:id, :code, :name, :status, :type,
-                    :risk, TRUE, :hid, 4.2, TRUE, :cat, :now, :now)
-            ON CONFLICT (supplier_code) DO UPDATE SET hotel_id=:hid
-        """), {
-            "id": s[0], "code": s[1], "name": s[2],
-            "status": s[4], "type": s[3], "risk": s[5],
-            "hid": DEMO_HOTEL, "cat": s[3], "now": NOW,
-        })
-    print("  Seeded " + str(len(suppliers)) + " suppliers")
-
-def seed_work_orders(conn, asset_ids):
-    asset_list = list(asset_ids.values())
-    statuses   = ["open", "in_progress", "completed", "closed"]
-    priorities = ["low", "medium", "high", "critical"]
-    types      = ["corrective", "preventive", "inspection"]
-    wos = []
-    for i in range(30):
-        status   = statuses[i % 4]
-        priority = priorities[i % 4]
-        wo_type  = types[i % 3]
-        asset    = asset_list[i % len(asset_list)]
-        days_ago = i * 3
-        sla_hrs  = 24 if priority in ("high", "critical") else 48
-        breach   = NOW - timedelta(days=days_ago) + timedelta(hours=sla_hrs)
-        sla_st   = "met" if status in ("completed", "closed") else ("breached" if breach < NOW else "on_track")
-        wos.append({
-            "id": uid(), "hid": DEMO_HOTEL,
-            "title": "Demo WO-" + str(i+1).zfill(3) + ": " + wo_type.title() + " Maintenance",
-            "desc": "Scheduled " + wo_type + " maintenance for asset",
-            "priority": priority, "status": status, "type": wo_type,
-            "asset_id": asset,
-            "sla_hours": sla_hrs,
-            "sla_breach_at": breach,
-            "sla_breached": breach < NOW and status not in ("completed", "closed"),
-            "sla_status": sla_st,
-            "created_at": NOW - timedelta(days=days_ago),
-            "due_date": breach,
-        })
-    for w in wos:
-        conn.execute(text("""
+    for title, wtype, priority, status in wos:
+        wo_id   = str(uuid.uuid4())
+        created = rdate(30)
+        breach  = created + timedelta(hours=sla[priority])
+        db.execute(text("""
             INSERT INTO work_orders
-            (id, hotel_id, title, description, priority, status, type,
-             asset_id, sla_hours, sla_breach_at, sla_breached, sla_status,
-             created_at, updated_at, due_date)
-            VALUES (:id, :hid, :title, :desc, :priority, :status, :type,
-                    :asset_id, :sla_hours, :sla_breach_at, :sla_breached, :sla_status,
-                    :created_at, :created_at, :due_date)
-        """), w)
-    print("  Seeded " + str(len(wos)) + " work orders")
+                (id, hotel_id, title, type, priority, status, asset_id,
+                 sla_hours, sla_breach_at, sla_status, sla_breached, created_at, updated_at)
+            VALUES
+                (:id, :hid, :title, :type, :priority, :status, :asset,
+                 :sla_h, :breach, :sla_st, FALSE, :now, :now)
+            ON CONFLICT (id) DO NOTHING
+        """), {"id": wo_id, "hid": DEMO_HOTEL_ID, "title": title,
+               "type": wtype, "priority": priority, "status": status,
+               "asset": random.choice(asset_ids), "sla_h": sla[priority],
+               "breach": breach,
+               "sla_st": "met" if status in ("completed","closed") else "on_track",
+               "now": created})
+    db.commit()
+    print(f"OK {len(wos)} work orders")
 
-def seed_service_requests(conn):
-    categories = ["HVAC", "Electrical", "Plumbing", "Fire Safety", "General"]
-    urgencies  = ["low", "normal", "high", "urgent"]
-    statuses   = ["open", "in_progress", "resolved", "closed"]
-    srs = []
-    for i in range(20):
-        srs.append({
-            "id": uid(), "hid": DEMO_HOTEL,
-            "title": "Demo SR-" + str(i+1).zfill(3) + ": " + categories[i%5] + " Issue Reported",
-            "desc": "Service request for " + categories[i%5] + " system",
-            "category": categories[i % 5],
-            "urgency": urgencies[i % 4],
-            "status": statuses[i % 4],
-            "submitted_by": "demo-user",
-            "created_at": NOW - timedelta(days=i*2),
-        })
-    for s in srs:
-        conn.execute(text("""
-            INSERT INTO service_requests
-            (id, hotel_id, title, description, category, urgency,
-             status, submitted_by, created_at, updated_at)
-            VALUES (:id, :hid, :title, :desc, :category, :urgency,
-                    :status, :submitted_by, :created_at, :created_at)
-        """), s)
-    print("  Seeded " + str(len(srs)) + " service requests")
+def seed_suppliers(db):
+    from sqlalchemy import text
+    rows = [
+        ("Carrier Egypt HVAC Services",    "HVAC",       "preferred", 4.5),
+        ("ABB Egypt Electrical",            "Electrical", "approved",  4.2),
+        ("Grundfos Middle East",            "Plumbing",   "preferred", 4.7),
+        ("Otis Elevator Egypt",             "Elevator",   "preferred", 4.8),
+        ("Tyco Fire & Security Egypt",      "Fire Safety","approved",  4.3),
+        ("Carrier Refrigeration Egypt",     "Kitchen",    "approved",  4.1),
+        ("Schneider Electric Egypt",        "Electrical", "approved",  4.4),
+        ("Al-Ahram Water Treatment",        "Plumbing",   "approved",  3.9),
+        ("Kempinski Technical Services",   "General",    "preferred", 4.6),
+        ("Gulf Engineering Solutions",      "General",    "approved",  3.8),
+    ]
+    for name, cat, status, rating in rows:
+        db.execute(text("""
+            INSERT INTO suppliers (id, hotel_id, name, category, status, rating, created_at)
+            VALUES (:id, :hid, :name, :cat, :status, :rating, :now)
+            ON CONFLICT DO NOTHING
+        """), {"id": str(uuid.uuid4()), "hid": DEMO_HOTEL_ID, "name": name,
+               "cat": cat, "status": status, "rating": rating, "now": datetime.utcnow()})
+    db.commit()
+    print(f"OK {len(rows)} suppliers")
 
-def run():
-    print("=== Triangle Black Demo Tenant Seed ===")
-    print("Hotel ID : " + DEMO_HOTEL)
-    with engine.connect() as conn:
-        if already_seeded(conn):
-            print("Demo tenant already seeded.")
-            return
-        print("Seeding demo data...")
-        asset_ids = seed_assets(conn)
-        seed_suppliers(conn)
-        seed_work_orders(conn, asset_ids)
-        seed_service_requests(conn)
-        conn.commit()
-    print("Done. Demo tenant seeded successfully.")
+def seed_invoices(db):
+    from sqlalchemy import text
+    rows = [
+        ("INV-2026-001", 15000, "paid",    "Carrier — Monthly HVAC Contract"),
+        ("INV-2026-002",  8500, "paid",    "ABB — Electrical Maintenance Q3"),
+        ("INV-2026-003", 12000, "paid",    "Otis — Elevator Annual Service"),
+        ("INV-2026-004",  3200, "pending", "Grundfos — Pump Replacement Parts"),
+        ("INV-2026-005",  5500, "pending", "Tyco — Fire System Inspection"),
+        ("INV-2026-006",  9800, "overdue", "Gulf Engineering — Emergency HVAC"),
+        ("INV-2026-007",  4200, "paid",    "Al-Ahram — Water Treatment Monthly"),
+        ("INV-2026-008",  2800, "pending", "Schneider — MDB Maintenance"),
+    ]
+    for num, amount, status, desc in rows:
+        db.execute(text("""
+            INSERT INTO invoices (id, hotel_id, invoice_number, amount, status, description, created_at)
+            VALUES (:id, :hid, :num, :amount, :status, :desc, :now)
+            ON CONFLICT DO NOTHING
+        """), {"id": str(uuid.uuid4()), "hid": DEMO_HOTEL_ID, "num": num,
+               "amount": amount, "status": status, "desc": desc, "now": rdate(30)})
+    db.commit()
+    print(f"OK {len(rows)} invoices")
 
 if __name__ == "__main__":
-    run()
+    print("Seeding demo tenant...")
+    db = get_db()
+    try:
+        seed_hotel(db)
+        aids = seed_assets(db)
+        seed_work_orders(db, aids)
+        seed_suppliers(db)
+        seed_invoices(db)
+        print("\n" + "="*50)
+        print("DEMO TENANT READY")
+        print(f"Login: {DEMO_EMAIL} / {DEMO_PASSWORD}")
+        print(f"Hotel: {DEMO_HOTEL_ID}")
+        print("="*50)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+    finally:
+        db.close()
