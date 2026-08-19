@@ -123,7 +123,7 @@ function ContractsPageInner() {
                 <tbody>
                   {filtered.map((c: any, i: number) =>{
                     const sc       = (STATUS_COLOR as Record<string, any>)[c.status]||"#6D5F53";
-                    const daysLeft = c.end_date?Math.ceil((new Date(c.end_date)-Date.now())/86400000):null;
+                    const daysLeft = c.end_date?Math.ceil((new Date(c.end_date).getTime() - Date.now())/86400000):null;
                     const isExpiring= c.status==="active"&&daysLeft!==null&&daysLeft>=0&&daysLeft<=30;
                     const isExpired = c.status==="expired";
                     return (

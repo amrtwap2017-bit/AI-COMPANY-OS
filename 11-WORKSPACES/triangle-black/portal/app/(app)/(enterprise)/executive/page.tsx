@@ -111,7 +111,7 @@ export default function ExecutivePage() {
                     </button>
                   ))}
                   {expiringContracts.slice(0,2).map((c: any, i: number) =>{
-                    const days=Math.ceil((new Date(c.end_date)-Date.now())/86400000);
+                    const days=Math.ceil((new Date(c.end_date).getTime() - Date.now())/86400000);
                     return (
                       <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)} className="tb-section text-left border-warning/30 bg-warning/5 cursor-pointer">
                         <div className="text-xs font-bold text-warning mb-1">Contract · {days}d left</div>

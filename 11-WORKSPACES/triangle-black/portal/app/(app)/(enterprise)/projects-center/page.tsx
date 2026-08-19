@@ -92,7 +92,7 @@ function ProjectsCenterPageInner() {
               const pct = Number(p.completion_pct||0);
               const budget = Number(p.budget||0);
               const projWOs = wos.filter((w: any) =>w.contract_id===p.id||w.project_id===p.id);
-              const daysLeft = p.end_date?Math.ceil((new Date(p.end_date)-Date.now())/86400000):null;
+              const daysLeft = p.end_date?Math.ceil((new Date(p.end_date).getTime() - Date.now())/86400000):null;
               const isOv = daysLeft!==null&&daysLeft<0&&p.status!=="completed";
               const barColor = pct>=80?"var(--color-success)":pct>=50?"var(--color-info)":"var(--color-warning)";
               return (
