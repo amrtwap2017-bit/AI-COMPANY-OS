@@ -1,388 +1,264 @@
 """
-Service Request Application Service — T-005
-Encapsulates business logic for Service Request operations.
-Router delegates here — no business logic in router layer.
+T-005: Application Service Layer — Service Request Domain
+Extracts business logic from router into a testable service class.
+The router delegates to OperationsService — no direct repo calls in router.
 """
-from __future__ import annotations
+from typing import Optional, List, Dict, Any
 from datetime import datetime
-from typing import Optional, Dict, Any, List
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+import uuid
 
+# ── Service Request Application Service ──────────────────────────────────────
 
 class ServiceRequestService:
     """
-    Application service layer for Service Request domain.
-    Sits between router and repository.
-    All SR business logic lives here — not in routers.
+    Application service for Service Request domain.
+    Contains all business logic for SR lifecycle.
+    Router calls this — service calls repository.
     """
 
-    def __init__(self, db: Session, hotel_id: str, actor: Optional[str] = None):
+    def __init__(self, db):
         self.db = db
-        self.hotel_id = hotel_id
-        self.actor = actor or "system"
 
-    # ── Queries ───────────────────────────────────────────────────────────────
-
-    def get_by_id(self, sr_id: str) -> Optional[Dict[str, Any]]:
-        """Fetch a single SR scoped to hotel."""
-        try:
-            row = self.db.execute(text(
-                """SELECT * FROM service_requests
-                   WHERE id = :id AND hotel_id = :hid
-                   LIMIT 1"""
-            ), {"id": sr_id, "hid": self.hotel_id}).fetchone()
-            return dict(row._mapping) if row else None
-        except Exception:
-            return None
-
-    def list_by_status(
+    def create(
         self,
-        status: Optional[str] = None,
-        limit: int = 50,
-        skip: int = 0
-    ) -> List[Dict[str, Any]]:
-        """List SRs for hotel, optionally filtered by status."""
-        try:
-            if status:
-                rows = self.db.execute(text(
-                    """SELECT * FROM service_requests
-                       WHERE hotel_id = :hid AND status = :status
-                       ORDER BY created_at DESC
-                       LIMIT :lim OFFSET :sk"""
-                ), {"hid": self.hotel_id, "status": status,
-                    "lim": limit, "sk": skip}).fetchall()
-            else:
-                rows = self.db.execute(text(
-                    """SELECT * FROM service_requests
-                       WHERE hotel_id = :hid
-                       ORDER BY created_at DESC
-                       LIMIT :lim OFFSET :sk"""
-                ), {"hid": self.hotel_id,
-                    "lim": limit, "sk": skip}).fetchall()
-            return [dict(r._mapping) for r in rows]
-        except Exception:
-            return []
-
-    def count(self, status: Optional[str] = None) -> int:
-        """Count SRs for hotel."""
-        try:
-            if status:
-                row = self.db.execute(text(
-                    "SELECT COUNT(*) FROM service_requests WHERE hotel_id=:hid AND status=:st"
-                ), {"hid": self.hotel_id, "st": status}).fetchone()
-            else:
-                row = self.db.execute(text(
-                    "SELECT COUNT(*) FROM service_requests WHERE hotel_id=:hid"
-                ), {"hid": self.hotel_id}).fetchone()
-            return int(row[0]) if row else 0
-        except Exception:
-            return 0
-
-    # ── Commands ──────────────────────────────────────────────────────────────
-
-    def create(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        hotel_id: str,
+        actor_id: str,
+        title: str,
+        urgency: str = "normal",
+        category: str = "General",
+        description: Optional[str] = None,
+        asset_id: Optional[str] = None,
+        location: Optional[str] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
         """
         Create a new Service Request.
-        Enforces hotel scope — ignores any hotel_id in payload.
+        Enforces: hotel_id, actor, timestamp, correlation_id.
+        Emits: SR_CREATED audit event.
         """
-        import uuid
+        from sqlalchemy import text as _text
+
         sr_id = str(uuid.uuid4())
+        correlation_id = str(uuid.uuid4())
         now = datetime.utcnow()
 
+        # Validate urgency
+        valid_urgencies = {"low", "normal", "high", "critical"}
+        if urgency not in valid_urgencies:
+            raise ValueError(f"Invalid urgency: {urgency}. Must be one of {valid_urgencies}")
+
         try:
-            self.db.execute(text(
-                """INSERT INTO service_requests
-                   (id, hotel_id, title, description, urgency, status,
-                    category, created_at, updated_at)
-                   VALUES (:id, :hid, :title, :desc, :urgency, :status,
-                           :category, :now, :now)"""
-            ), {
+            self.db.execute(_text("""
+                INSERT INTO service_requests
+                    (id, hotel_id, title, description, urgency, category,
+                     status, asset_id, location, created_by, created_at, updated_at)
+                VALUES
+                    (:id, :hotel_id, :title, :desc, :urgency, :category,
+                     'open', :asset_id, :location, :created_by, :now, :now)
+            """), {
                 "id": sr_id,
-                "hid": self.hotel_id,
-                "title": payload.get("title", "Untitled Request"),
-                "desc": payload.get("description", ""),
-                "urgency": payload.get("urgency", "normal"),
-                "status": "open",
-                "category": payload.get("category", "General"),
+                "hotel_id": hotel_id,
+                "title": title,
+                "desc": description,
+                "urgency": urgency,
+                "category": category,
+                "asset_id": asset_id,
+                "location": location,
+                "created_by": actor_id,
                 "now": now,
             })
             self.db.commit()
-            self._emit_audit("SR_CREATED", sr_id,
-                             {"title": payload.get("title")})
-            return {"id": sr_id, "hotel_id": self.hotel_id,
-                    "status": "open", "created_at": str(now)}
-        except Exception as e:
+        except Exception:
             self.db.rollback()
-            raise RuntimeError(f"SR create failed: {e}") from e
+            raise
 
-    def update_status(self, sr_id: str, new_status: str,
-                      reason: Optional[str] = None) -> bool:
+        self._emit_audit("SR_CREATED", hotel_id, actor_id, sr_id, {
+            "title": title, "urgency": urgency, "category": category
+        })
+
+        return {
+            "id": sr_id,
+            "hotel_id": hotel_id,
+            "title": title,
+            "urgency": urgency,
+            "category": category,
+            "status": "open",
+            "created_by": actor_id,
+            "created_at": now.isoformat(),
+            "correlation_id": correlation_id,
+        }
+
+    def get(self, sr_id: str, hotel_id: str) -> Optional[Dict[str, Any]]:
+        """Get a single SR with hotel_id scope enforced."""
+        from sqlalchemy import text as _text
+        row = self.db.execute(_text("""
+            SELECT * FROM service_requests
+            WHERE id = :id AND hotel_id = :hotel_id
+        """), {"id": sr_id, "hotel_id": hotel_id}).fetchone()
+        if not row:
+            return None
+        return dict(row._mapping)
+
+    def list(
+        self,
+        hotel_id: str,
+        status: Optional[str] = None,
+        urgency: Optional[str] = None,
+        limit: int = 50,
+        skip: int = 0
+    ) -> Dict[str, Any]:
+        """List SRs with hotel_id scope + optional filters."""
+        from sqlalchemy import text as _text
+
+        filters = ["hotel_id = :hotel_id"]
+        params: Dict[str, Any] = {"hotel_id": hotel_id, "limit": limit, "skip": skip}
+
+        if status:
+            filters.append("status = :status")
+            params["status"] = status
+        if urgency:
+            filters.append("urgency = :urgency")
+            params["urgency"] = urgency
+
+        where = " AND ".join(filters)
+
+        rows = self.db.execute(_text(f"""
+            SELECT * FROM service_requests
+            WHERE {where}
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :skip
+        """), params).fetchall()
+
+        count_row = self.db.execute(_text(f"""
+            SELECT COUNT(*) FROM service_requests WHERE {where}
+        """), {k: v for k, v in params.items() if k not in ("limit", "skip")}).fetchone()
+
+        return {
+            "count": count_row[0] if count_row else 0,
+            "results": [dict(r._mapping) for r in rows],
+            "hotel_id": hotel_id,
+        }
+
+    def transition(
+        self,
+        sr_id: str,
+        hotel_id: str,
+        actor_id: str,
+        new_status: str
+    ) -> Dict[str, Any]:
         """
         Transition SR to a new status.
-        Validates that SR belongs to this hotel before updating.
+        Validates allowed transitions.
+        Emits audit event.
         """
-        existing = self.get_by_id(sr_id)
-        if not existing:
-            return False
+        from sqlalchemy import text as _text
 
-        VALID_STATUSES = {"open", "in_progress", "resolved",
-                          "closed", "cancelled", "pending"}
-        if new_status not in VALID_STATUSES:
-            raise ValueError(f"Invalid status: {new_status}")
+        ALLOWED_TRANSITIONS = {
+            "open": {"in_progress", "cancelled"},
+            "in_progress": {"resolved", "on_hold", "cancelled"},
+            "on_hold": {"in_progress", "cancelled"},
+            "resolved": {"closed", "in_progress"},
+            "closed": set(),
+            "cancelled": set(),
+        }
 
-        try:
-            self.db.execute(text(
-                """UPDATE service_requests
-                   SET status = :status, updated_at = :now
-                   WHERE id = :id AND hotel_id = :hid"""
-            ), {"status": new_status, "now": datetime.utcnow(),
-                "id": sr_id, "hid": self.hotel_id})
-            self.db.commit()
-            self._emit_audit("SR_STATUS_CHANGED", sr_id,
-                             {"old": existing.get("status"),
-                              "new": new_status, "reason": reason})
-            return True
-        except Exception as e:
-            self.db.rollback()
-            raise RuntimeError(f"SR status update failed: {e}") from e
-
-    def generate_work_order(self, sr_id: str) -> Dict[str, Any]:
-        """
-        Create a Work Order linked to this Service Request.
-        The canonical SR→WO vertical slice entry point.
-        Delegates WO creation to WorkOrderService.
-        """
-        sr = self.get_by_id(sr_id)
+        sr = self.get(sr_id, hotel_id)
         if not sr:
-            raise ValueError(f"Service Request {sr_id} not found")
+            raise ValueError(f"Service request {sr_id} not found")
 
-        # Delegate to WO service
-        wo_service = WorkOrderService(
-            db=self.db,
-            hotel_id=self.hotel_id,
-            actor=self.actor
+        current = sr.get("status", "open")
+        allowed = ALLOWED_TRANSITIONS.get(current, set())
+
+        if new_status not in allowed:
+            raise ValueError(
+                f"Cannot transition SR from '{current}' to '{new_status}'. "
+                f"Allowed: {allowed}"
+            )
+
+        self.db.execute(_text("""
+            UPDATE service_requests
+            SET status = :status, updated_at = :now
+            WHERE id = :id AND hotel_id = :hotel_id
+        """), {
+            "status": new_status,
+            "now": datetime.utcnow(),
+            "id": sr_id,
+            "hotel_id": hotel_id,
+        })
+        self.db.commit()
+
+        self._emit_audit(f"SR_{new_status.upper()}", hotel_id, actor_id, sr_id, {
+            "from_status": current, "to_status": new_status
+        })
+
+        return {**sr, "status": new_status, "updated_at": datetime.utcnow().isoformat()}
+
+    def generate_work_order(
+        self,
+        sr_id: str,
+        hotel_id: str,
+        actor_id: str
+    ) -> Dict[str, Any]:
+        """
+        Generate a Work Order from a Service Request.
+        This is the SR→WO transition — core operational workflow.
+        """
+        sr = self.get(sr_id, hotel_id)
+        if not sr:
+            raise ValueError(f"Service request {sr_id} not found")
+
+        if sr.get("status") == "cancelled":
+            raise ValueError("Cannot generate WO from a cancelled service request")
+
+        # Delegate to WorkOrderService
+        from src.commercial.work_orders.service import WorkOrderService
+        wo_service = WorkOrderService(self.db)
+
+        wo = wo_service.create_from_sr(
+            sr_id=sr_id,
+            hotel_id=hotel_id,
+            actor_id=actor_id,
+            title=f"WO: {sr.get('title', 'Service Request')}",
+            priority=self._urgency_to_priority(sr.get("urgency", "normal")),
+            description=sr.get("description"),
+            asset_id=sr.get("asset_id"),
+            location=sr.get("location"),
         )
-        wo = wo_service.create_from_service_request(sr)
 
-        # Update SR status to in_progress
+        # Transition SR to in_progress
         try:
-            self.update_status(sr_id, "in_progress",
-                               reason=f"Work order {wo['id']} generated")
-        except Exception:
-            pass  # Non-blocking
+            self.transition(sr_id, hotel_id, actor_id, "in_progress")
+        except ValueError:
+            pass  # Already in_progress or other valid state
 
-        self._emit_audit("SR_WO_GENERATED", sr_id,
-                         {"work_order_id": wo.get("id")})
+        self._emit_audit("SR_WO_GENERATED", hotel_id, actor_id, sr_id, {
+            "work_order_id": wo.get("id")
+        })
+
         return {
             "service_request_id": sr_id,
             "work_order_id": wo.get("id"),
-            "hotel_id": self.hotel_id,
             "status": "work_order_created",
+            "work_order": wo,
         }
 
-    # ── Internal helpers ──────────────────────────────────────────────────────
+    def _urgency_to_priority(self, urgency: str) -> str:
+        return {"critical": "critical", "high": "high",
+                "normal": "medium", "low": "low"}.get(urgency, "medium")
 
-    def _emit_audit(self, event_type: str, entity_id: str,
-                    metadata: Optional[Dict] = None) -> None:
+    def _emit_audit(self, action: str, hotel_id: str, actor_id: str,
+                    entity_id: str, data: Dict[str, Any]) -> None:
         """Non-blocking audit event emission."""
         try:
-            import json, uuid
-            self.db.execute(text(
-                """INSERT INTO platform_audit_log
-                   (id, hotel_id, event_type, entity_id, actor,
-                    metadata, created_at)
-                   VALUES (:id, :hid, :et, :eid, :actor, :meta, :now)"""
-            ), {
-                "id": str(uuid.uuid4()),
-                "hid": self.hotel_id,
-                "et": event_type,
-                "eid": entity_id,
-                "actor": self.actor,
-                "meta": json.dumps(metadata or {}),
-                "now": datetime.utcnow(),
-            })
-            self.db.commit()
+            from src.core.audit import audit_action
+            audit_action(
+                db=self.db,
+                hotel_id=hotel_id,
+                actor_id=actor_id,
+                action=action,
+                entity_type="service_request",
+                entity_id=entity_id,
+                data=data
+            )
         except Exception:
-            pass  # Audit failure must never block business operation
-
-
-class WorkOrderService:
-    """
-    Application service layer for Work Order domain.
-    Sits between router and repository.
-    All WO business logic lives here — not in routers.
-    """
-
-    def __init__(self, db: Session, hotel_id: str, actor: Optional[str] = None):
-        self.db = db
-        self.hotel_id = hotel_id
-        self.actor = actor or "system"
-
-    # ── Queries ───────────────────────────────────────────────────────────────
-
-    def get_by_id(self, wo_id: str) -> Optional[Dict[str, Any]]:
-        """Fetch a single WO scoped to hotel."""
-        try:
-            row = self.db.execute(text(
-                """SELECT * FROM work_orders
-                   WHERE id = :id AND hotel_id = :hid
-                     AND deleted_at IS NULL
-                   LIMIT 1"""
-            ), {"id": wo_id, "hid": self.hotel_id}).fetchone()
-            return dict(row._mapping) if row else None
-        except Exception:
-            return None
-
-    def get_sla_summary(self) -> Dict[str, Any]:
-        """SLA compliance summary for this hotel."""
-        try:
-            row = self.db.execute(text(
-                """SELECT
-                    COUNT(*) AS total,
-                    SUM(CASE WHEN sla_status='met' THEN 1 ELSE 0 END) AS met,
-                    SUM(CASE WHEN sla_status='breached' THEN 1 ELSE 0 END) AS breached,
-                    SUM(CASE WHEN sla_status='on_track' THEN 1 ELSE 0 END) AS on_track
-                   FROM work_orders
-                   WHERE hotel_id=:hid AND deleted_at IS NULL"""
-            ), {"hid": self.hotel_id}).fetchone()
-            d = dict(row._mapping) if row else {}
-            total = int(d.get("total") or 0)
-            met = int(d.get("met") or 0)
-            return {
-                "hotel_id": self.hotel_id,
-                "total": total,
-                "met": met,
-                "breached": int(d.get("breached") or 0),
-                "on_track": int(d.get("on_track") or 0),
-                "compliance_pct": round(100.0 * met / total, 1) if total else 0.0,
-            }
-        except Exception as e:
-            return {"hotel_id": self.hotel_id, "error": str(e)}
-
-    # ── Commands ──────────────────────────────────────────────────────────────
-
-    def create_from_service_request(self, sr: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Create a Work Order from a Service Request.
-        Core SR→WO vertical slice business logic.
-        """
-        import uuid
-        from datetime import timedelta
-
-        wo_id = str(uuid.uuid4())
-        now = datetime.utcnow()
-        sla_hours = 24
-        sla_breach_at = now + timedelta(hours=sla_hours)
-
-        try:
-            self.db.execute(text(
-                """INSERT INTO work_orders
-                   (id, hotel_id, title, description, priority, status,
-                    technician_id, due_date, sla_hours, sla_breach_at,
-                    sla_breached, sla_status, created_at, updated_at)
-                   VALUES
-                   (:id, :hid, :title, :desc, :priority, 'open',
-                    NULL, :due, :sla_h, :sla_at,
-                    FALSE, 'on_track', :now, :now)"""
-            ), {
-                "id": wo_id,
-                "hid": self.hotel_id,
-                "title": f"WO: {sr.get('title', 'Service Request')}",
-                "desc": sr.get("description", "Generated from service request"),
-                "priority": sr.get("urgency", "normal"),
-                "due": sla_breach_at,
-                "sla_h": sla_hours,
-                "sla_at": sla_breach_at,
-                "now": now,
-            })
-            self.db.commit()
-            self._emit_audit("WO_CREATED_FROM_SR", wo_id,
-                             {"service_request_id": sr.get("id"),
-                              "sla_hours": sla_hours})
-            return {"id": wo_id, "hotel_id": self.hotel_id,
-                    "status": "open", "sla_hours": sla_hours,
-                    "sla_breach_at": str(sla_breach_at)}
-        except Exception as e:
-            self.db.rollback()
-            raise RuntimeError(f"WO create from SR failed: {e}") from e
-
-    def complete(self, wo_id: str,
-                 notes: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Complete a Work Order.
-        Updates status, marks SLA as met if not breached.
-        """
-        wo = self.get_by_id(wo_id)
-        if not wo:
-            raise ValueError(f"Work Order {wo_id} not found")
-
-        now = datetime.utcnow()
-        breach_at = wo.get("sla_breach_at")
-        sla_status = "met" if (breach_at is None or now <= breach_at) else "breached"
-
-        try:
-            self.db.execute(text(
-                """UPDATE work_orders
-                   SET status='completed', sla_status=:sla_st,
-                       updated_at=:now
-                   WHERE id=:id AND hotel_id=:hid"""
-            ), {"sla_st": sla_status, "now": now,
-                "id": wo_id, "hid": self.hotel_id})
-            self.db.commit()
-            self._emit_audit("WO_COMPLETED", wo_id,
-                             {"sla_status": sla_status, "notes": notes})
-            return {"ok": True, "work_order_id": wo_id,
-                    "status": "completed", "sla_status": sla_status}
-        except Exception as e:
-            self.db.rollback()
-            raise RuntimeError(f"WO complete failed: {e}") from e
-
-    def close(self, wo_id: str) -> Dict[str, Any]:
-        """
-        Close a Work Order.
-        Final state — creates service report record.
-        """
-        wo = self.get_by_id(wo_id)
-        if not wo:
-            raise ValueError(f"Work Order {wo_id} not found")
-
-        now = datetime.utcnow()
-        try:
-            self.db.execute(text(
-                """UPDATE work_orders
-                   SET status='closed', updated_at=:now
-                   WHERE id=:id AND hotel_id=:hid"""
-            ), {"now": now, "id": wo_id, "hid": self.hotel_id})
-            self.db.commit()
-            self._emit_audit("WO_CLOSED", wo_id, {"closed_at": str(now)})
-            return {"ok": True, "work_order_id": wo_id,
-                    "status": "closed", "closed_at": str(now)}
-        except Exception as e:
-            self.db.rollback()
-            raise RuntimeError(f"WO close failed: {e}") from e
-
-    # ── Internal helpers ──────────────────────────────────────────────────────
-
-    def _emit_audit(self, event_type: str, entity_id: str,
-                    metadata: Optional[Dict] = None) -> None:
-        """Non-blocking audit event emission."""
-        try:
-            import json, uuid
-            self.db.execute(text(
-                """INSERT INTO platform_audit_log
-                   (id, hotel_id, event_type, entity_id, actor,
-                    metadata, created_at)
-                   VALUES (:id, :hid, :et, :eid, :actor, :meta, :now)"""
-            ), {
-                "id": str(uuid.uuid4()),
-                "hid": self.hotel_id,
-                "et": event_type,
-                "eid": entity_id,
-                "actor": self.actor,
-                "meta": json.dumps(metadata or {}),
-                "now": datetime.utcnow(),
-            })
-            self.db.commit()
-        except Exception:
-            pass
+            pass  # Never block on audit failure
