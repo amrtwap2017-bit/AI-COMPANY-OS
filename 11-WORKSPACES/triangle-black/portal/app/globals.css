@@ -1347,6 +1347,7 @@
 [data-theme="obsidian"],
 [data-theme="warm-dark"],
 [data-theme="cool-dark"] {
+  --color-bg-compat:       #111111;  /* legacy compat for sprint010 */
   --color-bg:              #141210;
   --color-bg-alt:          #1E1B18;
   --color-surface:         #1E1B18;
