@@ -127,3 +127,29 @@ Last updated: August 18, 2026
 | T-028 | Main.py modular router extraction phase 2 | MEDIUM |
 | T-029 | Contract tests — frontend/backend API schema | MEDIUM |
 | T-030 | Performance SLO enforcement in CI | MEDIUM |
+
+## T-007 — DONE
+
+| Item | Result |
+|------|--------|
+| ExecutiveKPIReadModel | DONE |
+| 5 governed endpoints | DONE |
+| operations/maintenance/procurement/financial | DONE |
+| 17 tests passing | DONE |
+| emit_event EventType compat | DONE |
+
+## T-008 — DONE
+
+| Item | Result |
+|------|--------|
+| E2E vertical slice spec | DONE |
+| SR creation via API | PASS |
+| SR→WO generation | PASS |
+| WO complete→close | PASS |
+| SLA summary | PASS |
+| Executive KPI | PASS |
+| Full vertical slice test | PASS |
+| 14 E2E tests | PASS |
+
+## Next Sprint: T-009 — Organization ID Migration
+Awaiting GO signal.
