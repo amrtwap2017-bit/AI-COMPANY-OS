@@ -20,8 +20,8 @@ export default function PMPlansPage() {
   );
   const plans = toArr(raw);
   const now   = new Date();
-  const in7   = new Date(now.getTime()+7*86400000);
-  const in30  = new Date(now.getTime()+30*86400000);
+  const in7   = new Date(now.getTime().getTime() +7*86400000);
+  const in30  = new Date(now.getTime().getTime() +30*86400000);
 
   const overdue  = plans.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const dueWeek  = plans.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=in7);

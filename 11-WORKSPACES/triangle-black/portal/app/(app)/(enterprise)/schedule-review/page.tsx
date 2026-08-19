@@ -11,8 +11,8 @@ export default function ScheduleReviewPage() {
   const { data: woRaw } = useQuery(["sr2-wos"], () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const pms = toArr(pmRaw); const wos = toArr(woRaw);
   const now = new Date();
-  const next7  = new Date(now.getTime()+7*86400000);
-  const next30 = new Date(now.getTime()+30*86400000);
+  const next7  = new Date(now.getTime().getTime() +7*86400000);
+  const next30 = new Date(now.getTime().getTime() +30*86400000);
   const overdue   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const dueWeek   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=next7);
   const dueMonth  = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>next7&&new Date(p.next_due_ts)<=next30);
@@ -43,7 +43,7 @@ export default function ScheduleReviewPage() {
             <div className="space-y-2 mt-3">
               {dueWeek.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No PMs due this week</div></div>
               : dueWeek.map((pm: any, i: any) =>{
-                const days=Math.ceil((new Date(pm.next_due_ts)-now)/86400000);
+                const days=Math.ceil((new Date(pm.next_due_ts).getTime() -now)/86400000);
                 return (
                   <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                     <div className="flex items-center gap-2 min-w-0"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title||"—"}</span></div>
@@ -58,7 +58,7 @@ export default function ScheduleReviewPage() {
             <div className="space-y-2 mt-3">
               {wosDue.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No WOs due this week</div></div>
               : wosDue.map((wo: any, i: any) =>{
-                const days=Math.ceil((new Date(wo.due_date)-now)/86400000);
+                const days=Math.ceil((new Date(wo.due_date).getTime() -now)/86400000);
                 const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[wo.priority]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
@@ -74,7 +74,7 @@ export default function ScheduleReviewPage() {
           <div className="text-label-upper text-tertiary mb-3">Due This Month ({dueMonth.length})</div>
           <div className="space-y-2">
             {dueMonth.slice(0,5).map((pm: any, i: any) =>{
-              const days=Math.ceil((new Date(pm.next_due_ts)-now)/86400000);
+              const days=Math.ceil((new Date(pm.next_due_ts).getTime() -now)/86400000);
               return (
                 <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                   <div className="flex items-center gap-2 min-w-0"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title||"—"}</span></div>

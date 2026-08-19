@@ -21,7 +21,7 @@ export default function GoodsReceiptsPage() {
           <h1 className="tb-hero-title">Goods Receipts</h1>
           <p className="tb-hero-description">{grs.length} receipts recorded</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:grs.length,color:"#221D1A"},{label:"This Month",value:grs.filter((g: any) =>g.created_at&&new Date(g.created_at)>new Date(Date.now()-30*86400000)).length,color:"#547C4D"}].map((k: any, i: number) =>(
+            {[{label:"Total",value:grs.length,color:"#221D1A"},{label:"This Month",value:grs.filter((g: any) =>g.created_at&&new Date(g.created_at)>new Date(Date.now().getTime() -30*86400000)).length,color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

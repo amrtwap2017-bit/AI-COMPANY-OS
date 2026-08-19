@@ -22,7 +22,7 @@ export default function ExceptionsPage() {
 
   const criticalWOs  = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");
   const overdueWOs   = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
-  const expiringCts  = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
+  const expiringCts  = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime().getTime() +30*86400000));
   const overduePMs   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const totalExceptions = criticalWOs.length+overdueWOs.length+expiringCts.length+overduePMs.length;
 
@@ -86,7 +86,7 @@ export default function ExceptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 {overdueWOs.slice(0,5).map((wo: any, i: any) =>{
-                  const days=Math.floor((now-new Date(wo.due_date))/86400000);
+                  const days=Math.floor((now-new Date(wo.due_date).getTime())/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
                       <div className="text-sm text-secondary truncate">{wo.title||"—"}</div>
@@ -106,7 +106,7 @@ export default function ExceptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 {expiringCts.map((c: any, i: number) =>{
-                  const days=Math.ceil((new Date(c.end_date)-now)/86400000);
+                  const days=Math.ceil((new Date(c.end_date).getTime() -now)/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)} className="tb-action-item w-full justify-between">
                       <div className="text-sm text-secondary truncate">{c.title||c.id?.slice(0,20)}</div>
@@ -126,7 +126,7 @@ export default function ExceptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 {overduePMs.slice(0,5).map((pm: any, i: any) =>{
-                  const days=Math.floor((now-new Date(pm.next_due_ts))/86400000);
+                  const days=Math.floor((now-new Date(pm.next_due_ts).getTime())/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                       <div className="text-sm text-secondary truncate">{pm.title||"—"}</div>

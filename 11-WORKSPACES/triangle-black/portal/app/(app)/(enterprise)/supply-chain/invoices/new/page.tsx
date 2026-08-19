@@ -9,7 +9,7 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function CreateInvoicePage() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  const due30 = new Date(Date.now()+30*864e5).toISOString().split("T")[0];
+  const due30 = new Date(Date.now().getTime() +30*864e5).toISOString().split("T")[0];
   const [form, setForm] = useState({
     vendor_id:"", vendor_invoice_number:"", po_id:"", grn_id:"",
     invoice_date:today, due_date:due30, currency:"EGP", exchange_rate:1,

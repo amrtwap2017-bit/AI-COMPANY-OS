@@ -16,7 +16,7 @@ export default function PortfolioPage() {
   const contractValue   = activeContracts.reduce((s: any, c: any) =>s+Number(c.total_value||c.value||0),0);
   const revenue         = inv.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
   const now = new Date();
-  const expiringSoon = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
+  const expiringSoon = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime().getTime() +30*86400000));
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
@@ -42,7 +42,7 @@ export default function PortfolioPage() {
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Contracts</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {activeContracts.slice(0,5).map((c: any, i: number) =>{
-                const days = c.end_date?Math.ceil((new Date(c.end_date)-now)/86400000):null;
+                const days = c.end_date?Math.ceil((new Date(c.end_date).getTime() -now)/86400000):null;
                 return (
                   <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)} className="tb-action-item w-full justify-between">
                     <div className="min-w-0 flex items-center gap-2"><span className="text-base">📄</span><span className="text-sm text-secondary truncate">{c.title||c.id?.slice(0,20)}</span></div>

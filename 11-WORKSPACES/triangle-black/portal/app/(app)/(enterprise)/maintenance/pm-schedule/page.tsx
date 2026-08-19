@@ -42,8 +42,8 @@ export default function PMSchedulePage() {
   }, [mounted]);
 
   const now   = new Date();
-  const in7   = new Date(now.getTime() + 7  * 86400000);
-  const in30  = new Date(now.getTime() + 30 * 86400000);
+  const in7   = new Date(now.getTime().getTime() + 7  * 86400000);
+  const in30  = new Date(now.getTime().getTime() + 30 * 86400000);
 
   const classify = (p: Plan) => {
     if (!p.next_due_ts) return "future";

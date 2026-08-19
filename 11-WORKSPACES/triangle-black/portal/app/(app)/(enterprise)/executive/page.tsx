@@ -25,7 +25,7 @@ export default function ExecutivePage() {
   const notifs = toArr(notifRaw);
   const d = dash||{};
   const now = new Date();
-  const in30 = new Date(now.getTime()+30*86400000);
+  const in30 = new Date(now.getTime().getTime() +30*86400000);
   const score = twin?.health_score??0;
 
   const criticalWOs = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");

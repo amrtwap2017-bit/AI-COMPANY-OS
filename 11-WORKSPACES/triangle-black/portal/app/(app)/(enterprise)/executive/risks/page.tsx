@@ -16,7 +16,7 @@ export default function RisksPage() {
   const now = new Date();
   const criticalWOs = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed").length;
   const overdueWOs  = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed").length;
-  const expiringCts = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000)).length;
+  const expiringCts = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime().getTime() +30*86400000)).length;
   const overduePMs  = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
   const overdueInv  = inv.filter((i: any) =>i.status==="overdue").length;
   const riskScore   = criticalWOs*10+overdueWOs*3+expiringCts*5+overduePMs*2+overdueInv*4;
