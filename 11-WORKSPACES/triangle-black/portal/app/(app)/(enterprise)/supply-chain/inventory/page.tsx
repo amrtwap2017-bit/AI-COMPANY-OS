@@ -83,7 +83,7 @@ export default function InventoryPage() {
         <div className="tb-section mb-4">
           <div className="flex items-center gap-2.5 flex-wrap">
             <input className="tb-input" placeholder="Search by name, SKU, category..."
-              value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:"320px"}}/>
+              value={search} onChange={(e: any) =>setSearch(e.target.value)} style={{maxWidth:"320px"}}/>
             <div className="tb-tabs border-0 mb-0">
               {["all","low","ok"].map((f: any) =>(
                 <button key={f} onClick={()=>setFilterStock(f)} className={`tb-tab ${filterStock===f?"active":""}`}>

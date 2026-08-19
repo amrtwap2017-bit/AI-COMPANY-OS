@@ -139,7 +139,7 @@ export default function AssetQRGeneratorPage() {
         <>
           <input
             type="search" placeholder="Search assets by name, serial, location..."
-            value={search} onChange={e => setSearch(e.target.value)}
+            value={search} onChange={(e: any) => setSearch(e.target.value)}
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
 

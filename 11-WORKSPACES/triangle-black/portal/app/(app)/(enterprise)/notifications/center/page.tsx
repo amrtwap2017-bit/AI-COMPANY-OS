@@ -68,7 +68,7 @@ export default function NotificationsCenterPage() {
           {unread > 0 && (
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{unread}</span>
           )}
-          <select value={filter} onChange={e => setFilter(e.target.value)}
+          <select value={filter} onChange={(e: any) => setFilter(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none">
             <option value="all">All</option>
             <option value="unread">Unread</option>

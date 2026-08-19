@@ -101,7 +101,7 @@ export default function InvoicesPage() {
         )}
 
         <div className="flex gap-3 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by invoice number..."
+          <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search by invoice number..."
             className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
             {["all","overdue","pending","paid","cancelled"].map((s: any) =>(

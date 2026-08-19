@@ -59,7 +59,7 @@ export default function QuotationsPage() {
 
       <div className="tb-canvas">
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search RFQs..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
+          <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search RFQs..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
             {["all","draft","sent","responses_received","evaluated","awarded","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
@@ -91,7 +91,7 @@ export default function QuotationsPage() {
                           <td className="text-right font-bold text-success">{r.lowest_price?fmtEGP(r.lowest_price):"—"}</td>
                           <td className={`text-xs ${isExpired?"font-bold text-danger":"text-tertiary"}`}>{fmtDate(r.submission_deadline)}</td>
                           <td>
-                            <button onClick={e=>{e.stopPropagation();router.push(`/supply-chain/rfqs/${r.id}`);}}
+                            <button onClick={(e: any) =>{e.stopPropagation();router.push(`/supply-chain/rfqs/${r.id}`);}}
                               className="tb-btn tb-btn-sm" style={{background:"var(--color-brand-light)",color:"var(--color-brand)",border:"1px solid var(--color-brand-border)"}}>Compare</button>
                           </td>
                         </tr>

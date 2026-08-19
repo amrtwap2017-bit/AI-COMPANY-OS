@@ -62,7 +62,7 @@ export default function ClientRequestPage() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Issue Title *</label>
                 <input className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900"
-                  placeholder="e.g. Air conditioning not working in lobby" value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/>
+                  placeholder="e.g. Air conditioning not working in lobby" value={form.title} onChange={(e: any) =>setForm({...form,title:e.target.value})}/>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Urgency Level *</label>
@@ -79,7 +79,7 @@ export default function ClientRequestPage() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Category</label>
                 <select className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900"
-                  value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
+                  value={form.category} onChange={(e: any) =>setForm({...form,category:e.target.value})}>
                   {CATEGORIES.map((c: any) =><option key={c.v} value={c.v}>{c.label}</option>)}
                 </select>
               </div>
@@ -87,12 +87,12 @@ export default function ClientRequestPage() {
                 <label className="text-sm font-medium text-gray-700 block mb-1">Description</label>
                 <textarea className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900 resize-none h-28"
                   placeholder="Please describe the issue in detail — location, symptoms, when it started…"
-                  value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/>
+                  value={form.description} onChange={(e: any) =>setForm({...form,description:e.target.value})}/>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Your Phone Number</label>
                 <input className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900"
-                  placeholder="+20-2-XXXX-XXXX" value={form.contact_phone} onChange={e=>setForm({...form,contact_phone:e.target.value})}/>
+                  placeholder="+20-2-XXXX-XXXX" value={form.contact_phone} onChange={(e: any) =>setForm({...form,contact_phone:e.target.value})}/>
               </div>
               <button onClick={handleSubmit} disabled={loading||!form.title}
                 className="w-full py-3 rounded-xl font-bold text-white transition-all"

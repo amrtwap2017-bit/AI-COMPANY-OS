@@ -142,7 +142,7 @@ export default function ServiceRequestEditPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Status *</label>
-            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+            <select value={form.status} onChange={(e: any) => setForm(f => ({ ...f, status: e.target.value }))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
               {STATUS_OPTIONS.map((s: any) => (
                 <option key={s} value={s}>{s.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>
@@ -151,7 +151,7 @@ export default function ServiceRequestEditPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Urgency</label>
-            <select value={form.urgency} onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}
+            <select value={form.urgency} onChange={(e: any) => setForm(f => ({ ...f, urgency: e.target.value }))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
               {URGENCY_OPTIONS.map((u: any) => (
                 <option key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</option>
@@ -162,7 +162,7 @@ export default function ServiceRequestEditPage() {
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Contact Phone</label>
-          <input value={form.contact_phone} onChange={e => setForm(f => ({...f, contact_phone: e.target.value}))}
+          <input value={form.contact_phone} onChange={(e: any) => setForm(f => ({...f, contact_phone: e.target.value}))}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
             placeholder="+20 100 000 0000" />
         </div>
@@ -172,7 +172,7 @@ export default function ServiceRequestEditPage() {
             Resolution Notes {form.status === "resolved" && <span className="text-red-500">*</span>}
           </label>
           <textarea value={form.resolution_notes}
-            onChange={e => setForm(f => ({...f, resolution_notes: e.target.value}))}
+            onChange={(e: any) => setForm(f => ({...f, resolution_notes: e.target.value}))}
             rows={4} placeholder="Describe the resolution or action taken..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
         </div>

@@ -59,8 +59,8 @@ export function GlobalSearch() {
     <div style={{position:"relative"}}>
       <div className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-brand rounded-xl" style={{minWidth:280}}>
         {loading ? <Loader2 size={14} className="text-brand animate-spin"/> : <Search size={14} className="text-brand"/>}
-        <input ref={inputRef} value={query} onChange={e=>setQuery(e.target.value)}
-          onKeyDown={e=>e.key==="Escape"&&(setOpen(false),setQuery(""))}
+        <input ref={inputRef} value={query} onChange={(e: any) =>setQuery(e.target.value)}
+          onKeyDown={(e: any) =>e.key==="Escape"&&(setOpen(false),setQuery(""))}
           placeholder="Search work orders, assets, leads..."
           className="flex-1 bg-transparent outline-none text-sm text-primary"
           style={{minWidth:0}}

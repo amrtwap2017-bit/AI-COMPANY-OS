@@ -28,7 +28,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-tertiary pointer-events-none" />
           <input
             value={search.value}
-            onChange={e => search.onChange(e.target.value)}
+            onChange={(e: any) => search.onChange(e.target.value)}
             placeholder={search.placeholder || "Search..."}
             className="w-full pl-9 pr-4 py-2 text-sm bg-surface border border-border rounded-xl
               focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400
@@ -44,7 +44,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
             <select
               key={f.label}
               value={f.value}
-              onChange={e => f.onChange(e.target.value)}
+              onChange={(e: any) => f.onChange(e.target.value)}
               className="text-xs bg-surface border border-border rounded-xl px-3 py-2
                 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400
                 text-secondary font-medium cursor-pointer"

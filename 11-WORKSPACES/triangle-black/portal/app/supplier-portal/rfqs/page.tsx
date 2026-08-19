@@ -93,17 +93,17 @@ export default function SupplierRFQsPage() {
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">Total Amount (EGP) *</label>
                     <input type="number" className="w-full px-3 py-2 rounded-lg text-sm text-white" style={{background:"#0A0F1E",border:"1px solid rgba(255,255,255,0.1)"}}
-                      value={bidForm.total_amount} onChange={e=>setBidForm(f=>({...f,total_amount:e.target.value}))}/>
+                      value={bidForm.total_amount} onChange={(e: any) =>setBidForm(f=>({...f,total_amount:e.target.value}))}/>
                   </div>
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">Delivery Days</label>
                     <input type="number" className="w-full px-3 py-2 rounded-lg text-sm text-white" style={{background:"#0A0F1E",border:"1px solid rgba(255,255,255,0.1)"}}
-                      value={bidForm.delivery_days} onChange={e=>setBidForm(f=>({...f,delivery_days:Number(e.target.value)}))}/>
+                      value={bidForm.delivery_days} onChange={(e: any) =>setBidForm(f=>({...f,delivery_days:Number(e.target.value)}))}/>
                   </div>
                   <div className="col-span-2">
                     <label className="text-xs text-slate-400 block mb-1">Notes</label>
                     <input className="w-full px-3 py-2 rounded-lg text-sm text-white" style={{background:"#0A0F1E",border:"1px solid rgba(255,255,255,0.1)"}}
-                      placeholder="Any conditions, inclusions, warranty…" value={bidForm.notes} onChange={e=>setBidForm(f=>({...f,notes:e.target.value}))}/>
+                      placeholder="Any conditions, inclusions, warranty…" value={bidForm.notes} onChange={(e: any) =>setBidForm(f=>({...f,notes:e.target.value}))}/>
                   </div>
                 </div>
                 <div className="flex gap-2">

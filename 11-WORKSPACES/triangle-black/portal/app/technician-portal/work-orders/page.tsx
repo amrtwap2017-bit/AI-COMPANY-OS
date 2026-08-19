@@ -63,7 +63,7 @@ export default function TechnicianWorkOrdersPage() {
         {/* Search */}
         <input
           type="search" placeholder="Search work orders..."
-          value={search} onChange={e => setSearch(e.target.value)}
+          value={search} onChange={(e: any) => setSearch(e.target.value)}
           className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
         />
 

@@ -74,21 +74,21 @@ export default function InvoiceDetailPage() {
             <div className="tb-form-grid mt-3">
               <div className="tb-form-group">
                 <label className="tb-label">Amount (EGP) <span className="text-danger">*</span></label>
-                <input type="number" className="tb-input" placeholder={`Max: ${fmtEGP(inv.balance_due||0)}`} value={payForm.amount} onChange={e=>setPayForm({...payForm,amount:e.target.value})} />
+                <input type="number" className="tb-input" placeholder={`Max: ${fmtEGP(inv.balance_due||0)}`} value={payForm.amount} onChange={(e: any) =>setPayForm({...payForm,amount:e.target.value})} />
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Payment Method</label>
-                <select className="tb-select" value={payForm.method} onChange={e=>setPayForm({...payForm,method:e.target.value})}>
+                <select className="tb-select" value={payForm.method} onChange={(e: any) =>setPayForm({...payForm,method:e.target.value})}>
                   {["bank_transfer","cheque","cash","online"].map((m: any) =><option key={m} value={m}>{m.replace("_"," ")}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Reference No.</label>
-                <input className="tb-input" value={payForm.reference} onChange={e=>setPayForm({...payForm,reference:e.target.value})} placeholder="Bank ref / cheque no." />
+                <input className="tb-input" value={payForm.reference} onChange={(e: any) =>setPayForm({...payForm,reference:e.target.value})} placeholder="Bank ref / cheque no." />
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Notes</label>
-                <input className="tb-input" value={payForm.notes} onChange={e=>setPayForm({...payForm,notes:e.target.value})} />
+                <input className="tb-input" value={payForm.notes} onChange={(e: any) =>setPayForm({...payForm,notes:e.target.value})} />
               </div>
             </div>
             <div className="tb-action-bar mt-3">

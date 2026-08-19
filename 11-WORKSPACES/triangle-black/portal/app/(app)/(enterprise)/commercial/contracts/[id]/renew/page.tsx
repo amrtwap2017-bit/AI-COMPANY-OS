@@ -136,13 +136,13 @@ export default function ContractRenewPage() {
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Renewal Start Date *</label>
             <input type="date" required value={form.start_date}
-              onChange={e => setForm(f=>({...f,start_date:e.target.value}))}
+              onChange={(e: any) => setForm(f=>({...f,start_date:e.target.value}))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Renewal End Date *</label>
             <input type="date" required value={form.end_date}
-              onChange={e => setForm(f=>({...f,end_date:e.target.value}))}
+              onChange={(e: any) => setForm(f=>({...f,end_date:e.target.value}))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function ContractRenewPage() {
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Renewal Value (EGP)</label>
           <input type="number" min="0" step="0.01" value={form.total_value}
-            onChange={e => setForm(f=>({...f,total_value:e.target.value}))}
+            onChange={(e: any) => setForm(f=>({...f,total_value:e.target.value}))}
             placeholder={String(contract.total_value || "0")}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
           <p className="text-xs text-gray-400 mt-1">Leave blank to keep same value: {fmtEGP(contract.total_value)}</p>
@@ -158,7 +158,7 @@ export default function ContractRenewPage() {
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Renewal Type</label>
-          <select value={form.renewal_type} onChange={e => setForm(f=>({...f,renewal_type:e.target.value}))}
+          <select value={form.renewal_type} onChange={(e: any) => setForm(f=>({...f,renewal_type:e.target.value}))}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
             {["standard","extended","revised","escalated"].map((t: any) => (
               <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>
@@ -168,7 +168,7 @@ export default function ContractRenewPage() {
 
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-          <textarea value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))}
+          <textarea value={form.notes} onChange={(e: any) => setForm(f=>({...f,notes:e.target.value}))}
             rows={3} placeholder="Renewal terms, conditions, changes from original..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
         </div>

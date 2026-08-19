@@ -103,7 +103,7 @@ export default function WorkOrdersPage() {
         )}
 
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search work orders..." className="tb-input" style={{maxWidth:"320px"}} />
+          <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search work orders..." className="tb-input" style={{maxWidth:"320px"}} />
           <div className="tb-tabs border-0 mb-0">
             {["all","open","in_progress","completed","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>{setStatusF(s);setPage(1);}} className={`tb-tab ${statusF===s?"active":""}`}>

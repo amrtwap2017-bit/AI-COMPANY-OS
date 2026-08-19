@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
-const WarmTooltip = ({active,payload,label}) => {
+const WarmTooltip = ({active,payload,label}: any) => {
   if (!active||!payload?.length) return null;
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>

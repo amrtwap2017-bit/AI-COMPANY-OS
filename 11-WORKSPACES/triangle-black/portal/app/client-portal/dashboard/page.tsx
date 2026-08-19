@@ -12,7 +12,7 @@ const fmtDate = (d: any) => {
 const PC = {critical:"#F87171",high:"#FB923C",medium:"#FBBF24",low:"#34D399"};
 const SC = {open:"#60A5FA",in_progress:"#FBBF24",completed:"#34D399"};
 
-function ClientNav({ client, active }) {
+function ClientNav({ client, active }: any) {
   const router = useRouter();
   const items = [
     {id:"dashboard",label:"🏠 Overview",path:"/client-portal/dashboard"},

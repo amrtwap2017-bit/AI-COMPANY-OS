@@ -167,7 +167,7 @@ export function CommandBar({ open: externalOpen, onClose }: CommandBarProps = {}
           <input
             ref={inputRef}
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e: any) => setQuery(e.target.value)}
             onKeyDown={handleKey}
             placeholder="Search work orders, assets, leads, contracts..."
             style={{

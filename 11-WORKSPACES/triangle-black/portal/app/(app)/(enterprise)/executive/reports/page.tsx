@@ -9,7 +9,7 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP  = (n) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-function printReport(title, content) {
+function printReport(title: any, content: any) {
   const html = `<!DOCTYPE html><html><head><title>${title}</title>
 <style>body{font-family:Arial,sans-serif;font-size:12px;color:#332C27;padding:32px}h1{font-size:22px;font-weight:900;border-bottom:2px solid #E2E8F0;padding-bottom:12px;margin-bottom:20px}h2{font-size:16px;font-weight:700;margin:20px 0 8px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#F8FAFC;padding:8px 10px;text-align:left;font-size:11px;border-bottom:2px solid #E2E8F0}td{padding:7px 10px;border-bottom:1px solid #221D1A;font-size:12px}.kpi{display:inline-block;margin:6px 12px 6px 0;padding:10px 16px;background:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0}.kpi-val{font-size:20px;font-weight:900;color:#221D1A}.kpi-lbl{font-size:10px;color:#64748B;text-transform:uppercase}.header{display:flex;justify-content:space-between;margin-bottom:24px}.company{font-size:18px;font-weight:900}</style></head><body>
 <div class="header"><div><div class="company">🔺 Triangle Black</div><div style="color:#64748B;font-size:11px">Engineering Operations Platform</div></div><div style="text-align:right;font-size:11px;color:#64748B">Generated: ${new Date().toLocaleDateString("en-GB")} ${new Date().toLocaleTimeString("en-GB")}</div></div>

@@ -90,7 +90,7 @@ export default function PurchaseOrdersPage() {
                 className="tb-search flex-1"
                 placeholder="Search by PO number, supplier..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
               />
             </div>
             <div className="flex gap-2 flex-wrap">

@@ -101,7 +101,7 @@ export default function UserManagementPage() {
                         <>
                           <select
                             value={newRole || u.role}
-                            onChange={(e) => setNewRole(e.target.value)}
+                            onChange={(e: any) => setNewRole(e.target.value)}
                             className="tb-input text-xs py-1 px-2"
                             style={{ width: 120 }}
                           >

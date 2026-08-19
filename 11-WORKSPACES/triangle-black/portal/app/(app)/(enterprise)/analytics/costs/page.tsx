@@ -11,7 +11,7 @@ const fmtK = (n: any) => Number(n||0)>=1000?`EGP ${(Number(n)/1000).toFixed(0)}K
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const WARM_COLORS = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"];
 
-const WarmTooltip = ({active,payload,label}) => {
+const WarmTooltip = ({active,payload,label}: any) => {
   if (!active||!payload?.length) return null;
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
@@ -27,7 +27,7 @@ const WarmTooltip = ({active,payload,label}) => {
 
 const DATE_PRESETS = [{key:"30d",label:"Last 30 Days"},{key:"90d",label:"Last 90 Days"},{key:"ytd",label:"Year to Date"},{key:"all",label:"All Time"}];
 
-function getPresetRange(preset) {
+function getPresetRange(preset: any) {
   const now = new Date();
   if (preset==="30d") return {from:new Date(now.getTime()-30*86400000),to:now};
   if (preset==="90d") return {from:new Date(now.getTime()-90*86400000),to:now};
@@ -109,9 +109,9 @@ export default function AnalyticsCostsPage() {
             </div>
             {datePreset==="custom" && (
               <div className="flex gap-2 items-center">
-                <input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)} className="tb-input" style={{padding:"6px 10px",fontSize:"13px"}} />
+                <input type="date" value={customFrom} onChange={(e: any) =>setCustomFrom(e.target.value)} className="tb-input" style={{padding:"6px 10px",fontSize:"13px"}} />
                 <span className="text-tertiary">→</span>
-                <input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)} className="tb-input" style={{padding:"6px 10px",fontSize:"13px"}} />
+                <input type="date" value={customTo} onChange={(e: any) =>setCustomTo(e.target.value)} className="tb-input" style={{padding:"6px 10px",fontSize:"13px"}} />
               </div>
             )}
             {isFiltered && <span className="text-xs text-brand font-semibold">{filteredInvoices.length} of {allInvoices.length} invoices</span>}

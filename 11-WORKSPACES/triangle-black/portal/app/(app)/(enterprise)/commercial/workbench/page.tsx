@@ -37,7 +37,7 @@ export default function CommercialWorkbenchPage() {
         </div>
       </div></div>
       <div style={{maxWidth:1400,margin:"0 auto",padding:"32px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:16}}>
-        {modules.map((m: any, i: number) =>(<button key={i} onClick={()=>router.push(m.path)} style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:20,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}} onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(185,146,76,0.3)"} onMouseLeave={e=>e.currentTarget.style.borderColor="var(--color-border)"}><span style={{fontSize:"1.5rem"}}>{m.icon}</span><div style={{fontSize:"0.9375rem",fontWeight:700,color:"var(--color-text-1)",marginTop:8}}>{m.label}</div><div style={{fontSize:"0.8125rem",color:"var(--color-text-3)",marginTop:4}}>{m.desc}</div></button>))}
+        {modules.map((m: any, i: number) =>(<button key={i} onClick={()=>router.push(m.path)} style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:20,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}} onMouseEnter={(e: any) =>e.currentTarget.style.borderColor="rgba(185,146,76,0.3)"} onMouseLeave={(e: any) =>e.currentTarget.style.borderColor="var(--color-border)"}><span style={{fontSize:"1.5rem"}}>{m.icon}</span><div style={{fontSize:"0.9375rem",fontWeight:700,color:"var(--color-text-1)",marginTop:8}}>{m.label}</div><div style={{fontSize:"0.8125rem",color:"var(--color-text-3)",marginTop:4}}>{m.desc}</div></button>))}
       </div>
     </div>
   );

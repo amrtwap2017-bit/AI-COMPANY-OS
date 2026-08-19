@@ -197,8 +197,8 @@ export function EnterpriseTopbar() {
                       key={item.label}
                       onClick={() => { setUserOpen(false); router.push(item.path); }}
                       style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"9px 12px",borderRadius:8,cursor:"pointer",textAlign:"left",background:"transparent",border:"none",transition:"background 120ms ease"}}
-                      onMouseEnter={e=>e.currentTarget.style.background="var(--color-bg-alt)"}
-                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                      onMouseEnter={(e: any) =>e.currentTarget.style.background="var(--color-bg-alt)"}
+                      onMouseLeave={(e: any) =>e.currentTarget.style.background="transparent"}
                     >
                       <span style={{fontSize:"1rem",flexShrink:0,width:22,textAlign:"center"}}>{item.icon}</span>
                       <div style={{flex:1,minWidth:0}}>
@@ -219,8 +219,8 @@ export function EnterpriseTopbar() {
                       key={item.label}
                       onClick={() => { setUserOpen(false); router.push(item.path); }}
                       style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,cursor:"pointer",textAlign:"left",background:"transparent",border:"none",transition:"background 120ms ease",fontSize:"0.8125rem",color:"var(--color-text-2)"}}
-                      onMouseEnter={e=>e.currentTarget.style.background="var(--color-bg-alt)"}
-                      onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                      onMouseEnter={(e: any) =>e.currentTarget.style.background="var(--color-bg-alt)"}
+                      onMouseLeave={(e: any) =>e.currentTarget.style.background="transparent"}
                     >
                       <item.icon className="w-4 h-4" style={{color:"var(--color-text-3)"}} />
                       {item.label}
@@ -229,8 +229,8 @@ export function EnterpriseTopbar() {
                   <button
                     onClick={() => { setUserOpen(false); logout(); }}
                     style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,cursor:"pointer",textAlign:"left",background:"transparent",border:"none",transition:"background 120ms ease",fontSize:"0.8125rem",color:"#A84A3D"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(168,74,61,0.06)"}
-                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                    onMouseEnter={(e: any) =>e.currentTarget.style.background="rgba(168,74,61,0.06)"}
+                    onMouseLeave={(e: any) =>e.currentTarget.style.background="transparent"}
                   >
                     <LogOut className="w-4 h-4" />
                     Sign out

@@ -125,14 +125,14 @@ export default function ProfilePage() {
                 <div>
                   <div className="tb-form-group mb-3.5">
                     <label className="tb-label">Current Password <span className="text-danger">*</span></label>
-                    <input type="password" value={pwd.current} onChange={e=>setP("current",e.target.value)}
+                    <input type="password" value={pwd.current} onChange={(e: any) =>setP("current",e.target.value)}
                       placeholder="Enter current password" className="tb-input"
                       style={pwdErrors.current?{borderColor:"var(--color-danger)"}:{}} />
                     {pwdErrors.current && <p className="text-xs text-danger mt-1">{pwdErrors.current}</p>}
                   </div>
                   <div className="tb-form-group mb-3.5">
                     <label className="tb-label">New Password <span className="text-danger">*</span></label>
-                    <input type="password" value={pwd.new_} onChange={e=>setP("new_",e.target.value)}
+                    <input type="password" value={pwd.new_} onChange={(e: any) =>setP("new_",e.target.value)}
                       placeholder="Minimum 8 characters" className="tb-input"
                       style={pwdErrors.new_?{borderColor:"var(--color-danger)"}:{}} />
                     {pwdErrors.new_ && <p className="text-xs text-danger mt-1">{pwdErrors.new_}</p>}
@@ -140,7 +140,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="tb-form-group mb-5">
                     <label className="tb-label">Confirm New Password <span className="text-danger">*</span></label>
-                    <input type="password" value={pwd.confirm} onChange={e=>setP("confirm",e.target.value)}
+                    <input type="password" value={pwd.confirm} onChange={(e: any) =>setP("confirm",e.target.value)}
                       placeholder="Repeat new password" className="tb-input"
                       style={pwdErrors.confirm?{borderColor:"var(--color-danger)"}:pwd.confirm&&pwd.confirm===pwd.new_?{borderColor:"var(--color-success)"}:{}} />
                     {pwdErrors.confirm && <p className="text-xs text-danger mt-1">{pwdErrors.confirm}</p>}

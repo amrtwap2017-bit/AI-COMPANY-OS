@@ -88,7 +88,7 @@ function ContractsPageInner() {
         )}
 
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search contracts..."
+          <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search contracts..."
             className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
             {[["all","All"],["active","Active"],["pending_signature","Pending"],["expiring","Expiring"],["expired","Expired"]].map(([s,l])=>(

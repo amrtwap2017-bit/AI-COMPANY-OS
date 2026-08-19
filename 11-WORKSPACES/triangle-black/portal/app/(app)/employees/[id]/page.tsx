@@ -193,12 +193,12 @@ export default function EmployeeDetailPage() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
                 <input type="date" required value={form.work_date}
-                  onChange={e => setForm(f => ({ ...f, work_date: e.target.value }))}
+                  onChange={(e: any) => setForm(f => ({ ...f, work_date: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Work Type</label>
-                <select value={form.work_type} onChange={e => setForm(f => ({ ...f, work_type: e.target.value }))}
+                <select value={form.work_type} onChange={(e: any) => setForm(f => ({ ...f, work_type: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                   {["regular","overtime","sick","vacation","public_holiday","training"].map((t: any) => (
                     <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>
@@ -208,18 +208,18 @@ export default function EmployeeDetailPage() {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Hours Worked</label>
                 <input type="number" min="0" max="24" step="0.5" required value={form.hours_worked}
-                  onChange={e => setForm(f => ({ ...f, hours_worked: e.target.value }))}
+                  onChange={(e: any) => setForm(f => ({ ...f, hours_worked: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Overtime Hours</label>
                 <input type="number" min="0" max="24" step="0.5" value={form.overtime_hours}
-                  onChange={e => setForm(f => ({ ...f, overtime_hours: e.target.value }))}
+                  onChange={(e: any) => setForm(f => ({ ...f, overtime_hours: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
               </div>
               <div className="col-span-2">
                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                <textarea value={form.notes} onChange={(e: any) => setForm(f => ({ ...f, notes: e.target.value }))}
                   rows={2} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
               </div>
               <div className="col-span-2 flex gap-3">

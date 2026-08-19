@@ -64,43 +64,43 @@ export default function SOWCreatePage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="text-xs text-tertiary block mb-1">Title *</label>
-              <input className="tb-input w-full" placeholder="e.g. HVAC Maintenance - Tower A" value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/>
+              <input className="tb-input w-full" placeholder="e.g. HVAC Maintenance - Tower A" value={form.title} onChange={(e: any) =>setForm({...form,title:e.target.value})}/>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Type</label>
-              <select className="tb-input w-full" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
+              <select className="tb-input w-full" value={form.type} onChange={(e: any) =>setForm({...form,type:e.target.value})}>
                 {["service","maintenance","installation","repair","inspection"].map((t: any) =><option key={t} value={t}>{t}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Currency</label>
-              <select className="tb-input w-full" value={form.currency} onChange={e=>setForm({...form,currency:e.target.value})}>
+              <select className="tb-input w-full" value={form.currency} onChange={(e: any) =>setForm({...form,currency:e.target.value})}>
                 {["EGP","USD","EUR","GBP","SAR","AED"].map((c: any) =><option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Client Name</label>
-              <input className="tb-input w-full" value={form.client_name} onChange={e=>setForm({...form,client_name:e.target.value})}/>
+              <input className="tb-input w-full" value={form.client_name} onChange={(e: any) =>setForm({...form,client_name:e.target.value})}/>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Estimated Days</label>
-              <input type="number" className="tb-input w-full" value={form.estimated_days} onChange={e=>setForm({...form,estimated_days:e.target.value})} min="0"/>
+              <input type="number" className="tb-input w-full" value={form.estimated_days} onChange={(e: any) =>setForm({...form,estimated_days:e.target.value})} min="0"/>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Labor Cost ({form.currency})</label>
-              <input type="number" className="tb-input w-full" value={form.labor_cost} onChange={e=>setForm({...form,labor_cost:e.target.value})} min="0"/>
+              <input type="number" className="tb-input w-full" value={form.labor_cost} onChange={(e: any) =>setForm({...form,labor_cost:e.target.value})} min="0"/>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Overhead %</label>
-              <input type="number" className="tb-input w-full" value={form.overhead_pct} onChange={e=>setForm({...form,overhead_pct:e.target.value})} min="0" max="100"/>
+              <input type="number" className="tb-input w-full" value={form.overhead_pct} onChange={(e: any) =>setForm({...form,overhead_pct:e.target.value})} min="0" max="100"/>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Profit Margin %</label>
-              <input type="number" className="tb-input w-full" value={form.profit_margin_pct} onChange={e=>setForm({...form,profit_margin_pct:e.target.value})} min="0" max="100"/>
+              <input type="number" className="tb-input w-full" value={form.profit_margin_pct} onChange={(e: any) =>setForm({...form,profit_margin_pct:e.target.value})} min="0" max="100"/>
             </div>
             <div className="col-span-2">
               <label className="text-xs text-tertiary block mb-1">Description</label>
-              <textarea className="tb-input w-full h-20 resize-none" value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/>
+              <textarea className="tb-input w-full h-20 resize-none" value={form.description} onChange={(e: any) =>setForm({...form,description:e.target.value})}/>
             </div>
           </div>
         </div>
@@ -109,12 +109,12 @@ export default function SOWCreatePage() {
           <div className="p-4 rounded-xl bg-base-alt border border-border space-y-3">
             <div className="text-xs font-bold text-brand mb-2">Add BOQ Item</div>
             <div className="grid grid-cols-5 gap-2">
-              <input className="tb-input col-span-2" placeholder="Description *" value={newItem.description} onChange={e=>setNewItem({...newItem,description:e.target.value})}/>
-              <select className="tb-input" value={newItem.unit} onChange={e=>setNewItem({...newItem,unit:e.target.value})}>
+              <input className="tb-input col-span-2" placeholder="Description *" value={newItem.description} onChange={(e: any) =>setNewItem({...newItem,description:e.target.value})}/>
+              <select className="tb-input" value={newItem.unit} onChange={(e: any) =>setNewItem({...newItem,unit:e.target.value})}>
                 {["unit","m","m2","m3","hr","lot","kg","set"].map((u: any) =><option key={u} value={u}>{u}</option>)}
               </select>
-              <input type="number" className="tb-input" placeholder="Qty" value={newItem.quantity} onChange={e=>setNewItem({...newItem,quantity:e.target.value})} min="0.001" step="0.001"/>
-              <input type="number" className="tb-input" placeholder="Unit Rate" value={newItem.unit_rate} onChange={e=>setNewItem({...newItem,unit_rate:e.target.value})} min="0"/>
+              <input type="number" className="tb-input" placeholder="Qty" value={newItem.quantity} onChange={(e: any) =>setNewItem({...newItem,quantity:e.target.value})} min="0.001" step="0.001"/>
+              <input type="number" className="tb-input" placeholder="Unit Rate" value={newItem.unit_rate} onChange={(e: any) =>setNewItem({...newItem,unit_rate:e.target.value})} min="0"/>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-emerald-400 font-bold">{fmtEGP(Number(newItem.quantity||0)*Number(newItem.unit_rate||0))}</span>

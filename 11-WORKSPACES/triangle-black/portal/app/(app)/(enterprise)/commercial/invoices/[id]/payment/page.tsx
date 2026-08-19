@@ -137,33 +137,33 @@ export default function InvoicePaymentPage() {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Amount (EGP) *</label>
               <input type="number" min="0.01" step="0.01" max={outstanding} required
-                value={form.amount} onChange={e => setForm(f=>({...f,amount:e.target.value}))}
+                value={form.amount} onChange={(e: any) => setForm(f=>({...f,amount:e.target.value}))}
                 placeholder={`Max: ${outstanding.toFixed(2)}`}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Date</label>
               <input type="date" value={form.payment_date}
-                onChange={e => setForm(f=>({...f,payment_date:e.target.value}))}
+                onChange={(e: any) => setForm(f=>({...f,payment_date:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Method</label>
-              <select value={form.method} onChange={e => setForm(f=>({...f,method:e.target.value}))}
+              <select value={form.method} onChange={(e: any) => setForm(f=>({...f,method:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                 {PAYMENT_METHODS.map((m: any) => <option key={m} value={m}>{m.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Reference / Cheque No.</label>
-              <input value={form.reference} onChange={e => setForm(f=>({...f,reference:e.target.value}))}
+              <input value={form.reference} onChange={(e: any) => setForm(f=>({...f,reference:e.target.value}))}
                 placeholder="TRX-001 or cheque number"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <input value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))}
+            <input value={form.notes} onChange={(e: any) => setForm(f=>({...f,notes:e.target.value}))}
               placeholder="Payment notes..."
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
           </div>

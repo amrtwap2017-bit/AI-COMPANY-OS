@@ -39,7 +39,7 @@ export default function AllModulesPage() {
           <div className="mt-5" style={{maxWidth:520}}>
             <input
               value={query}
-              onChange={e=>setQuery(e.target.value)}
+              onChange={(e: any) =>setQuery(e.target.value)}
               placeholder="Search modules, pages, workflows..."
               className="tb-input w-full"
             />

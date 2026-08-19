@@ -271,8 +271,8 @@ export default function MyDayPage() {
                            borderRadius:10, cursor:"pointer", textAlign:"left",
                            fontSize:"0.8rem", fontWeight:500, color:"var(--color-text-1)",
                            transition:"all 0.15s ease" }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "#B9924C")}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--color-border)")}>
+                  onMouseEnter={(e: any) => (e.currentTarget.style.borderColor = "#B9924C")}
+                  onMouseLeave={(e: any) => (e.currentTarget.style.borderColor = "var(--color-border)")}>
                   <span style={{ fontSize:"1.2rem" }}>{action.icon}</span>
                   {action.label}
                 </button>

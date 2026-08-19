@@ -25,8 +25,8 @@ export default function AnalyticsReportsPage() {
           ) : reports.map((r: any, i: number) => (
             <button key={i} onClick={()=>router.push("/reports")}
               style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(185,146,76,0.3)";e.currentTarget.style.transform="translateY(-1px)";}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--color-border)";e.currentTarget.style.transform="none";}}>
+              onMouseEnter={(e: any) =>{e.currentTarget.style.borderColor="rgba(185,146,76,0.3)";e.currentTarget.style.transform="translateY(-1px)";}}
+              onMouseLeave={(e: any) =>{e.currentTarget.style.borderColor="var(--color-border)";e.currentTarget.style.transform="none";}}>
               <div style={{fontSize:"1.5rem",marginBottom:8}}>📊</div>
               <div style={{fontSize:"0.9375rem",fontWeight:700,color:"var(--color-text-1)"}}>{r.name || r.type || "Report"}</div>
               <div style={{fontSize:"0.8125rem",color:"var(--color-text-3)",marginTop:4}}>{r.description || "Generate and export"}</div>

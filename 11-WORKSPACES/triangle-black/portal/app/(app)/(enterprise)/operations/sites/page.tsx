@@ -53,7 +53,7 @@ export default function SitesPage() {
 
       <div className="tb-canvas">
         <div className="flex gap-2.5 flex-wrap items-center mb-5">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search sites..."
+          <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search sites..."
             className="tb-input" style={{minWidth:"240px"}}/>
           <div className="tb-tabs border-0 mb-0">
             {["all","active","inactive"].map((f: any) =>(

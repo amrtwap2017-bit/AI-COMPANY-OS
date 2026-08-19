@@ -143,7 +143,7 @@ export default function PlatformHealthPage() {
             </div>
             {auditEvents.length===0 ? (
               <p className="text-sm text-tertiary">No recent audit events</p>
-            ) : auditEvents.map((ev,i)=>(
+            ) : auditEvents.map((ev: any, i: any)=>(
               <div key={i} className="tb-detail-row flex-col items-start gap-0.5">
                 <div className="flex justify-between w-full">
                   <span className="text-xs font-bold text-primary">{ev.action||ev.event_type||"event"} <span className="font-normal text-tertiary">{ev.entity_type||""}</span></span>

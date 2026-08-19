@@ -40,13 +40,13 @@ export default function NewWorkOrderPage() {
       <form onSubmit={submit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-          <input required value={form.title} onChange={(e) => set("title", e.target.value)}
+          <input required value={form.title} onChange={(e: any) => set("title", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="e.g. HVAC Filter Replacement - Room 302" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea value={form.description} onChange={(e) => set("description", e.target.value)}
+          <textarea value={form.description} onChange={(e: any) => set("description", e.target.value)}
             rows={3}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Describe the work required..." />
@@ -54,7 +54,7 @@ export default function NewWorkOrderPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select value={form.type} onChange={(e) => set("type", e.target.value)}
+            <select value={form.type} onChange={(e: any) => set("type", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
               <option value="corrective">Corrective</option>
               <option value="preventive">Preventive</option>
@@ -63,7 +63,7 @@ export default function NewWorkOrderPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-            <select value={form.priority} onChange={(e) => set("priority", e.target.value)}
+            <select value={form.priority} onChange={(e: any) => set("priority", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
               <option value="critical">Critical</option>
               <option value="high">High</option>

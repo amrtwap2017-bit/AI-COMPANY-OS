@@ -12,7 +12,7 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const fmtQty = (n, unit) => `${Number(n||0).toLocaleString()} ${unit||""}`.trim();
 
-function getStockStatus(qtyOnHand, minStock, reorderQty) {
+function getStockStatus(qtyOnHand: any, minStock: any, reorderQty: any) {
   if (qtyOnHand <= 0) return "critical";
   if (minStock > 0 && qtyOnHand <= minStock) return "critical";
   if (reorderQty > 0 && qtyOnHand <= reorderQty) return "low";
@@ -117,12 +117,12 @@ export default function StockBalancesPage() {
 
         <div className="tb-section mb-4">
           <div className="flex gap-2.5 flex-wrap items-center">
-            <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}}
+            <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}}
               placeholder="Search items..." className="tb-input" style={{minWidth:"200px",width:"auto"}}/>
-            <select value={filterWarehouse} onChange={e=>{setFilterWarehouse(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterWarehouse} onChange={(e: any) =>{setFilterWarehouse(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
               {warehouseNames.map((w: any) =><option key={w} value={w}>{w==="all"?"All Warehouses":w}</option>)}
             </select>
-            <select value={filterCategory} onChange={e=>{setFilterCategory(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterCategory} onChange={(e: any) =>{setFilterCategory(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
               {categories.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
             <div className="flex gap-1.5">

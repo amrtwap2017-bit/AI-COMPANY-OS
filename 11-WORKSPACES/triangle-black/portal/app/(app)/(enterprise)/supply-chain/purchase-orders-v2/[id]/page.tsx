@@ -128,14 +128,14 @@ export default function POv2DetailPage() {
               <div className="p-4 rounded-xl bg-surface-alt border border-brand/30 mb-4 flex flex-col gap-3">
                 <div className="text-xs font-bold text-brand mb-2">New Line Item</div>
                 <div className="grid grid-cols-2 gap-3">
-                  <input className="tb-input col-span-2" placeholder="Description *" value={newLine.description} onChange={e=>setNewLine({...newLine,description:e.target.value})}/>
-                  <select className="tb-select" value={newLine.unit} onChange={e=>setNewLine({...newLine,unit:e.target.value})}>
+                  <input className="tb-input col-span-2" placeholder="Description *" value={newLine.description} onChange={(e: any) =>setNewLine({...newLine,description:e.target.value})}/>
+                  <select className="tb-select" value={newLine.unit} onChange={(e: any) =>setNewLine({...newLine,unit:e.target.value})}>
                     {["unit","m","m2","m3","hr","lot","kg","set","pair"].map((u: any) =><option key={u} value={u}>{u}</option>)}
                   </select>
-                  <input type="number" className="tb-input" placeholder="Quantity" value={newLine.quantity} onChange={e=>setNewLine({...newLine,quantity:e.target.value})} min="0.001" step="0.001"/>
-                  <input type="number" className="tb-input" placeholder="Unit Price (EGP)" value={newLine.unit_price} onChange={e=>setNewLine({...newLine,unit_price:e.target.value})} min="0"/>
-                  <input type="number" className="tb-input" placeholder="Discount %" value={newLine.discount_pct} onChange={e=>setNewLine({...newLine,discount_pct:e.target.value})} min="0" max="100"/>
-                  <input type="number" className="tb-input" placeholder="VAT %" value={newLine.vat_pct} onChange={e=>setNewLine({...newLine,vat_pct:e.target.value})} min="0"/>
+                  <input type="number" className="tb-input" placeholder="Quantity" value={newLine.quantity} onChange={(e: any) =>setNewLine({...newLine,quantity:e.target.value})} min="0.001" step="0.001"/>
+                  <input type="number" className="tb-input" placeholder="Unit Price (EGP)" value={newLine.unit_price} onChange={(e: any) =>setNewLine({...newLine,unit_price:e.target.value})} min="0"/>
+                  <input type="number" className="tb-input" placeholder="Discount %" value={newLine.discount_pct} onChange={(e: any) =>setNewLine({...newLine,discount_pct:e.target.value})} min="0" max="100"/>
+                  <input type="number" className="tb-input" placeholder="VAT %" value={newLine.vat_pct} onChange={(e: any) =>setNewLine({...newLine,vat_pct:e.target.value})} min="0"/>
                   <div className="text-sm font-bold text-success flex items-center">
                     Total: {fmtEGP(Number(newLine.quantity)*Number(newLine.unit_price)*(1-Number(newLine.discount_pct)/100)*(1+Number(newLine.vat_pct)/100))}
                   </div>

@@ -454,7 +454,7 @@ export default function SOWDetailPage() {
         <div onClick={() => setShowCreateRFQ(false)}
           className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-6"
           style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e => e.stopPropagation()}
+          <div onClick={(e: any) => e.stopPropagation()}
             className="tb-section w-full shadow-xl"
             style={{maxWidth:"520px",maxHeight:"90vh",overflowY:"auto",borderRadius:"16px"}}>
 
@@ -487,7 +487,7 @@ export default function SOWDetailPage() {
                 RFQ Title <span className="text-danger">*</span>
               </label>
               <input value={rfqForm.title}
-                onChange={e => setF("title", e.target.value)}
+                onChange={(e: any) => setF("title", e.target.value)}
                 className="tb-input"
                 style={rfqErrors.title ? {borderColor:"var(--color-danger)"} : {}} />
               {rfqErrors.title && (
@@ -500,7 +500,7 @@ export default function SOWDetailPage() {
               <div className="tb-form-group">
                 <label className="tb-label">RFQ Type</label>
                 <select value={rfqForm.rfq_type}
-                  onChange={e => setF("rfq_type", e.target.value)}
+                  onChange={(e: any) => setF("rfq_type", e.target.value)}
                   className="tb-select">
                   {["open","closed","direct"].map((t: any) => (
                     <option key={t} value={t}>
@@ -512,7 +512,7 @@ export default function SOWDetailPage() {
               <div className="tb-form-group">
                 <label className="tb-label">Currency</label>
                 <select value={rfqForm.currency}
-                  onChange={e => setF("currency", e.target.value)}
+                  onChange={(e: any) => setF("currency", e.target.value)}
                   className="tb-select">
                   {["EGP","USD","EUR","AED"].map((c: any) => (
                     <option key={c} value={c}>{c}</option>
@@ -526,7 +526,7 @@ export default function SOWDetailPage() {
               <div className="tb-form-group">
                 <label className="tb-label">Total Budget</label>
                 <input type="number" value={rfqForm.total_budget}
-                  onChange={e => setF("total_budget", e.target.value)}
+                  onChange={(e: any) => setF("total_budget", e.target.value)}
                   placeholder="0.00" min="0"
                   className="tb-input" />
               </div>
@@ -535,7 +535,7 @@ export default function SOWDetailPage() {
                   Submission Deadline <span className="text-danger">*</span>
                 </label>
                 <input type="date" value={rfqForm.submission_deadline}
-                  onChange={e => setF("submission_deadline", e.target.value)}
+                  onChange={(e: any) => setF("submission_deadline", e.target.value)}
                   className="tb-input"
                   style={rfqErrors.submission_deadline ? {borderColor:"var(--color-danger)"} : {}} />
                 {rfqErrors.submission_deadline && (
@@ -548,7 +548,7 @@ export default function SOWDetailPage() {
             <div className="tb-form-group mb-4">
               <label className="tb-label">Delivery Location</label>
               <input value={rfqForm.delivery_location}
-                onChange={e => setF("delivery_location", e.target.value)}
+                onChange={(e: any) => setF("delivery_location", e.target.value)}
                 placeholder="e.g. Nile Plaza Hotel — Basement Store"
                 className="tb-input" />
             </div>
@@ -557,7 +557,7 @@ export default function SOWDetailPage() {
             <div className="tb-form-group mb-6">
               <label className="tb-label">Notes</label>
               <textarea value={rfqForm.notes}
-                onChange={e => setF("notes", e.target.value)}
+                onChange={(e: any) => setF("notes", e.target.value)}
                 placeholder="Additional notes for vendors..."
                 rows={3}
                 className="tb-input"

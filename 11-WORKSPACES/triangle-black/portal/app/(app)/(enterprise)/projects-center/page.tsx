@@ -71,7 +71,7 @@ function ProjectsCenterPageInner() {
 
       <div className="tb-canvas">
         <div className="flex gap-3 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search projects..." className="tb-input" style={{maxWidth:"320px"}} />
+          <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search projects..." className="tb-input" style={{maxWidth:"320px"}} />
           <div className="tb-tabs border-0 mb-0">
             {["all","active","planning","completed"].map((s: any) =>(
               <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
@@ -153,7 +153,7 @@ function ProjectsCenterPageInner() {
 
       {showNewProject && (
         <div onClick={()=>setShowNewProject(false)} className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-5" style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e=>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
+          <div onClick={(e: any) =>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-lg font-bold text-primary">New Project</h2>
               <button onClick={()=>setShowNewProject(false)} className="tb-btn-ghost text-xl px-2">×</button>
@@ -161,22 +161,22 @@ function ProjectsCenterPageInner() {
             <div className="flex flex-col gap-3">
               <div className="tb-form-group">
                 <label className="tb-label">Title <span className="text-danger">*</span></label>
-                <input value={newProj.title} onChange={e=>setNewProj({...newProj,title:e.target.value})} placeholder="Project name" className="tb-input" />
+                <input value={newProj.title} onChange={(e: any) =>setNewProj({...newProj,title:e.target.value})} placeholder="Project name" className="tb-input" />
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Description</label>
-                <textarea value={newProj.description} onChange={e=>setNewProj({...newProj,description:e.target.value})} rows={2} placeholder="Project details" className="tb-input" style={{resize:"none"}} />
+                <textarea value={newProj.description} onChange={(e: any) =>setNewProj({...newProj,description:e.target.value})} rows={2} placeholder="Project details" className="tb-input" style={{resize:"none"}} />
               </div>
               <div className="tb-form-grid">
                 <div className="tb-form-group">
                   <label className="tb-label">Status</label>
-                  <select value={newProj.status} onChange={e=>setNewProj({...newProj,status:e.target.value})} className="tb-select">
+                  <select value={newProj.status} onChange={(e: any) =>setNewProj({...newProj,status:e.target.value})} className="tb-select">
                     {["planning","active","on_hold"].map((s: any) =><option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">Budget (EGP)</label>
-                  <input type="number" value={newProj.budget} onChange={e=>setNewProj({...newProj,budget:Number(e.target.value)})} className="tb-input" />
+                  <input type="number" value={newProj.budget} onChange={(e: any) =>setNewProj({...newProj,budget:Number(e.target.value)})} className="tb-input" />
                 </div>
               </div>
               <div className="tb-action-bar mt-1">

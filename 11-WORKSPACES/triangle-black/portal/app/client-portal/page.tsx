@@ -53,19 +53,19 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div>
               <label className="block text-xs mb-1.5 font-semibold uppercase tracking-wider" style={{color:"#B29F8B"}}>Email</label>
-              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required
+              <input type="email" value={email} onChange={(e: any) =>setEmail(e.target.value)} required
                 className="w-full rounded-md px-3.5 py-3 text-sm outline-none transition-colors"
                 style={{background:"#221E1B",border:"1px solid #2D2723",color:"#F3EFE8"}}
-                onFocus={e=>e.target.style.borderColor="#B9924C"} onBlur={e=>e.target.style.borderColor="#2D2723"}
+                onFocus={(e: any) =>e.target.style.borderColor="#B9924C"} onBlur={(e: any) =>e.target.style.borderColor="#2D2723"}
                 placeholder="you@company.com" />
             </div>
             <div>
               <label className="block text-xs mb-1.5 font-semibold uppercase tracking-wider" style={{color:"#B29F8B"}}>PIN Code</label>
-              <input type="password" value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,4))}
+              <input type="password" value={pin} onChange={(e: any) =>setPin(e.target.value.replace(/\D/g,"").slice(0,4))}
                 maxLength={4} inputMode="numeric" required
                 className="w-full rounded-md py-3 text-xl font-bold text-center tracking-widest outline-none transition-colors"
                 style={{background:"#221E1B",border:"1px solid #2D2723",color:"#F3EFE8"}}
-                onFocus={e=>e.target.style.borderColor="#B9924C"} onBlur={e=>e.target.style.borderColor="#2D2723"}
+                onFocus={(e: any) =>e.target.style.borderColor="#B9924C"} onBlur={(e: any) =>e.target.style.borderColor="#2D2723"}
                 placeholder="• • • •" />
             </div>
             {error && (

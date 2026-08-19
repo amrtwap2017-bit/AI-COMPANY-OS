@@ -110,7 +110,7 @@ export default function GoodsReceiptNewPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Purchase Order *</label>
-              <select value={form.po_id} onChange={e => setForm(f=>({...f,po_id:e.target.value}))}
+              <select value={form.po_id} onChange={(e: any) => setForm(f=>({...f,po_id:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" required>
                 <option value="">Select PO...</option>
                 {pos.map(po => (
@@ -125,25 +125,25 @@ export default function GoodsReceiptNewPage() {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Received Date</label>
               <input type="date" value={form.received_date}
-                onChange={e => setForm(f=>({...f,received_date:e.target.value}))}
+                onChange={(e: any) => setForm(f=>({...f,received_date:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Received By</label>
-              <input value={form.received_by} onChange={e => setForm(f=>({...f,received_by:e.target.value}))}
+              <input value={form.received_by} onChange={(e: any) => setForm(f=>({...f,received_by:e.target.value}))}
                 placeholder="Name of receiving staff"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Delivery Note Number</label>
-              <input value={form.delivery_note} onChange={e => setForm(f=>({...f,delivery_note:e.target.value}))}
+              <input value={form.delivery_note} onChange={(e: any) => setForm(f=>({...f,delivery_note:e.target.value}))}
                 placeholder="DN-001"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Overall Condition</label>
               <select value={form.overall_condition}
-                onChange={e => setForm(f=>({...f,overall_condition:e.target.value}))}
+                onChange={(e: any) => setForm(f=>({...f,overall_condition:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                 {CONDITION.map((c: any) => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
               </select>
@@ -163,7 +163,7 @@ export default function GoodsReceiptNewPage() {
 
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-            <textarea value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))}
+            <textarea value={form.notes} onChange={(e: any) => setForm(f=>({...f,notes:e.target.value}))}
               rows={2} placeholder="General receipt notes..."
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
           </div>
@@ -181,25 +181,25 @@ export default function GoodsReceiptNewPage() {
               <div key={i} className="grid grid-cols-12 gap-2 items-end p-3 bg-gray-50 rounded-xl">
                 <div className="col-span-4">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Description</label>}
-                  <input value={line.description} onChange={e => updateLine(i,"description",e.target.value)}
+                  <input value={line.description} onChange={(e: any) => updateLine(i,"description",e.target.value)}
                     placeholder="Item description..."
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-2">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Qty Received</label>}
                   <input type="number" min="0" step="0.01" value={line.qty_received}
-                    onChange={e => updateLine(i,"qty_received",e.target.value)}
+                    onChange={(e: any) => updateLine(i,"qty_received",e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-2">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Qty Accepted</label>}
                   <input type="number" min="0" step="0.01" value={line.qty_accepted}
-                    onChange={e => updateLine(i,"qty_accepted",e.target.value)}
+                    onChange={(e: any) => updateLine(i,"qty_accepted",e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-2">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Condition</label>}
-                  <select value={line.condition} onChange={e => updateLine(i,"condition",e.target.value)}
+                  <select value={line.condition} onChange={(e: any) => updateLine(i,"condition",e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900">
                     {CONDITION.map((c: any) => <option key={c} value={c}>{c}</option>)}
                   </select>

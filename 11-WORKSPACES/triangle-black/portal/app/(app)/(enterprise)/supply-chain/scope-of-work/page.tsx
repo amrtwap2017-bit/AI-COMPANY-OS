@@ -88,7 +88,7 @@ export default function ScopeOfWorkPage() {
 
       {showNewSOW && (
         <div onClick={()=>setShowNewSOW(false)} className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-5" style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e=>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
+          <div onClick={(e: any) =>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-lg font-bold text-primary">New Scope of Work</h2>
               <button onClick={()=>setShowNewSOW(false)} className="tb-btn-ghost text-2xl px-2">×</button>
@@ -96,25 +96,25 @@ export default function ScopeOfWorkPage() {
             <div className="flex flex-col gap-3">
               <div className="tb-form-group">
                 <label className="tb-label">Title <span className="text-danger">*</span></label>
-                <input value={newSOW.title} onChange={e=>setNewSOW({...newSOW,title:e.target.value})} placeholder="e.g. HVAC Maintenance SOW" className="tb-input" />
+                <input value={newSOW.title} onChange={(e: any) =>setNewSOW({...newSOW,title:e.target.value})} placeholder="e.g. HVAC Maintenance SOW" className="tb-input" />
               </div>
               <div className="tb-form-grid">
                 <div className="tb-form-group">
                   <label className="tb-label">Type</label>
-                  <select value={newSOW.type} onChange={e=>setNewSOW({...newSOW,type:e.target.value})} className="tb-select">
+                  <select value={newSOW.type} onChange={(e: any) =>setNewSOW({...newSOW,type:e.target.value})} className="tb-select">
                     {["service","maintenance","installation","repair","inspection"].map((t: any) =><option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">Client</label>
-                  <input value={newSOW.client_name} onChange={e=>setNewSOW({...newSOW,client_name:e.target.value})} placeholder="Client name" className="tb-input" />
+                  <input value={newSOW.client_name} onChange={(e: any) =>setNewSOW({...newSOW,client_name:e.target.value})} placeholder="Client name" className="tb-input" />
                 </div>
               </div>
               <div className="tb-grid-3">
                 {[{label:"Labor Cost",key:"labor_cost"},{label:"Materials",key:"materials_cost"},{label:"Days",key:"estimated_days"}].map((f: any) =>(
                   <div key={f.key} className="tb-form-group">
                     <label className="tb-label">{f.label}</label>
-                    <input type="number" value={newSOW[f.key]} onChange={e=>setNewSOW({...newSOW,[f.key]:Number(e.target.value)})} className="tb-input" />
+                    <input type="number" value={newSOW[f.key]} onChange={(e: any) =>setNewSOW({...newSOW,[f.key]:Number(e.target.value)})} className="tb-input" />
                   </div>
                 ))}
               </div>

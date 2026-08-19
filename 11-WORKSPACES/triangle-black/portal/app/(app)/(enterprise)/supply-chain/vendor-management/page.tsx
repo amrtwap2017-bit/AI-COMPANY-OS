@@ -75,7 +75,7 @@ export default function VendorManagementPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="flex gap-2.5 flex-wrap items-center mb-4">
-            <input className="tb-input flex-1" style={{minWidth:"200px"}} placeholder="Search vendors…" value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} />
+            <input className="tb-input flex-1" style={{minWidth:"200px"}} placeholder="Search vendors…" value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} />
             <div className="tb-tabs border-0 mb-0">
               <button onClick={()=>{setFilterCat("all");setPage(1);}} className={`tb-tab ${filterCat==="all"?"active":""}`}>All</button>
               {cats.map((c: any) =><button key={c} onClick={()=>{setFilterCat(c);setPage(1);}} className={`tb-tab ${filterCat===c?"active":""}`}>{c}</button>)}
@@ -121,7 +121,7 @@ export default function VendorManagementPage() {
 
       {showNewVendor && (
         <div onClick={()=>setShowNewVendor(false)} className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-5" style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e=>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
+          <div onClick={(e: any) =>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-lg font-bold text-primary">Add New Vendor</h2>
               <button onClick={()=>setShowNewVendor(false)} className="tb-btn-ghost text-xl px-2">×</button>
@@ -129,33 +129,33 @@ export default function VendorManagementPage() {
             <div className="flex flex-col gap-3">
               <div className="tb-form-group">
                 <label className="tb-label">Company Name <span className="text-danger">*</span></label>
-                <input value={newV.company_name} onChange={e=>setNewV({...newV,company_name:e.target.value})} placeholder="e.g. Arctic HVAC Systems" className="tb-input" style={vErrors.company_name?{borderColor:"var(--color-danger)"}:{}} />
+                <input value={newV.company_name} onChange={(e: any) =>setNewV({...newV,company_name:e.target.value})} placeholder="e.g. Arctic HVAC Systems" className="tb-input" style={vErrors.company_name?{borderColor:"var(--color-danger)"}:{}} />
                 {vErrors.company_name&&<div className="text-xs text-danger mt-1">{vErrors.company_name}</div>}
               </div>
               <div className="tb-form-grid">
                 <div className="tb-form-group">
                   <label className="tb-label">Category</label>
-                  <select value={newV.category} onChange={e=>setNewV({...newV,category:e.target.value})} className="tb-select">
+                  <select value={newV.category} onChange={(e: any) =>setNewV({...newV,category:e.target.value})} className="tb-select">
                     {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Elevator","Other"].map((c: any) =><option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">City</label>
-                  <input value={newV.city} onChange={e=>setNewV({...newV,city:e.target.value})} placeholder="Cairo" className="tb-input" />
+                  <input value={newV.city} onChange={(e: any) =>setNewV({...newV,city:e.target.value})} placeholder="Cairo" className="tb-input" />
                 </div>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Contact Person</label>
-                <input value={newV.contact_person} onChange={e=>setNewV({...newV,contact_person:e.target.value})} placeholder="Full name" className="tb-input" />
+                <input value={newV.contact_person} onChange={(e: any) =>setNewV({...newV,contact_person:e.target.value})} placeholder="Full name" className="tb-input" />
               </div>
               <div className="tb-form-grid">
                 <div className="tb-form-group">
                   <label className="tb-label">Email</label>
-                  <input value={newV.email} onChange={e=>setNewV({...newV,email:e.target.value})} placeholder="vendor@company.com" type="email" className="tb-input" />
+                  <input value={newV.email} onChange={(e: any) =>setNewV({...newV,email:e.target.value})} placeholder="vendor@company.com" type="email" className="tb-input" />
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">Phone</label>
-                  <input value={newV.phone} onChange={e=>setNewV({...newV,phone:e.target.value})} placeholder="+20-10-..." className="tb-input" />
+                  <input value={newV.phone} onChange={(e: any) =>setNewV({...newV,phone:e.target.value})} placeholder="+20-10-..." className="tb-input" />
                 </div>
               </div>
               <div className="tb-action-bar mt-1">

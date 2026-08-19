@@ -155,34 +155,34 @@ export function CreateModal({
                   {field.type === "select" ? (
                     <select
                       value={form[field.key] || field.defaultValue || ""}
-                      onChange={e => setForm(prev => ({...prev,[field.key]:e.target.value}))}
+                      onChange={(e: any) => setForm(prev => ({...prev,[field.key]:e.target.value}))}
                       required={field.required}
                       style={{...inputStyle,cursor:"pointer"}}
-                      onFocus={e => e.target.style.borderColor="var(--color-brand)"}
-                      onBlur={e  => e.target.style.borderColor="var(--color-border)"}>
+                      onFocus={(e: any) => e.target.style.borderColor="var(--color-brand)"}
+                      onBlur={(e: any) => e.target.style.borderColor="var(--color-border)"}>
                       <option value="">— Select {field.label} —</option>
                       {(field.options||[]).map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                   ) : field.type === "textarea" ? (
                     <textarea
                       value={form[field.key] || ""}
-                      onChange={e => setForm(prev => ({...prev,[field.key]:e.target.value}))}
+                      onChange={(e: any) => setForm(prev => ({...prev,[field.key]:e.target.value}))}
                       required={field.required}
                       placeholder={field.placeholder}
                       rows={3}
                       style={{...inputStyle,resize:"vertical"}}
-                      onFocus={e => e.target.style.borderColor="var(--color-brand)"}
-                      onBlur={e  => e.target.style.borderColor="var(--color-border)"}/>
+                      onFocus={(e: any) => e.target.style.borderColor="var(--color-brand)"}
+                      onBlur={(e: any) => e.target.style.borderColor="var(--color-border)"}/>
                   ) : (
                     <input
                       type={field.type}
                       value={form[field.key] || field.defaultValue || ""}
-                      onChange={e => setForm(prev => ({...prev,[field.key]:e.target.value}))}
+                      onChange={(e: any) => setForm(prev => ({...prev,[field.key]:e.target.value}))}
                       required={field.required}
                       placeholder={field.placeholder}
                       style={inputStyle}
-                      onFocus={e => e.target.style.borderColor="var(--color-brand)"}
-                      onBlur={e  => e.target.style.borderColor="var(--color-border)"}/>
+                      onFocus={(e: any) => e.target.style.borderColor="var(--color-brand)"}
+                      onBlur={(e: any) => e.target.style.borderColor="var(--color-border)"}/>
                   )}
                 </div>
               ))}

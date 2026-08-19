@@ -38,7 +38,7 @@ export function ActionBar({ search, filters=[], actions=[], count, onClear, hasF
           </svg>
           <input
             value={search.value}
-            onChange={e => search.onChange(e.target.value)}
+            onChange={(e: any) => search.onChange(e.target.value)}
             placeholder={search.placeholder || "Search..."}
             style={{
               width:        "100%",
@@ -54,15 +54,15 @@ export function ActionBar({ search, filters=[], actions=[], count, onClear, hasF
               outline:      "none",
               transition:   "border 150ms ease",
             }}
-            onFocus={e => e.target.style.borderColor = "var(--color-brand)"}
-            onBlur={e  => e.target.style.borderColor = "var(--color-border)"}
+            onFocus={(e: any) => e.target.style.borderColor = "var(--color-brand)"}
+            onBlur={(e: any) => e.target.style.borderColor = "var(--color-border)"}
           />
         </div>
       )}
 
       {/* Filters */}
       {filters.map((f: any, i: number) => (
-        <select key={i} value={f.value} onChange={e => f.onChange(e.target.value)}
+        <select key={i} value={f.value} onChange={(e: any) => f.onChange(e.target.value)}
           style={{
             padding:      "7px 10px",
             borderRadius: 8,

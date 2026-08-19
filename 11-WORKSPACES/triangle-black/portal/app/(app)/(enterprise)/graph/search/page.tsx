@@ -61,7 +61,7 @@ export default function KnowledgeGraphSearchPage() {
       )}
       <div className="flex gap-3">
         <input type="search" placeholder="Search all entities..." value={query}
-          onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&search(query)}
+          onChange={(e: any) =>setQuery(e.target.value)} onKeyDown={(e: any) =>e.key==="Enter"&&search(query)}
           className="flex-1 border border-gray-300 rounded-xl px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" autoFocus />
         <button onClick={()=>search(query)} disabled={loading||!query.trim()}
           className="px-6 py-3 bg-[var(--color-bg)] text-white rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50">

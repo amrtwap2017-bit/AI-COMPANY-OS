@@ -198,10 +198,10 @@ export function WorkspaceHeader({
                     background:    isPrimary ? accent : "rgba(255,255,255,0.06)",
                     color:         isPrimary ? "#fff" : "rgba(248,250,252,0.8)",
                   }}
-                  onMouseEnter={e => {
+                  onMouseEnter={(e: any) => {
                     e.currentTarget.style.background = isPrimary ? `${accent}dd` : "rgba(255,255,255,0.1)";
                   }}
-                  onMouseLeave={e => {
+                  onMouseLeave={(e: any) => {
                     e.currentTarget.style.background = isPrimary ? accent : "rgba(255,255,255,0.06)";
                   }}
                 >

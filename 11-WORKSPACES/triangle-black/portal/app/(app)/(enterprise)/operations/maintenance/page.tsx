@@ -89,14 +89,14 @@ export default function MaintenanceSchedulerPage() {
         {activeTab==="schedule" && (
           <>
             <div className="flex gap-3 mb-4 flex-wrap items-center">
-              <select className="tb-select" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)} style={{minWidth:"160px",width:"auto"}}>
+              <select className="tb-select" value={filterStatus} onChange={(e: any) =>setFilterStatus(e.target.value)} style={{minWidth:"160px",width:"auto"}}>
                 <option value="all">All Status</option>
                 <option value="overdue">🚨 Overdue</option>
                 <option value="due_soon">⚠️ Due This Week</option>
                 <option value="upcoming">📅 Due This Month</option>
                 <option value="scheduled">✅ Scheduled</option>
               </select>
-              <select className="tb-select" value={filterSite} onChange={e=>setFilterSite(e.target.value)} style={{minWidth:"180px",width:"auto"}}>
+              <select className="tb-select" value={filterSite} onChange={(e: any) =>setFilterSite(e.target.value)} style={{minWidth:"180px",width:"auto"}}>
                 <option value="all">All Sites</option>
                 {sites.map((s: any) =><option key={s} value={s}>{s.split(" ").slice(0,2).join(" ")}</option>)}
               </select>

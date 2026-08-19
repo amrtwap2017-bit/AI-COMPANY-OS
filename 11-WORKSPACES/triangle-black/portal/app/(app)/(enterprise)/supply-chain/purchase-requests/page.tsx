@@ -92,7 +92,7 @@ export default function PurchaseRequestsPage() {
         )}
 
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search purchase requests..."
+          <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search purchase requests..."
             className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
             {["all","pending","submitted","approved","rejected"].map((s: any) =>(
@@ -101,7 +101,7 @@ export default function PurchaseRequestsPage() {
               </button>
             ))}
           </div>
-          <select value={urgencyF} onChange={e=>setUrgencyF(e.target.value)} className="tb-select" style={{width:"auto"}}>
+          <select value={urgencyF} onChange={(e: any) =>setUrgencyF(e.target.value)} className="tb-select" style={{width:"auto"}}>
             <option value="all">All Urgency</option>
             {["urgent","high","normal","low"].map((u: any) =><option key={u} value={u}>{u.charAt(0).toUpperCase()+u.slice(1)}</option>)}
           </select>

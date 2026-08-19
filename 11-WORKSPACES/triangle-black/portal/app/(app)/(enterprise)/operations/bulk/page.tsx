@@ -64,7 +64,7 @@ export default function BulkOperationsPage() {
             <span className="text-sm font-bold text-brand">{selected.size} selected</span>
             <div className="flex items-center gap-2 flex-1">
               <span className="text-sm text-secondary">Set status to:</span>
-              <select value={bulkStatus} onChange={e=>setBulkStatus(e.target.value)} className="tb-select" style={{width:"auto",padding:"6px 10px"}}>
+              <select value={bulkStatus} onChange={(e: any) =>setBulkStatus(e.target.value)} className="tb-select" style={{width:"auto",padding:"6px 10px"}}>
                 {["in_progress","completed","cancelled","open"].map((s: any) =><option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
               </select>
               <button onClick={()=>bulkStatusMut.mutate()} disabled={bulkStatusMut.isLoading} className="tb-btn tb-btn-primary tb-btn-sm">

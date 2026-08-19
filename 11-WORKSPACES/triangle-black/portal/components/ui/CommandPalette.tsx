@@ -83,7 +83,7 @@ export function CommandPalette({ open, onClose }: Props) {
           border: "1px solid var(--color-border)",
           boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
         }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e: any) => e.stopPropagation()}
       >
         <div
           className="flex items-center gap-3 px-4 py-3 border-b"
@@ -93,7 +93,7 @@ export function CommandPalette({ open, onClose }: Props) {
           <input
             ref={inputRef}
             value={query}
-            onChange={e => { setQuery(e.target.value); setSelected(0); }}
+            onChange={(e: any) => { setQuery(e.target.value); setSelected(0); }}
             placeholder="Search work orders, assets, contracts, technicians..."
             className="flex-1 outline-none text-sm"
             style={{ color: "var(--color-text-1)", background: "transparent" }}

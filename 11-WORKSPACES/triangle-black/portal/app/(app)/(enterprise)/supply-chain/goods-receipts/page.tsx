@@ -29,7 +29,7 @@ export default function GoodsReceiptsPage() {
       </div>
       <div className="tb-canvas">
         <div className="tb-section">
-          <div className="flex items-center gap-2 mb-4"><span className="text-secondary text-sm">🔍</span><input className="tb-search flex-1" placeholder="Search receipts..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
+          <div className="flex items-center gap-2 mb-4"><span className="text-secondary text-sm">🔍</span><input className="tb-search flex-1" placeholder="Search receipts..." value={search} onChange={(e: any) =>setSearch(e.target.value)}/></div>
           {isLoading ? <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : filtered.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No goods receipts</div></div>
           : <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>

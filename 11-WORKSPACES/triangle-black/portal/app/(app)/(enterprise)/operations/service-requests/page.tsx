@@ -85,7 +85,7 @@ export default function ServiceRequestsPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <input className="tb-input flex-1" style={{minWidth:"200px"}} placeholder="Search service requests..." value={search} onChange={e=>setSearch(e.target.value)} />
+            <input className="tb-input flex-1" style={{minWidth:"200px"}} placeholder="Search service requests..." value={search} onChange={(e: any) =>setSearch(e.target.value)} />
             <div className="tb-tabs border-0 mb-0">
               {["all","open","in_progress","resolved","closed"].map((s: any) =>(
                 <button key={s} onClick={()=>setFilterStatus(s)} className={`tb-tab ${filterStatus===s?"active":""}`}>
@@ -169,7 +169,7 @@ export default function ServiceRequestsPage() {
 
       {showCreateSR && (
         <div onClick={()=>setShowCreateSR(false)} className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-5" style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e=>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"520px"}}>
+          <div onClick={(e: any) =>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"520px"}}>
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-lg font-bold text-primary">New Service Request</h2>
               <button onClick={()=>setShowCreateSR(false)} className="tb-btn-ghost text-xl px-2">×</button>
@@ -177,31 +177,31 @@ export default function ServiceRequestsPage() {
             <div className="flex flex-col gap-3.5">
               <div className="tb-form-group">
                 <label className="tb-label">Title <span className="text-danger">*</span></label>
-                <input value={newSR.title} onChange={e=>setNewSR({...newSR,title:e.target.value})} placeholder="Describe the issue..." className="tb-input" style={srErrors.title?{borderColor:"var(--color-danger)"}:{}} />
+                <input value={newSR.title} onChange={(e: any) =>setNewSR({...newSR,title:e.target.value})} placeholder="Describe the issue..." className="tb-input" style={srErrors.title?{borderColor:"var(--color-danger)"}:{}} />
                 {srErrors.title&&<div className="text-xs text-danger mt-1">{srErrors.title}</div>}
               </div>
               <div className="tb-form-grid">
                 <div className="tb-form-group">
                   <label className="tb-label">Category</label>
-                  <select value={newSR.category} onChange={e=>setNewSR({...newSR,category:e.target.value})} className="tb-select">
+                  <select value={newSR.category} onChange={(e: any) =>setNewSR({...newSR,category:e.target.value})} className="tb-select">
                     {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Other"].map((c: any) =><option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">Urgency</label>
-                  <select value={newSR.urgency} onChange={e=>setNewSR({...newSR,urgency:e.target.value})} className="tb-select">
+                  <select value={newSR.urgency} onChange={(e: any) =>setNewSR({...newSR,urgency:e.target.value})} className="tb-select">
                     {["emergency","critical","high","normal","low"].map((u: any) =><option key={u} value={u}>{u}</option>)}
                   </select>
                 </div>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Requested By <span className="text-danger">*</span></label>
-                <input value={newSR.submitted_by} onChange={e=>setNewSR({...newSR,submitted_by:e.target.value})} placeholder="Name of requester..." className="tb-input" style={srErrors.submitted_by?{borderColor:"var(--color-danger)"}:{}} />
+                <input value={newSR.submitted_by} onChange={(e: any) =>setNewSR({...newSR,submitted_by:e.target.value})} placeholder="Name of requester..." className="tb-input" style={srErrors.submitted_by?{borderColor:"var(--color-danger)"}:{}} />
                 {srErrors.submitted_by&&<div className="text-xs text-danger mt-1">{srErrors.submitted_by}</div>}
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Description</label>
-                <textarea value={newSR.description} onChange={e=>setNewSR({...newSR,description:e.target.value})} placeholder="Additional details..." rows={3} className="tb-input" style={{resize:"vertical"}} />
+                <textarea value={newSR.description} onChange={(e: any) =>setNewSR({...newSR,description:e.target.value})} placeholder="Additional details..." rows={3} className="tb-input" style={{resize:"vertical"}} />
               </div>
               <div className="tb-action-bar mt-1">
                 <button onClick={handleCreateSR} disabled={createSR.isLoading} className="tb-btn tb-btn-primary flex-1 justify-center">

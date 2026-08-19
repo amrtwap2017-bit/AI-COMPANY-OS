@@ -29,8 +29,8 @@ export default function PlatformExportsPage() {
         {exports.map((e: any, i: number) =>(
           <button key={i} onClick={()=>handleExport(e.url)}
             style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}}
-            onMouseEnter={ev=>ev.currentTarget.style.borderColor="rgba(185,146,76,0.3)"}
-            onMouseLeave={ev=>ev.currentTarget.style.borderColor="var(--color-border)"}>
+            onMouseEnter={(ev: any) =>ev.currentTarget.style.borderColor="rgba(185,146,76,0.3)"}
+            onMouseLeave={(ev: any) =>ev.currentTarget.style.borderColor="var(--color-border)"}>
             <span style={{fontSize:"1.5rem"}}>{e.icon}</span>
             <div style={{fontSize:"0.9375rem",fontWeight:700,color:"var(--color-text-1)",marginTop:8}}>{e.label}</div>
             <div style={{fontSize:"0.8125rem",color:"var(--color-text-3)",marginTop:4}}>{e.desc}</div>

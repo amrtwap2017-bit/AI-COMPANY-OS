@@ -11,7 +11,7 @@ const fmtK   = (n) => Number(n||0)>=1000?`${(Number(n)/1000).toFixed(0)}K`:Strin
 const COLORS  = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"];
 const AXIS    = {fontSize:11,fill:"var(--color-text-3)"};
 
-const WarmTooltip = ({active,payload,label}) => {
+const WarmTooltip = ({active,payload,label}: any) => {
   if (!active||!payload?.length) return null;
   return (
     <div className="tb-section shadow-lg" style={{padding:"8px 12px"}}>

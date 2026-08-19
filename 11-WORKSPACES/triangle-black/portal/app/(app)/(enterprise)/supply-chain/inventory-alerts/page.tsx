@@ -95,7 +95,7 @@ export default function InventoryAlertsPage() {
         <div className="flex items-center gap-3">
           <label className="text-xs text-gray-500">Alert threshold:</label>
           <input type="number" min="1" max="100" value={threshold}
-            onChange={e => setThreshold(Number(e.target.value))}
+            onChange={(e: any) => setThreshold(Number(e.target.value))}
             className="w-16 border border-gray-300 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-gray-900" />
           <button onClick={() => router.push("/supply-chain/inventory")}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">
@@ -122,7 +122,7 @@ export default function InventoryAlertsPage() {
 
       {/* Search */}
       <input type="search" placeholder="Search by item name or code..."
-        value={search} onChange={e => setSearch(e.target.value)}
+        value={search} onChange={(e: any) => setSearch(e.target.value)}
         className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
 
       {/* Table */}

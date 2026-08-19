@@ -13,7 +13,7 @@ const fmtBool = (v: any) => v===true||v==="true"||v===1 ? "✅ Yes" : "❌ No";
 const CATEGORIES = ["All","Operations","Financial","Procurement","Engineering","Executive"];
 const CAT_COLORS = {Operations:"#547C4D",Financial:"#5B7C8C",Procurement:"#B07A2A",Engineering:"#8D7443",Executive:"#B07A2A"};
 
-function formatCellValue(col, value) {
+function formatCellValue(col: any, value: any) {
   if (value === null || value === undefined) return "—";
   const v = String(value);
   if (col.includes("amount")||col.includes("value")||col.includes("budget")||col.includes("cost")||col.includes("outstanding")||col.includes("paid")||col.includes("invoiced")||col.includes("bid")||col.includes("subtotal")) return fmtEGP(value);
@@ -26,7 +26,7 @@ function formatCellValue(col, value) {
   return v || "—";
 }
 
-function formatColumnLabel(col) {
+function formatColumnLabel(col: any) {
   return col.replace(/_/g," ").replace(/\w/g,c=>c.toUpperCase());
 }
 
@@ -158,13 +158,13 @@ export default function ReportsPage() {
                     {selectedMeta?.filters?.includes("status") && (
                       <div>
                         <label className="tb-label">Status</label>
-                        <input className="tb-input w-full" placeholder="e.g. open, approved" value={filters.status} onChange={e=>setFilters({...filters,status:e.target.value})}/>
+                        <input className="tb-input w-full" placeholder="e.g. open, approved" value={filters.status} onChange={(e: any) =>setFilters({...filters,status:e.target.value})}/>
                       </div>
                     )}
                     {selectedMeta?.filters?.includes("priority") && (
                       <div>
                         <label className="tb-label">Priority</label>
-                        <select className="tb-select w-full" value={filters.priority} onChange={e=>setFilters({...filters,priority:e.target.value})}>
+                        <select className="tb-select w-full" value={filters.priority} onChange={(e: any) =>setFilters({...filters,priority:e.target.value})}>
                           <option value="">All</option>
                           {["critical","high","medium","low"].map((p: any) =><option key={p} value={p}>{p}</option>)}
                         </select>
@@ -173,7 +173,7 @@ export default function ReportsPage() {
                     {selectedMeta?.filters?.includes("urgency") && (
                       <div>
                         <label className="tb-label">Urgency</label>
-                        <select className="tb-select w-full" value={filters.urgency} onChange={e=>setFilters({...filters,urgency:e.target.value})}>
+                        <select className="tb-select w-full" value={filters.urgency} onChange={(e: any) =>setFilters({...filters,urgency:e.target.value})}>
                           <option value="">All</option>
                           {["critical","high","medium","low"].map((u: any) =><option key={u} value={u}>{u}</option>)}
                         </select>
@@ -182,7 +182,7 @@ export default function ReportsPage() {
                     {selectedMeta?.filters?.includes("payment_status") && (
                       <div>
                         <label className="tb-label">Payment Status</label>
-                        <select className="tb-select w-full" value={filters.payment_status} onChange={e=>setFilters({...filters,payment_status:e.target.value})}>
+                        <select className="tb-select w-full" value={filters.payment_status} onChange={(e: any) =>setFilters({...filters,payment_status:e.target.value})}>
                           <option value="">All</option>
                           {["unpaid","partial","paid"].map((s: any) =><option key={s} value={s}>{s}</option>)}
                         </select>
@@ -191,19 +191,19 @@ export default function ReportsPage() {
                     {selectedMeta?.filters?.includes("date_from") && (
                       <div>
                         <label className="tb-label">From Date</label>
-                        <input type="date" className="tb-input w-full" value={filters.date_from} onChange={e=>setFilters({...filters,date_from:e.target.value})}/>
+                        <input type="date" className="tb-input w-full" value={filters.date_from} onChange={(e: any) =>setFilters({...filters,date_from:e.target.value})}/>
                       </div>
                     )}
                     {selectedMeta?.filters?.includes("date_to") && (
                       <div>
                         <label className="tb-label">To Date</label>
-                        <input type="date" className="tb-input w-full" value={filters.date_to} onChange={e=>setFilters({...filters,date_to:e.target.value})}/>
+                        <input type="date" className="tb-input w-full" value={filters.date_to} onChange={(e: any) =>setFilters({...filters,date_to:e.target.value})}/>
                       </div>
                     )}
                     {selectedMeta?.filters?.includes("is_approved") && (
                       <div>
                         <label className="tb-label">Approval Status</label>
-                        <select className="tb-select w-full" value={filters.is_approved} onChange={e=>setFilters({...filters,is_approved:e.target.value})}>
+                        <select className="tb-select w-full" value={filters.is_approved} onChange={(e: any) =>setFilters({...filters,is_approved:e.target.value})}>
                           <option value="">All</option>
                           <option value="true">Approved</option>
                           <option value="false">Not Approved</option>

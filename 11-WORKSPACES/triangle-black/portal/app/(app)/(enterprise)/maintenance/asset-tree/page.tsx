@@ -104,7 +104,7 @@ export default function AssetTreePage() {
                 className="tb-search flex-1"
                 placeholder="Search assets by name, tag, location..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
               />
             </div>
             <div className="flex gap-2 flex-wrap">

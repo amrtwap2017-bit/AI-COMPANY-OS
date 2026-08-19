@@ -120,7 +120,7 @@ export default function TechnicianWODetail() {
             ))}
           </div>
           <textarea
-            value={notes} onChange={e => setNotes(e.target.value)}
+            value={notes} onChange={(e: any) => setNotes(e.target.value)}
             placeholder="Add notes about the work done..."
             rows={3}
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"

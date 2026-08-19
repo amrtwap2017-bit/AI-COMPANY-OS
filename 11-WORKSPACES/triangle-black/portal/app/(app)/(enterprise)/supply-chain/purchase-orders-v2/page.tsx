@@ -135,7 +135,7 @@ export default function PurchaseOrdersV2Page() {
         <div onClick={() => setShowNewPO(false)}
           className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-6"
           style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e => e.stopPropagation()}
+          <div onClick={(e: any) => e.stopPropagation()}
             className="tb-section w-full shadow-xl"
             style={{maxWidth:"560px",maxHeight:"90vh",overflowY:"auto",borderRadius:"16px"}}>
 
@@ -149,7 +149,7 @@ export default function PurchaseOrdersV2Page() {
 
             <div className="tb-form-group mb-4">
               <label className="tb-label">Vendor <span className="text-danger">*</span></label>
-              <select value={form.vendor_id} onChange={e=>set("vendor_id",e.target.value)}
+              <select value={form.vendor_id} onChange={(e: any) =>set("vendor_id",e.target.value)}
                 className="tb-select" style={errors.vendor_id?{borderColor:"var(--color-danger)"}:{}}>
                 <option value="">— Select vendor —</option>
                 {vendors.map((v: any) => <option key={v.id} value={v.id}>{v.company_name} · {v.category}</option>)}
@@ -159,7 +159,7 @@ export default function PurchaseOrdersV2Page() {
 
             <div className="tb-form-group mb-4">
               <label className="tb-label">Title <span className="text-danger">*</span></label>
-              <input value={form.title} onChange={e=>set("title",e.target.value)}
+              <input value={form.title} onChange={(e: any) =>set("title",e.target.value)}
                 placeholder="e.g. HVAC Spare Parts Q3 2026" className="tb-input"
                 style={errors.title?{borderColor:"var(--color-danger)"}:{}} />
               {errors.title && <p className="text-xs text-danger mt-1">{errors.title}</p>}
@@ -167,7 +167,7 @@ export default function PurchaseOrdersV2Page() {
 
             <div className="tb-form-group mb-4">
               <label className="tb-label">Linked RFQ <span className="text-xs font-normal text-tertiary">(optional)</span></label>
-              <select value={form.rfq_id} onChange={e=>set("rfq_id",e.target.value)} className="tb-select">
+              <select value={form.rfq_id} onChange={(e: any) =>set("rfq_id",e.target.value)} className="tb-select">
                 <option value="">— No linked RFQ —</option>
                 {rfqs.map((r: any) => <option key={r.id} value={r.id}>{r.rfq_number} · {(r.title||"").slice(0,40)}</option>)}
               </select>
@@ -176,31 +176,31 @@ export default function PurchaseOrdersV2Page() {
             <div className="tb-form-grid mb-4" style={{gridTemplateColumns:"1fr 2fr"}}>
               <div className="tb-form-group">
                 <label className="tb-label">Currency</label>
-                <select value={form.currency} onChange={e=>set("currency",e.target.value)} className="tb-select">
+                <select value={form.currency} onChange={(e: any) =>set("currency",e.target.value)} className="tb-select">
                   {["EGP","USD","EUR","AED","SAR"].map((c: any) =><option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Total Amount</label>
-                <input type="number" value={form.total_amount} onChange={e=>set("total_amount",e.target.value)} placeholder="0.00" min="0" className="tb-input" />
+                <input type="number" value={form.total_amount} onChange={(e: any) =>set("total_amount",e.target.value)} placeholder="0.00" min="0" className="tb-input" />
               </div>
             </div>
 
             <div className="tb-form-group mb-4">
               <label className="tb-label">Payment Terms (days)</label>
-              <select value={form.payment_terms} onChange={e=>set("payment_terms",e.target.value)} className="tb-select">
+              <select value={form.payment_terms} onChange={(e: any) =>set("payment_terms",e.target.value)} className="tb-select">
                 {[7,14,30,45,60,90].map((d: any) =><option key={d} value={d}>Net {d} days</option>)}
               </select>
             </div>
 
             <div className="tb-form-group mb-4">
               <label className="tb-label">Delivery Address</label>
-              <input value={form.delivery_address} onChange={e=>set("delivery_address",e.target.value)} placeholder="e.g. Nile Plaza Hotel, Garden City, Cairo" className="tb-input" />
+              <input value={form.delivery_address} onChange={(e: any) =>set("delivery_address",e.target.value)} placeholder="e.g. Nile Plaza Hotel, Garden City, Cairo" className="tb-input" />
             </div>
 
             <div className="tb-form-group mb-6">
               <label className="tb-label">Internal Notes</label>
-              <textarea value={form.internal_notes} onChange={e=>set("internal_notes",e.target.value)} placeholder="Any internal notes or special instructions..." rows={3} className="tb-input" style={{resize:"vertical",fontFamily:"inherit"}} />
+              <textarea value={form.internal_notes} onChange={(e: any) =>set("internal_notes",e.target.value)} placeholder="Any internal notes or special instructions..." rows={3} className="tb-input" style={{resize:"vertical",fontFamily:"inherit"}} />
             </div>
 
             <div className="tb-action-bar justify-end">

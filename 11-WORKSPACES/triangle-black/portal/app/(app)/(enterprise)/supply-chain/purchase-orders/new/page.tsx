@@ -101,7 +101,7 @@ export default function PurchaseOrderNewPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Supplier *</label>
-              <select value={form.vendor_id} onChange={e => setForm(f=>({...f,vendor_id:e.target.value}))}
+              <select value={form.vendor_id} onChange={(e: any) => setForm(f=>({...f,vendor_id:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" required>
                 <option value="">Select supplier...</option>
                 {suppliers.map((s: any) => (
@@ -111,27 +111,27 @@ export default function PurchaseOrderNewPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-              <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}
+              <select value={form.status} onChange={(e: any) => setForm(f=>({...f,status:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                 {PO_STATUS.map((s: any) => <option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Terms</label>
-              <select value={form.payment_terms} onChange={e => setForm(f=>({...f,payment_terms:e.target.value}))}
+              <select value={form.payment_terms} onChange={(e: any) => setForm(f=>({...f,payment_terms:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                 {PAYMENT_TERMS.map((t: any) => <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Expected Delivery</label>
-              <input type="date" value={form.expected_date} onChange={e => setForm(f=>({...f,expected_date:e.target.value}))}
+              <input type="date" value={form.expected_date} onChange={(e: any) => setForm(f=>({...f,expected_date:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Delivery Notes</label>
-            <textarea value={form.delivery_notes} onChange={e => setForm(f=>({...f,delivery_notes:e.target.value}))}
+            <textarea value={form.delivery_notes} onChange={(e: any) => setForm(f=>({...f,delivery_notes:e.target.value}))}
               rows={2} placeholder="Special delivery instructions..."
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none" />
           </div>
@@ -149,24 +149,24 @@ export default function PurchaseOrderNewPage() {
               <div key={i} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-5">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Description</label>}
-                  <input value={line.description} onChange={e => updateLine(i,"description",e.target.value)}
+                  <input value={line.description} onChange={(e: any) => updateLine(i,"description",e.target.value)}
                     placeholder="Item description..."
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-2">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Unit</label>}
-                  <input value={line.unit} onChange={e => updateLine(i,"unit",e.target.value)}
+                  <input value={line.unit} onChange={(e: any) => updateLine(i,"unit",e.target.value)}
                     placeholder="pcs"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-2">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Qty</label>}
-                  <input type="number" min="0" step="0.01" value={line.qty} onChange={e => updateLine(i,"qty",e.target.value)}
+                  <input type="number" min="0" step="0.01" value={line.qty} onChange={(e: any) => updateLine(i,"qty",e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-2">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Unit Price (EGP)</label>}
-                  <input type="number" min="0" step="0.01" value={line.unit_price} onChange={e => updateLine(i,"unit_price",e.target.value)}
+                  <input type="number" min="0" step="0.01" value={line.unit_price} onChange={(e: any) => updateLine(i,"unit_price",e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
                 </div>
                 <div className="col-span-1 flex justify-end">
@@ -188,7 +188,7 @@ export default function PurchaseOrderNewPage() {
               <div className="flex items-center gap-2">
                 <span className="text-gray-500">VAT</span>
                 <input type="number" min="0" max="100" value={form.vat_pct}
-                  onChange={e => setForm(f=>({...f,vat_pct:Number(e.target.value)}))}
+                  onChange={(e: any) => setForm(f=>({...f,vat_pct:Number(e.target.value)}))}
                   className="w-14 border border-gray-300 rounded px-2 py-0.5 text-xs text-center" />
                 <span className="text-gray-400 text-xs">%</span>
               </div>

@@ -80,7 +80,7 @@ export default function SuppliersPage() {
                 className="tb-search flex-1"
                 placeholder="Search suppliers by name, category, contact..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
               />
             </div>
             <div className="flex gap-2 flex-wrap">

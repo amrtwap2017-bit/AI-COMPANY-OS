@@ -37,7 +37,7 @@ export function Pagination({
         {onPageSize && (
           <select
             value={pageSize}
-            onChange={e => { onPageSize(Number(e.target.value)); onPage(1); }}
+            onChange={(e: any) => { onPageSize(Number(e.target.value)); onPage(1); }}
             className="text-xs border border-border rounded-lg px-2 py-1.5 text-secondary focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400"
           >
             {pageSizes.map((s: any) => (

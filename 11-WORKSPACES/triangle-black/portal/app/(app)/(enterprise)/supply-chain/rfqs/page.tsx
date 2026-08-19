@@ -51,7 +51,7 @@ export default function RFQsPage() {
 
       <div className="tb-canvas">
         <div className="flex gap-3 mb-5 flex-wrap items-center">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search RFQs..." className="tb-input" style={{minWidth:"240px",width:"auto"}} />
+          <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search RFQs..." className="tb-input" style={{minWidth:"240px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
             {["all","draft","open","closed","awarded","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>setFilterStatus(s)} className={`tb-tab ${filterStatus===s?"active":""}`}>

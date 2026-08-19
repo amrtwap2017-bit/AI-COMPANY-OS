@@ -16,7 +16,7 @@ const STATUS_CONFIG = {
 };
 const COLUMNS = ["open","in_progress","completed"];
 
-function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
+function WOCard({ wo, techs, onAssign, onStatus, onClick }: any) {
   const [showAssign, setShowAssign] = useState(false);
   const pc = (PRIORITY_COLORS as Record<string, any>)[wo.priority] || "#6D5F53";
   const overdue = isOverdue(wo.due_date);
@@ -49,12 +49,12 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
         </div>
       </div>
       <div className="border-t border-default px-3 py-2 flex items-center gap-2">
-        <button onClick={(e)=>{e.stopPropagation();setShowAssign(!showAssign);}}
+        <button onClick={(e: any) =>{e.stopPropagation();setShowAssign(!showAssign);}}
           className="text-xs text-brand hover:opacity-80 flex-1 text-left bg-transparent border-0 cursor-pointer">
           {wo.technician_name ? "Reassign ↓" : "+ Assign Tech"}
         </button>
         {wo.status !== "completed" && (
-          <button onClick={(e)=>{e.stopPropagation();onStatus(wo.id, wo.status==="open"?"in_progress":"completed");}}
+          <button onClick={(e: any) =>{e.stopPropagation();onStatus(wo.id, wo.status==="open"?"in_progress":"completed");}}
             className="text-xs px-2 py-0.5 rounded-lg transition-colors bg-transparent border-0 cursor-pointer"
             style={{background:wo.status==="open"?"#B07A2A20":"#547C4D20",color:wo.status==="open"?"#B07A2A":"#547C4D"}}>
             {wo.status==="open"?"▶ Start":"✓ Done"}
@@ -62,9 +62,9 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
         )}
       </div>
       {showAssign && (
-        <div className="px-3 pb-3" onClick={e=>e.stopPropagation()}>
+        <div className="px-3 pb-3" onClick={(e: any) =>e.stopPropagation()}>
           <select className="tb-select w-full" defaultValue={wo.technician_id||""}
-            onChange={e=>{onAssign(wo.id,e.target.value);setShowAssign(false);}}>
+            onChange={(e: any) =>{onAssign(wo.id,e.target.value);setShowAssign(false);}}>
             <option value="">Unassigned</option>
             {techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
@@ -140,11 +140,11 @@ export default function DispatchBoardPage() {
 
       <div className="tb-canvas">
         <div className="flex gap-3 mb-4 flex-wrap">
-          <select className="tb-select" value={filterPriority} onChange={e=>setFilterPriority(e.target.value)} style={{minWidth:"140px"}}>
+          <select className="tb-select" value={filterPriority} onChange={(e: any) =>setFilterPriority(e.target.value)} style={{minWidth:"140px"}}>
             <option value="">All Priorities</option>
             {["critical","high","medium","low"].map((p: any) =><option key={p} value={p}>{p}</option>)}
           </select>
-          <select className="tb-select" value={filterSite} onChange={e=>setFilterSite(e.target.value)} style={{minWidth:"180px"}}>
+          <select className="tb-select" value={filterSite} onChange={(e: any) =>setFilterSite(e.target.value)} style={{minWidth:"180px"}}>
             <option value="">All Sites</option>
             {[{id:"site-nile-plaza",name:"Nile Plaza"},{id:"site-cairo-festival",name:"Cairo Festival"},{id:"site-four-seasons",name:"Four Seasons"},{id:"site-hilton-cairo",name:"Hilton Cairo"}].map((s: any) =>(
               <option key={s.id} value={s.id}>{s.name}</option>

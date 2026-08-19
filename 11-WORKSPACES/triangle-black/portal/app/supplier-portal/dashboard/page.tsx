@@ -8,7 +8,7 @@ const fmtDate = (d: any) => { if(!d) return "—"; try { const dt=new Date(d); i
 const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#60A5FA",sent:"#A78BFA",received:"#34D399",paid:"#10B981"};
 const STARS = (r: any) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 
-function SupplierNav({ supplier, active }) {
+function SupplierNav({ supplier, active }: any) {
   const router = useRouter();
   const items = [
     {id:"dashboard",label:"🏠 Overview",path:"/supplier-portal/dashboard"},

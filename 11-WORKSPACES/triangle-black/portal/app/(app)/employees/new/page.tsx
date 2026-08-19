@@ -37,31 +37,31 @@ export default function NewEmployeePage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-            <input required value={form.name} onChange={(e) => set("name", e.target.value)}
+            <input required value={form.name} onChange={(e: any) => set("name", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ahmed Hassan" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-            <input value={form.employee_id} onChange={(e) => set("employee_id", e.target.value)}
+            <input value={form.employee_id} onChange={(e: any) => set("employee_id", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="EMP-001" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)}
+            <input type="email" value={form.email} onChange={(e: any) => set("email", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="ahmed@hotel.com" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input value={form.phone} onChange={(e) => set("phone", e.target.value)}
+            <input value={form.phone} onChange={(e: any) => set("phone", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="+20 1234567890" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <select value={form.department} onChange={(e) => set("department", e.target.value)}
+            <select value={form.department} onChange={(e: any) => set("department", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
               <option value="">Select...</option>
               <option value="Engineering">Engineering</option>
@@ -74,13 +74,13 @@ export default function NewEmployeePage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-            <input value={form.position} onChange={(e) => set("position", e.target.value)}
+            <input value={form.position} onChange={(e: any) => set("position", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="HVAC Technician" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Salary (EGP/month)</label>
-            <input type="number" value={form.salary} onChange={(e) => set("salary", e.target.value)}
+            <input type="number" value={form.salary} onChange={(e: any) => set("salary", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="0" />
           </div>

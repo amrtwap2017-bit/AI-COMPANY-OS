@@ -46,13 +46,13 @@ const CAT_ICONS = {
   packing_list: "📋", other: "📎",
 };
 
-const REQUIRED_BADGE = ({ is_required, is_verified }) => {
+const REQUIRED_BADGE = ({ is_required, is_verified }: any) => {
   if (!is_required) return null;
   if (is_verified) return <span className="tb-badge" style={{background:"#34D39918",color:"#34D399",fontSize:"0.45rem"}}>VERIFIED</span>;
   return <span className="tb-badge" style={{background:"#F8717118",color:"#F87171",fontSize:"0.45rem"}}>REQUIRED</span>;
 };
 
-export default function DocumentsPanel({ entityType, entityId, title = "Documents", categories = [] }) {
+export default function DocumentsPanel({ entityType, entityId, title = "Documents", categories = [] }: any) {
   const qc = useQueryClient();
   const fileRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -124,7 +124,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-tertiary block mb-1">Category *</label>
-              <select className="tb-input w-full" value={form.doc_category} onChange={e=>setForm({...form,doc_category:e.target.value})}>
+              <select className="tb-input w-full" value={form.doc_category} onChange={(e: any) =>setForm({...form,doc_category:e.target.value})}>
                 {(categories.length > 0 ? categories : Object.keys(CAT_LABELS)).map(cat=>(
                   <option key={cat} value={cat}>{(CAT_LABELS as Record<string, any>)[cat]||cat}</option>
                 ))}
@@ -132,7 +132,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Document Name</label>
-              <input className="tb-input w-full" placeholder="e.g. Trade License 2025" value={form.doc_name} onChange={e=>setForm({...form,doc_name:e.target.value})}/>
+              <input className="tb-input w-full" placeholder="e.g. Trade License 2025" value={form.doc_name} onChange={(e: any) =>setForm({...form,doc_name:e.target.value})}/>
             </div>
             <div className="col-span-2">
               <label className="text-xs text-tertiary block mb-1">File * (PDF, PNG, JPG, DOCX, XLSX — max 10MB)</label>
@@ -140,7 +140,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
             </div>
             <div className="col-span-2">
               <label className="text-xs text-tertiary block mb-1">Notes</label>
-              <input className="tb-input w-full" placeholder="Optional notes…" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/>
+              <input className="tb-input w-full" placeholder="Optional notes…" value={form.notes} onChange={(e: any) =>setForm({...form,notes:e.target.value})}/>
             </div>
           </div>
           <div className="flex gap-2">

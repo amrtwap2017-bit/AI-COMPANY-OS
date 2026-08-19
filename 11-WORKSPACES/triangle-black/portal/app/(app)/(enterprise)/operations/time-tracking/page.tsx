@@ -87,47 +87,47 @@ export default function TimeTrackingPage() {
             <div className="tb-form-grid">
               <div className="tb-form-group">
                 <label className="tb-label">Work Order <span className="text-danger">*</span></label>
-                <select className="tb-select" value={form.work_order_id} onChange={e=>setForm({...form,work_order_id:e.target.value})}>
+                <select className="tb-select" value={form.work_order_id} onChange={(e: any) =>setForm({...form,work_order_id:e.target.value})}>
                   <option value="">Select work order…</option>
                   {wos.map(wo=><option key={wo.id} value={wo.id}>{wo.title?.slice(0,40)} ({wo.priority})</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Technician <span className="text-danger">*</span></label>
-                <select className="tb-select" value={form.technician_id} onChange={e=>setForm({...form,technician_id:e.target.value})}>
+                <select className="tb-select" value={form.technician_id} onChange={(e: any) =>setForm({...form,technician_id:e.target.value})}>
                   <option value="">Select technician…</option>
                   {techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Work Type</label>
-                <select className="tb-select" value={form.work_type} onChange={e=>setForm({...form,work_type:e.target.value})}>
+                <select className="tb-select" value={form.work_type} onChange={(e: any) =>setForm({...form,work_type:e.target.value})}>
                   {WORK_TYPES.map(wt=><option key={wt.v} value={wt.v}>{wt.icon} {wt.label}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Hourly Rate (EGP)</label>
-                <input type="number" className="tb-input" value={form.hourly_rate} onChange={e=>setForm({...form,hourly_rate:Number(e.target.value)})} min="0" />
+                <input type="number" className="tb-input" value={form.hourly_rate} onChange={(e: any) =>setForm({...form,hourly_rate:Number(e.target.value)})} min="0" />
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Start Time</label>
-                <input type="datetime-local" className="tb-input" value={form.start_time} onChange={e=>setForm({...form,start_time:e.target.value})} />
+                <input type="datetime-local" className="tb-input" value={form.start_time} onChange={(e: any) =>setForm({...form,start_time:e.target.value})} />
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">End Time</label>
-                <input type="datetime-local" className="tb-input" value={form.end_time} onChange={e=>setForm({...form,end_time:e.target.value})} />
+                <input type="datetime-local" className="tb-input" value={form.end_time} onChange={(e: any) =>setForm({...form,end_time:e.target.value})} />
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Hours (or auto-calc)</label>
-                <input type="number" className="tb-input" placeholder="e.g. 2.5" value={form.hours_logged} onChange={e=>setForm({...form,hours_logged:e.target.value})} min="0" step="0.25" />
+                <input type="number" className="tb-input" placeholder="e.g. 2.5" value={form.hours_logged} onChange={(e: any) =>setForm({...form,hours_logged:e.target.value})} min="0" step="0.25" />
               </div>
               <div className="flex items-center gap-2.5 pt-5">
-                <input type="checkbox" id="billable" checked={form.is_billable} onChange={e=>setForm({...form,is_billable:e.target.checked})} style={{width:16,height:16}} />
+                <input type="checkbox" id="billable" checked={form.is_billable} onChange={(e: any) =>setForm({...form,is_billable:e.target.checked})} style={{width:16,height:16}} />
                 <label htmlFor="billable" className="text-sm text-secondary">Billable to client</label>
               </div>
               <div className="tb-form-group" style={{gridColumn:"1 / -1"}}>
                 <label className="tb-label">Notes</label>
-                <textarea className="tb-input" style={{height:64,resize:"none"}} value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} placeholder="Work performed…" />
+                <textarea className="tb-input" style={{height:64,resize:"none"}} value={form.notes} onChange={(e: any) =>setForm({...form,notes:e.target.value})} placeholder="Work performed…" />
               </div>
             </div>
             {estHours>0 && (
@@ -149,7 +149,7 @@ export default function TimeTrackingPage() {
 
         {activeTab==="entries" && (
           <SectionCard title="Time Entries" subtitle={`${entries.length} entries recorded`}
-            actions={<select className="tb-select" value={filterTech} onChange={e=>setFilterTech(e.target.value)} style={{minWidth:160}}><option value="">All Technicians</option>{techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}</select>}>
+            actions={<select className="tb-select" value={filterTech} onChange={(e: any) =>setFilterTech(e.target.value)} style={{minWidth:160}}><option value="">All Technicians</option>{techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}</select>}>
             {isLoading ? <LoadingState type="table" rows={6} /> : entries.length===0 ? (
               <EmptyState icon="⏱️" title="No time entries" description="Log your first time entry above" action={{label:"Log Time",onClick:()=>setActiveTab("log")}} size="sm" />
             ) : <DataTable columns={entriesColumns} data={entries} keyField="id" />}

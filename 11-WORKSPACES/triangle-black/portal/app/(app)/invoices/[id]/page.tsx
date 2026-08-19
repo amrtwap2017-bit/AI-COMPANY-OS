@@ -13,7 +13,7 @@ const STATUS_COLOR = {
   draft:"#94A3B8",cancelled:"#64748B",sent:"#60A5FA"
 };
 
-function printInvoice(inv) {
+function printInvoice(inv: any) {
   const sc     = (STATUS_COLOR as Record<string, any>)[inv.status] || "#94A3B8";
   const amount = Number(inv.total_amount || inv.amount || 0);
   const tax    = Number(inv.tax_amount || amount * 0.14);

@@ -91,7 +91,7 @@ export default function RFQManagementPage() {
 
       {showNewRFQ && (
         <div onClick={()=>setShowNewRFQ(false)} className="fixed inset-0 z-modal bg-overlay flex items-center justify-center p-5" style={{backdropFilter:"blur(4px)"}}>
-          <div onClick={e=>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
+          <div onClick={(e: any) =>e.stopPropagation()} className="tb-section w-full shadow-xl" style={{maxWidth:"500px"}}>
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-lg font-bold text-primary">New Request for Quotation</h2>
               <button onClick={()=>setShowNewRFQ(false)} className="tb-btn-ghost text-xl px-2">×</button>
@@ -99,23 +99,23 @@ export default function RFQManagementPage() {
             <div className="flex flex-col gap-3">
               <div className="tb-form-group">
                 <label className="tb-label">Title <span className="text-danger">*</span></label>
-                <input value={newRFQ.title} onChange={e=>setNewRFQ({...newRFQ,title:e.target.value})} placeholder="e.g. HVAC Spare Parts Q4 2026" className="tb-input" />
+                <input value={newRFQ.title} onChange={(e: any) =>setNewRFQ({...newRFQ,title:e.target.value})} placeholder="e.g. HVAC Spare Parts Q4 2026" className="tb-input" />
               </div>
               <div className="tb-form-grid">
                 <div className="tb-form-group">
                   <label className="tb-label">Type</label>
-                  <select value={newRFQ.rfq_type} onChange={e=>setNewRFQ({...newRFQ,rfq_type:e.target.value})} className="tb-select">
+                  <select value={newRFQ.rfq_type} onChange={(e: any) =>setNewRFQ({...newRFQ,rfq_type:e.target.value})} className="tb-select">
                     {["open","selective","direct"].map((t: any) =><option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">Budget (EGP)</label>
-                  <input type="number" value={newRFQ.total_budget} onChange={e=>setNewRFQ({...newRFQ,total_budget:Number(e.target.value)})} className="tb-input" />
+                  <input type="number" value={newRFQ.total_budget} onChange={(e: any) =>setNewRFQ({...newRFQ,total_budget:Number(e.target.value)})} className="tb-input" />
                 </div>
               </div>
               <div className="tb-form-group">
                 <label className="tb-label">Delivery Location</label>
-                <input value={newRFQ.delivery_location} onChange={e=>setNewRFQ({...newRFQ,delivery_location:e.target.value})} placeholder="Site and location" className="tb-input" />
+                <input value={newRFQ.delivery_location} onChange={(e: any) =>setNewRFQ({...newRFQ,delivery_location:e.target.value})} placeholder="Site and location" className="tb-input" />
               </div>
               <div className="tb-action-bar mt-1">
                 <button onClick={()=>{if(!newRFQ.title.trim()){toast.error("Title required");return;}createRFQ.mutate({...newRFQ,hotel_id:"tb-default-hotel-000000000001",status:"draft",prepared_by:"amr@triangleblack.com",evaluation_criteria:"best_value"});}} disabled={createRFQ.isLoading} className="tb-btn tb-btn-primary flex-1 justify-center">

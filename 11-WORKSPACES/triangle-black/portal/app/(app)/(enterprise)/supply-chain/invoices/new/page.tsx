@@ -60,16 +60,16 @@ export default function CreateInvoicePage() {
           <div className="tb-section-title">Invoice Information</div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="text-xs text-tertiary block mb-1">Vendor *</label>
-              <select className="tb-input w-full" value={form.vendor_id} onChange={e=>setForm({...form,vendor_id:e.target.value})}>
+              <select className="tb-input w-full" value={form.vendor_id} onChange={(e: any) =>setForm({...form,vendor_id:e.target.value})}>
                 <option value="">Select vendor…</option>
                 {vendors.map((v: any) =><option key={v.id} value={v.id}>{v.company_name} ({v.vendor_code})</option>)}
               </select>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Vendor Invoice No. *</label>
-              <input className="tb-input w-full" value={form.vendor_invoice_number} onChange={e=>setForm({...form,vendor_invoice_number:e.target.value})} placeholder="e.g. VND-2025-001"/>
+              <input className="tb-input w-full" value={form.vendor_invoice_number} onChange={(e: any) =>setForm({...form,vendor_invoice_number:e.target.value})} placeholder="e.g. VND-2025-001"/>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Linked PO</label>
-              <select className="tb-input w-full" value={form.po_id} onChange={e=>{
+              <select className="tb-input w-full" value={form.po_id} onChange={(e: any) =>{
                 const po = pos.find((p: any) =>p.id===e.target.value);
                 setForm({...form,po_id:e.target.value,po_total:po?.total_amount||0,vendor_id:po?.vendor_id||form.vendor_id});
               }}>
@@ -78,30 +78,30 @@ export default function CreateInvoicePage() {
               </select>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Currency</label>
-              <select className="tb-input w-full" value={form.currency} onChange={e=>setForm({...form,currency:e.target.value})}>
+              <select className="tb-input w-full" value={form.currency} onChange={(e: any) =>setForm({...form,currency:e.target.value})}>
                 {["EGP","USD","EUR","GBP","SAR","AED"].map((c: any) =><option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Invoice Date *</label>
-              <input type="date" className="tb-input w-full" value={form.invoice_date} onChange={e=>setForm({...form,invoice_date:e.target.value})}/>
+              <input type="date" className="tb-input w-full" value={form.invoice_date} onChange={(e: any) =>setForm({...form,invoice_date:e.target.value})}/>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Due Date *</label>
-              <input type="date" className="tb-input w-full" value={form.due_date} onChange={e=>setForm({...form,due_date:e.target.value})}/>
+              <input type="date" className="tb-input w-full" value={form.due_date} onChange={(e: any) =>setForm({...form,due_date:e.target.value})}/>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Subtotal (before VAT) *</label>
-              <input type="number" className="tb-input w-full" value={form.subtotal} onChange={e=>setForm({...form,subtotal:e.target.value})} min="0" step="0.01"/>
+              <input type="number" className="tb-input w-full" value={form.subtotal} onChange={(e: any) =>setForm({...form,subtotal:e.target.value})} min="0" step="0.01"/>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">VAT %</label>
-              <input type="number" className="tb-input w-full" value={form.vat_pct} onChange={e=>setForm({...form,vat_pct:e.target.value})} min="0" max="100"/>
+              <input type="number" className="tb-input w-full" value={form.vat_pct} onChange={(e: any) =>setForm({...form,vat_pct:e.target.value})} min="0" max="100"/>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Withholding Tax %</label>
-              <input type="number" className="tb-input w-full" value={form.withholding_tax_pct} onChange={e=>setForm({...form,withholding_tax_pct:e.target.value})} min="0" max="10"/>
+              <input type="number" className="tb-input w-full" value={form.withholding_tax_pct} onChange={(e: any) =>setForm({...form,withholding_tax_pct:e.target.value})} min="0" max="10"/>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">GRN Total (received value)</label>
-              <input type="number" className="tb-input w-full" value={form.grn_total} onChange={e=>setForm({...form,grn_total:e.target.value})} min="0"/>
+              <input type="number" className="tb-input w-full" value={form.grn_total} onChange={(e: any) =>setForm({...form,grn_total:e.target.value})} min="0"/>
             </div>
             <div className="col-span-2"><label className="text-xs text-tertiary block mb-1">Notes</label>
-              <textarea className="tb-input w-full h-20 resize-none" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/>
+              <textarea className="tb-input w-full h-20 resize-none" value={form.notes} onChange={(e: any) =>setForm({...form,notes:e.target.value})}/>
             </div>
           </div>
           <div className="p-4 rounded-xl bg-base-alt border border-border space-y-1">

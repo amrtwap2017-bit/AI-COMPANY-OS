@@ -63,7 +63,7 @@ export default function ProjectsListPage() {
 
       <div className="tb-canvas">
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
-          <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search projects..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
+          <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search projects..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
             {["all","planning","active","in_progress","on_hold","completed","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>

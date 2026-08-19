@@ -136,9 +136,9 @@ export default function WarrantyTrackingPage() {
       {/* Filters */}
       <div className="flex gap-3">
         <input type="search" placeholder="Search assets..."
-          value={search} onChange={e => setSearch(e.target.value)}
+          value={search} onChange={(e: any) => setSearch(e.target.value)}
           className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
-        <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}
+        <select value={sortBy} onChange={(e: any) => setSortBy(e.target.value as any)}
           className="border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none">
           <option value="expiry">Sort: Expiry Date</option>
           <option value="name">Sort: Asset Name</option>

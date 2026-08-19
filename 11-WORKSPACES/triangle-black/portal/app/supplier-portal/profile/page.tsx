@@ -112,7 +112,7 @@ export default function SupplierProfilePage() {
                 <div>
                   <label className="text-xs text-slate-400 block mb-1">Document Type</label>
                   <select className="w-full px-3 py-2 rounded-lg text-sm text-white" style={{background:"#0A0F1E",border:"1px solid rgba(255,255,255,0.1)"}}
-                    value={uploadCat} onChange={e=>setUploadCat(e.target.value)}>
+                    value={uploadCat} onChange={(e: any) =>setUploadCat(e.target.value)}>
                     {Object.entries(DOC_LABELS).map(([k,v])=>(
                       <option key={k} value={k}>{v}{REQ_DOCS.includes(k)?" ⭐":""}</option>
                     ))}

@@ -56,14 +56,14 @@ export function Input({
               : "1px solid var(--color-border)",
             ...(props.disabled ? { background: "var(--color-bg-alt)" } : {}),
           }}
-          onFocus={(e) => {
+          onFocus={(e: any) => {
             e.target.style.borderColor = error ? "var(--color-danger)" : "var(--color-border-focus)";
             e.target.style.boxShadow = error
               ? "0 0 0 3px rgba(220,38,38,0.15)"
               : "0 0 0 3px rgba(185,146,76,0.15)";
             props.onFocus?.(e);
           }}
-          onBlur={(e) => {
+          onBlur={(e: any) => {
             e.target.style.borderColor = error ? "var(--color-danger)" : "var(--color-border)";
             e.target.style.boxShadow = "none";
             props.onBlur?.(e);

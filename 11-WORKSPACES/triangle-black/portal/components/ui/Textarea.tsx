@@ -10,9 +10,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   maxCount?: number;
 }
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { label, helper, error, maxCount, className = "", id, value, ...props }, ref
-) {
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea({ label: any, helper: any, error: any, maxCount: any, className = "": any, id: any, value: any, ...props }: any, ref: any) {
   const textareaId = id || label?.toLowerCase().replace(/\s+/g, "-");
   const currentLength = String(value || "").length;
   return (

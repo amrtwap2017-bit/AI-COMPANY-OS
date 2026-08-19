@@ -91,7 +91,7 @@ export default function InvoiceMatchingPage() {
 
         <div className="tb-section">
           <div className="flex gap-2.5 mb-4 flex-wrap items-center">
-            <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search invoices..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
+            <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search invoices..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
             <div className="tb-tabs border-0 mb-0">
               {["all","submitted","matching","approved","paid","disputed"].map((s: any) =>(
                 <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
@@ -130,7 +130,7 @@ export default function InvoiceMatchingPage() {
                         <td className="text-right"><StatusBadge status={inv.status||"submitted"} /></td>
                         <td className="text-right text-xs text-tertiary">{fmtDate(inv.created_at)}</td>
                         <td className="text-right">
-                          <button onClick={e=>{e.stopPropagation();router.push(`/supply-chain/invoices/${inv.id}`);}}
+                          <button onClick={(e: any) =>{e.stopPropagation();router.push(`/supply-chain/invoices/${inv.id}`);}}
                             className="tb-btn tb-btn-sm" style={{background:"var(--color-brand-light)",color:"var(--color-brand)",border:"1px solid var(--color-brand-border)"}}>Review</button>
                         </td>
                       </tr>

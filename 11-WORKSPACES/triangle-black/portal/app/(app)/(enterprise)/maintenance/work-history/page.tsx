@@ -76,7 +76,7 @@ export default function WorkHistoryPage() {
 
         <div className="tb-section" style={{padding:"12px 16px"}}>
           <div className="flex gap-2.5 flex-wrap items-center">
-            <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search work orders..." className="tb-input" style={{minWidth:"220px",width:"auto"}} />
+            <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search work orders..." className="tb-input" style={{minWidth:"220px",width:"auto"}} />
             <div className="tb-tabs border-0 mb-0">
               {["all","open","in_progress","completed","cancelled"].map((s: any) =>(
                 <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>

@@ -11,7 +11,7 @@ const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); 
 
 const AGING_COLORS = {"Current":"#547C4D","1-30 Days":"#B07A2A","31-60 Days":"#B07A2A","61-90 Days":"#A84A3D","90+ Days":"#A84A3D"};
 
-function MiniBar({ value, max, color="#5B7C8C" }) {
+function MiniBar({ value, max, color="#5B7C8C" }: any) {
   const pct = max > 0 ? Math.min(100,(value/max)*100) : 0;
   return (
     <div className="h-2 rounded-full bg-surface-alt overflow-hidden">

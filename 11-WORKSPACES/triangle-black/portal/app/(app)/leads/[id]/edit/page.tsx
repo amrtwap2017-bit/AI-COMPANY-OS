@@ -71,27 +71,27 @@ export default function EditLeadPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-            <input required value={form.name} onChange={(e) => set("name", e.target.value)}
+            <input required value={form.name} onChange={(e: any) => set("name", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-            <input required type="email" value={form.email} onChange={(e) => set("email", e.target.value)}
+            <input required type="email" value={form.email} onChange={(e: any) => set("email", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-            <input value={form.company} onChange={(e) => set("company", e.target.value)}
+            <input value={form.company} onChange={(e: any) => set("company", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input value={form.phone} onChange={(e) => set("phone", e.target.value)}
+            <input value={form.phone} onChange={(e: any) => set("phone", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select value={form.status} onChange={(e) => set("status", e.target.value)}
+            <select value={form.status} onChange={(e: any) => set("status", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
               <option value="new">New</option>
               <option value="qualified">Qualified</option>
@@ -102,7 +102,7 @@ export default function EditLeadPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-            <select value={form.priority} onChange={(e) => set("priority", e.target.value)}
+            <select value={form.priority} onChange={(e: any) => set("priority", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none">
               <option value="high">High</option>
               <option value="medium">Medium</option>
@@ -112,7 +112,7 @@ export default function EditLeadPage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-          <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)}
+          <textarea value={form.notes} onChange={(e: any) => set("notes", e.target.value)}
             rows={3}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>

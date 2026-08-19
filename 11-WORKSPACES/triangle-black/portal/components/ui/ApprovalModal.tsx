@@ -92,7 +92,7 @@ export function ApprovalModal({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
          onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md"
-           onClick={e => e.stopPropagation()}>
+           onClick={(e: any) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="font-semibold text-primary">Review & Approve</h2>
           <button onClick={onClose} className="text-tertiary hover:text-secondary">
@@ -112,7 +112,7 @@ export function ApprovalModal({
           </label>
           <textarea
             value={comment}
-            onChange={e => setComment(e.target.value)}
+            onChange={(e: any) => setComment(e.target.value)}
             rows={3}
             placeholder="Add a comment or reason..."
             className="w-full border border-border rounded-lg px-3 py-2 text-sm
