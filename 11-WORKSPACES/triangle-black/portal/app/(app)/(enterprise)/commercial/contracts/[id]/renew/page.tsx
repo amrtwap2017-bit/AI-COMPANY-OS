@@ -62,7 +62,6 @@ export default function ContractRenewPage() {
       // Create a new contract as renewal
       const res = await tbFetch("/api/v1/contracts/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title:       `${contract?.title || "Contract"} — Renewal`,
           description: form.notes || `Renewal of contract ${id?.slice(0,8)}`,

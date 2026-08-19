@@ -15,6 +15,7 @@ function getToken(): string {
 }
 
 interface FetchOptions {
+  headers?: Record<string, string>;
   method?: string;
   body?: any;
   params?: Record<string, any>;
