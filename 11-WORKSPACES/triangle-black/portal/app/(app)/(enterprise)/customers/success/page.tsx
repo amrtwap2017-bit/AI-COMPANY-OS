@@ -8,8 +8,8 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function CustomerSuccessPage() {
   const router = useRouter();
-  const { data: slaDash }   = useQuery(["cs-sla"],       ()=>authFetch("/api/v1/sla/dashboard").then(r=>r.json()),    {staleTime:60000});
-  const { data: contracts } = useQuery(["cs-contracts"], ()=>authFetch("/api/v1/contracts/").then(r=>r.json()),       {staleTime:60000});
+  const { data: slaDash }   = useQuery(["cs-sla"],       ()=>authFetch("/api/v1/sla/dashboard").then(r => r.data ?? r),    {staleTime:60000});
+  const { data: contracts } = useQuery(["cs-contracts"], ()=>authFetch("/api/v1/contracts/").then(r => r.data ?? r),       {staleTime:60000});
 
   const siteSla = slaDash?.site_sla || [];
   const cl      = toArr(contracts);

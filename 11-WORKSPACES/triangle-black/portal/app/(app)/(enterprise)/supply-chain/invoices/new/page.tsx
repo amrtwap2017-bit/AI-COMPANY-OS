@@ -16,8 +16,8 @@ export default function CreateInvoicePage() {
     subtotal:0, vat_pct:14, withholding_tax_pct:0,
     po_total:0, grn_total:0, notes:"", submitted_by:"amr@triangleblack.com"
   });
-  const { data: vendorsRaw } = useQuery(["vendors-inv"], () => authFetch("/api/v1/vendors/").then(r=>r.json()), {staleTime:60000});
-  const { data: posRaw } = useQuery(["pos-inv"], () => authFetch("/api/v1/purchase-orders-v2/").then(r=>r.json()), {staleTime:60000});
+  const { data: vendorsRaw } = useQuery(["vendors-inv"], () => authFetch("/api/v1/vendors/").then(r => r.data ?? r), {staleTime:60000});
+  const { data: posRaw } = useQuery(["pos-inv"], () => authFetch("/api/v1/purchase-orders-v2/").then(r => r.data ?? r), {staleTime:60000});
   const vendors = toArr(vendorsRaw);
   const pos = toArr(posRaw);
   const vat_amount = Number(form.subtotal) * (Number(form.vat_pct)/100);
@@ -27,7 +27,7 @@ export default function CreateInvoicePage() {
   const createMut = useMutation(
     (payload) => authFetch("/api/v1/supplier-invoices/", {
       method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
-    }).then(r=>r.json()),
+    }).then(r => r.data ?? r),
     { onSuccess: (data) => { if (!data.error && data.id) router.push("/supply-chain/invoices/"+data.id); }}
   );
   const handleSubmit = () => createMut.mutate({...form, subtotal:Number(form.subtotal), vat_pct:Number(form.vat_pct), withholding_tax_pct:Number(form.withholding_tax_pct), exchange_rate:Number(form.exchange_rate), po_total:Number(form.po_total), grn_total:Number(form.grn_total)});

@@ -11,13 +11,13 @@ const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB
 
 export default function ExecutivePage() {
   const router = useRouter();
-  const { data: twin }        = useQuery(["exe-twin"],   ()=>authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: dash }        = useQuery(["exe-dash"],   ()=>authFetch("/api/v1/dashboard/summary").then(r=>r.json()),{refetchInterval:30000});
-  const { data: woRaw }       = useQuery(["exe-wos"],    ()=>authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: invRaw }      = useQuery(["exe-inv"],    ()=>authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: contractRaw } = useQuery(["exe-cont"],   ()=>authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: notifRaw }    = useQuery(["exe-notifs"], ()=>authFetch("/api/v1/notifications-portal").then(r=>r.json()));
-  const { data: autoStatus }  = useQuery(["exe-auto"],   ()=>authFetch("/api/v1/automation/status").then(r=>r.json()));
+  const { data: twin }        = useQuery(["exe-twin"],   ()=>authFetch("/api/v1/twin/state").then(r => r.data ?? r));
+  const { data: dash }        = useQuery(["exe-dash"],   ()=>authFetch("/api/v1/dashboard/summary").then(r => r.data ?? r),{refetchInterval:30000});
+  const { data: woRaw }       = useQuery(["exe-wos"],    ()=>authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
+  const { data: invRaw }      = useQuery(["exe-inv"],    ()=>authFetch("/api/v1/invoices/").then(r => r.data ?? r));
+  const { data: contractRaw } = useQuery(["exe-cont"],   ()=>authFetch("/api/v1/contracts/").then(r => r.data ?? r));
+  const { data: notifRaw }    = useQuery(["exe-notifs"], ()=>authFetch("/api/v1/notifications-portal").then(r => r.data ?? r));
+  const { data: autoStatus }  = useQuery(["exe-auto"],   ()=>authFetch("/api/v1/automation/status").then(r => r.data ?? r));
 
   const wos = toArr(woRaw);
   const invoices = toArr(invRaw);

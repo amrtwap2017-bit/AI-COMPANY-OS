@@ -34,7 +34,7 @@ export default function WorkOrderDetailPage() {
 
   const { data: wo, isLoading } = useQuery(
     ["wo-detail", id],
-    () => authFetch(`/api/v1/work-orders/${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/work-orders/${id}`).then(r => r.data ?? r),
     { enabled: !!id }
   );
 

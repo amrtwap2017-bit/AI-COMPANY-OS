@@ -9,8 +9,8 @@ const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function StockLevelsPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
-  const { data: stockRaw, isLoading } = useQuery(["sl-stock"], () => authFetch("/api/v1/stock-balances/").then(r=>r.json()));
-  const { data: itemRaw } = useQuery(["sl-items"], () => authFetch("/api/v1/inventory-items-portal").then(r=>r.json()));
+  const { data: stockRaw, isLoading } = useQuery(["sl-stock"], () => authFetch("/api/v1/stock-balances/").then(r => r.data ?? r));
+  const { data: itemRaw } = useQuery(["sl-items"], () => authFetch("/api/v1/inventory-items-portal").then(r => r.data ?? r));
   const stocks = toArr(stockRaw); const items = toArr(itemRaw);
   const enriched = stocks.map((s: any) =>{
     const item=items.find((i: any) =>i.id===s.item_id);

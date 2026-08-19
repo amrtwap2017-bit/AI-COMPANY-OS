@@ -10,8 +10,8 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function PaymentHistoryPage() {
   const router = useRouter();
-  const { data: dash }   = useQuery(["pay-dash"], ()=>authFetch("/api/v1/financial/dashboard").then(r=>r.json()), {staleTime:60000});
-  const { data: invRaw } = useQuery(["pay-inv"],  ()=>authFetch("/api/v1/supplier-invoices/").then(r=>r.json()), {staleTime:30000});
+  const { data: dash }   = useQuery(["pay-dash"], ()=>authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r), {staleTime:60000});
+  const { data: invRaw } = useQuery(["pay-inv"],  ()=>authFetch("/api/v1/supplier-invoices/").then(r => r.data ?? r), {staleTime:30000});
 
   const invoices = toArr(invRaw);
   const paid = invoices.filter((i: any) =>i.status==="paid"||i.payment_status==="paid");

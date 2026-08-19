@@ -35,7 +35,7 @@ export default function KnowledgeGraphSearchPage() {
     if (!q.trim()) return;
     setLoading(true); setSearched(true);
     try {
-      const d = await tbFetch(`/api/v1/knowledge-graph/search?q=${encodeURIComponent(q)}&limit=30`).then(r=>r.json());
+      const d = await tbFetch(`/api/v1/knowledge-graph/search?q=${encodeURIComponent(q)}&limit=30`).then(r => r.data ?? r);
       setResults(d.results || []);
     } catch { setResults([]); }
     finally { setLoading(false); }

@@ -9,8 +9,8 @@ const fmtDate = (d: any) => { if (!d) return ""; try { return new Date(d).toLoca
 
 export default function OperationsCalendarPage() {
   const router = useRouter();
-  const { data: woRaw } = useQuery(["cal-wos"],()=>authFetch("/api/v1/work-orders/?limit=50").then(r=>r.json()),{staleTime:30000});
-  const { data: pmRaw } = useQuery(["cal-pm"],()=>authFetch("/api/v1/pm-schedule/calendar").then(r=>r.json()),{staleTime:60000});
+  const { data: woRaw } = useQuery(["cal-wos"],()=>authFetch("/api/v1/work-orders/?limit=50").then(r => r.data ?? r),{staleTime:30000});
+  const { data: pmRaw } = useQuery(["cal-pm"],()=>authFetch("/api/v1/pm-schedule/calendar").then(r => r.data ?? r),{staleTime:60000});
   const wos = toArr(woRaw).filter((w: any) =>w.due_date).slice(0,20);
   const pm = toArr(pmRaw?.events||pmRaw).slice(0,10);
 

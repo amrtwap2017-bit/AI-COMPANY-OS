@@ -24,17 +24,17 @@ export default function TimeTrackingPage() {
   const [form, setForm] = useState({work_order_id:"",technician_id:"",work_type:"on_site",start_time:"",end_time:"",hours_logged:"",hourly_rate:150,notes:"",is_billable:true});
   const [filterTech, setFilterTech] = useState("");
 
-  const { data: summary } = useQuery(["time-summary"],()=>authFetch("/api/v1/time-entries/summary").then(r=>r.json()),{staleTime:30000});
-  const { data: entriesRaw, isLoading } = useQuery(["time-entries",filterTech],()=>authFetch(`/api/v1/time-entries/?${filterTech?"technician_id="+filterTech+"&":""}limit=50`).then(r=>r.json()),{staleTime:30000});
-  const { data: techsRaw } = useQuery(["techs-tt"],()=>authFetch("/api/v1/technicians/").then(r=>r.json()),{staleTime:60000});
-  const { data: wosRaw } = useQuery(["wos-tt"],()=>authFetch("/api/v1/work-orders/?limit=50").then(r=>r.json()),{staleTime:60000});
+  const { data: summary } = useQuery(["time-summary"],()=>authFetch("/api/v1/time-entries/summary").then(r => r.data ?? r),{staleTime:30000});
+  const { data: entriesRaw, isLoading } = useQuery(["time-entries",filterTech],()=>authFetch(`/api/v1/time-entries/?${filterTech?"technician_id="+filterTech+"&":""}limit=50`).then(r => r.data ?? r),{staleTime:30000});
+  const { data: techsRaw } = useQuery(["techs-tt"],()=>authFetch("/api/v1/technicians/").then(r => r.data ?? r),{staleTime:60000});
+  const { data: wosRaw } = useQuery(["wos-tt"],()=>authFetch("/api/v1/work-orders/?limit=50").then(r => r.data ?? r),{staleTime:60000});
 
   const entries = toArr(entriesRaw);
   const techs = toArr(techsRaw);
   const wos = toArr(wosRaw);
 
   const logMut = useMutation(
-    (payload)=>authFetch("/api/v1/time-entries/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
+    (payload)=>authFetch("/api/v1/time-entries/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.data ?? r),
     {onSuccess:(data)=>{if(!data.error){toast.success(`${data.hours_logged}h logged — ${fmtEGP(data.labor_cost)}`);qc.invalidateQueries(["time-entries"]);qc.invalidateQueries(["time-summary"]);setForm({work_order_id:"",technician_id:"",work_type:"on_site",start_time:"",end_time:"",hours_logged:"",hourly_rate:150,notes:"",is_billable:true});}else{toast.error(data.error);}},onError:()=>toast.error("Failed to log time")}
   );
 

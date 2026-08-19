@@ -42,7 +42,7 @@ export default function VendorScorecardPage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/vendor-scorecards/?limit=100")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         const items = d.results || d.items || (Array.isArray(d) ? d : []);
         setScorecards(items);

@@ -24,12 +24,12 @@ export default function MaintenanceSchedulerPage() {
   const [filterSite, setFilterSite] = useState("all");
   const [genResult, setGenResult] = useState<any>(null);
 
-  const { data: schedData, isLoading } = useQuery(["pm-schedule-assets"],()=>authFetch("/api/v1/pm-schedule/assets?limit=100").then(r=>r.json()),{staleTime:30000,refetchInterval:60000});
-  const { data: calData } = useQuery(["pm-schedule-calendar"],()=>authFetch("/api/v1/pm-schedule/calendar").then(r=>r.json()),{staleTime:60000});
-  const { data: stats } = useQuery(["pm-schedule-stats"],()=>authFetch("/api/v1/pm-schedule/stats").then(r=>r.json()),{staleTime:30000});
+  const { data: schedData, isLoading } = useQuery(["pm-schedule-assets"],()=>authFetch("/api/v1/pm-schedule/assets?limit=100").then(r => r.data ?? r),{staleTime:30000,refetchInterval:60000});
+  const { data: calData } = useQuery(["pm-schedule-calendar"],()=>authFetch("/api/v1/pm-schedule/calendar").then(r => r.data ?? r),{staleTime:60000});
+  const { data: stats } = useQuery(["pm-schedule-stats"],()=>authFetch("/api/v1/pm-schedule/stats").then(r => r.data ?? r),{staleTime:30000});
 
   const genMut = useMutation(
-    ()=>authFetch("/api/v1/pm-schedule/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(r=>r.json()),
+    ()=>authFetch("/api/v1/pm-schedule/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(r => r.data ?? r),
     {onSuccess:(data)=>{setGenResult(data);qc.invalidateQueries(["pm-schedule-assets"]);qc.invalidateQueries(["pm-schedule-stats"]);}}
   );
 

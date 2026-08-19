@@ -11,8 +11,8 @@ const SC = {open:"#5B7C8C",in_progress:"#B07A2A",resolved:"#547C4D",closed:"#6D5
 export default function TasksPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
-  const { data: srRaw, isLoading } = useQuery(["tasks-srs"], () => authFetch("/api/v1/service-requests/").then(r=>r.json()),{refetchInterval:30000});
-  const { data: woRaw } = useQuery(["tasks-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: srRaw, isLoading } = useQuery(["tasks-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.data ?? r),{refetchInterval:30000});
+  const { data: woRaw } = useQuery(["tasks-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
   const srs = toArr(srRaw); const wos = toArr(woRaw);
   const open = srs.filter((s: any) =>s.status==="open").length;
   const critical = srs.filter((s: any) =>s.priority==="critical"&&s.status!=="resolved"&&s.status!=="closed").length;

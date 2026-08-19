@@ -10,8 +10,8 @@ export default function CustomerDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
-  const { data: ctRaw, isLoading } = useQuery(["cust-d-cts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: invRaw } = useQuery(["cust-d-inv"], () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: ctRaw, isLoading } = useQuery(["cust-d-cts"], () => authFetch("/api/v1/contracts/").then(r => r.data ?? r));
+  const { data: invRaw } = useQuery(["cust-d-inv"], () => authFetch("/api/v1/invoices/").then(r => r.data ?? r));
   const contracts = toArr(ctRaw); const inv = toArr(invRaw);
   const first = contracts[0];
   const clientName = first?.client_name || ("Customer " + (id||"").slice(0,8));

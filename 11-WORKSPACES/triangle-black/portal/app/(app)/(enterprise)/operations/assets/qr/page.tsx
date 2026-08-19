@@ -20,7 +20,7 @@ export default function AssetQRGalleryPage() {
 
   const { data: raw, isLoading } = useQuery({
     queryKey:["asset-qr-list"],
-    queryFn:()=>authFetch("/api/v1/qr/assets/list?limit=200").then(r=>r.json()),
+    queryFn:()=>authFetch("/api/v1/qr/assets/list?limit=200").then(r => r.data ?? r),
     staleTime:60000
   });
   const assets = toArr(raw);

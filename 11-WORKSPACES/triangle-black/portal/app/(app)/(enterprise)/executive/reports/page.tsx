@@ -24,10 +24,10 @@ export default function ExecutiveReportsPage() {
   const router = useRouter();
   const [activeReport, setActiveReport] = useState("daily");
 
-  const { data: daily }    = useQuery(["rpt-daily"],     ()=>authFetch("/api/v1/reports/daily-summary").then(r=>r.json()), {staleTime:60000});
-  const { data: woReport } = useQuery(["rpt-wo"],        ()=>authFetch("/api/v1/reports/work-orders").then(r=>r.json()),   {staleTime:120000});
-  const { data: assetRpt } = useQuery(["rpt-assets"],    ()=>authFetch("/api/v1/reports/assets").then(r=>r.json()),        {staleTime:120000});
-  const { data: contRpt }  = useQuery(["rpt-contracts"], ()=>authFetch("/api/v1/reports/contracts").then(r=>r.json()),     {staleTime:120000});
+  const { data: daily }    = useQuery(["rpt-daily"],     ()=>authFetch("/api/v1/reports/daily-summary").then(r => r.data ?? r), {staleTime:60000});
+  const { data: woReport } = useQuery(["rpt-wo"],        ()=>authFetch("/api/v1/reports/work-orders").then(r => r.data ?? r),   {staleTime:120000});
+  const { data: assetRpt } = useQuery(["rpt-assets"],    ()=>authFetch("/api/v1/reports/assets").then(r => r.data ?? r),        {staleTime:120000});
+  const { data: contRpt }  = useQuery(["rpt-contracts"], ()=>authFetch("/api/v1/reports/contracts").then(r => r.data ?? r),     {staleTime:120000});
 
   const woSum = woReport?.summary||{};
   const aSum  = assetRpt?.summary||{};

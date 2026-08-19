@@ -30,20 +30,20 @@ export default function NotificationsPage() {
 
   const { data: notifData, isLoading } = useQuery(
     ["notifications"],
-    ()=>authFetch("/api/v1/platform-notif/").then(r=>r.json()),
+    ()=>authFetch("/api/v1/platform-notif/").then(r => r.data ?? r),
     {staleTime:15000,refetchInterval:30000}
   );
 
   const generateMut = useMutation(
-    ()=>authFetch("/api/v1/platform-notif/generate",{method:"POST"}).then(r=>r.json()),
+    ()=>authFetch("/api/v1/platform-notif/generate",{method:"POST"}).then(r => r.data ?? r),
     {onSuccess:()=>qc.invalidateQueries(["notifications"])}
   );
   const readMut = useMutation(
-    (id)=>authFetch(`/api/v1/platform-notif/${id}/read`,{method:"POST"}).then(r=>r.json()),
+    (id)=>authFetch(`/api/v1/platform-notif/${id}/read`,{method:"POST"}).then(r => r.data ?? r),
     {onSuccess:()=>qc.invalidateQueries(["notifications"])}
   );
   const readAllMut = useMutation(
-    ()=>authFetch("/api/v1/platform-notif/mark-all-read",{method:"POST"}).then(r=>r.json()),
+    ()=>authFetch("/api/v1/platform-notif/mark-all-read",{method:"POST"}).then(r => r.data ?? r),
     {onSuccess:()=>qc.invalidateQueries(["notifications"])}
   );
 

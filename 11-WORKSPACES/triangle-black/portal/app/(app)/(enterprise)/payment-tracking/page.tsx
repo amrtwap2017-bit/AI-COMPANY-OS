@@ -11,8 +11,8 @@ const SC = {paid:"#547C4D",pending:"#B07A2A",overdue:"#A84A3D",cancelled:"#6D5F5
 export default function PaymentTrackingPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
-  const { data: payRaw, isLoading } = useQuery(["pt2-list"], () => authFetch("/api/v1/payment-tracking/").then(r=>r.json()));
-  const { data: invRaw } = useQuery(["pt2-inv"], () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: payRaw, isLoading } = useQuery(["pt2-list"], () => authFetch("/api/v1/payment-tracking/").then(r => r.data ?? r));
+  const { data: invRaw } = useQuery(["pt2-inv"], () => authFetch("/api/v1/invoices/").then(r => r.data ?? r));
   const pays = toArr(payRaw); const inv = toArr(invRaw);
   const source = pays.length>0 ? pays : inv;
   const totalAmount   = source.reduce((s: any, p: any) =>s+Number(p.total_amount||0),0);

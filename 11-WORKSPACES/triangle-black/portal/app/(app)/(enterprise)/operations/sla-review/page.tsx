@@ -16,7 +16,7 @@ export default function SLAReviewPage() {
   const router = useRouter();
   const [tab, setTab] = useState("overview");
 
-  const { data: sla, isLoading } = useQuery({ queryKey:["sla-dashboard"], queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r=>r.json()), staleTime:60000, refetchInterval:120000 });
+  const { data: sla, isLoading } = useQuery({ queryKey:["sla-dashboard"], queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => r.data ?? r), staleTime:60000, refetchInterval:120000 });
 
   const overall = sla?.overall || {};
   const siteSLA = toArr(sla?.site_sla);

@@ -20,7 +20,7 @@ export default function SupplierProfilePage() {
 
   const loadProfile = (sup, t) => {
     fetch(`/api/v1/supplier/profile?vendor_id=${sup.vendor_id}`, {headers:{Authorization:`Bearer ${t}`}})
-      .then(r=>r.json()).then((d: any) => { setProfile(d); setLoading(false); });
+      .then(r => r.data ?? r).then((d: any) => { setProfile(d); setLoading(false); });
   };
 
   useEffect(() => {

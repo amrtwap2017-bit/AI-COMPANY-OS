@@ -16,8 +16,8 @@ export default function SLADashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: sla, isLoading } = useQuery(["sla-dashboard"],()=>authFetch("/api/v1/sla/dashboard").then(r=>r.json()),{staleTime:30000,refetchInterval:60000});
-  const { data: breaches=[] } = useQuery(["sla-breaches"],()=>authFetch("/api/v1/sla/breaches").then(r=>r.json()),{staleTime:30000});
+  const { data: sla, isLoading } = useQuery(["sla-dashboard"],()=>authFetch("/api/v1/sla/dashboard").then(r => r.data ?? r),{staleTime:30000,refetchInterval:60000});
+  const { data: breaches=[] } = useQuery(["sla-breaches"],()=>authFetch("/api/v1/sla/breaches").then(r => r.data ?? r),{staleTime:30000});
 
   const overall = sla?.overall||{};
   const siteSLA = sla?.site_sla||[];

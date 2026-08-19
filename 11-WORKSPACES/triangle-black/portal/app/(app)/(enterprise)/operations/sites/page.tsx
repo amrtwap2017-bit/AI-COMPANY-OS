@@ -17,7 +17,7 @@ export default function SitesPage() {
 
   const { data: raw, isLoading } = useQuery({
     queryKey:["sites-list"],
-    queryFn:()=>authFetch("/api/v1/sites-portal").then(r=>r.json()),
+    queryFn:()=>authFetch("/api/v1/sites-portal").then(r => r.data ?? r),
   });
 
   const all      = toArr(raw);

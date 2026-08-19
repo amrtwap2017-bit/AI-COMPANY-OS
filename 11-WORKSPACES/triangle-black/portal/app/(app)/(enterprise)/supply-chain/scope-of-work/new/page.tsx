@@ -19,7 +19,7 @@ export default function SOWCreatePage() {
   const createMut = useMutation(
     (payload) => authFetch("/api/v1/scope-of-work/", {
       method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
-    }).then(r=>r.json()),
+    }).then(r => r.data ?? r),
     { onSuccess: (data) => { if (!data.error) router.push("/supply-chain/scope-of-work/"+data.id); }}
   );
   const boqSubtotal = boqItems.reduce((s: any, i: any) =>s+Number(i.quantity||0)*Number(i.unit_rate||0),0);

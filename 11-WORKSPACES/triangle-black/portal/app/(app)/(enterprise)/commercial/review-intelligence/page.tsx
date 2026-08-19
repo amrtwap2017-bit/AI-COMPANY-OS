@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function ReviewIntelligencePage() {
-  const { data: fin } = useQuery(["ri-fin"], () => authFetch("/api/v1/financial/dashboard").then(r=>r.json()), {staleTime:60000});
-  const { data: proc } = useQuery(["ri-proc"], () => authFetch("/api/v1/procurement/dashboard").then(r=>r.json()), {staleTime:60000});
+  const { data: fin } = useQuery(["ri-fin"], () => authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r), {staleTime:60000});
+  const { data: proc } = useQuery(["ri-proc"], () => authFetch("/api/v1/procurement/dashboard").then(r => r.data ?? r), {staleTime:60000});
   const rev = fin?.revenue || {};
   return (
     <div style={{minHeight:"100vh",background:"var(--color-bg)"}}>

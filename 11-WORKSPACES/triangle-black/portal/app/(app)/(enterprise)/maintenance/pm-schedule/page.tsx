@@ -32,7 +32,7 @@ export default function PMSchedulePage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/maintenance/pm-plans/")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.plans || d?.results || d?.items || [];
         setPlans(items);

@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function NewWorkOrderPage() {
   const router = useRouter();
-  const { data: techRaw }  = useQuery(["nwo-techs"],  () => authFetch("/api/v1/technicians/").then(r=>r.json()));
-  const { data: assetRaw } = useQuery(["nwo-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
-  const { data: srRaw }    = useQuery(["nwo-srs"],    () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
+  const { data: techRaw }  = useQuery(["nwo-techs"],  () => authFetch("/api/v1/technicians/").then(r => r.data ?? r));
+  const { data: assetRaw } = useQuery(["nwo-assets"], () => authFetch("/api/v1/assets/").then(r => r.data ?? r));
+  const { data: srRaw }    = useQuery(["nwo-srs"],    () => authFetch("/api/v1/service-requests/").then(r => r.data ?? r));
   const techs = toArr(techRaw); const assets = toArr(assetRaw); const srs = toArr(srRaw);
   const unlinkedSRs = srs.filter((s: any) =>!s.work_order_id&&s.status==="open");
   return (

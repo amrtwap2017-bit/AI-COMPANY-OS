@@ -19,7 +19,7 @@ export default function BulkOperationsPage() {
   const [filterStatus, setFilterStatus] = useState("open");
   const [bulkStatus, setBulkStatus] = useState("in_progress");
 
-  const { data: rawWOs, isLoading } = useQuery({queryKey:["bulk-wos"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=100").then(r=>r.json()),staleTime:30000});
+  const { data: rawWOs, isLoading } = useQuery({queryKey:["bulk-wos"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=100").then(r => r.data ?? r),staleTime:30000});
   const { data: rawTechs } = useQuery({queryKey:["bulk-techs"],queryFn:()=>authFetch("/api/v1/technicians/").then(r => r.data ?? r).catch(()=>[]),staleTime:60000});
 
   const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);

@@ -16,14 +16,14 @@ export default function RFQDetailPage() {
   const [awardingId, setAwardingId] = useState<any>(null);
   const { data: rfq, isLoading } = useQuery(
     ["rfq-detail", id],
-    () => authFetch(`/api/v1/rfq/${id}/bid-comparison`).then(r=>r.json()),
+    () => authFetch(`/api/v1/rfq/${id}/bid-comparison`).then(r => r.data ?? r),
     { staleTime: 30000 }
   );
   const awardMut = useMutation(
     (payload) => authFetch(`/api/v1/rfq/${id}/award`, {
       method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({...payload, awarded_by:"amr@triangleblack.com"})
-    }).then(r=>r.json()),
+    }).then(r => r.data ?? r),
     { onSuccess: () => { qc.invalidateQueries(["rfq-detail",id]); setAwardingId(null); } }
   );
   if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading RFQ…</div></div>;

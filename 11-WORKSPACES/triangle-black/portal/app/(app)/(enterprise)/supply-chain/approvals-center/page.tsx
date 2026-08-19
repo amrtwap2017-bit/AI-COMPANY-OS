@@ -14,7 +14,7 @@ export default function ApprovalsCenterPage() {
   const qc = useQueryClient();
   const { data: raw, isLoading } = useQuery(
     ["approvals-list"],
-    () => authFetch("/api/v1/approval-requests/").then(r=>r.json()),
+    () => authFetch("/api/v1/approval-requests/").then(r => r.data ?? r),
     { staleTime: 30000, refetchInterval: 30000 }
   );
   const approvals = toArr(raw);
@@ -23,7 +23,7 @@ export default function ApprovalsCenterPage() {
     (id) => authFetch(`/api/v1/approval-requests/${id}/approve`, {
       method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({approved_by:"amr@triangleblack.com"})
-    }).then(r=>r.json()),
+    }).then(r => r.data ?? r),
     { onSuccess: () => { toast.success("Approval recorded"); qc.invalidateQueries(["approvals-list"]); } }
   );
   return (

@@ -10,10 +10,10 @@ const fmtRelative = (d: any) => { if (!d) return ""; try { const h=Math.floor((D
 
 export default function ExecutiveDashboardPage() {
   const router = useRouter();
-  const { data: dash, isLoading } = useQuery(["exec-dashboard"], ()=>authFetch("/api/v1/executive/dashboard").then(r=>r.json()), {staleTime:60000,refetchInterval:120000});
-  const { data: procDash } = useQuery(["exec-procurement"], ()=>authFetch("/api/v1/procurement/dashboard").then(r=>r.json()), {staleTime:60000});
-  const { data: timeDash } = useQuery(["exec-time"], ()=>authFetch("/api/v1/time-entries/summary").then(r=>r.json()), {staleTime:60000});
-  const { data: slaDash } = useQuery(["exec-sla"], ()=>authFetch("/api/v1/sla/dashboard").then(r=>r.json()), {staleTime:60000});
+  const { data: dash, isLoading } = useQuery(["exec-dashboard"], ()=>authFetch("/api/v1/executive/dashboard").then(r => r.data ?? r), {staleTime:60000,refetchInterval:120000});
+  const { data: procDash } = useQuery(["exec-procurement"], ()=>authFetch("/api/v1/procurement/dashboard").then(r => r.data ?? r), {staleTime:60000});
+  const { data: timeDash } = useQuery(["exec-time"], ()=>authFetch("/api/v1/time-entries/summary").then(r => r.data ?? r), {staleTime:60000});
+  const { data: slaDash } = useQuery(["exec-sla"], ()=>authFetch("/api/v1/sla/dashboard").then(r => r.data ?? r), {staleTime:60000});
 
   if (isLoading) return (
     <div className="min-h-screen bg-base flex items-center justify-center">

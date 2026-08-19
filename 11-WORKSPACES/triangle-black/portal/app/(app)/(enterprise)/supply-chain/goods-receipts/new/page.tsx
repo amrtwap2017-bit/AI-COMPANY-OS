@@ -31,7 +31,7 @@ export default function GoodsReceiptNewPage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/purchase-orders/?limit=100&status=approved")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setPos(items);

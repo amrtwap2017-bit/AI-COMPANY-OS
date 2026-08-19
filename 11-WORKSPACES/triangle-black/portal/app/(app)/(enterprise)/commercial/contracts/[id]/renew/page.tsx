@@ -37,7 +37,7 @@ export default function ContractRenewPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/contracts/${id}`)
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         setContract(d);
         // Pre-fill with current contract + 1 year

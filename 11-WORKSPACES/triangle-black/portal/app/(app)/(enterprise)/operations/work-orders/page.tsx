@@ -36,11 +36,11 @@ export default function WorkOrdersPage() {
   const [pageSize, setPageSize] = useState(25);
 
   const updateStatusMut = useMutation(
-    ({id,status})=>authFetch(`/api/v1/work-orders/${id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})}).then(r=>r.json()),
+    ({id,status})=>authFetch(`/api/v1/work-orders/${id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})}).then(r => r.data ?? r),
     {onSuccess:(data,vars)=>{toast.success(`Status updated to ${vars.status.replace(/_/g," ")}`);qc.invalidateQueries(["wo-list"]);setUpdatingId(null);},onError:()=>{toast.error("Failed to update status");setUpdatingId(null);}}
   );
 
-  const { data: raw, isLoading } = useQuery(["wo-list"],()=>authFetch("/api/v1/work-orders/").then(r=>r.json()),{refetchInterval:30000});
+  const { data: raw, isLoading } = useQuery(["wo-list"],()=>authFetch("/api/v1/work-orders/").then(r => r.data ?? r),{refetchInterval:30000});
   const wos = toArr(raw);
   const now = new Date();
 

@@ -16,7 +16,7 @@ export default function InvoicesPage() {
   const [statusF, setStatusF] = useState("all");
 
   const { data: raw, isLoading } = useQuery(
-    ["inv-all"],()=>authFetch("/api/v1/invoices/").then(r=>r.json()),{refetchInterval:120000}
+    ["inv-all"],()=>authFetch("/api/v1/invoices/").then(r => r.data ?? r),{refetchInterval:120000}
   );
   const invoices = toArr(raw);
 

@@ -23,9 +23,9 @@ export default function PurchaseOrdersV2Page() {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [errors, setErrors] = useState({});
 
-  const { data: rawPOs, isLoading } = useQuery({ queryKey:["pos-v2-list"], queryFn:()=>authFetch("/api/v1/purchase-orders-v2/").then(r=>r.json()), staleTime:60000 });
-  const { data: rawVendors } = useQuery({ queryKey:["vendors-dropdown"], queryFn:()=>authFetch("/api/v1/vendors/").then(r=>r.json()), staleTime:300000 });
-  const { data: rawRFQs } = useQuery({ queryKey:["rfqs-dropdown"], queryFn:()=>authFetch("/api/v1/rfq/").then(r=>r.json()), staleTime:300000 });
+  const { data: rawPOs, isLoading } = useQuery({ queryKey:["pos-v2-list"], queryFn:()=>authFetch("/api/v1/purchase-orders-v2/").then(r => r.data ?? r), staleTime:60000 });
+  const { data: rawVendors } = useQuery({ queryKey:["vendors-dropdown"], queryFn:()=>authFetch("/api/v1/vendors/").then(r => r.data ?? r), staleTime:300000 });
+  const { data: rawRFQs } = useQuery({ queryKey:["rfqs-dropdown"], queryFn:()=>authFetch("/api/v1/rfq/").then(r => r.data ?? r), staleTime:300000 });
 
   const pos = toArr(rawPOs);
   const vendors = toArr(rawVendors).filter((v: any) => !v.deleted_at && v.is_approved !== false);
@@ -36,7 +36,7 @@ export default function PurchaseOrdersV2Page() {
   const pending = pos.filter((p: any) => p.status === "pending_approval").length;
 
   const createPO = useMutation({
-    mutationFn: (payload) => authFetch("/api/v1/purchase-orders-v2/", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) }).then(r=>r.json()),
+    mutationFn: (payload) => authFetch("/api/v1/purchase-orders-v2/", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) }).then(r => r.data ?? r),
     onSuccess: (data) => {
       if (data?.id || data?.po_number) {
         toast.success(`Purchase Order ${data.po_number||""} created`);

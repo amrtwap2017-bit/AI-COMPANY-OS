@@ -14,9 +14,9 @@ export default function TechniciansPage() {
   const [filter, setFilter] = useState("all");
 
   const { data: raw, isLoading } = useQuery(
-    ["tech-list"],()=>authFetch("/api/v1/technicians/").then(r=>r.json()),{refetchInterval:60000}
+    ["tech-list"],()=>authFetch("/api/v1/technicians/").then(r => r.data ?? r),{refetchInterval:60000}
   );
-  const { data: woRaw } = useQuery(["tech-wos"],()=>authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: woRaw } = useQuery(["tech-wos"],()=>authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
 
   const techs = toArr(raw);
   const wos   = toArr(woRaw);

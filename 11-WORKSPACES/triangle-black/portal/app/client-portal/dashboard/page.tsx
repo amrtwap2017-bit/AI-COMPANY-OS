@@ -63,7 +63,7 @@ export default function ClientDashboardPage() {
   const { data: dash, isLoading } = useQuery(
     ["client-dashboard", client?.site_id],
     () => fetch(`/api/v1/client/dashboard?site_id=${client.site_id}`,
-        {headers:{Authorization:`Bearer ${token}`}}).then(r=>r.json()),
+        {headers:{Authorization:`Bearer ${token}`}}).then(r => r.data ?? r),
     { enabled: !!client?.site_id && !!token, staleTime: 30000 }
   );
 

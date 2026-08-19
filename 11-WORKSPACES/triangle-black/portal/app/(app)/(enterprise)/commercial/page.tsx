@@ -7,9 +7,9 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function CommercialPage() {
   const router = useRouter();
-  const { data: leadRaw } = useQuery(["com-leads"], () => authFetch("/api/v1/leads-portal").then(r=>r.json()));
-  const { data: contRaw } = useQuery(["com-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: invRaw }  = useQuery(["com-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
+  const { data: leadRaw } = useQuery(["com-leads"], () => authFetch("/api/v1/leads-portal").then(r => r.data ?? r));
+  const { data: contRaw } = useQuery(["com-conts"], () => authFetch("/api/v1/contracts/").then(r => r.data ?? r));
+  const { data: invRaw }  = useQuery(["com-inv"],   () => authFetch("/api/v1/invoices/").then(r => r.data ?? r));
   const leads = toArr(leadRaw); const contracts = toArr(contRaw); const inv = toArr(invRaw);
   const active = contracts.filter((c: any) =>c.status==="active");
   const won    = leads.filter((l: any) =>l.status==="won");

@@ -33,7 +33,7 @@ export function ActivityFeed({ entityId, limit = 15, compact = false }: Activity
     ["activity-feed", entityId, limit],
     () => {
       const params = entityId ? `?limit=${limit}&entity_id=${entityId}` : `?limit=${limit}`;
-      return authFetch(`/api/v1/activity-feed${params}`).then(r => r.json());
+      return authFetch(`/api/v1/activity-feed${params}`).then(r => r.data ?? r);
     },
     { refetchInterval: 30000 }
   );

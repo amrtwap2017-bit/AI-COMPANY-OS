@@ -23,7 +23,7 @@ export default function SupplierPurchaseOrdersPage() {
     setSupplier(sup);
     if (sup?.vendor_id) {
       fetch(`/api/v1/supplier/purchase-orders?vendor_id=${sup.vendor_id}`, {headers:{Authorization:`Bearer ${t}`}})
-        .then(r=>r.json()).then((d: any) => { setPos(Array.isArray(d)?d:[]); setLoading(false); });
+        .then(r => r.data ?? r).then((d: any) => { setPos(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 

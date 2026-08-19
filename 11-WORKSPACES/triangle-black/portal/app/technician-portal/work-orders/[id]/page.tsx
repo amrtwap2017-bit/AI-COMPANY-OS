@@ -28,7 +28,7 @@ export default function TechnicianWODetail() {
   useEffect(() => {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/work-orders/${id}`)
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then(data => { setWo(data); setNewStatus(data.status || "open"); })
       .catch(() => toast.error("Failed to load work order"))
       .finally(() => setLoading(false));

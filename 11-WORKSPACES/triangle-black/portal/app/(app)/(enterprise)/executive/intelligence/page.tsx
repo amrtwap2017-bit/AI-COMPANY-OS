@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function IntelligencePage() {
   const router = useRouter();
-  const { data: twin }    = useQuery(["int-twin"],  () => authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: signals } = useQuery(["int-sig"],   () => authFetch("/api/v1/ai/signals").then(r=>r.json()));
-  const { data: actRaw }  = useQuery(["int-act"],   () => authFetch("/api/v1/activity-feed?limit=20").then(r=>r.json()));
+  const { data: twin }    = useQuery(["int-twin"],  () => authFetch("/api/v1/twin/state").then(r => r.data ?? r));
+  const { data: signals } = useQuery(["int-sig"],   () => authFetch("/api/v1/ai/signals").then(r => r.data ?? r));
+  const { data: actRaw }  = useQuery(["int-act"],   () => authFetch("/api/v1/activity-feed?limit=20").then(r => r.data ?? r));
   const score = twin?.health_score||0;
   const domains = twin?.operational_domains||[];
   const activities = actRaw?.activities||[];

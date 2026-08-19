@@ -29,7 +29,7 @@ export default function EmployeeEditPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/employees/${id}`)
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then(emp => {
         setForm({
           name:        emp.name        || "",

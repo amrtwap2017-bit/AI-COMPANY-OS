@@ -19,7 +19,7 @@ export default function ClientApprovalsPage() {
     setClient(cl);
     if (cl?.company_name) {
       fetch(`/api/v1/client/sow-approvals?client_name=${encodeURIComponent(cl.company_name)}`,
-        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then((d: any) => { setSows(Array.isArray(d)?d:[]); setLoading(false); });
+        {headers:{Authorization:`Bearer ${t}`}}).then(r => r.data ?? r).then((d: any) => { setSows(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 

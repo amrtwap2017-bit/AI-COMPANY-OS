@@ -31,7 +31,7 @@ export default function TechnicianDashboard() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/work-orders/?limit=50")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then(data => {
         const list = Array.isArray(data) ? data : data?.results || data?.items || [];
         setWorkOrders(list);

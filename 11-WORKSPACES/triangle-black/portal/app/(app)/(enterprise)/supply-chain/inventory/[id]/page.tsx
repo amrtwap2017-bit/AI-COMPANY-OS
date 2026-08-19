@@ -15,12 +15,12 @@ export default function InventoryItemDetailPage() {
 
   const { data: item, isLoading } = useQuery(
     ["inv-detail", id],
-    () => authFetch("/api/v1/inventory-items-portal" + id).then(r => r.json()),
+    () => authFetch("/api/v1/inventory-items-portal" + id).then(r => r.data ?? r),
     { enabled: !!id }
   );
   const { data: stockRaw } = useQuery(
     ["inv-detail-stock"],
-    () => authFetch("/api/v1/stock-balances/").then(r => r.json())
+    () => authFetch("/api/v1/stock-balances/").then(r => r.data ?? r)
   );
 
   if (isLoading) return (

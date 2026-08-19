@@ -22,8 +22,8 @@ function MiniBar({ value, max, color="#5B7C8C" }: any) {
 
 export default function FinancialDashboardPage() {
   const router = useRouter();
-  const { data: fin, isLoading } = useQuery(["financial-dashboard"],()=>authFetch("/api/v1/financial/dashboard").then(r=>r.json()),{staleTime:60000});
-  const { data: cashFlow }       = useQuery(["cash-flow"],           ()=>authFetch("/api/v1/financial/cash-flow").then(r=>r.json()),{staleTime:60000});
+  const { data: fin, isLoading } = useQuery(["financial-dashboard"],()=>authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r),{staleTime:60000});
+  const { data: cashFlow }       = useQuery(["cash-flow"],           ()=>authFetch("/api/v1/financial/cash-flow").then(r => r.data ?? r),{staleTime:60000});
 
   if (isLoading) return (
     <div className="min-h-screen bg-base flex items-center justify-center">

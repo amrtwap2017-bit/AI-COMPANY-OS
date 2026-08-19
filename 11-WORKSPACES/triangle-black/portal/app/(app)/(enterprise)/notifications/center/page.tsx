@@ -33,7 +33,7 @@ export default function NotificationsCenterPage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/notifications/?limit=50")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.notifications || d?.results || d?.items || [];
         setNotifs(items);

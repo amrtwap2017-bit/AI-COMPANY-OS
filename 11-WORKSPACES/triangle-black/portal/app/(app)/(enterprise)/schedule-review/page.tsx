@@ -7,8 +7,8 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function ScheduleReviewPage() {
   const router = useRouter();
-  const { data: pmRaw } = useQuery(["sr2-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
-  const { data: woRaw } = useQuery(["sr2-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: pmRaw } = useQuery(["sr2-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r));
+  const { data: woRaw } = useQuery(["sr2-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
   const pms = toArr(pmRaw); const wos = toArr(woRaw);
   const now = new Date();
   const next7  = new Date(now.getTime()+7*86400000);

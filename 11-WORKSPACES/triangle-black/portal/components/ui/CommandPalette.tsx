@@ -38,7 +38,7 @@ export function CommandPalette({ open, onClose }: Props) {
 
   const { data, isFetching } = useQuery({
     queryKey: ["cmd-search", query],
-    queryFn: () => authFetch(`/api/v1/search/quick?q=${encodeURIComponent(query)}`).then(r => r.json()),
+    queryFn: () => authFetch(`/api/v1/search/quick?q=${encodeURIComponent(query)}`).then(r => r.data ?? r),
     enabled: open && query.length >= 2,
     staleTime: 5000,
   });

@@ -7,10 +7,10 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function RisksPage() {
   const router = useRouter();
-  const { data: woRaw }   = useQuery(["rsk-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: contRaw } = useQuery(["rsk-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
-  const { data: invRaw }  = useQuery(["rsk-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
-  const { data: pmRaw }   = useQuery(["rsk-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
+  const { data: woRaw }   = useQuery(["rsk-wos"],   () => authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
+  const { data: contRaw } = useQuery(["rsk-conts"], () => authFetch("/api/v1/contracts/").then(r => r.data ?? r));
+  const { data: invRaw }  = useQuery(["rsk-inv"],   () => authFetch("/api/v1/invoices/").then(r => r.data ?? r));
+  const { data: pmRaw }   = useQuery(["rsk-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r));
   const wos = toArr(woRaw); const contracts = toArr(contRaw);
   const inv = toArr(invRaw); const pms = toArr(pmRaw);
   const now = new Date();

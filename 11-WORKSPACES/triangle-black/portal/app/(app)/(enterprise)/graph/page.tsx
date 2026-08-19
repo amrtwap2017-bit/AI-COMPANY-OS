@@ -19,11 +19,11 @@ export default function DigitalTwinGraphPage() {
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const [selectedWO, setSelectedWO] = useState<string | null>(null);
 
-  const { data: rawSites, isLoading: loadSites } = useQuery({ queryKey: ["dt-sites"], queryFn: () => authFetch("/api/v1/sites-portal").then(r => r.json()), staleTime: 60000 });
-  const { data: rawAssets, isLoading: loadAssets } = useQuery({ queryKey: ["dt-assets"], queryFn: () => authFetch("/api/v1/assets-portal").then(r => r.json()), staleTime: 60000 });
-  const { data: rawWOs, isLoading: loadWOs } = useQuery({ queryKey: ["dt-wos"], queryFn: () => authFetch("/api/v1/work-orders/?limit=200").then(r => r.json()), staleTime: 60000 });
-  const { data: rawTechs, isLoading: loadTechs } = useQuery({ queryKey: ["dt-techs"], queryFn: () => authFetch("/api/v1/technicians/").then(r => r.json()), staleTime: 60000 });
-  const { data: signals } = useQuery({ queryKey: ["dt-signals"], queryFn: () => authFetch("/api/v1/ai/signals/summary").then(r => r.json()), staleTime: 30000 });
+  const { data: rawSites, isLoading: loadSites } = useQuery({ queryKey: ["dt-sites"], queryFn: () => authFetch("/api/v1/sites-portal").then(r => r.data ?? r), staleTime: 60000 });
+  const { data: rawAssets, isLoading: loadAssets } = useQuery({ queryKey: ["dt-assets"], queryFn: () => authFetch("/api/v1/assets-portal").then(r => r.data ?? r), staleTime: 60000 });
+  const { data: rawWOs, isLoading: loadWOs } = useQuery({ queryKey: ["dt-wos"], queryFn: () => authFetch("/api/v1/work-orders/?limit=200").then(r => r.data ?? r), staleTime: 60000 });
+  const { data: rawTechs, isLoading: loadTechs } = useQuery({ queryKey: ["dt-techs"], queryFn: () => authFetch("/api/v1/technicians/").then(r => r.data ?? r), staleTime: 60000 });
+  const { data: signals } = useQuery({ queryKey: ["dt-signals"], queryFn: () => authFetch("/api/v1/ai/signals/summary").then(r => r.data ?? r), staleTime: 30000 });
 
   const sites = toArr(rawSites);
   const allAssets = toArr(rawAssets).filter((a: any) => !a.deleted_at);

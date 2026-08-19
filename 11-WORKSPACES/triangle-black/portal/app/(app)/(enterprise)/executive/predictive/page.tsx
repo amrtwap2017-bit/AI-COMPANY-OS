@@ -12,12 +12,12 @@ export default function PredictivePage() {
   const router = useRouter();
   const { data: pred, isLoading } = useQuery(
     ["pred-maint"],
-    ()=>authFetch("/api/v1/ai/predictive-maintenance").then(r=>r.json()),
+    ()=>authFetch("/api/v1/ai/predictive-maintenance").then(r => r.data ?? r),
     {staleTime:300000,refetchOnWindowFocus:false}
   );
   const { data: patterns } = useQuery(
     ["wo-patterns"],
-    ()=>authFetch("/api/v1/ai/work-order-patterns").then(r=>r.json()),
+    ()=>authFetch("/api/v1/ai/work-order-patterns").then(r => r.data ?? r),
     {staleTime:300000,refetchOnWindowFocus:false}
   );
 

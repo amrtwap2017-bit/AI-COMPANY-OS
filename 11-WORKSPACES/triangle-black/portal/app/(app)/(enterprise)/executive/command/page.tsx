@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function CommandPage() {
   const router = useRouter();
-  const { data: twin } = useQuery(["cmd-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
-  const { data: dash } = useQuery(["cmd-dash"], () => authFetch("/api/v1/dashboard/summary").then(r=>r.json()),{refetchInterval:30000});
+  const { data: twin } = useQuery(["cmd-twin"], () => authFetch("/api/v1/twin/state").then(r => r.data ?? r));
+  const { data: dash } = useQuery(["cmd-dash"], () => authFetch("/api/v1/dashboard/summary").then(r => r.data ?? r),{refetchInterval:30000});
   const score = twin?.health_score||0;
   const d = dash||{};
   const commands = [

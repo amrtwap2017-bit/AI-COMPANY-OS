@@ -32,7 +32,7 @@ export default function RFQDetailPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/rfqs/${id}`)
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => setRfq(d))
       .catch(() => toast.error("Failed to load RFQ"))
       .finally(() => setLoading(false));

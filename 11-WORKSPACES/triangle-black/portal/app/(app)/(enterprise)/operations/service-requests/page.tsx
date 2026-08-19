@@ -26,7 +26,7 @@ export default function ServiceRequestsPage() {
   const qc = useQueryClient();
 
   const createSR = useMutation(
-    (payload) => authFetch("/api/v1/service-requests/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
+    (payload) => authFetch("/api/v1/service-requests/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.data ?? r),
     { onSuccess:(data)=>{ if(data.id){toast.success("Service request created");setShowCreateSR(false);setNewSR({title:"",category:"HVAC",urgency:"normal",description:"",submitted_by:"",site_id:""});qc.invalidateQueries(["sr-list"]);}else{toast.error(data.detail||"Failed");}}, onError:()=>toast.error("Connection error") }
   );
 
@@ -39,8 +39,8 @@ export default function ServiceRequestsPage() {
     createSR.mutate({...newSR, hotel_id:"tb-default-hotel-000000000001", status:"open"});
   };
 
-  const { data: srRaw, isLoading } = useQuery(["sr-list"], ()=>authFetch("/api/v1/service-requests/").then(r=>r.json()), {refetchInterval:30000});
-  const { data: woRaw } = useQuery(["sr-wos"], ()=>authFetch("/api/v1/work-orders/").then(r=>r.json()));
+  const { data: srRaw, isLoading } = useQuery(["sr-list"], ()=>authFetch("/api/v1/service-requests/").then(r => r.data ?? r), {refetchInterval:30000});
+  const { data: woRaw } = useQuery(["sr-wos"], ()=>authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
 
   const srs = toArr(srRaw);
   const wos = toArr(woRaw);

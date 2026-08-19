@@ -17,11 +17,11 @@ export default function RFQManagementPage() {
   const qc = useQueryClient();
 
   const createRFQ = useMutation(
-    (payload)=>import("@/lib/hooks/useAuthFetch").then(m=>m.authFetch("/api/v1/rfq/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})).then(r=>r.json()),
+    (payload)=>import("@/lib/hooks/useAuthFetch").then(m=>m.authFetch("/api/v1/rfq/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})).then(r => r.data ?? r),
     {onSuccess:(d)=>{if(d.id||d.rfq_number){toast.success("RFQ created successfully");setShowNewRFQ(false);qc.invalidateQueries(["rfq-list"]);}else{toast.error(d.detail||"Failed to create RFQ");}},onError:()=>toast.error("Connection error")}
   );
 
-  const { data: raw, isLoading } = useQuery(["rfq-list"],()=>authFetch("/api/v1/rfq/").then(r=>r.json()),{staleTime:60000});
+  const { data: raw, isLoading } = useQuery(["rfq-list"],()=>authFetch("/api/v1/rfq/").then(r => r.data ?? r),{staleTime:60000});
   const rfqs = toArr(raw);
   const filtered = filter==="all"?rfqs:rfqs.filter((r: any) =>r.status===filter);
 

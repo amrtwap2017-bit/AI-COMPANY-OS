@@ -17,7 +17,7 @@ const WarmTooltip = ({active,payload,label}: any) => {
 
 export default function ProjectsIntelligencePage() {
   const router = useRouter();
-  const { data: raw, isLoading } = useQuery({queryKey:["proj-intel"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r=>r.json()),staleTime:60000});
+  const { data: raw, isLoading } = useQuery({queryKey:["proj-intel"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r => r.data ?? r),staleTime:60000});
   const projects = toArr(raw);
 
   const byStatus = Object.entries(projects.reduce((acc: any, p: any) =>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{})).map(([name,value])=>({name,value}));

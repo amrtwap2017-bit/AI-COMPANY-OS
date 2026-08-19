@@ -18,8 +18,8 @@ export default function SchedulePage() {
   const [pageSize, setPageSize] = useState(25);
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const { data: rawPlans, isLoading } = useQuery({queryKey:["schedule-plans"],queryFn:()=>authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()),staleTime:60000});
-  const { data: stats } = useQuery({queryKey:["schedule-stats"],queryFn:()=>authFetch("/api/v1/pm-schedule/stats").then(r=>r.json()),staleTime:60000});
+  const { data: rawPlans, isLoading } = useQuery({queryKey:["schedule-plans"],queryFn:()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r),staleTime:60000});
+  const { data: stats } = useQuery({queryKey:["schedule-stats"],queryFn:()=>authFetch("/api/v1/pm-schedule/stats").then(r => r.data ?? r),staleTime:60000});
 
   const plans = toArr(rawPlans);
   const now = new Date();

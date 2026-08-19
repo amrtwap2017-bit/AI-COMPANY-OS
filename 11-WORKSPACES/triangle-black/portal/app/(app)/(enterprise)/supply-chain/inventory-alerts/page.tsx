@@ -47,7 +47,7 @@ export default function InventoryAlertsPage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/stock-balances/?limit=200")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setStocks(items);

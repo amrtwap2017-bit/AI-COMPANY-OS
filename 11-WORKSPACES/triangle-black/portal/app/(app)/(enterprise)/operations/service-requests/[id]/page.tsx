@@ -33,12 +33,12 @@ export default function ServiceRequestDetailPage() {
 
   const { data: sr, isLoading } = useQuery(
     ["sr-detail", id],
-    () => authFetch(`/api/v1/service-requests/${id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/service-requests/${id}`).then(r => r.data ?? r),
     { enabled: !!id }
   );
   const { data: woRaw } = useQuery(
     ["sr-detail-wo", sr?.work_order_id],
-    () => authFetch(`/api/v1/work-orders/${sr?.work_order_id}`).then(r => r.json()),
+    () => authFetch(`/api/v1/work-orders/${sr?.work_order_id}`).then(r => r.data ?? r),
     { enabled: !!sr?.work_order_id }
   );
 

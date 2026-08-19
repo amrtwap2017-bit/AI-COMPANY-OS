@@ -15,7 +15,7 @@ export default function RFQsPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const { data: raw, isLoading } = useQuery({queryKey:["rfqs-list"],queryFn:()=>authFetch("/api/v1/rfqs/").then(r=>r.json())});
+  const { data: raw, isLoading } = useQuery({queryKey:["rfqs-list"],queryFn:()=>authFetch("/api/v1/rfqs/").then(r => r.data ?? r)});
   const all = toArr(raw);
   const filtered = all.filter((r: any) =>{
     const ms = !search||(r.rfq_number||"").toLowerCase().includes(search.toLowerCase())||(r.title||"").toLowerCase().includes(search.toLowerCase())||(r.category||"").toLowerCase().includes(search.toLowerCase());

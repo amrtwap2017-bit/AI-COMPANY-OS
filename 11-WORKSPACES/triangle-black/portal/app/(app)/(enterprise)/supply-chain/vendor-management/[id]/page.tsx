@@ -15,19 +15,19 @@ export default function VendorDetailPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const { data: vendor, isLoading } = useQuery(
     ["vendor-detail", id],
-    () => authFetch(`/api/v1/vendors/${id}`).then(r=>r.json()),
+    () => authFetch(`/api/v1/vendors/${id}`).then(r => r.data ?? r),
     { staleTime: 30000 }
   );
   const { data: docStatus } = useQuery(
     ["vendor-doc-status", id],
-    () => authFetch(`/api/v1/vendors/${id}/doc-status`).then(r=>r.json()),
+    () => authFetch(`/api/v1/vendors/${id}/doc-status`).then(r => r.data ?? r),
     { staleTime: 30000, enabled: !!id }
   );
   const approveMut = useMutation(
     () => authFetch(`/api/v1/vendors/${id}`, {
       method: "PATCH", headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ is_approved: true, approved_by: "amr@triangleblack.com" })
-    }).then(r=>r.json()),
+    }).then(r => r.data ?? r),
     { onSuccess: () => qc.invalidateQueries(["vendor-detail", id]) }
   );
   const deleteMut = useMutation(

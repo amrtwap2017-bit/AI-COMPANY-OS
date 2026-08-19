@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function HubPage() {
   const router = useRouter();
-  const { data: health } = useQuery(["hub-h"], () => authFetch("/api/v1/ai/health").then(r=>r.json()), { staleTime:120000, refetchOnWindowFocus:false });
-  const { data: twin }   = useQuery(["hub-t"], () => authFetch("/api/v1/twin/state").then(r=>r.json()), { staleTime:60000, refetchOnWindowFocus:false });
-  const { data: sigRaw } = useQuery(["hub-s"], () => authFetch("/api/v1/ai/signals").then(r=>r.json()), { staleTime:60000, refetchOnWindowFocus:false });
+  const { data: health } = useQuery(["hub-h"], () => authFetch("/api/v1/ai/health").then(r => r.data ?? r), { staleTime:120000, refetchOnWindowFocus:false });
+  const { data: twin }   = useQuery(["hub-t"], () => authFetch("/api/v1/twin/state").then(r => r.data ?? r), { staleTime:60000, refetchOnWindowFocus:false });
+  const { data: sigRaw } = useQuery(["hub-s"], () => authFetch("/api/v1/ai/signals").then(r => r.data ?? r), { staleTime:60000, refetchOnWindowFocus:false });
   const score = twin?.health_score||0;
   const sigs  = toArr(sigRaw?.signals||sigRaw);
   const st    = health?.status||"unknown";

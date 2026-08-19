@@ -36,7 +36,7 @@ export default function PMPlanDetailPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/maintenance/pm-plans/${id}`)
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => { setPlan(d); if (d.status === "completed") setCompleted(true); })
       .catch(() => toast.error("Failed to load PM plan"))
       .finally(() => setLoading(false));

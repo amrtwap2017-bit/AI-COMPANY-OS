@@ -33,7 +33,7 @@ export default function InspectionsPage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/inspections/?limit=100")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setInspections(items);

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function WorkflowDesignerPage() {
   const router = useRouter();
-  const { data: woRaw } = useQuery(["wd-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
-  const { data: srRaw } = useQuery(["wd-srs"], () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
+  const { data: woRaw } = useQuery(["wd-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
+  const { data: srRaw } = useQuery(["wd-srs"], () => authFetch("/api/v1/service-requests/").then(r => r.data ?? r));
   const wos = toArr(woRaw); const srs = toArr(srRaw);
   const workflows = [
     {label:"SR → Work Order",    icon:"🎫→🔧", desc:"Service request creates work order automatically", active:srs.filter((s: any) =>s.work_order_id).length, total:srs.length, color:"#5B7C8C"},

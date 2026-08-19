@@ -14,12 +14,12 @@ export default function ContractDetailPage() {
 
   const { data: contract, isLoading } = useQuery(
     ["contract-detail",id],
-    ()=>authFetch(`/api/v1/contracts/${id}`).then(r=>r.json()),
+    ()=>authFetch(`/api/v1/contracts/${id}`).then(r => r.data ?? r),
     { enabled:!!id }
   );
 
   const activate = useMutation({
-    mutationFn: ()=>authFetch(`/api/v1/contracts/${id}/activate`,{method:"POST"}).then(r=>r.json()),
+    mutationFn: ()=>authFetch(`/api/v1/contracts/${id}/activate`,{method:"POST"}).then(r => r.data ?? r),
     onSuccess: ()=>window.location.reload(),
   });
 

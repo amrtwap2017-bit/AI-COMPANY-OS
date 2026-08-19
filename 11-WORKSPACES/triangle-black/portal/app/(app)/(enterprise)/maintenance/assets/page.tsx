@@ -20,8 +20,8 @@ function AssetsPageInner() {
   const [critF, setCritF] = useState("all");
 
   const [mounted, setMounted] = useState(false)
-  const { data: raw, isLoading } = useQuery(["assets-list"],()=>authFetch("/api/v1/assets/").then(r=>r.json()),{refetchInterval:120000});
-  const { data: twin } = useQuery(["assets-twin"],()=>authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: raw, isLoading } = useQuery(["assets-list"],()=>authFetch("/api/v1/assets/").then(r => r.data ?? r),{refetchInterval:120000});
+  const { data: twin } = useQuery(["assets-twin"],()=>authFetch("/api/v1/twin/state").then(r => r.data ?? r));
 
   useEffect(() => { setMounted(true) }, [])
   const assets = toArr(raw);

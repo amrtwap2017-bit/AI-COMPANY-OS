@@ -48,7 +48,7 @@ export default function PlatformReadinessPage() {
   useEffect(() => {
     if (!mounted) return;
     Promise.all([
-      fetch("/api/v1/health" in window.location ? "" : "http://localhost:8030/health").then(r => r.json()).catch(() => ({ok:true,version:"3.0.0"})),
+      fetch("/api/v1/health" in window.location ? "" : "http://localhost:8030/health").then(r => r.data ?? r).catch(() => ({ok:true,version:"3.0.0"})),
       tbFetch("/api/v1/executive-kpi/scorecard").then(r => r.data ?? r).catch(() => ({})),
       tbFetch("/api/v1/maintenance/dashboard").then(r => r.data ?? r).catch(() => ({})),
     ]).then(([h, k, m]: any[]) => {

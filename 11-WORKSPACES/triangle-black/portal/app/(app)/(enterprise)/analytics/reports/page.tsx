@@ -8,7 +8,7 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.repor
 
 export default function AnalyticsReportsPage() {
   const router = useRouter();
-  const { data: catalogRaw } = useQuery(["reports-catalog"], () => authFetch("/api/v1/report-engine/catalog").then(r=>r.json()), {staleTime:60000});
+  const { data: catalogRaw } = useQuery(["reports-catalog"], () => authFetch("/api/v1/report-engine/catalog").then(r => r.data ?? r), {staleTime:60000});
   const reports = toArr(catalogRaw?.reports || catalogRaw);
 
   return (

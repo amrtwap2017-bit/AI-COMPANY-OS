@@ -25,7 +25,7 @@ export default function ProcurementDashboardPage() {
   const router = useRouter();
   const { data: proc, isLoading } = useQuery({
     queryKey:["proc-dash"],
-    queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r=>r.json()),
+    queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r => r.data ?? r),
     staleTime:60000
   });
 

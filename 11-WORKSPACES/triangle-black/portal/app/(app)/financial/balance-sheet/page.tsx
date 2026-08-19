@@ -91,7 +91,7 @@ export default function BalanceSheetPage() {
   useEffect(() => {
     if (!mounted) return;
     tbFetch("/api/v1/financial/gl/balance-sheet")
-      .then(r => r.json())
+      .then(r => r.data ?? r)
       .then((d: any) => {
         setData(d);
         if (d.generated_at) {

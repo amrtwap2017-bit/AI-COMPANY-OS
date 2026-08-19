@@ -12,7 +12,7 @@ const SC = {active:"#547C4D",planning:"#5B7C8C",completed:"#8D7443",on_hold:"#B0
 
 export default function ProjectTimelinePage() {
   const router   = useRouter();
-  const { data: raw } = useQuery(["proj-timeline"],()=>authFetch("/api/v1/projects/").then(r=>r.json()),{staleTime:30000});
+  const { data: raw } = useQuery(["proj-timeline"],()=>authFetch("/api/v1/projects/").then(r => r.data ?? r),{staleTime:30000});
   const projects = toArr(raw);
 
   const byStatus = Object.entries(

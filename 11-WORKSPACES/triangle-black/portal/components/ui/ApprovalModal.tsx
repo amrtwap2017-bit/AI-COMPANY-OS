@@ -53,7 +53,7 @@ export function ApprovalModal({
             : { to: "active", comment }
         ),
       }
-    ).then(r => r.json()),
+    ).then(r => r.data ?? r),
     onSuccess: () => {
       setResult("approved");
       qc.invalidateQueries({ queryKey: invalidateKey });
@@ -77,7 +77,7 @@ export function ApprovalModal({
             : { to: "cancelled", comment }
         ),
       }
-    ).then(r => r.json()),
+    ).then(r => r.data ?? r),
     onSuccess: () => {
       setResult("rejected");
       qc.invalidateQueries({ queryKey: invalidateKey });

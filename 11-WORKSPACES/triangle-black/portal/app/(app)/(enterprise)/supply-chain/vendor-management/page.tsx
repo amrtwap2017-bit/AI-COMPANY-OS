@@ -26,7 +26,7 @@ export default function VendorManagementPage() {
   const qc = useQueryClient();
 
   const createVendor = useMutation(
-    (payload)=>authFetch("/api/v1/vendors/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
+    (payload)=>authFetch("/api/v1/vendors/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.data ?? r),
     {onSuccess:(data)=>{if(data.id){toast.success("Vendor created successfully");setShowNewVendor(false);setNewV({company_name:"",category:"General",contact_person:"",email:"",phone:"",city:"Cairo"});qc.invalidateQueries(["vendors-list"]);}else{toast.error(data.detail||data.error||"Failed");}},onError:()=>toast.error("Connection error")}
   );
 
@@ -38,7 +38,7 @@ export default function VendorManagementPage() {
     createVendor.mutate({...newV, vendor_code:"VND-"+Date.now().toString().slice(-6), hotel_id:"tb-default-hotel-000000000001", is_approved:false, rating:0});
   };
 
-  const { data: raw, isLoading } = useQuery(["vendors-list"], ()=>authFetch("/api/v1/vendors/").then(r=>r.json()), {staleTime:60000});
+  const { data: raw, isLoading } = useQuery(["vendors-list"], ()=>authFetch("/api/v1/vendors/").then(r => r.data ?? r), {staleTime:60000});
   const vendors = toArr(raw);
   const cats = [...new Set(vendors.map((v: any) =>v.category).filter(Boolean))];
   const filtered = vendors.filter((v: any) =>(filterCat==="all"||v.category===filterCat)&&(!search||(v.company_name||"").toLowerCase().includes(search.toLowerCase())||(v.category||"").toLowerCase().includes(search.toLowerCase())));

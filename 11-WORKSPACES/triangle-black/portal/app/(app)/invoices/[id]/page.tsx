@@ -40,7 +40,7 @@ export default function InvoiceDetailPage() {
 
   const { data: inv, isLoading } = useQuery(
     ["invoice-detail", id],
-    ()=>authFetch(`/api/v1/invoices/${id}`).then(r=>r.json()),
+    ()=>authFetch(`/api/v1/invoices/${id}`).then(r => r.data ?? r),
     {enabled:!!id}
   );
 

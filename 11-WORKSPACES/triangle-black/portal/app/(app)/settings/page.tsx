@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function SettingsPage() {
   const router = useRouter();
-  const { data: me } = useQuery(["settings-me"], () => authFetch("/api/v1/auth/me").then(r=>r.json()));
-  const { data: twin } = useQuery(["settings-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));
+  const { data: me } = useQuery(["settings-me"], () => authFetch("/api/v1/auth/me").then(r => r.data ?? r));
+  const { data: twin } = useQuery(["settings-twin"], () => authFetch("/api/v1/twin/state").then(r => r.data ?? r));
   const score = twin?.health_score||0;
   const sections = [
     {label:"Profile",         icon:"👤", desc:"Name, email, password", path:"/settings/profile"},

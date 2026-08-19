@@ -29,7 +29,7 @@ export default function SOWDetailPage() {
 
   const { data: sow, isLoading } = useQuery({
     queryKey: ["sow-detail", id],
-    queryFn: () => authFetch(`/api/v1/scope-of-work/${id}`).then(r => r.json()),
+    queryFn: () => authFetch(`/api/v1/scope-of-work/${id}`).then(r => r.data ?? r),
     staleTime: 30000,
     enabled: !!id,
   });
@@ -40,7 +40,7 @@ export default function SOWDetailPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, approved_by: "amr@triangleblack.com" }),
-      }).then(r => r.json()),
+      }).then(r => r.data ?? r),
     onSuccess: (data, action) => {
       if (data?.id || data?.status) {
         toast.success(action === "approve" ? "SOW approved" : "SOW rejected");
@@ -68,7 +68,7 @@ export default function SOWDetailPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).then(r => r.json()),
+      }).then(r => r.data ?? r),
     onSuccess: (data) => {
       if (data?.id || data?.rfq_number) {
         toast.success(`RFQ ${data.rfq_number || ""} created from SOW`);

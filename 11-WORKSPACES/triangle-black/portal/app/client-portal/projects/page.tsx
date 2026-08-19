@@ -19,7 +19,7 @@ export default function ClientProjectsPage() {
     setClient(cl);
     if (cl?.site_id) {
       fetch(`/api/v1/client/projects?site_id=${cl.site_id}`,
-        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then((d: any) => { setProjects(Array.isArray(d)?d:[]); setLoading(false); });
+        {headers:{Authorization:`Bearer ${t}`}}).then(r => r.data ?? r).then((d: any) => { setProjects(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 

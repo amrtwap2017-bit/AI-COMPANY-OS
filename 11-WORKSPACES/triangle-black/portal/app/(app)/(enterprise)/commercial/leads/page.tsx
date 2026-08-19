@@ -31,7 +31,7 @@ function LeadsPageInner() {
   const [statusF,    setStatusF]    = useState("all");
   const [showCreate, setShowCreate] = useState(false);
 
-  const { data: raw, isLoading } = useQuery(["leads-list"],()=>authFetch("/api/v1/leads-portal-v2").then(r=>r.json()));
+  const { data: raw, isLoading } = useQuery(["leads-list"],()=>authFetch("/api/v1/leads-portal-v2").then(r => r.data ?? r));
   const leads = toArr(raw);
 
   const filtered = leads.filter((l: any) =>{

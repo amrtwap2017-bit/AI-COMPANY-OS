@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [pwd, setPwd] = useState({ current:"", new_:"", confirm:"" });
   const [pwdErrors, setPwdErrors] = useState({});
 
-  const { data: me } = useQuery({ queryKey:["profile-me"], queryFn:()=>authFetch("/api/v1/me").then(r=>r.json()), staleTime:60000 });
+  const { data: me } = useQuery({ queryKey:["profile-me"], queryFn:()=>authFetch("/api/v1/me").then(r => r.data ?? r), staleTime:60000 });
 
   const rc = ROLE_COLORS[me?.role||user?.role] || "#6D5F53";
   const initials = (user?.name||me?.name||"TB").split(" ").map((n: any) =>n[0]).join("").slice(0,2).toUpperCase();
@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const displayRole = me?.role||user?.role||"—";
 
   const changePwdMut = useMutation({
-    mutationFn: (payload) => authFetch("/api/v1/secure/auth/change-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
+    mutationFn: (payload) => authFetch("/api/v1/secure/auth/change-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.data ?? r),
     onSuccess: (data) => {
       if (data?.success) { toast.success("Password changed successfully"); setPwd({current:"",new_:"",confirm:""}); setPwdErrors({}); setEditPwd(false); }
       else { toast.error(data?.detail||"Password change failed"); if (data?.detail?.toLowerCase().includes("current")) setPwdErrors({current:"Current password is incorrect"}); }

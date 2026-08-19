@@ -23,7 +23,7 @@ export default function SupplierInvoicesPage() {
     setSupplier(sup);
     if (sup?.vendor_id) {
       fetch(`/api/v1/supplier/invoices?vendor_id=${sup.vendor_id}`, {headers:{Authorization:`Bearer ${t}`}})
-        .then(r=>r.json()).then((d: any) => { setInvoices(Array.isArray(d)?d:[]); setLoading(false); });
+        .then(r => r.data ?? r).then((d: any) => { setInvoices(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 
