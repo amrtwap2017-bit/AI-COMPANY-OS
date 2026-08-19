@@ -9,7 +9,7 @@ import { FeatureGate } from "@/components/ui/FeatureGate";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
   active:"#547C4D", pending_signature:"#B07A2A", expired:"#A84A3D", draft:"#6D5F53",
@@ -28,14 +28,14 @@ function ContractsPageInner() {
   const in30  = new Date(now.getTime()+30*86400000);
   const in90  = new Date(now.getTime()+90*86400000);
 
-  const active     = contracts.filter(c=>c.status==="active");
-  const pending    = contracts.filter(c=>c.status==="pending_signature");
-  const expired    = contracts.filter(c=>c.status==="expired");
-  const expiring30 = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in30);
-  const expiring90 = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in90);
-  const totalValue = active.reduce((s,c)=>s+Number(c.total_value||0),0);
+  const active     = contracts.filter((c: any) =>c.status==="active");
+  const pending    = contracts.filter((c: any) =>c.status==="pending_signature");
+  const expired    = contracts.filter((c: any) =>c.status==="expired");
+  const expiring30 = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in30);
+  const expiring90 = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in90);
+  const totalValue = active.reduce((s: any, c: any) =>s+Number(c.total_value||0),0);
 
-  const filtered = contracts.filter(c=>{
+  const filtered = contracts.filter((c: any) =>{
     const ms  = !search||c.title?.toLowerCase().includes(search.toLowerCase())||c.id?.slice(0,8).includes(search.toLowerCase());
     const mst = statusF==="all"||c.status===statusF||
       (statusF==="expiring"&&c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in30);
@@ -66,7 +66,7 @@ function ContractsPageInner() {
               {label:"Expiring 30d", value:expiring30.length, color:expiring30.length>0?"var(--color-danger)":"var(--color-text-3)",f:"expiring",sub:"urgent"},
               {label:"Expiring 90d", value:expiring90.length, color:"var(--color-info)",  f:"expiring",     sub:"plan ahead"},
               {label:"Expired",      value:expired.length,    color:"var(--color-text-3)",f:"expired",      sub:"closed"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <button key={i} onClick={()=>setStatusF(statusF===k.f?"all":k.f)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.125rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -81,7 +81,7 @@ function ContractsPageInner() {
           <div className="tb-alert tb-alert-warning mb-4">
             <span className="text-xl">⏰</span>
             <div className="flex-1 text-sm font-bold">
-              {expiring30.length} contract{expiring30.length>1?"s":""} expiring within 30 days — {expiring30.slice(0,2).map(c=>c.title||c.id?.slice(0,8)).join(" · ")}
+              {expiring30.length} contract{expiring30.length>1?"s":""} expiring within 30 days — {expiring30.slice(0,2).map((c: any) =>c.title||c.id?.slice(0,8)).join(" · ")}
             </div>
             <button onClick={()=>router.push("/customers/renewals")} className="tb-btn tb-btn-secondary tb-btn-sm ml-auto">Manage Renewals →</button>
           </div>
@@ -121,8 +121,8 @@ function ContractsPageInner() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((c,i)=>{
-                    const sc       = STATUS_COLOR[c.status]||"#6D5F53";
+                  {filtered.map((c: any, i: number) =>{
+                    const sc       = (STATUS_COLOR as Record<string, any>)[c.status]||"#6D5F53";
                     const daysLeft = c.end_date?Math.ceil((new Date(c.end_date)-Date.now())/86400000):null;
                     const isExpiring= c.status==="active"&&daysLeft!==null&&daysLeft>=0&&daysLeft<=30;
                     const isExpired = c.status==="expired";

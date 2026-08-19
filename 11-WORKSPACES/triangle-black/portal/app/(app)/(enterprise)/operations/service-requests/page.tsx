@@ -8,8 +8,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const PRIORITY_COLOR = {critical:"var(--color-danger)",high:"var(--color-warning)",medium:"var(--color-warning)",low:"var(--color-text-3)"};
 const STATUS_COLOR   = {open:"var(--color-info)",in_progress:"var(--color-warning)",resolved:"var(--color-success)",closed:"var(--color-text-3)",cancelled:"var(--color-text-3)"};
@@ -44,12 +44,12 @@ export default function ServiceRequestsPage() {
 
   const srs = toArr(srRaw);
   const wos = toArr(woRaw);
-  const open = srs.filter(s=>s.status==="open").length;
-  const inProgress = srs.filter(s=>s.status==="in_progress").length;
-  const resolved = srs.filter(s=>s.status==="resolved").length;
-  const linked = srs.filter(s=>s.work_order_id).length;
+  const open = srs.filter((s: any) =>s.status==="open").length;
+  const inProgress = srs.filter((s: any) =>s.status==="in_progress").length;
+  const resolved = srs.filter((s: any) =>s.status==="resolved").length;
+  const linked = srs.filter((s: any) =>s.work_order_id).length;
 
-  const filtered = srs.filter(s => {
+  const filtered = srs.filter((s: any) => {
     const ms = !search||(s.title||"").toLowerCase().includes(search.toLowerCase())||(s.description||"").toLowerCase().includes(search.toLowerCase())||(s.requester_name||"").toLowerCase().includes(search.toLowerCase());
     return ms && (filterStatus==="all"||s.status===filterStatus);
   });
@@ -72,7 +72,7 @@ export default function ServiceRequestsPage() {
             </div>
           </div>
           <div className="tb-grid-5 mt-6">
-            {[{label:"Total",value:srs.length},{label:"Open",value:open,warn:true},{label:"In Progress",value:inProgress},{label:"Resolved",value:resolved},{label:"Linked WOs",value:linked}].map((k,i)=>(
+            {[{label:"Total",value:srs.length},{label:"Open",value:open,warn:true},{label:"In Progress",value:inProgress},{label:"Resolved",value:resolved},{label:"Linked WOs",value:linked}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.warn&&k.value>0?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -87,10 +87,10 @@ export default function ServiceRequestsPage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             <input className="tb-input flex-1" style={{minWidth:"200px"}} placeholder="Search service requests..." value={search} onChange={e=>setSearch(e.target.value)} />
             <div className="tb-tabs border-0 mb-0">
-              {["all","open","in_progress","resolved","closed"].map(s=>(
+              {["all","open","in_progress","resolved","closed"].map((s: any) =>(
                 <button key={s} onClick={()=>setFilterStatus(s)} className={`tb-tab ${filterStatus===s?"active":""}`}>
                   {s==="all"?"All":s.replace("_"," ")}
-                  {s!=="all"&&<span className="ml-1 opacity-60">{srs.filter(r=>r.status===s).length}</span>}
+                  {s!=="all"&&<span className="ml-1 opacity-60">{srs.filter((r: any) =>r.status===s).length}</span>}
                 </button>
               ))}
             </div>
@@ -106,7 +106,7 @@ export default function ServiceRequestsPage() {
             </div>
           </div>
           {isLoading ? (
-            <div className="flex flex-col gap-3">{[1,2,3,4,5].map(i=><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:56}} />)}</div>
+            <div className="flex flex-col gap-3">{[1,2,3,4,5].map((i: any) =><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:56}} />)}</div>
           ) : filtered.length===0 ? (
             <div className="tb-empty">
               <div className="tb-empty-icon">🎫</div>
@@ -120,7 +120,7 @@ export default function ServiceRequestsPage() {
                   <thead><tr><th>Request</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Requester</th><th style={{textAlign:"center"}}>Date</th><th style={{textAlign:"center"}}>Work Order</th></tr></thead>
                   <tbody>
                     {paged.map((sr,i)=>{
-                      const linkedWO = wos.find(w=>w.id===sr.work_order_id);
+                      const linkedWO = wos.find((w: any) =>w.id===sr.work_order_id);
                       return (
                         <tr key={i} onClick={()=>router.push(`/operations/service-requests/${sr.id}`)} className="cursor-pointer">
                           <td>
@@ -147,19 +147,19 @@ export default function ServiceRequestsPage() {
           <div className="tb-section">
             <div className="tb-section-title">By Priority</div>
             <div className="flex flex-col gap-2">
-              {["critical","high","medium","low"].map(p=>{const cnt=srs.filter(s=>s.priority===p).length;const pct=srs.length>0?(cnt/srs.length)*100:0;return(<div key={p}><div className="flex justify-between mb-1"><span className="text-xs text-secondary capitalize">{p}</span><span className="text-xs font-bold text-primary">{cnt}</span></div><div className="tb-progress"><div className="tb-progress-bar" style={{background:PRIORITY_COLOR[p],width:`${pct}%`}}/></div></div>);})}
+              {["critical","high","medium","low"].map((p: any) =>{const cnt=srs.filter((s: any) =>s.priority===p).length;const pct=srs.length>0?(cnt/srs.length)*100:0;return(<div key={p}><div className="flex justify-between mb-1"><span className="text-xs text-secondary capitalize">{p}</span><span className="text-xs font-bold text-primary">{cnt}</span></div><div className="tb-progress"><div className="tb-progress-bar" style={{background:(PRIORITY_COLOR as Record<string, any>)[p],width:`${pct}%`}}/></div></div>);})}
             </div>
           </div>
           <div className="tb-section">
             <div className="tb-section-title">By Status</div>
             <div className="flex flex-col gap-2">
-              {["open","in_progress","resolved","closed"].map(s=>{const cnt=srs.filter(sr=>sr.status===s).length;const pct=srs.length>0?(cnt/srs.length)*100:0;return(<div key={s}><div className="flex justify-between mb-1"><span className="text-xs text-secondary capitalize">{s.replace("_"," ")}</span><span className="text-xs font-bold text-primary">{cnt}</span></div><div className="tb-progress"><div className="tb-progress-bar" style={{background:STATUS_COLOR[s],width:`${pct}%`}}/></div></div>);})}
+              {["open","in_progress","resolved","closed"].map((s: any) =>{const cnt=srs.filter(sr=>sr.status===s).length;const pct=srs.length>0?(cnt/srs.length)*100:0;return(<div key={s}><div className="flex justify-between mb-1"><span className="text-xs text-secondary capitalize">{s.replace("_"," ")}</span><span className="text-xs font-bold text-primary">{cnt}</span></div><div className="tb-progress"><div className="tb-progress-bar" style={{background:(STATUS_COLOR as Record<string, any>)[s],width:`${pct}%`}}/></div></div>);})}
             </div>
           </div>
           <div className="tb-section">
             <div className="tb-section-title">Quick Actions</div>
             <div className="flex flex-col gap-2">
-              {[{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Dispatch",icon:"📋",path:"/operations/dispatch"},{label:"Technicians",icon:"👷",path:"/operations/technicians"},{label:"Assets",icon:"⚙️",path:"/maintenance/assets"}].map((a,i)=>(
+              {[{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Dispatch",icon:"📋",path:"/operations/dispatch"},{label:"Technicians",icon:"👷",path:"/operations/technicians"},{label:"Assets",icon:"⚙️",path:"/maintenance/assets"}].map((a: any, i: number) =>(
                 <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item"><span>{a.icon}</span><span className="text-sm text-secondary">{a.label}</span></button>
               ))}
             </div>
@@ -184,13 +184,13 @@ export default function ServiceRequestsPage() {
                 <div className="tb-form-group">
                   <label className="tb-label">Category</label>
                   <select value={newSR.category} onChange={e=>setNewSR({...newSR,category:e.target.value})} className="tb-select">
-                    {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Other"].map(c=><option key={c} value={c}>{c}</option>)}
+                    {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Other"].map((c: any) =><option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
                   <label className="tb-label">Urgency</label>
                   <select value={newSR.urgency} onChange={e=>setNewSR({...newSR,urgency:e.target.value})} className="tb-select">
-                    {["emergency","critical","high","normal","low"].map(u=><option key={u} value={u}>{u}</option>)}
+                    {["emergency","critical","high","normal","low"].map((u: any) =><option key={u} value={u}>{u}</option>)}
                   </select>
                 </div>
               </div>

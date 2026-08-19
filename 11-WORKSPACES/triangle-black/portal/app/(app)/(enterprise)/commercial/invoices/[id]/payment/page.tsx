@@ -36,7 +36,7 @@ export default function InvoicePaymentPage() {
     Promise.all([
       tbFetch(`/api/v1/invoices/${id}`).then(r => r.data ?? r),
       tbFetch(`/api/v1/invoices/${id}/payments`).then(r => r.data ?? r).catch(() => []),
-    ]).then(([inv, pmts]) => {
+    ]).then(([inv, pmts]: any[]) => {
       setInvoice(inv);
       const plist = Array.isArray(pmts) ? pmts : pmts?.payments || pmts?.results || [];
       setPayments(plist);
@@ -44,7 +44,7 @@ export default function InvoicePaymentPage() {
       .finally(() => setLoading(false));
   }, [mounted, id]);
 
-  const totalPaid = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
+  const totalPaid = payments.reduce((s: any, p: any) => s + Number(p.amount || 0), 0);
   const outstanding = Math.max(0, Number(invoice?.total_amount || 0) - totalPaid);
 
   const handleSubmit = async (e: any) => {
@@ -94,7 +94,7 @@ export default function InvoicePaymentPage() {
         </button>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--color-text-1)]">Record Payment</h1>
-          <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLOR[invoice.status] || "bg-gray-100 text-gray-600"}`}>
+          <span className={`text-sm px-3 py-1 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[invoice.status] || "bg-gray-100 text-gray-600"}`}>
             {invoice.status}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function InvoicePaymentPage() {
             { label:"Invoice Total",  value:fmtEGP(invoice.total_amount), color:"text-[var(--color-text-1)]" },
             { label:"Total Paid",     value:fmtEGP(totalPaid),            color:"text-green-600" },
             { label:"Outstanding",    value:fmtEGP(outstanding),          color:outstanding>0?"text-red-600":"text-green-600" },
-          ].map(k => (
+          ].map((k: any) => (
             <div key={k.label} className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-500">{k.label}</p>
               <p className={`text-lg font-bold mt-1 ${k.color}`}>{k.value}</p>
@@ -151,7 +151,7 @@ export default function InvoicePaymentPage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Method</label>
               <select value={form.method} onChange={e => setForm(f=>({...f,method:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
+                {PAYMENT_METHODS.map((m: any) => <option key={m} value={m}>{m.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
               </select>
             </div>
             <div>
@@ -199,13 +199,13 @@ export default function InvoicePaymentPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-gray-100">
               <tr>
-                {["Date","Amount","Method","Reference","Notes"].map(h => (
+                {["Date","Amount","Method","Reference","Notes"].map((h: any) => (
                   <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {payments.map((p, i) => (
+              {payments.map((p: any, i: number) => (
                 <tr key={p.id || i} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-gray-700">{fmtDate(p.payment_date || p.created_at)}</td>
                   <td className="px-4 py-3 font-semibold text-green-700">{fmtEGP(p.amount)}</td>

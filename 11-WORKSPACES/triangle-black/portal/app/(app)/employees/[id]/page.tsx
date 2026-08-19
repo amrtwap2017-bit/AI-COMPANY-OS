@@ -44,7 +44,7 @@ export default function EmployeeDetailPage() {
       tbFetch(`/api/v1/employees/${id}`).then(r => r.data ?? r),
       tbFetch(`/api/v1/timesheets/?employee_id=${id}&limit=100`).then(r => r.data ?? r),
       tbFetch(`/api/v1/timesheets/employee/${id}/summary`).then(r => r.data ?? r),
-    ]).then(([emp, ts, sum]) => {
+    ]).then(([emp, ts, sum]: any[]) => {
       setEmployee(emp);
       setTimesheets(Array.isArray(ts.results) ? ts.results : []);
       setSummary(sum);
@@ -84,7 +84,7 @@ export default function EmployeeDetailPage() {
     const data = await res.json();
     if (data.id) {
       toast.success("Approved");
-      setTimesheets(prev => prev.map(t => t.id === tsId ? data : t));
+      setTimesheets(prev => prev.map((t: any) => t.id === tsId ? data : t));
     }
   };
 
@@ -120,7 +120,7 @@ export default function EmployeeDetailPage() {
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex gap-6">
-          {["info", "timesheets"].map(t => (
+          {["info", "timesheets"].map((t: any) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -200,7 +200,7 @@ export default function EmployeeDetailPage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1">Work Type</label>
                 <select value={form.work_type} onChange={e => setForm(f => ({ ...f, work_type: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                  {["regular","overtime","sick","vacation","public_holiday","training"].map(t => (
+                  {["regular","overtime","sick","vacation","public_holiday","training"].map((t: any) => (
                     <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>
                   ))}
                 </select>
@@ -245,7 +245,7 @@ export default function EmployeeDetailPage() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    {["Date","Type","Hours","Overtime","Status","Notes","Actions"].map(h => (
+                    {["Date","Type","Hours","Overtime","Status","Notes","Actions"].map((h: any) => (
                       <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                     ))}
                   </tr>
@@ -258,7 +258,7 @@ export default function EmployeeDetailPage() {
                       <td className="px-4 py-3">{ts.hours_worked}h</td>
                       <td className="px-4 py-3">{ts.overtime_hours || 0}h</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLOR[ts.status] || ""}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${(STATUS_COLOR as Record<string, any>)[ts.status] || ""}`}>
                           {ts.status}
                         </span>
                       </td>

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 const RISK_COLOR = {CRITICAL:"#A84A3D",HIGH:"#B07A2A",MEDIUM:"#B07A2A",LOW:"#547C4D"};
 
@@ -23,8 +23,8 @@ export default function PredictivePage() {
 
   const predictions = toArr(pred?.predictions);
   const patternList = toArr(patterns?.patterns);
-  const highRisk    = predictions.filter(p=>p.risk_score>=40);
-  const critical    = predictions.filter(p=>p.risk_score>=70);
+  const highRisk    = predictions.filter((p: any) =>p.risk_score>=40);
+  const critical    = predictions.filter((p: any) =>p.risk_score>=70);
 
   return (
     <div className="min-h-screen bg-base">
@@ -44,7 +44,7 @@ export default function PredictivePage() {
               {label:"High Risk",value:highRisk.length,    color:highRisk.length>0?"var(--color-warning)":"var(--color-success)"},
               {label:"Critical", value:critical.length,    color:critical.length>0?"var(--color-danger)":"var(--color-success)"},
               {label:"Patterns", value:patternList.length, color:"var(--color-brand)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -71,13 +71,13 @@ export default function PredictivePage() {
             <button onClick={()=>router.push("/maintenance/assets")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All Assets →</button>
           </div>
           {isLoading ? (
-            <div className="flex flex-col gap-3 mt-3">{[1,2,3,4,5].map(i=><div key={i} className="tb-shimmer-block" style={{height:56}}/>)}</div>
+            <div className="flex flex-col gap-3 mt-3">{[1,2,3,4,5].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:56}}/>)}</div>
           ) : predictions.length===0 ? (
             <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-desc">No assets found</div></div>
           ) : (
             <div className="flex flex-col gap-2 mt-3">
               {predictions.map((pred,i)=>{
-                const c = RISK_COLOR[pred.risk_label]||"#6D5F53";
+                const c = (RISK_COLOR as Record<string, any>)[pred.risk_label]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/maintenance/assets/"+pred.asset_id)}
                     className="w-full flex items-start gap-3 p-3 rounded-xl bg-surface-alt tb-hover-lift text-left"
@@ -155,7 +155,7 @@ export default function PredictivePage() {
               {label:"Assets",     icon:"⚙️", path:"/maintenance/assets"},
               {label:"PM Plans",   icon:"📅",  path:"/maintenance/pm-plans"},
               {label:"Work Orders",icon:"🔧",  path:"/operations/work-orders"},
-            ].map((a,i)=>(
+            ].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span>
                 <span className="text-xs font-medium text-secondary">{a.label}</span>

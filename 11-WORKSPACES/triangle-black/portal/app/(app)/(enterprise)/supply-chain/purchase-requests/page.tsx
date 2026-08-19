@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { CreateModal } from "@/components/ui/CreateModal";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR  = {pending:"#B07A2A",submitted:"#5B7C8C",approved:"#547C4D",rejected:"#A84A3D",cancelled:"#6D5F53"};
 const URGENCY_COLOR = {urgent:"#A84A3D",high:"#B07A2A",normal:"#6D5F53",low:"rgba(148,163,184,0.4)"};
@@ -32,12 +32,12 @@ export default function PurchaseRequestsPage() {
   );
   const prs = toArr(raw);
 
-  const pending  = prs.filter(p=>p.status==="pending"||p.status==="submitted");
-  const approved = prs.filter(p=>p.status==="approved");
-  const urgent   = prs.filter(p=>p.urgency==="urgent");
-  const autoPRs  = prs.filter(p=>p.title?.startsWith("Auto-PR:"));
+  const pending  = prs.filter((p: any) =>p.status==="pending"||p.status==="submitted");
+  const approved = prs.filter((p: any) =>p.status==="approved");
+  const urgent   = prs.filter((p: any) =>p.urgency==="urgent");
+  const autoPRs  = prs.filter((p: any) =>p.title?.startsWith("Auto-PR:"));
 
-  const filtered = prs.filter(p => {
+  const filtered = prs.filter((p: any) => {
     const ms = !search||p.title?.toLowerCase().includes(search.toLowerCase())||p.pr_number?.toLowerCase().includes(search.toLowerCase());
     return ms && (statusF==="all"||p.status===statusF) && (urgencyF==="all"||p.urgency===urgencyF);
   });
@@ -70,7 +70,7 @@ export default function PurchaseRequestsPage() {
               {label:"Urgent",   value:urgent.length,   color:urgent.length>0?"var(--color-danger)":"var(--color-text-3)",    f:"all"},
               {label:"Auto-PR",  value:autoPRs.length,  color:"var(--color-brand)",                                            f:"all"},
               {label:"Total",    value:prs.length,      color:"var(--color-text-2)",                                           f:"all"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <button key={i} onClick={()=>setStatusF(k.f)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -85,7 +85,7 @@ export default function PurchaseRequestsPage() {
           <div className="tb-alert tb-alert-danger mb-4">
             <span className="text-xl">🚨</span>
             <div className="flex-1 text-sm font-bold">
-              {urgent.length} Urgent Purchase Request{urgent.length>1?"s":""} Need Immediate Approval — {urgent.slice(0,2).map(p=>p.title).join(" · ")}
+              {urgent.length} Urgent Purchase Request{urgent.length>1?"s":""} Need Immediate Approval — {urgent.slice(0,2).map((p: any) =>p.title).join(" · ")}
             </div>
             <button onClick={()=>setUrgencyF("urgent")} className="tb-btn tb-btn-danger tb-btn-sm ml-auto">Show Urgent</button>
           </div>
@@ -95,7 +95,7 @@ export default function PurchaseRequestsPage() {
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search purchase requests..."
             className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
-            {["all","pending","submitted","approved","rejected"].map(s=>(
+            {["all","pending","submitted","approved","rejected"].map((s: any) =>(
               <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
@@ -103,7 +103,7 @@ export default function PurchaseRequestsPage() {
           </div>
           <select value={urgencyF} onChange={e=>setUrgencyF(e.target.value)} className="tb-select" style={{width:"auto"}}>
             <option value="all">All Urgency</option>
-            {["urgent","high","normal","low"].map(u=><option key={u} value={u}>{u.charAt(0).toUpperCase()+u.slice(1)}</option>)}
+            {["urgent","high","normal","low"].map((u: any) =><option key={u} value={u}>{u.charAt(0).toUpperCase()+u.slice(1)}</option>)}
           </select>
           {(search||statusF!=="all"||urgencyF!=="all")&&<button onClick={()=>{setSearch("");setStatusF("all");setUrgencyF("all");}} className="tb-btn tb-btn-ghost tb-btn-sm">Clear ×</button>}
           <span className="text-xs text-tertiary ml-auto">{filtered.length} requests</span>
@@ -132,8 +132,8 @@ export default function PurchaseRequestsPage() {
                 </thead>
                 <tbody>
                   {filtered.map((pr,i)=>{
-                    const sc = STATUS_COLOR[pr.status]||"#6D5F53";
-                    const uc = URGENCY_COLOR[pr.urgency]||"rgba(148,163,184,0.4)";
+                    const sc = (STATUS_COLOR as Record<string, any>)[pr.status]||"#6D5F53";
+                    const uc = (URGENCY_COLOR as Record<string, any>)[pr.urgency]||"rgba(148,163,184,0.4)";
                     return (
                       <tr key={i} onClick={()=>router.push(`/supply-chain/purchase-requests/${pr.id}`)} className="cursor-pointer">
                         <td>

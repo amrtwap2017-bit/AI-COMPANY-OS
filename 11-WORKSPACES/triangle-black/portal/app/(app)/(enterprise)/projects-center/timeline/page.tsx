@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate= (d) => { if (!d) return "—"; try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 const SC = {active:"#547C4D",planning:"#5B7C8C",completed:"#8D7443",on_hold:"#B07A2A",cancelled:"#A84A3D"};
 
@@ -16,7 +16,7 @@ export default function ProjectTimelinePage() {
   const projects = toArr(raw);
 
   const byStatus = Object.entries(
-    projects.reduce((acc,p)=>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{})
+    projects.reduce((acc: any, p: any) =>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{})
   );
 
   return (
@@ -34,10 +34,10 @@ export default function ProjectTimelinePage() {
           <div className="tb-grid-4 mt-6">
             {[
               {label:"Total",     value:projects.length},
-              {label:"Active",    value:projects.filter(p=>p.status==="active").length,    good:true},
-              {label:"Completed", value:projects.filter(p=>p.status==="completed").length, good:true},
-              {label:"On Hold",   value:projects.filter(p=>p.status==="on_hold").length,   warn:true},
-            ].map((k,i)=>(
+              {label:"Active",    value:projects.filter((p: any) =>p.status==="active").length,    good:true},
+              {label:"Completed", value:projects.filter((p: any) =>p.status==="completed").length, good:true},
+              {label:"On Hold",   value:projects.filter((p: any) =>p.status==="on_hold").length,   warn:true},
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.good?"var(--color-success)":k.warn?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -56,7 +56,7 @@ export default function ProjectTimelinePage() {
               <div className="tb-empty-title">No projects found</div>
               <div className="tb-empty-desc">Projects will appear here once created</div>
             </div>
-          ) : projects.map((p,i)=>{
+          ) : projects.map((p: any, i: number) =>{
             const sc  = SC[p.status]||"#6D5F53";
             const pct = Number(p.completion_pct||p.progress||0);
             return (

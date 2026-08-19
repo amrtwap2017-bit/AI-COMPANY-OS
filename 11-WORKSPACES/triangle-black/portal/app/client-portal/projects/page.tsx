@@ -19,12 +19,12 @@ export default function ClientProjectsPage() {
     setClient(cl);
     if (cl?.site_id) {
       fetch(`/api/v1/client/projects?site_id=${cl.site_id}`,
-        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then(d=>{ setProjects(Array.isArray(d)?d:[]); setLoading(false); });
+        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then((d: any) => { setProjects(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 
-  const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-  const fmtDate = (d) => { if(!d) return "—"; try { const dt=new Date(d); return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+  const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+  const fmtDate = (d: any) => { if(!d) return "—"; try { const dt=new Date(d); return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 
   return (
     <div className="min-h-screen" style={{background:"#F8FAFC"}}>
@@ -33,7 +33,7 @@ export default function ClientProjectsPage() {
         <div className="text-sm font-bold text-gray-800">Our Projects — {client?.company_name}</div>
       </nav>
       <div className="max-w-4xl mx-auto px-6 py-6">
-        {loading ? <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-32 bg-white rounded-2xl animate-pulse"/>)}</div>
+        {loading ? <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-32 bg-white rounded-2xl animate-pulse"/>)}</div>
         : projects.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
             <div className="text-4xl mb-3">🏗️</div>

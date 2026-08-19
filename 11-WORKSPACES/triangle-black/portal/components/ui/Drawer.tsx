@@ -48,7 +48,7 @@ export function Drawer({
       />
       <div className={
         "absolute top-0 bottom-0 flex flex-col bg-white shadow-xl border-border w-full " +
-        WIDTHS[width] + " " +
+        (WIDTHS as Record<string, any>)[width] + " " +
         (side === "right" ? "right-0 border-l" : "left-0 border-r")
       }>
         {(title || onClose) && (

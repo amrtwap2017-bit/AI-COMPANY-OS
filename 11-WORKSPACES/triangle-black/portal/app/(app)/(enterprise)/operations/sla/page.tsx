@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const fmtHours = (h) => { const n=Number(h||0); if(n<1) return `${Math.round(n*60)}m`; return `${n.toFixed(1)}h`; };
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtHours = (h: any) => { const n=Number(h||0); if(n<1) return `${Math.round(n*60)}m`; return `${n.toFixed(1)}h`; };
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 const GRADE_COLOR = {A:"var(--color-success)",B:"var(--color-info)",C:"var(--color-warning)",D:"var(--color-danger)"};
 const URGENCY_COLOR = {critical:"var(--color-danger)",high:"var(--color-warning)",medium:"var(--color-warning)",low:"var(--color-success)"};
 
@@ -41,7 +41,7 @@ export default function SLADashboardPage() {
             </div>
           </div>
           <div className="tb-grid-4">
-            {[{label:"Total Requests",value:overall.total_requests||0},{label:"Resolved",value:overall.resolved||0,good:true},{label:"Active Breaches",value:breachCount,danger:breachCount>0},{label:"Avg Resolution",value:overall.avg_resolution_hours?`${Number(overall.avg_resolution_hours).toFixed(1)}h`:"—"}].map((k,i)=>(
+            {[{label:"Total Requests",value:overall.total_requests||0},{label:"Resolved",value:overall.resolved||0,good:true},{label:"Active Breaches",value:breachCount,danger:breachCount>0},{label:"Avg Resolution",value:overall.avg_resolution_hours?`${Number(overall.avg_resolution_hours).toFixed(1)}h`:"—"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.good?"var(--color-success)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -62,12 +62,12 @@ export default function SLADashboardPage() {
           <div className="flex flex-col gap-4">
             <div className="tb-section">
               <div className="tb-section-title">SLA Compliance by Site</div>
-              {isLoading ? <div className="flex flex-col gap-2">{[1,2,3,4].map(i=><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:80}} />)}</div> : (
+              {isLoading ? <div className="flex flex-col gap-2">{[1,2,3,4].map((i: any) =><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:80}} />)}</div> : (
                 <div className="tb-grid-2 mt-3">
                   {siteSLA.map((site,i)=>{
                     const score = site.sla_score||0;
                     const grade = site.sla_grade||"D";
-                    const gc = GRADE_COLOR[grade]||"var(--color-text-3)";
+                    const gc = (GRADE_COLOR as Record<string, any>)[grade]||"var(--color-text-3)";
                     return (
                       <div key={i} className="p-4 rounded-2xl border border-default bg-surface-alt">
                         <div className="flex items-start justify-between mb-3">

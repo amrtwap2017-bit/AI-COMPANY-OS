@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 const PROGRAM_STATUS = [
   {key:"A",label:"UX Foundation",status:"complete",desc:"239 pages, 0 dead stubs"},
@@ -62,7 +62,7 @@ export default function PlatformHealthPage() {
             {isLoading ? <KpiSkeleton /> : <>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{summary?.backend_routes||163}</div><div className="tb-hero-kpi-label">API Routes</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{summary?.frontend_pages||239}</div><div className="tb-hero-kpi-label">Portal Pages</div></div>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{PROGRAM_STATUS.filter(p=>p.status==="complete").length}/12</div><div className="tb-hero-kpi-label">Programs Done</div></div>
+              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{PROGRAM_STATUS.filter((p: any) =>p.status==="complete").length}/12</div><div className="tb-hero-kpi-label">Programs Done</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value text-brand">{summary?.sprint||"325"}</div><div className="tb-hero-kpi-label">Current Sprint</div></div>
             </>}
           </div>
@@ -95,7 +95,7 @@ export default function PlatformHealthPage() {
                   <div className="mt-3">
                     <div className="text-label-upper text-tertiary mb-1.5">Features</div>
                     <div className="flex flex-wrap gap-1.5">
-                      {tenantFeatures.map((f,i)=>(
+                      {tenantFeatures.map((f: any, i: number) =>(
                         <span key={i} className={`tb-badge ${f.enabled?"tb-badge-success":"tb-badge-danger"}`} style={{fontSize:"10px"}}>{f.feature}</span>
                       ))}
                     </div>
@@ -110,7 +110,7 @@ export default function PlatformHealthPage() {
           <div className="tb-section-title">12 Hardening Programs</div>
           <div className="tb-grid-4 mt-2">
             {PROGRAM_STATUS.map((prog)=>{
-              const meta = STATUS_META[prog.status]||STATUS_META.pending;
+              const meta = (STATUS_META as Record<string, any>)[prog.status]||STATUS_META.pending;
               return (
                 <div key={prog.key} className="p-3 bg-surface-alt rounded-lg border border-default">
                   <div className="flex justify-between items-center mb-1.5">

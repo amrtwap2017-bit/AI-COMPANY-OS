@@ -9,8 +9,8 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function Assets360Page() {
   const router = useRouter();
@@ -22,15 +22,15 @@ export default function Assets360Page() {
   const [pageSize, setPageSize] = useState(25);
 
   const { data: raw, isLoading } = useQuery({ queryKey:["assets-360"], queryFn:()=>authFetch("/api/v1/assets-portal").then(r=>r.json()), staleTime:60000 });
-  const assets = toArr(raw).filter(a=>!a.deleted_at);
-  const cats = useMemo(()=>["all",...Array.from(new Set(assets.map(a=>a.category).filter(Boolean)))],[assets]);
-  const crits = useMemo(()=>["all",...Array.from(new Set(assets.map(a=>a.criticality).filter(Boolean)))],[assets]);
+  const assets = toArr(raw).filter((a: any) =>!a.deleted_at);
+  const cats = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.category).filter(Boolean)))],[assets]);
+  const crits = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.criticality).filter(Boolean)))],[assets]);
 
   const now = new Date();
-  const overdueAssets = assets.filter(a=>a.next_maintenance_date&&new Date(a.next_maintenance_date)<now);
-  const criticalCount = assets.filter(a=>a.criticality==="critical").length;
+  const overdueAssets = assets.filter((a: any) =>a.next_maintenance_date&&new Date(a.next_maintenance_date)<now);
+  const criticalCount = assets.filter((a: any) =>a.criticality==="critical").length;
 
-  const filtered = useMemo(()=>assets.filter(a=>{
+  const filtered = useMemo(()=>assets.filter((a: any) =>{
     const ms = !search||(a.name||"").toLowerCase().includes(search.toLowerCase())||(a.location_description||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterCat==="all"||a.category===filterCat)&&(filterCrit==="all"||a.criticality===filterCrit)&&(filterStatus==="all"||a.status===filterStatus);
   }),[assets,search,filterCat,filterCrit,filterStatus]);
@@ -80,13 +80,13 @@ export default function Assets360Page() {
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search assets..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
             <select value={filterCat} onChange={e=>{setFilterCat(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
-              {cats.map(c=><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
+              {cats.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
             <select value={filterCrit} onChange={e=>{setFilterCrit(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
-              {crits.map(c=><option key={c} value={c}>{c==="all"?"All Criticality":c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+              {crits.map((c: any) =><option key={c} value={c}>{c==="all"?"All Criticality":c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
             </select>
             <div className="tb-tabs border-0 mb-0">
-              {["all","operational","maintenance","offline"].map(s=>(
+              {["all","operational","maintenance","offline"].map((s: any) =>(
                 <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
                   {s==="all"?"All Status":s.charAt(0).toUpperCase()+s.slice(1)}
                 </button>
@@ -107,7 +107,7 @@ export default function Assets360Page() {
                 <table className="tb-table">
                   <thead><tr><th>Asset</th><th>Category</th><th>Criticality</th><th>Status</th><th>Last PM</th><th>Next PM</th><th></th></tr></thead>
                   <tbody>
-                    {paged.map((a,i)=>{
+                    {paged.map((a: any, i: number) =>{
                       const isOverdue = a.next_maintenance_date&&new Date(a.next_maintenance_date)<now;
                       return (
                         <tr key={a.id||i} style={{borderLeft:isOverdue?"3px solid var(--color-warning-border)":a.criticality==="critical"?"3px solid var(--color-danger-border)":"3px solid transparent"}}>

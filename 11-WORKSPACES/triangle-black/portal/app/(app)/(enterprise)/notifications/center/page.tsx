@@ -34,7 +34,7 @@ export default function NotificationsCenterPage() {
     if (!mounted) return;
     tbFetch("/api/v1/notifications/?limit=50")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.notifications || d?.results || d?.items || [];
         setNotifs(items);
         setUnread(items.filter((n:any) => !n.read && !n.is_read).length);
@@ -43,7 +43,7 @@ export default function NotificationsCenterPage() {
       .finally(() => setLoading(false));
   }, [mounted]);
 
-  const filtered = notifs.filter(n =>
+  const filtered = notifs.filter((n: any) =>
     filter === "all" ||
     (filter === "unread" && (!n.read && !n.is_read)) ||
     n.type === filter || n.priority === filter
@@ -95,9 +95,9 @@ export default function NotificationsCenterPage() {
             const type     = n.type || n.notification_type || "info";
             return (
               <div key={n.id || i}
-                className={`rounded-xl p-4 transition-all ${PRIORITY_COLOR[priority] || "bg-white border border-gray-200"} ${isUnread ? "shadow-sm" : "opacity-80"}`}>
+                className={`rounded-xl p-4 transition-all ${(PRIORITY_COLOR as Record<string, any>)[priority] || "bg-white border border-gray-200"} ${isUnread ? "shadow-sm" : "opacity-80"}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[type] || "🔔"}</span>
+                  <span className="text-xl shrink-0 mt-0.5">{(TYPE_ICON as Record<string, any>)[type] || "🔔"}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className={`text-sm font-semibold text-[var(--color-text-1)] ${isUnread ? "" : "font-normal"}`}>

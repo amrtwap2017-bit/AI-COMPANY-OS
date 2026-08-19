@@ -74,7 +74,7 @@ export default function TechnicianDashboard() {
             { label: "Open",        value: stats.open,        color: "text-blue-400" },
             { label: "In Progress", value: stats.in_progress, color: "text-yellow-400" },
             { label: "Completed",   value: stats.completed,   color: "text-green-400" },
-          ].map(s => (
+          ].map((s: any) => (
             <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-3 text-center">
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
               <p className="text-xs text-gray-500 mt-1">{s.label}</p>
@@ -117,10 +117,10 @@ export default function TechnicianDashboard() {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[wo.status] || "bg-gray-700 text-gray-300"}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[wo.status] || "bg-gray-700 text-gray-300"}`}>
                         {wo.status?.replace("_", " ")}
                       </span>
-                      <span className={`text-xs font-medium ${PRIORITY_COLOR[wo.priority] || "text-gray-400"}`}>
+                      <span className={`text-xs font-medium ${(PRIORITY_COLOR as Record<string, any>)[wo.priority] || "text-gray-400"}`}>
                         {wo.priority || "normal"}
                       </span>
                     </div>

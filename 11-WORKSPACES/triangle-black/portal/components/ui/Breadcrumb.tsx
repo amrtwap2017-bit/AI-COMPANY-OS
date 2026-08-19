@@ -110,7 +110,7 @@ export function Breadcrumb({ className = "" }: { className?: string }) {
   const segments = pathname
     .split("/")
     .filter(Boolean)
-    .filter(s => !s.startsWith("("));   // remove route groups like (app)
+    .filter((s: any) => !s.startsWith("("));   // remove route groups like (app)
 
   // Don't show breadcrumb on root/home pages
   if (segments.length <= 1) return null;
@@ -118,11 +118,11 @@ export function Breadcrumb({ className = "" }: { className?: string }) {
   // Build crumb list
   const crumbs = segments
     .map((seg, i) => ({
-      label: LABELS[seg] || seg.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+      label: (LABELS as Record<string, any>)[seg] || seg.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
       href:  "/" + segments.slice(0, i + 1).join("/"),
       last:  i === segments.length - 1,
     }))
-    .filter(c => c.label && c.label !== "App");
+    .filter((c: any) => c.label && c.label !== "App");
 
   return (
     <nav

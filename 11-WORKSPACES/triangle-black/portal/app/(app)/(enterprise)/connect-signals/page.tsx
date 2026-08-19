@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function ConnectSignalsPage() {
   const router = useRouter();
   const { data: sigRaw }  = useQuery(["cs-signals"], () => authFetch("/api/v1/ai/signals").then(r=>r.json()));
@@ -20,7 +20,7 @@ export default function ConnectSignalsPage() {
           <h1 className="tb-hero-title">Connect Signals</h1>
           <p className="tb-hero-description">Real-time AI signals, platform events, and operational intelligence</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Active Signals",value:signals.length,color:"#5B7C8C"},{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Events",value:activities.length,color:"#8D7443"},{label:"Status",value:"Live",color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Active Signals",value:signals.length,color:"#5B7C8C"},{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Events",value:activities.length,color:"#8D7443"},{label:"Status",value:"Live",color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -56,7 +56,7 @@ export default function ConnectSignalsPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">AI Platform</div>
           <div className="tb-grid-4">
-            {[{label:"AI Hub",icon:"🤖",path:"/hub"},{label:"Knowledge Graph",icon:"🔷",path:"/graph"},{label:"Intelligence",icon:"🧠",path:"/executive/intelligence"},{label:"Digital Twin",icon:"🔷",path:"/executive"}].map((a,i)=>(
+            {[{label:"AI Hub",icon:"🤖",path:"/hub"},{label:"Knowledge Graph",icon:"🔷",path:"/graph"},{label:"Intelligence",icon:"🧠",path:"/executive/intelligence"},{label:"Digital Twin",icon:"🔷",path:"/executive"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

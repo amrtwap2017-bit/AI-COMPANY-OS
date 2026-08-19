@@ -9,9 +9,9 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function InvoiceMatchingPage() {
   const router = useRouter();
@@ -93,10 +93,10 @@ export default function InvoiceMatchingPage() {
           <div className="flex gap-2.5 mb-4 flex-wrap items-center">
             <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search invoices..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
             <div className="tb-tabs border-0 mb-0">
-              {["all","submitted","matching","approved","paid","disputed"].map(s=>(
+              {["all","submitted","matching","approved","paid","disputed"].map((s: any) =>(
                 <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
                   {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
-                  {s!=="all"&&<span className="ml-1 opacity-60">{invoices.filter(i=>i.status===s).length}</span>}
+                  {s!=="all"&&<span className="ml-1 opacity-60">{invoices.filter((i: any) =>i.status===s).length}</span>}
                 </button>
               ))}
             </div>

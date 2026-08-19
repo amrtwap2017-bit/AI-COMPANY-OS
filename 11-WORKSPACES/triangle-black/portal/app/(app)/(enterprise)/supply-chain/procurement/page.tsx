@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => "EGP " + Number(n || 0).toLocaleString();
+const fmtEGP = (n: any) => "EGP " + Number(n || 0).toLocaleString();
 
 export default function ProcurementHub() {
   const router = useRouter();
@@ -106,7 +106,7 @@ export default function ProcurementHub() {
             End-to-end procurement: SOW → Supplier → RFQ → PO → GRN
           </p>
           <div className="tb-grid-4 mt-6">
-            {kpis.map((k, i) => (
+            {kpis.map((k: any, i: number) => (
               <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{ color: k.color }}>
                   {k.value}
@@ -122,7 +122,7 @@ export default function ProcurementHub() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Procurement Modules</div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {modules.map((m, i) => (
+            {modules.map((m: any, i: number) => (
               <button
                 key={i}
                 onClick={() => router.push(m.path)}
@@ -148,7 +148,7 @@ export default function ProcurementHub() {
           <div className="tb-section">
             <div className="tb-section-title">Top Suppliers by Spend</div>
             <div className="space-y-2 mt-2">
-              {d.top_vendors.slice(0, 5).map((v, i) => (
+              {d.top_vendors.slice(0, 5).map((v: any, i: number) => (
                 <div
                   key={i}
                   className="flex items-center gap-4 p-3 rounded-xl bg-base-alt"

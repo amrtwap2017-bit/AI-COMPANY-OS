@@ -48,7 +48,7 @@ export default function InventoryAlertsPage() {
     if (!mounted) return;
     tbFetch("/api/v1/stock-balances/?limit=200")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setStocks(items);
       })
@@ -63,18 +63,18 @@ export default function InventoryAlertsPage() {
     return "ok";
   };
 
-  const filtered = stocks.filter(s => {
+  const filtered = stocks.filter((s: any) => {
     const level = getLevel(s);
     const matchFilter = filter === "all" || level === filter;
     const name = (s.item_name || s.item_id || "").toLowerCase();
     const matchSearch = !search || name.includes(search.toLowerCase()) ||
       (s.item_code || "").toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
-  }).sort((a,b) => Number(a.qty_available||0) - Number(b.qty_available||0));
+  }).sort((a: any, b: any) => Number(a.qty_available||0) - Number(b.qty_available||0));
 
-  const critical = stocks.filter(s => getLevel(s) === "critical").length;
-  const low      = stocks.filter(s => getLevel(s) === "low").length;
-  const ok       = stocks.filter(s => getLevel(s) === "ok").length;
+  const critical = stocks.filter((s: any) => getLevel(s) === "critical").length;
+  const low      = stocks.filter((s: any) => getLevel(s) === "low").length;
+  const ok       = stocks.filter((s: any) => getLevel(s) === "ok").length;
 
   if (!mounted || loading) return (
     <div className="flex items-center justify-center h-64">
@@ -110,7 +110,7 @@ export default function InventoryAlertsPage() {
           { label:"🔴 Critical (Out/Near Zero)", value:critical, color:"bg-red-50 border-red-200", tag:"critical" },
           { label:"🟡 Low Stock",                value:low,      color:"bg-yellow-50 border-yellow-200", tag:"low" },
           { label:"✅ Adequate Stock",            value:ok,       color:"bg-green-50 border-green-200", tag:"all" },
-        ].map(k => (
+        ].map((k: any) => (
           <button key={k.label}
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag as any)}
             className={`${k.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
@@ -135,13 +135,13 @@ export default function InventoryAlertsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {["Alert","Item","Code","Warehouse","On Hand","Reserved","Available","Stock Level"].map(h => (
+                {["Alert","Item","Code","Warehouse","On Hand","Reserved","Available","Stock Level"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map(s => {
+              {filtered.map((s: any) => {
                 const level = getLevel(s);
                 return (
                   <tr key={s.id} className={`hover:bg-gray-50 ${level === "critical" ? "bg-red-50" : level === "low" ? "bg-yellow-50" : ""}`}>

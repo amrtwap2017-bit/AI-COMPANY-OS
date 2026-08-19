@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
@@ -40,7 +40,7 @@ export default function PurchaseRequestDetailPage() {
     </div>
   );
 
-  const sc = STATUS_COLOR[pr.status] || "#6D5F53";
+  const sc = (STATUS_COLOR as Record<string, any>)[pr.status] || "#6D5F53";
 
   return (
     <div className="min-h-screen bg-base">
@@ -63,7 +63,7 @@ export default function PurchaseRequestDetailPage() {
               { label:"Total",       value:fmtEGP(pr.total_amount||0),       color:"#547C4D" },
               { label:"Requested By",value:pr.requested_by||"—",             color:"#221D1A" },
               { label:"Created",     value:fmtDate(pr.created_at),           color:"#6D5F53" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -154,7 +154,7 @@ export default function PurchaseRequestDetailPage() {
                   { label:"Purchase Orders",  icon:"📦", path:"/supply-chain/purchase-orders" },
                   { label:"Suppliers",        icon:"🏭", path:"/supply-chain/suppliers" },
                   { label:"Inventory",        icon:"📦", path:"/supply-chain/inventory" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

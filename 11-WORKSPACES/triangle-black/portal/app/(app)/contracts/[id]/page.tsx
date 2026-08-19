@@ -58,7 +58,7 @@ export default function ContractDetailPage() {
           <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{contract.title}</h1>
           <p className="text-gray-500 text-sm mt-1">{contract.description}</p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[contract.status] || "bg-gray-100 text-gray-700"}`}>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${(STATUS_COLORS as Record<string, any>)[contract.status] || "bg-gray-100 text-gray-700"}`}>
           {contract.status?.replace(/_/g, " ")}
         </span>
       </div>

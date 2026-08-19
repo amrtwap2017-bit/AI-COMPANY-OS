@@ -51,7 +51,7 @@ export default function PlatformReadinessPage() {
       fetch("/api/v1/health" in window.location ? "" : "http://localhost:8030/health").then(r => r.data ?? r).catch(() => ({ok:true,version:"3.0.0"})),
       tbFetch("/api/v1/executive-kpi/scorecard").then(r => r.data ?? r).catch(() => ({})),
       tbFetch("/api/v1/maintenance/dashboard").then(r => r.data ?? r).catch(() => ({})),
-    ]).then(([h, k, m]) => {
+    ]).then(([h, k, m]: any[]) => {
       setHealth(h);
       setKpi(k);
       setMaint(m);
@@ -71,7 +71,7 @@ export default function PlatformReadinessPage() {
     documentation:   88,
   };
 
-  const overall = Math.round(Object.values(scores).reduce((a,b) => a+b, 0) / Object.keys(scores).length);
+  const overall = Math.round(Object.values(scores).reduce((a: any, b: any) => a+b, 0) / Object.keys(scores).length);
 
   if (!mounted || loading) return (
     <div className="flex items-center justify-center h-64">
@@ -102,7 +102,7 @@ export default function PlatformReadinessPage() {
           { label:"DB Tables",    value:"165",   icon:"🗄️" },
           { label:"Tests",        value:"218",   icon:"✅" },
           { label:"Commits",      value:"960+",  icon:"💾" },
-        ].map(s => (
+        ].map((s: any) => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4 text-center">
             <p className="text-2xl mb-1">{s.icon}</p>
             <p className="text-2xl font-black text-[var(--color-text-1)]">{s.value}</p>
@@ -124,7 +124,7 @@ export default function PlatformReadinessPage() {
             { label:"Mobile",           score:scores.mobile,          note:"Technician + QR scanner portals" },
             { label:"AI Platform",      score:scores.ai_platform,     note:"Signals, KPIs, PM intelligence" },
             { label:"Documentation",    score:scores.documentation,   note:"AGENT_HANDOFF, ARCHITECTURE docs" },
-          ].map(s => (
+          ].map((s: any) => (
             <div key={s.label} className="space-y-1">
               <div className="flex justify-between text-sm">
                 <span className="font-medium text-gray-700">{s.label}</span>
@@ -164,7 +164,7 @@ export default function PlatformReadinessPage() {
             { label:"Backend API", version:"v3.0.0", status:"operational" },
             { label:"PostgreSQL",  version:"pg17",   status:"connected" },
             { label:"Portal",      version:"Next.js 14", status:"running" },
-          ].map(s => (
+          ].map((s: any) => (
             <div key={s.label} className="bg-green-50 border border-green-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />

@@ -7,8 +7,8 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TableSkeleton, KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.work_orders || [];
-const fmtDate = (d) => { try { return d ? new Date(d).toLocaleDateString("en-GB") : "—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.work_orders || [];
+const fmtDate = (d: any) => { try { return d ? new Date(d).toLocaleDateString("en-GB") : "—"; } catch { return "—"; } };
 
 export default function TechnicianDetailPage() {
   const router = useRouter();
@@ -18,9 +18,9 @@ export default function TechnicianDetailPage() {
   const { data: tech, isLoading } = useQuery({ queryKey:["tech-detail",id], queryFn:()=>authFetch(`/api/v1/technicians/${id}`).then(r=>r.json()), enabled:!!id });
   const { data: rawWOs, isLoading: wosLoading } = useQuery({ queryKey:["tech-wos",id], queryFn:()=>authFetch(`/api/v1/technicians/${id}/work-orders`).then(r=>r.json()), enabled:!!id });
 
-  const wos = toArr(rawWOs).filter(w => !w.deleted_at);
-  const activeWOs = wos.filter(w => ["open","in_progress"].includes(w.status));
-  const completedWOs = wos.filter(w => w.status === "completed");
+  const wos = toArr(rawWOs).filter((w: any) => !w.deleted_at);
+  const activeWOs = wos.filter((w: any) => ["open","in_progress"].includes(w.status));
+  const completedWOs = wos.filter((w: any) => w.status === "completed");
   const compRate = wos.length > 0 ? Math.round((completedWOs.length / wos.length) * 100) : 0;
   const specs = Array.isArray(tech?.specializations) ? tech.specializations : tech?.specializations ? [tech.specializations] : [];
   const load = tech?.current_work_orders || 0;
@@ -103,7 +103,7 @@ export default function TechnicianDetailPage() {
                 <div className="mt-4">
                   <div className="text-label-upper text-tertiary mb-2">Specializations</div>
                   <div className="flex flex-wrap gap-1.5">
-                    {specs.map((s, i) => (
+                    {specs.map((s: any, i: number) => (
                       <span key={i} className="tb-badge tb-badge-brand">{s}</span>
                     ))}
                   </div>
@@ -154,7 +154,7 @@ export default function TechnicianDetailPage() {
                 <div className="tb-progress-bar" style={{width:`${compRate}%`, background:compRate>=80?"var(--color-success)":compRate>=50?"var(--color-warning)":"var(--color-danger)"}} />
               </div>
               <div className="tb-grid-3">
-                {[{label:"Total",value:wos.length,color:"var(--color-text-1)"},{label:"Done",value:completedWOs.length,color:"var(--color-success)"},{label:"Active",value:activeWOs.length,color:activeWOs.length>0?"var(--color-warning)":"var(--color-success)"}].map((s,i)=>(
+                {[{label:"Total",value:wos.length,color:"var(--color-text-1)"},{label:"Done",value:completedWOs.length,color:"var(--color-success)"},{label:"Active",value:activeWOs.length,color:activeWOs.length>0?"var(--color-warning)":"var(--color-success)"}].map((s: any, i: number) =>(
                   <div key={i} className="p-2 bg-surface-alt rounded-lg">
                     <div className="text-xl font-extrabold" style={{color:s.color}}>{s.value}</div>
                     <div className="text-xs text-tertiary mt-0.5">{s.label}</div>
@@ -178,7 +178,7 @@ export default function TechnicianDetailPage() {
             <div className="tb-section">
               <div className="tb-section-title">Quick Actions</div>
               <div className="flex flex-col gap-2">
-                {[{label:"All Technicians",icon:"👷",path:"/operations/technicians"},{label:"Dispatch Board",icon:"📋",path:"/operations/dispatch"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Time Tracking",icon:"⏱️",path:"/operations/time-tracking"}].map((a,i)=>(
+                {[{label:"All Technicians",icon:"👷",path:"/operations/technicians"},{label:"Dispatch Board",icon:"📋",path:"/operations/dispatch"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Time Tracking",icon:"⏱️",path:"/operations/time-tracking"}].map((a: any, i: number) =>(
                   <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item">
                     <span>{a.icon}</span><span>{a.label}</span>
                   </button>

@@ -29,7 +29,7 @@ export default function EmployeesPage() {
     });
   }, [mounted]);
 
-  const filtered = employees.filter((e) =>
+  const filtered = employees.filter((e: any) =>
     !search ||
     e.name?.toLowerCase().includes(search.toLowerCase()) ||
     e.department?.toLowerCase().includes(search.toLowerCase()) ||
@@ -86,7 +86,7 @@ export default function EmployeesPage() {
               </div>
               <div className="flex items-center gap-3">
                 {emp.department && (
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${DEPT_COLORS[emp.department] || "bg-gray-100 text-gray-700"}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${(DEPT_COLORS as Record<string, any>)[emp.department] || "bg-gray-100 text-gray-700"}`}>
                     {emp.department}
                   </span>
                 )}

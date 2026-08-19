@@ -52,11 +52,11 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: Props) {
 
         <div className="p-6 max-h-96 overflow-y-auto">
           <div className="space-y-3">
-            {SHORTCUTS.map((s, i) => (
+            {SHORTCUTS.map((s: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <span className="text-sm text-secondary">{s.description}</span>
                 <div className="flex items-center gap-1">
-                  {s.keys.map((k, j) => (
+                  {s.keys.map((k: any, j: number) => (
                     <span key={j} className="flex items-center gap-1">
                       <KeyBadge k={k} />
                       {j < s.keys.length - 1 && (

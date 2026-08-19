@@ -5,8 +5,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 const ROLE_CONFIG = {
   admin: { label:"Administrator", tagline:"Full platform access · Security · Users · Audit",
@@ -31,7 +31,7 @@ export default function WorkspacePage() {
   const router = useRouter();
   const { user } = useAuth();
   const role = user?.role || "viewer";
-  const config = ROLE_CONFIG[role] || ROLE_CONFIG.viewer;
+  const config = (ROLE_CONFIG as Record<string, any>)[role] || ROLE_CONFIG.viewer;
 
   const { data: execDash } = useQuery({ queryKey:["workspace-exec"], queryFn:()=>authFetch("/api/v1/executive/dashboard").then(r=>r.json()), staleTime:60000 });
   const { data: approvalRaw } = useQuery({ queryKey:["workspace-approvals"], queryFn:()=>authFetch("/api/v1/approval-requests/").then(r=>r.json()), staleTime:30000 });
@@ -41,7 +41,7 @@ export default function WorkspacePage() {
 
   const ops = execDash?.operations?.work_orders || {};
   const fin = execDash?.financial?.invoices || {};
-  const pendingApprovals = toArr(approvalRaw).filter(a => a.status === "pending");
+  const pendingApprovals = toArr(approvalRaw).filter((a: any) => a.status === "pending");
   const recentWOs = toArr(woRaw).slice(0,5);
   const slaBreaches = slaDash?.breach_count || 0;
   const totalHours = timeDash?.totals?.total_hours || 0;
@@ -83,7 +83,7 @@ export default function WorkspacePage() {
             )}
           </div>
           <div className="tb-grid-4 mt-6">
-            {kpis.map((k,i) => (
+            {kpis.map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.warn?"var(--color-warning)":"var(--color-text-inv)",fontSize:"1.1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -101,7 +101,7 @@ export default function WorkspacePage() {
               <div className="text-label-upper text-brand mb-1">Start Here</div>
               <div className="font-bold text-primary mb-4">Your Core Tasks</div>
               <div className="tb-grid-2">
-                {config.primaryActions.map((a,i) => (
+                {config.primaryActions.map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item">
                     <span className="text-xl flex-shrink-0">{a.icon}</span>
                     <div className="min-w-0">
@@ -153,7 +153,7 @@ export default function WorkspacePage() {
             {pendingApprovals.length > 0 && (
               <div className="tb-alert tb-alert-warning flex-col items-start">
                 <div className="font-bold mb-3">✍ {pendingApprovals.length} Pending Approvals</div>
-                {pendingApprovals.slice(0,3).map((a,i) => (
+                {pendingApprovals.slice(0,3).map((a: any, i: number) => (
                   <div key={i} className="text-sm py-1.5 border-b border-warning/20 w-full">
                     <div className="font-semibold">{(a.title||"").slice(0,40)}{(a.title||"").length>40?"...":""}</div>
                     <div className="text-xs opacity-70">{a.document_type?.toUpperCase()} · {a.currency} {Number(a.amount||0).toLocaleString()}</div>

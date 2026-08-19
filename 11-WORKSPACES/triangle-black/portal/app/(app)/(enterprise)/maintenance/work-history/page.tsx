@@ -9,8 +9,8 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function WorkHistoryPage() {
   const router = useRouter();
@@ -22,13 +22,13 @@ export default function WorkHistoryPage() {
 
   const { data: rawWOs, isLoading } = useQuery({queryKey:["maint-wo-history"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=200").then(r=>r.json()),staleTime:60000});
 
-  const wos = toArr(rawWOs).filter(w=>!w.deleted_at);
-  const completed = wos.filter(w=>w.status==="completed");
+  const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
+  const completed = wos.filter((w: any) =>w.status==="completed");
   const byType = useMemo(()=>{const m={};wos.forEach(w=>{m[w.type||"corrective"]=(m[w.type||"corrective"]||0)+1;});return m;},[wos]);
   const types = ["all",...Object.keys(byType)];
   const compRate = wos.length>0?Math.round(completed.length/wos.length*100):0;
 
-  const filtered = useMemo(()=>wos.filter(w=>{
+  const filtered = useMemo(()=>wos.filter((w: any) =>{
     const ms = !search||(w.title||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterType==="all"||(w.type||"corrective")===filterType)&&(filterStatus==="all"||w.status===filterStatus);
   }),[wos,search,filterType,filterStatus]);
@@ -78,7 +78,7 @@ export default function WorkHistoryPage() {
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search work orders..." className="tb-input" style={{minWidth:"220px",width:"auto"}} />
             <div className="tb-tabs border-0 mb-0">
-              {["all","open","in_progress","completed","cancelled"].map(s=>(
+              {["all","open","in_progress","completed","cancelled"].map((s: any) =>(
                 <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
                   {s==="all"?"All":s==="in_progress"?"In Progress":s.charAt(0).toUpperCase()+s.slice(1)}
                 </button>
@@ -99,7 +99,7 @@ export default function WorkHistoryPage() {
                 <table className="tb-table">
                   <thead><tr><th>Work Order</th><th>Type</th><th>Priority</th><th>Status</th><th>Created</th><th>Completed</th></tr></thead>
                   <tbody>
-                    {paged.map((w,i)=>(
+                    {paged.map((w: any, i: number) =>(
                       <tr key={w.id||i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)} className="cursor-pointer">
                         <td>
                           <div className="font-semibold text-sm text-primary">{(w.title||"Untitled").slice(0,50)}</div>

@@ -32,7 +32,7 @@ export default function GoodsReceiptNewPage() {
     if (!mounted) return;
     tbFetch("/api/v1/purchase-orders/?limit=100&status=approved")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setPos(items);
       })
@@ -42,7 +42,7 @@ export default function GoodsReceiptNewPage() {
 
   useEffect(() => {
     if (!form.po_id) { setSelectedPO(null); return; }
-    const po = pos.find(p => p.id === form.po_id);
+    const po = pos.find((p: any) => p.id === form.po_id);
     setSelectedPO(po || null);
     if (po?.lines?.length > 0) {
       setLines(po.lines.map((l: any) => ({
@@ -67,8 +67,8 @@ export default function GoodsReceiptNewPage() {
     try {
       const payload = {
         ...form,
-        items: lines.filter(l => l.description),
-        lines: lines.filter(l => l.description),
+        items: lines.filter((l: any) => l.description),
+        lines: lines.filter((l: any) => l.description),
       };
       const res = await tbFetch("/api/v1/goods-receipts/", {
         method: "POST",
@@ -145,7 +145,7 @@ export default function GoodsReceiptNewPage() {
               <select value={form.overall_condition}
                 onChange={e => setForm(f=>({...f,overall_condition:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {CONDITION.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+                {CONDITION.map((c: any) => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
               </select>
             </div>
           </div>
@@ -201,7 +201,7 @@ export default function GoodsReceiptNewPage() {
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Condition</label>}
                   <select value={line.condition} onChange={e => updateLine(i,"condition",e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900">
-                    {CONDITION.map(c => <option key={c} value={c}>{c}</option>)}
+                    {CONDITION.map((c: any) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="col-span-1">

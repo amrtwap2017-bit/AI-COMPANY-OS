@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function RFQsPage() {
   const router = useRouter();
@@ -17,14 +17,14 @@ export default function RFQsPage() {
 
   const { data: raw, isLoading } = useQuery({queryKey:["rfqs-list"],queryFn:()=>authFetch("/api/v1/rfqs/").then(r=>r.json())});
   const all = toArr(raw);
-  const filtered = all.filter(r=>{
+  const filtered = all.filter((r: any) =>{
     const ms = !search||(r.rfq_number||"").toLowerCase().includes(search.toLowerCase())||(r.title||"").toLowerCase().includes(search.toLowerCase())||(r.category||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterStatus==="all"||r.status===filterStatus);
   });
 
-  const open = all.filter(r=>r.status==="open").length;
-  const awarded = all.filter(r=>r.status==="awarded").length;
-  const draft = all.filter(r=>r.status==="draft").length;
+  const open = all.filter((r: any) =>r.status==="open").length;
+  const awarded = all.filter((r: any) =>r.status==="awarded").length;
+  const draft = all.filter((r: any) =>r.status==="draft").length;
 
   return (
     <div className="min-h-screen bg-base">
@@ -53,7 +53,7 @@ export default function RFQsPage() {
         <div className="flex gap-3 mb-5 flex-wrap items-center">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search RFQs..." className="tb-input" style={{minWidth:"240px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
-            {["all","draft","open","closed","awarded","cancelled"].map(s=>(
+            {["all","draft","open","closed","awarded","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>setFilterStatus(s)} className={`tb-tab ${filterStatus===s?"active":""}`}>
                 {s==="all"?"All Statuses":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
@@ -72,7 +72,7 @@ export default function RFQsPage() {
               <table className="tb-table">
                 <thead><tr><th>RFQ</th><th>Category</th><th>Due Date</th><th>Created By</th><th>Status</th><th>Bids</th></tr></thead>
                 <tbody>
-                  {filtered.map(r=>(
+                  {filtered.map((r: any) =>(
                     <tr key={r.id} onClick={()=>router.push(`/supply-chain/rfq-management/${r.id}`)} className="cursor-pointer">
                       <td>
                         <div className="font-semibold text-sm text-primary">{r.rfq_number||r.id?.slice(0,8)}</div>

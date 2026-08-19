@@ -70,7 +70,7 @@ export default function KnowledgeGraphSearchPage() {
       </div>
       <div className="flex gap-2 flex-wrap">
         <span className="text-xs text-gray-400">Quick:</span>
-        {["HVAC","Chiller","Electrical","ABB","Carrier","Fire","Test"].map(s=>(
+        {["HVAC","Chiller","Electrical","ABB","Carrier","Fire","Test"].map((s: any) =>(
           <button key={s} onClick={()=>{setQuery(s);search(s);}}
             className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full">{s}</button>
         ))}
@@ -85,9 +85,9 @@ export default function KnowledgeGraphSearchPage() {
         <div className="space-y-2">
           <p className="text-sm text-gray-500">{results.length} results</p>
           {results.map((r:any,i:number)=>(
-            <div key={r.id||i} onClick={()=>r.id&&TYPE_PATH[r.type]&&router.push(`${TYPE_PATH[r.type]}${r.id}`)}
-              className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer hover:shadow-sm ${TYPE_COLOR[r.type]||"bg-gray-50 border-gray-200"}`}>
-              <span className="text-2xl">{TYPE_ICON[r.type]||"📌"}</span>
+            <div key={r.id||i} onClick={()=>r.id&&(TYPE_PATH as Record<string, any>)[r.type]&&router.push(`${(TYPE_PATH as Record<string, any>)[r.type]}${r.id}`)}
+              className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer hover:shadow-sm ${(TYPE_COLOR as Record<string, any>)[r.type]||"bg-gray-50 border-gray-200"}`}>
+              <span className="text-2xl">{(TYPE_ICON as Record<string, any>)[r.type]||"📌"}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-[var(--color-text-1)] truncate">{r.label}</p>
                 <p className="text-xs text-gray-500 capitalize">{r.type?.replace("_"," ")}{r.meta&&` · ${r.meta}`}</p>

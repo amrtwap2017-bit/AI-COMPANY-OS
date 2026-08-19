@@ -32,7 +32,7 @@ export function Tooltip({ content, children, placement = "top" }: TooltipProps) 
       {visible && content && (
         <div
           role="tooltip"
-          className={"absolute z-[70] px-2.5 py-1.5 bg-sidebar text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap pointer-events-none " + PLACEMENT[placement]}
+          className={"absolute z-[70] px-2.5 py-1.5 bg-sidebar text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap pointer-events-none " + (PLACEMENT as Record<string, any>)[placement]}
         >
           {content}
         </div>

@@ -20,10 +20,10 @@ export default function ExceptionsPage() {
   const notifs    = toArr(notifRaw);
   const now       = new Date();
 
-  const criticalWOs  = wos.filter(w=>w.priority==="critical"&&w.status!=="completed");
-  const overdueWOs   = wos.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
-  const expiringCts  = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
-  const overduePMs   = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);
+  const criticalWOs  = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");
+  const overdueWOs   = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
+  const expiringCts  = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
+  const overduePMs   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const totalExceptions = criticalWOs.length+overdueWOs.length+expiringCts.length+overduePMs.length;
 
   return (
@@ -39,7 +39,7 @@ export default function ExceptionsPage() {
               {label:"Overdue WOs",         value:overdueWOs.length,   color:overdueWOs.length>0?"var(--color-warning)":"var(--color-success)"},
               {label:"Expiring Contracts",  value:expiringCts.length,  color:expiringCts.length>0?"var(--color-warning)":"var(--color-success)"},
               {label:"Overdue PMs",         value:overduePMs.length,   color:overduePMs.length>0?"var(--color-danger)":"var(--color-success)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -105,7 +105,7 @@ export default function ExceptionsPage() {
                 <button onClick={()=>router.push("/commercial/contracts")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Contracts →</button>
               </div>
               <div className="flex flex-col gap-2">
-                {expiringCts.map((c,i)=>{
+                {expiringCts.map((c: any, i: number) =>{
                   const days=Math.ceil((new Date(c.end_date)-now)/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)} className="tb-action-item w-full justify-between">

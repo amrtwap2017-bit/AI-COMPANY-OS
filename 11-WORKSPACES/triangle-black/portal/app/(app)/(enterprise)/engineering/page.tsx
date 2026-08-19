@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 export default function EngineeringHubPage() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function EngineeringHubPage() {
             {label:"In Progress",value:ops.in_progress||0,color:"#B07A2A"},
             {label:"Completed",value:ops.completed||0,color:"#547C4D"},
             {label:"Hours Logged",value:`${Math.round(time.total_hours||0)}h`,color:"#B9924C"},
-          ].map((k,i)=>(
+          ].map((k: any, i: number) =>(
             <div key={i} className="tb-hero-kpi">
               <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
               <div className="tb-hero-kpi-label">{k.label}</div>
@@ -48,7 +48,7 @@ export default function EngineeringHubPage() {
         </div>
       </div></div>
       <div style={{maxWidth:1400,margin:"0 auto",padding:"32px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:16}}>
-        {modules.map((m,i)=>(
+        {modules.map((m: any, i: number) =>(
           <button key={i} onClick={()=>router.push(m.path)}
             style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:20,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}}
             onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(185,146,76,0.3)"}

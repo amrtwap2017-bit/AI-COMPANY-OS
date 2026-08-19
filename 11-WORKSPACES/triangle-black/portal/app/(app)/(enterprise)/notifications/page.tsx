@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtRelative = (d) => {
+const fmtRelative = (d: any) => {
   if (!d) return "";
   try {
     const ms = Date.now()-new Date(d).getTime();
@@ -75,9 +75,9 @@ export default function NotificationsPage() {
             {[
               {label:"Total",    value:notifications.length,                                       color:"var(--color-text-2)"},
               {label:"Unread",   value:unread,                                                     color:unread>0?"var(--color-warning)":"var(--color-success)"},
-              {label:"Alerts",   value:notifications.filter(n=>n.type==="alert").length,           color:"var(--color-danger)"},
-              {label:"Critical", value:notifications.filter(n=>n.priority==="critical").length,    color:notifications.filter(n=>n.priority==="critical").length>0?"var(--color-danger)":"var(--color-success)"},
-            ].map((k,i)=>(
+              {label:"Alerts",   value:notifications.filter((n: any) =>n.type==="alert").length,           color:"var(--color-danger)"},
+              {label:"Critical", value:notifications.filter((n: any) =>n.priority==="critical").length,    color:notifications.filter((n: any) =>n.priority==="critical").length>0?"var(--color-danger)":"var(--color-success)"},
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -97,7 +97,7 @@ export default function NotificationsPage() {
 
         <div className="tb-section">
           {isLoading ? (
-            <div className="flex flex-col gap-3">{[1,2,3,4].map(i=><div key={i} className="tb-shimmer-block" style={{height:64}}/>)}</div>
+            <div className="flex flex-col gap-3">{[1,2,3,4].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:64}}/>)}</div>
           ) : notifications.length===0 ? (
             <div className="tb-empty">
               <div className="tb-empty-icon">🔔</div>
@@ -108,7 +108,7 @@ export default function NotificationsPage() {
           ) : (
             <div className="flex flex-col gap-2">
               {notifications.map((notif,i)=>{
-                const cfg = TYPE_CONFIG[notif.type]||TYPE_CONFIG.info;
+                const cfg = (TYPE_CONFIG as Record<string, any>)[notif.type]||TYPE_CONFIG.info;
                 return (
                   <div key={i}
                     className="flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer tb-hover-lift"

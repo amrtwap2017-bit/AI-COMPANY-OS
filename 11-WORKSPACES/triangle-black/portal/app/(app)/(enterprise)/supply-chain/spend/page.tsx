@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtK = (n) => Number(n||0)>=1000?`${(Number(n)/1000).toFixed(0)}K`:String(Math.round(n||0));
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtK = (n: any) => Number(n||0)>=1000?`${(Number(n)/1000).toFixed(0)}K`:String(Math.round(n||0));
 const COLORS = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"];
 
 const WarmTooltip = ({active,payload,label}) => {
@@ -15,7 +15,7 @@ const WarmTooltip = ({active,payload,label}) => {
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label&&<div className="text-xs text-tertiary mb-1">{label}</div>}
-      {payload.map((p,i)=><div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>{p.name}: {fmtEGP(p.value)}</div>)}
+      {payload.map((p: any, i: number) =><div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>{p.name}: {fmtEGP(p.value)}</div>)}
     </div>
   );
 };
@@ -32,7 +32,7 @@ export default function SpendAnalyticsPage() {
   const grns = proc?.grns||{};
   const costs = finDash?.costs||{};
 
-  const spendBreakdown = [{name:"PO Spend",value:Number(pos.total_value||0)},{name:"Labor",value:Number(costs.total_labor||0)},{name:"Materials",value:Number(costs.total_materials||0)},{name:"Overhead",value:Number(costs.total_overhead_profit||0)}].filter(d=>d.value>0);
+  const spendBreakdown = [{name:"PO Spend",value:Number(pos.total_value||0)},{name:"Labor",value:Number(costs.total_labor||0)},{name:"Materials",value:Number(costs.total_materials||0)},{name:"Overhead",value:Number(costs.total_overhead_profit||0)}].filter((d: any) =>d.value>0);
   const procPipeline = [{name:"SOWs",value:sow.total||0,fill:"#B9924C"},{name:"RFQs",value:rfqs.total||0,fill:"#5B7C8C"},{name:"POs",value:pos.total||0,fill:"#547C4D"},{name:"GRNs",value:grns.total||0,fill:"#8D7443"}];
   const AXIS = {fontSize:11,fill:"var(--color-text-3)"};
 
@@ -70,7 +70,7 @@ export default function SpendAnalyticsPage() {
                 <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={fmtK} />
                 <Tooltip content={({active,payload,label})=>{if(!active||!payload?.length) return null;return<div className="tb-section shadow-lg" style={{padding:"8px 12px"}}><div className="text-xs text-tertiary">{label}</div><div className="text-sm font-bold text-primary">{payload[0].value} items</div></div>;}} />
                 <Bar dataKey="value" radius={[6,6,0,0]}>
-                  {procPipeline.map((e,i)=><Cell key={i} fill={e.fill} />)}
+                  {procPipeline.map((e: any, i: number) =><Cell key={i} fill={e.fill} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -89,7 +89,7 @@ export default function SpendAnalyticsPage() {
               </ResponsiveContainer>
             ) : <div className="flex items-center justify-center text-tertiary text-sm" style={{height:240}}>No spend data available</div>}
             <div className="flex flex-col gap-1.5 mt-2">
-              {spendBreakdown.map((d,i)=>(
+              {spendBreakdown.map((d: any, i: number) =>(
                 <div key={i} className="flex justify-between items-center">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full" style={{background:COLORS[i%COLORS.length]}} />
@@ -119,7 +119,7 @@ export default function SpendAnalyticsPage() {
         <div className="tb-section mt-4">
           <div className="tb-section-title">Quick Actions</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:10}}>
-            {[{label:"Purchase Orders",path:"/supply-chain/purchase-orders-v2",icon:"📋"},{label:"RFQ Management",path:"/supply-chain/rfq-management",icon:"📨"},{label:"Invoice Matching",path:"/supply-chain/invoice-matching",icon:"🧾"},{label:"Vendor Management",path:"/supply-chain/vendor-management",icon:"🏢"},{label:"Stock Balances",path:"/supply-chain/stock-balances",icon:"📦"},{label:"Goods Receipts",path:"/supply-chain/goods-receipts",icon:"✅"}].map((a,i)=>(
+            {[{label:"Purchase Orders",path:"/supply-chain/purchase-orders-v2",icon:"📋"},{label:"RFQ Management",path:"/supply-chain/rfq-management",icon:"📨"},{label:"Invoice Matching",path:"/supply-chain/invoice-matching",icon:"🧾"},{label:"Vendor Management",path:"/supply-chain/vendor-management",icon:"🏢"},{label:"Stock Balances",path:"/supply-chain/stock-balances",icon:"📦"},{label:"Goods Receipts",path:"/supply-chain/goods-receipts",icon:"✅"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item">
                 <span>{a.icon}</span><span>{a.label}</span>
               </button>

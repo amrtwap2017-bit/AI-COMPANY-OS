@@ -8,9 +8,9 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
-const pct = (n) => `${Math.round(n||0)}%`;
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const pct = (n: any) => `${Math.round(n||0)}%`;
 
 export default function SLAReviewPage() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function SLAReviewPage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs">
-          {[{key:"overview",label:"Overview"},{key:"breaches",label:`Active Breaches (${breaches.length})`},{key:"sites",label:"By Site"}].map(t=>(
+          {[{key:"overview",label:"Overview"},{key:"breaches",label:`Active Breaches (${breaches.length})`},{key:"sites",label:"By Site"}].map((t: any) =>(
             <button key={t.key} onClick={()=>setTab(t.key)} className={`tb-tab ${tab===t.key?"active":""}`}>{t.label}</button>
           ))}
         </div>
@@ -103,7 +103,7 @@ export default function SLAReviewPage() {
                 <table className="tb-table">
                   <thead><tr><th>Work Order</th><th>Priority</th><th>Status</th><th>Breach Type</th><th>Due Date</th><th></th></tr></thead>
                   <tbody>
-                    {breaches.map((b,i)=>(
+                    {breaches.map((b: any, i: number) =>(
                       <tr key={b.id||i} style={{borderLeft:"3px solid var(--color-danger-border)"}}>
                         <td>
                           <div className="font-semibold text-sm text-primary">{(b.title||"Untitled").slice(0,50)}</div>
@@ -136,7 +136,7 @@ export default function SLAReviewPage() {
                 <table className="tb-table">
                   <thead><tr><th>Site</th><th>Total WOs</th><th>On Time</th><th>Breached</th><th>Compliance</th></tr></thead>
                   <tbody>
-                    {siteSLA.map((s,i)=>{
+                    {siteSLA.map((s: any, i: number) =>{
                       const comp = s.total>0?Math.round((s.on_time||0)/s.total*100):0;
                       return (
                         <tr key={i}>

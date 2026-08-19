@@ -3,20 +3,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function PortfolioPage() {
   const router = useRouter();
   const { data: contRaw } = useQuery(["pf-conts"], () => authFetch("/api/v1/contracts/").then(r=>r.json()));
   const { data: projRaw } = useQuery(["pf-projs"], () => authFetch("/api/v1/projects/").then(r=>r.json()));
   const { data: invRaw }  = useQuery(["pf-inv"],   () => authFetch("/api/v1/invoices/").then(r=>r.json()));
   const contracts = toArr(contRaw); const projects = toArr(projRaw); const inv = toArr(invRaw);
-  const activeContracts = contracts.filter(c=>c.status==="active");
-  const contractValue   = activeContracts.reduce((s,c)=>s+Number(c.total_value||c.value||0),0);
-  const revenue         = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const activeContracts = contracts.filter((c: any) =>c.status==="active");
+  const contractValue   = activeContracts.reduce((s: any, c: any) =>s+Number(c.total_value||c.value||0),0);
+  const revenue         = inv.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
   const now = new Date();
-  const expiringSoon = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
+  const expiringSoon = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000));
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
@@ -25,7 +25,7 @@ export default function PortfolioPage() {
           <h1 className="tb-hero-title">Portfolio</h1>
           <p className="tb-hero-description">Active contracts, projects and revenue overview</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Active Contracts",value:activeContracts.length,color:"#547C4D"},{label:"Portfolio Value",value:fmtEGP(contractValue),color:"#B07A2A"},{label:"Active Projects",value:projects.filter(p=>p.status==="active").length,color:"#5B7C8C"},{label:"Revenue",value:fmtEGP(revenue),color:"#8D7443"}].map((k,i)=>(
+            {[{label:"Active Contracts",value:activeContracts.length,color:"#547C4D"},{label:"Portfolio Value",value:fmtEGP(contractValue),color:"#B07A2A"},{label:"Active Projects",value:projects.filter((p: any) =>p.status==="active").length,color:"#5B7C8C"},{label:"Revenue",value:fmtEGP(revenue),color:"#8D7443"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -41,7 +41,7 @@ export default function PortfolioPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Contracts</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {activeContracts.slice(0,5).map((c,i)=>{
+              {activeContracts.slice(0,5).map((c: any, i: number) =>{
                 const days = c.end_date?Math.ceil((new Date(c.end_date)-now)/86400000):null;
                 return (
                   <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)} className="tb-action-item w-full justify-between">
@@ -56,13 +56,13 @@ export default function PortfolioPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Projects</div><button onClick={()=>router.push("/projects-center")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {projects.filter(p=>p.status==="active").slice(0,5).map((proj,i)=>(
+              {projects.filter((p: any) =>p.status==="active").slice(0,5).map((proj,i)=>(
                 <button key={i} onClick={()=>router.push("/projects-center/"+proj.id)} className="tb-action-item w-full justify-between">
                   <div className="min-w-0 flex items-center gap-2"><span className="text-base">🏗️</span><span className="text-sm text-secondary truncate">{proj.name||proj.title||"—"}</span></div>
                   <span className="text-xs text-tertiary flex-shrink-0">{proj.end_date?fmtDate(proj.end_date):"—"}</span>
                 </button>
               ))}
-              {projects.filter(p=>p.status==="active").length===0 && <div className="text-xs text-tertiary py-4 text-center">No active projects</div>}
+              {projects.filter((p: any) =>p.status==="active").length===0 && <div className="text-xs text-tertiary py-4 text-center">No active projects</div>}
             </div>
           </div>
         </div>

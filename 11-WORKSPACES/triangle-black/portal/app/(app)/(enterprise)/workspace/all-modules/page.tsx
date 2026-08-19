@@ -12,7 +12,7 @@ export default function AllModulesPage() {
     const q = query.trim().toLowerCase();
     return navGroups.map(group => {
       const centers = group.items
-        .map(key => enterpriseCenters.find(c => c.key === key))
+        .map(key => enterpriseCenters.find((c: any) => c.key === key))
         .filter(Boolean)
         .map(center => {
           const children = (center.children || []).filter(child =>
@@ -26,7 +26,7 @@ export default function AllModulesPage() {
         })
         .filter(Boolean);
       return { ...group, centers };
-    }).filter(g => g.centers.length > 0);
+    }).filter((g: any) => g.centers.length > 0);
   }, [query]);
 
   return (

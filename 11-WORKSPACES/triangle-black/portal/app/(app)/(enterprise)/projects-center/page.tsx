@@ -8,9 +8,9 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { FeatureGate } from "@/components/ui/FeatureGate";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 function ProjectsCenterPageInner() {
   const router = useRouter();
@@ -30,13 +30,13 @@ function ProjectsCenterPageInner() {
   const projects = toArr(raw);
   const wos = toArr(woRaw);
 
-  const active = projects.filter(p=>p.status==="active");
-  const planning = projects.filter(p=>p.status==="planning");
-  const completed = projects.filter(p=>p.status==="completed");
-  const totalBudget = projects.reduce((s,p)=>s+Number(p.budget||0),0);
-  const avgCompletion = projects.length>0?Math.round(projects.reduce((s,p)=>s+Number(p.completion_pct||0),0)/projects.length):0;
+  const active = projects.filter((p: any) =>p.status==="active");
+  const planning = projects.filter((p: any) =>p.status==="planning");
+  const completed = projects.filter((p: any) =>p.status==="completed");
+  const totalBudget = projects.reduce((s: any, p: any) =>s+Number(p.budget||0),0);
+  const avgCompletion = projects.length>0?Math.round(projects.reduce((s: any, p: any) =>s+Number(p.completion_pct||0),0)/projects.length):0;
 
-  const filtered = projects.filter(p=>{
+  const filtered = projects.filter((p: any) =>{
     const ms = !search||p.title?.toLowerCase().includes(search.toLowerCase())||p.name?.toLowerCase().includes(search.toLowerCase());
     return ms&&(statusF==="all"||p.status===statusF);
   });
@@ -59,7 +59,7 @@ function ProjectsCenterPageInner() {
             </div>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Active",value:active.length,f:"active"},{label:"Planning",value:planning.length,f:"planning"},{label:"Completed",value:completed.length,f:"completed"},{label:"Total Budget",value:fmtEGP(totalBudget),f:"all"}].map((k,i)=>(
+            {[{label:"Active",value:active.length,f:"active"},{label:"Planning",value:planning.length,f:"planning"},{label:"Completed",value:completed.length,f:"completed"},{label:"Total Budget",value:fmtEGP(totalBudget),f:"all"}].map((k: any, i: number) =>(
               <button key={i} onClick={()=>setStatusF(statusF===k.f&&i<3?"all":k.f)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{fontSize:i===3?"1rem":"1.375rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -73,7 +73,7 @@ function ProjectsCenterPageInner() {
         <div className="flex gap-3 flex-wrap items-center mb-4">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search projects..." className="tb-input" style={{maxWidth:"320px"}} />
           <div className="tb-tabs border-0 mb-0">
-            {["all","active","planning","completed"].map(s=>(
+            {["all","active","planning","completed"].map((s: any) =>(
               <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
@@ -88,10 +88,10 @@ function ProjectsCenterPageInner() {
           <div className="tb-section"><div className="tb-empty"><div className="tb-empty-icon">🏗️</div><div className="tb-empty-title">No projects found</div></div></div>
         ) : (
           <div className="tb-grid-3">
-            {filtered.map((p,i)=>{
+            {filtered.map((p: any, i: number) =>{
               const pct = Number(p.completion_pct||0);
               const budget = Number(p.budget||0);
-              const projWOs = wos.filter(w=>w.contract_id===p.id||w.project_id===p.id);
+              const projWOs = wos.filter((w: any) =>w.contract_id===p.id||w.project_id===p.id);
               const daysLeft = p.end_date?Math.ceil((new Date(p.end_date)-Date.now())/86400000):null;
               const isOv = daysLeft!==null&&daysLeft<0&&p.status!=="completed";
               const barColor = pct>=80?"var(--color-success)":pct>=50?"var(--color-info)":"var(--color-warning)";
@@ -141,7 +141,7 @@ function ProjectsCenterPageInner() {
         <div className="tb-section">
           <div className="tb-section-title">Project Views</div>
           <div className="tb-grid-4">
-            {[{label:"List View",icon:"📋",path:"/projects-center/list"},{label:"Timeline",icon:"📅",path:"/projects-center/timeline"},{label:"Actions",icon:"⚡",path:"/projects-center/actions"},{label:"Review",icon:"📊",path:"/projects-center/review"}].map((a,i)=>(
+            {[{label:"List View",icon:"📋",path:"/projects-center/list"},{label:"Timeline",icon:"📅",path:"/projects-center/timeline"},{label:"Actions",icon:"⚡",path:"/projects-center/actions"},{label:"Review",icon:"📊",path:"/projects-center/review"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span>
                 <span className="text-xs font-medium text-secondary">{a.label}</span>
@@ -171,7 +171,7 @@ function ProjectsCenterPageInner() {
                 <div className="tb-form-group">
                   <label className="tb-label">Status</label>
                   <select value={newProj.status} onChange={e=>setNewProj({...newProj,status:e.target.value})} className="tb-select">
-                    {["planning","active","on_hold"].map(s=><option key={s} value={s}>{s}</option>)}
+                    {["planning","active","on_hold"].map((s: any) =><option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">

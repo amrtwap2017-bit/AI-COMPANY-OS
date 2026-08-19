@@ -70,7 +70,7 @@ export default function AuditTrailPage() {
               {label:"Entity Types",value:stats.entity_types||0,color:"#5B7C8C"},
               {label:"Unique Actors",value:stats.unique_actors||0,color:"#8D7443"},
               {label:"Last Event",value:fmtRelative(stats.last_event),color:"#547C4D"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -95,7 +95,7 @@ export default function AuditTrailPage() {
                 {entityTypes.map((t: any) => (
                   <button key={t} onClick={()=>setFilterType(t)}
                     className={"w-full text-left px-3 py-2 rounded-lg text-xs transition-colors " + (filterType===t ? "bg-brand/10 text-brand font-bold" : "text-tertiary hover:text-primary hover:bg-base-alt")}>
-                    {ENTITY_ICONS[t]||"📄"} {t.replace(/_/g," ")}
+                    {(ENTITY_ICONS as Record<string, any>)[t]||"📄"} {t.replace(/_/g," ")}
                   </button>
                 ))}
               </div>
@@ -134,9 +134,9 @@ export default function AuditTrailPage() {
               ) : (
                 <div className="space-y-1">
                   {events.map((e: any,i: number) => {
-                    const ac = ACTION_COLORS[e.action] || "#6D5F53";
-                    const icon = ENTITY_ICONS[e.entity_type] || "📄";
-                    const path = ENTITY_PATHS[e.entity_type];
+                    const ac = (ACTION_COLORS as Record<string, any>)[e.action] || "#6D5F53";
+                    const icon = (ENTITY_ICONS as Record<string, any>)[e.entity_type] || "📄";
+                    const path = (ENTITY_PATHS as Record<string, any>)[e.entity_type];
                     return (
                       <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors border border-transparent hover:border-border">
                         <div className="flex flex-col items-center gap-1 flex-shrink-0 pt-0.5">

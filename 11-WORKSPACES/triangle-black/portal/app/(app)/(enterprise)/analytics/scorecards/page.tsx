@@ -8,15 +8,15 @@ import {
   PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend,
 } from "recharts";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const WarmTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label && <div className="text-xs text-tertiary mb-1 font-semibold">{label}</div>}
-      {payload.map((p, i) => (
+      {payload.map((p: any, i: number) => (
         <div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>
           {p.name}: {p.value}{p.unit||""}
         </div>
@@ -43,33 +43,33 @@ export default function AnalyticsScorecards() {
   const score  = twin?.health_score ?? 0;
   const now    = new Date();
 
-  const compRate    = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
-  const collRate    = inv.length>0?Math.round(inv.filter(i=>i.status==="paid").length/inv.length*100):0;
-  const assetUp     = assets.length>0?Math.round(assets.filter(a=>a.status==="Operational").length/assets.length*100):100;
-  const pmCompliance= pms.length>0?Math.round((pms.length-pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now).length)/pms.length*100):100;
-  const totalRev    = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const compRate    = wos.length>0?Math.round(wos.filter((w: any) =>w.status==="completed").length/wos.length*100):0;
+  const collRate    = inv.length>0?Math.round(inv.filter((i: any) =>i.status==="paid").length/inv.length*100):0;
+  const assetUp     = assets.length>0?Math.round(assets.filter((a: any) =>a.status==="Operational").length/assets.length*100):100;
+  const pmCompliance= pms.length>0?Math.round((pms.length-pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now).length)/pms.length*100):100;
+  const totalRev    = inv.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
 
   const woStatusData = [
-    {name:"Open",        value:wos.filter(w=>w.status==="open").length,        fill:"#5B7C8C"},
-    {name:"In Progress", value:wos.filter(w=>w.status==="in_progress").length, fill:"#B07A2A"},
-    {name:"Completed",   value:wos.filter(w=>w.status==="completed").length,   fill:"#547C4D"},
-    {name:"Cancelled",   value:wos.filter(w=>w.status==="cancelled").length,   fill:"var(--color-text-3)"},
+    {name:"Open",        value:wos.filter((w: any) =>w.status==="open").length,        fill:"#5B7C8C"},
+    {name:"In Progress", value:wos.filter((w: any) =>w.status==="in_progress").length, fill:"#B07A2A"},
+    {name:"Completed",   value:wos.filter((w: any) =>w.status==="completed").length,   fill:"#547C4D"},
+    {name:"Cancelled",   value:wos.filter((w: any) =>w.status==="cancelled").length,   fill:"var(--color-text-3)"},
   ];
   const woPriorityData = [
-    {name:"Critical", value:wos.filter(w=>w.priority==="critical").length, fill:"#A84A3D"},
-    {name:"High",     value:wos.filter(w=>w.priority==="high").length,     fill:"#B07A2A"},
-    {name:"Medium",   value:wos.filter(w=>w.priority==="medium").length,   fill:"#B07A2A"},
-    {name:"Low",      value:wos.filter(w=>w.priority==="low").length,      fill:"var(--color-text-3)"},
+    {name:"Critical", value:wos.filter((w: any) =>w.priority==="critical").length, fill:"#A84A3D"},
+    {name:"High",     value:wos.filter((w: any) =>w.priority==="high").length,     fill:"#B07A2A"},
+    {name:"Medium",   value:wos.filter((w: any) =>w.priority==="medium").length,   fill:"#B07A2A"},
+    {name:"Low",      value:wos.filter((w: any) =>w.priority==="low").length,      fill:"var(--color-text-3)"},
   ];
   const invoiceData = [
-    {name:"Paid",      value:inv.filter(i=>i.status==="paid").length,      fill:"#547C4D"},
-    {name:"Pending",   value:inv.filter(i=>i.status==="pending").length,   fill:"#B07A2A"},
-    {name:"Overdue",   value:inv.filter(i=>i.status==="overdue").length,   fill:"#A84A3D"},
-    {name:"Cancelled", value:inv.filter(i=>i.status==="cancelled").length, fill:"var(--color-text-3)"},
-  ].filter(d=>d.value>0);
+    {name:"Paid",      value:inv.filter((i: any) =>i.status==="paid").length,      fill:"#547C4D"},
+    {name:"Pending",   value:inv.filter((i: any) =>i.status==="pending").length,   fill:"#B07A2A"},
+    {name:"Overdue",   value:inv.filter((i: any) =>i.status==="overdue").length,   fill:"#A84A3D"},
+    {name:"Cancelled", value:inv.filter((i: any) =>i.status==="cancelled").length, fill:"var(--color-text-3)"},
+  ].filter((d: any) =>d.value>0);
   const assetCategoryMap = {};
   assets.forEach(a => { const cat=a.category||"Other"; assetCategoryMap[cat]=(assetCategoryMap[cat]||0)+1; });
-  const assetCategoryData = Object.entries(assetCategoryMap).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value).slice(0,6);
+  const assetCategoryData = Object.entries(assetCategoryMap).map(([name,value])=>({name,value})).sort((a: any, b: any) =>b.value-a.value).slice(0,6);
   const kpiData = [
     {name:"WO Completion",   value:compRate,    fill:"#547C4D"},
     {name:"Invoice Collect", value:collRate,    fill:"#B07A2A"},
@@ -102,7 +102,7 @@ export default function AnalyticsScorecards() {
               {label:"Asset Uptime",   value:`${assetUp}%`,    color:assetUp>=95?"var(--color-success)":"var(--color-warning)"},
               {label:"PM Compliance",  value:`${pmCompliance}%`,color:pmCompliance>=90?"var(--color-success)":"var(--color-warning)"},
               {label:"Revenue",        value:fmtEGP(totalRev), color:"var(--color-brand)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -138,7 +138,7 @@ export default function AnalyticsScorecards() {
                 <XAxis dataKey="name" tick={AXIS} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS} axisLine={false} tickLine={false}/>
                 <Tooltip content={<WarmTooltip/>}/>
-                <Bar dataKey="value" radius={[6,6,0,0]}>{woStatusData.map((e,i)=><Cell key={i} fill={e.fill}/>)}</Bar>
+                <Bar dataKey="value" radius={[6,6,0,0]}>{woStatusData.map((e: any, i: number) =><Cell key={i} fill={e.fill}/>)}</Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -156,7 +156,7 @@ export default function AnalyticsScorecards() {
                 <XAxis type="number" tick={AXIS} axisLine={false} tickLine={false}/>
                 <YAxis type="category" dataKey="name" tick={AXIS} axisLine={false} tickLine={false} width={70}/>
                 <Tooltip content={<WarmTooltip/>}/>
-                <Bar dataKey="value" radius={[0,6,6,0]}>{woPriorityData.map((e,i)=><Cell key={i} fill={e.fill}/>)}</Bar>
+                <Bar dataKey="value" radius={[0,6,6,0]}>{woPriorityData.map((e: any, i: number) =><Cell key={i} fill={e.fill}/>)}</Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -169,13 +169,13 @@ export default function AnalyticsScorecards() {
               <ResponsiveContainer width="60%" height={250}>
                 <PieChart>
                   <Pie data={invoiceData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value">
-                    {invoiceData.map((e,i)=><Cell key={i} fill={e.fill}/>)}
+                    {invoiceData.map((e: any, i: number) =><Cell key={i} fill={e.fill}/>)}
                   </Pie>
                   <Tooltip content={<WarmTooltip/>}/>
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-3">
-                {invoiceData.map((d,i)=>(
+                {invoiceData.map((d: any, i: number) =>(
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{background:d.fill}}/>
                     <div>
@@ -232,7 +232,7 @@ export default function AnalyticsScorecards() {
               {label:"Trends",        icon:"📈", path:"/analytics/trends"},
               {label:"Cost Analysis", icon:"💵", path:"/analytics/costs"},
               {label:"Executive Hub", icon:"📊", path:"/analytics"},
-            ].map((a,i)=>(
+            ].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span>
                 <span className="text-xs font-medium text-secondary">{a.label}</span>

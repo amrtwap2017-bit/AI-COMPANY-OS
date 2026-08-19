@@ -8,8 +8,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const fmtQty = (n, unit) => `${Number(n||0).toLocaleString()} ${unit||""}`.trim();
 
 function getStockStatus(qtyOnHand, minStock, reorderQty) {
@@ -46,10 +46,10 @@ export default function StockBalancesPage() {
   }),[rawBalances,itemMap]);
 
   const warehouses    = toArr(rawWarehouses);
-  const categories    = useMemo(()=>["all",...Array.from(new Set(balances.map(b=>b.category).filter(c=>c&&c!=="—")))]   ,[balances]);
-  const warehouseNames= useMemo(()=>["all",...Array.from(new Set(balances.map(b=>b.warehouse_name).filter(Boolean)))]  ,[balances]);
+  const categories    = useMemo(()=>["all",...Array.from(new Set(balances.map((b: any) =>b.category).filter((c: any) =>c&&c!=="—")))]   ,[balances]);
+  const warehouseNames= useMemo(()=>["all",...Array.from(new Set(balances.map((b: any) =>b.warehouse_name).filter(Boolean)))]  ,[balances]);
 
-  const filtered = useMemo(()=>balances.filter(b=>{
+  const filtered = useMemo(()=>balances.filter((b: any) =>{
     const q=search.toLowerCase();
     return (!search||(b.item_name||"").toLowerCase().includes(q)||(b.item_code||"").toLowerCase().includes(q)||(b.category||"").toLowerCase().includes(q))
       &&(filterWarehouse==="all"||b.warehouse_name===filterWarehouse)
@@ -59,9 +59,9 @@ export default function StockBalancesPage() {
 
   const totalPages = Math.ceil(filtered.length/pageSize);
   const paged      = filtered.slice((page-1)*pageSize,page*pageSize);
-  const lowStock   = balances.filter(b=>b.status==="low").length;
-  const critical   = balances.filter(b=>b.status==="critical").length;
-  const totalValue = balances.reduce((s,b)=>s+Number(b.total_value||0),0);
+  const lowStock   = balances.filter((b: any) =>b.status==="low").length;
+  const critical   = balances.filter((b: any) =>b.status==="critical").length;
+  const totalValue = balances.reduce((s: any, b: any) =>s+Number(b.total_value||0),0);
   const hasFilters = search||filterWarehouse!=="all"||filterCategory!=="all"||filterStatus!=="all";
   const clearFilters=()=>{setSearch("");setFilterWarehouse("all");setFilterCategory("all");setFilterStatus("all");setPage(1);};
 
@@ -120,17 +120,17 @@ export default function StockBalancesPage() {
             <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}}
               placeholder="Search items..." className="tb-input" style={{minWidth:"200px",width:"auto"}}/>
             <select value={filterWarehouse} onChange={e=>{setFilterWarehouse(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
-              {warehouseNames.map(w=><option key={w} value={w}>{w==="all"?"All Warehouses":w}</option>)}
+              {warehouseNames.map((w: any) =><option key={w} value={w}>{w==="all"?"All Warehouses":w}</option>)}
             </select>
             <select value={filterCategory} onChange={e=>{setFilterCategory(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
-              {categories.map(c=><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
+              {categories.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
             <div className="flex gap-1.5">
-              {["all","ok","low","critical"].map(s=>(
+              {["all","ok","low","critical"].map((s: any) =>(
                 <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}}
                   className={`tb-btn tb-btn-sm ${filterStatus===s?s==="critical"?"tb-btn-danger":s==="ok"?"tb-btn-primary":"tb-btn-secondary":"tb-btn-ghost"}`}>
-                  {s==="all"?"All":STATUS_META[s]?.label}
-                  {s!=="all"&&<span className="ml-1 opacity-60">{balances.filter(b=>b.status===s).length}</span>}
+                  {s==="all"?"All":(STATUS_META as Record<string, any>)[s]?.label}
+                  {s!=="all"&&<span className="ml-1 opacity-60">{balances.filter((b: any) =>b.status===s).length}</span>}
                 </button>
               ))}
             </div>
@@ -142,7 +142,7 @@ export default function StockBalancesPage() {
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
             <div className="tb-section-title" style={{margin:0}}>Inventory Stock Levels</div>
-            <span className="text-sm font-bold text-brand">{fmtEGP(filtered.reduce((s,b)=>s+Number(b.total_value||0),0))} total</span>
+            <span className="text-sm font-bold text-brand">{fmtEGP(filtered.reduce((s: any, b: any) =>s+Number(b.total_value||0),0))} total</span>
           </div>
           {isLoading ? <TableSkeleton /> : filtered.length===0 ? (
             <EmptyState icon="📦" title="No stock items found"
@@ -166,8 +166,8 @@ export default function StockBalancesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paged.map((b,i)=>{
-                      const meta=STATUS_META[b.status]||STATUS_META.ok;
+                    {paged.map((b: any, i: number) =>{
+                      const meta=(STATUS_META as Record<string, any>)[b.status]||STATUS_META.ok;
                       const isCritical=b.status==="critical";
                       const isLow=b.status==="low";
                       return (
@@ -214,10 +214,10 @@ export default function StockBalancesPage() {
 
         {warehouses.length>0&&(
           <div className="tb-grid-3">
-            {warehouses.map((w,i)=>{
-              const wBal=balances.filter(b=>b.warehouse_name===w.name);
-              const wValue=wBal.reduce((s,b)=>s+Number(b.total_value||0),0);
-              const wCrit=wBal.filter(b=>b.status==="critical").length;
+            {warehouses.map((w: any, i: number) =>{
+              const wBal=balances.filter((b: any) =>b.warehouse_name===w.name);
+              const wValue=wBal.reduce((s: any, b: any) =>s+Number(b.total_value||0),0);
+              const wCrit=wBal.filter((b: any) =>b.status==="critical").length;
               return (
                 <div key={w.id||i} className="tb-section">
                   <div className="flex justify-between items-start mb-3">
@@ -228,7 +228,7 @@ export default function StockBalancesPage() {
                     {wCrit>0&&<span className="tb-badge tb-badge-danger">{wCrit} critical</span>}
                   </div>
                   <div className="tb-grid-2">
-                    {[{label:"SKUs",value:wBal.length},{label:"Total Value",value:fmtEGP(wValue)},{label:"Low Stock",value:wBal.filter(b=>b.status==="low").length},{label:"Critical",value:wCrit}].map(({label,value},j)=>(
+                    {[{label:"SKUs",value:wBal.length},{label:"Total Value",value:fmtEGP(wValue)},{label:"Low Stock",value:wBal.filter((b: any) =>b.status==="low").length},{label:"Critical",value:wCrit}].map(({label,value},j)=>(
                       <div key={j} className="p-2 bg-surface-alt rounded-md">
                         <div className="font-bold text-sm text-primary">{value}</div>
                         <div className="text-xs text-tertiary mt-0.5">{label}</div>

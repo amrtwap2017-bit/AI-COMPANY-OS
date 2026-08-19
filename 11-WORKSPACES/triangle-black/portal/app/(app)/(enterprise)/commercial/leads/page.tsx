@@ -34,14 +34,14 @@ function LeadsPageInner() {
   const { data: raw, isLoading } = useQuery(["leads-list"],()=>authFetch("/api/v1/leads-portal-v2").then(r=>r.json()));
   const leads = toArr(raw);
 
-  const filtered = leads.filter(l=>{
+  const filtered = leads.filter((l: any) =>{
     const ms = !search||l.name?.toLowerCase().includes(search.toLowerCase())||l.company?.toLowerCase().includes(search.toLowerCase());
     return ms&&(statusF==="all"||l.status===statusF);
   });
 
   const stages    = ["new","qualified","proposal","negotiation","won","lost"];
-  const hotLeads  = leads.filter(l=>(l.score||0)>=70&&l.status!=="won"&&l.status!=="lost");
-  const wonLeads  = leads.filter(l=>l.status==="won");
+  const hotLeads  = leads.filter((l: any) =>(l.score||0)>=70&&l.status!=="won"&&l.status!=="lost");
+  const wonLeads  = leads.filter((l: any) =>l.status==="won");
 
   if (isLoading) return <div className="tb-canvas"><div className="tb-shimmer-block" style={{height:60}}/></div>;
 
@@ -62,9 +62,9 @@ function LeadsPageInner() {
             <button onClick={()=>setShowCreate(true)} className="tb-btn tb-btn-primary">+ New Lead</button>
           </div>
           <div className="mt-6" style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12}}>
-            {stages.map((s,i)=>{
-              const count  = leads.filter(l=>l.status===s).length;
-              const c      = STATUS_COLOR[s]||"rgba(148,163,184,0.8)";
+            {stages.map((s: any, i: number) =>{
+              const count  = leads.filter((l: any) =>l.status===s).length;
+              const c      = (STATUS_COLOR as Record<string, any>)[s]||"rgba(148,163,184,0.8)";
               const active = statusF===s;
               return (
                 <button key={i} onClick={()=>setStatusF(active?"all":s)} className="tb-hero-kpi cursor-pointer">
@@ -82,7 +82,7 @@ function LeadsPageInner() {
           <div className="tb-alert tb-alert-warning mb-4">
             <span className="text-xl">🔥</span>
             <div className="flex-1 text-sm font-bold">
-              {hotLeads.length} hot lead{hotLeads.length>1?"s":""} with score ≥70 ready for conversion — {hotLeads.slice(0,2).map(l=>l.name).join(", ")}
+              {hotLeads.length} hot lead{hotLeads.length>1?"s":""} with score ≥70 ready for conversion — {hotLeads.slice(0,2).map((l: any) =>l.name).join(", ")}
             </div>
             <button onClick={()=>setStatusF("negotiation")} className="tb-btn tb-btn-secondary tb-btn-sm ml-auto">Focus →</button>
           </div>
@@ -92,7 +92,7 @@ function LeadsPageInner() {
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search leads by name or company..."
             className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
-            {["all",...stages].map(s=>(
+            {["all",...stages].map((s: any) =>(
               <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>
@@ -123,10 +123,10 @@ function LeadsPageInner() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((l,i)=>{
+                  {filtered.map((l: any, i: number) =>{
                     const score = Number(l.score||0);
                     const isHot = score>=70&&l.status!=="won"&&l.status!=="lost";
-                    const sc    = STATUS_COLOR[l.status]||"rgba(148,163,184,0.8)";
+                    const sc    = (STATUS_COLOR as Record<string, any>)[l.status]||"rgba(148,163,184,0.8)";
                     return (
                       <tr key={i} onClick={()=>router.push(`/commercial/leads/${l.id}`)} className="cursor-pointer">
                         <td>

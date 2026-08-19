@@ -83,7 +83,7 @@ export function EntityShell({
         {/* Hero metrics */}
         {heroMetrics.length > 0 && (
           <div className="flex items-center gap-6 mb-4 pb-4 border-b border-divider">
-            {heroMetrics.map((m, i) => (
+            {heroMetrics.map((m: any, i: number) => (
               <div key={i} className="flex items-center gap-2">
                 <div>
                   <div className="text-xs text-tertiary font-medium">{m.label}</div>

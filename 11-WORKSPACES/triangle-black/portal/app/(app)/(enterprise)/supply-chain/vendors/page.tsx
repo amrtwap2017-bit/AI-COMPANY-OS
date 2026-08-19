@@ -8,8 +8,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const STARS = (r: any) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 
 export default function VendorsPage() {
   const router = useRouter();
@@ -17,16 +17,16 @@ export default function VendorsPage() {
   const [filterCat, setFilterCat] = useState("all");
 
   const { data: raw, isLoading } = useQuery({queryKey:["vendors-list"],queryFn:()=>authFetch("/api/v1/vendors/").then(r=>r.json())});
-  const all = toArr(raw).filter(v=>!v.deleted_at);
-  const categories = ["all",...Array.from(new Set(all.map(v=>v.category).filter(Boolean)))];
-  const filtered = all.filter(v=>{
+  const all = toArr(raw).filter((v: any) =>!v.deleted_at);
+  const categories = ["all",...Array.from(new Set(all.map((v: any) =>v.category).filter(Boolean)))];
+  const filtered = all.filter((v: any) =>{
     const ms = !search||(v.company_name||"").toLowerCase().includes(search.toLowerCase())||(v.contact_person||"").toLowerCase().includes(search.toLowerCase())||(v.email||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterCat==="all"||v.category===filterCat);
   });
 
-  const approved = all.filter(v=>v.is_approved).length;
-  const totalOrders = all.reduce((s,v)=>s+(v.total_orders||0),0);
-  const avgRating = all.length?(all.reduce((s,v)=>s+(v.rating||0),0)/all.length).toFixed(1):"0.0";
+  const approved = all.filter((v: any) =>v.is_approved).length;
+  const totalOrders = all.reduce((s: any, v: any) =>s+(v.total_orders||0),0);
+  const avgRating = all.length?(all.reduce((s: any, v: any) =>s+(v.rating||0),0)/all.length).toFixed(1):"0.0";
 
   return (
     <div className="min-h-screen bg-base">
@@ -78,7 +78,7 @@ export default function VendorsPage() {
               <table className="tb-table">
                 <thead><tr><th>Vendor</th><th>Category</th><th>Contact</th><th>Rating</th><th>Orders</th><th>Status</th></tr></thead>
                 <tbody>
-                  {filtered.map(v=>(
+                  {filtered.map((v: any) =>(
                     <tr key={v.id} onClick={()=>router.push(`/supply-chain/vendor-management/${v.id}`)} className="cursor-pointer">
                       <td>
                         <div className="font-semibold text-sm text-primary">{v.company_name||"—"}</div>

@@ -73,8 +73,8 @@ export function NotificationBell() {
                 All clear — no active alerts
               </div>
             ) : list.map((n: any) => {
-              const Icon = PRIORITY_ICONS[n.priority] ?? Info;
-              const colorClass = PRIORITY_COLORS[n.priority] ?? PRIORITY_COLORS.low;
+              const Icon = (PRIORITY_ICONS as Record<string, any>)[n.priority] ?? Info;
+              const colorClass = (PRIORITY_COLORS as Record<string, any>)[n.priority] ?? PRIORITY_COLORS.low;
               return (
                 <div key={n.id}
                      className={`flex gap-3 px-4 py-3 border-b border-divider ${colorClass} border-l-4 border-l-current`}>

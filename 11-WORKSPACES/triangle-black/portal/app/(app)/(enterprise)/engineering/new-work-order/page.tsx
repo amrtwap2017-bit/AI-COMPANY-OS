@@ -3,14 +3,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function NewWorkOrderPage() {
   const router = useRouter();
   const { data: techRaw }  = useQuery(["nwo-techs"],  () => authFetch("/api/v1/technicians/").then(r=>r.json()));
   const { data: assetRaw } = useQuery(["nwo-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
   const { data: srRaw }    = useQuery(["nwo-srs"],    () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
   const techs = toArr(techRaw); const assets = toArr(assetRaw); const srs = toArr(srRaw);
-  const unlinkedSRs = srs.filter(s=>!s.work_order_id&&s.status==="open");
+  const unlinkedSRs = srs.filter((s: any) =>!s.work_order_id&&s.status==="open");
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
@@ -19,7 +19,7 @@ export default function NewWorkOrderPage() {
           <h1 className="tb-hero-title">New Work Order</h1>
           <p className="tb-hero-description">{techs.length} technicians · {assets.length} assets · {unlinkedSRs.length} unlinked service requests</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Technicians",value:techs.length,color:"#547C4D"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Open SRs",value:unlinkedSRs.length,color:unlinkedSRs.length>0?"#B07A2A":"#547C4D"},{label:"Ready",value:"Yes",color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Technicians",value:techs.length,color:"#547C4D"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Open SRs",value:unlinkedSRs.length,color:unlinkedSRs.length>0?"#B07A2A":"#547C4D"},{label:"Ready",value:"Yes",color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

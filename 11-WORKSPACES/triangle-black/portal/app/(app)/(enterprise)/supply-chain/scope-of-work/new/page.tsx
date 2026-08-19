@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const EMPTY_BOQ = {description:"",unit:"unit",quantity:1,unit_rate:0,category:"material"};
 export default function SOWCreatePage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function SOWCreatePage() {
     }).then(r=>r.json()),
     { onSuccess: (data) => { if (!data.error) router.push("/supply-chain/scope-of-work/"+data.id); }}
   );
-  const boqSubtotal = boqItems.reduce((s,i)=>s+Number(i.quantity||0)*Number(i.unit_rate||0),0);
+  const boqSubtotal = boqItems.reduce((s: any, i: any) =>s+Number(i.quantity||0)*Number(i.unit_rate||0),0);
   const overhead = boqSubtotal * (Number(form.overhead_pct||0)/100);
   const profit = (boqSubtotal+overhead) * (Number(form.profit_margin_pct||0)/100);
   const grandTotal = boqSubtotal + overhead + profit + Number(form.labor_cost||0);
@@ -49,7 +49,7 @@ export default function SOWCreatePage() {
               {label:"BOQ Total",value:fmtEGP(boqSubtotal),color:"#B07A2A"},
               {label:"Grand Total",value:fmtEGP(grandTotal),color:"#547C4D"},
               {label:"Est. Days",value:`${form.estimated_days||0}d`,color:"#8D7443"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -69,13 +69,13 @@ export default function SOWCreatePage() {
             <div>
               <label className="text-xs text-tertiary block mb-1">Type</label>
               <select className="tb-input w-full" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
-                {["service","maintenance","installation","repair","inspection"].map(t=><option key={t} value={t}>{t}</option>)}
+                {["service","maintenance","installation","repair","inspection"].map((t: any) =><option key={t} value={t}>{t}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs text-tertiary block mb-1">Currency</label>
               <select className="tb-input w-full" value={form.currency} onChange={e=>setForm({...form,currency:e.target.value})}>
-                {["EGP","USD","EUR","GBP","SAR","AED"].map(c=><option key={c} value={c}>{c}</option>)}
+                {["EGP","USD","EUR","GBP","SAR","AED"].map((c: any) =><option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
@@ -111,7 +111,7 @@ export default function SOWCreatePage() {
             <div className="grid grid-cols-5 gap-2">
               <input className="tb-input col-span-2" placeholder="Description *" value={newItem.description} onChange={e=>setNewItem({...newItem,description:e.target.value})}/>
               <select className="tb-input" value={newItem.unit} onChange={e=>setNewItem({...newItem,unit:e.target.value})}>
-                {["unit","m","m2","m3","hr","lot","kg","set"].map(u=><option key={u} value={u}>{u}</option>)}
+                {["unit","m","m2","m3","hr","lot","kg","set"].map((u: any) =><option key={u} value={u}>{u}</option>)}
               </select>
               <input type="number" className="tb-input" placeholder="Qty" value={newItem.quantity} onChange={e=>setNewItem({...newItem,quantity:e.target.value})} min="0.001" step="0.001"/>
               <input type="number" className="tb-input" placeholder="Unit Rate" value={newItem.unit_rate} onChange={e=>setNewItem({...newItem,unit_rate:e.target.value})} min="0"/>
@@ -124,7 +124,7 @@ export default function SOWCreatePage() {
           {boqItems.length>0 && (
             <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
               <div className="tb-table-head" style={{gridTemplateColumns:"40px 1fr 70px 70px 100px 110px 40px"}}>
-                {["#","Description","Unit","Qty","Rate","Total",""].map((h,i)=>(
+                {["#","Description","Unit","Qty","Rate","Total",""].map((h: any, i: number) =>(
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>1?"center":"left"}}>{h}</div>
                 ))}
               </div>

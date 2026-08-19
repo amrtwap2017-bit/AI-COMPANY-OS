@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function WarehouseDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -13,14 +13,14 @@ export default function WarehouseDetailPage() {
   const { data: stockRaw } = useQuery(["wh-d-stock"], () => authFetch("/api/v1/stock-balances/").then(r=>r.json()));
   const { data: itemRaw } = useQuery(["wh-d-items"], () => authFetch("/api/v1/inventory-items-portal").then(r=>r.json()));
   const whs = toArr(whRaw); const stocks = toArr(stockRaw); const items = toArr(itemRaw);
-  const wh = whs.find(w=>w.id===id)||whs[0];
-  const whStocks = stocks.filter(s=>s.warehouse_id===(wh?.id||id));
-  const totalValue = whStocks.reduce((s,b)=>{
-    const item=items.find(i=>i.id===b.item_id);
+  const wh = whs.find((w: any) =>w.id===id)||whs[0];
+  const whStocks = stocks.filter((s: any) =>s.warehouse_id===(wh?.id||id));
+  const totalValue = whStocks.reduce((s: any, b: any) =>{
+    const item=items.find((i: any) =>i.id===b.item_id);
     return s+(Number(b.qty_on_hand||b.qty||0)*Number(item?.unit_price||item?.cost||0));
   },0);
-  const lowStock = whStocks.filter(b=>{
-    const item=items.find(i=>i.id===b.item_id);
+  const lowStock = whStocks.filter((b: any) =>{
+    const item=items.find((i: any) =>i.id===b.item_id);
     return Number(b.qty_on_hand||b.qty||0)<=Number(item?.minimum_quantity||item?.min_quantity||5);
   });
   if (!isLoading && !wh) return (
@@ -42,7 +42,7 @@ export default function WarehouseDetailPage() {
             <button onClick={()=>router.push("/supply-chain/warehouses")} className="tb-btn-secondary">← Back</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Stock Items",value:whStocks.length,color:"#547C4D"},{label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"#A84A3D":"#547C4D"},{label:"Total Value",value:fmtEGP(totalValue),color:"#B07A2A"},{label:"Status",value:wh?.status||"Active",color:"#5B7C8C"}].map((k,i)=>(
+            {[{label:"Stock Items",value:whStocks.length,color:"#547C4D"},{label:"Low Stock",value:lowStock.length,color:lowStock.length>0?"#A84A3D":"#547C4D"},{label:"Total Value",value:fmtEGP(totalValue),color:"#B07A2A"},{label:"Status",value:wh?.status||"Active",color:"#5B7C8C"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -66,7 +66,7 @@ export default function WarehouseDetailPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Stock Items ({whStocks.length})</div><button onClick={()=>router.push("/supply-chain/inventory")} className="tb-section-link">Inventory →</button></div>
             <div className="space-y-2 mt-3">
-              {whStocks.slice(0,10).map((s,i)=>{
+              {whStocks.slice(0,10).map((s: any, i: number) =>{
                 const item=items.find(it=>it.id===s.item_id);
                 const qty=Number(s.qty_on_hand||s.qty||0);
                 const min=Number(item?.minimum_quantity||item?.min_quantity||5);
@@ -87,7 +87,7 @@ export default function WarehouseDetailPage() {
         <div className="tb-section">
           <div className="tb-section-title">Quick Actions</div>
           <div className="space-y-2">
-            {[{label:"All Warehouses",icon:"🏗️",path:"/supply-chain/warehouses"},{label:"Inventory",icon:"📦",path:"/supply-chain/inventory"},{label:"Purchase Requests",icon:"📋",path:"/supply-chain/purchase-requests"}].map((a,i)=>(
+            {[{label:"All Warehouses",icon:"🏗️",path:"/supply-chain/warehouses"},{label:"Inventory",icon:"📦",path:"/supply-chain/inventory"},{label:"Purchase Requests",icon:"📋",path:"/supply-chain/purchase-requests"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item w-full justify-start"><span>{a.icon}</span><span className="text-sm text-secondary">{a.label}</span></button>
             ))}
           </div>

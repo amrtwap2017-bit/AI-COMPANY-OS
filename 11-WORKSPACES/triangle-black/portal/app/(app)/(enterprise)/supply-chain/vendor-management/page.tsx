@@ -7,8 +7,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const STARS = (r: any) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 const handleExport = (url) => {
   import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(url))
     .then(r=>r.blob()).then(blob=>{const dl=document.createElement("a");dl.href=URL.createObjectURL(blob);dl.download=url.split("/").pop()+"_"+new Date().toISOString().slice(0,10)+".csv";dl.click();});
@@ -40,8 +40,8 @@ export default function VendorManagementPage() {
 
   const { data: raw, isLoading } = useQuery(["vendors-list"], ()=>authFetch("/api/v1/vendors/").then(r=>r.json()), {staleTime:60000});
   const vendors = toArr(raw);
-  const cats = [...new Set(vendors.map(v=>v.category).filter(Boolean))];
-  const filtered = vendors.filter(v=>(filterCat==="all"||v.category===filterCat)&&(!search||(v.company_name||"").toLowerCase().includes(search.toLowerCase())||(v.category||"").toLowerCase().includes(search.toLowerCase())));
+  const cats = [...new Set(vendors.map((v: any) =>v.category).filter(Boolean))];
+  const filtered = vendors.filter((v: any) =>(filterCat==="all"||v.category===filterCat)&&(!search||(v.company_name||"").toLowerCase().includes(search.toLowerCase())||(v.category||"").toLowerCase().includes(search.toLowerCase())));
   const totalPages = Math.ceil(filtered.length/pageSize);
   const paged = filtered.slice((page-1)*pageSize, page*pageSize);
 
@@ -53,7 +53,7 @@ export default function VendorManagementPage() {
             <div>
               <div className="text-label-upper text-brand mb-1.5">Supply Chain · Procurement</div>
               <h1 className="tb-hero-title">Vendor Management</h1>
-              <p className="tb-hero-description">{vendors.length} vendors · {vendors.filter(v=>v.is_approved).length} approved</p>
+              <p className="tb-hero-description">{vendors.length} vendors · {vendors.filter((v: any) =>v.is_approved).length} approved</p>
             </div>
             <div className="tb-action-bar">
               <button onClick={()=>router.push("/supply-chain/procurement")} className="tb-btn tb-btn-secondary">← Back</button>
@@ -62,7 +62,7 @@ export default function VendorManagementPage() {
             </div>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:vendors.length},{label:"Approved",value:vendors.filter(v=>v.is_approved).length,good:true},{label:"Categories",value:cats.length},{label:"Avg Rating",value:vendors.length>0?(vendors.reduce((s,v)=>s+(v.rating||0),0)/vendors.length).toFixed(1):0}].map((k,i)=>(
+            {[{label:"Total",value:vendors.length},{label:"Approved",value:vendors.filter((v: any) =>v.is_approved).length,good:true},{label:"Categories",value:cats.length},{label:"Avg Rating",value:vendors.length>0?(vendors.reduce((s: any, v: any) =>s+(v.rating||0),0)/vendors.length).toFixed(1):0}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.good?"var(--color-success)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -78,17 +78,17 @@ export default function VendorManagementPage() {
             <input className="tb-input flex-1" style={{minWidth:"200px"}} placeholder="Search vendors…" value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} />
             <div className="tb-tabs border-0 mb-0">
               <button onClick={()=>{setFilterCat("all");setPage(1);}} className={`tb-tab ${filterCat==="all"?"active":""}`}>All</button>
-              {cats.map(c=><button key={c} onClick={()=>{setFilterCat(c);setPage(1);}} className={`tb-tab ${filterCat===c?"active":""}`}>{c}</button>)}
+              {cats.map((c: any) =><button key={c} onClick={()=>{setFilterCat(c);setPage(1);}} className={`tb-tab ${filterCat===c?"active":""}`}>{c}</button>)}
             </div>
           </div>
           {isLoading ? (
-            <div className="flex flex-col gap-3">{[1,2,3].map(i=><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:64}} />)}</div>
+            <div className="flex flex-col gap-3">{[1,2,3].map((i: any) =><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:64}} />)}</div>
           ) : filtered.length===0 ? (
             <div className="tb-empty"><div className="tb-empty-icon">🏭</div><div className="tb-empty-title">No vendors found</div></div>
           ) : (
             <>
               <div className="tb-grid-2">
-                {paged.map((v,i)=>(
+                {paged.map((v: any, i: number) =>(
                   <button key={i} onClick={()=>router.push("/supply-chain/vendor-management/"+v.id)}
                     className="tb-section text-left tb-hover-lift cursor-pointer">
                     <div className="flex items-start justify-between gap-3">
@@ -136,7 +136,7 @@ export default function VendorManagementPage() {
                 <div className="tb-form-group">
                   <label className="tb-label">Category</label>
                   <select value={newV.category} onChange={e=>setNewV({...newV,category:e.target.value})} className="tb-select">
-                    {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Elevator","Other"].map(c=><option key={c} value={c}>{c}</option>)}
+                    {["HVAC","Electrical","Plumbing","Fire","Civil","IT","General","Elevator","Other"].map((c: any) =><option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">

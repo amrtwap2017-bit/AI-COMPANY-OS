@@ -17,7 +17,7 @@ function AISignalsPageInner() {
   const loadData = () => {
     setLoading(true);
     tbFetch("/api/v1/ai/signals/summary").then(r => r.data ?? r)
-      .then(d => { setSummary(d); setLast(new Date().toLocaleTimeString("en-GB")); })
+      .then((d: any) => { setSummary(d); setLast(new Date().toLocaleTimeString("en-GB")); })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -48,7 +48,7 @@ function AISignalsPageInner() {
             { label:"🟠 High",     value:summary.high||0,     color:"bg-orange-50 border-orange-200" },
             { label:"🟡 Medium",   value:summary.medium||0,   color:"bg-yellow-50 border-yellow-200" },
             { label:"📊 Total",    value:summary.total||0,    color:"bg-gray-50 border-gray-200" },
-          ].map(k => (
+          ].map((k: any) => (
             <div key={k.label} className={`${k.color} border rounded-xl p-4`}>
               <p className="text-xs text-gray-500">{k.label}</p>
               <p className="text-3xl font-bold text-[var(--color-text-1)] mt-1">{k.value}</p>

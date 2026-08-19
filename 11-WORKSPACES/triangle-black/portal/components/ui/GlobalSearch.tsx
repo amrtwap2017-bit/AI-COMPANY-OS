@@ -71,8 +71,8 @@ export function GlobalSearch() {
         <div style={{position:"absolute",top:"calc(100% + 8px)",left:0,right:0,zIndex:50,background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:12,boxShadow:"var(--shadow-lg)",overflow:"hidden",minWidth:320}}>
           {results.length === 0 ? (
             <div className="px-4 py-3 text-sm text-secondary text-center">No results for "{query}"</div>
-          ) : results.map((r,i)=>{
-            const tc = TYPE_CONFIG[r.type]||{icon:"📋",color:"#94A3B8"};
+          ) : results.map((r: any, i: number) =>{
+            const tc = (TYPE_CONFIG as Record<string, any>)[r.type]||{icon:"📋",color:"#94A3B8"};
             return (
               <button key={i} onClick={()=>{router.push(r.path);setOpen(false);setQuery("");}}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-base-alt transition-colors border-b border-divider last:border-0">

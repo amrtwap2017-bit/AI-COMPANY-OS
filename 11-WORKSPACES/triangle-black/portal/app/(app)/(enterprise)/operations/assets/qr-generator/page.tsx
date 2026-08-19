@@ -37,7 +37,7 @@ export default function AssetQRGeneratorPage() {
     if (!mounted) return;
     tbFetch("/api/v1/assets/?limit=200")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setAssets(items);
       })
@@ -45,7 +45,7 @@ export default function AssetQRGeneratorPage() {
       .finally(() => setLoading(false));
   }, [mounted]);
 
-  const filtered = assets.filter(a =>
+  const filtered = assets.filter((a: any) =>
     !search || (a.name || "").toLowerCase().includes(search.toLowerCase()) ||
     (a.serial_number || "").toLowerCase().includes(search.toLowerCase()) ||
     (a.location_description || "").toLowerCase().includes(search.toLowerCase())
@@ -156,7 +156,7 @@ export default function AssetQRGeneratorPage() {
                       <p className="text-xs text-gray-500 mt-0.5 truncate">{asset.serial_number || "No serial"}</p>
                       <p className="text-xs text-gray-400 truncate">{asset.location_description || "No location"}</p>
                     </div>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${STATUS_COLOR[asset.status] || "bg-gray-100 text-gray-600"}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${(STATUS_COLOR as Record<string, any>)[asset.status] || "bg-gray-100 text-gray-600"}`}>
                       {asset.status || "unknown"}
                     </span>
                   </div>

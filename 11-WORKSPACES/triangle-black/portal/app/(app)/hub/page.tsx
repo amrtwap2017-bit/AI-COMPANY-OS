@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function HubPage() {
   const router = useRouter();
   const { data: health } = useQuery(["hub-h"], () => authFetch("/api/v1/ai/health").then(r=>r.json()), { staleTime:120000, refetchOnWindowFocus:false });
@@ -28,7 +28,7 @@ export default function HubPage() {
           <h1 className="tb-hero-title">AI Hub OS</h1>
           <p className="tb-hero-description">Local AI powered by Qwen 2.5 · Digital twin · Knowledge graph</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"AI Status",value:st.toUpperCase(),color:["ok","healthy"].includes(st)?"#34D399":"#FBBF24"},{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Signals",value:sigs.length,color:"#60A5FA"},{label:"Model",value:"Qwen 2.5",color:"#A78BFA"}].map((k,i)=>(
+            {[{label:"AI Status",value:st.toUpperCase(),color:["ok","healthy"].includes(st)?"#34D399":"#FBBF24"},{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Signals",value:sigs.length,color:"#60A5FA"},{label:"Model",value:"Qwen 2.5",color:"#A78BFA"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -38,7 +38,7 @@ export default function HubPage() {
         <div className="tb-section">
           <div className="tb-section-title">AI Modules</div>
           <div className="tb-grid-3">
-            {modules.map((m,i)=>(
+            {modules.map((m: any, i: number) =>(
               <button key={i} onClick={()=>router.push(m.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div style={{fontSize:"1.75rem",marginBottom:8}}>{m.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{m.label}</div>

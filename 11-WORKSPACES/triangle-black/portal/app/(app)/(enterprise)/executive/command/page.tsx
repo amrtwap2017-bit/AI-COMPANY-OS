@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function CommandPage() {
   const router = useRouter();
   const { data: twin } = useQuery(["cmd-twin"], () => authFetch("/api/v1/twin/state").then(r=>r.json()));

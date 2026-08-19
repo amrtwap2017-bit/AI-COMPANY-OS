@@ -124,7 +124,7 @@ export function CommandPalette({ open, onClose }: Props) {
             </div>
           ) : (
             results.map((item, i) => {
-              const s = TYPE_STYLES[item.type] || { bg: "rgba(109,95,83,0.08)", color: "#6D5F53", border: "rgba(109,95,83,0.18)" };
+              const s = (TYPE_STYLES as Record<string, any>)[item.type] || { bg: "rgba(109,95,83,0.08)", color: "#6D5F53", border: "rgba(109,95,83,0.18)" };
               const active = i === selected;
               return (
                 <button

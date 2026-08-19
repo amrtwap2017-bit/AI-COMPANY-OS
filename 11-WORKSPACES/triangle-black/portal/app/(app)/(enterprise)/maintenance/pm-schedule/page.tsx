@@ -33,7 +33,7 @@ export default function PMSchedulePage() {
     if (!mounted) return;
     tbFetch("/api/v1/maintenance/pm-plans/")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.plans || d?.results || d?.items || [];
         setPlans(items);
       })
@@ -61,19 +61,19 @@ export default function PMSchedulePage() {
     { label:"🟢 Upcoming (30d+)", tag:"future",  color:"bg-green-50 border-green-200",  plans: [] },
   ];
 
-  const filtered = plans.filter(p => filter === "all" || classify(p) === filter);
+  const filtered = plans.filter((p: any) => filter === "all" || classify(p) === filter);
   filtered.forEach(p => {
     const tag = classify(p);
-    const g = groups.find(g => g.tag === tag);
+    const g = groups.find((g: any) => g.tag === tag);
     if (g) g.plans.push(p);
   });
 
   // Sort each group by due date
-  groups.forEach(g => g.plans.sort((a,b) => new Date(a.next_due_ts||0).getTime() - new Date(b.next_due_ts||0).getTime()));
+  groups.forEach(g => g.plans.sort((a: any, b: any) => new Date(a.next_due_ts||0).getTime() - new Date(b.next_due_ts||0).getTime()));
 
-  const totalOverdue = plans.filter(p => classify(p) === "overdue").length;
-  const totalWeek    = plans.filter(p => classify(p) === "week").length;
-  const totalMonth   = plans.filter(p => classify(p) === "month").length;
+  const totalOverdue = plans.filter((p: any) => classify(p) === "overdue").length;
+  const totalWeek    = plans.filter((p: any) => classify(p) === "week").length;
+  const totalMonth   = plans.filter((p: any) => classify(p) === "month").length;
 
   if (!mounted || loading) return (
     <div className="flex items-center justify-center h-64">
@@ -97,7 +97,7 @@ export default function PMSchedulePage() {
             📋 All Plans
           </button>
           <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-            {(["calendar","list"] as const).map(v => (
+            {(["calendar","list"] as const).map((v: any) => (
               <button key={v} onClick={() => setView(v)}
                 className={`px-3 py-2 text-sm font-medium capitalize transition-colors ${view===v ? "bg-[var(--color-bg)] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>
                 {v === "calendar" ? "📅 Groups" : "☰ List"}
@@ -114,7 +114,7 @@ export default function PMSchedulePage() {
           { label:"Overdue",        value:totalOverdue,  color:"bg-red-50",    tag:"overdue" },
           { label:"Due This Week",  value:totalWeek,     color:"bg-orange-50", tag:"week" },
           { label:"Due This Month", value:totalMonth,    color:"bg-yellow-50", tag:"month" },
-        ].map(k => (
+        ].map((k: any) => (
           <button key={k.label}
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag)}
             className={`${k.color} border rounded-xl p-3 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
@@ -127,7 +127,7 @@ export default function PMSchedulePage() {
       {/* Calendar Groups View */}
       {view === "calendar" && (
         <div className="space-y-5">
-          {groups.filter(g => g.plans.length > 0 || g.tag === "overdue").map(group => (
+          {groups.filter((g: any) => g.plans.length > 0 || g.tag === "overdue").map(group => (
             <div key={group.tag} className={`border rounded-xl overflow-hidden ${group.color}`}>
               <div className="flex items-center justify-between px-5 py-3 border-b border-current border-opacity-20">
                 <h2 className="font-semibold text-[var(--color-text-1)]">{group.label}</h2>
@@ -142,9 +142,9 @@ export default function PMSchedulePage() {
                   {group.plans.map(plan => (
                     <div key={plan.id}
                       onClick={() => router.push(`/maintenance/pm-plans/${plan.id}`)}
-                      className={`flex items-center justify-between px-5 py-3 hover:bg-gray-50 cursor-pointer ${FREQ_COLOR[plan.frequency] || "border-l-4 border-gray-300"}`}>
+                      className={`flex items-center justify-between px-5 py-3 hover:bg-gray-50 cursor-pointer ${(FREQ_COLOR as Record<string, any>)[plan.frequency] || "border-l-4 border-gray-300"}`}>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-xl shrink-0">{FREQ_ICON[plan.frequency] || "📋"}</span>
+                        <span className="text-xl shrink-0">{(FREQ_ICON as Record<string, any>)[plan.frequency] || "📋"}</span>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[var(--color-text-1)] truncate">{plan.title}</p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -173,15 +173,15 @@ export default function PMSchedulePage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {["Plan","Type","Frequency","Owner","Next Due","Status"].map(h => (
+                {["Plan","Type","Frequency","Owner","Next Due","Status"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered
-                .sort((a,b) => new Date(a.next_due_ts||0).getTime() - new Date(b.next_due_ts||0).getTime())
-                .map(p => {
+                .sort((a: any, b: any) => new Date(a.next_due_ts||0).getTime() - new Date(b.next_due_ts||0).getTime())
+                .map((p: any) => {
                   const cat = classify(p);
                   return (
                     <tr key={p.id} className="hover:bg-gray-50 cursor-pointer"
@@ -189,7 +189,7 @@ export default function PMSchedulePage() {
                       <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-56 truncate">{p.title}</td>
                       <td className="px-4 py-3 capitalize text-gray-600">{p.plan_type}</td>
                       <td className="px-4 py-3">
-                        <span className="text-xs">{FREQ_ICON[p.frequency]} {p.frequency}</span>
+                        <span className="text-xs">{(FREQ_ICON as Record<string, any>)[p.frequency]} {p.frequency}</span>
                       </td>
                       <td className="px-4 py-3 text-gray-500">{p.owner || "—"}</td>
                       <td className={`px-4 py-3 font-medium ${cat==="overdue" ? "text-red-600" : cat==="week" ? "text-orange-600" : "text-gray-700"}`}>

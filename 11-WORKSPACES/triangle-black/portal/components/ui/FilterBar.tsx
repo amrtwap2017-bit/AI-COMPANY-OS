@@ -40,7 +40,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
       {filters && filters.length > 0 && (
         <div className="flex items-center gap-1.5">
           <SlidersHorizontal className="w-3.5 h-3.5 text-tertiary flex-shrink-0" />
-          {filters.map(f => (
+          {filters.map((f: any) => (
             <select
               key={f.label}
               value={f.value}
@@ -50,7 +50,7 @@ export function FilterBar({ search, filters, actions, count }: Props) {
                 text-secondary font-medium cursor-pointer"
             >
               <option value="">{f.label}: All</option>
-              {f.options.map(o => (
+              {f.options.map((o: any) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>

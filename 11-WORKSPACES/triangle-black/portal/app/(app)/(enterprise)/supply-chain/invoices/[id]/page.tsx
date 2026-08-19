@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function InvoiceDetailPage() {
   const router = useRouter();
@@ -57,7 +57,7 @@ export default function InvoiceDetailPage() {
             {overdue&&<span className="tb-badge tb-badge-danger">⚠ OVERDUE</span>}
           </div>
           <div className="tb-grid-4">
-            {[{label:"Invoice Total",value:fmtEGP(inv.total_amount||0)},{label:"PO Total",value:fmtEGP(inv.po_total||0)},{label:"Balance Due",value:fmtEGP(inv.balance_due||0),warn:Number(inv.balance_due||0)>0},{label:"Variance",value:`${inv.match_variance_pct||0}%`,danger:Number(inv.match_variance_pct||0)>2}].map((k,i)=>(
+            {[{label:"Invoice Total",value:fmtEGP(inv.total_amount||0)},{label:"PO Total",value:fmtEGP(inv.po_total||0)},{label:"Balance Due",value:fmtEGP(inv.balance_due||0),warn:Number(inv.balance_due||0)>0},{label:"Variance",value:`${inv.match_variance_pct||0}%`,danger:Number(inv.match_variance_pct||0)>2}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.warn?"var(--color-warning)":"var(--color-text-inv)",fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -79,7 +79,7 @@ export default function InvoiceDetailPage() {
               <div className="tb-form-group">
                 <label className="tb-label">Payment Method</label>
                 <select className="tb-select" value={payForm.method} onChange={e=>setPayForm({...payForm,method:e.target.value})}>
-                  {["bank_transfer","cheque","cash","online"].map(m=><option key={m} value={m}>{m.replace("_"," ")}</option>)}
+                  {["bank_transfer","cheque","cash","online"].map((m: any) =><option key={m} value={m}>{m.replace("_"," ")}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
@@ -108,7 +108,7 @@ export default function InvoiceDetailPage() {
         )}
 
         <div className="tb-tabs mb-4">
-          {[{k:"overview",l:"Overview"},{k:"lines",l:"Line Items"},{k:"payments",l:"Payments"},{k:"match",l:"Match Details"}].map(t=>(
+          {[{k:"overview",l:"Overview"},{k:"lines",l:"Line Items"},{k:"payments",l:"Payments"},{k:"match",l:"Match Details"}].map((t: any) =>(
             <button key={t.k} onClick={()=>setActiveTab(t.k)} className={`tb-tab ${activeTab===t.k?"active":""}`}>{t.l}</button>
           ))}
         </div>

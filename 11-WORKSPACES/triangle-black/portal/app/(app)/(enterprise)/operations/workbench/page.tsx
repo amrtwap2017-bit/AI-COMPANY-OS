@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function OperationsWorkbenchPage() {
   const router = useRouter();
@@ -15,12 +15,12 @@ export default function OperationsWorkbenchPage() {
   const { data: dispatch } = useQuery({queryKey:["wb-dispatch"],queryFn:()=>authFetch("/api/v1/dispatch/board").then(r=>r.json()),staleTime:30000});
   const { data: sla } = useQuery({queryKey:["wb-sla"],queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r=>r.json()),staleTime:60000});
 
-  const wos = toArr(rawWOs).filter(w=>!w.deleted_at);
-  const open = wos.filter(w=>w.status==="open");
-  const inProg = wos.filter(w=>w.status==="in_progress");
-  const overdue = wos.filter(w=>w.due_date&&new Date(w.due_date)<new Date()&&w.status!=="completed");
+  const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
+  const open = wos.filter((w: any) =>w.status==="open");
+  const inProg = wos.filter((w: any) =>w.status==="in_progress");
+  const overdue = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<new Date()&&w.status!=="completed");
   const techs = toArr(dispatch?.technicians);
-  const activeTechs = techs.filter(t=>(t.current_work_orders||0)>0);
+  const activeTechs = techs.filter((t: any) =>(t.current_work_orders||0)>0);
   const overall = sla?.overall||{};
 
   const SECTIONS = [
@@ -68,7 +68,7 @@ export default function OperationsWorkbenchPage() {
                 </div>
                 {items.length===0 ? (
                   <p className="text-sm text-tertiary">No items</p>
-                ) : items.map((w,i)=>(
+                ) : items.map((w: any, i: number) =>(
                   <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)}
                     className="flex justify-between items-center py-2 border-b border-divider w-full text-left bg-transparent cursor-pointer">
                     <div className="flex-1 min-w-0">
@@ -85,7 +85,7 @@ export default function OperationsWorkbenchPage() {
           <div className="flex flex-col gap-3.5">
             <div className="tb-section">
               <div className="tb-section-title">Active Technicians ({activeTechs.length})</div>
-              {activeTechs.slice(0,8).map((t,i)=>(
+              {activeTechs.slice(0,8).map((t: any, i: number) =>(
                 <div key={i} className="tb-detail-row">
                   <span className="tb-detail-key">{t.name?.split(" ")[0]||"—"}</span>
                   <span className="tb-detail-value font-bold text-brand">{t.current_work_orders||0} WO</span>
@@ -98,7 +98,7 @@ export default function OperationsWorkbenchPage() {
             <div className="tb-section">
               <div className="tb-section-title">Quick Actions</div>
               <div className="flex flex-col gap-1.5">
-                {[{label:"+ New Work Order",path:"/operations/work-orders/new",primary:true},{label:"Bulk Operations",path:"/operations/bulk"},{label:"SLA Review",path:"/operations/sla-review"},{label:"Schedule",path:"/operations/schedule"},{label:"Time Tracking",path:"/operations/time-tracking"}].map((a,i)=>(
+                {[{label:"+ New Work Order",path:"/operations/work-orders/new",primary:true},{label:"Bulk Operations",path:"/operations/bulk"},{label:"SLA Review",path:"/operations/sla-review"},{label:"Schedule",path:"/operations/schedule"},{label:"Time Tracking",path:"/operations/time-tracking"}].map((a: any, i: number) =>(
                   <button key={i} onClick={()=>router.push(a.path)}
                     className={a.primary?"tb-btn tb-btn-primary w-full justify-center":"tb-btn tb-btn-secondary w-full justify-start"}>
                     {a.label}

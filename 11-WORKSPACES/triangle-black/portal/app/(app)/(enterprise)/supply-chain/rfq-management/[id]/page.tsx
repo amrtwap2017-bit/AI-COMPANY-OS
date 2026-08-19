@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const SC = {draft:"#6D5F53",sent:"#5B7C8C",responses_received:"#B07A2A",evaluated:"#8D7443",awarded:"#547C4D",cancelled:"#A84A3D"};
 export default function RFQDetailPage() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function RFQDetailPage() {
               {label:"Quotations",value:quotes.length,color:"#B07A2A"},
               {label:"Lowest Bid",value:fmtEGP(lowest),color:"#547C4D"},
               {label:"Budget",value:fmtEGP(rfq.total_budget||0),color:"#8D7443"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -76,7 +76,7 @@ export default function RFQDetailPage() {
             {items.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">📝</div><div className="tb-empty-title">No items</div></div> : (
               <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
                 <div className="tb-table-head" style={{gridTemplateColumns:"40px 1fr 80px 80px 120px"}}>
-                  {["#","Description","Unit","Qty","Est. Price"].map((h,i)=>(
+                  {["#","Description","Unit","Qty","Est. Price"].map((h: any, i: number) =>(
                     <div key={i} className="tb-table-head-cell" style={{textAlign:i>1?"center":"left"}}>{h}</div>
                   ))}
                 </div>
@@ -98,7 +98,7 @@ export default function RFQDetailPage() {
             <div className="tb-section-title">Bid Comparison — {quotes.length} Quotations</div>
             {quotes.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">⚖️</div><div className="tb-empty-title">No quotations received yet</div></div> : (
               <div className="space-y-3 mt-3">
-                {quotes.map((q,i)=>{
+                {quotes.map((q: any, i: number) =>{
                   const isLowest = Number(q.total_amount||0) === lowest && lowest > 0;
                   const savings = lowest > 0 ? ((Number(q.total_amount||0)-lowest)/lowest*100) : 0;
                   return (

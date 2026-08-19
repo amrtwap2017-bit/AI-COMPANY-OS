@@ -17,7 +17,7 @@ export default function HotelsPage() {
           <h1 className="tb-hero-title">Hotels & Sites</h1>
           <p className="tb-hero-description">{sites.length} sites · {assets.length} assets registered</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Sites",value:sites.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Active",value:sites.filter((s: any)=>s.status==="active"||!s.status).length,color:"#547C4D"},{label:"Categories",value:[...new Set(assets.map((a: any)=>a.category).filter(Boolean))].length,color:"#8D7443"}].map((k,i)=>(
+            {[{label:"Sites",value:sites.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Active",value:sites.filter((s: any)=>s.status==="active"||!s.status).length,color:"#547C4D"},{label:"Categories",value:[...new Set(assets.map((a: any)=>a.category).filter(Boolean))].length,color:"#8D7443"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -26,7 +26,7 @@ export default function HotelsPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="tb-flex-between mb-4"><div className="text-sm text-secondary">{sites.length} sites</div><button onClick={()=>router.push("/operations/sites")} className="tb-section-link">Sites →</button></div>
-          {isLoading ? <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+          {isLoading ? <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : sites.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">🏨</div><div className="tb-empty-title">No sites configured</div></div>
           : <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
             {sites.map((site: any, i: number)=>{

@@ -9,9 +9,9 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => "EGP " + Number(n || 0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n || 0).toLocaleString();
 
 const EMPTY_FORM = { vendor_id:"", title:"", rfq_id:"", currency:"EGP", total_amount:"", payment_terms:30, delivery_address:"", internal_notes:"" };
 
@@ -28,12 +28,12 @@ export default function PurchaseOrdersV2Page() {
   const { data: rawRFQs } = useQuery({ queryKey:["rfqs-dropdown"], queryFn:()=>authFetch("/api/v1/rfq/").then(r=>r.json()), staleTime:300000 });
 
   const pos = toArr(rawPOs);
-  const vendors = toArr(rawVendors).filter(v => !v.deleted_at && v.is_approved !== false);
-  const rfqs = toArr(rawRFQs).filter(r => ["open","draft","awarded"].includes(r.status));
-  const filtered = filter === "all" ? pos : pos.filter(p => p.status === filter);
-  const totalValue = pos.reduce((s,p) => s + Number(p.total_amount||0), 0);
-  const approved = pos.filter(p => p.status === "approved").length;
-  const pending = pos.filter(p => p.status === "pending_approval").length;
+  const vendors = toArr(rawVendors).filter((v: any) => !v.deleted_at && v.is_approved !== false);
+  const rfqs = toArr(rawRFQs).filter((r: any) => ["open","draft","awarded"].includes(r.status));
+  const filtered = filter === "all" ? pos : pos.filter((p: any) => p.status === filter);
+  const totalValue = pos.reduce((s: any, p: any) => s + Number(p.total_amount||0), 0);
+  const approved = pos.filter((p: any) => p.status === "approved").length;
+  const pending = pos.filter((p: any) => p.status === "pending_approval").length;
 
   const createPO = useMutation({
     mutationFn: (payload) => authFetch("/api/v1/purchase-orders-v2/", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) }).then(r=>r.json()),
@@ -84,10 +84,10 @@ export default function PurchaseOrdersV2Page() {
 
       <div className="tb-canvas">
         <div className="tb-tabs">
-          {["all","draft","pending_approval","approved","sent","received","paid","cancelled"].map(f => (
+          {["all","draft","pending_approval","approved","sent","received","paid","cancelled"].map((f: any) => (
             <button key={f} onClick={() => setFilter(f)} className={`tb-tab ${filter === f ? "active" : ""}`}>
               {f === "all" ? "All" : f.replace(/_/g," ")}
-              {f !== "all" && <span className="ml-1 opacity-60">{pos.filter(p=>p.status===f).length}</span>}
+              {f !== "all" && <span className="ml-1 opacity-60">{pos.filter((p: any) =>p.status===f).length}</span>}
             </button>
           ))}
         </div>
@@ -98,7 +98,7 @@ export default function PurchaseOrdersV2Page() {
               Purchase Orders
               <span className="ml-2 text-sm font-normal text-tertiary">{filtered.length} of {pos.length}</span>
             </div>
-            <span className="text-sm font-bold text-brand">{fmtEGP(filtered.reduce((s,p)=>s+Number(p.total_amount||0),0))}</span>
+            <span className="text-sm font-bold text-brand">{fmtEGP(filtered.reduce((s: any, p: any) =>s+Number(p.total_amount||0),0))}</span>
           </div>
 
           {isLoading ? <TableSkeleton /> : filtered.length === 0 ? (
@@ -152,7 +152,7 @@ export default function PurchaseOrdersV2Page() {
               <select value={form.vendor_id} onChange={e=>set("vendor_id",e.target.value)}
                 className="tb-select" style={errors.vendor_id?{borderColor:"var(--color-danger)"}:{}}>
                 <option value="">— Select vendor —</option>
-                {vendors.map(v => <option key={v.id} value={v.id}>{v.company_name} · {v.category}</option>)}
+                {vendors.map((v: any) => <option key={v.id} value={v.id}>{v.company_name} · {v.category}</option>)}
               </select>
               {errors.vendor_id && <p className="text-xs text-danger mt-1">{errors.vendor_id}</p>}
             </div>
@@ -169,7 +169,7 @@ export default function PurchaseOrdersV2Page() {
               <label className="tb-label">Linked RFQ <span className="text-xs font-normal text-tertiary">(optional)</span></label>
               <select value={form.rfq_id} onChange={e=>set("rfq_id",e.target.value)} className="tb-select">
                 <option value="">— No linked RFQ —</option>
-                {rfqs.map(r => <option key={r.id} value={r.id}>{r.rfq_number} · {(r.title||"").slice(0,40)}</option>)}
+                {rfqs.map((r: any) => <option key={r.id} value={r.id}>{r.rfq_number} · {(r.title||"").slice(0,40)}</option>)}
               </select>
             </div>
 
@@ -177,7 +177,7 @@ export default function PurchaseOrdersV2Page() {
               <div className="tb-form-group">
                 <label className="tb-label">Currency</label>
                 <select value={form.currency} onChange={e=>set("currency",e.target.value)} className="tb-select">
-                  {["EGP","USD","EUR","AED","SAR"].map(c=><option key={c} value={c}>{c}</option>)}
+                  {["EGP","USD","EUR","AED","SAR"].map((c: any) =><option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
@@ -189,7 +189,7 @@ export default function PurchaseOrdersV2Page() {
             <div className="tb-form-group mb-4">
               <label className="tb-label">Payment Terms (days)</label>
               <select value={form.payment_terms} onChange={e=>set("payment_terms",e.target.value)} className="tb-select">
-                {[7,14,30,45,60,90].map(d=><option key={d} value={d}>Net {d} days</option>)}
+                {[7,14,30,45,60,90].map((d: any) =><option key={d} value={d}>Net {d} days</option>)}
               </select>
             </div>
 

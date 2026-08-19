@@ -61,7 +61,7 @@ export function ActionBar({ search, filters=[], actions=[], count, onClear, hasF
       )}
 
       {/* Filters */}
-      {filters.map((f, i) => (
+      {filters.map((f: any, i: number) => (
         <select key={i} value={f.value} onChange={e => f.onChange(e.target.value)}
           style={{
             padding:      "7px 10px",
@@ -96,7 +96,7 @@ export function ActionBar({ search, filters=[], actions=[], count, onClear, hasF
       )}
 
       {/* Actions */}
-      {actions.map((a, i) => (
+      {actions.map((a: any, i: number) => (
         <button key={i} onClick={a.onClick}
           style={{
             padding:      "7px 14px",

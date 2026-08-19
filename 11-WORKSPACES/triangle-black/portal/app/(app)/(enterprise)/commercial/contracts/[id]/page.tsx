@@ -5,8 +5,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function ContractDetailPage() {
   const router = useRouter();
@@ -76,7 +76,7 @@ export default function ContractDetailPage() {
               {label:"Monthly Value", value:fmtEGP(contract.monthly_value)},
               {label:"Duration",      value:`${contract.duration_months||"—"} months`},
               {label:"Period",        value:`${fmtDate(contract.start_date)} — ${fmtDate(contract.end_date)}`},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{fontSize:i===0?"1.1rem":"0.85rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>

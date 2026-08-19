@@ -70,13 +70,13 @@ export function Button({
     <button
       {...props}
       disabled={disabled || loading}
-      style={{ ...VARIANT_STYLES[variant], ...style }}
+      style={{ ...(VARIANT_STYLES as Record<string, any>)[variant], ...style }}
       className={`
         inline-flex items-center justify-center font-medium transition-all
         disabled:opacity-50 disabled:cursor-not-allowed
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-focus)] focus-visible:ring-offset-1
         active:scale-[0.98]
-        ${SIZE_CLASSES[size]} ${className}
+        ${(SIZE_CLASSES as Record<string, any>)[size]} ${className}
       `}
     >
       {loading ? (

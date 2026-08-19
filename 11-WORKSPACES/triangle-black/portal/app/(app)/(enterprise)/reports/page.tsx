@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => { if (n===null||n===undefined||n==="") return "—"; return "EGP " + Number(n||0).toLocaleString(); };
-const fmtNum = (n) => { if (n===null||n===undefined) return "—"; return Number(n||0).toLocaleString(); };
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtBool = (v) => v===true||v==="true"||v===1 ? "✅ Yes" : "❌ No";
+const fmtEGP = (n: any) => { if (n===null||n===undefined||n==="") return "—"; return "EGP " + Number(n||0).toLocaleString(); };
+const fmtNum = (n: any) => { if (n===null||n===undefined) return "—"; return Number(n||0).toLocaleString(); };
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtBool = (v: any) => v===true||v==="true"||v===1 ? "✅ Yes" : "❌ No";
 
 const CATEGORIES = ["All","Operations","Financial","Procurement","Engineering","Executive"];
 const CAT_COLORS = {Operations:"#547C4D",Financial:"#5B7C8C",Procurement:"#B07A2A",Engineering:"#8D7443",Executive:"#B07A2A"};
@@ -59,8 +59,8 @@ export default function ReportsPage() {
     { enabled: !!selectedReport, staleTime: 30000 }
   );
 
-  const filteredCatalog = activeCategory==="All" ? catalog : catalog.filter(r=>r.category===activeCategory);
-  const selectedMeta = catalog.find(r=>r.id===selectedReport);
+  const filteredCatalog = activeCategory==="All" ? catalog : catalog.filter((r: any) =>r.category===activeCategory);
+  const selectedMeta = catalog.find((r: any) =>r.id===selectedReport);
   const reportRows = reportData?.data || [];
   const columns = reportData?.columns || [];
   const summary = reportData?.summary || reportData?.aging_summary || null;
@@ -133,7 +133,7 @@ export default function ReportsPage() {
                     <div className="text-sm font-semibold text-primary truncate">{report.label}</div>
                     <div className="text-xs text-tertiary mt-0.5">{report.description.slice(0,55)}…</div>
                   </div>
-                  <span className="tb-badge flex-shrink-0" style={{fontSize:"0.45rem",background:(CAT_COLORS[report.category]||"#6D5F53")+"18",color:CAT_COLORS[report.category]||"#6D5F53"}}>
+                  <span className="tb-badge flex-shrink-0" style={{fontSize:"0.45rem",background:((CAT_COLORS as Record<string, any>)[report.category]||"#6D5F53")+"18",color:(CAT_COLORS as Record<string, any>)[report.category]||"#6D5F53"}}>
                     {report.category}
                   </span>
                 </div>
@@ -166,7 +166,7 @@ export default function ReportsPage() {
                         <label className="tb-label">Priority</label>
                         <select className="tb-select w-full" value={filters.priority} onChange={e=>setFilters({...filters,priority:e.target.value})}>
                           <option value="">All</option>
-                          {["critical","high","medium","low"].map(p=><option key={p} value={p}>{p}</option>)}
+                          {["critical","high","medium","low"].map((p: any) =><option key={p} value={p}>{p}</option>)}
                         </select>
                       </div>
                     )}
@@ -175,7 +175,7 @@ export default function ReportsPage() {
                         <label className="tb-label">Urgency</label>
                         <select className="tb-select w-full" value={filters.urgency} onChange={e=>setFilters({...filters,urgency:e.target.value})}>
                           <option value="">All</option>
-                          {["critical","high","medium","low"].map(u=><option key={u} value={u}>{u}</option>)}
+                          {["critical","high","medium","low"].map((u: any) =><option key={u} value={u}>{u}</option>)}
                         </select>
                       </div>
                     )}
@@ -184,7 +184,7 @@ export default function ReportsPage() {
                         <label className="tb-label">Payment Status</label>
                         <select className="tb-select w-full" value={filters.payment_status} onChange={e=>setFilters({...filters,payment_status:e.target.value})}>
                           <option value="">All</option>
-                          {["unpaid","partial","paid"].map(s=><option key={s} value={s}>{s}</option>)}
+                          {["unpaid","partial","paid"].map((s: any) =><option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     )}
@@ -281,7 +281,7 @@ export default function ReportsPage() {
                       )}
                     </div>
                     {reportLoading ? (
-                      <div className="flex flex-col gap-2">{[1,2,3,4,5].map(i=><div key={i} className="tb-shimmer-block" style={{height:40}}/>)}</div>
+                      <div className="flex flex-col gap-2">{[1,2,3,4,5].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:40}}/>)}</div>
                     ) : reportRows.length === 0 ? (
                       <div className="tb-empty">
                         <div className="tb-empty-icon">📋</div>

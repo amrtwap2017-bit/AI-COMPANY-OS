@@ -9,8 +9,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { toast } from "@/lib/toast";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function BulkOperationsPage() {
   const router = useRouter();
@@ -22,11 +22,11 @@ export default function BulkOperationsPage() {
   const { data: rawWOs, isLoading } = useQuery({queryKey:["bulk-wos"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=100").then(r=>r.json()),staleTime:30000});
   const { data: rawTechs } = useQuery({queryKey:["bulk-techs"],queryFn:()=>authFetch("/api/v1/technicians/").then(r => r.data ?? r).catch(()=>[]),staleTime:60000});
 
-  const wos = toArr(rawWOs).filter(w=>!w.deleted_at);
-  const techs = toArr(rawTechs).filter(t=>t.is_active);
-  const filtered = filterStatus==="all"?wos:wos.filter(w=>w.status===filterStatus);
+  const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
+  const techs = toArr(rawTechs).filter((t: any) =>t.is_active);
+  const filtered = filterStatus==="all"?wos:wos.filter((w: any) =>w.status===filterStatus);
 
-  const toggleAll = () => { if(selected.size===filtered.length) setSelected(new Set()); else setSelected(new Set(filtered.map(w=>w.id))); };
+  const toggleAll = () => { if(selected.size===filtered.length) setSelected(new Set()); else setSelected(new Set(filtered.map((w: any) =>w.id))); };
   const toggle = (id) => { const next=new Set(selected); next.has(id)?next.delete(id):next.add(id); setSelected(next); };
 
   const bulkStatusMut = useMutation({
@@ -65,7 +65,7 @@ export default function BulkOperationsPage() {
             <div className="flex items-center gap-2 flex-1">
               <span className="text-sm text-secondary">Set status to:</span>
               <select value={bulkStatus} onChange={e=>setBulkStatus(e.target.value)} className="tb-select" style={{width:"auto",padding:"6px 10px"}}>
-                {["in_progress","completed","cancelled","open"].map(s=><option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
+                {["in_progress","completed","cancelled","open"].map((s: any) =><option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
               </select>
               <button onClick={()=>bulkStatusMut.mutate()} disabled={bulkStatusMut.isLoading} className="tb-btn tb-btn-primary tb-btn-sm">
                 {bulkStatusMut.isLoading?"Updating...":"Apply"}
@@ -76,10 +76,10 @@ export default function BulkOperationsPage() {
         )}
 
         <div className="tb-tabs mb-4">
-          {["all","open","in_progress","completed"].map(s=>(
+          {["all","open","in_progress","completed"].map((s: any) =>(
             <button key={s} onClick={()=>{setFilterStatus(s);setSelected(new Set());}} className={`tb-tab ${filterStatus===s?"active":""}`}>
               {s==="all"?"All":s==="in_progress"?"In Progress":s.charAt(0).toUpperCase()+s.slice(1)}
-              <span className="ml-1 opacity-60">{s==="all"?wos.length:wos.filter(w=>w.status===s).length}</span>
+              <span className="ml-1 opacity-60">{s==="all"?wos.length:wos.filter((w: any) =>w.status===s).length}</span>
             </button>
           ))}
         </div>
@@ -99,7 +99,7 @@ export default function BulkOperationsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((w,i)=>(
+                  {filtered.map((w: any, i: number) =>(
                     <tr key={w.id||i} className={selected.has(w.id)?"bg-brand/5":""} style={{borderLeft:selected.has(w.id)?"3px solid var(--color-brand)":"3px solid transparent"}}>
                       <td>
                         <input type="checkbox" checked={selected.has(w.id)} onChange={()=>toggle(w.id)} className="cursor-pointer" style={{width:16,height:16}} />

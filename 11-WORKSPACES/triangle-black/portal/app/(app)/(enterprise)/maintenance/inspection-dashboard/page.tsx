@@ -9,8 +9,8 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function InspectionDashboardPage() {
   const router = useRouter();
@@ -25,12 +25,12 @@ export default function InspectionDashboardPage() {
 
   const plans = toArr(rawPlans);
   const now = new Date();
-  const overdue = plans.filter(p=>p.next_due_date&&new Date(p.next_due_date)<now&&p.status!=="completed");
-  const dueThisWeek = plans.filter(p=>{if(!p.next_due_date) return false;const d=new Date(p.next_due_date);const diff=(d.getTime()-now.getTime())/86400000;return diff>=0&&diff<=7;});
-  const types = ["all",...Array.from(new Set(plans.map(p=>p.plan_type).filter(Boolean)))];
-  const statuses = ["all",...Array.from(new Set(plans.map(p=>p.status).filter(Boolean)))];
+  const overdue = plans.filter((p: any) =>p.next_due_date&&new Date(p.next_due_date)<now&&p.status!=="completed");
+  const dueThisWeek = plans.filter((p: any) =>{if(!p.next_due_date) return false;const d=new Date(p.next_due_date);const diff=(d.getTime()-now.getTime())/86400000;return diff>=0&&diff<=7;});
+  const types = ["all",...Array.from(new Set(plans.map((p: any) =>p.plan_type).filter(Boolean)))];
+  const statuses = ["all",...Array.from(new Set(plans.map((p: any) =>p.status).filter(Boolean)))];
 
-  const filtered = useMemo(()=>plans.filter(p=>{
+  const filtered = useMemo(()=>plans.filter((p: any) =>{
     const ms = !search||(p.title||"").toLowerCase().includes(search.toLowerCase())||(p.owner||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterType==="all"||p.plan_type===filterType)&&(filterStatus==="all"||p.status===filterStatus);
   }),[plans,search,filterType,filterStatus]);
@@ -74,10 +74,10 @@ export default function InspectionDashboardPage() {
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search plans..." className="tb-input" style={{minWidth:"220px",width:"auto"}} />
             <select value={filterType} onChange={e=>{setFilterType(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
-              {types.map(t=><option key={t} value={t}>{t==="all"?"All Types":t}</option>)}
+              {types.map((t: any) =><option key={t} value={t}>{t==="all"?"All Types":t}</option>)}
             </select>
             <select value={filterStatus} onChange={e=>{setFilterStatus(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
-              {statuses.map(s=><option key={s} value={s}>{s==="all"?"All Statuses":s}</option>)}
+              {statuses.map((s: any) =><option key={s} value={s}>{s==="all"?"All Statuses":s}</option>)}
             </select>
             {hasFilters&&<button onClick={clearFilters} className="tb-btn tb-btn-ghost tb-btn-sm">✕ Clear</button>}
             <span className="ml-auto text-xs text-tertiary">{filtered.length} of {plans.length}</span>
@@ -94,7 +94,7 @@ export default function InspectionDashboardPage() {
                 <table className="tb-table">
                   <thead><tr><th>Plan</th><th>Type</th><th>Frequency</th><th>Owner</th><th>Next Due</th><th>Status</th></tr></thead>
                   <tbody>
-                    {paged.map((p,i)=>{
+                    {paged.map((p: any, i: number) =>{
                       const isOverdueRow = p.next_due_date&&new Date(p.next_due_date)<now&&p.status!=="completed";
                       const isDueSoon = p.next_due_date&&!isOverdueRow&&((new Date(p.next_due_date).getTime()-now.getTime())/86400000)<=7;
                       return (

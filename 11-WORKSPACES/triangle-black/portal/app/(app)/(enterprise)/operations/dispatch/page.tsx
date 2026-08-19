@@ -5,8 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
-const isOverdue = (d) => d && new Date(d) < new Date() && new Date(d).getFullYear() > 1990;
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const isOverdue = (d: any) => d && new Date(d) < new Date() && new Date(d).getFullYear() > 1990;
 
 const PRIORITY_COLORS = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#547C4D"};
 const STATUS_CONFIG = {
@@ -18,7 +18,7 @@ const COLUMNS = ["open","in_progress","completed"];
 
 function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
   const [showAssign, setShowAssign] = useState(false);
-  const pc = PRIORITY_COLORS[wo.priority] || "#6D5F53";
+  const pc = (PRIORITY_COLORS as Record<string, any>)[wo.priority] || "#6D5F53";
   const overdue = isOverdue(wo.due_date);
   return (
     <div className="rounded-xl border border-default transition-all tb-hover-lift cursor-pointer"
@@ -66,7 +66,7 @@ function WOCard({ wo, techs, onAssign, onStatus, onClick }) {
           <select className="tb-select w-full" defaultValue={wo.technician_id||""}
             onChange={e=>{onAssign(wo.id,e.target.value);setShowAssign(false);}}>
             <option value="">Unassigned</option>
-            {techs.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+            {techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </div>
       )}
@@ -106,7 +106,7 @@ export default function DispatchBoardPage() {
 
   const totalOpen = counts.open        || 0;
   const totalIP   = counts.in_progress || 0;
-  const critical  = [...(board.open||[]),...(board.in_progress||[])].filter(w=>w.priority==="critical").length;
+  const critical  = [...(board.open||[]),...(board.in_progress||[])].filter((w: any) =>w.priority==="critical").length;
 
   return (
     <div className="min-h-screen bg-base">
@@ -128,7 +128,7 @@ export default function DispatchBoardPage() {
               {label:"In Progress", value:totalIP,            color:"var(--color-warning)"},
               {label:"Completed",   value:counts.completed||0,color:"var(--color-success)"},
               {label:"Critical",    value:critical,           color:critical>0?"var(--color-danger)":"var(--color-success)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -142,11 +142,11 @@ export default function DispatchBoardPage() {
         <div className="flex gap-3 mb-4 flex-wrap">
           <select className="tb-select" value={filterPriority} onChange={e=>setFilterPriority(e.target.value)} style={{minWidth:"140px"}}>
             <option value="">All Priorities</option>
-            {["critical","high","medium","low"].map(p=><option key={p} value={p}>{p}</option>)}
+            {["critical","high","medium","low"].map((p: any) =><option key={p} value={p}>{p}</option>)}
           </select>
           <select className="tb-select" value={filterSite} onChange={e=>setFilterSite(e.target.value)} style={{minWidth:"180px"}}>
             <option value="">All Sites</option>
-            {[{id:"site-nile-plaza",name:"Nile Plaza"},{id:"site-cairo-festival",name:"Cairo Festival"},{id:"site-four-seasons",name:"Four Seasons"},{id:"site-hilton-cairo",name:"Hilton Cairo"}].map(s=>(
+            {[{id:"site-nile-plaza",name:"Nile Plaza"},{id:"site-cairo-festival",name:"Cairo Festival"},{id:"site-four-seasons",name:"Four Seasons"},{id:"site-hilton-cairo",name:"Hilton Cairo"}].map((s: any) =>(
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
@@ -156,11 +156,11 @@ export default function DispatchBoardPage() {
         </div>
 
         {isLoading ? (
-          <div className="tb-grid-3">{[1,2,3].map(i=><div key={i} className="tb-shimmer-block" style={{height:384}}/>)}</div>
+          <div className="tb-grid-3">{[1,2,3].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:384}}/>)}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {COLUMNS.map(col=>{
-              const cfg = STATUS_CONFIG[col];
+              const cfg = (STATUS_CONFIG as Record<string, any>)[col];
               const wos = board[col] || [];
               return (
                 <div key={col} className="flex flex-col rounded-2xl overflow-hidden border border-default"

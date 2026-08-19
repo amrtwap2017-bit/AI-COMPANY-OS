@@ -9,9 +9,9 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function QuotationsPage() {
   const router = useRouter();
@@ -22,10 +22,10 @@ export default function QuotationsPage() {
 
   const { data: rawRFQs, isLoading } = useQuery({queryKey:["quot-rfqs"],queryFn:()=>authFetch("/api/v1/rfq/").then(r=>r.json()),staleTime:60000});
   const rfqs = toArr(rawRFQs);
-  const withQuotes = rfqs.filter(r=>r.quotation_count>0||["responses_received","evaluated","awarded"].includes(r.status));
-  const totalQuotes = rfqs.reduce((s,r)=>s+(r.quotation_count||0),0);
+  const withQuotes = rfqs.filter((r: any) =>r.quotation_count>0||["responses_received","evaluated","awarded"].includes(r.status));
+  const totalQuotes = rfqs.reduce((s: any, r: any) =>s+(r.quotation_count||0),0);
 
-  const filtered = useMemo(()=>rfqs.filter(r=>{
+  const filtered = useMemo(()=>rfqs.filter((r: any) =>{
     const ms = !search||(r.rfq_number||"").toLowerCase().includes(search.toLowerCase())||(r.title||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterStatus==="all"||r.status===filterStatus);
   }),[rfqs,search,filterStatus]);
@@ -50,7 +50,7 @@ export default function QuotationsPage() {
             {isLoading ? <KpiSkeleton /> : <>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{rfqs.length}</div><div className="tb-hero-kpi-label">Total RFQs</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value text-brand">{totalQuotes}</div><div className="tb-hero-kpi-label">Total Quotes</div></div>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{rfqs.filter(r=>r.status==="awarded").length}</div><div className="tb-hero-kpi-label">Awarded</div></div>
+              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{rfqs.filter((r: any) =>r.status==="awarded").length}</div><div className="tb-hero-kpi-label">Awarded</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-info)"}}>{withQuotes.length}</div><div className="tb-hero-kpi-label">With Responses</div></div>
             </>}
           </div>
@@ -61,10 +61,10 @@ export default function QuotationsPage() {
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
           <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search RFQs..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
-            {["all","draft","sent","responses_received","evaluated","awarded","cancelled"].map(s=>(
+            {["all","draft","sent","responses_received","evaluated","awarded","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
                 {s==="all"?"All":s.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
-                {s!=="all"&&<span className="ml-1 opacity-60">{rfqs.filter(r=>r.status===s).length}</span>}
+                {s!=="all"&&<span className="ml-1 opacity-60">{rfqs.filter((r: any) =>r.status===s).length}</span>}
               </button>
             ))}
           </div>
@@ -80,7 +80,7 @@ export default function QuotationsPage() {
                 <table className="tb-table">
                   <thead><tr><th>RFQ</th><th>Title</th><th>Status</th><th>Quotes</th><th style={{textAlign:"right"}}>Lowest Bid</th><th>Deadline</th><th></th></tr></thead>
                   <tbody>
-                    {paged.map((r,i)=>{
+                    {paged.map((r: any, i: number) =>{
                       const isExpired = r.submission_deadline&&new Date(r.submission_deadline)<new Date();
                       return (
                         <tr key={r.id||i} onClick={()=>router.push(`/supply-chain/rfqs/${r.id}`)} className="cursor-pointer">

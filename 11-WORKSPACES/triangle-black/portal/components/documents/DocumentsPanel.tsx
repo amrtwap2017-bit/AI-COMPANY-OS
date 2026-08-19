@@ -11,7 +11,7 @@ const fmtSize = (bytes) => {
   return (bytes/(1024*1024)).toFixed(1) + " MB";
 };
 
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const CAT_LABELS = {
   trade_license: "Trade License",
@@ -102,7 +102,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
     finally { setUploading(false); }
   };
 
-  const totalRequired = docs.filter(d=>d.is_required).length;
+  const totalRequired = docs.filter((d: any) =>d.is_required).length;
   const totalDocs = docs.length;
 
   return (
@@ -126,7 +126,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
               <label className="text-xs text-tertiary block mb-1">Category *</label>
               <select className="tb-input w-full" value={form.doc_category} onChange={e=>setForm({...form,doc_category:e.target.value})}>
                 {(categories.length > 0 ? categories : Object.keys(CAT_LABELS)).map(cat=>(
-                  <option key={cat} value={cat}>{CAT_LABELS[cat]||cat}</option>
+                  <option key={cat} value={cat}>{(CAT_LABELS as Record<string, any>)[cat]||cat}</option>
                 ))}
               </select>
             </div>
@@ -153,7 +153,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
       )}
 
       {isLoading ? (
-        <div className="space-y-2">{[1,2].map(i=><div key={i} className="h-12 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+        <div className="space-y-2">{[1,2].map((i: any) =><div key={i} className="h-12 bg-base-alt rounded-xl animate-pulse"/>)}</div>
       ) : docs.length === 0 ? (
         <div className="tb-empty" style={{padding:"24px"}}>
           <div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>📎</div>
@@ -164,14 +164,14 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
         <div className="space-y-2">
           {docs.map((doc, i) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt border border-border hover:border-border/80 transition-colors">
-              <span style={{fontSize:"1.25rem"}}>{CAT_ICONS[doc.doc_category]||"📎"}</span>
+              <span style={{fontSize:"1.25rem"}}>{(CAT_ICONS as Record<string, any>)[doc.doc_category]||"📎"}</span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-semibold text-primary truncate">{doc.doc_name}</span>
                   <REQUIRED_BADGE is_required={doc.is_required} is_verified={doc.is_verified}/>
                 </div>
                 <div className="text-xs text-tertiary">
-                  {CAT_LABELS[doc.doc_category]||doc.doc_category} · {fmtSize(doc.file_size_bytes)} · {fmtDate(doc.created_at)}
+                  {(CAT_LABELS as Record<string, any>)[doc.doc_category]||doc.doc_category} · {fmtSize(doc.file_size_bytes)} · {fmtDate(doc.created_at)}
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">

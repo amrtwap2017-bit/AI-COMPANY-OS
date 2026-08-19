@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function InvoicesPage() {
   const router = useRouter();
@@ -20,20 +20,20 @@ export default function InvoicesPage() {
   );
   const invoices = toArr(raw);
 
-  const paid      = invoices.filter(i=>i.status==="paid");
-  const pending   = invoices.filter(i=>i.status==="pending");
-  const overdue   = invoices.filter(i=>i.status==="overdue");
-  const cancelled = invoices.filter(i=>i.status==="cancelled");
-  const totalValue   = invoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const paidValue    = paid.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const pendingValue = pending.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const overdueValue = overdue.reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const paid      = invoices.filter((i: any) =>i.status==="paid");
+  const pending   = invoices.filter((i: any) =>i.status==="pending");
+  const overdue   = invoices.filter((i: any) =>i.status==="overdue");
+  const cancelled = invoices.filter((i: any) =>i.status==="cancelled");
+  const totalValue   = invoices.reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const paidValue    = paid.reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const pendingValue = pending.reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const overdueValue = overdue.reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
   const collRate     = totalValue>0?Math.round(paidValue/totalValue*100):0;
 
   const filtered = invoices.filter(inv=>{
     const ms = !search||inv.invoice_number?.toLowerCase().includes(search.toLowerCase())||inv.id?.slice(0,8).includes(search);
     return ms&&(statusF==="all"||inv.status===statusF);
-  }).sort((a,b)=>{const o={overdue:0,pending:1,paid:2,cancelled:3};return(o[a.status]??2)-(o[b.status]??2);});
+  }).sort((a: any, b: any) =>{const o={overdue:0,pending:1,paid:2,cancelled:3};return(o[a.status]??2)-(o[b.status]??2);});
 
   if (isLoading) return <div className="tb-canvas"><div className="tb-shimmer-block" style={{height:60}}/></div>;
 
@@ -58,7 +58,7 @@ export default function InvoicesPage() {
               {label:"Pending",   value:pending.length,   sub:fmtEGP(pendingValue), f:"pending"},
               {label:"Overdue",   value:overdue.length,   sub:fmtEGP(overdueValue), f:"overdue",   danger:overdue.length>0},
               {label:"Cancelled", value:cancelled.length, sub:"closed",             f:"cancelled"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <button key={i} onClick={()=>setStatusF(statusF===k.f?"all":k.f)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.good?"var(--color-success)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -83,7 +83,7 @@ export default function InvoicesPage() {
             </div>
           </div>
           <div className="flex gap-5 mt-2">
-            {[{label:"Paid",color:"var(--color-success)",value:fmtEGP(paidValue)},{label:"Pending",color:"var(--color-warning)",value:fmtEGP(pendingValue)},{label:"Overdue",color:"var(--color-danger)",value:fmtEGP(overdueValue)}].map((s,i)=>(
+            {[{label:"Paid",color:"var(--color-success)",value:fmtEGP(paidValue)},{label:"Pending",color:"var(--color-warning)",value:fmtEGP(pendingValue)},{label:"Overdue",color:"var(--color-danger)",value:fmtEGP(overdueValue)}].map((s: any, i: number) =>(
               <div key={i} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{background:s.color}}/>
                 <span className="text-xs text-tertiary">{s.label}: {s.value}</span>
@@ -104,7 +104,7 @@ export default function InvoicesPage() {
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by invoice number..."
             className="tb-input" style={{maxWidth:"320px"}}/>
           <div className="tb-tabs border-0 mb-0">
-            {["all","overdue","pending","paid","cancelled"].map(s=>(
+            {["all","overdue","pending","paid","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>setStatusF(s)} className={`tb-tab ${statusF===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
               </button>

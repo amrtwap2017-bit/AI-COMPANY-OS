@@ -9,8 +9,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function SchedulePage() {
   const router = useRouter();
@@ -23,10 +23,10 @@ export default function SchedulePage() {
 
   const plans = toArr(rawPlans);
   const now = new Date();
-  const overdue = plans.filter(p=>p.next_due_date&&new Date(p.next_due_date)<now);
-  const upcoming = plans.filter(p=>{if(!p.next_due_date) return false;const diff=(new Date(p.next_due_date).getTime()-now.getTime())/86400000;return diff>=0&&diff<=30;});
+  const overdue = plans.filter((p: any) =>p.next_due_date&&new Date(p.next_due_date)<now);
+  const upcoming = plans.filter((p: any) =>{if(!p.next_due_date) return false;const diff=(new Date(p.next_due_date).getTime()-now.getTime())/86400000;return diff>=0&&diff<=30;});
 
-  const filtered = filterStatus==="all"?plans:plans.filter(p=>p.status===filterStatus);
+  const filtered = filterStatus==="all"?plans:plans.filter((p: any) =>p.status===filterStatus);
   const totalPages = Math.ceil(filtered.length/pageSize);
   const paged = filtered.slice((page-1)*pageSize,page*pageSize);
 
@@ -58,10 +58,10 @@ export default function SchedulePage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs mb-4">
-          {["all","scheduled","in_progress","completed","overdue"].map(s=>(
+          {["all","scheduled","in_progress","completed","overdue"].map((s: any) =>(
             <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
               {s==="all"?"All":s.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
-              {s!=="all"&&<span className="ml-1 opacity-60">{plans.filter(p=>p.status===s).length}</span>}
+              {s!=="all"&&<span className="ml-1 opacity-60">{plans.filter((p: any) =>p.status===s).length}</span>}
             </button>
           ))}
         </div>
@@ -76,7 +76,7 @@ export default function SchedulePage() {
                 <table className="tb-table">
                   <thead><tr><th>Plan</th><th>Type</th><th>Frequency</th><th>Next Due</th><th>Status</th><th>Owner</th></tr></thead>
                   <tbody>
-                    {paged.map((p,i)=>{
+                    {paged.map((p: any, i: number) =>{
                       const isOvd = p.next_due_date&&new Date(p.next_due_date)<now;
                       return (
                         <tr key={p.id||i} style={{borderLeft:isOvd?"3px solid var(--color-danger-border)":"3px solid transparent"}}>

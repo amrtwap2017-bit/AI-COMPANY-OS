@@ -59,7 +59,7 @@ export default function WarrantyTrackingPage() {
     if (!mounted) return;
     tbFetch("/api/v1/assets/?limit=200")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setAssets(items);
       })
@@ -68,7 +68,7 @@ export default function WarrantyTrackingPage() {
   }, [mounted]);
 
   const filtered = assets
-    .filter(a => {
+    .filter((a: any) => {
       const ws = getWarrantyStatus(a.warranty_expiry);
       const matchFilter = filter === "all" || ws === filter;
       const matchSearch = !search ||
@@ -77,7 +77,7 @@ export default function WarrantyTrackingPage() {
         (a.manufacturer || "").toLowerCase().includes(search.toLowerCase());
       return matchFilter && matchSearch;
     })
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       if (sortBy === "expiry") {
         const da = a.warranty_expiry ? new Date(a.warranty_expiry).getTime() : Infinity;
         const db = b.warranty_expiry ? new Date(b.warranty_expiry).getTime() : Infinity;
@@ -88,10 +88,10 @@ export default function WarrantyTrackingPage() {
     });
 
   const counts = {
-    expired:       assets.filter(a => getWarrantyStatus(a.warranty_expiry) === "expired").length,
-    expiring_soon: assets.filter(a => getWarrantyStatus(a.warranty_expiry) === "expiring_soon").length,
-    active:        assets.filter(a => getWarrantyStatus(a.warranty_expiry) === "active").length,
-    unknown:       assets.filter(a => getWarrantyStatus(a.warranty_expiry) === "unknown").length,
+    expired:       assets.filter((a: any) => getWarrantyStatus(a.warranty_expiry) === "expired").length,
+    expiring_soon: assets.filter((a: any) => getWarrantyStatus(a.warranty_expiry) === "expiring_soon").length,
+    active:        assets.filter((a: any) => getWarrantyStatus(a.warranty_expiry) === "active").length,
+    unknown:       assets.filter((a: any) => getWarrantyStatus(a.warranty_expiry) === "unknown").length,
   };
 
   if (!mounted || loading) return (
@@ -123,7 +123,7 @@ export default function WarrantyTrackingPage() {
           { label:"⚠️ Expiring (90d)", value:counts.expiring_soon, color:"bg-yellow-50 border-yellow-200", tag:"expiring_soon" },
           { label:"✅ Active",         value:counts.active,         color:"bg-green-50 border-green-200", tag:"active" },
           { label:"❓ No Warranty",    value:counts.unknown,        color:"bg-gray-50 border-gray-200",  tag:"all" },
-        ].map(k => (
+        ].map((k: any) => (
           <button key={k.label}
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag as any)}
             className={`${k.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
@@ -151,7 +151,7 @@ export default function WarrantyTrackingPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              {["Asset","Category","Serial No.","Manufacturer","Warranty Status","Expiry Date","Days Left"].map(h => (
+              {["Asset","Category","Serial No.","Manufacturer","Warranty Status","Expiry Date","Days Left"].map((h: any) => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
               ))}
             </tr>
@@ -171,8 +171,8 @@ export default function WarrantyTrackingPage() {
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{asset.serial_number || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{asset.manufacturer || "—"}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${WARRANTY_COLOR[ws]}`}>
-                      {WARRANTY_LABEL[ws]}
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(WARRANTY_COLOR as Record<string, any>)[ws]}`}>
+                      {(WARRANTY_LABEL as Record<string, any>)[ws]}
                     </span>
                   </td>
                   <td className={`px-4 py-3 font-medium ${ws==="expired" ? "text-red-600" : ws==="expiring_soon" ? "text-yellow-600" : "text-gray-700"}`}>

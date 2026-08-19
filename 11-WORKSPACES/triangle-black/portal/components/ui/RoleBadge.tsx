@@ -33,8 +33,8 @@ export function RoleBadge({ size = "sm" }: { size?: "sm" | "md" }) {
 
   if (!role) return null;
 
-  const color = ROLE_COLORS[role] || "#94A3B8";
-  const icon  = ROLE_ICONS[role]  || "👤";
+  const color = (ROLE_COLORS as Record<string, any>)[role] || "#94A3B8";
+  const icon  = (ROLE_ICONS as Record<string, any>)[role]  || "👤";
 
   return (
     <span style={{

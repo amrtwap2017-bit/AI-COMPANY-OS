@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if(!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if(!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#60A5FA",sent:"#A78BFA",received:"#34D399",paid:"#10B981"};
-const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
+const STARS = (r: any) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 
 function SupplierNav({ supplier, active }) {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function SupplierDashboard() {
     setSupplier(sup);
     if (sup?.vendor_id) {
       fetch(`/api/v1/supplier/dashboard?vendor_id=${sup.vendor_id}`, {headers:{Authorization:`Bearer ${t}`}})
-        .then(r=>r.json()).then(d=>{ setDash(d); setLoading(false); });
+        .then(r=>r.json()).then((d: any) => { setDash(d); setLoading(false); });
     }
   }, []);
 
@@ -84,7 +84,7 @@ export default function SupplierDashboard() {
           </div>
         </div>
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="h-24 rounded-2xl animate-pulse" style={{background:"#1E293B"}}/>)}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[1,2,3,4].map((i: any) =><div key={i} className="h-24 rounded-2xl animate-pulse" style={{background:"#1E293B"}}/>)}</div>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -93,7 +93,7 @@ export default function SupplierDashboard() {
                 {label:"Total PO Value",value:fmtEGP(po.total_value||0),sub:"All time",color:"#34D399"},
                 {label:"Outstanding",value:fmtEGP(inv.outstanding||0),sub:`${inv.total||0} invoices`,color:(inv.outstanding||0)>0?"#FBBF24":"#34D399"},
                 {label:"Active RFQs",value:rfq.active||0,sub:`${rfq.total||0} total bids`,color:"#A78BFA"},
-              ].map((k,i)=>(
+              ].map((k: any, i: number) =>(
                 <div key={i} className="rounded-2xl p-5 border" style={{background:"#1E293B",borderColor:"rgba(255,255,255,0.08)"}}>
                   <div className="text-2xl font-black mb-1" style={{color:k.color}}>{k.value}</div>
                   <div className="text-sm font-bold text-white">{k.label}</div>

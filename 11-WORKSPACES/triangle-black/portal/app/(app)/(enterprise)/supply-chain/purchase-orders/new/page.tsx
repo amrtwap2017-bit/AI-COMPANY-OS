@@ -32,7 +32,7 @@ export default function PurchaseOrderNewPage() {
     if (!mounted) return;
     tbFetch("/api/v1/suppliers/?limit=100")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setSuppliers(items);
       })
@@ -45,7 +45,7 @@ export default function PurchaseOrderNewPage() {
   const updateLine = (i: number, key: string, val: any) =>
     setLines(l => l.map((ln,idx) => idx === i ? {...ln, [key]: val} : ln));
 
-  const subtotal  = lines.reduce((s,l) => s + (Number(l.qty)||0) * (Number(l.unit_price)||0), 0);
+  const subtotal  = lines.reduce((s: any, l: any) => s + (Number(l.qty)||0) * (Number(l.unit_price)||0), 0);
   const vat       = subtotal * (Number(form.vat_pct)||0) / 100;
   const total     = subtotal + vat;
 
@@ -56,7 +56,7 @@ export default function PurchaseOrderNewPage() {
     try {
       const payload = {
         ...form,
-        lines: lines.filter(l => l.description),
+        lines: lines.filter((l: any) => l.description),
         subtotal: subtotal.toFixed(2),
         vat_amount: vat.toFixed(2),
         total_amount: total.toFixed(2),
@@ -104,7 +104,7 @@ export default function PurchaseOrderNewPage() {
               <select value={form.vendor_id} onChange={e => setForm(f=>({...f,vendor_id:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" required>
                 <option value="">Select supplier...</option>
-                {suppliers.map(s => (
+                {suppliers.map((s: any) => (
                   <option key={s.id} value={s.id}>{s.company_name} — {s.supplier_code || s.category}</option>
                 ))}
               </select>
@@ -113,14 +113,14 @@ export default function PurchaseOrderNewPage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
               <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {PO_STATUS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
+                {PO_STATUS.map((s: any) => <option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Terms</label>
               <select value={form.payment_terms} onChange={e => setForm(f=>({...f,payment_terms:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {PAYMENT_TERMS.map(t => <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
+                {PAYMENT_TERMS.map((t: any) => <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
               </select>
             </div>
             <div>

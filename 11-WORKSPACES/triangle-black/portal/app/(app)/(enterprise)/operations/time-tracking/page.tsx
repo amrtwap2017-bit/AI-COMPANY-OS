@@ -11,9 +11,9 @@ import { SectionCard } from "@/components/ui/SectionCard";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { DataTable } from "@/components/ui/DataTable";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleString("en-GB",{dateStyle:"short",timeStyle:"short"}); } catch { return "—"; } };
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleString("en-GB",{dateStyle:"short",timeStyle:"short"}); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 const WORK_TYPES = [{v:"on_site",label:"On Site",icon:"🔧"},{v:"travel",label:"Travel",icon:"🚗"},{v:"remote",label:"Remote",icon:"💻"},{v:"inspection",label:"Inspection",icon:"🔍"},{v:"admin",label:"Admin",icon:"📋"}];
 
@@ -46,7 +46,7 @@ export default function TimeTrackingPage() {
   const estCost = estHours*Number(form.hourly_rate||0);
 
   const entriesColumns = [
-    {key:"work_type",label:"Type",render:(row)=>{const wt=WORK_TYPES.find(t=>t.v===row.work_type);return<span>{wt?.icon||"🔧"} {wt?.label||row.work_type}</span>;}},
+    {key:"work_type",label:"Type",render:(row)=>{const wt=WORK_TYPES.find((t: any) =>t.v===row.work_type);return<span>{wt?.icon||"🔧"} {wt?.label||row.work_type}</span>;}},
     {key:"wo_title",label:"Work Order",render:(row)=><span className="font-medium text-primary text-sm">{row.wo_title||"—"}</span>},
     {key:"technician_name",label:"Technician",render:(row)=><span className="text-secondary text-sm">{row.technician_name||"—"}</span>},
     {key:"start_time",label:"Date",render:(row)=><span className="text-xs text-tertiary">{fmtDate(row.start_time)}</span>},
@@ -96,7 +96,7 @@ export default function TimeTrackingPage() {
                 <label className="tb-label">Technician <span className="text-danger">*</span></label>
                 <select className="tb-select" value={form.technician_id} onChange={e=>setForm({...form,technician_id:e.target.value})}>
                   <option value="">Select technician…</option>
-                  {techs.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+                  {techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
@@ -149,7 +149,7 @@ export default function TimeTrackingPage() {
 
         {activeTab==="entries" && (
           <SectionCard title="Time Entries" subtitle={`${entries.length} entries recorded`}
-            actions={<select className="tb-select" value={filterTech} onChange={e=>setFilterTech(e.target.value)} style={{minWidth:160}}><option value="">All Technicians</option>{techs.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select>}>
+            actions={<select className="tb-select" value={filterTech} onChange={e=>setFilterTech(e.target.value)} style={{minWidth:160}}><option value="">All Technicians</option>{techs.map((t: any) =><option key={t.id} value={t.id}>{t.name}</option>)}</select>}>
             {isLoading ? <LoadingState type="table" rows={6} /> : entries.length===0 ? (
               <EmptyState icon="⏱️" title="No time entries" description="Log your first time entry above" action={{label:"Log Time",onClick:()=>setActiveTab("log")}} size="sm" />
             ) : <DataTable columns={entriesColumns} data={entries} keyField="id" />}
@@ -161,7 +161,7 @@ export default function TimeTrackingPage() {
             <SectionCard title="By Work Type">
               {byType.length===0 ? <EmptyState icon="📊" title="No data" size="sm" /> : (
                 <div className="flex flex-col gap-2">
-                  {byType.map((wt,i)=>{const type=WORK_TYPES.find(t=>t.v===wt.work_type);return(
+                  {byType.map((wt,i)=>{const type=WORK_TYPES.find((t: any) =>t.v===wt.work_type);return(
                     <div key={i} className="flex items-center gap-3 p-2.5 bg-surface-alt rounded-lg">
                       <span className="text-xl">{type?.icon||"🔧"}</span>
                       <div className="flex-1 text-sm text-primary">{type?.label||wt.work_type}</div>
@@ -193,10 +193,10 @@ export default function TimeTrackingPage() {
 
         {activeTab==="utilization" && (
           <SectionCard title="Technician Utilization">
-            {byTech.filter(t=>t.total_hours>0).length===0 ? <EmptyState icon="👷" title="No time entries yet" size="sm" /> : (
+            {byTech.filter((t: any) =>t.total_hours>0).length===0 ? <EmptyState icon="👷" title="No time entries yet" size="sm" /> : (
               <div className="flex flex-col gap-3">
-                {byTech.filter(t=>t.total_hours>0).map((tech,i)=>{
-                  const maxH = Math.max(...byTech.map(t=>Number(t.total_hours||0)),1);
+                {byTech.filter((t: any) =>t.total_hours>0).map((tech,i)=>{
+                  const maxH = Math.max(...byTech.map((t: any) =>Number(t.total_hours||0)),1);
                   const pct = Math.min(100,(Number(tech.total_hours||0)/maxH)*100);
                   return (
                     <div key={i} className="p-4 bg-surface-alt border border-default rounded-lg">

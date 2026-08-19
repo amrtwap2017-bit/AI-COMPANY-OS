@@ -8,7 +8,7 @@ import { toast } from "@/lib/toast";
 import { useRouter, useParams } from "next/navigation";
 
 const fmtEGP  = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const SC = {draft:"#6D5F53",pending_approval:"#B07A2A",approved:"#5B7C8C",sent:"#8D7443",acknowledged:"#8D7443",partial:"#B07A2A",received:"#547C4D",invoiced:"#547C4D",paid:"#547C4D",cancelled:"#A84A3D"};
 const EMPTY_LINE = {description:"",unit:"unit",quantity:1,unit_price:0,discount_pct:0,vat_pct:14,notes:""};
 
@@ -44,8 +44,8 @@ export default function POv2DetailPage() {
   const sc         = SC[po.status]||"#6D5F53";
   const lines      = po.line_items||[];
   const grns       = po.grns||[];
-  const subtotal   = lines.reduce((s,l)=>s+Number(l.total_before_vat||0),0);
-  const vatTotal   = lines.reduce((s,l)=>s+Number(l.vat_amount||0),0);
+  const subtotal   = lines.reduce((s: any, l: any) =>s+Number(l.total_before_vat||0),0);
+  const vatTotal   = lines.reduce((s: any, l: any) =>s+Number(l.vat_amount||0),0);
   const grandTotal = subtotal+vatTotal;
 
   const ACTIONS = {
@@ -55,7 +55,7 @@ export default function POv2DetailPage() {
     sent:[{label:"Mark Acknowledged",status:"acknowledged",color:"#5B7C8C"}],
     acknowledged:[{label:"Mark Received",status:"received",color:"#547C4D"}],
   };
-  const actions = ACTIONS[po.status]||[];
+  const actions = (ACTIONS as Record<string, any>)[po.status]||[];
 
   return (
     <div className="min-h-screen bg-base">
@@ -71,7 +71,7 @@ export default function POv2DetailPage() {
               {deleteMut.isLoading?"Deleting…":"🗑 Delete"}
             </button>
             <div className="flex gap-2 flex-wrap ml-auto">
-              {actions.map((a,i)=>(
+              {actions.map((a: any, i: number) =>(
                 <button key={i} onClick={()=>statusMut.mutate(a.status)} disabled={statusMut.isLoading}
                   className="tb-btn tb-btn-primary tb-btn-sm" style={{background:a.color}}>
                   {a.label}
@@ -96,7 +96,7 @@ export default function POv2DetailPage() {
               {label:"Subtotal",   value:fmtEGP(subtotal),   color:"var(--color-warning)"},
               {label:"VAT (14%)", value:fmtEGP(vatTotal),    color:"var(--color-warning)"},
               {label:"Grand Total",value:fmtEGP(grandTotal),  color:"var(--color-success)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -130,7 +130,7 @@ export default function POv2DetailPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <input className="tb-input col-span-2" placeholder="Description *" value={newLine.description} onChange={e=>setNewLine({...newLine,description:e.target.value})}/>
                   <select className="tb-select" value={newLine.unit} onChange={e=>setNewLine({...newLine,unit:e.target.value})}>
-                    {["unit","m","m2","m3","hr","lot","kg","set","pair"].map(u=><option key={u} value={u}>{u}</option>)}
+                    {["unit","m","m2","m3","hr","lot","kg","set","pair"].map((u: any) =><option key={u} value={u}>{u}</option>)}
                   </select>
                   <input type="number" className="tb-input" placeholder="Quantity" value={newLine.quantity} onChange={e=>setNewLine({...newLine,quantity:e.target.value})} min="0.001" step="0.001"/>
                   <input type="number" className="tb-input" placeholder="Unit Price (EGP)" value={newLine.unit_price} onChange={e=>setNewLine({...newLine,unit_price:e.target.value})} min="0"/>
@@ -191,7 +191,7 @@ export default function POv2DetailPage() {
               <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No receipts yet</div></div>
             ) : (
               <div className="flex flex-col gap-2 mt-2">
-                {grns.map((g,i)=>(
+                {grns.map((g: any, i: number) =>(
                   <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-surface-alt">
                     <div className="flex-1">
                       <div className="text-sm font-semibold text-primary">{g.grn_number||g.id?.slice(0,12)}</div>

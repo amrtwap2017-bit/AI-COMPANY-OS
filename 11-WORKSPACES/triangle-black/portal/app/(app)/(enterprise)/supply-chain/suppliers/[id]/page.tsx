@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const PO_STATUS_COLOR = {
@@ -70,7 +70,7 @@ export default function SupplierDetailPage() {
               { label:"Total Value",  value:fmtEGP(stats.total_value||0), color:"#547C4D" },
               { label:"Open PRs",     value:stats.total_prs||0,       color:"#B07A2A" },
               { label:"Category",     value:supplier.category||"—",   color:"#5B7C8C" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -115,12 +115,12 @@ export default function SupplierDetailPage() {
                 </div>
                 <div className="tb-table" style={{borderRadius:12,overflow:"hidden",marginTop:12}}>
                   <div className="tb-table-head" style={{gridTemplateColumns:"1fr 90px 120px 100px"}}>
-                    {["PO Number","Status","Amount","Date"].map((h, i) => (
+                    {["PO Number","Status","Amount","Date"].map((h: any, i: number) => (
                       <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                     ))}
                   </div>
                   {pos.map((po, i) => {
-                    const pc = PO_STATUS_COLOR[po.status] || "#6D5F53";
+                    const pc = (PO_STATUS_COLOR as Record<string, any>)[po.status] || "#6D5F53";
                     return (
                       <button key={i}
                         onClick={() => router.push(`/supply-chain/purchase-orders/${po.id}`)}
@@ -193,7 +193,7 @@ export default function SupplierDetailPage() {
                   { label:"Purchase Orders",    icon:"📦", path:"/supply-chain/purchase-orders" },
                   { label:"Purchase Requests",  icon:"📋", path:"/supply-chain/purchase-requests" },
                   { label:"Inventory",          icon:"📦", path:"/supply-chain/inventory" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

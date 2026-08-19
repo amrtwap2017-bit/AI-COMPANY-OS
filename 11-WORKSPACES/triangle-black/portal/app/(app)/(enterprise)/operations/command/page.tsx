@@ -6,7 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function OperationsCommandPage() {
   const router = useRouter();
@@ -16,10 +16,10 @@ export default function OperationsCommandPage() {
   const { data: rawWOs } = useQuery({ queryKey:["cmd-wos"], queryFn:()=>authFetch("/api/v1/work-orders/?limit=50").then(r=>r.json()), staleTime:30000 });
 
   const techs = toArr(dispatch?.technicians);
-  const wos = toArr(rawWOs).filter(w=>!w.deleted_at);
-  const open = wos.filter(w=>w.status==="open");
-  const inProg = wos.filter(w=>w.status==="in_progress");
-  const critical = wos.filter(w=>w.priority==="critical"&&w.status!=="completed");
+  const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
+  const open = wos.filter((w: any) =>w.status==="open");
+  const inProg = wos.filter((w: any) =>w.status==="in_progress");
+  const critical = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");
   const overall = sla?.overall||{};
   const breaches = toArr(sla?.active_breaches);
   const isLoading = loadD||loadS;
@@ -30,7 +30,7 @@ export default function OperationsCommandPage() {
     {label:"Service Requests",icon:"🎫",path:"/operations/service-requests"},
     {label:"SLA Review",icon:"📊",path:"/operations/sla-review",count:breaches.length,warn:breaches.length>0},
     {label:"Time Tracking",icon:"⏱",path:"/operations/time-tracking"},
-    {label:"Technicians",icon:"👷",path:"/operations/technicians",count:techs.filter(t=>t.is_active).length},
+    {label:"Technicians",icon:"👷",path:"/operations/technicians",count:techs.filter((t: any) =>t.is_active).length},
   ];
 
   return (
@@ -71,14 +71,14 @@ export default function OperationsCommandPage() {
             <span>🚨</span>
             <div className="flex-1">
               <span className="font-bold">{critical.length} critical work orders need immediate attention</span>
-              <div className="text-xs opacity-70 mt-0.5">{critical.slice(0,3).map(w=>w.title).join(" · ")}</div>
+              <div className="text-xs opacity-70 mt-0.5">{critical.slice(0,3).map((w: any) =>w.title).join(" · ")}</div>
             </div>
             <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn tb-btn-danger tb-btn-sm">View →</button>
           </div>
         )}
 
         <div className="tb-grid-3 mb-5">
-          {ACTIONS.map((a,i)=>(
+          {ACTIONS.map((a: any, i: number) =>(
             <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item">
               <span className="text-2xl">{a.icon}</span>
               <div className="flex-1">
@@ -100,7 +100,7 @@ export default function OperationsCommandPage() {
             <p className="text-sm text-tertiary">No technician data available</p>
           ) : (
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10}}>
-              {techs.slice(0,12).map((t,i)=>{
+              {techs.slice(0,12).map((t: any, i: number) =>{
                 const load = t.current_work_orders||0;
                 const max = t.max_work_orders||10;
                 const pct = Math.min(100,Math.round(load/max*100));

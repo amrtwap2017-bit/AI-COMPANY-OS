@@ -34,7 +34,7 @@ export default function InspectionsPage() {
     if (!mounted) return;
     tbFetch("/api/v1/inspections/?limit=100")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = Array.isArray(d) ? d : d?.results || d?.items || [];
         setInspections(items);
       })
@@ -42,7 +42,7 @@ export default function InspectionsPage() {
       .finally(() => setLoading(false));
   }, [mounted]);
 
-  const filtered = inspections.filter(i => {
+  const filtered = inspections.filter((i: any) => {
     const matchFilter = filter === "all" || i.status === filter;
     const matchSearch = !search ||
       (i.title || i.inspection_type || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -52,10 +52,10 @@ export default function InspectionsPage() {
   });
 
   const counts = {
-    passed:    inspections.filter(i => i.status === "passed").length,
-    failed:    inspections.filter(i => i.status === "failed").length,
-    pending:   inspections.filter(i => i.status === "pending").length,
-    scheduled: inspections.filter(i => i.status === "scheduled").length,
+    passed:    inspections.filter((i: any) => i.status === "passed").length,
+    failed:    inspections.filter((i: any) => i.status === "failed").length,
+    pending:   inspections.filter((i: any) => i.status === "pending").length,
+    scheduled: inspections.filter((i: any) => i.status === "scheduled").length,
   };
 
   if (!mounted || loading) return (
@@ -87,7 +87,7 @@ export default function InspectionsPage() {
           { label:"❌ Failed",    value:counts.failed,    color:"bg-red-50 border-red-200",      tag:"failed" },
           { label:"⏳ Pending",   value:counts.pending,   color:"bg-yellow-50 border-yellow-200",tag:"pending" },
           { label:"📅 Scheduled", value:counts.scheduled, color:"bg-blue-50 border-blue-200",   tag:"scheduled" },
-        ].map(k => (
+        ].map((k: any) => (
           <button key={k.label}
             onClick={() => setFilter(filter===k.tag ? "all" : k.tag)}
             className={`${k.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${filter===k.tag ? "ring-2 ring-gray-900" : ""}`}>
@@ -112,7 +112,7 @@ export default function InspectionsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {["Status","Inspection","Type","Location","Inspector","Date","Score"].map(h => (
+                {["Status","Inspection","Type","Location","Inspector","Date","Score"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
@@ -122,8 +122,8 @@ export default function InspectionsPage() {
                 <tr key={insp.id} className="hover:bg-gray-50 cursor-pointer"
                   onClick={() => router.push(`/engineering/inspections/${insp.id}`)}>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[insp.status] || "bg-gray-100 text-gray-600"}`}>
-                      {STATUS_ICON[insp.status] || "📋"} {insp.status || "—"}
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[insp.status] || "bg-gray-100 text-gray-600"}`}>
+                      {(STATUS_ICON as Record<string, any>)[insp.status] || "📋"} {insp.status || "—"}
                     </span>
                   </td>
                   <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-48 truncate">

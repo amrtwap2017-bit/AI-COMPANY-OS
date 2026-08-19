@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function ExecutivePage() {
   const router = useRouter();
@@ -28,13 +28,13 @@ export default function ExecutivePage() {
   const in30 = new Date(now.getTime()+30*86400000);
   const score = twin?.health_score??0;
 
-  const criticalWOs = wos.filter(w=>w.priority==="critical"&&w.status!=="completed");
-  const overdueWOs = wos.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
-  const expiringContracts = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in30);
-  const totalRevenue = invoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const pendingRevenue = invoices.filter(i=>i.status==="pending").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const unreadNotifs = notifs.filter(n=>!n.is_read);
-  const compRate = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
+  const criticalWOs = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");
+  const overdueWOs = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
+  const expiringContracts = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)>=now&&new Date(c.end_date)<=in30);
+  const totalRevenue = invoices.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const pendingRevenue = invoices.filter((i: any) =>i.status==="pending").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const unreadNotifs = notifs.filter((n: any) =>!n.is_read);
+  const compRate = wos.length>0?Math.round(wos.filter((w: any) =>w.status==="completed").length/wos.length*100):0;
   const riskScore = criticalWOs.length*10+overdueWOs.length*3+expiringContracts.length*5+(d.maintenance?.overdue||0)*2;
   const riskLevel = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
   const riskColor = riskScore===0?"var(--color-success)":riskScore<15?"var(--color-info)":riskScore<30?"var(--color-warning)":"var(--color-danger)";
@@ -67,7 +67,7 @@ export default function ExecutivePage() {
           </div>
 
           <div className="grid mt-6" style={{gridTemplateColumns:"repeat(6,1fr)",gap:12}}>
-            {[{label:"Active Contracts",value:d.commercial?.active_contracts??0,path:"/commercial/contracts"},{label:"Revenue",value:fmtEGP(totalRevenue),path:"/invoices"},{label:"Pending",value:fmtEGP(pendingRevenue),path:"/invoices"},{label:"Critical WOs",value:criticalWOs.length,danger:criticalWOs.length>0,path:"/executive/exceptions"},{label:"WO Completion",value:`${compRate}%`,good:compRate>=80,path:"/analytics/scorecards"},{label:"Unread Alerts",value:unreadNotifs.length,path:"/inbox"}].map((k,i)=>(
+            {[{label:"Active Contracts",value:d.commercial?.active_contracts??0,path:"/commercial/contracts"},{label:"Revenue",value:fmtEGP(totalRevenue),path:"/invoices"},{label:"Pending",value:fmtEGP(pendingRevenue),path:"/invoices"},{label:"Critical WOs",value:criticalWOs.length,danger:criticalWOs.length>0,path:"/executive/exceptions"},{label:"WO Completion",value:`${compRate}%`,good:compRate>=80,path:"/analytics/scorecards"},{label:"Unread Alerts",value:unreadNotifs.length,path:"/inbox"}].map((k: any, i: number) =>(
               <button key={i} onClick={()=>router.push(k.path)} className="tb-hero-kpi text-left cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.good?"var(--color-success)":"var(--color-text-inv)",fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -104,13 +104,13 @@ export default function ExecutivePage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {criticalWOs.slice(0,3).map((w,i)=>(
+                  {criticalWOs.slice(0,3).map((w: any, i: number) =>(
                     <button key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)} className="tb-section text-left border-danger/30 bg-danger/5 cursor-pointer">
                       <div className="text-xs font-bold text-danger mb-1">Critical WO</div>
                       <div className="text-sm font-semibold text-primary truncate">{w.title}</div>
                     </button>
                   ))}
-                  {expiringContracts.slice(0,2).map((c,i)=>{
+                  {expiringContracts.slice(0,2).map((c: any, i: number) =>{
                     const days=Math.ceil((new Date(c.end_date)-Date.now())/86400000);
                     return (
                       <button key={i} onClick={()=>router.push(`/commercial/contracts/${c.id}`)} className="tb-section text-left border-warning/30 bg-warning/5 cursor-pointer">
@@ -168,7 +168,7 @@ export default function ExecutivePage() {
                 <button onClick={()=>router.push("/invoices")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Full report →</button>
               </div>
               <div className="tb-grid-4 mb-4">
-                {[{label:"Paid",count:d.finance?.paid??0,color:"var(--color-success)"},{label:"Pending",count:d.finance?.pending??0,color:"var(--color-warning)"},{label:"Overdue",count:d.finance?.overdue??0,color:"var(--color-danger)"},{label:"Cancelled",count:d.finance?.cancelled??0}].map((s,i)=>(
+                {[{label:"Paid",count:d.finance?.paid??0,color:"var(--color-success)"},{label:"Pending",count:d.finance?.pending??0,color:"var(--color-warning)"},{label:"Overdue",count:d.finance?.overdue??0,color:"var(--color-danger)"},{label:"Cancelled",count:d.finance?.cancelled??0}].map((s: any, i: number) =>(
                   <div key={i} className="bg-surface-alt rounded-xl p-3 text-center">
                     <div className="text-2xl font-black" style={{color:s.color||"var(--color-text-1)"}}>{s.count}</div>
                     <div className="text-xs text-tertiary mt-0.5">{s.label}</div>

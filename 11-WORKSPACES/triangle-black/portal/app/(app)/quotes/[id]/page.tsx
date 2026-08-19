@@ -70,7 +70,7 @@ export default function QuoteDetailPage() {
           <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{quote.title || `Quote ${id?.slice(0,8)}`}</h1>
           <p className="text-gray-500 text-sm mt-1">{quote.description}</p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[quote.status] || "bg-gray-100 text-gray-700"}`}>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${(STATUS_COLORS as Record<string, any>)[quote.status] || "bg-gray-100 text-gray-700"}`}>
           {quote.status}
         </span>
       </div>

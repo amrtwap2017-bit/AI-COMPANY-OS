@@ -6,13 +6,13 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const COLORS = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"];
 
 const WarmTooltip = ({active,payload,label}) => {
   if (!active||!payload?.length) return null;
-  return <div className="tb-section shadow-lg" style={{padding:"8px 12px"}}>{label&&<div className="text-xs text-tertiary mb-1">{label}</div>}{payload.map((p,i)=><div key={i} className="text-sm font-bold text-primary">{p.value}</div>)}</div>;
+  return <div className="tb-section shadow-lg" style={{padding:"8px 12px"}}>{label&&<div className="text-xs text-tertiary mb-1">{label}</div>}{payload.map((p: any, i: number) =><div key={i} className="text-sm font-bold text-primary">{p.value}</div>)}</div>;
 };
 
 export default function ProjectsIntelligencePage() {
@@ -20,10 +20,10 @@ export default function ProjectsIntelligencePage() {
   const { data: raw, isLoading } = useQuery({queryKey:["proj-intel"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r=>r.json()),staleTime:60000});
   const projects = toArr(raw);
 
-  const byStatus = Object.entries(projects.reduce((acc,p)=>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{})).map(([name,value])=>({name,value}));
-  const avgCompletion = projects.length>0?Math.round(projects.reduce((s,p)=>s+(p.completion_pct||0),0)/projects.length):0;
-  const totalBudget = projects.reduce((s,p)=>s+Number(p.budget||0),0);
-  const overdue = projects.filter(p=>p.end_date&&new Date(p.end_date)<new Date()&&p.status!=="completed").length;
+  const byStatus = Object.entries(projects.reduce((acc: any, p: any) =>{acc[p.status||"unknown"]=(acc[p.status||"unknown"]||0)+1;return acc;},{})).map(([name,value])=>({name,value}));
+  const avgCompletion = projects.length>0?Math.round(projects.reduce((s: any, p: any) =>s+(p.completion_pct||0),0)/projects.length):0;
+  const totalBudget = projects.reduce((s: any, p: any) =>s+Number(p.budget||0),0);
+  const overdue = projects.filter((p: any) =>p.end_date&&new Date(p.end_date)<new Date()&&p.status!=="completed").length;
   const AXIS = {fontSize:11,fill:"var(--color-text-3)"};
 
   return (
@@ -68,7 +68,7 @@ export default function ProjectsIntelligencePage() {
 
           <div className="tb-section">
             <div className="tb-section-title">Portfolio Health</div>
-            {[["Total Projects",projects.length,"var(--color-text-1)"],["Active",projects.filter(p=>["active","in_progress"].includes(p.status)).length,"var(--color-info)"],["Completed",projects.filter(p=>p.status==="completed").length,"var(--color-success)"],["On Hold",projects.filter(p=>p.status==="on_hold").length,"var(--color-warning)"],["Overdue",overdue,overdue>0?"var(--color-danger)":"var(--color-success)"],["Avg Completion",`${avgCompletion}%`,avgCompletion>=70?"var(--color-success)":"var(--color-warning)"],["Total Budget",fmtEGP(totalBudget),"var(--color-brand)"]].map(([label,value,color],i)=>(
+            {[["Total Projects",projects.length,"var(--color-text-1)"],["Active",projects.filter((p: any) =>["active","in_progress"].includes(p.status)).length,"var(--color-info)"],["Completed",projects.filter((p: any) =>p.status==="completed").length,"var(--color-success)"],["On Hold",projects.filter((p: any) =>p.status==="on_hold").length,"var(--color-warning)"],["Overdue",overdue,overdue>0?"var(--color-danger)":"var(--color-success)"],["Avg Completion",`${avgCompletion}%`,avgCompletion>=70?"var(--color-success)":"var(--color-warning)"],["Total Budget",fmtEGP(totalBudget),"var(--color-brand)"]].map(([label,value,color],i)=>(
               <div key={i} className="tb-detail-row">
                 <span className="tb-detail-key">{label}</span>
                 <span className="tb-detail-value font-bold" style={{color}}>{value}</span>
@@ -82,7 +82,7 @@ export default function ProjectsIntelligencePage() {
             <div className="tb-section-title" style={{margin:0}}>Top Projects by Completion</div>
             <button onClick={()=>router.push("/projects-center/list")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View All →</button>
           </div>
-          {projects.sort((a,b)=>(b.completion_pct||0)-(a.completion_pct||0)).slice(0,8).map((p,i)=>(
+          {projects.sort((a: any, b: any) =>(b.completion_pct||0)-(a.completion_pct||0)).slice(0,8).map((p: any, i: number) =>(
             <button key={i} onClick={()=>router.push(`/projects-center/${p.id}`)}
               className="flex items-center gap-3 py-2 border-b border-divider w-full text-left bg-transparent cursor-pointer">
               <div className="flex-1 min-w-0">

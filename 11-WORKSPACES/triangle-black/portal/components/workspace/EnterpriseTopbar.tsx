@@ -36,7 +36,7 @@ export function EnterpriseTopbar() {
   useEffect(() => {
     const token = tokenManager.getToken() || "";
     if (token) {
-      authFetch("/api/v1/platform-notif/?limit=5").then(r=>r.json()).then(d=>{
+      authFetch("/api/v1/platform-notif/?limit=5").then(r=>r.json()).then((d: any) => {
         setNotifBadge(d?.unread_count || 0);
         setRealNotifs((d?.notifications||[]).map((n:any)=>({
           id:n.id, type:n.type==="alert"?"error":n.type==="warning"?"warning":n.type==="success"?"success":"info",
@@ -51,7 +51,7 @@ export function EnterpriseTopbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 
-  const activeCenter = enterpriseCenters.find(c => pathname.startsWith(c.href));
+  const activeCenter = enterpriseCenters.find((c: any) => pathname.startsWith(c.href));
   const unreadCount = notifBadge || realNotifs.filter((n: any) => !n.read).length;
   const initials = user?.name
     ? user.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()

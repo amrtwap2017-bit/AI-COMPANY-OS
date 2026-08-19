@@ -63,7 +63,7 @@ export function KpiCard({
       onClick={isClickable ? handleClick : undefined}
       className={[
         "bg-surface border rounded-2xl p-5 transition-all duration-base",
-        STATUS_RING[status],
+        (STATUS_RING as Record<string, any>)[status],
         isClickable
           ? "cursor-pointer hover:border-brand hover:shadow-md group"
           : "",
@@ -81,8 +81,8 @@ export function KpiCard({
       {/* Value */}
       <div className={[
         "font-black leading-none",
-        VALUE_SIZE[size] || VALUE_SIZE.md,
-        COLOR_MAP[color],
+        (VALUE_SIZE as Record<string, any>)[size] || VALUE_SIZE.md,
+        (COLOR_MAP as Record<string, any>)[color],
         isClickable ? "group-hover:scale-105 transition-transform origin-left" : "",
       ].join(" ")}>
         {value}

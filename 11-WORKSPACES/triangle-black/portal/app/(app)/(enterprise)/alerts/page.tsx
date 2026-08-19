@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtRel = (d) => { if (!d) return ""; try { const h=Math.floor((Date.now()-new Date(d).getTime())/3600000); return h<1?"just now":h<24?h+"h ago":Math.floor(h/24)+"d ago"; } catch { return ""; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtRel = (d: any) => { if (!d) return ""; try { const h=Math.floor((Date.now()-new Date(d).getTime())/3600000); return h<1?"just now":h<24?h+"h ago":Math.floor(h/24)+"d ago"; } catch { return ""; } };
 
 export default function AlertsPage() {
   const router = useRouter();
@@ -23,14 +23,14 @@ export default function AlertsPage() {
         <div className="tb-hero-inner">
           <div className="text-label-upper text-brand mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Alerts & Breaches</h1>
-          <p className="tb-hero-description">{breachList.length} active breaches · {notifList.filter(n=>!n.is_read).length} unread</p>
+          <p className="tb-hero-description">{breachList.length} active breaches · {notifList.filter((n: any) =>!n.is_read).length} unread</p>
           <div className="tb-grid-4 mt-6">
             {[
               {label:"SLA Breaches",value:breachList.length,danger:breachList.length>0},
               {label:"Total SRs",value:overall.total_requests||0},
               {label:"Resolved",value:overall.resolved||0,good:true},
               {label:"Avg Resolution",value:`${Math.round(overall.avg_resolution_hours||0)}h`},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":k.good?"var(--color-success)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -49,7 +49,7 @@ export default function AlertsPage() {
                 <div className="tb-empty-icon" style={{opacity:0.4}}>✅</div>
                 <div className="tb-empty-title">No active SLA breaches</div>
               </div>
-            ) : breachList.map((b,i)=>(
+            ) : breachList.map((b: any, i: number) =>(
               <div key={i} className="flex items-start gap-3 p-3 bg-surface-alt rounded-lg mb-2 border border-danger/10">
                 <div className="w-2 h-2 rounded-full bg-danger flex-shrink-0 mt-1.5" />
                 <div className="flex-1 min-w-0">
@@ -68,7 +68,7 @@ export default function AlertsPage() {
             <div className="font-bold text-primary mb-4">Recent Notifications</div>
             {notifList.length===0 ? (
               <div className="tb-empty"><div className="tb-empty-title">No notifications</div></div>
-            ) : notifList.map((n,i)=>(
+            ) : notifList.map((n: any, i: number) =>(
               <div key={i} className="flex items-start gap-3 py-2.5 border-b border-divider">
                 <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5" style={{background:n.is_read?"var(--color-text-3)":"var(--color-brand)"}} />
                 <div className="flex-1">

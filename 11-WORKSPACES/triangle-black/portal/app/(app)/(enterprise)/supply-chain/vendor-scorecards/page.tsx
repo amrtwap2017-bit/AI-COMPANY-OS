@@ -43,7 +43,7 @@ export default function VendorScorecardPage() {
     if (!mounted) return;
     tbFetch("/api/v1/vendor-scorecards/?limit=100")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         const items = d.results || d.items || (Array.isArray(d) ? d : []);
         setScorecards(items);
       })
@@ -52,12 +52,12 @@ export default function VendorScorecardPage() {
   }, [mounted]);
 
   const filtered = scorecards
-    .filter(s => !search || (s.company_name || "").toLowerCase().includes(search.toLowerCase()) ||
+    .filter((s: any) => !search || (s.company_name || "").toLowerCase().includes(search.toLowerCase()) ||
       (s.vendor_code || "").toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => (Number(b[sortBy] || 0)) - (Number(a[sortBy] || 0)));
+    .sort((a: any, b: any) => (Number(b[sortBy] || 0)) - (Number(a[sortBy] || 0)));
 
   const avg = (key: string) => scorecards.length > 0
-    ? scorecards.reduce((sum, s) => sum + Number(s[key] || 0), 0) / scorecards.length
+    ? scorecards.reduce((sum: any, s: any) => sum + Number(s[key] || 0), 0) / scorecards.length
     : 0;
 
   if (!mounted || loading) return (
@@ -126,7 +126,7 @@ export default function VendorScorecardPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {["Vendor","Code","Risk","Total POs","Spend","On-Time","Quality","Price","Overall"].map(h => (
+                {["Vendor","Code","Risk","Total POs","Spend","On-Time","Quality","Price","Overall"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}
               </tr>
@@ -141,7 +141,7 @@ export default function VendorScorecardPage() {
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.vendor_code}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${RISK_COLOR[s.risk_level] || "bg-gray-100 text-gray-600"}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(RISK_COLOR as Record<string, any>)[s.risk_level] || "bg-gray-100 text-gray-600"}`}>
                       {s.risk_level}
                     </span>
                   </td>

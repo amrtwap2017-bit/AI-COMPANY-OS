@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function PaymentHistoryPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function PaymentHistoryPage() {
   const { data: invRaw } = useQuery(["pay-inv"],  ()=>authFetch("/api/v1/supplier-invoices/").then(r=>r.json()), {staleTime:30000});
 
   const invoices = toArr(invRaw);
-  const paid = invoices.filter(i=>i.status==="paid"||i.payment_status==="paid");
+  const paid = invoices.filter((i: any) =>i.status==="paid"||i.payment_status==="paid");
   const rev = dash?.revenue||{};
   const costs = dash?.costs||{};
 
@@ -31,7 +31,7 @@ export default function PaymentHistoryPage() {
               {label:"Collected",       value:fmtEGP(rev.total_collected||0),good:true},
               {label:"Outstanding",     value:fmtEGP(rev.total_outstanding||0),warn:true},
               {label:"Collection Rate", value:`${Math.round(rev.collection_rate_pct||0)}%`,good:(rev.collection_rate_pct||0)>=80},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.good?"var(--color-success)":k.warn?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>

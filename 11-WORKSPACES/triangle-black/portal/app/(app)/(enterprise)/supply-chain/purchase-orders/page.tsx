@@ -5,8 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
@@ -31,13 +31,13 @@ export default function PurchaseOrdersPage() {
   const supps = toArr(suppRaw);
   const prs   = toArr(prRaw);
 
-  const totalValue   = pos.reduce((s, p) => s + Number(p.total_amount || p.total_value || 0), 0);
-  const pending      = pos.filter(p => p.status === "pending").length;
-  const approved     = pos.filter(p => p.status === "approved").length;
-  const received     = pos.filter(p => p.status === "received").length;
-  const openPRs      = prs.filter(p => p.status === "pending" || p.status === "open").length;
+  const totalValue   = pos.reduce((s: any, p: any) => s + Number(p.total_amount || p.total_value || 0), 0);
+  const pending      = pos.filter((p: any) => p.status === "pending").length;
+  const approved     = pos.filter((p: any) => p.status === "approved").length;
+  const received     = pos.filter((p: any) => p.status === "received").length;
+  const openPRs      = prs.filter((p: any) => p.status === "pending" || p.status === "open").length;
 
-  const filtered = pos.filter(p => {
+  const filtered = pos.filter((p: any) => {
     const matchSearch = !search ||
       (p.po_number||p.id||"").toLowerCase().includes(search.toLowerCase()) ||
       (p.supplier_name||"").toLowerCase().includes(search.toLowerCase()) ||
@@ -70,7 +70,7 @@ export default function PurchaseOrdersPage() {
               { label:"Approved",    value:approved,          color:"#8D7443" },
               { label:"Received",    value:received,          color:"#547C4D" },
               { label:"Open PRs",    value:openPRs,           color:"#B07A2A" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -94,7 +94,7 @@ export default function PurchaseOrdersPage() {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {["all","pending","approved","ordered","received","cancelled"].map(s => (
+              {["all","pending","approved","ordered","received","cancelled"].map((s: any) => (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
@@ -102,7 +102,7 @@ export default function PurchaseOrdersPage() {
                 >
                   {s === "all" ? "All" : s}
                   {s !== "all" && (
-                    <span className="ml-1 opacity-60">{pos.filter(p => p.status === s).length}</span>
+                    <span className="ml-1 opacity-60">{pos.filter((p: any) => p.status === s).length}</span>
                   )}
                 </button>
               ))}
@@ -115,13 +115,13 @@ export default function PurchaseOrdersPage() {
           <div className="tb-flex-between mb-4">
             <div className="text-sm text-secondary">{filtered.length} orders</div>
             <div className="text-sm font-bold text-emerald-400">
-              {fmtEGP(filtered.reduce((s,p)=>s+Number(p.total_amount||p.total_value||0),0))}
+              {fmtEGP(filtered.reduce((s: any, p: any) =>s+Number(p.total_amount||p.total_value||0),0))}
             </div>
           </div>
 
           {isLoading ? (
             <div className="space-y-3">
-              {[1,2,3,4,5].map(i => (
+              {[1,2,3,4,5].map((i: any) => (
                 <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>
               ))}
             </div>
@@ -136,13 +136,13 @@ export default function PurchaseOrdersPage() {
           ) : (
             <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
               <div className="tb-table-head" style={{gridTemplateColumns:"1.5fr 120px 100px 130px 110px 110px"}}>
-                {["PO Number / Supplier","Status","Items","Total Value","Order Date","Expected"].map((h, i) => (
+                {["PO Number / Supplier","Status","Items","Total Value","Order Date","Expected"].map((h: any, i: number) => (
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
               {filtered.map((po, i) => {
-                const sc = STATUS_COLOR[po.status] || "#6D5F53";
-                const supp = supps.find(s => s.id === po.supplier_id);
+                const sc = (STATUS_COLOR as Record<string, any>)[po.status] || "#6D5F53";
+                const supp = supps.find((s: any) => s.id === po.supplier_id);
                 return (
                   <button
                     key={i}
@@ -189,8 +189,8 @@ export default function PurchaseOrdersPage() {
             <div className="tb-section-title">Order Value by Status</div>
             <div className="space-y-3">
               {Object.entries(STATUS_COLOR).map(([status, color]) => {
-                const statusPos = pos.filter(p => p.status === status);
-                const val = statusPos.reduce((s,p)=>s+Number(p.total_amount||p.total_value||0),0);
+                const statusPos = pos.filter((p: any) => p.status === status);
+                const val = statusPos.reduce((s: any, p: any) =>s+Number(p.total_amount||p.total_value||0),0);
                 const pct = totalValue > 0 ? (val / totalValue) * 100 : 0;
                 return statusPos.length > 0 ? (
                   <div key={status}>
@@ -216,7 +216,7 @@ export default function PurchaseOrdersPage() {
                 { label:"Inventory",           icon:"📦", path:"/supply-chain/inventory",            count:null },
                 { label:"Warehouses",          icon:"🏗️",  path:"/supply-chain/warehouses",          count:null },
                 { label:"Goods Receipts",      icon:"✅", path:"/supply-chain/goods-receipts",       count:null },
-              ].map((a, i) => (
+              ].map((a: any, i: number) => (
                 <button key={i} onClick={() => router.push(a.path)}
                   className="tb-action-item w-full justify-between">
                   <div className="flex items-center gap-3">

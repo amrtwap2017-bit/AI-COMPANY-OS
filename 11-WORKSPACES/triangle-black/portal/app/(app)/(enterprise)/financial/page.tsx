@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => { if (n===null||n===undefined) return "—"; const num=Number(n||0); if(num>=1000000) return `EGP ${(num/1000000).toFixed(2)}M`; if(num>=1000) return `EGP ${(num/1000).toFixed(1)}K`; return `EGP ${num.toLocaleString()}`; };
-const fmtEGPFull = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtEGP = (n: any) => { if (n===null||n===undefined) return "—"; const num=Number(n||0); if(num>=1000000) return `EGP ${(num/1000000).toFixed(2)}M`; if(num>=1000) return `EGP ${(num/1000).toFixed(1)}K`; return `EGP ${num.toLocaleString()}`; };
+const fmtEGPFull = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const fmtPct  = (n) => `${Number(n||0).toFixed(1)}%`;
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const AGING_COLORS = {"Current":"#547C4D","1-30 Days":"#B07A2A","31-60 Days":"#B07A2A","61-90 Days":"#A84A3D","90+ Days":"#A84A3D"};
 
@@ -40,9 +40,9 @@ export default function FinancialDashboardPage() {
   const monthly    = fin?.monthly_trend    || [];
   const vendorSpend= fin?.vendor_spend     || [];
 
-  const maxMonthly = Math.max(...monthly.map(m=>Number(m.invoiced||0)),1);
-  const maxAged    = Math.max(...aged.map(a=>Number(a.amount||0)),1);
-  const maxVendor  = Math.max(...vendorSpend.map(v=>Number(v.total_spend||0)),1);
+  const maxMonthly = Math.max(...monthly.map((m: any) =>Number(m.invoiced||0)),1);
+  const maxAged    = Math.max(...aged.map((a: any) =>Number(a.amount||0)),1);
+  const maxVendor  = Math.max(...vendorSpend.map((v: any) =>Number(v.total_spend||0)),1);
 
   return (
     <div className="min-h-screen bg-base">
@@ -70,7 +70,7 @@ export default function FinancialDashboardPage() {
               {label:"Collected",      value:fmtEGP(rev.total_collected),  sub:`${fmtPct(summary.collection_rate_pct)} rate`,color:"var(--color-success)"},
               {label:"Outstanding",    value:fmtEGP(rev.total_outstanding),sub:`${rev.unpaid_count||0} unpaid invoices`,color:(rev.total_outstanding||0)>0?"var(--color-warning)":"var(--color-success)"},
               {label:"SOW Pipeline",   value:fmtEGP(costs.total_sow_value),sub:`${costs.sow_count||0} documents`,      color:"var(--color-brand)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -120,7 +120,7 @@ export default function FinancialDashboardPage() {
               <div className="tb-section">
                 <div className="tb-section-title">Monthly Revenue Trend</div>
                 <div className="mt-3 flex flex-col gap-2">
-                  {monthly.map((m,i)=>(
+                  {monthly.map((m: any, i: number) =>(
                     <div key={i} className="flex items-center gap-3">
                       <div className="text-xs text-tertiary w-16 flex-shrink-0">{m.month}</div>
                       <div className="flex-1 flex flex-col gap-1">
@@ -215,7 +215,7 @@ export default function FinancialDashboardPage() {
               ) : (
                 <div className="flex flex-col gap-3 mt-3">
                   {aged.map((bucket,i)=>{
-                    const color = AGING_COLORS[bucket.bucket] || "#6D5F53";
+                    const color = (AGING_COLORS as Record<string, any>)[bucket.bucket] || "#6D5F53";
                     return (
                       <div key={i}>
                         <div className="flex justify-between text-xs mb-1">
@@ -242,7 +242,7 @@ export default function FinancialDashboardPage() {
               <div className="flex flex-col gap-3 mt-3">
                 {vendorSpend.length === 0 ? (
                   <div className="text-sm text-tertiary text-center py-4">No PO data yet</div>
-                ) : vendorSpend.map((v,i)=>(
+                ) : vendorSpend.map((v: any, i: number) =>(
                   <div key={i}>
                     <div className="flex justify-between text-xs mb-1">
                       <span className="text-secondary">{v.category}</span>

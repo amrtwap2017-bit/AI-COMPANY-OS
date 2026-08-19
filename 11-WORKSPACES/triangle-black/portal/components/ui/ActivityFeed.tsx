@@ -42,7 +42,7 @@ export function ActivityFeed({ entityId, limit = 15, compact = false }: Activity
 
   if (isLoading) return (
     <div className="space-y-3">
-      {[1,2,3,4].map(i => (
+      {[1,2,3,4].map((i: any) => (
         <div key={i} className="flex items-start gap-3 animate-pulse">
           <div className="w-8 h-8 bg-base-alt rounded-xl flex-shrink-0"/>
           <div className="flex-1 space-y-2">

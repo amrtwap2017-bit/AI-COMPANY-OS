@@ -6,9 +6,9 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtK = (n) => Number(n||0)>=1000?`EGP ${(Number(n)/1000).toFixed(0)}K`:fmtEGP(n);
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtK = (n: any) => Number(n||0)>=1000?`EGP ${(Number(n)/1000).toFixed(0)}K`:fmtEGP(n);
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const WARM_COLORS = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"];
 
 const WarmTooltip = ({active,payload,label}) => {
@@ -16,7 +16,7 @@ const WarmTooltip = ({active,payload,label}) => {
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label&&<div className="text-xs text-tertiary mb-1 font-semibold">{label}</div>}
-      {payload.map((p,i)=>(
+      {payload.map((p: any, i: number) =>(
         <div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>
           {p.name}: {typeof p.value==="number"?fmtEGP(p.value):p.value}
         </div>
@@ -59,12 +59,12 @@ export default function AnalyticsCostsPage() {
   const rev = finDash?.revenue||{};
   const costs = finDash?.costs||{};
   const time = timeDash?.totals||{};
-  const filteredPaid = filteredInvoices.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const filteredTotal = filteredInvoices.reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const filteredOutstanding = filteredInvoices.filter(i=>!["paid"].includes(i.status)).reduce((s,i)=>s+Number(i.total_amount||0),0);
+  const filteredPaid = filteredInvoices.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const filteredTotal = filteredInvoices.reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const filteredOutstanding = filteredInvoices.filter((i: any) =>!["paid"].includes(i.status)).reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
   const isFiltered = datePreset!=="all";
 
-  const costBreakdown = [{name:"Labor",value:Number(costs.total_labor||0)},{name:"Materials",value:Number(costs.total_materials||0)},{name:"Overhead",value:Number(costs.total_overhead_profit||0)},{name:"PO Spend",value:Number(procDash?.pos?.total_value||0)}].filter(d=>d.value>0);
+  const costBreakdown = [{name:"Labor",value:Number(costs.total_labor||0)},{name:"Materials",value:Number(costs.total_materials||0)},{name:"Overhead",value:Number(costs.total_overhead_profit||0)},{name:"PO Spend",value:Number(procDash?.pos?.total_value||0)}].filter((d: any) =>d.value>0);
   const revenueData = [{name:"Invoiced",value:Number(rev.total_invoiced||0),fill:"#B9924C"},{name:"Collected",value:Number(rev.total_collected||0),fill:"#547C4D"},{name:"Outstanding",value:Number(rev.total_outstanding||0),fill:"#A84A3D"},{name:"Labor Cost",value:Number(time.total_labor_cost||0),fill:"#B07A2A"},{name:"PO Spend",value:Number(procDash?.pos?.total_value||0),fill:"#5B7C8C"}];
   const invoiceByStatus = Object.entries(filteredInvoices.reduce((acc,inv)=>{const s=inv.status||"unknown";acc[s]=(acc[s]||0)+Number(inv.total_amount||0);return acc;},{})).map(([name,value])=>({name,value}));
   const AXIS_STYLE = {fontSize:11,fill:"var(--color-text-3)"};
@@ -87,7 +87,7 @@ export default function AnalyticsCostsPage() {
               {label:isFiltered?"Period Paid":"Collected",value:fmtK(isFiltered?filteredPaid:rev.total_collected||0),good:true},
               {label:"Outstanding",value:fmtK(isFiltered?filteredOutstanding:rev.total_outstanding||0),warn:true},
               {label:"Labor Cost",value:fmtK(time.total_labor_cost||0)},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value text-brand" style={{fontSize:"15px",color:k.good?"var(--color-success)":k.warn?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -102,7 +102,7 @@ export default function AnalyticsCostsPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-sm font-semibold text-secondary">Period:</span>
             <div className="tb-tabs border-0 mb-0">
-              {DATE_PRESETS.map(p=>(
+              {DATE_PRESETS.map((p: any) =>(
                 <button key={p.key} onClick={()=>setDatePreset(p.key)} className={`tb-tab ${datePreset===p.key?"active":""}`}>{p.label}</button>
               ))}
               <button onClick={()=>setDatePreset("custom")} className={`tb-tab ${datePreset==="custom"?"active":""}`}>Custom</button>
@@ -153,7 +153,7 @@ export default function AnalyticsCostsPage() {
           <div className="tb-section">
             <div className="tb-section-title">
               Invoice Status
-              {isFiltered&&<span className="ml-1.5 text-xs text-brand font-normal">({DATE_PRESETS.find(p=>p.key===datePreset)?.label||"Custom"})</span>}
+              {isFiltered&&<span className="ml-1.5 text-xs text-brand font-normal">({DATE_PRESETS.find((p: any) =>p.key===datePreset)?.label||"Custom"})</span>}
             </div>
             {invoiceByStatus.length>0 ? (
               <ResponsiveContainer width="100%" height={200}>
@@ -173,7 +173,7 @@ export default function AnalyticsCostsPage() {
           <div className="tb-section">
             <div className="tb-section-title">
               Period Summary
-              {isFiltered&&<span className="ml-1.5 text-xs text-brand font-normal">({DATE_PRESETS.find(p=>p.key===datePreset)?.label||"Custom"})</span>}
+              {isFiltered&&<span className="ml-1.5 text-xs text-brand font-normal">({DATE_PRESETS.find((p: any) =>p.key===datePreset)?.label||"Custom"})</span>}
             </div>
             {[{label:"Invoices in Period",value:filteredInvoices.length},{label:"Total Value",value:fmtEGP(filteredTotal),color:"var(--color-brand)"},{label:"Paid",value:fmtEGP(filteredPaid),color:"var(--color-success)"},{label:"Outstanding",value:fmtEGP(filteredOutstanding),color:"var(--color-danger)"},{label:"Collection Rate",value:filteredTotal>0?`${Math.round(filteredPaid/filteredTotal*100)}%`:"—",color:"var(--color-warning)"},{label:"Hours Logged",value:`${Math.round(time.total_hours||0)}h`},{label:"Labor Cost",value:fmtEGP(time.total_labor_cost||0)},{label:"PO Spend",value:fmtEGP(procDash?.pos?.total_value||0)}].map(({label,value,color},i)=>(
               <div key={i} className="tb-detail-row">

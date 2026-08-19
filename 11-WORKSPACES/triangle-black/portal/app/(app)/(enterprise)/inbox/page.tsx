@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtAgo = (d) => {
+const fmtAgo = (d: any) => {
   try {
     const diff = Date.now() - new Date(d).getTime();
     const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), dy = Math.floor(diff/86400000);
@@ -37,7 +37,7 @@ export default function InboxPage() {
     // authFetch automatically adds Authorization: Bearer <token> header
     authFetch("/api/v1/notifications-portal?limit=30")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         setNotifs(Array.isArray(d) ? d : d?.items || d?.data || []);
         setNLoaded(true);
       })
@@ -45,15 +45,15 @@ export default function InboxPage() {
 
     authFetch("/api/v1/activity-feed?limit=10")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         setActivities(d?.activities || []);
         setALoaded(true);
       })
       .catch(() => setALoaded(true));
   }, []);
 
-  const unread   = notifs.filter(n => !n.is_read);
-  const critical = notifs.filter(n => !n.is_read &&
+  const unread   = notifs.filter((n: any) => !n.is_read);
+  const critical = notifs.filter((n: any) => !n.is_read &&
     ["contract_expiring","asset_fault","pm_overdue"].includes(n.type));
 
   return (
@@ -76,7 +76,7 @@ export default function InboxPage() {
               { label:"Unread",   value:unread.length,    color:unread.length>0?"#B07A2A":"#547C4D" },
               { label:"Critical", value:critical.length,  color:critical.length>0?"#A84A3D":"#547C4D" },
               { label:"Activity", value:activities.length,color:"#8D7443" },
-            ].map((k,i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -105,7 +105,7 @@ export default function InboxPage() {
 
             {!nLoaded ? (
               <div className="space-y-2 mt-3">
-                {[1,2,3].map(i => (
+                {[1,2,3].map((i: any) => (
                   <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>
                 ))}
               </div>
@@ -116,8 +116,8 @@ export default function InboxPage() {
               </div>
             ) : (
               <div className="space-y-1 mt-3">
-                {unread.slice(0, 6).map((n, i) => {
-                  const m = TMETA[n.type] || { icon:"🔔", color:"#8D7443", path:"/workspace" };
+                {unread.slice(0, 6).map((n: any, i: number) => {
+                  const m = (TMETA as Record<string, any>)[n.type] || { icon:"🔔", color:"#8D7443", path:"/workspace" };
                   return (
                     <button key={i} onClick={() => router.push(m.path)}
                       className="w-full flex items-start gap-3 p-3 rounded-xl bg-base-alt hover:bg-surface transition-colors text-left"
@@ -163,7 +163,7 @@ export default function InboxPage() {
 
             {!aLoaded ? (
               <div className="space-y-2 mt-3">
-                {[1,2,3].map(i => (
+                {[1,2,3].map((i: any) => (
                   <div key={i} className="h-12 bg-base-alt rounded-xl animate-pulse"/>
                 ))}
               </div>
@@ -206,7 +206,7 @@ export default function InboxPage() {
               { label:"PM Plans",    icon:"📅", path:"/maintenance/pm-plans" },
               { label:"Procurement", icon:"🛒", path:"/supply-chain/purchase-requests" },
               { label:"Workspace",   icon:"🏠", path:"/workspace" },
-            ].map((a, i) => (
+            ].map((a: any, i: number) => (
               <button key={i} onClick={() => router.push(a.path)}
                 className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span>

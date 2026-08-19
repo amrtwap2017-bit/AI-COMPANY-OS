@@ -25,7 +25,7 @@ export function TableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       <div className="bg-base-alt px-5 py-3 flex gap-6">
-        {[40, 20, 20, 15].map((w, i) => (
+        {[40, 20, 20, 15].map((w: any, i: number) => (
           <SkeletonBlock key={i} className="h-3 rounded" style={{ width: `${w}%` }} />
         ))}
       </div>

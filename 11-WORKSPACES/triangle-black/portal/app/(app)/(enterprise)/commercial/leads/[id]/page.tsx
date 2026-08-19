@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
@@ -43,7 +43,7 @@ export default function LeadDetailPage() {
     </div>
   );
 
-  const sc        = STATUS_COLOR[lead.status] || "#6D5F53";
+  const sc        = (STATUS_COLOR as Record<string, any>)[lead.status] || "#6D5F53";
   const contracts = lead.contracts || [];
   const stageIdx  = PIPELINE_STAGES.indexOf(lead.status);
   const isWon     = lead.status === "won" || lead.status === "converted";
@@ -71,7 +71,7 @@ export default function LeadDetailPage() {
               { label:"Score",        value:lead.score||"—",                  color:Number(lead.score||0)>=70?"#547C4D":"#B07A2A" },
               { label:"Value",        value:fmtEGP(lead.estimated_value||lead.value||0), color:"#547C4D" },
               { label:"Contracts",    value:contracts.length,                 color:"#8D7443" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -93,7 +93,7 @@ export default function LeadDetailPage() {
                   {PIPELINE_STAGES.map((stage, i) => {
                     const isPast    = i <= stageIdx || isWon;
                     const isCurrent = i === stageIdx && !isWon;
-                    const c = STATUS_COLOR[stage] || "#6D5F53";
+                    const c = (STATUS_COLOR as Record<string, any>)[stage] || "#6D5F53";
                     return (
                       <div key={stage} className="flex items-center flex-1 min-w-0">
                         <div className="flex flex-col items-center flex-1">
@@ -213,7 +213,7 @@ export default function LeadDetailPage() {
                   { label:"Contracts",        icon:"📄", path:"/commercial/contracts" },
                   { label:"Sales Pipeline",   icon:"📊", path:"/commercial/pipeline" },
                   { label:"Invoices",         icon:"💰", path:"/invoices" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

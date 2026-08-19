@@ -8,15 +8,15 @@ import {
   Tooltip, ResponsiveContainer, Cell, AreaChart, Area, Legend,
 } from "recharts";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const WarmTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label && <div className="text-xs text-tertiary mb-1 font-semibold">{label}</div>}
-      {payload.map((p, i) => (
+      {payload.map((p: any, i: number) => (
         <div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>
           {p.name}: {p.value}{p.unit||""}
         </div>
@@ -50,7 +50,7 @@ export default function AnalyticsTrends() {
     if (w.status==="open")       woByMonth[key].open++;
     if (w.priority==="critical") woByMonth[key].critical++;
   });
-  const woTrendData = Object.values(woByMonth).sort((a,b)=>new Date(a.month).getTime()-new Date(b.month).getTime()).slice(-6);
+  const woTrendData = Object.values(woByMonth).sort((a: any, b: any) =>new Date(a.month).getTime()-new Date(b.month).getTime()).slice(-6);
 
   const invByMonth = {};
   inv.forEach(i => {
@@ -65,18 +65,18 @@ export default function AnalyticsTrends() {
   const invTrendData = Object.values(invByMonth).slice(-6);
 
   const leadStatusData = [
-    {stage:"New",         count:leads.filter(l=>l.status==="new").length,         fill:"#5B7C8C"},
-    {stage:"Qualified",   count:leads.filter(l=>l.status==="qualified").length,   fill:"#8D7443"},
-    {stage:"Proposal",    count:leads.filter(l=>l.status==="proposal").length,    fill:"#818CF8"},
-    {stage:"Negotiation", count:leads.filter(l=>l.status==="negotiation").length, fill:"#B07A2A"},
-    {stage:"Won",         count:leads.filter(l=>l.status==="won").length,         fill:"#547C4D"},
-    {stage:"Lost",        count:leads.filter(l=>l.status==="lost").length,        fill:"#A84A3D"},
+    {stage:"New",         count:leads.filter((l: any) =>l.status==="new").length,         fill:"#5B7C8C"},
+    {stage:"Qualified",   count:leads.filter((l: any) =>l.status==="qualified").length,   fill:"#8D7443"},
+    {stage:"Proposal",    count:leads.filter((l: any) =>l.status==="proposal").length,    fill:"#818CF8"},
+    {stage:"Negotiation", count:leads.filter((l: any) =>l.status==="negotiation").length, fill:"#B07A2A"},
+    {stage:"Won",         count:leads.filter((l: any) =>l.status==="won").length,         fill:"#547C4D"},
+    {stage:"Lost",        count:leads.filter((l: any) =>l.status==="lost").length,        fill:"#A84A3D"},
   ];
 
-  const pmOverdue    = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
+  const pmOverdue    = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
   const pmCompliance = Math.round((pms.length-pmOverdue)/Math.max(pms.length,1)*100);
-  const compRate     = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
-  const collRate     = inv.length>0?Math.round(inv.filter(i=>i.status==="paid").length/inv.length*100):0;
+  const compRate     = wos.length>0?Math.round(wos.filter((w: any) =>w.status==="completed").length/wos.length*100):0;
+  const collRate     = inv.length>0?Math.round(inv.filter((i: any) =>i.status==="paid").length/inv.length*100):0;
 
   const AXIS = {fontSize:11,fill:"var(--color-text-3)"};
   const GRID = "rgba(255,255,255,0.06)";
@@ -96,9 +96,9 @@ export default function AnalyticsTrends() {
               {label:"Collection Rate", value:`${collRate}%`,    color:collRate>=90?"var(--color-success)":"var(--color-warning)"},
               {label:"PM Compliance",   value:`${pmCompliance}%`,color:pmCompliance>=90?"var(--color-success)":"var(--color-warning)"},
               {label:"Total WOs",       value:wos.length,        color:"var(--color-info)"},
-              {label:"Active Leads",    value:leads.filter(l=>l.status!=="won"&&l.status!=="lost").length, color:"var(--color-brand)"},
+              {label:"Active Leads",    value:leads.filter((l: any) =>l.status!=="won"&&l.status!=="lost").length, color:"var(--color-brand)"},
               {label:"PM Overdue",      value:pmOverdue,         color:pmOverdue>0?"var(--color-danger)":"var(--color-success)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1.125rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -189,7 +189,7 @@ export default function AnalyticsTrends() {
                 <YAxis type="category" dataKey="stage" tick={AXIS} axisLine={false} tickLine={false} width={80}/>
                 <Tooltip content={<WarmTooltip/>}/>
                 <Bar dataKey="count" name="Leads" radius={[0,6,6,0]}>
-                  {leadStatusData.map((e,i)=><Cell key={i} fill={e.fill}/>)}
+                  {leadStatusData.map((e: any, i: number) =><Cell key={i} fill={e.fill}/>)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -205,8 +205,8 @@ export default function AnalyticsTrends() {
               {label:"PM Plan Compliance",   value:pmCompliance, target:90,  color:"#8D7443", path:"/maintenance/pm-plans",   unit:"%"},
               {label:"Asset Uptime",         value:100,          target:95,  color:"#5B7C8C", path:"/maintenance/assets",     unit:"%"},
               {label:"Contract Active Rate", value:Math.round(43/72*100), target:60, color:"#B07A2A", path:"/commercial/contracts", unit:"%"},
-              {label:"Lead Conversion",      value:leads.length>0?Math.round(leads.filter(l=>l.status==="won").length/leads.length*100):0, target:20, color:"#547C4D", path:"/commercial/leads", unit:"%"},
-            ].map((k,i)=>{
+              {label:"Lead Conversion",      value:leads.length>0?Math.round(leads.filter((l: any) =>l.status==="won").length/leads.length*100):0, target:20, color:"#547C4D", path:"/commercial/leads", unit:"%"},
+            ].map((k: any, i: number) =>{
               const isGood = k.value >= k.target;
               return (
                 <button key={i} onClick={()=>router.push(k.path)} className="tb-section text-left cursor-pointer">

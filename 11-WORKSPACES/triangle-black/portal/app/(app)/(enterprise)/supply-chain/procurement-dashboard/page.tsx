@@ -6,7 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const fmtK   = (n) => Number(n||0)>=1000?`${(Number(n)/1000).toFixed(0)}K`:String(Math.round(n||0));
 const COLORS  = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"];
 const AXIS    = {fontSize:11,fill:"var(--color-text-3)"};
@@ -16,7 +16,7 @@ const WarmTooltip = ({active,payload,label}) => {
   return (
     <div className="tb-section shadow-lg" style={{padding:"8px 12px"}}>
       {label&&<div className="text-xs text-tertiary mb-1">{label}</div>}
-      {payload.map((p,i)=><div key={i} className="text-sm font-bold text-primary">{p.name}: {p.value}</div>)}
+      {payload.map((p: any, i: number) =><div key={i} className="text-sm font-bold text-primary">{p.name}: {p.value}</div>)}
     </div>
   );
 };
@@ -119,7 +119,7 @@ export default function ProcurementDashboardPage() {
                 <XAxis dataKey="name" tick={AXIS} axisLine={false} tickLine={false}/>
                 <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={fmtK}/>
                 <Tooltip content={<WarmTooltip/>}/>
-                <Bar dataKey="value" radius={[6,6,0,0]}>{pipeline.map((e,i)=><Cell key={i} fill={e.fill}/>)}</Bar>
+                <Bar dataKey="value" radius={[6,6,0,0]}>{pipeline.map((e: any, i: number) =><Cell key={i} fill={e.fill}/>)}</Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -136,7 +136,7 @@ export default function ProcurementDashboardPage() {
         </div>
 
         <div className="tb-grid-3">
-          {MODULES.map((m,i)=>(
+          {MODULES.map((m: any, i: number) =>(
             <button key={i} onClick={()=>router.push(m.path)} className="tb-action-item gap-3">
               <span className="text-xl">{m.icon}</span>
               <div className="text-left">

@@ -9,8 +9,8 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { toast } from "@/lib/toast";
 
-const fmtEGP = (n) => "EGP " + Number(n || 0).toLocaleString();
-const fmtDate = (d) => { try { return d ? new Date(d).toLocaleDateString("en-GB") : "—"; } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n || 0).toLocaleString();
+const fmtDate = (d: any) => { try { return d ? new Date(d).toLocaleDateString("en-GB") : "—"; } catch { return "—"; } };
 
 const EMPTY_RFQ = {
   title: "", rfq_type: "open", currency: "EGP",
@@ -142,7 +142,7 @@ export default function SOWDetailPage() {
   );
 
   const boqItems = sow.boq_items || [];
-  const boqTotal = boqItems.reduce((s, i) => s + Number(i.total_amount || 0), 0);
+  const boqTotal = boqItems.reduce((s: any, i: any) => s + Number(i.total_amount || 0), 0);
   const overhead = boqTotal * (Number(sow.overhead_pct || 0) / 100);
   const profit = (boqTotal + overhead) * (Number(sow.profit_margin_pct || 0) / 100);
   const grandTotal = boqTotal + overhead + profit + Number(sow.labor_cost || 0);
@@ -230,7 +230,7 @@ export default function SOWDetailPage() {
             { key: "boq",     label: `BOQ Items (${boqItems.length})` },
             { key: "details", label: "SOW Details" },
             { key: "actions", label: "Actions" },
-          ].map(t => (
+          ].map((t: any) => (
             <button key={t.key} onClick={() => setActiveTab(t.key)}
               className={`tb-tab ${activeTab === t.key ? "active" : ""}`}>
               {t.label}
@@ -502,7 +502,7 @@ export default function SOWDetailPage() {
                 <select value={rfqForm.rfq_type}
                   onChange={e => setF("rfq_type", e.target.value)}
                   className="tb-select">
-                  {["open","closed","direct"].map(t => (
+                  {["open","closed","direct"].map((t: any) => (
                     <option key={t} value={t}>
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </option>
@@ -514,7 +514,7 @@ export default function SOWDetailPage() {
                 <select value={rfqForm.currency}
                   onChange={e => setF("currency", e.target.value)}
                   className="tb-select">
-                  {["EGP","USD","EUR","AED"].map(c => (
+                  {["EGP","USD","EUR","AED"].map((c: any) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>

@@ -5,9 +5,9 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const STARS = (r: any) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 export default function VendorDetailPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -38,7 +38,7 @@ export default function VendorDetailPage() {
     if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary text-sm animate-pulse">Loading vendor…</div></div>;
   if (!vendor || vendor.error) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-tertiary">Vendor not found</div></div>;
   const pos = vendor.purchase_orders || [];
-  const totalPOValue = pos.reduce((s,p)=>s+Number(p.total_amount||0),0);
+  const totalPOValue = pos.reduce((s: any, p: any) =>s+Number(p.total_amount||0),0);
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg,#221D1A 0%,#221D1A 100%)"}}>
@@ -85,7 +85,7 @@ export default function VendorDetailPage() {
               {label:"Total Value",value:fmtEGP(totalPOValue),color:"#547C4D"},
               {label:"Rating",value:`${Number(vendor.rating||0).toFixed(1)}/5`,color:"#B07A2A"},
               {label:"Payment Terms",value:`${vendor.payment_terms||30} days`,color:"#8D7443"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>

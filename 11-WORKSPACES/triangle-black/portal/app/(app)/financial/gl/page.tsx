@@ -17,7 +17,7 @@ export default function GLPage() {
     Promise.all([
       tbFetch("/api/v1/financial/gl/?limit=50"),
       tbFetch("/api/v1/financial/gl/summary"),
-    ]).then(([e, s]) => {
+    ]).then(([e, s]: any[]) => {
       setEntries(Array.isArray(e.data) ? e.data : []);
       setSummary(s.data);
       setLoading(false);
@@ -81,7 +81,7 @@ export default function GLPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {entries.map((e) => (
+              {entries.map((e: any) => (
                 <tr key={e.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono text-xs text-gray-600">{e.entry_number}</td>
                   <td className="px-4 py-3 text-gray-600">{new Date(e.entry_date).toLocaleDateString()}</td>

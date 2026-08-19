@@ -7,18 +7,18 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
-const fmtEGP = (n) => n?"EGP "+Number(n).toLocaleString():"—";
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const fmtEGP = (n: any) => n?"EGP "+Number(n).toLocaleString():"—";
 
 export default function ProjectsReviewPage() {
   const router = useRouter();
   const { data: raw, isLoading } = useQuery({queryKey:["proj-review"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r=>r.json()),staleTime:60000});
   const projects = toArr(raw);
   const now = new Date();
-  const needsReview = projects.filter(p=>["active","in_progress","on_hold"].includes(p.status));
-  const overdue = projects.filter(p=>p.end_date&&new Date(p.end_date)<now&&p.status!=="completed");
-  const behindSchedule = projects.filter(p=>(p.completion_pct||0)<50&&p.status==="active");
+  const needsReview = projects.filter((p: any) =>["active","in_progress","on_hold"].includes(p.status));
+  const overdue = projects.filter((p: any) =>p.end_date&&new Date(p.end_date)<now&&p.status!=="completed");
+  const behindSchedule = projects.filter((p: any) =>(p.completion_pct||0)<50&&p.status==="active");
 
   return (
     <div className="min-h-screen bg-base">
@@ -37,7 +37,7 @@ export default function ProjectsReviewPage() {
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{needsReview.length}</div><div className="tb-hero-kpi-label">Active</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:overdue.length>0?"var(--color-danger)":"var(--color-success)"}}>{overdue.length}</div><div className="tb-hero-kpi-label">Overdue</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:behindSchedule.length>0?"var(--color-warning)":"var(--color-success)"}}>{behindSchedule.length}</div><div className="tb-hero-kpi-label">Behind Schedule</div></div>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{projects.filter(p=>p.status==="completed").length}</div><div className="tb-hero-kpi-label">Completed</div></div>
+              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{projects.filter((p: any) =>p.status==="completed").length}</div><div className="tb-hero-kpi-label">Completed</div></div>
             </>}
           </div>
         </div>
@@ -60,7 +60,7 @@ export default function ProjectsReviewPage() {
               <table className="tb-table">
                 <thead><tr><th>Project</th><th>Status</th><th>Completion</th><th>End Date</th><th style={{textAlign:"right"}}>Budget</th><th>Risk</th></tr></thead>
                 <tbody>
-                  {needsReview.map((p,i)=>{
+                  {needsReview.map((p: any, i: number) =>{
                     const isOvd = p.end_date&&new Date(p.end_date)<now;
                     const isBehind = (p.completion_pct||0)<50;
                     const risk = isOvd?"High":isBehind?"Medium":"Low";

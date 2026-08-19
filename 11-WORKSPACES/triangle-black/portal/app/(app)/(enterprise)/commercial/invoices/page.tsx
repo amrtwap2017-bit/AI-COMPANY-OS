@@ -8,9 +8,9 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function CommercialInvoicesPage() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function CommercialInvoicesPage() {
   const { data: raw, isLoading } = useQuery(["comm-inv"],()=>authFetch("/api/v1/supplier-invoices/").then(r=>r.json()),{staleTime:30000});
   const { data: dash } = useQuery(["comm-inv-dash"],()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r=>r.json()),{staleTime:60000});
   const invoices = toArr(raw);
-  const filtered = filter==="all"?invoices:invoices.filter(i=>i.status===filter);
+  const filtered = filter==="all"?invoices:invoices.filter((i: any) =>i.status===filter);
   const totals = dash?.totals||{};
 
   return (
@@ -29,7 +29,7 @@ export default function CommercialInvoicesPage() {
           <h1 className="tb-hero-title">Invoices</h1>
           <p className="tb-hero-description">{invoices.length} invoices · {fmtEGP(totals.total_value||0)} total</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Invoiced",value:fmtEGP(totals.total_value||0)},{label:"Outstanding",value:fmtEGP(totals.total_outstanding||0),warn:true},{label:"Paid",value:invoices.filter(i=>i.status==="paid").length,good:true},{label:"Pending",value:invoices.filter(i=>i.status==="submitted"||i.status==="matching").length}].map((k,i)=>(
+            {[{label:"Total Invoiced",value:fmtEGP(totals.total_value||0)},{label:"Outstanding",value:fmtEGP(totals.total_outstanding||0),warn:true},{label:"Paid",value:invoices.filter((i: any) =>i.status==="paid").length,good:true},{label:"Pending",value:invoices.filter((i: any) =>i.status==="submitted"||i.status==="matching").length}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.good?"var(--color-success)":k.warn?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -41,9 +41,9 @@ export default function CommercialInvoicesPage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs mb-4">
-          {["all","draft","submitted","matching","approved","paid"].map(f=>(
+          {["all","draft","submitted","matching","approved","paid"].map((f: any) =>(
             <button key={f} onClick={()=>setFilter(f)} className={`tb-tab ${filter===f?"active":""}`}>
-              {f==="all"?"All":f}{f!=="all"&&` (${invoices.filter(i=>i.status===f).length})`}
+              {f==="all"?"All":f}{f!=="all"&&` (${invoices.filter((i: any) =>i.status===f).length})`}
             </button>
           ))}
         </div>

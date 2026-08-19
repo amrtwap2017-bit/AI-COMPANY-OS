@@ -57,7 +57,7 @@ export function Modal({
         className="absolute inset-0 backdrop-blur-sm"
         onClick={closeOnBackdrop ? onClose : undefined}
       />
-      <div className={`relative w-full rounded-xl shadow-lg flex flex-col max-h-[90vh] ${SIZES[size] || SIZES.md}`} style={{background:"var(--color-surface)",border:"1px solid var(--color-border)"}}>
+      <div className={`relative w-full rounded-xl shadow-lg flex flex-col max-h-[90vh] ${(SIZES as Record<string, any>)[size] || SIZES.md}`} style={{background:"var(--color-surface)",border:"1px solid var(--color-border)"}}>
         {(title || onClose) && (
           <div className="flex items-start justify-between px-6 py-4 border-b flex-shrink-0">
             <div>

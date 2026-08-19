@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
@@ -40,7 +40,7 @@ export default function PurchaseOrderDetailPage() {
     </div>
   );
 
-  const sc = STATUS_COLOR[po.status] || "#6D5F53";
+  const sc = (STATUS_COLOR as Record<string, any>)[po.status] || "#6D5F53";
   const amount = Number(po.total_amount || po.total_value || 0);
 
   return (
@@ -64,7 +64,7 @@ export default function PurchaseOrderDetailPage() {
               { label:"Total",      value:fmtEGP(amount),                 color:"#547C4D" },
               { label:"Supplier",   value:po.supplier_name||"—",          color:"#5B7C8C" },
               { label:"Order Date", value:fmtDate(po.order_date||po.created_at), color:"#6D5F53" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -157,7 +157,7 @@ export default function PurchaseOrderDetailPage() {
                   { label:"Purchase Requests", icon:"📋", path:"/supply-chain/purchase-requests" },
                   { label:"Suppliers",         icon:"🏭", path:"/supply-chain/suppliers" },
                   { label:"Inventory",         icon:"📦", path:"/supply-chain/inventory" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

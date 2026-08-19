@@ -33,7 +33,7 @@ export default function RFQDetailPage() {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/rfqs/${id}`)
       .then(r => r.json())
-      .then(d => setRfq(d))
+      .then((d: any) => setRfq(d))
       .catch(() => toast.error("Failed to load RFQ"))
       .finally(() => setLoading(false));
   }, [mounted, id]);
@@ -88,7 +88,7 @@ export default function RFQDetailPage() {
           <div className="flex items-center gap-2 mt-1">
             <span className="font-mono text-sm text-gray-500">{rfq.rfq_number}</span>
             <span className="text-gray-300">·</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[rfq.status] || "bg-gray-100 text-gray-600"}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[rfq.status] || "bg-gray-100 text-gray-600"}`}>
               {rfq.status}
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function RFQDetailPage() {
           { label:"Required By",  value:fmtDate(rfq.required_date||rfq.due_date), color:"bg-blue-50" },
           { label:"Line Items",   value:lines.length,                        color:"bg-purple-50" },
           { label:"Created",      value:fmtDate(rfq.created_at),            color:"bg-gray-50" },
-        ].map(k => (
+        ].map((k: any) => (
           <div key={k.label} className={`${k.color} border border-gray-200 rounded-xl p-4`}>
             <p className="text-xs text-gray-500">{k.label}</p>
             <p className="text-lg font-bold text-[var(--color-text-1)] mt-1 capitalize">{k.value}</p>

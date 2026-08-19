@@ -37,7 +37,7 @@ export default function PMPlanDetailPage() {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/maintenance/pm-plans/${id}`)
       .then(r => r.json())
-      .then(d => { setPlan(d); if (d.status === "completed") setCompleted(true); })
+      .then((d: any) => { setPlan(d); if (d.status === "completed") setCompleted(true); })
       .catch(() => toast.error("Failed to load PM plan"))
       .finally(() => setLoading(false));
   }, [mounted, id]);
@@ -91,7 +91,7 @@ export default function PMPlanDetailPage() {
           </button>
           <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{plan.title}</h1>
           <div className="flex items-center gap-2 mt-2">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[plan.status] || "bg-gray-100 text-gray-600"}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[plan.status] || "bg-gray-100 text-gray-600"}`}>
               {plan.status}
             </span>
             {isOverdue && (
@@ -99,7 +99,7 @@ export default function PMPlanDetailPage() {
                 ⚠️ OVERDUE
               </span>
             )}
-            <span className="text-xs text-gray-500">{FREQ_LABEL[plan.frequency] || plan.frequency}</span>
+            <span className="text-xs text-gray-500">{(FREQ_LABEL as Record<string, any>)[plan.frequency] || plan.frequency}</span>
           </div>
         </div>
         {!completed && (
@@ -130,7 +130,7 @@ export default function PMPlanDetailPage() {
         <div className="grid grid-cols-2 gap-4">
           {[
             ["Plan Type",    plan.plan_type || "preventive"],
-            ["Frequency",    FREQ_LABEL[plan.frequency] || plan.frequency],
+            ["Frequency",    (FREQ_LABEL as Record<string, any>)[plan.frequency] || plan.frequency],
             ["Status",       plan.status],
             ["Owner",        plan.owner || "—"],
             ["Asset Node",   plan.asset_node_id || "—"],

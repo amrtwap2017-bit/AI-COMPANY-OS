@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function RisksPage() {
   const router = useRouter();
   const { data: woRaw }   = useQuery(["rsk-wos"],   () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
@@ -14,11 +14,11 @@ export default function RisksPage() {
   const wos = toArr(woRaw); const contracts = toArr(contRaw);
   const inv = toArr(invRaw); const pms = toArr(pmRaw);
   const now = new Date();
-  const criticalWOs = wos.filter(w=>w.priority==="critical"&&w.status!=="completed").length;
-  const overdueWOs  = wos.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed").length;
-  const expiringCts = contracts.filter(c=>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000)).length;
-  const overduePMs  = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
-  const overdueInv  = inv.filter(i=>i.status==="overdue").length;
+  const criticalWOs = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed").length;
+  const overdueWOs  = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed").length;
+  const expiringCts = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime()+30*86400000)).length;
+  const overduePMs  = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now).length;
+  const overdueInv  = inv.filter((i: any) =>i.status==="overdue").length;
   const riskScore   = criticalWOs*10+overdueWOs*3+expiringCts*5+overduePMs*2+overdueInv*4;
   const riskLevel   = riskScore===0?"None":riskScore<15?"Low":riskScore<30?"Medium":"High";
   const riskColor   = riskScore===0?"#547C4D":riskScore<15?"#5B7C8C":riskScore<30?"#B07A2A":"#A84A3D";
@@ -37,7 +37,7 @@ export default function RisksPage() {
           <h1 className="tb-hero-title">Risk Register</h1>
           <p className="tb-hero-description">Platform risk assessment and mitigation status</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Risk Score",value:riskScore,color:riskColor},{label:"Risk Level",value:riskLevel,color:riskColor},{label:"Risk Items",value:risks.filter(r=>r.value>0).length,color:risks.filter(r=>r.value>0).length>0?"#B07A2A":"#547C4D"},{label:"Status",value:riskScore===0?"Clear":"Active",color:riskColor}].map((k,i)=>(
+            {[{label:"Risk Score",value:riskScore,color:riskColor},{label:"Risk Level",value:riskLevel,color:riskColor},{label:"Risk Items",value:risks.filter((r: any) =>r.value>0).length,color:risks.filter((r: any) =>r.value>0).length>0?"#B07A2A":"#547C4D"},{label:"Status",value:riskScore===0?"Clear":"Active",color:riskColor}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -71,7 +71,7 @@ export default function RisksPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Mitigation Actions</div>
           <div className="tb-grid-3">
-            {[{label:"View Exceptions",icon:"🚨",path:"/executive/exceptions"},{label:"Dispatch WOs",icon:"📋",path:"/operations/dispatch"},{label:"Review Contracts",icon:"📄",path:"/commercial/contracts"}].map((a,i)=>(
+            {[{label:"View Exceptions",icon:"🚨",path:"/executive/exceptions"},{label:"Dispatch WOs",icon:"📋",path:"/operations/dispatch"},{label:"Review Contracts",icon:"📄",path:"/commercial/contracts"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

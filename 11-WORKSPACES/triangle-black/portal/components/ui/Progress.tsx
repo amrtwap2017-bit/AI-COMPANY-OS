@@ -30,7 +30,7 @@ export function Progress({
   color = "amber", size = "md", className = ""
 }: ProgressBarProps) {
   const pct = Math.min(Math.max((value / max) * 100, 0), 100);
-  const barColor = pct >= 90 ? COLORS.red : pct >= 70 ? COLORS.amber : COLORS[color] || COLORS.amber;
+  const barColor = pct >= 90 ? COLORS.red : pct >= 70 ? COLORS.amber : (COLORS as Record<string, any>)[color] || COLORS.amber;
   return (
     <div className={"w-full " + className}>
       {(label || showValue) && (
@@ -42,7 +42,7 @@ export function Progress({
         </div>
       )}
       <div
-        className={"w-full bg-surface-alt rounded-full overflow-hidden " + HEIGHTS[size]}
+        className={"w-full bg-surface-alt rounded-full overflow-hidden " + (HEIGHTS as Record<string, any>)[size]}
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}

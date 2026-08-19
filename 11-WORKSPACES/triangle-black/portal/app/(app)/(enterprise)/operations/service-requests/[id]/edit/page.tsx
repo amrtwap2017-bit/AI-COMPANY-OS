@@ -42,7 +42,7 @@ export default function ServiceRequestEditPage() {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/service-requests/${id}`)
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         setSr(d);
         setForm({
           status:           d.status || "open",
@@ -103,13 +103,13 @@ export default function ServiceRequestEditPage() {
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-4">
         <div>
           <p className="text-xs text-gray-500 mb-1">Current Status</p>
-          <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLOR[sr.status] || "bg-gray-100 text-gray-600"}`}>
+          <span className={`text-sm px-3 py-1 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[sr.status] || "bg-gray-100 text-gray-600"}`}>
             {sr.status}
           </span>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1">Urgency</p>
-          <span className={`text-sm font-semibold ${URGENCY_COLOR[sr.urgency] || "text-gray-600"}`}>
+          <span className={`text-sm font-semibold ${(URGENCY_COLOR as Record<string, any>)[sr.urgency] || "text-gray-600"}`}>
             {sr.urgency}
           </span>
         </div>
@@ -144,7 +144,7 @@ export default function ServiceRequestEditPage() {
             <label className="block text-xs font-medium text-gray-700 mb-1">Status *</label>
             <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-              {STATUS_OPTIONS.map(s => (
+              {STATUS_OPTIONS.map((s: any) => (
                 <option key={s} value={s}>{s.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>
               ))}
             </select>
@@ -153,7 +153,7 @@ export default function ServiceRequestEditPage() {
             <label className="block text-xs font-medium text-gray-700 mb-1">Urgency</label>
             <select value={form.urgency} onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-              {URGENCY_OPTIONS.map(u => (
+              {URGENCY_OPTIONS.map((u: any) => (
                 <option key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</option>
               ))}
             </select>

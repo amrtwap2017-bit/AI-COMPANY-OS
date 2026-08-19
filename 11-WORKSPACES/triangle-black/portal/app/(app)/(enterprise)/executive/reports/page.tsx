@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP  = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 function printReport(title, content) {
   const html = `<!DOCTYPE html><html><head><title>${title}</title>
@@ -41,13 +41,13 @@ export default function ExecutiveReportsPage() {
       printReport("Daily Operations Summary — "+(daily.date||""),`<h2>Work Orders</h2><div><div class="kpi"><div class="kpi-val">${dWO.open_total||0}</div><div class="kpi-lbl">Open</div></div><div class="kpi"><div class="kpi-val">${dWO.critical_open||0}</div><div class="kpi-lbl">Critical</div></div><div class="kpi"><div class="kpi-val">${dWO.created_today||0}</div><div class="kpi-lbl">Created Today</div></div><div class="kpi"><div class="kpi-val">${dWO.completed_today||0}</div><div class="kpi-lbl">Completed Today</div></div></div><h2>Finance</h2><div><div class="kpi"><div class="kpi-val">EGP ${Number(dFin.collected||0).toLocaleString()}</div><div class="kpi-lbl">Collected</div></div></div>`);
     } else if (type==="work-orders"&&woReport) {
       const rows=toArr(woReport.recent);
-      printReport("Work Orders Report",`<h2>Summary</h2><div><div class="kpi"><div class="kpi-val">${woSum.total||0}</div><div class="kpi-lbl">Total</div></div></div><h2>Recent Work Orders</h2><table><thead><tr><th>Title</th><th>Priority</th><th>Status</th><th>Technician</th><th>Date</th></tr></thead><tbody>${rows.map(w=>`<tr><td>${w.title||""}</td><td>${w.priority||""}</td><td>${w.status||""}</td><td>${w.technician_name||"—"}</td><td>${new Date(w.created_at).toLocaleDateString("en-GB")}</td></tr>`).join("")}</tbody></table>`);
+      printReport("Work Orders Report",`<h2>Summary</h2><div><div class="kpi"><div class="kpi-val">${woSum.total||0}</div><div class="kpi-lbl">Total</div></div></div><h2>Recent Work Orders</h2><table><thead><tr><th>Title</th><th>Priority</th><th>Status</th><th>Technician</th><th>Date</th></tr></thead><tbody>${rows.map((w: any) =>`<tr><td>${w.title||""}</td><td>${w.priority||""}</td><td>${w.status||""}</td><td>${w.technician_name||"—"}</td><td>${new Date(w.created_at).toLocaleDateString("en-GB")}</td></tr>`).join("")}</tbody></table>`);
     } else if (type==="assets"&&assetRpt) {
       const rows=toArr(assetRpt.assets);
-      printReport("Asset Register",`<h2>Summary</h2><div><div class="kpi"><div class="kpi-val">${aSum.total||0}</div><div class="kpi-lbl">Total</div></div></div><h2>Asset Register</h2><table><thead><tr><th>Asset</th><th>Category</th><th>Status</th><th>Location</th><th>WOs</th></tr></thead><tbody>${rows.map(a=>`<tr><td>${a.name||""}</td><td>${a.category||""}</td><td>${a.status||""}</td><td>${a.location||"—"}</td><td>${a.total_wos||0}</td></tr>`).join("")}</tbody></table>`);
+      printReport("Asset Register",`<h2>Summary</h2><div><div class="kpi"><div class="kpi-val">${aSum.total||0}</div><div class="kpi-lbl">Total</div></div></div><h2>Asset Register</h2><table><thead><tr><th>Asset</th><th>Category</th><th>Status</th><th>Location</th><th>WOs</th></tr></thead><tbody>${rows.map((a: any) =>`<tr><td>${a.name||""}</td><td>${a.category||""}</td><td>${a.status||""}</td><td>${a.location||"—"}</td><td>${a.total_wos||0}</td></tr>`).join("")}</tbody></table>`);
     } else if (type==="contracts"&&contRpt) {
       const rows=toArr(contRpt.contracts);
-      printReport("Contracts Portfolio",`<h2>Summary</h2><div><div class="kpi"><div class="kpi-val">${cSum.active||0}</div><div class="kpi-lbl">Active</div></div></div><h2>Contracts</h2><table><thead><tr><th>Title</th><th>Status</th><th>Value</th><th>End Date</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${c.title||""}</td><td>${c.status||""}</td><td>EGP ${Number(c.total_value||0).toLocaleString()}</td><td>${c.end_date?new Date(c.end_date).toLocaleDateString("en-GB"):"—"}</td></tr>`).join("")}</tbody></table>`);
+      printReport("Contracts Portfolio",`<h2>Summary</h2><div><div class="kpi"><div class="kpi-val">${cSum.active||0}</div><div class="kpi-lbl">Active</div></div></div><h2>Contracts</h2><table><thead><tr><th>Title</th><th>Status</th><th>Value</th><th>End Date</th></tr></thead><tbody>${rows.map((c: any) =>`<tr><td>${c.title||""}</td><td>${c.status||""}</td><td>EGP ${Number(c.total_value||0).toLocaleString()}</td><td>${c.end_date?new Date(c.end_date).toLocaleDateString("en-GB"):"—"}</td></tr>`).join("")}</tbody></table>`);
     }
   };
 
@@ -76,7 +76,7 @@ export default function ExecutiveReportsPage() {
               {label:"Assets",          value:aSum.total||0},
               {label:"Active Contracts",value:cSum.active||0},
               {label:"Critical Open",   value:dWO.critical_open||0,danger:(dWO.critical_open||0)>0},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.danger?"var(--color-danger)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -90,7 +90,7 @@ export default function ExecutiveReportsPage() {
         <div className="tb-section mb-4">
           <div className="tb-section-title">Available Reports</div>
           <div className="tb-grid-4">
-            {REPORTS.map((r,i)=>(
+            {REPORTS.map((r: any, i: number) =>(
               <button key={i} onClick={()=>setActiveReport(r.id)}
                 className={`tb-section text-left tb-hover-lift cursor-pointer ${activeReport===r.id?"border-brand bg-surface":""}`}>
                 <div className="text-3xl mb-2">{r.icon}</div>
@@ -111,7 +111,7 @@ export default function ExecutiveReportsPage() {
               <button onClick={()=>handlePrint("daily")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
-              {[{label:"Open WOs",value:dWO.open_total||0},{label:"Critical WOs",value:dWO.critical_open||0,danger:(dWO.critical_open||0)>0},{label:"Created Today",value:dWO.created_today||0},{label:"Overdue PMs",value:dMaint.overdue_pms||0,danger:(dMaint.overdue_pms||0)>0},{label:"Collected",value:fmtEGP(dFin.collected)},{label:"Pending",value:fmtEGP(dFin.pending)},{label:"Unread Alerts",value:(daily.alerts||[]).length},{label:"Due This Week",value:dMaint.due_this_week||0}].map((k,i)=>(
+              {[{label:"Open WOs",value:dWO.open_total||0},{label:"Critical WOs",value:dWO.critical_open||0,danger:(dWO.critical_open||0)>0},{label:"Created Today",value:dWO.created_today||0},{label:"Overdue PMs",value:dMaint.overdue_pms||0,danger:(dMaint.overdue_pms||0)>0},{label:"Collected",value:fmtEGP(dFin.collected)},{label:"Pending",value:fmtEGP(dFin.pending)},{label:"Unread Alerts",value:(daily.alerts||[]).length},{label:"Due This Week",value:dMaint.due_this_week||0}].map((k: any, i: number) =>(
                 <div key={i} className="p-3 bg-surface-alt rounded-xl text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.danger&&k.value>0?"var(--color-danger)":"var(--color-text-1)"}}>{k.value}</div>
                   <div className="text-xs text-tertiary">{k.label}</div>
@@ -122,7 +122,7 @@ export default function ExecutiveReportsPage() {
               <div className="mt-4">
                 <div className="text-xs text-tertiary mb-2">Recent Alerts</div>
                 <div className="flex flex-col gap-1">
-                  {(daily.alerts||[]).slice(0,5).map((a,i)=>(
+                  {(daily.alerts||[]).slice(0,5).map((a: any, i: number) =>(
                     <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-surface-alt">
                       <span className="text-xs font-bold text-brand">{a.type||"info"}</span>
                       <span className="text-xs text-secondary truncate">{a.title}</span>
@@ -141,7 +141,7 @@ export default function ExecutiveReportsPage() {
               <button onClick={()=>handlePrint("work-orders")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
-              {[{label:"Total",value:woSum.total||0},{label:"Completed",value:woSum.completed||0,good:true},{label:"Open",value:woSum.open_count||0},{label:"Avg Resolve",value:(Math.round(woSum.avg_resolution_hours||0))+"h"}].map((k,i)=>(
+              {[{label:"Total",value:woSum.total||0},{label:"Completed",value:woSum.completed||0,good:true},{label:"Open",value:woSum.open_count||0},{label:"Avg Resolve",value:(Math.round(woSum.avg_resolution_hours||0))+"h"}].map((k: any, i: number) =>(
                 <div key={i} className="p-3 bg-surface-alt rounded-xl text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.good?"var(--color-success)":"var(--color-text-1)"}}>{k.value}</div>
                   <div className="text-xs text-tertiary">{k.label}</div>
@@ -152,7 +152,7 @@ export default function ExecutiveReportsPage() {
               <table className="tb-table">
                 <thead><tr><th>Work Order</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th>Technician</th><th>Date</th></tr></thead>
                 <tbody>
-                  {toArr(woReport.recent).slice(0,10).map((w,i)=>(
+                  {toArr(woReport.recent).slice(0,10).map((w: any, i: number) =>(
                     <tr key={i}>
                       <td className="font-medium text-sm text-primary truncate">{w.title||"—"}</td>
                       <td className="text-center"><span className={`tb-badge ${w.priority==="critical"?"tb-badge-danger":w.priority==="high"?"tb-badge-warning":"tb-badge-neutral"}`} style={{fontSize:"9px"}}>{w.priority}</span></td>
@@ -174,7 +174,7 @@ export default function ExecutiveReportsPage() {
               <button onClick={()=>handlePrint("assets")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
-              {[{label:"Total",value:aSum.total||0},{label:"Operational",value:aSum.operational||0,good:true},{label:"In Fault",value:aSum.faulted||0,danger:(aSum.faulted||0)>0},{label:"Categories",value:aSum.categories||0}].map((k,i)=>(
+              {[{label:"Total",value:aSum.total||0},{label:"Operational",value:aSum.operational||0,good:true},{label:"In Fault",value:aSum.faulted||0,danger:(aSum.faulted||0)>0},{label:"Categories",value:aSum.categories||0}].map((k: any, i: number) =>(
                 <div key={i} className="p-3 bg-surface-alt rounded-xl text-center">
                   <div className="text-xl font-black mb-1" style={{color:k.good?"var(--color-success)":k.danger&&k.value>0?"var(--color-danger)":"var(--color-text-1)"}}>{k.value}</div>
                   <div className="text-xs text-tertiary">{k.label}</div>
@@ -185,7 +185,7 @@ export default function ExecutiveReportsPage() {
               <table className="tb-table">
                 <thead><tr><th>Asset</th><th>Category</th><th>Status</th><th>Location</th><th style={{textAlign:"center"}}>WOs</th></tr></thead>
                 <tbody>
-                  {toArr(assetRpt.assets).slice(0,15).map((a,i)=>(
+                  {toArr(assetRpt.assets).slice(0,15).map((a: any, i: number) =>(
                     <tr key={i}>
                       <td className="font-medium text-sm text-primary">{a.name||"—"}</td>
                       <td className="text-xs text-secondary">{a.category||"—"}</td>
@@ -207,7 +207,7 @@ export default function ExecutiveReportsPage() {
               <button onClick={()=>handlePrint("contracts")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
-              {[{label:"Active",value:cSum.active||0,good:true},{label:"Portfolio",value:fmtEGP(cSum.active_value)},{label:"Expiring 30d",value:cSum.expiring_30d||0,danger:(cSum.expiring_30d||0)>0},{label:"Expired",value:cSum.expired||0}].map((k,i)=>(
+              {[{label:"Active",value:cSum.active||0,good:true},{label:"Portfolio",value:fmtEGP(cSum.active_value)},{label:"Expiring 30d",value:cSum.expiring_30d||0,danger:(cSum.expiring_30d||0)>0},{label:"Expired",value:cSum.expired||0}].map((k: any, i: number) =>(
                 <div key={i} className="p-3 bg-surface-alt rounded-xl text-center">
                   <div className="text-lg font-black mb-1" style={{color:k.good?"var(--color-success)":k.danger&&k.value>0?"var(--color-danger)":"var(--color-text-1)"}}>{k.value}</div>
                   <div className="text-xs text-tertiary">{k.label}</div>
@@ -218,7 +218,7 @@ export default function ExecutiveReportsPage() {
               <table className="tb-table">
                 <thead><tr><th>Contract</th><th>Status</th><th style={{textAlign:"right"}}>Value</th><th>Expires</th><th style={{textAlign:"center"}}>Days Left</th></tr></thead>
                 <tbody>
-                  {toArr(contRpt.contracts).slice(0,15).map((c,i)=>{
+                  {toArr(contRpt.contracts).slice(0,15).map((c: any, i: number) =>{
                     const days=Math.round(c.days_remaining||0);
                     return (
                       <tr key={i}>

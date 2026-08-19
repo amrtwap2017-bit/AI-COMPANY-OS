@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function IntegrationEntitiesPage() {
   const router = useRouter();
   const { data: assetRaw } = useQuery(["ie-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
@@ -28,7 +28,7 @@ export default function IntegrationEntitiesPage() {
           <h1 className="tb-hero-title">Entity Catalog</h1>
           <p className="tb-hero-description">Platform entity registry and API documentation</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Entities",value:entities.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Work Orders",value:wos.length,color:"#B07A2A"},{label:"Contracts",value:contracts.length,color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Entities",value:entities.length,color:"#221D1A"},{label:"Assets",value:assets.length,color:"#5B7C8C"},{label:"Work Orders",value:wos.length,color:"#B07A2A"},{label:"Contracts",value:contracts.length,color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -39,9 +39,9 @@ export default function IntegrationEntitiesPage() {
           <div className="tb-section-title">Entity Registry</div>
           <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
             <div className="tb-table-head" style={{gridTemplateColumns:"1fr 80px 1fr"}}>
-              {["Entity","Count","API Endpoint"].map((h,i)=><div key={i} className="tb-table-head-cell" style={{textAlign:i===1?"center":"left"}}>{h}</div>)}
+              {["Entity","Count","API Endpoint"].map((h: any, i: number) =><div key={i} className="tb-table-head-cell" style={{textAlign:i===1?"center":"left"}}>{h}</div>)}
             </div>
-            {entities.map((e,i)=>(
+            {entities.map((e: any, i: number) =>(
               <button key={i} onClick={()=>router.push(e.path)} className="tb-table-row" style={{gridTemplateColumns:"1fr 80px 1fr"}}>
                 <div className="flex items-center gap-2"><span>{e.icon}</span><span className="text-sm font-medium text-primary">{e.name}</span></div>
                 <div className="text-center text-sm font-bold" style={{color:"#5B7C8C"}}>{e.count??"-"}</div>

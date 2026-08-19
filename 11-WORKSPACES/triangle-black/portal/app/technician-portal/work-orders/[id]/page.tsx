@@ -74,7 +74,7 @@ export default function TechnicianWODetail() {
           <h1 className="text-base font-bold leading-tight">
             {wo.title || wo.description || `WO-${wo.id?.slice(0,8)}`}
           </h1>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[wo.status] || "bg-gray-800 text-gray-400"}`}>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[wo.status] || "bg-gray-800 text-gray-400"}`}>
             {wo.status?.replace("_"," ")}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function TechnicianWODetail() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
           <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">Update Status</p>
           <div className="grid grid-cols-2 gap-2">
-            {STATUS_OPTIONS.map(s => (
+            {STATUS_OPTIONS.map((s: any) => (
               <button key={s} onClick={() => setNewStatus(s)}
                 className={`py-2.5 rounded-lg text-xs font-medium transition-colors ${
                   newStatus === s ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"

@@ -50,7 +50,7 @@ function badgeClass(badge: string): string {
 
 function CenterAccordion({ center, pathname, collapsed }: { center: NavCenter; pathname: string; collapsed: boolean }) {
   const [open, setOpen] = useState(pathname.startsWith(center.href));
-  const Icon = ICONS[center.key] || LayoutDashboard;
+  const Icon = (ICONS as Record<string, any>)[center.key] || LayoutDashboard;
   const anyActive = pathname === center.href || pathname.startsWith(center.href + "/");
   const childActive = center.children?.some(c => pathname === c.href || pathname.startsWith(c.href + "/")) ?? false;
 
@@ -148,9 +148,9 @@ export function EnterpriseSidebar() {
     localStorage.setItem("tb_sidebar_collapsed", String(next));
   }
 
-  const centerMap = Object.fromEntries(enterpriseCenters.map(c => [c.key, c]));
-  const primaryKeys = PRIMARY_BY_ROLE[role] || PRIMARY_BY_ROLE.viewer;
-  const startHere = START_HERE_BY_ROLE[role] || START_HERE_BY_ROLE.viewer;
+  const centerMap = Object.fromEntries(enterpriseCenters.map((c: any) => [c.key, c]));
+  const primaryKeys = (PRIMARY_BY_ROLE as Record<string, any>)[role] || PRIMARY_BY_ROLE.viewer;
+  const startHere = (START_HERE_BY_ROLE as Record<string, any>)[role] || START_HERE_BY_ROLE.viewer;
 
   // Sprint-202: Feature flag to nav key mapping
   const { isEnabled } = useFeatureFlags();
@@ -166,16 +166,16 @@ export function EnterpriseSidebar() {
 
   const filteredGroups = useMemo(() => {
     return navGroups
-      .map(g => ({
+      .map((g: any) => ({
         ...g,
-        items: g.items.filter(k => {
+        items: g.items.filter((k: any) => {
           if (!primaryKeys.includes(k)) return false;
-          const flagKey = NAV_TO_FLAG[k];
+          const flagKey = (NAV_TO_FLAG as Record<string, any>)[k];
           if (flagKey && !isEnabled(flagKey)) return false;
           return true;
         })
       }))
-      .filter(g => g.items.length > 0);
+      .filter((g: any) => g.items.length > 0);
   }, [primaryKeys, isEnabled]);
 
   const recentPaths = useMemo(() => {
@@ -218,7 +218,7 @@ export function EnterpriseSidebar() {
           {!collapsed && (
             <div className="min-w-0">
               <div style={{color:"#F3EFE8",fontWeight:700,fontSize:"0.875rem",lineHeight:1}} className="truncate">Triangle Black</div>
-              <div style={{color:"#6D5F53",fontSize:"0.625rem",marginTop:3}}>{ROLE_LABELS[role] || "User"}</div>
+              <div style={{color:"#6D5F53",fontSize:"0.625rem",marginTop:3}}>{(ROLE_LABELS as Record<string, any>)[role] || "User"}</div>
             </div>
           )}
         </Link>
@@ -256,7 +256,7 @@ export function EnterpriseSidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
         {filteredGroups.map((group, gi) => {
-          const centers = group.items.map(k => centerMap[k]).filter(Boolean);
+          const centers = group.items.map((k: any) => centerMap[k]).filter(Boolean);
           if (centers.length === 0) return null;
           return (
             <div key={group.label} className={gi > 0 ? "pt-3" : "pt-1"}>
@@ -320,7 +320,7 @@ export function EnterpriseSidebar() {
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <div style={{fontSize:"0.75rem",fontWeight:600,color:"#F3EFE8"}} className="truncate">{user?.name || "User"}</div>
-              <div style={{fontSize:"0.625rem",color:"#6D5F53"}} className="truncate">{ROLE_LABELS[role] || role}</div>
+              <div style={{fontSize:"0.625rem",color:"#6D5F53"}} className="truncate">{(ROLE_LABELS as Record<string, any>)[role] || role}</div>
             </div>
           )}
           <button onClick={logout} style={{background:"transparent",border:"none",cursor:"pointer",padding:0}}>

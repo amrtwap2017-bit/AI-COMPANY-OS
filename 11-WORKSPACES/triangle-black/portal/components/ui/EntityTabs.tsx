@@ -6,7 +6,7 @@ interface Tab { id: string; label: string; icon?: string; badge?: number; conten
 
 export function EntityTabs({ tabs }: { tabs: Tab[] }) {
   const [active, setActive] = useState(tabs[0]?.id || "");
-  const content = tabs.find(t => t.id === active)?.content;
+  const content = tabs.find((t: any) => t.id === active)?.content;
   return (
     <div className="bg-white rounded-2xl border border-border overflow-hidden">
       <nav className="flex overflow-x-auto border-b border-border scrollbar-none">

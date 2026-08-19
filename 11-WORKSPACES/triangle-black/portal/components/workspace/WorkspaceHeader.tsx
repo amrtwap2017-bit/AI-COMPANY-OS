@@ -74,7 +74,7 @@ export function WorkspaceHeader({
   kpis = [], actions = [], aiInsight, health, tabs = [],
 }: WorkspaceHeaderProps) {
   const router = useRouter();
-  const accent = domainColor || DOMAIN_ACCENT[domain] || "#F59E0B";
+  const accent = domainColor || (DOMAIN_ACCENT as Record<string, any>)[domain] || "#F59E0B";
 
   const handleAction = (a: ActionItem) => {
     if (a.onClick) a.onClick();
@@ -180,7 +180,7 @@ export function WorkspaceHeader({
         {/* ── ROW 2: Actions ───────────────────────────────────── */}
         {actions.length > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
-            {actions.map((a, i) => {
+            {actions.map((a: any, i: number) => {
               const isPrimary = a.variant === "primary" || (i === 0 && !a.variant);
               return (
                 <button key={i} onClick={() => handleAction(a)}

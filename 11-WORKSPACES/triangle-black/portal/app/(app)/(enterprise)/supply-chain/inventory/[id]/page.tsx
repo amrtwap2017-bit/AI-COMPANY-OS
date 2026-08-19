@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function InventoryItemDetailPage() {
@@ -40,7 +40,7 @@ export default function InventoryItemDetailPage() {
   );
 
   const stocks = Array.isArray(stockRaw) ? stockRaw : [];
-  const balance = stocks.find(s => s.item_id === id);
+  const balance = stocks.find((s: any) => s.item_id === id);
   const qty     = Number(balance?.qty_on_hand || 0);
   const minQty  = Number(item.minimum_quantity || item.min_quantity || 5);
   const isLow   = qty <= minQty;
@@ -72,7 +72,7 @@ export default function InventoryItemDetailPage() {
               { label:"Minimum",     value:minQty,           color:"#B07A2A" },
               { label:"Unit Price",  value:fmtEGP(unitVal),  color:"#5B7C8C" },
               { label:"Stock Value", value:fmtEGP(totalVal), color:"#8D7443" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -173,7 +173,7 @@ export default function InventoryItemDetailPage() {
                   { label:"Purchase Requests",  icon:"📋", path:"/supply-chain/purchase-requests" },
                   { label:"Purchase Orders",    icon:"📦", path:"/supply-chain/purchase-orders" },
                   { label:"Warehouses",         icon:"🏗️",  path:"/supply-chain/warehouses" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

@@ -246,7 +246,7 @@ export default function DigitalTwinGraphPage() {
         {/* Legend */}
         <div className="tb-section flex gap-5 flex-wrap items-center">
           <span className="text-label text-tertiary">Legend:</span>
-          {[{label:"Critical",cls:"tb-badge-danger"},{label:"High/Medium",cls:"tb-badge-warning"},{label:"Operational",cls:"tb-badge-success"},{label:"In Progress",cls:"tb-badge-info"},{label:"Selected",cls:"tb-badge-brand"}].map((l,i) => (
+          {[{label:"Critical",cls:"tb-badge-danger"},{label:"High/Medium",cls:"tb-badge-warning"},{label:"Operational",cls:"tb-badge-success"},{label:"In Progress",cls:"tb-badge-info"},{label:"Selected",cls:"tb-badge-brand"}].map((l: any, i: number) => (
             <span key={i} className={`tb-badge ${l.cls}`}>{l.label}</span>
           ))}
           <span className="ml-auto text-xs text-tertiary">Click to cascade-filter · Click again to deselect</span>

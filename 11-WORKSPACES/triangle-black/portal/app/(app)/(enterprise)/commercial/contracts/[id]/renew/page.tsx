@@ -38,7 +38,7 @@ export default function ContractRenewPage() {
     if (!mounted || !id) return;
     tbFetch(`/api/v1/contracts/${id}`)
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         setContract(d);
         // Pre-fill with current contract + 1 year
         const now = new Date();
@@ -110,7 +110,7 @@ export default function ContractRenewPage() {
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-[var(--color-text-1)]">{contract.title}</h2>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[contract.status] || "bg-gray-100 text-gray-600"}`}>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[contract.status] || "bg-gray-100 text-gray-600"}`}>
             {contract.status || "active"}
           </span>
         </div>
@@ -160,7 +160,7 @@ export default function ContractRenewPage() {
           <label className="block text-xs font-medium text-gray-700 mb-1">Renewal Type</label>
           <select value={form.renewal_type} onChange={e => setForm(f=>({...f,renewal_type:e.target.value}))}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-            {["standard","extended","revised","escalated"].map(t => (
+            {["standard","extended","revised","escalated"].map((t: any) => (
               <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>
             ))}
           </select>

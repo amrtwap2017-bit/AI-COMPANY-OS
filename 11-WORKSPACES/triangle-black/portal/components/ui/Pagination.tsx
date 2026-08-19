@@ -40,7 +40,7 @@ export function Pagination({
             onChange={e => { onPageSize(Number(e.target.value)); onPage(1); }}
             className="text-xs border border-border rounded-lg px-2 py-1.5 text-secondary focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400"
           >
-            {pageSizes.map(s => (
+            {pageSizes.map((s: any) => (
               <option key={s} value={s}>{s} per page</option>
             ))}
           </select>
@@ -56,7 +56,7 @@ export function Pagination({
             className="px-3 py-1.5 text-sm rounded-lg border border-border text-secondary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-base-alt transition-colors"
           >←</button>
 
-          {getPages().map((p, i) =>
+          {getPages().map((p: any, i: number) =>
             p === 0 ? (
               <span key={"ellipsis-" + i} className="px-2 text-tertiary">…</span>
             ) : (

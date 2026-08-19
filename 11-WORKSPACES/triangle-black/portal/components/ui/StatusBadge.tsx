@@ -59,7 +59,7 @@ interface StatusBadgeProps {
 
 export function StatusBadge({ status, size = "sm" }: StatusBadgeProps) {
   const key = status || "";
-  const config = STATUS_CONFIG[key] || STATUS_CONFIG[key?.toLowerCase()] || {
+  const config = (STATUS_CONFIG as Record<string, any>)[key] || STATUS_CONFIG[key?.toLowerCase()] || {
     label: key.replace(/_/g, " ") || "—",
     cls:   "bg-base-alt text-secondary border border-border",
   };

@@ -6,8 +6,8 @@ import { toast } from "@/lib/toast";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function RFQManagementPage() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export default function RFQManagementPage() {
 
   const { data: raw, isLoading } = useQuery(["rfq-list"],()=>authFetch("/api/v1/rfq/").then(r=>r.json()),{staleTime:60000});
   const rfqs = toArr(raw);
-  const filtered = filter==="all"?rfqs:rfqs.filter(r=>r.status===filter);
+  const filtered = filter==="all"?rfqs:rfqs.filter((r: any) =>r.status===filter);
 
   return (
     <div className="min-h-screen bg-base">
@@ -41,7 +41,7 @@ export default function RFQManagementPage() {
             </div>
           </div>
           <div className="tb-grid-4">
-            {[{label:"Total",value:rfqs.length},{label:"Active",value:rfqs.filter(r=>r.status==="sent").length,color:"var(--color-info)"},{label:"With Quotes",value:rfqs.filter(r=>r.status==="responses_received").length,color:"var(--color-warning)"},{label:"Awarded",value:rfqs.filter(r=>r.status==="awarded").length,color:"var(--color-success)"}].map((k,i)=>(
+            {[{label:"Total",value:rfqs.length},{label:"Active",value:rfqs.filter((r: any) =>r.status==="sent").length,color:"var(--color-info)"},{label:"With Quotes",value:rfqs.filter((r: any) =>r.status==="responses_received").length,color:"var(--color-warning)"},{label:"Awarded",value:rfqs.filter((r: any) =>r.status==="awarded").length,color:"var(--color-success)"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color||"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -54,20 +54,20 @@ export default function RFQManagementPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="tb-tabs mb-4">
-            {["all","draft","sent","responses_received","evaluated","awarded"].map(f=>(
+            {["all","draft","sent","responses_received","evaluated","awarded"].map((f: any) =>(
               <button key={f} onClick={()=>setFilter(f)} className={`tb-tab ${filter===f?"active":""}`}>
                 {f==="all"?"All":f.replace(/_/g," ")}
-                {f!=="all"&&<span className="ml-1 opacity-60">{rfqs.filter(r=>r.status===f).length}</span>}
+                {f!=="all"&&<span className="ml-1 opacity-60">{rfqs.filter((r: any) =>r.status===f).length}</span>}
               </button>
             ))}
           </div>
           {isLoading ? (
-            <div className="flex flex-col gap-3">{[1,2,3].map(i=><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:56}} />)}</div>
+            <div className="flex flex-col gap-3">{[1,2,3].map((i: any) =><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:56}} />)}</div>
           ) : filtered.length===0 ? (
             <div className="tb-empty"><div className="tb-empty-icon">📝</div><div className="tb-empty-title">No RFQs found</div><div className="tb-empty-desc">Create an RFQ to request vendor quotations</div></div>
           ) : (
             <div className="flex flex-col gap-2">
-              {filtered.map((r,i)=>(
+              {filtered.map((r: any, i: number) =>(
                 <button key={i} onClick={()=>router.push("/supply-chain/rfq-management/"+r.id)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-surface-alt tb-hover-lift text-left border border-transparent hover:border-default">
                   <div className="flex-1 min-w-0">
@@ -105,7 +105,7 @@ export default function RFQManagementPage() {
                 <div className="tb-form-group">
                   <label className="tb-label">Type</label>
                   <select value={newRFQ.rfq_type} onChange={e=>setNewRFQ({...newRFQ,rfq_type:e.target.value})} className="tb-select">
-                    {["open","selective","direct"].map(t=><option key={t} value={t}>{t}</option>)}
+                    {["open","selective","direct"].map((t: any) =><option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">

@@ -18,7 +18,7 @@ const SECTION_CONFIG: Record<string, { label: string; color: string; bg: string;
 
 function AccountSection({ sectionKey, data, defaultOpen = false }: { sectionKey: string; data: any; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
-  const cfg = SECTION_CONFIG[sectionKey] || { label: sectionKey, color: "text-gray-700", bg: "bg-gray-50 border-gray-200", icon: "📂" };
+  const cfg = (SECTION_CONFIG as Record<string, any>)[sectionKey] || { label: sectionKey, color: "text-gray-700", bg: "bg-gray-50 border-gray-200", icon: "📂" };
   const accounts = data?.accounts || [];
 
   return (
@@ -92,7 +92,7 @@ export default function BalanceSheetPage() {
     if (!mounted) return;
     tbFetch("/api/v1/financial/gl/balance-sheet")
       .then(r => r.json())
-      .then(d => {
+      .then((d: any) => {
         setData(d);
         if (d.generated_at) {
           const dt = new Date(d.generated_at);

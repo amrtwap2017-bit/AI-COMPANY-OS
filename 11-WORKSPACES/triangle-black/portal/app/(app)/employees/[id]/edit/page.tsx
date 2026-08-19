@@ -147,7 +147,7 @@ export default function EmployeeEditPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
             >
               <option value="">Select department</option>
-              {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+              {DEPARTMENTS.map((d: any) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           <div>
@@ -157,7 +157,7 @@ export default function EmployeeEditPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
             >
               <option value="">Select position</option>
-              {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+              {POSITIONS.map((p: any) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function EmployeeEditPage() {
               name="status" value={form.status} onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
             >
-              {STATUSES.map(s => (
+              {STATUSES.map((s: any) => (
                 <option key={s} value={s}>{s.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>
               ))}
             </select>

@@ -82,7 +82,7 @@ export default function LeadDetailPage() {
           <p className="text-gray-500 mt-1">{lead.company}</p>
         </div>
         <div className="flex gap-2 items-center">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[lead.status] || "bg-gray-100 text-gray-700"}`}>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${(STATUS_COLORS as Record<string, any>)[lead.status] || "bg-gray-100 text-gray-700"}`}>
             {lead.status}
           </span>
           <button
@@ -134,7 +134,7 @@ export default function LeadDetailPage() {
           <p className="text-sm text-gray-400">No activity yet</p>
         ) : (
           <div className="space-y-2">
-            {timeline.slice(0, 10).map((t, i) => (
+            {timeline.slice(0, 10).map((t: any, i: number) => (
               <div key={i} className="flex gap-3 text-sm">
                 <span className="text-gray-400 text-xs w-32 shrink-0">
                   {new Date(t.created_at).toLocaleDateString()}

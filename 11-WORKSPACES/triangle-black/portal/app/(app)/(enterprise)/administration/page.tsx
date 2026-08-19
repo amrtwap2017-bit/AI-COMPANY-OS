@@ -26,7 +26,7 @@ export default function AdministrationPage() {
           <h1 className="tb-hero-title">Administration</h1>
           <p className="tb-hero-description">System configuration, users, and platform settings</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Version",value:"2.0.1",color:"#5B7C8C"},{label:"Status",value:"Active",color:"#547C4D"},{label:"Environment",value:"Production",color:"#8D7443"}].map((k,i)=>(
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"Version",value:"2.0.1",color:"#5B7C8C"},{label:"Status",value:"Active",color:"#547C4D"},{label:"Environment",value:"Production",color:"#8D7443"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -41,7 +41,7 @@ export default function AdministrationPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Admin Modules</div>
           <div className="tb-grid-3">
-            {modules.map((m,i)=>(
+            {modules.map((m: any, i: number) =>(
               <button key={i} onClick={()=>router.push(m.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div style={{fontSize:"1.75rem",marginBottom:8}}>{m.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{m.label}</div>

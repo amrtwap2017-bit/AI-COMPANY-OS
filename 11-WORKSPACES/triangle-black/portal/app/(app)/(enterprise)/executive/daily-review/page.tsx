@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function DailyReviewPage() {
   const router = useRouter();
   const today = new Date().toLocaleDateString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
@@ -14,9 +14,9 @@ export default function DailyReviewPage() {
   const { data: actRaw }  = useQuery(["dr-act"],   () => authFetch("/api/v1/activity-feed?limit=15").then(r=>r.json()));
   const wos = toArr(woRaw); const notifs = toArr(notifRaw);
   const score = twin?.health_score||0;
-  const critical = wos.filter(w=>w.priority==="critical"&&w.status!=="completed");
-  const overdue  = wos.filter(w=>w.due_date&&new Date(w.due_date)<new Date()&&w.status!=="completed");
-  const unread   = notifs.filter(n=>!n.is_read);
+  const critical = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");
+  const overdue  = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<new Date()&&w.status!=="completed");
+  const unread   = notifs.filter((n: any) =>!n.is_read);
   const activities = actRaw?.activities||[];
   return (
     <div className="min-h-screen bg-base">
@@ -31,7 +31,7 @@ export default function DailyReviewPage() {
               {label:"Critical WOs",  value:critical.length,        color:critical.length>0?"#A84A3D":"#547C4D"},
               {label:"Overdue WOs",   value:overdue.length,         color:overdue.length>0?"#B07A2A":"#547C4D"},
               {label:"Unread Alerts", value:unread.length,          color:unread.length>0?"#8D7443":"#547C4D"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -70,7 +70,7 @@ export default function DailyReviewPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Executive Navigation</div>
           <div className="tb-grid-4" style={{gridTemplateColumns:"repeat(5,1fr)"}}>
-            {[{label:"Intelligence",icon:"🧠",path:"/executive/intelligence"},{label:"Portfolio",icon:"💼",path:"/executive/portfolio"},{label:"Risks",icon:"⚠️",path:"/executive/risks"},{label:"Exceptions",icon:"🚨",path:"/executive/exceptions"},{label:"Reports",icon:"📊",path:"/executive/reports"}].map((a,i)=>(
+            {[{label:"Intelligence",icon:"🧠",path:"/executive/intelligence"},{label:"Portfolio",icon:"💼",path:"/executive/portfolio"},{label:"Risks",icon:"⚠️",path:"/executive/risks"},{label:"Exceptions",icon:"🚨",path:"/executive/exceptions"},{label:"Reports",icon:"📊",path:"/executive/reports"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

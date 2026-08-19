@@ -12,9 +12,9 @@ import { SectionCard } from "@/components/ui/SectionCard";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { DataTable } from "@/components/ui/DataTable";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 export default function ScopeOfWorkPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function ScopeOfWorkPage() {
 
   const { data: raw, isLoading } = useQuery(["sow-list"],()=>authFetch("/api/v1/scope-of-work/").then(r=>r.json()),{staleTime:60000});
   const sows = toArr(raw);
-  const filtered = filter==="all"?sows:sows.filter(s=>s.status===filter);
+  const filtered = filter==="all"?sows:sows.filter((s: any) =>s.status===filter);
 
   const createSOW = useMutation(
     (payload)=>authFetch("/api/v1/scope-of-work/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r=>r.json()),
@@ -62,9 +62,9 @@ export default function ScopeOfWorkPage() {
           </div>
           <div className="tb-hero-kpis">
             <KpiCard label="Total SOWs" value={sows.length} color="slate" icon="📋" />
-            <KpiCard label="Draft" value={sows.filter(s=>s.status==="draft").length} color="slate" icon="✏️" />
-            <KpiCard label="Pending" value={sows.filter(s=>s.status==="pending_approval").length} color="amber" icon="⏳" status={sows.filter(s=>s.status==="pending_approval").length>0?"warn":"neutral"} />
-            <KpiCard label="Approved" value={sows.filter(s=>s.status==="approved").length} color="emerald" icon="✅" status="ok" />
+            <KpiCard label="Draft" value={sows.filter((s: any) =>s.status==="draft").length} color="slate" icon="✏️" />
+            <KpiCard label="Pending" value={sows.filter((s: any) =>s.status==="pending_approval").length} color="amber" icon="⏳" status={sows.filter((s: any) =>s.status==="pending_approval").length>0?"warn":"neutral"} />
+            <KpiCard label="Approved" value={sows.filter((s: any) =>s.status==="approved").length} color="emerald" icon="✅" status="ok" />
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function ScopeOfWorkPage() {
       <div className="tb-canvas">
         <SectionCard title="Scope of Work Documents" subtitle="All SOW documents for procurement">
           <div className="tb-tabs mb-4">
-            {["all","draft","pending_approval","approved","sent_to_client"].map(f=>(
+            {["all","draft","pending_approval","approved","sent_to_client"].map((f: any) =>(
               <button key={f} onClick={()=>setFilter(f)} className={`tb-tab ${filter===f?"active":""}`}>
                 {f==="all"?"All":f.replace(/_/g," ")}
               </button>
@@ -102,7 +102,7 @@ export default function ScopeOfWorkPage() {
                 <div className="tb-form-group">
                   <label className="tb-label">Type</label>
                   <select value={newSOW.type} onChange={e=>setNewSOW({...newSOW,type:e.target.value})} className="tb-select">
-                    {["service","maintenance","installation","repair","inspection"].map(t=><option key={t} value={t}>{t}</option>)}
+                    {["service","maintenance","installation","repair","inspection"].map((t: any) =><option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="tb-form-group">
@@ -111,7 +111,7 @@ export default function ScopeOfWorkPage() {
                 </div>
               </div>
               <div className="tb-grid-3">
-                {[{label:"Labor Cost",key:"labor_cost"},{label:"Materials",key:"materials_cost"},{label:"Days",key:"estimated_days"}].map(f=>(
+                {[{label:"Labor Cost",key:"labor_cost"},{label:"Materials",key:"materials_cost"},{label:"Days",key:"estimated_days"}].map((f: any) =>(
                   <div key={f.key} className="tb-form-group">
                     <label className="tb-label">{f.label}</label>
                     <input type="number" value={newSOW[f.key]} onChange={e=>setNewSOW({...newSOW,[f.key]:Number(e.target.value)})} className="tb-input" />

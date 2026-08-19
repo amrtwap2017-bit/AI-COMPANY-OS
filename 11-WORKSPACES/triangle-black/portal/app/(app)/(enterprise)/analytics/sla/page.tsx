@@ -5,14 +5,14 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
 const WarmTooltip = ({active,payload,label}) => {
   if (!active||!payload?.length) return null;
   return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label&&<div className="text-xs text-tertiary mb-1 font-semibold">{label}</div>}
-      {payload.map((p,i)=><div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>{p.name}: {p.value}{p.unit||""}</div>)}
+      {payload.map((p: any, i: number) =><div key={i} className="text-sm font-bold" style={{color:p.color||"var(--color-text-1)"}}>{p.name}: {p.value}{p.unit||""}</div>)}
     </div>
   );
 };
@@ -26,18 +26,18 @@ export default function AnalyticsSLA() {
   const slaTargets = {critical:4,high:8,medium:24,low:72};
 
   const slaData = ["critical","high","medium","low"].map(priority=>{
-    const group = wos.filter(w=>w.priority===priority);
-    const completed = group.filter(w=>w.status==="completed");
-    const breached = group.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
-    const withinSla = completed.filter(w=>{if(!w.created_at||!w.completed_at) return true;const hrs=(new Date(w.completed_at).getTime()-new Date(w.created_at).getTime())/3600000;return hrs<=slaTargets[priority];});
+    const group = wos.filter((w: any) =>w.priority===priority);
+    const completed = group.filter((w: any) =>w.status==="completed");
+    const breached = group.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
+    const withinSla = completed.filter((w: any) =>{if(!w.created_at||!w.completed_at) return true;const hrs=(new Date(w.completed_at).getTime()-new Date(w.created_at).getTime())/3600000;return hrs<=slaTargets[priority];});
     const compliance = completed.length>0?Math.round(withinSla.length/completed.length*100):100;
     return {priority,label:priority.charAt(0).toUpperCase()+priority.slice(1),total:group.length,completed:completed.length,breached:breached.length,compliance,target:slaTargets[priority],color:priority==="critical"?"var(--color-danger)":priority==="high"?"var(--color-warning)":"var(--color-text-3)"};
   });
 
-  const overall = Math.round(slaData.reduce((s,r)=>s+r.compliance,0)/slaData.length);
-  const breachedWOs = wos.filter(w=>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed").sort((a,b)=>new Date(a.due_date).getTime()-new Date(b.due_date).getTime()).slice(0,10);
-  const complianceChartData = slaData.map(s=>({name:s.label,compliance:s.compliance,target:85,color:s.color}));
-  const priorityCountData = slaData.map(s=>({name:s.label,total:s.total,completed:s.completed,breached:s.breached}));
+  const overall = Math.round(slaData.reduce((s: any, r: any) =>s+r.compliance,0)/slaData.length);
+  const breachedWOs = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed").sort((a: any, b: any) =>new Date(a.due_date).getTime()-new Date(b.due_date).getTime()).slice(0,10);
+  const complianceChartData = slaData.map((s: any) =>({name:s.label,compliance:s.compliance,target:85,color:s.color}));
+  const priorityCountData = slaData.map((s: any) =>({name:s.label,total:s.total,completed:s.completed,breached:s.breached}));
   const AXIS = {fontSize:11,fill:"var(--color-text-3)"};
 
   return (
@@ -56,7 +56,7 @@ export default function AnalyticsSLA() {
             </div>
           </div>
           <div className="tb-grid-4 mt-6">
-            {slaData.map((s,i)=>(
+            {slaData.map((s: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:s.color}}>{s.compliance}%</div>
                 <div className="tb-hero-kpi-label">{s.label} (≤{s.target}h)</div>
@@ -81,7 +81,7 @@ export default function AnalyticsSLA() {
                 <Tooltip content={<WarmTooltip/>}/>
                 <ReferenceLine y={85} stroke="var(--color-brand)" strokeDasharray="4 4" label={{value:"Target 85%",fill:"var(--color-brand)",fontSize:10}}/>
                 <Bar dataKey="compliance" name="Compliance" radius={[6,6,0,0]} unit="%">
-                  {complianceChartData.map((e,i)=><Cell key={i} fill={e.color}/>)}
+                  {complianceChartData.map((e: any, i: number) =><Cell key={i} fill={e.color}/>)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -106,7 +106,7 @@ export default function AnalyticsSLA() {
         </div>
 
         <div className="tb-grid-4 mb-4">
-          {slaData.map((s,i)=>(
+          {slaData.map((s: any, i: number) =>(
             <div key={i} className="tb-section">
               <div className="text-xs text-tertiary mb-2 uppercase tracking-wider">{s.label} Priority</div>
               <div className="text-3xl font-black mb-1" style={{color:s.color}}>{s.compliance}%</div>
@@ -135,7 +135,7 @@ export default function AnalyticsSLA() {
               <table className="tb-table">
                 <thead><tr><th>Work Order</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Overdue By</th></tr></thead>
                 <tbody>
-                  {breachedWOs.map((w,i)=>{
+                  {breachedWOs.map((w: any, i: number) =>{
                     const daysOver = Math.floor((now.getTime()-new Date(w.due_date).getTime())/86400000);
                     return (
                       <tr key={i} onClick={()=>router.push(`/operations/work-orders/${w.id}`)} className="cursor-pointer">

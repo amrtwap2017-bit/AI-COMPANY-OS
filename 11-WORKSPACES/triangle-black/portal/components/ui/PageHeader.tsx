@@ -43,7 +43,7 @@ export function PageHeader({
   domain, title, description, action, secondaryAction, badge, breadcrumb, metric
 }: PageHeaderProps) {
   const router = useRouter();
-  const domainColor = domain ? (DOMAIN_COLORS[domain] || "text-brand") : "text-brand";
+  const domainColor = domain ? ((DOMAIN_COLORS as Record<string, any>)[domain] || "text-brand") : "text-brand";
 
   const handleAction = (a: { onClick?: () => void; href?: string }) => {
     if (a.onClick) a.onClick();

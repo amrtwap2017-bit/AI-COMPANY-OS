@@ -208,7 +208,7 @@ export function TBIcon({
   className = '',
   strokeWidth = 1.75
 }: TBIconProps) {
-  const Icon = TB_ICONS[name]
+  const Icon = (TB_ICONS as Record<string, any>)[name]
   if (!Icon) {
     // Fallback to circle for unknown icons
     return <Circle size={size} className={className} strokeWidth={strokeWidth} />

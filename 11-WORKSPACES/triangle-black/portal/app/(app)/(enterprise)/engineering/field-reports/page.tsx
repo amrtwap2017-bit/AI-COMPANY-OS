@@ -56,7 +56,7 @@ export default function EngineeringFieldReportsPage() {
   useEffect(() => {
     if (!mounted) return;
     Promise.all(
-      SECTION_CONFIG.map(s =>
+      SECTION_CONFIG.map((s: any) =>
         tbFetch(`${s.endpoint}?limit=20`).then(r => r.data ?? r).catch(() => [])
       )
     ).then(results => {
@@ -69,7 +69,7 @@ export default function EngineeringFieldReportsPage() {
     }).finally(() => setLoading(false));
   }, [mounted]);
 
-  const activeSection = SECTION_CONFIG.find(s => s.key === activeTab)!;
+  const activeSection = SECTION_CONFIG.find((s: any) => s.key === activeTab)!;
   const activeRecords = data[activeTab] || [];
 
   if (!mounted || loading) return (
@@ -100,7 +100,7 @@ export default function EngineeringFieldReportsPage() {
 
       {/* Section KPI Cards */}
       <div className="grid grid-cols-4 gap-4">
-        {SECTION_CONFIG.map(s => (
+        {SECTION_CONFIG.map((s: any) => (
           <button key={s.key}
             onClick={() => setActiveTab(s.key)}
             className={`${s.color} border rounded-xl p-4 text-left hover:opacity-80 transition-opacity ${activeTab===s.key ? "ring-2 ring-gray-900" : ""}`}>

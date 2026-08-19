@@ -32,7 +32,7 @@ export default function AssetScanPage() {
     Promise.all([
       tbFetch(`/api/v1/assets/${id}`).then(r => r.data ?? r).catch(() => null),
       tbFetch(`/api/v1/work-orders/?limit=10`).then(r => r.data ?? r).catch(() => []),
-    ]).then(([a, wos]) => {
+    ]).then(([a, wos]: any[]) => {
       setAsset(a);
       const items = Array.isArray(wos) ? wos : wos?.results || wos?.items || [];
       // Filter WOs linked to this asset if possible
@@ -73,11 +73,11 @@ export default function AssetScanPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 mt-2">
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[asset.status] || "bg-[var(--color-surface)] text-gray-400"}`}>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[asset.status] || "bg-[var(--color-surface)] text-gray-400"}`}>
             {asset.status || "unknown"}
           </span>
           {asset.criticality && (
-            <span className={`text-xs font-medium ${CRIT_COLOR[asset.criticality] || "text-gray-400"}`}>
+            <span className={`text-xs font-medium ${(CRIT_COLOR as Record<string, any>)[asset.criticality] || "text-gray-400"}`}>
               {asset.criticality} priority
             </span>
           )}

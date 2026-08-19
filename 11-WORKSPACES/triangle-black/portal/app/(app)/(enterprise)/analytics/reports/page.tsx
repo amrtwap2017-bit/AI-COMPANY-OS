@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.reports || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.reports || [];
 
 export default function AnalyticsReportsPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function AnalyticsReportsPage() {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
           {reports.length === 0 ? (
             <div style={{gridColumn:"1/-1",textAlign:"center",padding:48,color:"var(--color-text-3)"}}>No reports configured</div>
-          ) : reports.map((r,i) => (
+          ) : reports.map((r: any, i: number) => (
             <button key={i} onClick={()=>router.push("/reports")}
               style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(185,146,76,0.3)";e.currentTarget.style.transform="translateY(-1px)";}}

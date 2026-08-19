@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-const STARS = (r) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
+const STARS = (r: any) => { const s=Math.round(r||0); return "★".repeat(s)+"☆".repeat(5-s); };
 const REQ_DOCS = ["trade_license","tax_card"];
 const DOC_LABELS = {trade_license:"Trade License",tax_card:"Tax Card",commercial_reg:"Commercial Reg.",iso_cert:"ISO Certificate",insurance:"Insurance",bank_letter:"Bank Letter",nda:"Signed NDA",portfolio:"Portfolio",other:"Other"};
 
@@ -20,7 +20,7 @@ export default function SupplierProfilePage() {
 
   const loadProfile = (sup, t) => {
     fetch(`/api/v1/supplier/profile?vendor_id=${sup.vendor_id}`, {headers:{Authorization:`Bearer ${t}`}})
-      .then(r=>r.json()).then(d=>{ setProfile(d); setLoading(false); });
+      .then(r=>r.json()).then((d: any) => { setProfile(d); setLoading(false); });
   };
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function SupplierProfilePage() {
     fd.append("entity_type", "vendor");
     fd.append("entity_id", supplier?.vendor_id);
     fd.append("doc_category", uploadCat);
-    fd.append("doc_name", DOC_LABELS[uploadCat]||uploadCat);
+    fd.append("doc_name", (DOC_LABELS as Record<string, any>)[uploadCat]||uploadCat);
     fd.append("uploaded_by", supplier?.name||"supplier");
     const r = await fetch("/api/v1/documents/v2/upload", {method:"POST",body:fd,headers:{Authorization:`Bearer ${token}`}});
     const data = await r.json();
@@ -74,7 +74,7 @@ export default function SupplierProfilePage() {
                   </div>
                   {!approvalReady && docStatus.missing_required?.length > 0 && (
                     <div className="text-xs text-slate-400 mt-1">
-                      Missing: {docStatus.missing_required.map(d=>DOC_LABELS[d]||d).join(", ")}
+                      Missing: {docStatus.missing_required.map((d: any) =>(DOC_LABELS as Record<string, any>)[d]||d).join(", ")}
                     </div>
                   )}
                 </div>
@@ -139,7 +139,7 @@ export default function SupplierProfilePage() {
                         <span className="text-lg">{isReq?"⭐":"📎"}</span>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-white">{doc.doc_name}</div>
-                          <div className="text-xs text-slate-400">{DOC_LABELS[doc.doc_category]||doc.doc_category} · {(doc.file_size_bytes/1024).toFixed(1)}KB</div>
+                          <div className="text-xs text-slate-400">{(DOC_LABELS as Record<string, any>)[doc.doc_category]||doc.doc_category} · {(doc.file_size_bytes/1024).toFixed(1)}KB</div>
                         </div>
                         <a href={doc.url} target="_blank" className="text-xs text-amber-400 hover:text-amber-300 px-3 py-1 rounded-lg border border-amber-400/30" style={{textDecoration:"none"}}>View</a>
                       </div>

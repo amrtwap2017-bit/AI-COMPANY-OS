@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "@/lib/toast";
 
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); } catch { return "—"; } };
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); } catch { return "—"; } };
 const ROLE_COLORS = { admin:"#B9924C",manager:"#B07A2A",agent:"#5B7C8C",engineer:"#547C4D",finance:"#8D7443",viewer:"#6D5F53" };
 
 export default function ProfilePage() {
@@ -20,7 +20,7 @@ export default function ProfilePage() {
   const { data: me } = useQuery({ queryKey:["profile-me"], queryFn:()=>authFetch("/api/v1/me").then(r=>r.json()), staleTime:60000 });
 
   const rc = ROLE_COLORS[me?.role||user?.role] || "#6D5F53";
-  const initials = (user?.name||me?.name||"TB").split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
+  const initials = (user?.name||me?.name||"TB").split(" ").map((n: any) =>n[0]).join("").slice(0,2).toUpperCase();
   const displayName = user?.name||me?.name||"User";
   const displayEmail = user?.email||me?.email||"—";
   const displayRole = me?.role||user?.role||"—";
@@ -97,7 +97,7 @@ export default function ProfilePage() {
             <div className="tb-section">
               <div className="tb-section-title">Quick Navigation</div>
               <div className="flex flex-col gap-2">
-                {[{label:"Audit Trail",icon:"🔍",path:"/administration/audit"},{label:"My Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Time Tracking",icon:"⏱",path:"/operations/time-tracking"},{label:"Dashboard",icon:"📊",path:"/workspace"}].map((a,i)=>(
+                {[{label:"Audit Trail",icon:"🔍",path:"/administration/audit"},{label:"My Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Time Tracking",icon:"⏱",path:"/operations/time-tracking"},{label:"Dashboard",icon:"📊",path:"/workspace"}].map((a: any, i: number) =>(
                   <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item">
                     <span>{a.icon}</span><span>{a.label}</span>
                   </button>

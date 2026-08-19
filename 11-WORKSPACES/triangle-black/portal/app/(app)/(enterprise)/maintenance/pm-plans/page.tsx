@@ -6,8 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function PMPlansPage() {
   const router = useRouter();
@@ -23,13 +23,13 @@ export default function PMPlansPage() {
   const in7   = new Date(now.getTime()+7*86400000);
   const in30  = new Date(now.getTime()+30*86400000);
 
-  const overdue  = plans.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);
-  const dueWeek  = plans.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=in7);
-  const dueMonth = plans.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=in30);
-  const scheduled= plans.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>in30);
-  const types    = [...new Set(plans.map(p=>p.plan_type||"general"))].sort();
+  const overdue  = plans.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
+  const dueWeek  = plans.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=in7);
+  const dueMonth = plans.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=in30);
+  const scheduled= plans.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>in30);
+  const types    = [...new Set(plans.map((p: any) =>p.plan_type||"general"))].sort();
 
-  const filtered = plans.filter(p=>{
+  const filtered = plans.filter((p: any) =>{
     const ms = !search||p.title?.toLowerCase().includes(search.toLowerCase());
     const mt = typeFilter==="all"||(p.plan_type||"general")===typeFilter;
     const md = dueFilter==="all"||
@@ -42,7 +42,7 @@ export default function PMPlansPage() {
   if (isLoading) return (
     <div className="tb-canvas">
       <div className="tb-shimmer-block" style={{height:60}}/>
-      <div className="tb-grid-4">{[1,2,3,4].map(i=><div key={i} className="tb-shimmer-block" style={{height:64}}/>)}</div>
+      <div className="tb-grid-4">{[1,2,3,4].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:64}}/>)}</div>
     </div>
   );
 
@@ -64,7 +64,7 @@ export default function PMPlansPage() {
               {label:"Due This Week",  value:dueWeek.length,  color:dueWeek.length>0?"var(--color-warning)":"var(--color-text-3)",  filter:"week"},
               {label:"Due This Month", value:dueMonth.length, color:"var(--color-info)",                                             filter:"month"},
               {label:"Scheduled",      value:scheduled.length,color:"var(--color-success)",                                          filter:"all"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <button key={i} onClick={()=>setDueFilter(dueFilter===k.filter?"all":k.filter)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -79,7 +79,7 @@ export default function PMPlansPage() {
           <div className="tb-alert tb-alert-danger mb-4">
             <span className="text-xl">🔧</span>
             <div className="flex-1 text-sm font-bold">
-              {overdue.length} PM Plans Overdue — {overdue.slice(0,2).map(p=>p.title).join(" · ")}
+              {overdue.length} PM Plans Overdue — {overdue.slice(0,2).map((p: any) =>p.title).join(" · ")}
             </div>
             <button onClick={()=>setDueFilter("overdue")} className="tb-btn tb-btn-danger tb-btn-sm ml-auto">Show Overdue</button>
           </div>
@@ -90,7 +90,7 @@ export default function PMPlansPage() {
             className="tb-input" style={{maxWidth:"320px"}}/>
           <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} className="tb-select" style={{width:"auto"}}>
             <option value="all">All Types</option>
-            {types.map(t=><option key={t} value={t}>{t}</option>)}
+            {types.map((t: any) =><option key={t} value={t}>{t}</option>)}
           </select>
           {(search||typeFilter!=="all"||dueFilter!=="all")&&(
             <button onClick={()=>{setSearch("");setTypeFilter("all");setDueFilter("all");}} className="tb-btn tb-btn-ghost tb-btn-sm">Clear ×</button>
@@ -119,7 +119,7 @@ export default function PMPlansPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((p,i)=>{
+                  {filtered.map((p: any, i: number) =>{
                     const isOv = p.next_due_ts&&new Date(p.next_due_ts)<now;
                     const isDW = !isOv&&p.next_due_ts&&new Date(p.next_due_ts)<=in7;
                     return (

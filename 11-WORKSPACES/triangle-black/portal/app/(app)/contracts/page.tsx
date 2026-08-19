@@ -91,7 +91,7 @@ export default function ContractsPage() {
                 </tr>
               </thead>
               <tbody>
-                {contracts.map((c) => (
+                {contracts.map((c: any) => (
                   <tr key={c.id}>
                     <td>
                       <a

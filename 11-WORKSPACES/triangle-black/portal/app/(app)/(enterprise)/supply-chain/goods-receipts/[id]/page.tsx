@@ -7,9 +7,9 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
-const fmtDateTime = (d) => { try { return d?new Date(d).toLocaleString("en-GB"):"—"; } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const fmtDateTime = (d: any) => { try { return d?new Date(d).toLocaleString("en-GB"):"—"; } catch { return "—"; } };
 
 export default function GRNDetailPage() {
   const router = useRouter();
@@ -130,7 +130,7 @@ export default function GRNDetailPage() {
             <div className="tb-section">
               <div className="tb-section-title">Quick Actions</div>
               <div className="flex flex-col gap-2">
-                {[{label:"All GRNs",icon:"📦",path:"/supply-chain/goods-receipts"},{label:"Purchase Orders",icon:"📋",path:"/supply-chain/purchase-orders-v2"},{label:"Supplier Invoices",icon:"🧾",path:"/supply-chain/supplier-invoices"},{label:"Vendor Management",icon:"🏢",path:"/supply-chain/vendor-management"}].map((a,i)=>(
+                {[{label:"All GRNs",icon:"📦",path:"/supply-chain/goods-receipts"},{label:"Purchase Orders",icon:"📋",path:"/supply-chain/purchase-orders-v2"},{label:"Supplier Invoices",icon:"🧾",path:"/supply-chain/supplier-invoices"},{label:"Vendor Management",icon:"🏢",path:"/supply-chain/vendor-management"}].map((a: any, i: number) =>(
                   <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item">
                     <span>{a.icon}</span><span>{a.label}</span>
                   </button>

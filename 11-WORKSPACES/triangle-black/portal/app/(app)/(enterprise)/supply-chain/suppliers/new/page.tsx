@@ -103,14 +103,14 @@ export default function SupplierNewPage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Supplier Type</label>
               <select value={form.supplier_type} onChange={set("supplier_type")}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {SUPPLIER_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
+                {SUPPLIER_TYPES.map((t: any) => <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
               <select value={form.category} onChange={set("category")}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+                {CATEGORIES.map((c: any) => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
               </select>
             </div>
             <div>
@@ -162,7 +162,7 @@ export default function SupplierNewPage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Payment Terms</label>
               <select value={form.payment_terms} onChange={set("payment_terms")}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {PAYMENT_TERMS.map(t => <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
+                {PAYMENT_TERMS.map((t: any) => <option key={t} value={t}>{t.replace("_"," ").replace(/\b\w/g,l=>l.toUpperCase())}</option>)}
               </select>
             </div>
             <div>
@@ -174,7 +174,7 @@ export default function SupplierNewPage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Risk Level</label>
               <select value={form.risk_level} onChange={set("risk_level")}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                {RISK_LEVELS.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
+                {RISK_LEVELS.map((r: any) => <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
               </select>
             </div>
             <div>

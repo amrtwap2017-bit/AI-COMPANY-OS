@@ -55,7 +55,7 @@ export default function QuotesPage() {
 
   const filtered = statusFilter === "all"
     ? quotes
-    : quotes.filter((q) => q.status === statusFilter);
+    : quotes.filter((q: any) => q.status === statusFilter);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -92,7 +92,7 @@ export default function QuotesPage() {
       </div>
 
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-        {["all", "draft", "review", "sent", "approved", "rejected", "expired"].map((s) => (
+        {["all", "draft", "review", "sent", "approved", "rejected", "expired"].map((s: any) => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
@@ -122,7 +122,7 @@ export default function QuotesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((q) => (
+              {filtered.map((q: any) => (
                 <tr
                   key={q.id}
                   onClick={() => router.push(`/quotes/${q.id}`)}
@@ -132,7 +132,7 @@ export default function QuotesPage() {
                     {q.title || `Quote ${q.id.slice(0, 8)}`}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[q.status] || "bg-gray-100 text-gray-700"}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${(STATUS_COLORS as Record<string, any>)[q.status] || "bg-gray-100 text-gray-700"}`}>
                       {q.status}
                     </span>
                   </td>

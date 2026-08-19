@@ -4,8 +4,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => {
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => {
   if (!d || d === null || d === undefined) return "—";
   try {
     const dt = new Date(d);
@@ -13,7 +13,7 @@ const fmtDate = (d) => {
     return dt.toLocaleDateString("en-GB");
   } catch { return "—"; }
 };
-const fmtDateTime = (d) => {
+const fmtDateTime = (d: any) => {
   if (!d || d === null || d === undefined) return "—";
   try {
     const dt = new Date(d);
@@ -70,8 +70,8 @@ export default function ServiceRequestDetailPage() {
     </div>
   );
 
-  const pc  = PRIORITY_COLOR[sr.priority] || "#6D5F53";
-  const sc  = STATUS_COLOR[sr.status]     || "#6D5F53";
+  const pc  = (PRIORITY_COLOR as Record<string, any>)[sr.priority] || "#6D5F53";
+  const sc  = (STATUS_COLOR as Record<string, any>)[sr.status]     || "#6D5F53";
   const wo  = woRaw && !woRaw.detail ? woRaw : null;
 
   return (
@@ -96,7 +96,7 @@ export default function ServiceRequestDetailPage() {
               { label:"Status",    value:(sr.status||"—").replace("_"," ").toUpperCase(), color:sc },
               { label:"Requester", value:sr.requester_name||"—",                  color:"#221D1A" },
               { label:"Work Order",value:wo ? "Linked" : "Not Linked",            color:wo?"#547C4D":"#6D5F53" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -148,8 +148,8 @@ export default function ServiceRequestDetailPage() {
                     <div className="text-sm font-semibold text-primary">{wo.title||"—"}</div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="tb-badge" style={{
-                        background:(WO_SC[wo.status]||"#6D5F53")+"18",
-                        color:WO_SC[wo.status]||"#6D5F53",
+                        background:((WO_SC as Record<string, any>)[wo.status]||"#6D5F53")+"18",
+                        color:(WO_SC as Record<string, any>)[wo.status]||"#6D5F53",
                         fontSize:"0.5rem"
                       }}>{(wo.status||"—").replace("_"," ")}</span>
                       <span className="text-xs text-tertiary">{wo.priority||"—"} priority</span>
@@ -212,7 +212,7 @@ export default function ServiceRequestDetailPage() {
                   { label:"Work Orders",     icon:"🔧", path:"/operations/work-orders" },
                   { label:"Dispatch Board",  icon:"📋", path:"/operations/dispatch" },
                   { label:"Assets",          icon:"⚙️",  path:"/maintenance/assets" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

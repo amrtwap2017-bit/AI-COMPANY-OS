@@ -35,7 +35,7 @@ export default function HotelDetailPage() {
             <button onClick={()=>router.push("/administration/hotels")} className="tb-btn-secondary">← Back</button>
           </div>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Assets",value:siteAssets.length,color:"#5B7C8C"},{label:"Operational",value:siteAssets.filter((a: any) =>a.status==="Operational").length,color:"#547C4D"},{label:"In Fault",value:faulted.length,color:faulted.length>0?"#A84A3D":"#547C4D"},{label:"Active Contracts",value:contracts.filter((c: any) =>c.status==="active").length,color:"#8D7443"}].map((k,i)=>(
+            {[{label:"Total Assets",value:siteAssets.length,color:"#5B7C8C"},{label:"Operational",value:siteAssets.filter((a: any) =>a.status==="Operational").length,color:"#547C4D"},{label:"In Fault",value:faulted.length,color:faulted.length>0?"#A84A3D":"#547C4D"},{label:"Active Contracts",value:contracts.filter((c: any) =>c.status==="active").length,color:"#8D7443"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -65,7 +65,7 @@ export default function HotelDetailPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Navigate</div>
           <div className="tb-grid-4">
-            {[{label:"Hotels",icon:"🏨",path:"/administration/hotels"},{label:"Administration",icon:"⚙️",path:"/administration"},{label:"Assets",icon:"🔧",path:"/maintenance/assets"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"}].map((a,i)=>(
+            {[{label:"Hotels",icon:"🏨",path:"/administration/hotels"},{label:"Administration",icon:"⚙️",path:"/administration"},{label:"Assets",icon:"🔧",path:"/maintenance/assets"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

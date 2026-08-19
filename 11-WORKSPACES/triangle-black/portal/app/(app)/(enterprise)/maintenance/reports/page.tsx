@@ -29,7 +29,7 @@ export default function MaintenanceReportsPage() {
       tbFetch("/api/v1/maintenance/costs").then(r => r.data ?? r).catch(() => ({})),
       tbFetch("/api/v1/maintenance/work-items").then(r => r.data ?? r).catch(() => ({})),
       tbFetch("/api/v1/maintenance/dashboard").then(r => r.data ?? r).catch(() => ({})),
-    ]).then(([dt, c, wi, dash]) => {
+    ]).then(([dt, c, wi, dash]: any[]) => {
       setDowntime(dt);
       setCosts(c);
       setWorkItems(wi);
@@ -72,7 +72,7 @@ export default function MaintenanceReportsPage() {
           { label:"Open Work Orders",   value:fmtNum(dashboard?.open_work_orders||0),   icon:"🔧", color:"bg-orange-50" },
           { label:"Downtime Hours",     value:totalDowntimeHours.toFixed(1)+"h",        icon:"⏱️", color:"bg-red-50" },
           { label:"Maintenance Cost",   value:fmtEGP(totalCost),                        icon:"💰", color:"bg-blue-50" },
-        ].map(k => (
+        ].map((k: any) => (
           <div key={k.label} className={`${k.color} border border-gray-200 rounded-xl p-4`}>
             <div className="flex items-center gap-2 mb-1">
               <span>{k.icon}</span>
@@ -91,7 +91,7 @@ export default function MaintenanceReportsPage() {
             { key:"downtime",    label:`Downtime (${dtData.length})` },
             { key:"costs",       label:`Costs (${costData.length})` },
             { key:"work-items",  label:`Work Items (${wiData.length})` },
-          ].map(t => (
+          ].map((t: any) => (
             <button key={t.key} onClick={() => setActiveTab(t.key as any)}
               className={`py-2 px-1 border-b-2 text-sm font-medium transition-colors ${
                 activeTab===t.key ? "border-gray-900 text-[var(--color-text-1)]" : "border-transparent text-gray-500 hover:text-gray-700"
@@ -154,7 +154,7 @@ export default function MaintenanceReportsPage() {
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>{["Asset","Reason","Hours","Start","End","Status"].map(h => (
+                <tr>{["Asset","Reason","Hours","Start","End","Status"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}</tr>
               </thead>
@@ -186,7 +186,7 @@ export default function MaintenanceReportsPage() {
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>{["Title","Type","Amount","Status","Date"].map(h => (
+                <tr>{["Title","Type","Amount","Status","Date"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}</tr>
               </thead>
@@ -217,7 +217,7 @@ export default function MaintenanceReportsPage() {
           ) : (
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>{["Title","Type","Status","Priority","Due"].map(h => (
+                <tr>{["Title","Type","Status","Priority","Due"].map((h: any) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                 ))}</tr>
               </thead>

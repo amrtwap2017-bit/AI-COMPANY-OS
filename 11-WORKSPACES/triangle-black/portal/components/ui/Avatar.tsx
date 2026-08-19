@@ -27,7 +27,7 @@ const INDICATOR: Record<string, string> = {
 
 function getInitials(name?: string): string {
   if (!name) return "?";
-  return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  return name.split(" ").map((n: any) => n[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function getBgColor(name?: string): string {
@@ -42,7 +42,7 @@ function getBgColor(name?: string): string {
 export function Avatar({ name, src, size = "md", online, className = "" }: AvatarProps) {
   return (
     <div className={"relative inline-flex flex-shrink-0 " + className}>
-      <div className={"rounded-full overflow-hidden flex items-center justify-center " + SIZES[size] + " " + (src ? "" : getBgColor(name))}>
+      <div className={"rounded-full overflow-hidden flex items-center justify-center " + (SIZES as Record<string, any>)[size] + " " + (src ? "" : getBgColor(name))}>
         {src ? (
           <img src={src} alt={name || "User"} className="w-full h-full object-cover" />
         ) : (
@@ -50,7 +50,7 @@ export function Avatar({ name, src, size = "md", online, className = "" }: Avata
         )}
       </div>
       {online !== undefined && (
-        <span className={"absolute bottom-0 right-0 rounded-full border-2 border-white " + INDICATOR[size] + " " + (online ? "bg-emerald-500" : "bg-base-alt")} />
+        <span className={"absolute bottom-0 right-0 rounded-full border-2 border-white " + (INDICATOR as Record<string, any>)[size] + " " + (online ? "bg-emerald-500" : "bg-base-alt")} />
       )}
     </div>
   );

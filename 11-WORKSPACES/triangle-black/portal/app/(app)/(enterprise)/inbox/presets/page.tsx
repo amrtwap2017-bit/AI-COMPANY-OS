@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function InboxPresetsPage() {
   const router = useRouter();
   const { data: notifRaw } = useQuery(["ip-notifs"], () => authFetch("/api/v1/notifications-portal?limit=100").then(r=>r.json()));
@@ -24,7 +24,7 @@ export default function InboxPresetsPage() {
           <h1 className="tb-hero-title">Inbox Presets</h1>
           <p className="tb-hero-description">Filtered notification views by category</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:notifs.length,color:"#221D1A"},{label:"Unread",value:notifs.filter(n=>!n.is_read).length,color:"#B07A2A"},{label:"Presets",value:presets.length,color:"#8D7443"},{label:"Types",value:[...new Set(notifs.map(n=>n.type).filter(Boolean))].length,color:"#5B7C8C"}].map((k,i)=>(
+            {[{label:"Total",value:notifs.length,color:"#221D1A"},{label:"Unread",value:notifs.filter((n: any) =>!n.is_read).length,color:"#B07A2A"},{label:"Presets",value:presets.length,color:"#8D7443"},{label:"Types",value:[...new Set(notifs.map((n: any) =>n.type).filter(Boolean))].length,color:"#5B7C8C"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -35,8 +35,8 @@ export default function InboxPresetsPage() {
           <div className="text-label-upper text-tertiary mb-4">Filter Presets</div>
           <div className="tb-grid-3">
             {presets.map((preset,i)=>{
-              const count = notifs.filter(n=>(n.type||"").includes(preset.filter)).length;
-              const unread= notifs.filter(n=>(n.type||"").includes(preset.filter)&&!n.is_read).length;
+              const count = notifs.filter((n: any) =>(n.type||"").includes(preset.filter)).length;
+              const unread= notifs.filter((n: any) =>(n.type||"").includes(preset.filter)&&!n.is_read).length;
               return (
                 <button key={i} onClick={()=>router.push("/notifications")} className="tb-section text-left hover:border-brand transition-colors">
                   <div className="flex items-center justify-between mb-3"><span style={{fontSize:"1.5rem"}}>{preset.icon}</span><span className="text-2xl font-black" style={{color:preset.color}}>{count}</span></div>
@@ -50,7 +50,7 @@ export default function InboxPresetsPage() {
         </div>
         <div className="tb-section">
           <div className="space-y-2">
-            {[{label:"All Notifications",icon:"🔔",path:"/notifications"},{label:"Inbox",icon:"📬",path:"/inbox"},{label:"Workspace",icon:"🏠",path:"/workspace"}].map((a,i)=>(
+            {[{label:"All Notifications",icon:"🔔",path:"/notifications"},{label:"Inbox",icon:"📬",path:"/inbox"},{label:"Workspace",icon:"🏠",path:"/workspace"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item w-full justify-start"><span>{a.icon}</span><span className="text-sm text-secondary">{a.label}</span></button>
             ))}
           </div>

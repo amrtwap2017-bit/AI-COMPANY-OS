@@ -16,7 +16,7 @@ type TrendSeriesPanelProps = {
 };
 
 function maxOf(points: TrendPoint[]) {
-  const max = Math.max(0, ...points.map((p) => p.count || 0));
+  const max = Math.max(0, ...points.map((p: any) => p.count || 0));
   return max || 1;
 }
 

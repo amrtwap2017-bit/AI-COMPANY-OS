@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const SC = {
   draft:"#6D5F53", submitted:"#5B7C8C", matching:"#8D7443",
   matched:"#547C4D", mismatch:"#A84A3D", approved:"#547C4D",
@@ -54,7 +54,7 @@ export default function InvoicesPage() {
               {label:"Total Value",value:fmtEGP(dash?.totals?.total_value||0),color:"#5B7C8C"},
               {label:"Outstanding",value:fmtEGP(dash?.totals?.total_outstanding||0),color:"#B07A2A"},
               {label:"Mismatches",value:dash?.by_status?.mismatch||0,color:(dash?.by_status?.mismatch||0)>0?"#A84A3D":"#547C4D"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -66,7 +66,7 @@ export default function InvoicesPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="flex gap-2 mb-4 flex-wrap">
-            {["all","submitted","matching","approved","mismatch","paid"].map(f=>(
+            {["all","submitted","matching","approved","mismatch","paid"].map((f: any) =>(
               <button key={f} onClick={()=>setFilter(f)} className={"tb-pill "+(filter===f?"tb-pill--active":"")}>
                 {f==="all"?"All":f.charAt(0).toUpperCase()+f.slice(1)}
                 {f!=="all" && <span className="ml-1 opacity-60">{dash?.by_status?.[f]||0}</span>}
@@ -74,13 +74,13 @@ export default function InvoicesPage() {
             ))}
           </div>
           {isLoading ? (
-            <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+            <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           ) : invoices.length===0 ? (
             <div className="tb-empty"><div className="tb-empty-icon">📄</div><div className="tb-empty-title">No invoices found</div></div>
           ) : (
             <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
               <div className="tb-table-head" style={{gridTemplateColumns:"1fr 130px 110px 120px 110px 100px 110px"}}>
-                {["Invoice / Vendor","Status","Match","Total","Balance","Due Date","Action"].map((h,i)=>(
+                {["Invoice / Vendor","Status","Match","Total","Balance","Due Date","Action"].map((h: any, i: number) =>(
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>

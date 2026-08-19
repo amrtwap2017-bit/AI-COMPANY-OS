@@ -18,7 +18,7 @@ const typeIcon = { info:Info, success:CheckCircle, warning:AlertTriangle, error:
 const typeBg   = { info:"bg-blue-100 text-blue-600", success:"bg-emerald-100 text-emerald-600", warning:"bg-amber-100 text-amber-600", error:"bg-red-100 text-red-600" };
 
 export function NotificationDrawer({ open, onClose, notifications = [] }: Props) {
-  const unread = notifications.filter(n => !n.read).length;
+  const unread = notifications.filter((n: any) => !n.read).length;
   return (
     <AnimatePresence>
       {open && (
@@ -48,7 +48,7 @@ export function NotificationDrawer({ open, onClose, notifications = [] }: Props)
                   <div className="text-sm font-medium text-primary">All caught up!</div>
                   <div className="text-xs text-tertiary mt-1">No new notifications</div>
                 </div>
-              ) : notifications.map(n => {
+              ) : notifications.map((n: any) => {
                 const Icon = typeIcon[n.type];
                 return (
                   <div key={n.id} className={`flex gap-3 px-4 py-3.5 hover:bg-base-alt transition-colors ${!n.read ? "bg-amber-50/50" : ""}`}>

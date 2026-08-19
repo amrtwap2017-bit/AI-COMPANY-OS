@@ -57,7 +57,7 @@ export default function PlatformMetricsPage() {
       tbFetch("/api/v1/executive-kpi/summary").then(r => r.data ?? r).catch(() => ({})),
       tbFetch("/api/v1/executive-kpi/scorecard").then(r => r.data ?? r).catch(() => ({})),
       tbFetch("/api/v1/maintenance/dashboard").then(r => r.data ?? r).catch(() => ({})),
-    ]).then(([kpi, sc, maint]) => {
+    ]).then(([kpi, sc, maint]: any[]) => {
       setKpiSummary(kpi);
       setScorecard(sc);
       setMaintDash(maint);
@@ -143,7 +143,7 @@ export default function PlatformMetricsPage() {
             { label:"Backend API",   status:"online",  value:"3.0.0",        icon:"🟢", color:"bg-green-50" },
             { label:"Database",      status:"online",  value:"PostgreSQL 17", icon:"🟢", color:"bg-green-50" },
             { label:"Portal",        status:"online",  value:"Next.js 14",   icon:"🟢", color:"bg-green-50" },
-          ].map(s => (
+          ].map((s: any) => (
             <div key={s.label} className={`${s.color} border border-gray-200 rounded-xl p-4`}>
               <div className="flex items-center gap-2 mb-2">
                 <span>{s.icon}</span>

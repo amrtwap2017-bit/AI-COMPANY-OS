@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function WorkbenchPage() {
   const router = useRouter();
   const { data: twin }    = useQuery(["wb-twin"],   () => authFetch("/api/v1/twin/state").then(r=>r.json()));
@@ -31,7 +31,7 @@ export default function WorkbenchPage() {
           <h1 className="tb-hero-title">Executive Workbench</h1>
           <p className="tb-hero-description">Personal workspace for executive decision-making</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"WOs",value:d.work_orders?.total||0,color:"#5B7C8C"},{label:"Contracts",value:d.commercial?.active_contracts||0,color:"#547C4D"},{label:"Alerts",value:d.notifications?.unread||0,color:"#8D7443"}].map((k,i)=>(
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"WOs",value:d.work_orders?.total||0,color:"#5B7C8C"},{label:"Contracts",value:d.commercial?.active_contracts||0,color:"#547C4D"},{label:"Alerts",value:d.notifications?.unread||0,color:"#8D7443"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

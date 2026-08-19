@@ -26,7 +26,7 @@ export function EnterpriseShell({ children, rail }: EnterpriseShellProps) {
   const centerKey = Object.keys(CENTER_SUB_NAV).find(key =>
     pathname.startsWith("/" + key)
   );
-  const subNavItems = centerKey ? CENTER_SUB_NAV[centerKey] : [];
+  const subNavItems = centerKey ? (CENTER_SUB_NAV as Record<string, any>)[centerKey] : [];
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--color-bg)" }}>

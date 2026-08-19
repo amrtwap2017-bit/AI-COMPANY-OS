@@ -5,8 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const CATEGORY_COLOR = {
   hvac:"#5B7C8C", electrical:"#B07A2A", plumbing:"#547C4D",
@@ -30,11 +30,11 @@ export default function SuppliersPage() {
   const pos   = toArr(poRaw);
   const prs   = toArr(prRaw);
 
-  const active   = supps.filter(s => s.status === "active" || !s.status).length;
-  const cats     = [...new Set(supps.map(s => s.category).filter(Boolean))];
+  const active   = supps.filter((s: any) => s.status === "active" || !s.status).length;
+  const cats     = [...new Set(supps.map((s: any) => s.category).filter(Boolean))];
   const totalPOs = pos.length;
 
-  const filtered = supps.filter(s => {
+  const filtered = supps.filter((s: any) => {
     const matchSearch = !search ||
       (s.name||"").toLowerCase().includes(search.toLowerCase()) ||
       (s.email||"").toLowerCase().includes(search.toLowerCase()) ||
@@ -61,7 +61,7 @@ export default function SuppliersPage() {
               { label:"Active",     value:active,       color:"#547C4D" },
               { label:"Categories", value:cats.length,  color:"#5B7C8C" },
               { label:"Total POs",  value:totalPOs,     color:"#B07A2A" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -85,7 +85,7 @@ export default function SuppliersPage() {
             </div>
             <div className="flex gap-2 flex-wrap">
               <button onClick={() => setFilterCat("all")} className={`tb-pill ${filterCat === "all" ? "tb-pill--active" : ""}`}>All</button>
-              {cats.map(c => (
+              {cats.map((c: any) => (
                 <button key={c} onClick={() => setFilterCat(c)}
                   className={`tb-pill ${filterCat === c ? "tb-pill--active" : ""}`}>
                   {c}
@@ -101,7 +101,7 @@ export default function SuppliersPage() {
             <button onClick={() => router.push("/supply-chain/purchase-orders")} className="tb-section-link">Purchase Orders →</button>
           </div>
           {isLoading ? (
-            <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+            <div className="space-y-3">{[1,2,3,4,5].map((i: any) => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           ) : filtered.length === 0 ? (
             <div className="tb-empty">
               <div className="tb-empty-icon">🏭</div>
@@ -111,13 +111,13 @@ export default function SuppliersPage() {
           ) : (
             <div className="tb-table" style={{borderRadius:12,overflow:"hidden"}}>
               <div className="tb-table-head" style={{gridTemplateColumns:"2fr 100px 140px 140px 80px"}}>
-                {["Supplier","Category","Contact","Email","POs"].map((h, i) => (
+                {["Supplier","Category","Contact","Email","POs"].map((h: any, i: number) => (
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
-              {filtered.map((s, i) => {
+              {filtered.map((s: any, i: number) => {
                 const cc = CATEGORY_COLOR[s.category?.toLowerCase()] || "#6D5F53";
-                const supplierPOs = pos.filter(p => p.supplier_id === s.id).length;
+                const supplierPOs = pos.filter((p: any) => p.supplier_id === s.id).length;
                 return (
                   <button key={i}
                     onClick={() => router.push(`/supply-chain/suppliers/${s.id}`)}
@@ -154,7 +154,7 @@ export default function SuppliersPage() {
             <div className="tb-section-title">Suppliers by Category</div>
             <div className="space-y-2">
               {cats.map(cat => {
-                const cnt = supps.filter(s => s.category === cat).length;
+                const cnt = supps.filter((s: any) => s.category === cat).length;
                 const pct = supps.length > 0 ? (cnt / supps.length) * 100 : 0;
                 const c = CATEGORY_COLOR[cat?.toLowerCase()] || "#6D5F53";
                 return (
@@ -177,7 +177,7 @@ export default function SuppliersPage() {
                 { label:"Purchase Requests", icon:"📋", path:"/supply-chain/purchase-requests", count:prs.length },
                 { label:"Goods Receipts",    icon:"✅", path:"/supply-chain/goods-receipts",    count:null },
                 { label:"RFQs",              icon:"📝", path:"/supply-chain/rfqs",              count:null },
-              ].map((a, i) => (
+              ].map((a: any, i: number) => (
                 <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-between">
                   <div className="flex items-center gap-3">
                     <span>{a.icon}</span>

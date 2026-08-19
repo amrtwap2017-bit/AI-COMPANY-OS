@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function CreateInvoicePage() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
@@ -46,7 +46,7 @@ export default function CreateInvoicePage() {
               {label:`VAT (${form.vat_pct}%)`,value:fmtEGP(vat_amount),color:"#8D7443"},
               {label:"Total",value:fmtEGP(total),color:"#547C4D"},
               {label:"Net Payable",value:fmtEGP(net_payable),color:"#B07A2A"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"1rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -62,7 +62,7 @@ export default function CreateInvoicePage() {
             <div><label className="text-xs text-tertiary block mb-1">Vendor *</label>
               <select className="tb-input w-full" value={form.vendor_id} onChange={e=>setForm({...form,vendor_id:e.target.value})}>
                 <option value="">Select vendor…</option>
-                {vendors.map(v=><option key={v.id} value={v.id}>{v.company_name} ({v.vendor_code})</option>)}
+                {vendors.map((v: any) =><option key={v.id} value={v.id}>{v.company_name} ({v.vendor_code})</option>)}
               </select>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Vendor Invoice No. *</label>
@@ -70,16 +70,16 @@ export default function CreateInvoicePage() {
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Linked PO</label>
               <select className="tb-input w-full" value={form.po_id} onChange={e=>{
-                const po = pos.find(p=>p.id===e.target.value);
+                const po = pos.find((p: any) =>p.id===e.target.value);
                 setForm({...form,po_id:e.target.value,po_total:po?.total_amount||0,vendor_id:po?.vendor_id||form.vendor_id});
               }}>
                 <option value="">Select PO (optional)…</option>
-                {pos.map(p=><option key={p.id} value={p.id}>{p.po_number} — {p.vendor_name||"—"}</option>)}
+                {pos.map((p: any) =><option key={p.id} value={p.id}>{p.po_number} — {p.vendor_name||"—"}</option>)}
               </select>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Currency</label>
               <select className="tb-input w-full" value={form.currency} onChange={e=>setForm({...form,currency:e.target.value})}>
-                {["EGP","USD","EUR","GBP","SAR","AED"].map(c=><option key={c} value={c}>{c}</option>)}
+                {["EGP","USD","EUR","GBP","SAR","AED"].map((c: any) =><option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div><label className="text-xs text-tertiary block mb-1">Invoice Date *</label>
@@ -110,7 +110,7 @@ export default function CreateInvoicePage() {
               {label:"Subtotal",value:fmtEGP(Number(form.subtotal)||0)},
               {label:`VAT ${form.vat_pct}%`,value:fmtEGP(vat_amount)},
               {label:`WHT ${form.withholding_tax_pct}%`,value:`-${fmtEGP(wht_amount)}`},
-            ].map((r,i)=>(
+            ].map((r: any, i: number) =>(
               <div key={i} className="flex justify-between text-xs"><span className="text-tertiary">{r.label}</span><span className="text-secondary">{r.value}</span></div>
             ))}
             <div className="flex justify-between text-sm font-black pt-2 border-t border-border">

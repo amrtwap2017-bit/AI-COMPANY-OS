@@ -41,7 +41,7 @@ export default function AssetHistoryPage() {
       tbFetch(`/api/v1/assets/${id}`).then(r => r.data ?? r).catch(() => null),
       tbFetch(`/api/v1/maintenance/pm-plans/`).then(r => r.data ?? r).catch(() => []),
       tbFetch(`/api/v1/work-orders/?limit=200`).then(r => r.data ?? r).catch(() => []),
-    ]).then(([a, plans, wos]) => {
+    ]).then(([a, plans, wos]: any[]) => {
       setAsset(a);
       const plist = Array.isArray(plans) ? plans : plans?.plans || [];
       const allPmPlans = plist.filter((p:any) => p.asset_node_id === id || p.asset_node_id === String(id));
@@ -87,7 +87,7 @@ export default function AssetHistoryPage() {
             {asset.criticality && (
               <>
                 <span className="text-gray-300">·</span>
-                <span className={`text-xs font-medium ${PRIORITY_COLOR[asset.criticality] || "text-gray-500"}`}>
+                <span className={`text-xs font-medium ${(PRIORITY_COLOR as Record<string, any>)[asset.criticality] || "text-gray-500"}`}>
                   {asset.criticality} criticality
                 </span>
               </>
@@ -109,7 +109,7 @@ export default function AssetHistoryPage() {
           { label:"Work Orders",   value:workOrders.length,           color:"bg-blue-50" },
           { label:"Completed WOs", value:completedWOs,                color:"bg-green-50" },
           { label:"PM Plans",      value:pmPlans.length || "—",       color:"bg-purple-50" },
-        ].map(k => (
+        ].map((k: any) => (
           <div key={k.label} className={`${k.color} border border-gray-200 rounded-xl p-4`}>
             <p className="text-xs text-gray-500">{k.label}</p>
             <p className="text-xl font-bold text-[var(--color-text-1)] mt-1 capitalize">{k.value}</p>
@@ -139,7 +139,7 @@ export default function AssetHistoryPage() {
             { key:"info", label:"Asset Info" },
             { key:"wos",  label:`Work Orders (${workOrders.length})` },
             { key:"pm",   label:`PM Plans (${pmPlans.length})` },
-          ].map(t => (
+          ].map((t: any) => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className={`py-2 px-1 border-b-2 text-sm font-medium transition-colors ${
                 tab === t.key ? "border-gray-900 text-[var(--color-text-1)]" : "border-transparent text-gray-500 hover:text-gray-700"
@@ -204,7 +204,7 @@ export default function AssetHistoryPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {["Title","Priority","Status","Due Date","Created"].map(h => (
+                  {["Title","Priority","Status","Due Date","Created"].map((h: any) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
                   ))}
                 </tr>
@@ -216,11 +216,11 @@ export default function AssetHistoryPage() {
                     <td className="px-4 py-3 font-medium text-[var(--color-text-1)] max-w-48 truncate">
                       {wo.title || wo.description || `WO-${wo.id?.slice(0,8)}`}
                     </td>
-                    <td className={`px-4 py-3 text-sm font-medium ${PRIORITY_COLOR[wo.priority] || "text-gray-500"}`}>
+                    <td className={`px-4 py-3 text-sm font-medium ${(PRIORITY_COLOR as Record<string, any>)[wo.priority] || "text-gray-500"}`}>
                       {wo.priority || "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[wo.status] || "bg-gray-100 text-gray-600"}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[wo.status] || "bg-gray-100 text-gray-600"}`}>
                         {wo.status?.replace("_"," ")}
                       </span>
                     </td>

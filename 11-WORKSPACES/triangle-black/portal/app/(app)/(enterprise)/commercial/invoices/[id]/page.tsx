@@ -6,8 +6,8 @@ import { toast } from "@/lib/toast";
 import { useRouter, useParams } from "next/navigation";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 export default function InvoiceDetailPage() {
   const router = useRouter();
@@ -64,7 +64,7 @@ export default function InvoiceDetailPage() {
               {label:"VAT",value:fmtEGP(inv.vat_amount||0)},
               {label:"Balance Due",value:fmtEGP(inv.balance_due||inv.total_amount||0),warn:inv.payment_status!=="paid"},
               {label:"Due Date",value:fmtDate(inv.due_date)},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.warn?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>

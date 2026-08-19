@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function SitesPage() {
   const router = useRouter();
@@ -21,15 +21,15 @@ export default function SitesPage() {
   });
 
   const all      = toArr(raw);
-  const filtered = all.filter(s=>{
+  const filtered = all.filter((s: any) =>{
     const matchSearch = !search||(s.name||"").toLowerCase().includes(search.toLowerCase())||(s.city||"").toLowerCase().includes(search.toLowerCase())||(s.contact_person||"").toLowerCase().includes(search.toLowerCase());
     const matchActive = filterActive==="all"||(filterActive==="active"&&s.is_active)||(filterActive==="inactive"&&!s.is_active);
     return matchSearch&&matchActive;
   });
 
-  const active   = all.filter(s=>s.is_active).length;
-  const inactive = all.filter(s=>!s.is_active).length;
-  const cities   = Array.from(new Set(all.map(s=>s.city).filter(Boolean)));
+  const active   = all.filter((s: any) =>s.is_active).length;
+  const inactive = all.filter((s: any) =>!s.is_active).length;
+  const cities   = Array.from(new Set(all.map((s: any) =>s.city).filter(Boolean)));
 
   return (
     <div className="min-h-screen bg-base">
@@ -56,7 +56,7 @@ export default function SitesPage() {
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search sites..."
             className="tb-input" style={{minWidth:"240px"}}/>
           <div className="tb-tabs border-0 mb-0">
-            {["all","active","inactive"].map(f=>(
+            {["all","active","inactive"].map((f: any) =>(
               <button key={f} onClick={()=>setFilterActive(f)} className={`tb-tab ${filterActive===f?"active":""}`}>
                 {f.charAt(0).toUpperCase()+f.slice(1)}
               </button>
@@ -65,12 +65,12 @@ export default function SitesPage() {
         </div>
 
         {isLoading ? (
-          <div className="tb-grid-3">{[1,2,3,4,5,6].map(i=><div key={i} className="tb-section tb-shimmer-block" style={{height:160}}/>)}</div>
+          <div className="tb-grid-3">{[1,2,3,4,5,6].map((i: any) =><div key={i} className="tb-section tb-shimmer-block" style={{height:160}}/>)}</div>
         ) : filtered.length===0 ? (
           <EmptyState icon="🏨" title="No sites found" description={search?"Try adjusting your search":"No hotel sites configured yet"}/>
         ) : (
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:16}}>
-            {filtered.map(s=>(
+            {filtered.map((s: any) =>(
               <div key={s.id} className="tb-section tb-hover-lift cursor-pointer">
                 <div className="flex justify-between items-start mb-3">
                   <div>

@@ -67,7 +67,7 @@ export default function ClientRequestPage() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Urgency Level *</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {URGENCIES.map(u=>(
+                  {URGENCIES.map((u: any) =>(
                     <button key={u.v} onClick={()=>setForm({...form,urgency:u.v})}
                       className="p-3 rounded-xl border text-left transition-all text-sm"
                       style={{borderColor:form.urgency===u.v?"#059669":"#E5E7EB",background:form.urgency===u.v?"#ECFDF5":"white",color:form.urgency===u.v?"#065F46":"#374151"}}>
@@ -80,7 +80,7 @@ export default function ClientRequestPage() {
                 <label className="text-sm font-medium text-gray-700 block mb-1">Category</label>
                 <select className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
-                  {CATEGORIES.map(c=><option key={c.v} value={c.v}>{c.label}</option>)}
+                  {CATEGORIES.map((c: any) =><option key={c.v} value={c.v}>{c.label}</option>)}
                 </select>
               </div>
               <div>

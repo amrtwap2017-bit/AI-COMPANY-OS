@@ -18,7 +18,7 @@ const GRID: Record<number, string> = {
 export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
   if (type === "cards") {
     return (
-      <div className={"grid gap-4 " + (GRID[cols] || GRID[4])}>
+      <div className={"grid gap-4 " + ((GRID as Record<string, any>)[cols] || GRID[4])}>
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="bg-white rounded-2xl border border-border p-5">
             <div className="h-3 skeleton w-2/3 mb-3" />
@@ -53,7 +53,7 @@ export function LoadingState({ rows = 5, cols = 4, type = "table" }: Props) {
         <div className="skeleton h-8 w-1/3" />
         <div className="skeleton h-4 w-1/2" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2, 3, 4].map((i: any) => (
             <div key={i} className="bg-white rounded-2xl border border-border p-5">
               <div className="skeleton h-3 w-2/3 mb-3" />
               <div className="skeleton h-7 w-1/2" />

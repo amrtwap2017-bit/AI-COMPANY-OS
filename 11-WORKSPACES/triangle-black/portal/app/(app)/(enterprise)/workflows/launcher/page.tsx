@@ -3,12 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function WorkflowLauncherPage() {
   const router = useRouter();
   const { data: autoRaw } = useQuery(["wl-auto"], () => authFetch("/api/v1/automation/status").then(r=>r.json()));
   const pending = autoRaw?.pending_actions||{};
-  const total = Object.values(pending).reduce((s,v)=>s+Number(v),0);
+  const total = Object.values(pending).reduce((s: any, v: any) =>s+Number(v),0);
   const actions = [
     {label:"Create Work Order",  icon:"🔧", desc:"New maintenance or repair task", path:"/operations/work-orders"},
     {label:"New Service Request", icon:"🎫", desc:"Log a service request", path:"/operations/service-requests"},
@@ -25,7 +25,7 @@ export default function WorkflowLauncherPage() {
           <h1 className="tb-hero-title">Workflow Launcher</h1>
           <p className="tb-hero-description">Quick-start common platform workflows</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Quick Actions",value:actions.length,color:"#5B7C8C"},{label:"Pending",value:total,color:total>0?"#B07A2A":"#547C4D"},{label:"Automation",value:"Active",color:"#547C4D"},{label:"Status",value:"Ready",color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Quick Actions",value:actions.length,color:"#5B7C8C"},{label:"Pending",value:total,color:total>0?"#B07A2A":"#547C4D"},{label:"Automation",value:"Active",color:"#547C4D"},{label:"Status",value:"Ready",color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -35,7 +35,7 @@ export default function WorkflowLauncherPage() {
         <div className="tb-section">
           <div className="tb-section-title">Quick Start Actions</div>
           <div className="tb-grid-3">
-            {actions.map((a,i)=>(
+            {actions.map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div style={{fontSize:"2rem",marginBottom:8}}>{a.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{a.label}</div>

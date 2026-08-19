@@ -25,7 +25,7 @@ export default function NotificationRulesPage() {
           <h1 className="tb-hero-title">Notification Rules</h1>
           <p className="tb-hero-description">{notifs.length} notifications · {types.length} types · {notifs.filter((n: any)=>!n.is_read).length} unread</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total",value:notifs.length,color:"#221D1A"},{label:"Unread",value:notifs.filter((n: any)=>!n.is_read).length,color:"#B07A2A"},{label:"Types",value:types.length,color:"#8D7443"},{label:"Rules Active",value:types.length,color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Total",value:notifs.length,color:"#221D1A"},{label:"Unread",value:notifs.filter((n: any)=>!n.is_read).length,color:"#B07A2A"},{label:"Types",value:types.length,color:"#8D7443"},{label:"Rules Active",value:types.length,color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -52,7 +52,7 @@ export default function NotificationRulesPage() {
         <div className="tb-section">
           <div className="tb-section-title">Navigation</div>
           <div className="space-y-2">
-            {[{label:"All Notifications",icon:"🔔",path:"/notifications"},{label:"Inbox",icon:"📬",path:"/inbox"},{label:"Workspace",icon:"🏠",path:"/workspace"}].map((a,i)=>(
+            {[{label:"All Notifications",icon:"🔔",path:"/notifications"},{label:"Inbox",icon:"📬",path:"/inbox"},{label:"Workspace",icon:"🏠",path:"/workspace"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item w-full justify-start"><span>{a.icon}</span><span className="text-sm text-secondary">{a.label}</span></button>
             ))}
           </div>

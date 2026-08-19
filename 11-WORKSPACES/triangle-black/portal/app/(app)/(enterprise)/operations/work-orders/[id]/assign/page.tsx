@@ -24,7 +24,7 @@ export default function WorkOrderAssignPage() {
     Promise.all([
       tbFetch(`/api/v1/work-orders/${id}`).then(r => r.data ?? r),
       tbFetch("/api/v1/technicians/?limit=100").then(r => r.data ?? r),
-    ]).then(([woData, techData]) => {
+    ]).then(([woData, techData]: any[]) => {
       setWo(woData);
       const techs = Array.isArray(techData) ? techData : techData?.results || techData?.items || [];
       setTechnicians(techs);
@@ -44,7 +44,7 @@ export default function WorkOrderAssignPage() {
       });
       const data = await res.json();
       if (res.ok || data.id || data.technician_id) {
-        const tech = technicians.find(t => t.id === selectedTech);
+        const tech = technicians.find((t: any) => t.id === selectedTech);
         toast.success(`Assigned to ${tech?.name || selectedTech}`);
         router.push(`/operations/work-orders/${id}`);
       } else {
@@ -60,7 +60,7 @@ export default function WorkOrderAssignPage() {
     </div>
   );
 
-  const currentTech = technicians.find(t => t.id === wo?.technician_id);
+  const currentTech = technicians.find((t: any) => t.id === wo?.technician_id);
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">

@@ -6,7 +6,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -21,19 +21,19 @@ export default function InventoryPage() {
   const items  = toArr(itemRaw);
   const stocks = toArr(stockRaw);
   const whs    = toArr(whRaw);
-  const cats   = [...new Set(items.map(i=>i.category).filter(Boolean))];
+  const cats   = [...new Set(items.map((i: any) =>i.category).filter(Boolean))];
 
-  const lowStock   = items.filter(i=>{const bal=stocks.find(s=>s.item_id===i.id);return bal&&Number(bal.quantity||0)<=Number(i.minimum_quantity||i.min_quantity||5);});
-  const totalValue = stocks.reduce((s,b)=>{const item=items.find(i=>i.id===b.item_id);return s+(Number(b.qty_on_hand||0)*Number(item?.unit_price||item?.cost||0));},0);
+  const lowStock   = items.filter((i: any) =>{const bal=stocks.find((s: any) =>s.item_id===i.id);return bal&&Number(bal.quantity||0)<=Number(i.minimum_quantity||i.min_quantity||5);});
+  const totalValue = stocks.reduce((s: any, b: any) =>{const item=items.find((i: any) =>i.id===b.item_id);return s+(Number(b.qty_on_hand||0)*Number(item?.unit_price||item?.cost||0));},0);
 
   const enriched = items.map(item=>{
-    const bal = stocks.find(s=>s.item_id===item.id);
+    const bal = stocks.find((s: any) =>s.item_id===item.id);
     const qty = Number(bal?.qty_on_hand||0);
     const min = Number(item.minimum_quantity||item.min_quantity||5);
     return {...item,current_qty:qty,min_qty:min,is_low:qty<=min};
   });
 
-  const filtered = enriched.filter(i=>{
+  const filtered = enriched.filter((i: any) =>{
     const matchSearch = !search||(i.name||"").toLowerCase().includes(search.toLowerCase())||(i.sku||i.part_number||"").toLowerCase().includes(search.toLowerCase())||(i.category||"").toLowerCase().includes(search.toLowerCase());
     const matchCat    = filterCat==="all"||i.category===filterCat;
     const matchStock  = filterStock==="all"||(filterStock==="low"&&i.is_low)||(filterStock==="ok"&&!i.is_low);
@@ -59,7 +59,7 @@ export default function InventoryPage() {
               {label:"Categories",  value:cats.length,        color:"var(--color-info)"},
               {label:"Warehouses",  value:whs.length,         color:"var(--color-brand)"},
               {label:"Total Value", value:fmtEGP(totalValue), color:"var(--color-warning)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -85,7 +85,7 @@ export default function InventoryPage() {
             <input className="tb-input" placeholder="Search by name, SKU, category..."
               value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:"320px"}}/>
             <div className="tb-tabs border-0 mb-0">
-              {["all","low","ok"].map(f=>(
+              {["all","low","ok"].map((f: any) =>(
                 <button key={f} onClick={()=>setFilterStock(f)} className={`tb-tab ${filterStock===f?"active":""}`}>
                   {f==="all"?"All Stock":f==="low"?"Low Stock":"In Stock"}
                   {f==="low"&&lowStock.length>0&&<span className="ml-1 opacity-80">{lowStock.length}</span>}
@@ -94,7 +94,7 @@ export default function InventoryPage() {
             </div>
             <div className="w-px bg-surface-alt h-5"/>
             <button onClick={()=>setFilterCat("all")} className={`tb-btn tb-btn-sm ${filterCat==="all"?"tb-btn-secondary":"tb-btn-ghost"}`}>All</button>
-            {cats.slice(0,5).map(c=>(
+            {cats.slice(0,5).map((c: any) =>(
               <button key={c} onClick={()=>setFilterCat(c)} className={`tb-btn tb-btn-sm ${filterCat===c?"tb-btn-secondary":"tb-btn-ghost"}`}>{c}</button>
             ))}
           </div>
@@ -106,7 +106,7 @@ export default function InventoryPage() {
             <div className="text-sm font-bold text-success">{fmtEGP(totalValue)}</div>
           </div>
           {isLoading ? (
-            <div className="flex flex-col gap-3">{[1,2,3,4,5].map(i=><div key={i} className="tb-shimmer-block" style={{height:56}}/>)}</div>
+            <div className="flex flex-col gap-3">{[1,2,3,4,5].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:56}}/>)}</div>
           ) : filtered.length===0 ? (
             <div className="tb-empty">
               <div className="tb-empty-icon">📦</div>
@@ -171,9 +171,9 @@ export default function InventoryPage() {
             <div className="tb-section-title">Items by Category</div>
             <div className="flex flex-col gap-2">
               {cats.map(cat=>{
-                const cnt = items.filter(i=>i.category===cat).length;
+                const cnt = items.filter((i: any) =>i.category===cat).length;
                 const pct = items.length>0?(cnt/items.length)*100:0;
-                const low = enriched.filter(i=>i.category===cat&&i.is_low).length;
+                const low = enriched.filter((i: any) =>i.category===cat&&i.is_low).length;
                 return (
                   <div key={cat}>
                     <div className="flex justify-between items-center mb-1">
@@ -200,7 +200,7 @@ export default function InventoryPage() {
                 {label:"Goods Receipts",   icon:"✅",  path:"/supply-chain/goods-receipts"},
                 {label:"Purchase Requests",icon:"📋",  path:"/supply-chain/purchase-requests"},
                 {label:"Purchase Orders",  icon:"📦",  path:"/supply-chain/purchase-orders"},
-              ].map((a,i)=>(
+              ].map((a: any, i: number) =>(
                 <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item w-full justify-start">
                   <span>{a.icon}</span>
                   <span className="text-sm text-secondary">{a.label}</span>

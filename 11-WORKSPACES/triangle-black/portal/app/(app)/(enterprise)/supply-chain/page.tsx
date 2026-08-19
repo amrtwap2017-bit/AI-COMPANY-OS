@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { FeatureGate } from "@/components/ui/FeatureGate";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 function SupplyChainHubInner() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter();
@@ -37,10 +37,10 @@ function SupplyChainHubInner() {
           <div className="tb-grid-4 mt-6">
             {[
               { label:"Purchase Orders",  value:pos.length,   color:"#547C4D" },
-              { label:"Open PRs",         value:prs.filter(p=>p.status==="pending"||p.status==="open").length, color:"#5B7C8C" },
+              { label:"Open PRs",         value:prs.filter((p: any) =>p.status==="pending"||p.status==="open").length, color:"#5B7C8C" },
               { label:"Inventory Items",  value:inv.length,   color:"#B07A2A" },
               { label:"Suppliers",        value:supps.length, color:"#8D7443" },
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -53,7 +53,7 @@ function SupplyChainHubInner() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Supply Chain Modules</div>
           <div className="tb-grid-4">
-            {modules.map((m,i)=>(
+            {modules.map((m: any, i: number) =>(
               <button key={i} onClick={()=>router.push(m.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div className="flex items-center justify-between mb-3">
                   <span style={{fontSize:"1.75rem"}}>{m.icon}</span>

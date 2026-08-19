@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtRelative = (d) => { if (!d) return ""; try { const h=Math.floor((Date.now()-new Date(d).getTime())/3600000); if(h<1) return "just now"; if(h<24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`; } catch { return ""; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtRelative = (d: any) => { if (!d) return ""; try { const h=Math.floor((Date.now()-new Date(d).getTime())/3600000); if(h<1) return "just now"; if(h<24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`; } catch { return ""; } };
 
 export default function ExecutiveDashboardPage() {
   const router = useRouter();
@@ -66,7 +66,7 @@ export default function ExecutiveDashboardPage() {
               {label:"Revenue Collected",value:fmtEGP(inv.collected||0),sub:`EGP ${Number(inv.outstanding||0).toLocaleString()} outstanding`,icon:"💰",path:"/supply-chain/invoices"},
               {label:"Active Projects",value:proj.active||0,sub:`EGP ${Number(proj.total_budget||0).toLocaleString()} budget · ${Math.round(proj.avg_completion||0)}% avg`,icon:"🏗️",path:"/projects"},
               {label:"Service Requests",value:sr.open_count||0,sub:`${sr.critical||0} critical · ${sr.high_urgency||0} high`,warn:(sr.critical||0)>0,icon:"🎫",path:"/operations/service-requests"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <button key={i} onClick={()=>router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity cursor-pointer">
                 <div className="text-2xl mb-1">{k.icon}</div>
                 <div className="tb-hero-kpi-value" style={{color:k.warn?"var(--color-warning)":"var(--color-text-inv)"}}>{k.value}</div>
@@ -88,7 +88,7 @@ export default function ExecutiveDashboardPage() {
                 <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View all →</button>
               </div>
               <div className="tb-grid-4">
-                {[{label:"Total",value:wo.total||0},{label:"Open",value:wo.open_count||0,warn:true},{label:"In Progress",value:wo.in_progress||0},{label:"Completed",value:wo.completed||0,good:true}].map((s,i)=>(
+                {[{label:"Total",value:wo.total||0},{label:"Open",value:wo.open_count||0,warn:true},{label:"In Progress",value:wo.in_progress||0},{label:"Completed",value:wo.completed||0,good:true}].map((s: any, i: number) =>(
                   <div key={i} className="p-3 rounded-xl bg-surface-alt text-center">
                     <div className="text-2xl font-black" style={{color:s.good?"var(--color-success)":s.warn?(wo.open_count||0)>0?"var(--color-info)":"var(--color-text-1)":"var(--color-text-1)"}}>{s.value}</div>
                     <div className="text-xs text-tertiary mt-1">{s.label}</div>

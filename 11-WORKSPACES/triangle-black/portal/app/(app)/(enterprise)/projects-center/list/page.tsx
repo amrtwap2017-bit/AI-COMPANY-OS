@@ -9,9 +9,9 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
-const fmtEGP = (n) => n?"EGP "+Number(n).toLocaleString():"—";
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const fmtEGP = (n: any) => n?"EGP "+Number(n).toLocaleString():"—";
 
 export default function ProjectsListPage() {
   const router = useRouter();
@@ -22,11 +22,11 @@ export default function ProjectsListPage() {
 
   const { data: raw, isLoading } = useQuery({queryKey:["projects-list"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r=>r.json()),staleTime:60000});
   const projects = toArr(raw);
-  const active = projects.filter(p=>p.status==="active"||p.status==="in_progress");
-  const completed = projects.filter(p=>p.status==="completed");
-  const totalBudget = projects.reduce((s,p)=>s+Number(p.budget||0),0);
+  const active = projects.filter((p: any) =>p.status==="active"||p.status==="in_progress");
+  const completed = projects.filter((p: any) =>p.status==="completed");
+  const totalBudget = projects.reduce((s: any, p: any) =>s+Number(p.budget||0),0);
 
-  const filtered = useMemo(()=>projects.filter(p=>{
+  const filtered = useMemo(()=>projects.filter((p: any) =>{
     const ms = !search||(p.title||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterStatus==="all"||p.status===filterStatus);
   }),[projects,search,filterStatus]);
@@ -65,10 +65,10 @@ export default function ProjectsListPage() {
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
           <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search projects..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
-            {["all","planning","active","in_progress","on_hold","completed","cancelled"].map(s=>(
+            {["all","planning","active","in_progress","on_hold","completed","cancelled"].map((s: any) =>(
               <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
                 {s==="all"?"All":s.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
-                {s!=="all"&&<span className="ml-1 opacity-60">{projects.filter(p=>p.status===s).length}</span>}
+                {s!=="all"&&<span className="ml-1 opacity-60">{projects.filter((p: any) =>p.status===s).length}</span>}
               </button>
             ))}
           </div>
@@ -85,7 +85,7 @@ export default function ProjectsListPage() {
                 <table className="tb-table">
                   <thead><tr><th>Project</th><th>Status</th><th>Progress</th><th style={{textAlign:"right"}}>Budget</th><th>Start</th><th>End</th></tr></thead>
                   <tbody>
-                    {paged.map((p,i)=>{
+                    {paged.map((p: any, i: number) =>{
                       const isOverdue = p.end_date&&new Date(p.end_date)<new Date()&&p.status!=="completed";
                       return (
                         <tr key={p.id||i} onClick={()=>router.push(`/projects-center/${p.id}`)} className="cursor-pointer">

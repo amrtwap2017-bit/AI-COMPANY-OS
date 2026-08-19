@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => {
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => {
   if (!d) return "—";
   try {
     const dt = new Date(d);
@@ -61,10 +61,10 @@ export default function UserManagementPage() {
           <div className="tb-grid-4 mt-6">
             {[
               { label: "Total Users", value: users.length, color: "#221D1A" },
-              { label: "Admins", value: users.filter((u) => u.role === "admin").length, color: "#A84A3D" },
-              { label: "Managers", value: users.filter((u) => u.role === "manager").length, color: "#B07A2A" },
-              { label: "Active", value: users.filter((u) => u.is_active).length, color: "#547C4D" },
-            ].map((k, i) => (
+              { label: "Admins", value: users.filter((u: any) => u.role === "admin").length, color: "#A84A3D" },
+              { label: "Managers", value: users.filter((u: any) => u.role === "manager").length, color: "#B07A2A" },
+              { label: "Active", value: users.filter((u: any) => u.is_active).length, color: "#547C4D" },
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi cursor-default">
                 <div className="tb-hero-kpi-value" style={{ color: k.color }}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -79,12 +79,12 @@ export default function UserManagementPage() {
           <div className="tb-section-title">Platform Users</div>
           {isLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse" />)}
+              {[1, 2, 3].map((i: any) => <div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse" />)}
             </div>
           ) : (
             <div className="space-y-2 mt-3">
-              {users.map((u, i) => {
-                const rc = ROLE_COLORS[u.role] || "#6D5F53";
+              {users.map((u: any, i: number) => {
+                const rc = (ROLE_COLORS as Record<string, any>)[u.role] || "#6D5F53";
                 const isEditing = editingId === u.id;
                 return (
                   <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-base-alt border border-transparent hover:border-border transition-colors">
@@ -105,7 +105,7 @@ export default function UserManagementPage() {
                             className="tb-input text-xs py-1 px-2"
                             style={{ width: 120 }}
                           >
-                            {roles.map((r) => <option key={r} value={r}>{r}</option>)}
+                            {roles.map((r: any) => <option key={r} value={r}>{r}</option>)}
                           </select>
                           <button
                             onClick={() => updateRole.mutate({ userId: u.id, role: newRole || u.role })}
@@ -150,7 +150,7 @@ export default function UserManagementPage() {
               { role: "engineer", desc: "Log time, update WO status, view assigned work", color: "#547C4D" },
               { role: "finance", desc: "View and process invoices, financial reports", color: "#8D7443" },
               { role: "viewer", desc: "Read-only access to all modules", color: "#6D5F53" },
-            ].map((r, i) => (
+            ].map((r: any, i: number) => (
               <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-base-alt">
                 <span className="tb-badge flex-shrink-0" style={{ background: r.color + "18", color: r.color, border: "1px solid " + r.color + "30" }}>{r.role}</span>
                 <div className="text-xs text-tertiary">{r.desc}</div>

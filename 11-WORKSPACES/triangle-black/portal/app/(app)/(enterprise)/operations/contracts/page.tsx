@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n || 0).toLocaleString();
-const fmtDate = (d) => {
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n || 0).toLocaleString();
+const fmtDate = (d: any) => {
   if (!d) return "—";
   try {
     const dt = new Date(d);
@@ -33,10 +33,10 @@ export default function ContractsPage() {
     { staleTime: 60000 }
   );
   const contracts = toArr(raw);
-  const filtered = filter === "all" ? contracts : contracts.filter((c) => c.status === filter);
-  const totalValue = filtered.reduce((s, c) => s + Number(c.total_value || 0), 0);
-  const activeCount = contracts.filter((c) => c.status === "active").length;
-  const pendingCount = contracts.filter((c) => c.status === "pending_signature").length;
+  const filtered = filter === "all" ? contracts : contracts.filter((c: any) => c.status === filter);
+  const totalValue = filtered.reduce((s: any, c: any) => s + Number(c.total_value || 0), 0);
+  const activeCount = contracts.filter((c: any) => c.status === "active").length;
+  const pendingCount = contracts.filter((c: any) => c.status === "pending_signature").length;
 
   return (
     <div className="min-h-screen bg-base">
@@ -47,7 +47,7 @@ export default function ContractsPage() {
               <div className="text-label-upper text-blue-400 mb-1.5">Operations</div>
               <h1 className="tb-hero-title">Contracts</h1>
               <p className="tb-hero-description">
-                {contracts.length} contracts · EGP {Number(contracts.reduce((s, c) => s + Number(c.total_value || 0), 0)).toLocaleString()} total value
+                {contracts.length} contracts · EGP {Number(contracts.reduce((s: any, c: any) => s + Number(c.total_value || 0), 0)).toLocaleString()} total value
               </p>
             </div>
           </div>
@@ -56,8 +56,8 @@ export default function ContractsPage() {
               { label: "Total", value: contracts.length, color: "#221D1A" },
               { label: "Active", value: activeCount, color: "#547C4D" },
               { label: "Pending Sign", value: pendingCount, color: "#B07A2A" },
-              { label: "Total Value", value: fmtEGP(contracts.reduce((s, c) => s + Number(c.total_value || 0), 0)), color: "#8D7443" },
-            ].map((k, i) => (
+              { label: "Total Value", value: fmtEGP(contracts.reduce((s: any, c: any) => s + Number(c.total_value || 0), 0)), color: "#8D7443" },
+            ].map((k: any, i: number) => (
               <button key={i} onClick={()=>k.path&&router.push(k.path)} className="tb-hero-kpi text-left hover:opacity-80 transition-opacity">
                 <div className="tb-hero-kpi-value" style={{ color: k.color, fontSize: "0.95rem" }}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -70,7 +70,7 @@ export default function ContractsPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="flex gap-2 mb-4 flex-wrap">
-            {["all", "draft", "pending_signature", "active", "expired"].map((f) => (
+            {["all", "draft", "pending_signature", "active", "expired"].map((f: any) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -79,7 +79,7 @@ export default function ContractsPage() {
                 {f === "all" ? "All" : f.replace(/_/g, " ")}
                 {f !== "all" && (
                   <span className="ml-1 opacity-60">
-                    {contracts.filter((c) => c.status === f).length}
+                    {contracts.filter((c: any) => c.status === f).length}
                   </span>
                 )}
               </button>
@@ -93,7 +93,7 @@ export default function ContractsPage() {
 
           {isLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3].map((i: any) => (
                 <div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse" />
               ))}
             </div>
@@ -106,11 +106,11 @@ export default function ContractsPage() {
           ) : (
             <div className="tb-table" style={{ borderRadius: 12, overflow: "hidden" }}>
               <div className="tb-table-head" style={{ gridTemplateColumns: "2fr 110px 100px 120px 110px 100px" }}>
-                {["Contract / Client", "Status", "Duration", "Value", "Start", "End"].map((h, i) => (
+                {["Contract / Client", "Status", "Duration", "Value", "Start", "End"].map((h: any, i: number) => (
                   <div key={i} className="tb-table-head-cell" style={{ textAlign: i > 0 ? "center" : "left" }}>{h}</div>
                 ))}
               </div>
-              {filtered.map((c, i) => {
+              {filtered.map((c: any, i: number) => {
                 const sc = SC[c.status] || "#6D5F53";
                 return (
                   <div key={i} className="tb-table-row" style={{ gridTemplateColumns: "2fr 110px 100px 120px 110px 100px" }}>

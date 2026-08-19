@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP  = (n) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
@@ -40,9 +40,9 @@ export default function ProjectDetailPage() {
     </div>
   );
 
-  const sc  = STATUS_COLOR[proj.status] || "#6D5F53";
+  const sc  = (STATUS_COLOR as Record<string, any>)[proj.status] || "#6D5F53";
   const wos = proj.work_orders || [];
-  const completedWOs = wos.filter(w => w.status === "completed").length;
+  const completedWOs = wos.filter((w: any) => w.status === "completed").length;
   const progress = wos.length > 0 ? Math.round((completedWOs / wos.length) * 100) : Number(proj.progress || 0);
 
   return (
@@ -68,7 +68,7 @@ export default function ProjectDetailPage() {
               { label:"Budget",     value:fmtEGP(proj.budget||proj.total_value||0), color:"#221D1A" },
               { label:"Work Orders",value:wos.length,                              color:"#5B7C8C" },
               { label:"End Date",   value:fmtDate(proj.end_date),                  color:"#8D7443" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -171,7 +171,7 @@ export default function ProjectDetailPage() {
                   { label:"Work Orders",   icon:"🔧", path:"/operations/work-orders" },
                   { label:"Assets",        icon:"⚙️", path:"/maintenance/assets" },
                   { label:"Contracts",     icon:"📄", path:"/commercial/contracts" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

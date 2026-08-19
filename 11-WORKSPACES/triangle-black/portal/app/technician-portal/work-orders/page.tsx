@@ -69,7 +69,7 @@ export default function TechnicianWorkOrdersPage() {
 
         {/* Filter tabs */}
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {["all", "open", "in_progress", "completed"].map(f => (
+          {["all", "open", "in_progress", "completed"].map((f: any) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -94,7 +94,7 @@ export default function TechnicianWorkOrdersPage() {
                 className="w-full bg-gray-900 border border-gray-800 rounded-xl p-4 text-left hover:border-gray-600 active:bg-gray-800 transition-colors"
               >
                 <div className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5">{PRIORITY_ICON[wo.priority] || "⚪"}</span>
+                  <span className="text-lg mt-0.5">{(PRIORITY_ICON as Record<string, any>)[wo.priority] || "⚪"}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">
                       {wo.title || wo.description || `WO-${wo.id?.slice(0,8)}`}
@@ -103,7 +103,7 @@ export default function TechnicianWorkOrdersPage() {
                       {wo.location || wo.asset_name || "—"}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[wo.status] || "bg-gray-800 text-gray-400"}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(STATUS_COLOR as Record<string, any>)[wo.status] || "bg-gray-800 text-gray-400"}`}>
                         {wo.status?.replace("_", " ")}
                       </span>
                       {wo.due_date && (

@@ -9,9 +9,9 @@ import { KpiSkeleton, TableSkeleton } from "@/components/ui/LoadingSkeleton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Pagination } from "@/components/ui/Pagination";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
-const fmtEGP = (n) => n?"EGP "+Number(n).toLocaleString():"—";
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-GB"):"—"; } catch { return "—"; } };
+const fmtEGP = (n: any) => n?"EGP "+Number(n).toLocaleString():"—";
 
 export default function CustomersPage() {
   const router = useRouter();
@@ -22,10 +22,10 @@ export default function CustomersPage() {
 
   const { data: raw, isLoading } = useQuery({queryKey:["leads-v2"],queryFn:()=>authFetch("/api/v1/leads-portal-v2").then(r=>r.json()),staleTime:60000});
   const leads = toArr(raw);
-  const active = leads.filter(l=>l.status==="active"||l.status==="won");
-  const totalValue = leads.reduce((s,l)=>s+Number(l.contract_value||l.deal_value||0),0);
+  const active = leads.filter((l: any) =>l.status==="active"||l.status==="won");
+  const totalValue = leads.reduce((s: any, l: any) =>s+Number(l.contract_value||l.deal_value||0),0);
 
-  const filtered = useMemo(()=>leads.filter(l=>{
+  const filtered = useMemo(()=>leads.filter((l: any) =>{
     const ms = !search||(l.company_name||l.name||"").toLowerCase().includes(search.toLowerCase())||(l.contact_person||"").toLowerCase().includes(search.toLowerCase());
     return ms&&(filterStatus==="all"||l.status===filterStatus);
   }),[leads,search,filterStatus]);
@@ -51,7 +51,7 @@ export default function CustomersPage() {
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{leads.length}</div><div className="tb-hero-kpi-label">Total</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{active.length}</div><div className="tb-hero-kpi-label">Active</div></div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value text-brand" style={{fontSize:"14px"}}>{fmtEGP(totalValue)}</div><div className="tb-hero-kpi-label">Pipeline Value</div></div>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{leads.filter(l=>l.status==="won").length}</div><div className="tb-hero-kpi-label">Won</div></div>
+              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{leads.filter((l: any) =>l.status==="won").length}</div><div className="tb-hero-kpi-label">Won</div></div>
             </>}
           </div>
         </div>
@@ -61,10 +61,10 @@ export default function CustomersPage() {
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
           <input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Search customers..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
-            {["all","prospect","active","won","lost"].map(s=>(
+            {["all","prospect","active","won","lost"].map((s: any) =>(
               <button key={s} onClick={()=>{setFilterStatus(s);setPage(1);}} className={`tb-tab ${filterStatus===s?"active":""}`}>
                 {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1)}
-                {s!=="all"&&<span className="ml-1 opacity-60">{leads.filter(l=>l.status===s).length}</span>}
+                {s!=="all"&&<span className="ml-1 opacity-60">{leads.filter((l: any) =>l.status===s).length}</span>}
               </button>
             ))}
           </div>
@@ -82,7 +82,7 @@ export default function CustomersPage() {
                 <table className="tb-table">
                   <thead><tr><th>Customer</th><th>Status</th><th>Contact</th><th style={{textAlign:"right"}}>Value</th><th>Created</th><th></th></tr></thead>
                   <tbody>
-                    {paged.map((l,i)=>(
+                    {paged.map((l: any, i: number) =>(
                       <tr key={l.id||i} onClick={()=>router.push(`/commercial/leads/${l.id}`)} className="cursor-pointer">
                         <td>
                           <div className="font-semibold text-sm text-primary">{l.company_name||l.name||"—"}</div>

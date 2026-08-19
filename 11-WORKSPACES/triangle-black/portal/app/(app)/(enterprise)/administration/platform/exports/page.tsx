@@ -26,7 +26,7 @@ export default function PlatformExportsPage() {
         <p className="tb-hero-description">{exports.length} export types · CSV format</p>
       </div></div>
       <div style={{maxWidth:1400,margin:"0 auto",padding:"32px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
-        {exports.map((e,i)=>(
+        {exports.map((e: any, i: number) =>(
           <button key={i} onClick={()=>handleExport(e.url)}
             style={{background:"var(--color-surface)",border:"1px solid var(--color-border)",borderRadius:14,padding:24,textAlign:"left",cursor:"pointer",transition:"all 160ms ease"}}
             onMouseEnter={ev=>ev.currentTarget.style.borderColor="rgba(185,146,76,0.3)"}

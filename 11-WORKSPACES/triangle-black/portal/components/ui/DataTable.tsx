@@ -37,7 +37,7 @@ export function DataTable<T extends Record<string, any>>({
   }
 
   const sorted = sortKey
-    ? [...data].sort((a, b) => {
+    ? [...data].sort((a: any, b: any) => {
         const av = a[sortKey] ?? ""; const bv = b[sortKey] ?? "";
         const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
         return sortDir === "asc" ? cmp : -cmp;

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function SettingsPage() {
   const router = useRouter();
   const { data: me } = useQuery(["settings-me"], () => authFetch("/api/v1/auth/me").then(r=>r.json()));
@@ -25,7 +25,7 @@ export default function SettingsPage() {
           <h1 className="tb-hero-title">Settings</h1>
           <p className="tb-hero-description">Platform configuration and preferences</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"User",value:me?.email||me?.username||"amr@triangleblack.com",color:"#F1F5F9"},{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Version",value:"2.0.1",color:"#60A5FA"},{label:"Status",value:"Active",color:"#34D399"}].map((k,i)=>(
+            {[{label:"User",value:me?.email||me?.username||"amr@triangleblack.com",color:"#F1F5F9"},{label:"Twin Score",value:score+"/100",color:score>=95?"#34D399":"#FBBF24"},{label:"Version",value:"2.0.1",color:"#60A5FA"},{label:"Status",value:"Active",color:"#34D399"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.8rem"}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -35,7 +35,7 @@ export default function SettingsPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Configuration</div>
           <div className="tb-grid-3">
-            {sections.map((s,i)=>(
+            {sections.map((s: any, i: number) =>(
               <button key={i} onClick={()=>router.push(s.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div style={{fontSize:"1.75rem",marginBottom:8}}>{s.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{s.label}</div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-const fmtDate = (d) => {
+const fmtDate = (d: any) => {
   if (!d) return "—";
   try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); }
   catch { return "—"; }
@@ -83,7 +83,7 @@ export default function ClientDashboardPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[1,2,3,4].map(i=><div key={i} className="h-24 bg-white rounded-2xl animate-pulse"/>)}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{[1,2,3,4].map((i: any) =><div key={i} className="h-24 bg-white rounded-2xl animate-pulse"/>)}</div>
         ) : (
           <>
             {/* KPI Cards */}
@@ -93,7 +93,7 @@ export default function ClientDashboardPage() {
                 {label:"In Progress",value:wo.in_progress||0,sub:"being worked on",color:"#D97706",bg:"#FFFBEB"},
                 {label:"Completed",value:wo.completed||0,sub:"this period",color:"#059669",bg:"#ECFDF5"},
                 {label:"Our Assets",value:assets.total||0,sub:`${assets.operational||0} operational`,color:"#7C3AED",bg:"#F5F3FF"},
-              ].map((k,i)=>(
+              ].map((k: any, i: number) =>(
                 <div key={i} className="rounded-2xl p-5 border border-gray-100" style={{background:k.bg}}>
                   <div className="text-3xl font-black mb-1" style={{color:k.color}}>{k.value}</div>
                   <div className="text-sm font-bold text-gray-700">{k.label}</div>

@@ -8,7 +8,7 @@ import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.assets || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.assets || [];
 
 export default function AssetQRGalleryPage() {
   const router = useRouter();
@@ -24,11 +24,11 @@ export default function AssetQRGalleryPage() {
     staleTime:60000
   });
   const assets = toArr(raw);
-  const sites  = useMemo(()=>["all",...Array.from(new Set(assets.map(a=>a.site_name).filter(Boolean)))]        ,[assets]);
-  const cats   = useMemo(()=>["all",...Array.from(new Set(assets.map(a=>a.category).filter(Boolean)))]         ,[assets]);
-  const crits  = useMemo(()=>["all",...Array.from(new Set(assets.map(a=>a.criticality).filter(Boolean)))]      ,[assets]);
+  const sites  = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.site_name).filter(Boolean)))]        ,[assets]);
+  const cats   = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.category).filter(Boolean)))]         ,[assets]);
+  const crits  = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.criticality).filter(Boolean)))]      ,[assets]);
 
-  const filtered = useMemo(()=>assets.filter(a=>{
+  const filtered = useMemo(()=>assets.filter((a: any) =>{
     const q = search.toLowerCase();
     return (!search||(a.name||"").toLowerCase().includes(q)||(a.category||"").toLowerCase().includes(q)||(a.location_description||"").toLowerCase().includes(q))
       &&(filterSite==="all"||a.site_name===filterSite)
@@ -36,7 +36,7 @@ export default function AssetQRGalleryPage() {
       &&(filterCrit==="all"||a.criticality===filterCrit);
   }),[assets,search,filterSite,filterCat,filterCrit]);
 
-  const critical   = assets.filter(a=>a.criticality==="critical").length;
+  const critical   = assets.filter((a: any) =>a.criticality==="critical").length;
   const hasFilters = search||filterSite!=="all"||filterCat!=="all"||filterCrit!=="all";
   const clearFilters=()=>{setSearch("");setFilterSite("all");setFilterCat("all");setFilterCrit("all");};
 
@@ -74,13 +74,13 @@ export default function AssetQRGalleryPage() {
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search assets..."
               className="tb-input" style={{minWidth:"200px",width:"auto"}}/>
             <select value={filterSite} onChange={e=>setFilterSite(e.target.value)} className="tb-select" style={{width:"auto"}}>
-              {sites.map(s=><option key={s} value={s}>{s==="all"?"All Sites":s.split(" ").slice(0,3).join(" ")}</option>)}
+              {sites.map((s: any) =><option key={s} value={s}>{s==="all"?"All Sites":s.split(" ").slice(0,3).join(" ")}</option>)}
             </select>
             <select value={filterCat} onChange={e=>setFilterCat(e.target.value)} className="tb-select" style={{width:"auto"}}>
-              {cats.map(c=><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
+              {cats.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
             <select value={filterCrit} onChange={e=>setFilterCrit(e.target.value)} className="tb-select" style={{width:"auto"}}>
-              {crits.map(c=><option key={c} value={c}>{c==="all"?"All Criticality":c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+              {crits.map((c: any) =><option key={c} value={c}>{c==="all"?"All Criticality":c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
             </select>
             {hasFilters&&<button onClick={clearFilters} className="tb-btn tb-btn-ghost tb-btn-sm">✕ Clear</button>}
             <span className="text-xs text-tertiary ml-auto">{filtered.length} of {assets.length} assets</span>
@@ -89,7 +89,7 @@ export default function AssetQRGalleryPage() {
 
         {isLoading ? (
           <div className="tb-grid-4">
-            {[1,2,3,4,5,6,7,8].map(i=><div key={i} className="tb-shimmer-block" style={{height:280}}/>)}
+            {[1,2,3,4,5,6,7,8].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:280}}/>)}
           </div>
         ) : filtered.length===0 ? (
           <EmptyState icon="📱" title="No assets found"

@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 
 export default function TechniciansPage() {
   const router = useRouter();
@@ -21,12 +21,12 @@ export default function TechniciansPage() {
   const techs = toArr(raw);
   const wos   = toArr(woRaw);
 
-  const active    = techs.filter(t=>t.is_active!==false);
-  const busy      = techs.filter(t=>(t.current_work_orders||0)>0);
-  const atCap     = techs.filter(t=>(t.current_work_orders||0)>=(t.max_work_orders||5));
-  const available = techs.filter(t=>t.is_active!==false&&(t.current_work_orders||0)===0);
+  const active    = techs.filter((t: any) =>t.is_active!==false);
+  const busy      = techs.filter((t: any) =>(t.current_work_orders||0)>0);
+  const atCap     = techs.filter((t: any) =>(t.current_work_orders||0)>=(t.max_work_orders||5));
+  const available = techs.filter((t: any) =>t.is_active!==false&&(t.current_work_orders||0)===0);
 
-  const filtered = techs.filter(t=>{
+  const filtered = techs.filter((t: any) =>{
     const ms = !search||t.name?.toLowerCase().includes(search.toLowerCase())||t.email?.toLowerCase().includes(search.toLowerCase());
     const mf = filter==="all"||
       (filter==="active"&&t.is_active!==false)||
@@ -57,7 +57,7 @@ export default function TechniciansPage() {
               {label:"Available",  value:available.length,color:"var(--color-success)", f:"available"},
               {label:"On Duty",    value:busy.length,     color:"var(--color-warning)", f:"busy"},
               {label:"At Capacity",value:atCap.length,    color:atCap.length>0?"var(--color-danger)":"var(--color-success)",f:"capacity"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <button key={i} onClick={()=>setFilter(filter===k.f?"all":k.f)} className="tb-hero-kpi cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -90,11 +90,11 @@ export default function TechniciansPage() {
           </div>
         ) : (
           <div className="tb-grid-3">
-            {filtered.map((t,i)=>{
+            {filtered.map((t: any, i: number) =>{
               const load         = Math.min(Math.round((t.current_work_orders||0)/Math.max(t.max_work_orders||5,1)*100),100);
-              const techWOs      = wos.filter(w=>w.technician_id===t.id);
-              const completedWOs = techWOs.filter(w=>w.status==="completed");
-              const openWOs      = techWOs.filter(w=>w.status==="open"||w.status==="in_progress");
+              const techWOs      = wos.filter((w: any) =>w.technician_id===t.id);
+              const completedWOs = techWOs.filter((w: any) =>w.status==="completed");
+              const openWOs      = techWOs.filter((w: any) =>w.status==="open"||w.status==="in_progress");
               const loadColor    = load>=90?"#A84A3D":load>=70?"#B07A2A":"#547C4D";
               return (
                 <button key={i} onClick={()=>router.push(`/operations/technicians/${t.id}`)}
@@ -111,7 +111,7 @@ export default function TechniciansPage() {
                       <div className="text-xs text-tertiary truncate">{t.email}</div>
                       {t.specializations?.length>0&&(
                         <div className="flex gap-1 mt-1.5 flex-wrap">
-                          {t.specializations.slice(0,2).map((s,j)=>(
+                          {t.specializations.slice(0,2).map((s: any, j: number) =>(
                             <span key={j} className="tb-badge tb-badge-brand" style={{fontSize:"0.5rem",padding:"1px 6px"}}>{s}</span>
                           ))}
                           {t.specializations.length>2&&<span className="text-xs text-tertiary">+{t.specializations.length-2}</span>}
@@ -133,7 +133,7 @@ export default function TechniciansPage() {
                       {label:"Total",value:techWOs.length,    color:"text-secondary"},
                       {label:"Done", value:completedWOs.length,color:"text-success"},
                       {label:"Open", value:openWOs.length,    color:"text-warning"},
-                    ].map((s,j)=>(
+                    ].map((s: any, j: number) =>(
                       <div key={j} className="text-center bg-surface-alt rounded-lg py-2">
                         <div className={`text-base font-black ${s.color}`}>{s.value}</div>
                         <div className="text-xs text-tertiary">{s.label}</div>

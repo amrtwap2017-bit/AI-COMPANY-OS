@@ -5,8 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const fmtDate = (d) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtDays = (n) => { const days=Number(n||0); if(days>0) return `${days}d overdue`; if(days===0) return "Due today"; return `In ${Math.abs(days)}d`; };
+const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtDays = (n: any) => { const days=Number(n||0); if(days>0) return `${days}d overdue`; if(days===0) return "Due today"; return `In ${Math.abs(days)}d`; };
 
 const STATUS_CONFIG = {
   overdue:   {color:"var(--color-danger)",bg:"rgba(168,74,61,0.08)",label:"Overdue",icon:"🚨"},
@@ -39,8 +39,8 @@ export default function MaintenanceSchedulerPage() {
   const assetStats = stats?.assets||{};
   const woStats = stats?.wos_this_month||{};
 
-  const filtered = assets.filter(a=>(filterStatus==="all"||a.schedule_status===filterStatus)&&(filterSite==="all"||a.site_name?.includes(filterSite)));
-  const sites = [...new Set(assets.map(a=>a.site_name).filter(Boolean))];
+  const filtered = assets.filter((a: any) =>(filterStatus==="all"||a.schedule_status===filterStatus)&&(filterSite==="all"||a.site_name?.includes(filterSite)));
+  const sites = [...new Set(assets.map((a: any) =>a.site_name).filter(Boolean))];
 
   return (
     <div className="min-h-screen bg-base">
@@ -68,7 +68,7 @@ export default function MaintenanceSchedulerPage() {
           )}
 
           <div className="tb-grid-4">
-            {[{label:"Overdue",value:assetStats.overdue||0,color:"var(--color-danger)",sub:"immediate action"},{label:"Due This Week",value:assetStats.due_week||0,color:"var(--color-warning)",sub:"schedule now"},{label:"Due This Month",value:assetStats.due_month||0,color:"var(--color-info)",sub:"plan ahead"},{label:"WOs Created",value:woStats.created||0,color:"var(--color-success)",sub:`${woStats.completed||0} completed`}].map((k,i)=>(
+            {[{label:"Overdue",value:assetStats.overdue||0,color:"var(--color-danger)",sub:"immediate action"},{label:"Due This Week",value:assetStats.due_week||0,color:"var(--color-warning)",sub:"schedule now"},{label:"Due This Month",value:assetStats.due_month||0,color:"var(--color-info)",sub:"plan ahead"},{label:"WOs Created",value:woStats.created||0,color:"var(--color-success)",sub:`${woStats.completed||0} completed`}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -98,7 +98,7 @@ export default function MaintenanceSchedulerPage() {
               </select>
               <select className="tb-select" value={filterSite} onChange={e=>setFilterSite(e.target.value)} style={{minWidth:"180px",width:"auto"}}>
                 <option value="all">All Sites</option>
-                {sites.map(s=><option key={s} value={s}>{s.split(" ").slice(0,2).join(" ")}</option>)}
+                {sites.map((s: any) =><option key={s} value={s}>{s.split(" ").slice(0,2).join(" ")}</option>)}
               </select>
               {(filterStatus!=="all"||filterSite!=="all")&&<button onClick={()=>{setFilterStatus("all");setFilterSite("all");}} className="tb-btn tb-btn-ghost tb-btn-sm">Reset</button>}
               <span className="text-xs text-tertiary">{filtered.length} assets</span>
@@ -106,7 +106,7 @@ export default function MaintenanceSchedulerPage() {
 
             <div className="tb-grid-4 mb-4">
               {Object.entries(STATUS_CONFIG).map(([status,cfg])=>{
-                const count = assets.filter(a=>a.schedule_status===status).length;
+                const count = assets.filter((a: any) =>a.schedule_status===status).length;
                 return (
                   <button key={status} onClick={()=>setFilterStatus(status===filterStatus?"all":status)}
                     className="tb-section text-left cursor-pointer"
@@ -122,14 +122,14 @@ export default function MaintenanceSchedulerPage() {
             </div>
 
             {isLoading ? (
-              <div className="flex flex-col gap-2">{[1,2,3,4,5].map(i=><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:64}} />)}</div>
+              <div className="flex flex-col gap-2">{[1,2,3,4,5].map((i: any) =><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:64}} />)}</div>
             ) : filtered.length===0 ? (
               <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">All clear!</div><div className="tb-empty-desc">No assets match this filter</div></div>
             ) : (
               <div className="flex flex-col gap-2">
                 {filtered.map((asset,i)=>{
-                  const cfg = STATUS_CONFIG[asset.schedule_status]||STATUS_CONFIG.scheduled;
-                  const cc = CRIT_COLORS[asset.criticality]||"var(--color-text-3)";
+                  const cfg = (STATUS_CONFIG as Record<string, any>)[asset.schedule_status]||STATUS_CONFIG.scheduled;
+                  const cc = (CRIT_COLORS as Record<string, any>)[asset.criticality]||"var(--color-text-3)";
                   const hasRecentWO = (asset.recent_wo_count||0)>0;
                   return (
                     <div key={i} className="flex items-center gap-4 p-4 rounded-xl border"
@@ -163,7 +163,7 @@ export default function MaintenanceSchedulerPage() {
               <div className="tb-section" style={{borderColor:"var(--color-danger-border)",background:"var(--color-danger-bg)"}}>
                 <div className="font-bold text-danger mb-3">🚨 Overdue ({overdue_cal.length} assets)</div>
                 <div className="tb-grid-2">
-                  {overdue_cal.map((a,i)=>(
+                  {overdue_cal.map((a: any, i: number) =>(
                     <div key={i} className="flex items-center gap-3 p-3 bg-surface-alt rounded-lg">
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-primary truncate">{a.name}</div>
@@ -181,8 +181,8 @@ export default function MaintenanceSchedulerPage() {
               <div key={wi} className="tb-section">
                 <div className="tb-section-title">Week of {fmtDate(week)} ({weekAssets.length} assets)</div>
                 <div className="tb-grid-2 mt-3">
-                  {weekAssets.map((a,i)=>{
-                    const cc = CRIT_COLORS[a.criticality]||"var(--color-text-3)";
+                  {weekAssets.map((a: any, i: number) =>{
+                    const cc = (CRIT_COLORS as Record<string, any>)[a.criticality]||"var(--color-text-3)";
                     return (
                       <div key={i} className="flex items-center gap-3 p-3 bg-surface-alt rounded-lg">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:cc}} />

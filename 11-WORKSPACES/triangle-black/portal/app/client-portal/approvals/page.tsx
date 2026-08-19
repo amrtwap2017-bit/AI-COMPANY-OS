@@ -19,11 +19,11 @@ export default function ClientApprovalsPage() {
     setClient(cl);
     if (cl?.company_name) {
       fetch(`/api/v1/client/sow-approvals?client_name=${encodeURIComponent(cl.company_name)}`,
-        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then(d=>{ setSows(Array.isArray(d)?d:[]); setLoading(false); });
+        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then((d: any) => { setSows(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 
-  const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+  const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
   return (
     <div className="min-h-screen" style={{background:"#F8FAFC"}}>
@@ -33,7 +33,7 @@ export default function ClientApprovalsPage() {
       </nav>
       <div className="max-w-4xl mx-auto px-6 py-6">
         {loading ? (
-          <div className="space-y-3">{[1,2].map(i=><div key={i} className="h-32 bg-white rounded-2xl animate-pulse"/>)}</div>
+          <div className="space-y-3">{[1,2].map((i: any) =><div key={i} className="h-32 bg-white rounded-2xl animate-pulse"/>)}</div>
         ) : sows.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
             <div className="text-4xl mb-3">📋</div>

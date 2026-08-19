@@ -5,8 +5,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { toast } from "@/lib/toast";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => {
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => {
   if (!d || d === null || d === undefined) return "—";
   try {
     const dt = new Date(d);
@@ -14,7 +14,7 @@ const fmtDate = (d) => {
     return dt.toLocaleDateString("en-GB");
   } catch { return "—"; }
 };
-const fmtDateTime = (d) => {
+const fmtDateTime = (d: any) => {
   if (!d || d === null || d === undefined) return "—";
   try {
     const dt = new Date(d);
@@ -67,8 +67,8 @@ export default function WorkOrderDetailPage() {
     </div>
   );
 
-  const pc = PRIORITY_COLOR[wo.priority] || "#6D5F53";
-  const sc = STATUS_COLOR[wo.status]   || "#6D5F53";
+  const pc = (PRIORITY_COLOR as Record<string, any>)[wo.priority] || "#6D5F53";
+  const sc = (STATUS_COLOR as Record<string, any>)[wo.status]   || "#6D5F53";
 
   return (
     <div className="min-h-screen bg-base">
@@ -96,7 +96,7 @@ export default function WorkOrderDetailPage() {
               { label:"Status",      value:(wo.status||"—").replace("_"," ").toUpperCase(), color:sc },
               { label:"Technician",  value:wo.technician?.name || "Unassigned",     color:wo.technician?"#547C4D":"#B07A2A" },
               { label:"Due Date",    value:fmtDate(wo.due_date),                    color:"#221D1A" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -224,7 +224,7 @@ export default function WorkOrderDetailPage() {
                   { label:"Dispatch Board",     icon:"📋", path:"/operations/dispatch" },
                   { label:"Service Requests",   icon:"🎫", path:"/operations/service-requests" },
                   { label:"Technicians",        icon:"👷", path:"/operations/technicians" },
-                ].map((a, i) => (
+                ].map((a: any, i: number) => (
                   <button key={i} onClick={() => router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

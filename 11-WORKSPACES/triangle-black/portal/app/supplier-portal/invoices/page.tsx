@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
-const fmtDate = (d) => { if(!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
+const fmtDate = (d: any) => { if(!d) return "—"; try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); } catch { return "—"; } };
 const PS = {paid:"#34D399",unpaid:"#FBBF24",partial:"#FB923C"};
 
 export default function SupplierInvoicesPage() {
@@ -23,7 +23,7 @@ export default function SupplierInvoicesPage() {
     setSupplier(sup);
     if (sup?.vendor_id) {
       fetch(`/api/v1/supplier/invoices?vendor_id=${sup.vendor_id}`, {headers:{Authorization:`Bearer ${t}`}})
-        .then(r=>r.json()).then(d=>{ setInvoices(Array.isArray(d)?d:[]); setLoading(false); });
+        .then(r=>r.json()).then((d: any) => { setInvoices(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 
@@ -35,7 +35,7 @@ export default function SupplierInvoicesPage() {
         <div className="ml-auto text-xs text-slate-400">{invoices.length} invoices</div>
       </nav>
       <div className="max-w-4xl mx-auto px-6 py-6">
-        {loading ? <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-20 rounded-2xl animate-pulse" style={{background:"#1E293B"}}/>)}</div>
+        {loading ? <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-20 rounded-2xl animate-pulse" style={{background:"#1E293B"}}/>)}</div>
         : invoices.length===0 ? (
           <div className="text-center py-16 rounded-2xl border" style={{background:"#1E293B",borderColor:"rgba(255,255,255,0.08)"}}>
             <div className="text-4xl mb-3">📄</div><div className="text-white font-bold">No invoices yet</div>

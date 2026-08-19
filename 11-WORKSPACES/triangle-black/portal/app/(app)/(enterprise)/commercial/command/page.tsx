@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 export default function CommercialCommandPage() {
   const router = useRouter();
@@ -18,14 +18,14 @@ export default function CommercialCommandPage() {
   const leads = toArr(rawLeads);
   const contracts = toArr(rawContracts);
   const rev = finDash?.revenue||{};
-  const activeCont = contracts.filter(c=>c.status==="active").length;
-  const expiringSoon = contracts.filter(c=>{if(!c.end_date) return false;const diff=(new Date(c.end_date).getTime()-Date.now())/86400000;return diff>=0&&diff<=30;}).length;
+  const activeCont = contracts.filter((c: any) =>c.status==="active").length;
+  const expiringSoon = contracts.filter((c: any) =>{if(!c.end_date) return false;const diff=(new Date(c.end_date).getTime()-Date.now())/86400000;return diff>=0&&diff<=30;}).length;
 
   const MODULES = [
     {label:"Leads & Pipeline",icon:"📊",path:"/commercial/leads",desc:`${leads.length} leads`},
     {label:"Contracts",icon:"📋",path:"/commercial/contracts",desc:`${activeCont} active`},
     {label:"Invoices",icon:"🧾",path:"/commercial/invoices",desc:`${fmtEGP(rev.total_invoiced||0)} invoiced`},
-    {label:"Customers",icon:"🏨",path:"/commercial/customers",desc:`${leads.filter(l=>l.status==="won").length} accounts`},
+    {label:"Customers",icon:"🏨",path:"/commercial/customers",desc:`${leads.filter((l: any) =>l.status==="won").length} accounts`},
     {label:"Payment History",icon:"💰",path:"/commercial/payment-history",desc:`${fmtEGP(rev.total_collected||0)} collected`},
     {label:"Renewals",icon:"🔄",path:"/commercial/contracts/renewal",desc:`${expiringSoon} expiring soon`},
   ];
@@ -63,7 +63,7 @@ export default function CommercialCommandPage() {
         )}
 
         <div className="tb-grid-3 mb-5">
-          {MODULES.map((m,i)=>(
+          {MODULES.map((m: any, i: number) =>(
             <button key={i} onClick={()=>router.push(m.path)} className="tb-section text-left flex flex-col gap-1.5 cursor-pointer tb-hover-lift">
               <span className="text-2xl">{m.icon}</span>
               <div className="font-bold text-sm text-primary">{m.label}</div>
@@ -84,7 +84,7 @@ export default function CommercialCommandPage() {
           </div>
           <div className="tb-section">
             <div className="tb-section-title">Contracts Summary</div>
-            {[["Total Contracts",contracts.length,"var(--color-text-1)"],["Active",activeCont,"var(--color-success)"],["Expiring Soon",expiringSoon,expiringSoon>0?"var(--color-warning)":"var(--color-success)"],["Leads in Pipeline",leads.filter(l=>!["won","lost"].includes(l.status)).length,"var(--color-info)"]].map(([label,value,color],i)=>(
+            {[["Total Contracts",contracts.length,"var(--color-text-1)"],["Active",activeCont,"var(--color-success)"],["Expiring Soon",expiringSoon,expiringSoon>0?"var(--color-warning)":"var(--color-success)"],["Leads in Pipeline",leads.filter((l: any) =>!["won","lost"].includes(l.status)).length,"var(--color-info)"]].map(([label,value,color],i)=>(
               <div key={i} className="tb-detail-row">
                 <span className="tb-detail-key">{label}</span>
                 <span className="tb-detail-value font-bold" style={{color}}>{value}</span>

@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter, useParams } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR   = {Operational:"#547C4D","In Fault":"#A84A3D","Under Maintenance":"#B07A2A",Inactive:"#6D5F53"};
 const PRIORITY_COLOR = {critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"};
@@ -38,10 +38,10 @@ export default function AssetDetailPage() {
     </div>
   );
 
-  const sc     = STATUS_COLOR[asset.status] || "#6D5F53";
+  const sc     = (STATUS_COLOR as Record<string, any>)[asset.status] || "#6D5F53";
   const wos    = asset.work_orders || [];
   const pms    = asset.pm_plans    || [];
-  const openWOs= wos.filter(w=>w.status!=="completed").length;
+  const openWOs= wos.filter((w: any) =>w.status!=="completed").length;
 
   return (
     <div className="min-h-screen bg-base">
@@ -65,7 +65,7 @@ export default function AssetDetailPage() {
               {label:"Category",    value:asset.category||"—",color:"var(--color-info)"},
               {label:"Work Orders", value:wos.length,         color:openWOs>0?"var(--color-warning)":"var(--color-success)"},
               {label:"PM Plans",    value:pms.length,         color:"var(--color-brand)"},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.9rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -119,8 +119,8 @@ export default function AssetDetailPage() {
                     </thead>
                     <tbody>
                       {wos.map((wo,i)=>{
-                        const pc  = PRIORITY_COLOR[wo.priority]  || "#6D5F53";
-                        const wsc = WO_STATUS_COLOR[wo.status]   || "#6D5F53";
+                        const pc  = (PRIORITY_COLOR as Record<string, any>)[wo.priority]  || "#6D5F53";
+                        const wsc = (WO_STATUS_COLOR as Record<string, any>)[wo.status]   || "#6D5F53";
                         return (
                           <tr key={i} onClick={()=>router.push(`/operations/work-orders/${wo.id}`)} className="cursor-pointer">
                             <td>
@@ -205,7 +205,7 @@ export default function AssetDetailPage() {
                   {label:"Asset Tree",  icon:"🌳",  path:"/maintenance/asset-tree"},
                   {label:"PM Plans",    icon:"📅",  path:"/maintenance/pm-plans"},
                   {label:"Work Orders", icon:"🔧",  path:"/operations/work-orders"},
-                ].map((a,i)=>(
+                ].map((a: any, i: number) =>(
                   <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item w-full justify-start">
                     <span>{a.icon}</span>
                     <span className="text-sm text-secondary">{a.label}</span>

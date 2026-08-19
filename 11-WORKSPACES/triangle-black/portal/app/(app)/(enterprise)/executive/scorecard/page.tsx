@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtEGP = (n) => "EGP " + Number(n||0).toLocaleString();
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function ScorecardPage() {
   const router = useRouter();
   const { data: twin }   = useQuery(["sc2-twin"],  () => authFetch("/api/v1/twin/state").then(r=>r.json()));
@@ -14,16 +14,16 @@ export default function ScorecardPage() {
   const wos = toArr(woRaw); const inv = toArr(invRaw); const pms = toArr(pmRaw);
   const score = twin?.health_score||0;
   const now = new Date();
-  const compRate  = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
-  const collRate  = inv.length>0?Math.round(inv.filter(i=>i.status==="paid").length/inv.length*100):0;
-  const pmComp    = pms.length>0?Math.round((pms.length-pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now).length)/pms.length*100):100;
+  const compRate  = wos.length>0?Math.round(wos.filter((w: any) =>w.status==="completed").length/wos.length*100):0;
+  const collRate  = inv.length>0?Math.round(inv.filter((i: any) =>i.status==="paid").length/inv.length*100):0;
+  const pmComp    = pms.length>0?Math.round((pms.length-pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now).length)/pms.length*100):100;
   const kpis = [
     {label:"Platform Twin Score",   value:score,     target:95,  color:"#547C4D", unit:"/100",  path:"/executive"},
     {label:"WO Completion Rate",    value:compRate,  target:85,  color:"#5B7C8C", unit:"%",     path:"/operations/work-orders"},
     {label:"Invoice Collection",    value:collRate,  target:90,  color:"#B07A2A", unit:"%",     path:"/invoices"},
     {label:"PM Plan Compliance",    value:pmComp,    target:90,  color:"#8D7443", unit:"%",     path:"/maintenance/pm-plans"},
     {label:"Asset Uptime",          value:100,       target:95,  color:"#547C4D", unit:"%",     path:"/maintenance/assets"},
-    {label:"Critical WOs Open",     value:wos.filter(w=>w.priority==="critical"&&w.status!=="completed").length, target:0, color:"#A84A3D", unit:"",path:"/operations/work-orders"},
+    {label:"Critical WOs Open",     value:wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed").length, target:0, color:"#A84A3D", unit:"",path:"/operations/work-orders"},
   ];
   return (
     <div className="min-h-screen bg-base">
@@ -33,7 +33,7 @@ export default function ScorecardPage() {
           <h1 className="tb-hero-title">Executive Scorecard</h1>
           <p className="tb-hero-description">Key performance indicators vs targets</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"On Target",value:kpis.filter(k=>k.value>=(k.target||0)&&k.label!=="Critical WOs Open"||k.value===0).length+"/"+kpis.length,color:"#547C4D"},{label:"WO Rate",value:compRate+"%",color:compRate>=85?"#547C4D":"#B07A2A"},{label:"Collection",value:collRate+"%",color:collRate>=90?"#547C4D":"#B07A2A"}].map((k,i)=>(
+            {[{label:"Twin Score",value:score+"/100",color:score>=95?"#547C4D":"#B07A2A"},{label:"On Target",value:kpis.filter((k: any) =>k.value>=(k.target||0)&&k.label!=="Critical WOs Open"||k.value===0).length+"/"+kpis.length,color:"#547C4D"},{label:"WO Rate",value:compRate+"%",color:compRate>=85?"#547C4D":"#B07A2A"},{label:"Collection",value:collRate+"%",color:collRate>=90?"#547C4D":"#B07A2A"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 
 const toArr  = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
 const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const STATUS_COLOR = {
   paid:"#34D399",pending:"#FBBF24",overdue:"#F87171",
@@ -14,7 +14,7 @@ const STATUS_COLOR = {
 };
 
 function printInvoice(inv) {
-  const sc     = STATUS_COLOR[inv.status] || "#94A3B8";
+  const sc     = (STATUS_COLOR as Record<string, any>)[inv.status] || "#94A3B8";
   const amount = Number(inv.total_amount || inv.amount || 0);
   const tax    = Number(inv.tax_amount || amount * 0.14);
   const subtot = amount - tax;
@@ -60,7 +60,7 @@ export default function InvoiceDetailPage() {
     </div>
   );
 
-  const sc     = STATUS_COLOR[inv.status]||"#94A3B8";
+  const sc     = (STATUS_COLOR as Record<string, any>)[inv.status]||"#94A3B8";
   const amount = Number(inv.total_amount||inv.amount||0);
   const tax    = Number(inv.tax_amount||amount*0.14);
   const subtot = amount-tax;
@@ -89,7 +89,7 @@ export default function InvoiceDetailPage() {
               {label:"Subtotal",    value:fmtEGP(subtot), color:"var(--color-text-inv)"},
               {label:"VAT (14%)",   value:fmtEGP(tax),    color:"var(--color-warning)"},
               {label:"Status",      value:(inv.status||"—").toUpperCase(),color:sc},
-            ].map((k,i)=>(
+            ].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color,fontSize:"0.95rem"}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>

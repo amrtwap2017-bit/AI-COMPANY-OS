@@ -3,19 +3,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function WorkflowDesignerPage() {
   const router = useRouter();
   const { data: woRaw } = useQuery(["wd-wos"], () => authFetch("/api/v1/work-orders/").then(r=>r.json()));
   const { data: srRaw } = useQuery(["wd-srs"], () => authFetch("/api/v1/service-requests/").then(r=>r.json()));
   const wos = toArr(woRaw); const srs = toArr(srRaw);
   const workflows = [
-    {label:"SR → Work Order",    icon:"🎫→🔧", desc:"Service request creates work order automatically", active:srs.filter(s=>s.work_order_id).length, total:srs.length, color:"#5B7C8C"},
-    {label:"PM → Work Order",    icon:"📅→🔧", desc:"Overdue PM plan triggers work order creation",     active:wos.filter(w=>w.title?.startsWith("PM:")).length, total:wos.length, color:"#8D7443"},
-    {label:"WO → Invoice",       icon:"🔧→💰", desc:"Completed work order creates invoice draft",       active:wos.filter(w=>w.status==="completed").length, total:wos.length, color:"#547C4D"},
+    {label:"SR → Work Order",    icon:"🎫→🔧", desc:"Service request creates work order automatically", active:srs.filter((s: any) =>s.work_order_id).length, total:srs.length, color:"#5B7C8C"},
+    {label:"PM → Work Order",    icon:"📅→🔧", desc:"Overdue PM plan triggers work order creation",     active:wos.filter((w: any) =>w.title?.startsWith("PM:")).length, total:wos.length, color:"#8D7443"},
+    {label:"WO → Invoice",       icon:"🔧→💰", desc:"Completed work order creates invoice draft",       active:wos.filter((w: any) =>w.status==="completed").length, total:wos.length, color:"#547C4D"},
     {label:"Contract → Renewal", icon:"📄→🔄", desc:"Expiring contract triggers renewal notification",  active:0, total:0, color:"#B07A2A"},
     {label:"Stock Alert → PR",   icon:"📦→📋", desc:"Low stock triggers purchase request",             active:0, total:0, color:"#B07A2A"},
-    {label:"WO → Notification",  icon:"🔧→🔔", desc:"Work order status change sends notification",     active:wos.filter(w=>w.status!=="completed").length, total:wos.length, color:"#A84A3D"},
+    {label:"WO → Notification",  icon:"🔧→🔔", desc:"Work order status change sends notification",     active:wos.filter((w: any) =>w.status!=="completed").length, total:wos.length, color:"#A84A3D"},
   ];
   return (
     <div className="min-h-screen bg-base">
@@ -25,7 +25,7 @@ export default function WorkflowDesignerPage() {
           <h1 className="tb-hero-title">Workflow Designer</h1>
           <p className="tb-hero-description">Automated workflow rules and business process automation</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Workflows",value:workflows.length,color:"#5B7C8C"},{label:"Active WOs",value:wos.filter(w=>w.status!=="completed").length,color:"#B07A2A"},{label:"Linked SRs",value:srs.filter(s=>s.work_order_id).length,color:"#547C4D"},{label:"Auto-created",value:wos.filter(w=>w.title?.startsWith("PM:")).length,color:"#8D7443"}].map((k,i)=>(
+            {[{label:"Workflows",value:workflows.length,color:"#5B7C8C"},{label:"Active WOs",value:wos.filter((w: any) =>w.status!=="completed").length,color:"#B07A2A"},{label:"Linked SRs",value:srs.filter((s: any) =>s.work_order_id).length,color:"#547C4D"},{label:"Auto-created",value:wos.filter((w: any) =>w.title?.startsWith("PM:")).length,color:"#8D7443"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -53,7 +53,7 @@ export default function WorkflowDesignerPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Navigate</div>
           <div className="tb-grid-4">
-            {[{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Service Requests",icon:"🎫",path:"/operations/service-requests"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Automation",icon:"⚡",path:"/workspace"}].map((a,i)=>(
+            {[{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"},{label:"Service Requests",icon:"🎫",path:"/operations/service-requests"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Automation",icon:"⚡",path:"/workspace"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

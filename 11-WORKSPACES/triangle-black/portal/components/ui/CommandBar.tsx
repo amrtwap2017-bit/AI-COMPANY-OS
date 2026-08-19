@@ -128,7 +128,7 @@ export function CommandBar({ open: externalOpen, onClose }: CommandBarProps = {}
       const r = results[idx];
       if (r) { router.push(r.path); setOpen(false); setQuery(""); }
     } else {
-      const cmd = NAV_COMMANDS[idx];
+      const cmd = (NAV_COMMANDS as Record<string, any>)[idx];
       if (cmd) { router.push(cmd.action); setOpen(false); setQuery(""); }
     }
   };
@@ -198,8 +198,8 @@ export function CommandBar({ open: externalOpen, onClose }: CommandBarProps = {}
                   No results for "{query}"
                 </div>
               )}
-              {results.map((r, i) => {
-                const tc = TYPE_CONFIG[r.type] || {icon:"📋", color:"rgba(148,163,184,0.8)", bg:"rgba(148,163,184,0.1)"};
+              {results.map((r: any, i: number) => {
+                const tc = (TYPE_CONFIG as Record<string, any>)[r.type] || {icon:"📋", color:"rgba(148,163,184,0.8)", bg:"rgba(148,163,184,0.1)"};
                 const isSelected = i === selected;
                 return (
                   <button key={r.id} onClick={() => { router.push(r.path); setOpen(false); setQuery(""); }}

@@ -3,17 +3,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function EngineeringPMPlansPage() {
   const router = useRouter();
   const { data: pmRaw }    = useQuery(["epmp-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
   const { data: assetRaw } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets/").then(r=>r.json()));
   const pms = toArr(pmRaw); const assets = toArr(assetRaw);
   const now = new Date();
-  const overdue = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);
-  const dueWeek = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=new Date(now.getTime()+7*86400000));
-  const onTrack = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>new Date(now.getTime()+7*86400000));
+  const overdue = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
+  const dueWeek = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=new Date(now.getTime()+7*86400000));
+  const onTrack = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>new Date(now.getTime()+7*86400000));
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
@@ -22,7 +22,7 @@ export default function EngineeringPMPlansPage() {
           <h1 className="tb-hero-title">PM Plans</h1>
           <p className="tb-hero-description">{pms.length} plans · {overdue.length} overdue · {dueWeek.length} due this week</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Total Plans",value:pms.length,color:"#221D1A"},{label:"Overdue",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"On Track",value:onTrack.length,color:"#547C4D"}].map((k,i)=>(
+            {[{label:"Total Plans",value:pms.length,color:"#221D1A"},{label:"Overdue",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"On Track",value:onTrack.length,color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>
@@ -49,7 +49,7 @@ export default function EngineeringPMPlansPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-3">Navigate</div>
           <div className="tb-grid-3">
-            {[{label:"PM Plans Full",icon:"📅",path:"/maintenance/pm-plans"},{label:"Assets",icon:"⚙️",path:"/maintenance/assets"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a,i)=>(
+            {[{label:"PM Plans Full",icon:"📅",path:"/maintenance/pm-plans"},{label:"Assets",icon:"⚙️",path:"/maintenance/assets"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

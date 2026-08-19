@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 
 export default function CustomerSuccessPage() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function CustomerSuccessPage() {
 
   const siteSla = slaDash?.site_sla || [];
   const cl      = toArr(contracts);
-  const active  = cl.filter(c=>c.status==="active");
+  const active  = cl.filter((c: any) =>c.status==="active");
 
   return (
     <div className="min-h-screen bg-base">
@@ -25,7 +25,7 @@ export default function CustomerSuccessPage() {
           <div className="tb-grid-3 mt-6">
             <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{siteSla.length}</div><div className="tb-hero-kpi-label">Client Sites</div></div>
             <div className="tb-hero-kpi"><div className="tb-hero-kpi-value text-success">{active.length}</div><div className="tb-hero-kpi-label">Active Contracts</div></div>
-            <div className="tb-hero-kpi"><div className="tb-hero-kpi-value text-brand">{siteSla.filter(s=>s.sla_grade==="A").length}</div><div className="tb-hero-kpi-label">Grade A Sites</div></div>
+            <div className="tb-hero-kpi"><div className="tb-hero-kpi-value text-brand">{siteSla.filter((s: any) =>s.sla_grade==="A").length}</div><div className="tb-hero-kpi-label">Grade A Sites</div></div>
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ export default function CustomerSuccessPage() {
             <div className="tb-section-title">SLA by Client Site</div>
             {siteSla.length === 0 ? (
               <div className="tb-empty"><div className="tb-empty-icon">📊</div><div className="tb-empty-desc">No SLA data available</div></div>
-            ) : siteSla.map((s,i)=>{
+            ) : siteSla.map((s: any, i: number) =>{
               const gc = s.sla_grade==="A"?"#547C4D":s.sla_grade==="B"?"#5B7C8C":s.sla_grade==="C"?"#B07A2A":"#A84A3D";
               return (
                 <div key={i} className="flex items-center gap-3 py-3 border-b border-divider">
@@ -57,7 +57,7 @@ export default function CustomerSuccessPage() {
             <div className="tb-section-title">Active Contracts</div>
             {active.length === 0 ? (
               <div className="tb-empty"><div className="tb-empty-desc">No active contracts</div></div>
-            ) : active.map((c,i)=>(
+            ) : active.map((c: any, i: number) =>(
               <button key={i} onClick={()=>router.push("/commercial/contracts/"+c.id)}
                 className="flex justify-between items-center py-3 border-b border-divider w-full text-left bg-transparent border-0 cursor-pointer">
                 <span className="text-sm font-semibold text-primary truncate flex-1 pr-3">{c.title}</span>

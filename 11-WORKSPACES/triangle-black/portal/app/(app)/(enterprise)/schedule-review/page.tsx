@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function ScheduleReviewPage() {
   const router = useRouter();
   const { data: pmRaw } = useQuery(["sr2-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r=>r.json()));
@@ -13,10 +13,10 @@ export default function ScheduleReviewPage() {
   const now = new Date();
   const next7  = new Date(now.getTime()+7*86400000);
   const next30 = new Date(now.getTime()+30*86400000);
-  const overdue   = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)<now);
-  const dueWeek   = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=next7);
-  const dueMonth  = pms.filter(p=>p.next_due_ts&&new Date(p.next_due_ts)>next7&&new Date(p.next_due_ts)<=next30);
-  const wosDue    = wos.filter(w=>w.due_date&&new Date(w.due_date)>=now&&new Date(w.due_date)<=next7&&w.status!=="completed");
+  const overdue   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
+  const dueWeek   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=next7);
+  const dueMonth  = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>next7&&new Date(p.next_due_ts)<=next30);
+  const wosDue    = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)>=now&&new Date(w.due_date)<=next7&&w.status!=="completed");
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
@@ -25,7 +25,7 @@ export default function ScheduleReviewPage() {
           <h1 className="tb-hero-title">Schedule Review</h1>
           <p className="tb-hero-description">Upcoming maintenance and work order schedule</p>
           <div className="tb-grid-4 mt-6">
-            {[{label:"Overdue PMs",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"Due This Month",value:dueMonth.length,color:"#5B7C8C"},{label:"WOs Due Soon",value:wosDue.length,color:wosDue.length>0?"#B07A2A":"#547C4D"}].map((k,i)=>(
+            {[{label:"Overdue PMs",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"Due This Month",value:dueMonth.length,color:"#5B7C8C"},{label:"WOs Due Soon",value:wosDue.length,color:wosDue.length>0?"#B07A2A":"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
             ))}
           </div>

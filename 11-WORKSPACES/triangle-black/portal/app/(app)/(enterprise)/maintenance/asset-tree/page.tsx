@@ -5,8 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
 const STATUS_COLOR = {
   Operational:"#547C4D", "In Fault":"#A84A3D", "Under Maintenance":"#B07A2A", Inactive:"#6D5F53"
@@ -34,19 +34,19 @@ export default function AssetTreePage() {
   const assets = toArr(assetRaw);
   const wos    = toArr(woRaw);
   const pms    = toArr(pmRaw);
-  const cats   = [...new Set(assets.map(a => a.category).filter(Boolean))];
+  const cats   = [...new Set(assets.map((a: any) => a.category).filter(Boolean))];
 
-  const operational    = assets.filter(a => a.status === "Operational").length;
-  const faulted        = assets.filter(a => a.status === "In Fault").length;
-  const underMaint     = assets.filter(a => a.status === "Under Maintenance").length;
+  const operational    = assets.filter((a: any) => a.status === "Operational").length;
+  const faulted        = assets.filter((a: any) => a.status === "In Fault").length;
+  const underMaint     = assets.filter((a: any) => a.status === "Under Maintenance").length;
 
   const enriched = assets.map(asset => {
-    const activeWOs = wos.filter(w => w.asset_id === asset.id && w.status !== "completed");
-    const assetPMs  = pms.filter(p => p.asset_node_id === asset.id);
+    const activeWOs = wos.filter((w: any) => w.asset_id === asset.id && w.status !== "completed");
+    const assetPMs  = pms.filter((p: any) => p.asset_node_id === asset.id);
     return { ...asset, active_wos: activeWOs.length, pm_count: assetPMs.length };
   });
 
-  const filtered = enriched.filter(a => {
+  const filtered = enriched.filter((a: any) => {
     const matchSearch = !search ||
       (a.name||"").toLowerCase().includes(search.toLowerCase()) ||
       (a.asset_tag||"").toLowerCase().includes(search.toLowerCase()) ||
@@ -58,7 +58,7 @@ export default function AssetTreePage() {
   });
 
   const groupedByCat = cats.reduce((acc, cat) => {
-    acc[cat] = filtered.filter(a => a.category === cat);
+    acc[cat] = filtered.filter((a: any) => a.category === cat);
     return acc;
   }, {});
 
@@ -85,7 +85,7 @@ export default function AssetTreePage() {
               { label:"In Fault",       value:faulted,        color:faulted>0?"#A84A3D":"#547C4D" },
               { label:"Under Maint",    value:underMaint,     color:"#B07A2A" },
               { label:"Categories",     value:cats.length,    color:"#8D7443" },
-            ].map((k, i) => (
+            ].map((k: any, i: number) => (
               <div key={i} className="tb-hero-kpi">
                 <div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div>
                 <div className="tb-hero-kpi-label">{k.label}</div>
@@ -108,11 +108,11 @@ export default function AssetTreePage() {
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {["all","Operational","In Fault","Under Maintenance"].map(s => (
+              {["all","Operational","In Fault","Under Maintenance"].map((s: any) => (
                 <button key={s} onClick={() => setFilterStatus(s)}
                   className={`tb-pill ${filterStatus === s ? "tb-pill--active" : ""}`}>
                   {s === "all" ? "All Status" : s}
-                  {s !== "all" && <span className="ml-1 opacity-60">{assets.filter(a => a.status === s).length}</span>}
+                  {s !== "all" && <span className="ml-1 opacity-60">{assets.filter((a: any) => a.status === s).length}</span>}
                 </button>
               ))}
             </div>
@@ -122,18 +122,18 @@ export default function AssetTreePage() {
         {/* Tree View */}
         <div className="tb-section">
           <div className="tb-flex-between mb-4">
-            <div className="text-sm text-secondary">{filtered.length} assets in {Object.keys(groupedByCat).filter(c => groupedByCat[c].length > 0).length} categories</div>
-            <button onClick={() => setExpandedCats(cats.reduce((a,c)=>({...a,[c]:true}),{}))} className="tb-section-link text-xs">Expand All →</button>
+            <div className="text-sm text-secondary">{filtered.length} assets in {Object.keys(groupedByCat).filter((c: any) => groupedByCat[c].length > 0).length} categories</div>
+            <button onClick={() => setExpandedCats(cats.reduce((a: any, c: any) =>({...a,[c]:true}),{}))} className="tb-section-link text-xs">Expand All →</button>
           </div>
           {isLoading ? (
-            <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse"/>)}</div>
+            <div className="space-y-3">{[1,2,3].map((i: any) => <div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           ) : (
             <div className="space-y-3">
               {cats.filter(cat => (groupedByCat[cat]||[]).length > 0).map(cat => {
                 const catAssets   = groupedByCat[cat] || [];
                 const isExpanded  = expandedCats[cat] !== false;
-                const catFaulted  = catAssets.filter(a => a.status === "In Fault").length;
-                const catIcon     = CAT_ICON[cat] || "⚙️";
+                const catFaulted  = catAssets.filter((a: any) => a.status === "In Fault").length;
+                const catIcon     = (CAT_ICON as Record<string, any>)[cat] || "⚙️";
                 return (
                   <div key={cat} className="border border-border rounded-xl overflow-hidden">
                     <button onClick={() => toggleCat(cat)}
@@ -151,7 +151,7 @@ export default function AssetTreePage() {
                     {isExpanded && (
                       <div className="divide-y divide-border">
                         {catAssets.map((asset, i) => {
-                          const sc = STATUS_COLOR[asset.status] || "#6D5F53";
+                          const sc = (STATUS_COLOR as Record<string, any>)[asset.status] || "#6D5F53";
                           return (
                             <button key={i}
                               onClick={() => router.push(`/maintenance/assets/${asset.id}`)}

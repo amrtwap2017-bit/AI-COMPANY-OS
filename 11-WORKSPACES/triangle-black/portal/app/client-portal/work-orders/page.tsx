@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const fmtDate = (d) => {
+const fmtDate = (d: any) => {
   if (!d) return "—";
   try { const dt=new Date(d); if(isNaN(dt.getTime())||dt.getFullYear()<1990) return "—"; return dt.toLocaleDateString("en-GB"); }
   catch { return "—"; }
@@ -28,11 +28,11 @@ export default function ClientWorkOrdersPage() {
     setClient(cl);
     if (cl?.site_id) {
       fetch(`/api/v1/client/work-orders?site_id=${cl.site_id}&limit=100`,
-        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then(d=>{ setWos(Array.isArray(d)?d:[]); setLoading(false); });
+        {headers:{Authorization:`Bearer ${t}`}}).then(r=>r.json()).then((d: any) => { setWos(Array.isArray(d)?d:[]); setLoading(false); });
     }
   }, []);
 
-  const filtered = filter==="all" ? wos : wos.filter(w=>w.status===filter);
+  const filtered = filter==="all" ? wos : wos.filter((w: any) =>w.status===filter);
 
   return (
     <div className="min-h-screen" style={{background:"#F8FAFC"}}>
@@ -43,17 +43,17 @@ export default function ClientWorkOrdersPage() {
       </nav>
       <div className="max-w-4xl mx-auto px-6 py-6">
         <div className="flex gap-2 mb-4 overflow-x-auto">
-          {["all","open","in_progress","completed"].map(f=>(
+          {["all","open","in_progress","completed"].map((f: any) =>(
             <button key={f} onClick={()=>setFilter(f)}
               className="px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-colors"
               style={{background:filter===f?"#059669":filter===f?"#059669":"white",color:filter===f?"white":"#6B7280",border:"1px solid",borderColor:filter===f?"#059669":"#E5E7EB"}}>
               {f==="all"?"All":(f==="in_progress"?"In Progress":f.charAt(0).toUpperCase()+f.slice(1))}
-              {" "}<span className="opacity-70">({f==="all"?wos.length:wos.filter(w=>w.status===f).length})</span>
+              {" "}<span className="opacity-70">({f==="all"?wos.length:wos.filter((w: any) =>w.status===f).length})</span>
             </button>
           ))}
         </div>
         {loading ? (
-          <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-20 bg-white rounded-2xl animate-pulse"/>)}</div>
+          <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-20 bg-white rounded-2xl animate-pulse"/>)}</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
             <div className="text-4xl mb-3">🔧</div>

@@ -6,8 +6,8 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { FeatureGate } from "@/components/ui/FeatureGate";
 
-const toArr = (d) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
-const fmtEGP = (n) => `EGP ${Number(n||0).toLocaleString()}`;
+const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.results || [];
+const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 function AnalyticsHubInner() {
   const [mounted, setMounted] = useState(false)
@@ -25,10 +25,10 @@ function AnalyticsHubInner() {
   const d      = dash||{};
   const score  = twin?.health_score??0;
 
-  const compRate   = wos.length>0?Math.round(wos.filter(w=>w.status==="completed").length/wos.length*100):0;
-  const totalRev   = inv.filter(i=>i.status==="paid").reduce((s,i)=>s+Number(i.total_amount||0),0);
-  const collRate   = inv.length>0?Math.round(inv.filter(i=>i.status==="paid").length/inv.length*100):0;
-  const assetUp    = assets.length>0?Math.round(assets.filter(a=>a.status==="Operational").length/assets.length*100):100;
+  const compRate   = wos.length>0?Math.round(wos.filter((w: any) =>w.status==="completed").length/wos.length*100):0;
+  const totalRev   = inv.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
+  const collRate   = inv.length>0?Math.round(inv.filter((i: any) =>i.status==="paid").length/inv.length*100):0;
+  const assetUp    = assets.length>0?Math.round(assets.filter((a: any) =>a.status==="Operational").length/assets.length*100):100;
   const pmCompliance=(d.maintenance?.pm_plans||0)>0?Math.round(((d.maintenance?.pm_plans||0)-(d.maintenance?.overdue||0))/(d.maintenance?.pm_plans||1)*100):100;
 
   const subPages = [
@@ -84,7 +84,7 @@ function AnalyticsHubInner() {
           </div>
           {/* Sub-page nav */}
           <div className="tb-grid-4 mt-6">
-            {subPages.map((s,i)=>(
+            {subPages.map((s: any, i: number) =>(
               <button key={i} onClick={()=>router.push(s.path)}
                 className="tb-hero-kpi text-left" style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}>
                 <div style={{fontSize:"1.25rem",marginBottom:6}}>{s.icon}</div>
