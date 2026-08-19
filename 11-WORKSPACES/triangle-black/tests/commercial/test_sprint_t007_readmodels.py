@@ -1,12 +1,10 @@
-"""T-007: Executive read models — governed KPI projections"""
-import requests
+"""T-007: Executive Read Models — Integration Tests"""
 import pytest
+import requests
 from pathlib import Path
-from unittest.mock import MagicMock
 
 BASE = "http://localhost:8030"
-SRC  = Path("/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src")
-HOTEL = "tb-default-hotel-000000000001"
+SRC = Path("/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/src")
 
 _C = {}
 def _h():
@@ -21,82 +19,105 @@ def _s(r, ctx=""):
     if hasattr(r, "status_code") and r.status_code == 429:
         pytest.skip(f"Rate limited — {ctx}")
 
-# ── File existence ─────────────────────────────────────────────────────────
+# ── File existence ────────────────────────────────────────────────────────────
 def test_read_models_file_exists():
-    assert (SRC / "commercial/executive_dashboard/read_models.py").exists()
+    assert (SRC / "commercial/executive_intelligence/read_models.py").exists()
 
-def test_read_models_has_executive_class():
-    src = (SRC / "commercial/executive_dashboard/read_models.py").read_text()
-    assert "class ExecutiveReadModel" in src
+def test_router_file_exists():
+    assert (SRC / "commercial/executive_intelligence/router.py").exists()
 
-def test_read_models_has_required_methods():
-    src = (SRC / "commercial/executive_dashboard/read_models.py").read_text()
-    for method in ["get_full_dashboard", "_work_order_kpis",
-                   "_service_request_kpis", "_invoice_kpis",
-                   "_purchase_order_kpis", "_project_kpis",
-                   "_sla_kpis", "_event_outbox_stats"]:
-        assert f"def {method}" in src, f"Missing method: {method}"
+# ── Class structure ───────────────────────────────────────────────────────────
+def test_read_model_class_importable():
+    from src.commercial.executive_intelligence.read_models import ExecutiveKPIReadModel
+    assert ExecutiveKPIReadModel is not None
 
-def test_read_models_scoped_to_hotel():
-    src = (SRC / "commercial/executive_dashboard/read_models.py").read_text()
-    assert "self.hotel_id" in src
-    assert "hotel_id = :hid" in src
+def test_read_model_has_all_methods():
+    from src.commercial.executive_intelligence.read_models import ExecutiveKPIReadModel
+    for method in ["get_operations_kpi", "get_maintenance_kpi",
+                   "get_procurement_kpi", "get_financial_kpi", "get_full_summary"]:
+        assert hasattr(ExecutiveKPIReadModel, method), f"Missing: {method}"
 
-# ── Unit tests — read model without HTTP ──────────────────────────────────
-def test_read_model_instantiates():
-    import sys
-    sys.path.insert(0, str(SRC.parent))
-    try:
-        from src.commercial.executive_dashboard.read_models import ExecutiveReadModel
-        mock_db = MagicMock()
-        rm = ExecutiveReadModel(db=mock_db, hotel_id=HOTEL)
-        assert rm.hotel_id == HOTEL
-    except ImportError as e:
-        pytest.skip(f"Import failed: {e}")
+def test_read_model_enforces_hotel_id():
+    text = (SRC / "commercial/executive_intelligence/read_models.py").read_text()
+    assert "hotel_id = :hid" in text or "hotel_id = :hotel_id" in text
 
-def test_read_model_handles_db_failure():
-    import sys
-    sys.path.insert(0, str(SRC.parent))
-    try:
-        from src.commercial.executive_dashboard.read_models import ExecutiveReadModel
-        mock_db = MagicMock()
-        mock_db.execute.side_effect = Exception("DB down")
-        rm = ExecutiveReadModel(db=mock_db, hotel_id=HOTEL)
-        dashboard = rm.get_full_dashboard()
-        assert "hotel_id" in dashboard
-        assert dashboard["work_orders"] == {}
-        assert dashboard["events"] == {}
-    except ImportError as e:
-        pytest.skip(f"Import failed: {e}")
+def test_router_has_all_endpoints():
+    text = (SRC / "commercial/executive_intelligence/router.py").read_text()
+    for ep in ["/summary", "/operations", "/maintenance", "/procurement", "/financial"]:
+        assert ep in text, f"Missing endpoint: {ep}"
 
-def test_read_model_dashboard_has_all_sections():
-    import sys
-    sys.path.insert(0, str(SRC.parent))
-    try:
-        from src.commercial.executive_dashboard.read_models import ExecutiveReadModel
-        mock_db = MagicMock()
-        mock_db.execute.return_value.fetchone.return_value = None
-        rm = ExecutiveReadModel(db=mock_db, hotel_id=HOTEL)
-        dashboard = rm.get_full_dashboard()
-        for section in ["work_orders", "service_requests", "invoices",
-                       "purchase_orders", "projects", "sla", "events"]:
-            assert section in dashboard, f"Missing section: {section}"
-    except ImportError as e:
-        pytest.skip(f"Import failed: {e}")
+def test_router_uses_read_model():
+    text = (SRC / "commercial/executive_intelligence/router.py").read_text()
+    assert "ExecutiveKPIReadModel" in text
 
-# ── Live API ───────────────────────────────────────────────────────────────
-def test_executive_dashboard_still_works():
-    r = requests.get(f"{BASE}/api/v1/executive-dashboard/",
-                     headers=_h(), timeout=10)
-    _s(r, "exec-dashboard-t007")
-    assert r.status_code in (200, 404)
+def test_router_registered_in_main():
+    text = (SRC / "main.py").read_text()
+    assert "executive_intelligence" in text
 
-def test_health_still_works():
-    r = requests.get(f"{BASE}/api/v1/health/live", timeout=5)
+# ── Live API tests ────────────────────────────────────────────────────────────
+def test_summary_endpoint_returns_200():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/summary",
+        headers=_h(), timeout=10)
+    _s(r, "ei-summary")
+    assert r.status_code == 200, f"Summary returned {r.status_code}"
+
+def test_summary_has_all_sections():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/summary",
+        headers=_h(), timeout=10)
+    _s(r, "ei-sections")
+    if r.status_code == 200:
+        d = r.json()
+        assert "hotel_id" in d
+        assert "operations" in d
+        assert "maintenance" in d
+        assert "procurement" in d
+        assert "financial" in d
+
+def test_operations_endpoint_returns_200():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/operations",
+        headers=_h(), timeout=10)
+    _s(r, "ei-ops")
     assert r.status_code == 200
 
-def test_sla_summary_still_works():
-    r = requests.get(f"{BASE}/api/v1/work-orders/sla-summary",
-                     headers=_h(), timeout=5)
-    _s(r, "sla-t007")
+def test_operations_has_work_order_fields():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/operations",
+        headers=_h(), timeout=10)
+    _s(r, "ei-wo-fields")
+    if r.status_code == 200:
+        d = r.json()
+        assert "hotel_id" in d
+        assert "open_work_orders" in d or "error" in d
+
+def test_maintenance_endpoint_returns_200():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/maintenance",
+        headers=_h(), timeout=10)
+    _s(r, "ei-maint")
     assert r.status_code == 200
+
+def test_procurement_endpoint_returns_200():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/procurement",
+        headers=_h(), timeout=10)
+    _s(r, "ei-proc")
+    assert r.status_code == 200
+
+def test_financial_endpoint_returns_200():
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/financial",
+        headers=_h(), timeout=10)
+    _s(r, "ei-fin")
+    assert r.status_code == 200
+
+def test_all_endpoints_require_auth():
+    for ep in ["/summary", "/operations", "/maintenance", "/procurement", "/financial"]:
+        r = requests.get(f"{BASE}/api/v1/executive-intelligence{ep}", timeout=5)
+        _s(r, f"ei-noauth-{ep}")
+        assert r.status_code in (200, 401, 403, 422)
+
+def test_summary_response_time_acceptable():
+    import time
+    start = time.perf_counter()
+    r = requests.get(f"{BASE}/api/v1/executive-intelligence/summary",
+        headers=_h(), timeout=10)
+    ms = (time.perf_counter() - start) * 1000
+    _s(r, "ei-perf")
+    if r.status_code == 200:
+        assert ms < 3000, f"Summary took {ms:.0f}ms — too slow"

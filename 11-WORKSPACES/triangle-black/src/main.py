@@ -20,6 +20,7 @@ del _env_file, _os_268, _Path_268
 Triangle Black — Main FastAPI Application v1.4.0
 Hotel Engineering Platform — Multi-hotel tenant isolation
 """
+from src.commercial.executive_intelligence.router import router as executive_intelligence_router
 from fastapi import Depends, FastAPI, Form, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import logging
