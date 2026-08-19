@@ -1,7 +1,6 @@
 // @ts-nocheck
 // Triangle Black - Badge (enterprise-aligned)
 // Maps legacy Badge API to enterprise design tokens
-
 interface BadgeProps {
   children:   React.ReactNode;
   className?: string;

@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Warranty Tracking Dashboard
 // Sprint-043: Asset Warranty Management
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

@@ -4,7 +4,6 @@
 // THE universal page header — replaces all inline dark hero sections
 // Every page gets: context + KPIs + actions + AI insight + health
 // Max height: 240px desktop — users reach content immediately
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 

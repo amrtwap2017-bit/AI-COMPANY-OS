@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Loading Skeletons v2.0
 // Uses tb-skeleton CSS animation from globals.css
-
 const SkeletonBlock = ({ className = "" }) => (
   <div className={`tb-skeleton bg-base-alt rounded ${className}`} />
 );

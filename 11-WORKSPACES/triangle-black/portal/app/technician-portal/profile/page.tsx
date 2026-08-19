@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Technician Profile (Mobile)
 // Sprint-018
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

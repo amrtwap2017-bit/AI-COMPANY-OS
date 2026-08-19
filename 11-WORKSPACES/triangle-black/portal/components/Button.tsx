@@ -1,7 +1,6 @@
 // @ts-nocheck
 // Triangle Black - Button (enterprise-aligned)
 // Maps legacy Button API to enterprise design tokens
-
 interface ButtonProps {
   children:   React.ReactNode;
   type?:      "button" | "submit" | "reset";

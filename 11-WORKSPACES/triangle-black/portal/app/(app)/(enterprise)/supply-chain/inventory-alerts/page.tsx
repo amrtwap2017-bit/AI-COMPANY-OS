@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Inventory Alerts Dashboard
 // Sprint-034: Low Stock + Reorder Alerts
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

@@ -1,6 +1,7 @@
 // @ts-nocheck
 // Triangle Black - Loading State
-// UI-000: Fixed grid-cols dynamic class (Tailwind purge bug)
+// UI-000: Fixed grid-cols dynamic 
+class (Tailwind purge bug)
 interface Props {
   message?: string;
   rows?:    number;

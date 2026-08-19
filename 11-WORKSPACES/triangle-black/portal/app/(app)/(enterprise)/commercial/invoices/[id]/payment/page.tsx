@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Invoice Payment Recording
 // Sprint-036: Invoice Payment Workflow
-
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Status Badge v2.0
 // One source of truth for ALL status values across the platform
-
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   // ── Work Orders ───────────────────────────────────────
   open:           { label: "Open",           cls: "bg-info-bg text-info-text border border-info-border" },

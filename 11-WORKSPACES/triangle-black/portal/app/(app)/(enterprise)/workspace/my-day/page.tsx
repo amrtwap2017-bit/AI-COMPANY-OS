@@ -4,7 +4,6 @@
 // Sprint 302: Program A — Component Library Adoption
 // Migrated: inline KPIs → KpiCard, inline status → StatusBadge,
 //           inline empty → EmptyState, inline header → PageHeader
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";

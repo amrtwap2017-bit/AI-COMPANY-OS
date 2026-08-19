@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — RFQ Detail
 // Sprint-042: RFQ Portal
-
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Asset QR Landing Page
 // Sprint-028: Scanned by technician in field
-
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

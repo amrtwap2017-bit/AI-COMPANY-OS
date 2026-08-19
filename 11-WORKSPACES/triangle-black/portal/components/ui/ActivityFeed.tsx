@@ -3,7 +3,6 @@
 // @ts-nocheck
 // Triangle Black — Activity Feed Component
 // Shows recent platform events with icons, colors, timestamps
-
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";

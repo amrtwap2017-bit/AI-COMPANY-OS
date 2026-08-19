@@ -1,7 +1,6 @@
 "use client";
 // @ts-nocheck
 // Triangle Black — Empty State v2.0
-
 import { useRouter } from "next/navigation";
 
 interface EmptyStateProps {

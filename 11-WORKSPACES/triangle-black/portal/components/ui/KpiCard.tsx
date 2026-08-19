@@ -3,7 +3,6 @@ import React from "react";
 // @ts-nocheck
 // Triangle Black — Enterprise KPI Card v2.0
 // Uses TBEDS design tokens — never hardcoded colors
-
 import { useRouter } from "next/navigation";
 
 type KpiColor = "blue" | "emerald" | "amber" | "red" | "purple" | "orange" | "cyan" | "slate" | "brand";

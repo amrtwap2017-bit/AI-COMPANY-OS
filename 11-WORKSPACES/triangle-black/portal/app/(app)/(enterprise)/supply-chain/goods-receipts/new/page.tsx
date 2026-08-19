@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Goods Receipt Note (GRN) Create
 // Sprint-040: GRN Create Form
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

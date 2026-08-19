@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Asset QR Code Generator
 // Sprint-028: Asset QR Scanner Portal
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

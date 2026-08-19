@@ -2,7 +2,6 @@
 // Triangle Black - Card (enterprise-aligned)
 // Maps legacy Card API to enterprise design tokens
 // Keeps same props so existing pages work unchanged
-
 interface CardProps {
   children:   React.ReactNode;
   className?: string;

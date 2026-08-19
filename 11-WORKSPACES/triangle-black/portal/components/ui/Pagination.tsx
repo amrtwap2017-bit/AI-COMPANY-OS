@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black - Pagination
 // UI-032: Added per-page selector, total display
-
 interface PaginationProps {
   page:         number;
   totalPages:   number;

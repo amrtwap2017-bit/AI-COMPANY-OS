@@ -3,7 +3,6 @@
 // Triangle Black V7 — Sticky Action Bar
 // Sits between WorkspaceHeader and content
 // Search + filters + bulk actions + export
-
 import { useState } from "react";
 
 interface ActionBarProps {

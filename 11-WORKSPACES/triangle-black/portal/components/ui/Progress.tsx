@@ -1,7 +1,6 @@
 // @ts-nocheck
 // Triangle Black - Progress Component
 // UI-029: Progress bar and circular ring
-
 interface ProgressBarProps {
   value:     number;
   max?:      number;

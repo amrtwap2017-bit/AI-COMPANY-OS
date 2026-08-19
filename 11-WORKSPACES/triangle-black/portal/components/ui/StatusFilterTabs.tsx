@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black - Status Filter Tabs
 // UI-044: Standard filter tab pattern used across all list pages
-
 interface FilterTab {
   value: string;
   label: string;

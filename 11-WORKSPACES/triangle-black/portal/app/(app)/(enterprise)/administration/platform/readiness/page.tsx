@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Platform Readiness Assessment
 // Sprint-050: Enterprise Readiness Score
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

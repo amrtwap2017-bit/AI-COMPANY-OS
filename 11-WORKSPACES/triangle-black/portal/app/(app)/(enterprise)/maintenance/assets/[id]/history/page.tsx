@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Asset Maintenance History
 // Sprint-038: Asset History Portal
-
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

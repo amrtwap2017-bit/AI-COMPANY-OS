@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Page Header v2.0
 // Standard header for every page — domain badge + title + actions
-
 import { useRouter } from "next/navigation";
 
 const DOMAIN_COLORS: Record<string, string> = {

@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Knowledge Graph Search
 // Sprint-051
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tbFetch } from "@/lib/api/tb-client";

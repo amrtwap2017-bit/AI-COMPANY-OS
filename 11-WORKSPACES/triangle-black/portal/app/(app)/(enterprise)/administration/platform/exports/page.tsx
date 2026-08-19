@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 import { useRouter } from "next/navigation";
-const handleExport = ((url: any)) => {
+const handleExport = (url: any) => {
   import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(url))
     .then(r => r.blob())
     .then(blob => { const dl = document.createElement("a"); dl.href = URL.createObjectURL(blob); dl.download = url.split("/").pop() + "_" + new Date().toISOString().slice(0,10) + ".csv"; dl.click(); });

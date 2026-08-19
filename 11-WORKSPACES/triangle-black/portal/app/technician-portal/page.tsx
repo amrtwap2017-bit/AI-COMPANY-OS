@@ -2,7 +2,6 @@
 // @ts-nocheck
 // Triangle Black — Technician Portal Entry
 // Sprint-018: Mobile Technician Portal
-
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
