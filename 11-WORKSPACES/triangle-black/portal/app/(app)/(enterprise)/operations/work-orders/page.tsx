@@ -20,7 +20,7 @@ const P_COLOR = {critical:"var(--color-danger)",high:"var(--color-warning)",medi
 const woFields = [
   {key:"title",label:"Title",type:"text",required:true,placeholder:"e.g. HVAC Filter Replacement"},
   {key:"description",label:"Description",type:"textarea",required:false,placeholder:"Describe the work required..."},
-  {key:"priority",label:"Priority",type:"select",required:true,defaultValue:"medium",options:[{label:"Critical",value:"critical"},{label:"High",value:"high"},{label:"Medium",value:"medium"},{label:"Low",value:"low"}]},
+  {key:"priority",label:"Priority",type:"select",required:true,defaultValue:"medium",options:[{label:"Critical",value:"critical"},{label:"High",value:"high"},{label:"Medium",value:"medium"},{label:"Low",value:"low"}] as any[]},
   {key:"type",label:"Type",type:"select",required:true,defaultValue:"corrective",options:[{label:"Corrective",value:"corrective"},{label:"Preventive",value:"preventive"},{label:"Inspection",value:"inspection"}]},
 ];
 

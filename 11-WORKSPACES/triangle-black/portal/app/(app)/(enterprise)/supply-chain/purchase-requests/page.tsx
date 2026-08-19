@@ -15,7 +15,7 @@ const URGENCY_COLOR = {urgent:"#A84A3D",high:"#B07A2A",normal:"#6D5F53",low:"rgb
 const prFields = [
   {key:"title",         label:"Title",         type:"text",     required:true,  placeholder:"e.g. HVAC Filters Restock"},
   {key:"justification", label:"Justification", type:"textarea", required:false, placeholder:"Why is this purchase needed?"},
-  {key:"department",    label:"Department",    type:"select",   required:true,  defaultValue:"Engineering", options:[{label:"Engineering",value:"Engineering"},{label:"Operations",value:"Operations"},{label:"Maintenance",value:"Maintenance"},{label:"Administration",value:"Administration"}]},
+  {key:"department",    label:"Department",    type:"select",   required:true,  defaultValue:"Engineering", options:[{label:"Engineering",value:"Engineering"},{label:"Operations",value:"Operations"},{label:"Maintenance",value:"Maintenance"},{label:"Administration",value:"Administration"}] as any[]},
   {key:"urgency",       label:"Urgency",       type:"select",   required:true,  defaultValue:"normal", options:[{label:"Urgent",value:"urgent"},{label:"High",value:"high"},{label:"Normal",value:"normal"},{label:"Low",value:"low"}]},
   {key:"required_date", label:"Required By",   type:"date",     required:false},
 ];

@@ -21,7 +21,7 @@ const leadFields = [
   {key:"company", label:"Company",   type:"text",   required:false, placeholder:"Cairo MEP Solutions"},
   {key:"email",   label:"Email",     type:"email",  required:false, placeholder:"ahmed@company.com"},
   {key:"phone",   label:"Phone",     type:"tel",    required:false, placeholder:"+20..."},
-  {key:"source",  label:"Source",    type:"select", required:false, defaultValue:"manual", options:[{label:"Manual",value:"manual"},{label:"Referral",value:"referral"},{label:"Website",value:"website"},{label:"Exhibition",value:"exhibition"}]},
+  {key:"source",  label:"Source",    type:"select", required:false, defaultValue:"manual", options:[{label:"Manual",value:"manual"},{label:"Referral",value:"referral"},{label:"Website",value:"website"},{label:"Exhibition",value:"exhibition"}] as any[]},
   {key:"priority",label:"Priority",  type:"select", required:false, defaultValue:"medium", options:[{label:"High",value:"high"},{label:"Medium",value:"medium"},{label:"Low",value:"low"}]},
 ];
 
@@ -48,7 +48,7 @@ function LeadsPageInner() {
   return (
     <div className="min-h-screen bg-base">
       <CreateModal open={showCreate} onClose={()=>setShowCreate(false)} title="Lead" icon="👤"
-        endpoint="/api/v1/leads-portal-v2" fields={leadFields} invalidateKeys={["leads-list"]}
+        endpoint="/api/v1/leads-portal-v2" fields={leadFields as any} invalidateKeys={["leads-list"]}
         successPath="/commercial/leads/"/>
 
       <div className="tb-hero">
