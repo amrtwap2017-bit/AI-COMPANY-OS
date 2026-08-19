@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function ClientProjectsPage() {
   const router = useRouter();
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<any>(null);
   const [token, setToken] = useState("");
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);

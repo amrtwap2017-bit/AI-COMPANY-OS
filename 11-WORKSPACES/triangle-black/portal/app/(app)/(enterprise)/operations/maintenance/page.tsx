@@ -22,7 +22,7 @@ export default function MaintenanceSchedulerPage() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterSite, setFilterSite] = useState("all");
-  const [genResult, setGenResult] = useState(null);
+  const [genResult, setGenResult] = useState<any>(null);
 
   const { data: schedData, isLoading } = useQuery(["pm-schedule-assets"],()=>authFetch("/api/v1/pm-schedule/assets?limit=100").then(r=>r.json()),{staleTime:30000,refetchInterval:60000});
   const { data: calData } = useQuery(["pm-schedule-calendar"],()=>authFetch("/api/v1/pm-schedule/calendar").then(r=>r.json()),{staleTime:60000});

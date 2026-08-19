@@ -13,7 +13,7 @@ export default function RFQDetailPage() {
   const { id } = useParams();
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState("items");
-  const [awardingId, setAwardingId] = useState(null);
+  const [awardingId, setAwardingId] = useState<any>(null);
   const { data: rfq, isLoading } = useQuery(
     ["rfq-detail", id],
     () => authFetch(`/api/v1/rfq/${id}/bid-comparison`).then(r=>r.json()),

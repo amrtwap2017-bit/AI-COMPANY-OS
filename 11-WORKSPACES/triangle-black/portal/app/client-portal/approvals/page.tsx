@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function ClientApprovalsPage() {
   const router = useRouter();
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<any>(null);
   const [token, setToken] = useState("");
   const [sows, setSows] = useState([]);
   const [loading, setLoading] = useState(true);

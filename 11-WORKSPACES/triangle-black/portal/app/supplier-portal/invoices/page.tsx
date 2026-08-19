@@ -9,7 +9,7 @@ const PS = {paid:"#34D399",unpaid:"#FBBF24",partial:"#FB923C"};
 
 export default function SupplierInvoicesPage() {
   const router = useRouter();
-  const [supplier, setSupplier] = useState(null);
+  const [supplier, setSupplier] = useState<any>(null);
   const [token, setToken] = useState("");
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);

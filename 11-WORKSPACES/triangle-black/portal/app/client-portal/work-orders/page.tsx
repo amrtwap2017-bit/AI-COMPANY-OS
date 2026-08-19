@@ -13,7 +13,7 @@ const SC = {open:"#2563EB",in_progress:"#D97706",completed:"#059669",cancelled:"
 
 export default function ClientWorkOrdersPage() {
   const router = useRouter();
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<any>(null);
   const [token, setToken] = useState("");
   const [wos, setWos] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -27,7 +27,7 @@ const woFields = [
 export default function WorkOrdersPage() {
   const router = useRouter();
   const qc = useQueryClient();
-  const [updatingId, setUpdatingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState<any>(null);
   const [search, setSearch] = useState("");
   const [statusF, setStatusF] = useState("all");
   const [priorityF, setPriorityF] = useState("all");

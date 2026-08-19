@@ -9,9 +9,9 @@ const DOC_LABELS = {trade_license:"Trade License",tax_card:"Tax Card",commercial
 
 export default function SupplierProfilePage() {
   const router = useRouter();
-  const [supplier, setSupplier] = useState(null);
+  const [supplier, setSupplier] = useState<any>(null);
   const [token, setToken] = useState("");
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadCat, setUploadCat] = useState("trade_license");

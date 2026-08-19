@@ -9,7 +9,7 @@ const SC = {draft:"#94A3B8",pending_approval:"#FBBF24",approved:"#60A5FA",sent:"
 
 export default function SupplierPurchaseOrdersPage() {
   const router = useRouter();
-  const [supplier, setSupplier] = useState(null);
+  const [supplier, setSupplier] = useState<any>(null);
   const [token, setToken] = useState("");
   const [pos, setPos] = useState([]);
   const [loading, setLoading] = useState(true);

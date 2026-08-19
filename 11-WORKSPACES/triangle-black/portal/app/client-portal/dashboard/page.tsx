@@ -49,7 +49,7 @@ function ClientNav({ client, active }: any) {
 
 export default function ClientDashboardPage() {
   const router = useRouter();
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<any>(null);
   const [token, setToken] = useState("");
 
   useEffect(() => {

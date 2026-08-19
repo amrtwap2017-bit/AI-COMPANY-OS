@@ -121,6 +121,8 @@ export default function AnalyticsScorecards() {
             </div>
             <ResponsiveContainer width="100%" height={280}>
               <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={kpiData}>
+                {/* @ts-ignore recharts type mismatch */}
+
                 <RadialBar minAngle={15} label={{position:"insideStart",fill:"#fff",fontSize:10}} background clockWise dataKey="value" max={100}/>
                 <Legend iconSize={10} formatter={(value)=><span style={{color:"var(--color-text-3)",fontSize:"0.75rem"}}>{value}</span>}/>
                 <Tooltip content={<WarmTooltip/>}/>

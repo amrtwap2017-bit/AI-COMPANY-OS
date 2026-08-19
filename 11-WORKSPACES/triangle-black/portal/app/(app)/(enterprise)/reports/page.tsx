@@ -32,7 +32,7 @@ function formatColumnLabel(col: any) {
 
 export default function ReportsPage() {
   const router = useRouter();
-  const [selectedReport, setSelectedReport] = useState(null);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [filters, setFilters] = useState({
     status:"", priority:"", urgency:"", vendor_id:"", site_id:"",

@@ -45,9 +45,9 @@ function SupplierNav({ supplier, active }: any) {
 
 export default function SupplierDashboard() {
   const router = useRouter();
-  const [supplier, setSupplier] = useState(null);
+  const [supplier, setSupplier] = useState<any>(null);
   const [token, setToken] = useState("");
-  const [dash, setDash] = useState(null);
+  const [dash, setDash] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

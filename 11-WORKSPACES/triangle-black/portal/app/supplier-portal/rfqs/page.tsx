@@ -8,12 +8,12 @@ const fmtDate = (d: any) => { if(!d) return "—"; try { const dt=new Date(d); i
 
 export default function SupplierRFQsPage() {
   const router = useRouter();
-  const [supplier, setSupplier] = useState(null);
+  const [supplier, setSupplier] = useState<any>(null);
   const [token, setToken] = useState("");
   const [rfqs, setRfqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bidForm, setBidForm] = useState({rfq_id:"",total_amount:"",payment_terms:30,delivery_days:7,notes:""});
-  const [showBid, setShowBid] = useState(null);
+  const [showBid, setShowBid] = useState<any>(null);
   const [success, setSuccess] = useState("");
 
   useEffect(() => {

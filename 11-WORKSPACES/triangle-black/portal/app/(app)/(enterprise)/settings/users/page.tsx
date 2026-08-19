@@ -25,7 +25,7 @@ const ROLE_COLORS = {
 
 export default function UserManagementPage() {
   const qc = useQueryClient();
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<any>(null);
   const [newRole, setNewRole] = useState("");
 
   const { data: raw, isLoading } = useQuery(

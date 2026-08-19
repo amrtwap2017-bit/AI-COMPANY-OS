@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function ClientRequestPage() {
   const router = useRouter();
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<any>(null);
   const [token, setToken] = useState("");
   const [form, setForm] = useState({title:"",description:"",urgency:"medium",category:"fault",contact_phone:""});
   const [loading, setLoading] = useState(false);
