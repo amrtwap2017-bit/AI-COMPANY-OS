@@ -91,7 +91,7 @@ export default function MyDayPage() {
       <div>
         <div className="tb-hero">
           <div className="tb-hero-inner">
-            <p className="tb-hero-title">{greeting}, {userName}</p>
+            <h1 className="tb-hero-title">{greeting}, {userName}</h1>
           </div>
         </div>
         <div className="tb-canvas">
@@ -107,7 +107,7 @@ export default function MyDayPage() {
       <div className="tb-hero">
         <div className="tb-hero-inner">
           <div>
-            <p className="tb-hero-title">{greeting}, {userName} 👋</p>
+            <h1 className="tb-hero-title">{greeting}, {userName} 👋</h1>
             <p className="tb-hero-description">
               {new Date().toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}
               {pendingCount > 0 && <span style={{ marginLeft:12, color:"#B9924C", fontWeight:600 }}>· {pendingCount} pending approval{pendingCount > 1 ? "s" : ""}</span>}
