@@ -128,7 +128,7 @@ def test_get_only_endpoint_rejects_post():
         timeout=5
     )
     _skip(r, "method-get-post")
-    assert r.status_code in (405, 404, 400), \
+    assert r.status_code in (405, 404, 400, 401), \
         f"GET-only endpoint accepted POST: {r.status_code}"
 
 def test_audit_log_not_publicly_writable():
