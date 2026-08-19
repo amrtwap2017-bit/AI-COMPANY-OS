@@ -127,7 +127,7 @@ export default function TechnicianWorkOrdersPage() {
           { label: "Dashboard", icon: "🏠", path: "/technician-portal/dashboard", active: false },
           { label: "Work Orders", icon: "🔧", path: "/technician-portal/work-orders", active: true },
           { label: "Profile", icon: "👤", path: "/technician-portal/profile", active: false },
-        ].map(item => (
+        ].map((item: any) => (
           <button key={item.label} onClick={() => router.push(item.path)}
             className={`flex-1 py-3 flex flex-col items-center gap-1 text-xs ${item.active ? "text-blue-400" : "text-gray-500"}`}>
             <span className="text-xl">{item.icon}</span>

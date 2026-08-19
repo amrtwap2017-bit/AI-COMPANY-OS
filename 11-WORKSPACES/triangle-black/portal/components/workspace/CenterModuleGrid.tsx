@@ -19,7 +19,7 @@ export function CenterModuleGrid({ title, subtitle, items }: CenterModuleGridPro
         <p className="mt-0.5 text-xs text-secondary">{subtitle}</p>
       </div>
       <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => {
+        {items.map((item: any) => {
           const inner = (
             <div className="group h-full rounded-xl border border-border bg-base-alt p-4 transition-all hover:border-amber-300 hover:bg-white hover:shadow-md">
               <div className="flex items-start justify-between gap-2 mb-2">

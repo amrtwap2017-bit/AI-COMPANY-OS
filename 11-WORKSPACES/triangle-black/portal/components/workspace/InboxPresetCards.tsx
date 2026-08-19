@@ -42,7 +42,7 @@ export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsP
             <div className="mt-2 text-sm text-primary">{preset.defaultView}</div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {preset.filters.map((item) => (
+              {preset.filters.map((item: any) => (
                 <span
                   key={item}
                   className="rounded-full border border-border bg-white px-3 py-1 text-xs text-primary"

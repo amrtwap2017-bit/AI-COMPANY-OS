@@ -95,7 +95,7 @@ export function ContextRail({ open, onToggle, aiInsights = [], activities = [], 
                       <Zap className="w-6 h-6 text-tertiary mx-auto mb-2" />
                       <div className="text-xs text-tertiary">No AI insights yet</div>
                     </div>
-                  ) : aiInsights.map((item, i) => (
+                  ) : aiInsights.map((item: any, i: number) => (
                     <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl p-3">
                       <div className="text-xs font-semibold text-amber-800 mb-1">{item.title}</div>
                       <div className="text-xs text-amber-700 leading-relaxed">{item.insight}</div>

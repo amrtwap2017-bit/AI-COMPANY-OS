@@ -29,7 +29,7 @@ function SupplierNav({ supplier, active }: any) {
         </div>
       </div>
       <div className="flex items-center gap-1 flex-1 overflow-x-auto">
-        {items.map(item=>(
+        {items.map((item: any) =>(
           <button key={item.id} onClick={()=>router.push(item.path)}
             className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors"
             style={{background:active===item.id?"#D97706":"transparent",color:active===item.id?"white":"#94A3B8"}}>

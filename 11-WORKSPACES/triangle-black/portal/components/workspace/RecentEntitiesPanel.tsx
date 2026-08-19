@@ -36,7 +36,7 @@ export function RecentEntitiesPanel() {
         </div>
       ) : (
         <div className="mt-5 space-y-3">
-          {items.map((item, index) => (
+          {items.map((item: any, index: number) => (
             <Link
               key={item.entityType + item.entityId + item.entityName + index}
               href={item.href}

@@ -262,7 +262,7 @@ export default function SOWDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {boqItems.map((item, i) => (
+                    {boqItems.map((item: any, i: number) => (
                       <tr key={item.id || i}>
                         <td className="text-tertiary font-semibold text-xs">{i + 1}</td>
                         <td>

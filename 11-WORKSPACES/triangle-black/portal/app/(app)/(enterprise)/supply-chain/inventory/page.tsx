@@ -26,7 +26,7 @@ export default function InventoryPage() {
   const lowStock   = items.filter((i: any) =>{const bal=stocks.find((s: any) =>s.item_id===i.id);return bal&&Number(bal.quantity||0)<=Number(i.minimum_quantity||i.min_quantity||5);});
   const totalValue = stocks.reduce((s: any, b: any) =>{const item=items.find((i: any) =>i.id===b.item_id);return s+(Number(b.qty_on_hand||0)*Number(item?.unit_price||item?.cost||0));},0);
 
-  const enriched = items.map(item=>{
+  const enriched = items.map((item: any) =>{
     const bal = stocks.find((s: any) =>s.item_id===item.id);
     const qty = Number(bal?.qty_on_hand||0);
     const min = Number(item.minimum_quantity||item.min_quantity||5);
@@ -127,7 +127,7 @@ export default function InventoryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((item,i)=>{
+                  {filtered.map((item: any, i: number) =>{
                     const pct   = item.min_qty>0?Math.min((item.current_qty/item.min_qty)*100,100):100;
                     const color = item.is_low?"#A84A3D":"#547C4D";
                     return (

@@ -32,7 +32,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((item, index) => (
+        {items.map((item: any, index: number) => (
           <div key={`${item.title}-${index}`} className={"rounded-2xl border p-5 " + toneClasses(item.tone)}>
             <div className="flex items-start justify-between gap-3">
               <div className="text-base font-semibold text-primary">{item.title}</div>

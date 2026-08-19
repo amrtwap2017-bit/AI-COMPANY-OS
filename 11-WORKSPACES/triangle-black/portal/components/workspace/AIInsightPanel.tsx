@@ -23,7 +23,7 @@ export function AIInsightPanel({ title, subtitle, insights }: AIInsightPanelProp
         </div>
       </div>
       <div className="space-y-2.5">
-        {insights.map((item) => {
+        {insights.map((item: any) => {
           const s = severityMap[item.severity ?? "info"];
           const Icon = s.icon;
           return (

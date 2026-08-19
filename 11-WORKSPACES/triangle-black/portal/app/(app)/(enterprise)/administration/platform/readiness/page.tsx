@@ -144,7 +144,7 @@ export default function PlatformReadinessPage() {
             <div key={cat.category} className="bg-white border border-gray-200 rounded-xl p-4">
               <p className="font-semibold text-[var(--color-text-1)] mb-3">{cat.category}</p>
               <div className="space-y-1.5">
-                {cat.items.map(item => (
+                {cat.items.map((item: any) => (
                   <div key={item} className="flex items-center gap-2 text-xs text-gray-600">
                     <span className="w-4 h-4 bg-green-100 text-green-600 rounded-full flex items-center justify-center shrink-0 text-xs">✓</span>
                     {item}
@@ -194,7 +194,7 @@ export default function PlatformReadinessPage() {
             { label:"Technician",    path:"/technician-portal",        icon:"📱" },
             { label:"Client",        path:"/client-portal",            icon:"🏨" },
             { label:"Reports",       path:"/maintenance/reports",      icon:"📋" },
-          ].map(item => (
+          ].map((item: any) => (
             <button key={item.label} onClick={() => router.push(item.path)}
               className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-gray-200">
               <span className="text-xl">{item.icon}</span>

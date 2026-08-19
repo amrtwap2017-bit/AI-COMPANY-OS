@@ -242,7 +242,7 @@ export function EnterpriseSidebar() {
         <div style={{padding:"12px 12px 8px",borderBottom:"1px solid rgba(185,146,76,0.04)"}}>
           <div style={{fontSize:"0.5625rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#6D5F53",marginBottom:8}}>Start Here</div>
           <div style={{display:"flex",flexDirection:"column",gap:4}}>
-            {startHere.map((item, i) => (
+            {startHere.map((item: any, i: number) => (
               <button key={i} onClick={() => router.push(item.href)}
                 style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 10px",borderRadius:8,background:"rgba(185,146,76,0.06)",border:"1px solid rgba(185,146,76,0.10)",cursor:"pointer",textAlign:"left"}}>
                 <span style={{fontSize:"0.75rem",fontWeight:600,color:"#B9924C"}}>{item.label}</span>

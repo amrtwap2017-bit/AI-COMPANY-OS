@@ -61,7 +61,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((item) => (
+        {kpis.map((item: any) => (
           <KpiCard
             key={item.label}
             label={item.label}
@@ -82,7 +82,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
             </div>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {queues.map((item) => (
+              {queues.map((item: any) => (
                 <div key={item.title} className="rounded-2xl border border-divider bg-base-alt p-4">
                   <div className="text-sm font-semibold text-primary">{item.title}</div>
                   <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">{item.value}</div>
@@ -99,7 +99,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
             </div>
 
             <div className="mt-5 space-y-4">
-              {activity.map((item) => (
+              {activity.map((item: any) => (
                 <div key={item.time + item.title} className="flex gap-4">
                   <div className="mt-2 h-3 w-3 rounded-full bg-amber-500" />
                   <div className="min-w-0 flex-1 rounded-2xl border border-divider bg-base-alt p-4">
@@ -125,7 +125,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
             </div>
 
             <div className="mt-4 space-y-3">
-              {insights.map((item) => (
+              {insights.map((item: any) => (
                 <div key={item.title} className="rounded-2xl border border-divider bg-base-alt p-4">
                   <div className="text-sm font-semibold text-primary">{item.title}</div>
                   <div className="mt-2 text-sm leading-6 text-secondary">{item.detail}</div>
@@ -141,7 +141,7 @@ export function CenterDashboard(props: CenterDashboardProps) {
             </div>
 
             <div className="mt-4 space-y-3">
-              {quickActions.map((item) => (
+              {quickActions.map((item: any) => (
                 <button
                   key={item.label}
                   className="block w-full rounded-2xl border border-divider bg-base-alt px-4 py-4 text-left transition hover:border-border hover:bg-white"

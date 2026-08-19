@@ -138,7 +138,7 @@ export default function TechnicianDashboard() {
           { label: "Dashboard", icon: "🏠", path: "/technician-portal/dashboard", active: true },
           { label: "Work Orders", icon: "🔧", path: "/technician-portal/work-orders", active: false },
           { label: "Profile", icon: "👤", path: "/technician-portal/profile", active: false },
-        ].map(item => (
+        ].map((item: any) => (
           <button
             key={item.label}
             onClick={() => router.push(item.path)}

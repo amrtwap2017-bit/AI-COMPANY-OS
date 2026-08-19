@@ -57,7 +57,7 @@ export function NotificationInboxPanel(props: NotificationInboxPanelProps) {
         </div>
       ) : (
         <div className="mt-5 space-y-3">
-          {items.map((item) => (
+          {items.map((item: any) => (
             <div key={item.id} className={"rounded-2xl border p-4 " + toneClasses(item)}>
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

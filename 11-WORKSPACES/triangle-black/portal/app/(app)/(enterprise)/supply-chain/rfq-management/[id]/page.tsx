@@ -80,7 +80,7 @@ export default function RFQDetailPage() {
                     <div key={i} className="tb-table-head-cell" style={{textAlign:i>1?"center":"left"}}>{h}</div>
                   ))}
                 </div>
-                {items.map((item,i)=>(
+                {items.map((item: any, i: number) =>(
                   <div key={i} className="tb-table-row" style={{gridTemplateColumns:"40px 1fr 80px 80px 120px"}}>
                     <div className="text-xs text-tertiary">{item.item_number||i+1}</div>
                     <div className="text-sm text-primary">{item.description}</div>

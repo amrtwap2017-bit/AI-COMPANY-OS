@@ -30,7 +30,7 @@ export function ActionQueueList({ title, subtitle, items }: ActionQueueListProps
       </div>
 
       <div className="mt-5 space-y-3">
-        {items.map((item) => {
+        {items.map((item: any) => {
           const content = (
             <div className={"rounded-2xl border p-4 " + toneClasses(item.tone)}>
               <div className="flex items-start justify-between gap-3">

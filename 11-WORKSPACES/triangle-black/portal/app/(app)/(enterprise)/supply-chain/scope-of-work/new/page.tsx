@@ -128,7 +128,7 @@ export default function SOWCreatePage() {
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>1?"center":"left"}}>{h}</div>
                 ))}
               </div>
-              {boqItems.map((item,i)=>(
+              {boqItems.map((item: any, i: number) =>(
                 <div key={i} className="tb-table-row" style={{gridTemplateColumns:"40px 1fr 70px 70px 100px 110px 40px"}}>
                   <div className="text-xs text-tertiary">{i+1}</div>
                   <div className="text-sm text-primary">{item.description}</div>

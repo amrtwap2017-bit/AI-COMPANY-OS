@@ -31,7 +31,7 @@ export function KnowledgePanel({ title, subtitle, sections }: KnowledgePanelProp
           <div key={section.title} className="rounded-2xl border border-divider bg-base-alt p-4">
             <div className="text-sm font-semibold text-primary">{section.title}</div>
             <div className="mt-3 space-y-3">
-              {section.items.map((item) => (
+              {section.items.map((item: any) => (
                 <div key={item.label} className="rounded-xl border border-border bg-white px-4 py-3">
                   <div className="text-sm font-medium text-primary">{item.label}</div>
                   <div className="mt-1 text-sm leading-6 text-secondary">{item.detail}</div>

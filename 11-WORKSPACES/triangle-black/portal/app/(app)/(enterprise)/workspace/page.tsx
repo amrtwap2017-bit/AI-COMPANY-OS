@@ -173,7 +173,7 @@ export default function WorkspacePage() {
 
             <div className="tb-section">
               <div className="font-bold text-primary mb-3">Platform Areas</div>
-              {[{icon:"☀️",label:"My Day",path:"/workspace/my-day"},{icon:"📊",label:"Executive Dashboard",path:"/executive/dashboard"},{icon:"📋",label:"Reports",path:"/reports"},{icon:"📈",label:"Analytics",path:"/analytics"},{icon:"🔔",label:"Notifications",path:"/notifications"},{icon:"👤",label:"My Profile",path:"/settings/profile"}].map((item,i)=>(
+              {[{icon:"☀️",label:"My Day",path:"/workspace/my-day"},{icon:"📊",label:"Executive Dashboard",path:"/executive/dashboard"},{icon:"📋",label:"Reports",path:"/reports"},{icon:"📈",label:"Analytics",path:"/analytics"},{icon:"🔔",label:"Notifications",path:"/notifications"},{icon:"👤",label:"My Profile",path:"/settings/profile"}].map((item: any, i: number) =>(
                 <button key={i} onClick={() => router.push(item.path)}
                   className="flex items-center gap-2.5 py-2 border-b border-divider w-full text-left bg-transparent cursor-pointer">
                   <span className="text-base">{item.icon}</span>

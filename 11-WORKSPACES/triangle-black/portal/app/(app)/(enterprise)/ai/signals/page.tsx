@@ -76,7 +76,7 @@ function AISignalsPageInner() {
           { label:"PM Maintenance", icon:"🔧", path:"/maintenance/pm-schedule", count:summary?.critical||0 },
           { label:"Inventory",      icon:"📦", path:"/supply-chain/inventory-alerts", count:summary?.high||0 },
           { label:"Operations",     icon:"⚙️", path:"/operations/work-orders", count:summary?.medium||0 },
-        ].map(item => (
+        ].map((item: any) => (
           <button key={item.label} onClick={() => router.push(item.path)}
             className="bg-white border border-gray-200 rounded-xl p-4 text-left hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-2 mb-2">

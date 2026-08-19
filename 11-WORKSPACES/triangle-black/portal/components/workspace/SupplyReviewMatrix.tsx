@@ -30,7 +30,7 @@ export function SupplyReviewMatrix({ title, subtitle, items }: SupplyReviewMatri
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item, index) => (
+        {items.map((item: any, index: number) => (
           <div key={`${item.title}-${index}`} className={"rounded-2xl border p-4 " + emphasisClasses(item.emphasis)}>
             <div className="text-sm font-semibold text-primary">{item.title}</div>
             <div className="mt-2 text-3xl font-semibold tracking-tight text-primary">{item.value}</div>

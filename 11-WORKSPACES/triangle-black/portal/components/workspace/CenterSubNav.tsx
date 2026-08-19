@@ -20,7 +20,7 @@ export function CenterSubNav({ items }: CenterSubNavProps) {
   return (
     <div className="border-b border-border bg-white sticky top-14 z-20 flex-shrink-0">
       <div className="px-4 sm:px-6 flex items-end gap-0 overflow-x-auto scrollbar-none">
-        {items.map(item => {
+        {items.map((item: any) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link

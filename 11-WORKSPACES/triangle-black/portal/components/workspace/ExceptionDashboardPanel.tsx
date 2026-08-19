@@ -38,7 +38,7 @@ export function ExceptionDashboardPanel({ title, subtitle, items }: ExceptionDas
             No exceptions are currently visible.
           </div>
         ) : (
-          items.map((item, index) => (
+          items.map((item: any, index: number) => (
             <div key={`${item.title}-${index}`} className={"rounded-2xl border p-4 " + severityClasses(item.severity)}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-sm font-semibold text-primary">{item.title}</div>

@@ -37,7 +37,7 @@ function entityRouteSuggestions(entity: string, id?: string, name?: string) {
 
   const list = [...(specific[entity] || []), ...base];
 
-  return list.map((item) => {
+  return list.map((item: any) => {
     const params = new URLSearchParams();
     params.set("entity", entity);
     if (id) params.set("id", id);
@@ -162,7 +162,7 @@ export function EntityContextDrawer() {
           <section className="rounded-3xl border border-border bg-white p-5">
             <div className="text-lg font-semibold text-primary">Suggested Navigation</div>
             <div className="mt-4 space-y-3">
-              {suggestions.map((item) => (
+              {suggestions.map((item: any) => (
                 <Link
                   key={item.href + item.label}
                   href={item.href}

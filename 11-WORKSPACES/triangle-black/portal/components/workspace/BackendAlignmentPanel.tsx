@@ -63,7 +63,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
           <div className="rounded-2xl border border-divider bg-base-alt p-4">
             <div className="text-sm font-semibold text-primary">Related Objects</div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {relatedObjects.map((item, index) => (
+              {relatedObjects.map((item: any, index: number) => (
                 <span
                   key={`${item}-${index}`}
                   className="rounded-full border border-border bg-white px-3 py-1 text-xs text-primary"

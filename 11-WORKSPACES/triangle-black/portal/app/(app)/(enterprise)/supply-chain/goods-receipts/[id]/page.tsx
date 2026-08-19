@@ -77,7 +77,7 @@ export default function GRNDetailPage() {
                   <table className="tb-table">
                     <thead><tr><th>Item</th><th style={{textAlign:"right"}}>Ordered</th><th style={{textAlign:"right"}}>Received</th><th style={{textAlign:"right"}}>Rejected</th><th>Unit</th><th>Notes</th></tr></thead>
                     <tbody>
-                      {items.map((item,i) => {
+                      {items.map((item: any, i: number) => {
                         const hasRej = (item.qty_rejected||0) > 0;
                         return (
                           <tr key={item.id||i} style={{borderLeft:hasRej?"3px solid var(--color-danger-border)":"3px solid transparent"}}>

@@ -57,7 +57,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
           </div>
 
           <div className="space-y-2">
-            {enterpriseCenters.map((item) => {
+            {enterpriseCenters.map((item: any) => {
               const active = isActive(pathname, item.href);
               return (
                 <Link
@@ -83,7 +83,7 @@ export function MobileCenterDrawer({ open, onClose }: MobileCenterDrawerProps) {
               Legacy Navigation
             </div>
             <div className="space-y-1">
-              {legacyLinks.map((item) => (
+              {legacyLinks.map((item: any) => (
                 <Link
                   key={item.href}
                   href={item.href}

@@ -143,7 +143,7 @@ export default function EngineeringFieldReportsPage() {
             { label:"Downtime Records", path:"/maintenance/downtime/review", icon:"⏱️" },
             { label:"Cost Records",     path:"/maintenance/costs/review",    icon:"💰" },
             { label:"Work History",     path:"/maintenance/work-history",    icon:"📊" },
-          ].map(item => (
+          ].map((item: any) => (
             <button key={item.label} onClick={() => router.push(item.path)}
               className="bg-white border border-gray-200 rounded-xl p-3 text-left hover:bg-gray-50 flex items-center gap-2">
               <span className="text-lg">{item.icon}</span>

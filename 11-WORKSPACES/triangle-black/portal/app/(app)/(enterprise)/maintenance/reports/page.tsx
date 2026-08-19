@@ -130,7 +130,7 @@ export default function MaintenanceReportsPage() {
                 { label:"Warranty Tracking",path:"/maintenance/warranties",    icon:"🛡️" },
                 { label:"Inspections",      path:"/engineering/inspections",   icon:"🔍" },
                 { label:"Field Reports",    path:"/engineering/field-reports", icon:"📋" },
-              ].map(item => (
+              ].map((item: any) => (
                 <button key={item.label} onClick={() => router.push(item.path)}
                   className="w-full flex items-center gap-3 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-sm text-gray-700 font-medium transition-colors text-left">
                   <span>{item.icon}</span>

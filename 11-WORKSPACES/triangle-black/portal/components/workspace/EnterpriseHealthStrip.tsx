@@ -18,7 +18,7 @@ export function EnterpriseHealthStrip({ title, subtitle, items }: EnterpriseHeal
         <p className="mt-0.5 text-xs text-secondary">{subtitle}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {items.map((item) => {
+        {items.map((item: any) => {
           const t = toneMap[item.tone ?? "neutral"];
           const Icon = t.icon;
           return (

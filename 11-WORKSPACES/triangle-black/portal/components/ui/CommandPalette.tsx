@@ -123,7 +123,7 @@ export function CommandPalette({ open, onClose }: Props) {
               No results found for “{query}”
             </div>
           ) : (
-            results.map((item, i) => {
+            results.map((item: any, i: number) => {
               const s = (TYPE_STYLES as Record<string, any>)[item.type] || { bg: "rgba(109,95,83,0.08)", color: "#6D5F53", border: "rgba(109,95,83,0.18)" };
               const active = i === selected;
               return (

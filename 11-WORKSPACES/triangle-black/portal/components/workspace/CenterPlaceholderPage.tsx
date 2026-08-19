@@ -27,7 +27,7 @@ export function CenterPlaceholderPage({ eyebrow, title, subtitle, bullets, actio
         <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
           <h2 className="text-sm font-bold text-primary mb-3">Workspace Scope</h2>
           <ul className="space-y-2">
-            {bullets.map((item, i) => (
+            {bullets.map((item: any, i: number) => (
               <li key={i} className="flex items-start gap-2.5 rounded-xl border border-divider bg-base-alt px-3.5 py-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0 mt-1.5" />
                 <span className="text-sm text-primary">{item}</span>
@@ -38,7 +38,7 @@ export function CenterPlaceholderPage({ eyebrow, title, subtitle, bullets, actio
         <section className="rounded-2xl border border-border bg-white p-5 shadow-sm">
           <h2 className="text-sm font-bold text-primary mb-3">Build Priorities</h2>
           <div className="space-y-2">
-            {actions.map((item, i) => (
+            {actions.map((item: any, i: number) => (
               <div key={i} className="rounded-xl border border-divider bg-base-alt px-3.5 py-3">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-surface-alt text-secondary text-[10px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>

@@ -24,7 +24,7 @@ export function EscalationLane({ title, subtitle, items }: EscalationLaneProps) 
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item, index) => (
+        {items.map((item: any, index: number) => (
           <div key={`${item.lane}-${index}`} className="rounded-2xl border border-border bg-base-alt p-4">
             <div className="text-sm font-semibold text-primary">{item.lane}</div>
             <div className="mt-2 text-2xl font-semibold tracking-tight text-primary">{item.count}</div>

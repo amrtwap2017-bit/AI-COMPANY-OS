@@ -17,7 +17,7 @@ export function MobileBottomNav() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border"
          style={{background:"#0F172A",paddingBottom:"env(safe-area-inset-bottom)"}}>
       <div className="flex items-center justify-around h-14">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item: any) => {
           const active = pathname.startsWith(item.href);
           return (
             <Link key={item.href} href={item.href}

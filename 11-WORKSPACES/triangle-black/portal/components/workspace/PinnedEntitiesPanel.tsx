@@ -41,7 +41,7 @@ export function PinnedEntitiesPanel() {
         </div>
       ) : (
         <div className="mt-5 space-y-3">
-          {items.map((item, index) => (
+          {items.map((item: any, index: number) => (
             <div
               key={item.entityType + item.entityId + item.entityName + index}
               className="rounded-2xl border border-divider bg-base-alt px-4 py-4"

@@ -192,7 +192,7 @@ export function EnterpriseTopbar() {
                     {icon:"🔧", label:"My Work Orders", desc:"Assigned to me", path:"/operations/work-orders"},
                     {icon:"⏱", label:"Log Time", desc:"Record hours worked", path:"/operations/time-tracking"},
                     {icon:"📊", label:"Executive View", desc:"Platform KPIs", path:"/executive/dashboard"},
-                  ].map(item => (
+                  ].map((item: any) => (
                     <button
                       key={item.label}
                       onClick={() => { setUserOpen(false); router.push(item.path); }}
@@ -214,7 +214,7 @@ export function EnterpriseTopbar() {
                   {[
                     {icon:User, label:"My Profile", path:"/settings/profile"},
                     {icon:Settings, label:"Settings", path:"/settings/users"},
-                  ].map(item => (
+                  ].map((item: any) => (
                     <button
                       key={item.label}
                       onClick={() => { setUserOpen(false); router.push(item.path); }}

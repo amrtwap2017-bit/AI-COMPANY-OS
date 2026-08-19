@@ -164,7 +164,7 @@ export default function SLADashboardPage() {
               <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No active breaches</div><div className="tb-empty-desc">All service requests are within SLA</div></div>
             ) : (
               <div className="flex flex-col gap-2">
-                {activeBreach.map((item,i)=>(
+                {activeBreach.map((item: any, i: number) =>(
                   <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-danger/20 bg-danger/5">
                     <span className={`tb-badge flex-shrink-0 ${item.urgency==="critical"?"tb-badge-danger":item.urgency==="high"?"tb-badge-warning":"tb-badge-neutral"}`}>{item.urgency}</span>
                     <div className="flex-1 min-w-0">
