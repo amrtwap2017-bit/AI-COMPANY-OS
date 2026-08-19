@@ -1,35 +1,59 @@
-# Triangle Black Demo Guide
+# Triangle Black — Commercial Demo Guide
 
 ## Demo Tenant
-Hotel: Sharm Palace Engineering
-Hotel ID: tb-demo-hotel-000000000001
+
+| Item | Value |
+|------|-------|
+| Hotel | Grand Sands Hotel — Demo |
+| Hotel ID | tb-demo-hotel-000000000001 |
+| Email | demo@triangleblack.com |
+| Password | demo123 |
+| Portal | http://localhost:3000 |
+| API | http://localhost:8030 |
 
 ## Quick Start
+
+```bash
 cd ~/AI-COMPANY-OS/11-WORKSPACES/triangle-black
 bash START.sh
-.venv/bin/python3 scripts/seed_demo_tenant.py
+.venv/bin/python scripts/seed_demo_tenant.py
+Open: http://localhost:3000
+Login: demo@triangleblack.com / demo123
 
-## Login
-URL: http://localhost:3000
-Email: amr@triangleblack.com
-Password: admin123
+What Is Seeded
+21 assets (HVAC, Electrical, Plumbing, Pool, Elevators, Fire, Kitchen)
+20 work orders (completed + open + in-progress + assigned)
+10 suppliers with ratings (3.8 – 4.8)
+8 invoices (paid + pending + overdue)
+Key Demo Flows
+1. Executive Dashboard — /executive/dashboard
+Shows: WO counts, SLA compliance, asset health, spend analysis
 
-## What Is Seeded
-Assets: 15 — HVAC, Electrical, Plumbing, Fire Safety, Elevator
-Work Orders: 30 — 30 days of corrective and preventive maintenance
-Suppliers: 10 — Approved suppliers with ratings
-Service Requests: 20 — Mixed urgency and status
+2. Operations — /operations/work-orders
+Shows: Live WO list, SLA indicators, priority filters
 
-## Key Demo Pages
-Operations: /operations/work-orders — 30 WOs with SLA status
-Assets: /maintenance/assets — 15 critical assets
-Executive: /executive — KPI overview
-Service Requests: /operations/service-requests — 20 requests
-Suppliers: /supply-chain/suppliers — 10 approved suppliers
+3. Maintenance — /maintenance/assets
+Shows: Asset tree, PM compliance, criticality map
 
-## Value Proposition
-1. Operational Visibility — Which assets are critical
-2. SLA Compliance — Are work orders completed on time
-3. Maintenance Intelligence — What needs attention
-4. Supplier Management — Who is performing
-5. AI Recommendations — What should we do next
+4. AI Gateway
+POST /api/v1/ai-gateway/maintenance-recommendation
+Shows: Governed AI recommendation for HVAC asset
+
+5. Digital Twin Impact
+GET /api/v1/twin/asset/{asset_id}/impact
+Shows: Which WOs and technicians affect this asset
+
+Commercial Pitch Points
+Operational Transparency — real-time WO status and SLA tracking
+Asset Intelligence — full lifecycle from PM to corrective repair
+Procurement Control — supplier ratings and PO tracking
+AI Assistance — governed recommendations with full audit trail
+Executive Visibility — live KPI dashboard from operational data
+Security — tenant isolation and auth boundary fully tested
+Value Proposition
+Triangle Black gives engineering companies operating hotels:
+
+Visibility into what is happening across all assets
+Control over maintenance workflows and SLA compliance
+Intelligence from AI-assisted recommendations
+Evidence for every decision through audit trails
