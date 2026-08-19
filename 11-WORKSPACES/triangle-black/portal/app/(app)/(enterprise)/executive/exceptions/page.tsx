@@ -86,7 +86,7 @@ export default function ExceptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 {overdueWOs.slice(0,5).map((wo: any, i: any) =>{
-                  const days=Math.floor((now-new Date(wo.due_date).getTime())/86400000);
+                  const days=Math.floor((now.getTime() - new Date(wo.due_date).getTime())/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
                       <div className="text-sm text-secondary truncate">{wo.title||"—"}</div>
@@ -126,7 +126,7 @@ export default function ExceptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 {overduePMs.slice(0,5).map((pm: any, i: any) =>{
-                  const days=Math.floor((now-new Date(pm.next_due_ts).getTime())/86400000);
+                  const days=Math.floor((now.getTime() - new Date(pm.next_due_ts).getTime())/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                       <div className="text-sm text-secondary truncate">{pm.title||"—"}</div>
