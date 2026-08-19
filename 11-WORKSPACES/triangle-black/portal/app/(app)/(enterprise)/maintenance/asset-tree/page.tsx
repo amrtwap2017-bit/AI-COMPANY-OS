@@ -57,7 +57,7 @@ export default function AssetTreePage() {
     return matchSearch && matchStatus && matchCat;
   });
 
-  const groupedByCat = cats.reduce((acc, cat) => {
+  const groupedByCat = cats.reduce((acc: any, cat: any) => {
     acc[cat] = filtered.filter((a: any) => a.category === cat);
     return acc;
   }, {});

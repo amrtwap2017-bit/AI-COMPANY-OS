@@ -66,7 +66,7 @@ export default function AnalyticsCostsPage() {
 
   const costBreakdown = [{name:"Labor",value:Number(costs.total_labor||0)},{name:"Materials",value:Number(costs.total_materials||0)},{name:"Overhead",value:Number(costs.total_overhead_profit||0)},{name:"PO Spend",value:Number(procDash?.pos?.total_value||0)}].filter((d: any) =>d.value>0);
   const revenueData = [{name:"Invoiced",value:Number(rev.total_invoiced||0),fill:"#B9924C"},{name:"Collected",value:Number(rev.total_collected||0),fill:"#547C4D"},{name:"Outstanding",value:Number(rev.total_outstanding||0),fill:"#A84A3D"},{name:"Labor Cost",value:Number(time.total_labor_cost||0),fill:"#B07A2A"},{name:"PO Spend",value:Number(procDash?.pos?.total_value||0),fill:"#5B7C8C"}];
-  const invoiceByStatus = Object.entries(filteredInvoices.reduce((acc,inv)=>{const s=inv.status||"unknown";acc[s]=(acc[s]||0)+Number(inv.total_amount||0);return acc;},{})).map(([name,value])=>({name,value}));
+  const invoiceByStatus = Object.entries(filteredInvoices.reduce((acc: any, inv: any) =>{const s=inv.status||"unknown";acc[s]=(acc[s]||0)+Number(inv.total_amount||0);return acc;},{})).map(([name,value])=>({name,value}));
   const AXIS_STYLE = {fontSize:11,fill:"var(--color-text-3)"};
 
   return (
