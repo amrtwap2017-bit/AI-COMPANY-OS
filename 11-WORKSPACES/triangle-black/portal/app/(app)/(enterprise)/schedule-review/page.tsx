@@ -11,8 +11,8 @@ export default function ScheduleReviewPage() {
   const { data: woRaw } = useQuery(["sr2-wos"], () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const pms = toArr(pmRaw); const wos = toArr(woRaw);
   const now = new Date();
-  const next7  = new Date(now.getTime().getTime() +7*86400000);
-  const next30 = new Date(now.getTime().getTime() +30*86400000);
+  const next7  = new Date(now.getTime() +7*86400000);
+  const next30 = new Date(now.getTime() +30*86400000);
   const overdue   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const dueWeek   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=next7);
   const dueMonth  = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>next7&&new Date(p.next_due_ts)<=next30);

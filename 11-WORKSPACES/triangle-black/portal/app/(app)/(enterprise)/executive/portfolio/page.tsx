@@ -16,7 +16,7 @@ export default function PortfolioPage() {
   const contractValue   = activeContracts.reduce((s: any, c: any) =>s+Number(c.total_value||c.value||0),0);
   const revenue         = inv.filter((i: any) =>i.status==="paid").reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
   const now = new Date();
-  const expiringSoon = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime().getTime() +30*86400000));
+  const expiringSoon = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime() +30*86400000));
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>

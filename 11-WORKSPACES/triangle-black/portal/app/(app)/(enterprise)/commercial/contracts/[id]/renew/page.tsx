@@ -42,7 +42,7 @@ export default function ContractRenewPage() {
         setContract(d);
         // Pre-fill with current contract + 1 year
         const now = new Date();
-        const nextYear = new Date(now.getFullYear().getTime() + 1, now.getMonth(), now.getDate());
+        const nextYear = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
         setForm(f => ({
           ...f,
           total_value:  String(d.total_value || ""),

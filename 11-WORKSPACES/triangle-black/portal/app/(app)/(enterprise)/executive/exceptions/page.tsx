@@ -22,7 +22,7 @@ export default function ExceptionsPage() {
 
   const criticalWOs  = wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed");
   const overdueWOs   = wos.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");
-  const expiringCts  = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime().getTime() +30*86400000));
+  const expiringCts  = contracts.filter((c: any) =>c.status==="active"&&c.end_date&&new Date(c.end_date)<=new Date(now.getTime() +30*86400000));
   const overduePMs   = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const totalExceptions = criticalWOs.length+overdueWOs.length+expiringCts.length+overduePMs.length;
 

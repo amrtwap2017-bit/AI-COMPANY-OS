@@ -25,8 +25,8 @@ function ContractsPageInner() {
   );
   const contracts = toArr(raw);
   const now   = new Date();
-  const in30  = new Date(now.getTime().getTime() +30*86400000);
-  const in90  = new Date(now.getTime().getTime() +90*86400000);
+  const in30  = new Date(now.getTime() +30*86400000);
+  const in90  = new Date(now.getTime() +90*86400000);
 
   const active     = contracts.filter((c: any) =>c.status==="active");
   const pending    = contracts.filter((c: any) =>c.status==="pending_signature");

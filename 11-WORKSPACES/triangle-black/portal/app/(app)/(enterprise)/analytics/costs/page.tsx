@@ -29,8 +29,8 @@ const DATE_PRESETS = [{key:"30d",label:"Last 30 Days"},{key:"90d",label:"Last 90
 
 function getPresetRange(preset: any) {
   const now = new Date();
-  if (preset==="30d") return {from:new Date(now.getTime().getTime() -30*86400000),to:now};
-  if (preset==="90d") return {from:new Date(now.getTime().getTime() -90*86400000),to:now};
+  if (preset==="30d") return {from:new Date(now.getTime() -30*86400000),to:now};
+  if (preset==="90d") return {from:new Date(now.getTime() -90*86400000),to:now};
   if (preset==="ytd") return {from:new Date(now.getFullYear(),0,1),to:now};
   return {from:null,to:now};
 }

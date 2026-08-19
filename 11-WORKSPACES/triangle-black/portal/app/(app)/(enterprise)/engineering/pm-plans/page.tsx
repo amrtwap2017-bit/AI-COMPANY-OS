@@ -12,8 +12,8 @@ export default function EngineeringPMPlansPage() {
   const pms = toArr(pmRaw); const assets = toArr(assetRaw);
   const now = new Date();
   const overdue = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
-  const dueWeek = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=new Date(now.getTime().getTime() +7*86400000));
-  const onTrack = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>new Date(now.getTime().getTime() +7*86400000));
+  const dueWeek = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=new Date(now.getTime() +7*86400000));
+  const onTrack = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>new Date(now.getTime() +7*86400000));
   return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
