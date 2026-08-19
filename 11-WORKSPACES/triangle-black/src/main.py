@@ -374,6 +374,7 @@ def list_user_roles(_admin: str = Depends(require_admin)):
 
 API_PREFIX = "/api/v1"
 
+app.include_router(executive_intelligence_router, prefix="/api/v1")
 app.include_router(leads_router,         prefix=API_PREFIX + "/leads")
 app.include_router(agents_router,        prefix=API_PREFIX)
 app.include_router(pipeline_router,      prefix=API_PREFIX)
