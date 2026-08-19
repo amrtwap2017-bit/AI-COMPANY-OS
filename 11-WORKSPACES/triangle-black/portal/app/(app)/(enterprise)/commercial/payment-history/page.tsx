@@ -50,7 +50,7 @@ export default function PaymentHistoryPage() {
                 <div className="tb-empty-icon" style={{opacity:0.4}}>💳</div>
                 <div className="tb-empty-title">No payment records yet</div>
               </div>
-            ) : paid.map((inv,i)=>(
+            ) : paid.map((inv: any, i: any) =>(
               <button key={i} onClick={()=>router.push("/commercial/invoices/"+inv.id)}
                 className="flex items-center gap-4 py-3 border-b border-divider w-full text-left bg-transparent cursor-pointer">
                 <div className="w-9 h-9 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center text-base flex-shrink-0">💳</div>

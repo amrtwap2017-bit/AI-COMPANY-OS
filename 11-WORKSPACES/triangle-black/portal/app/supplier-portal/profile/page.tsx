@@ -132,7 +132,7 @@ export default function SupplierProfilePage() {
               {docs.length > 0 && (
                 <div className="mt-5 space-y-2">
                   <div className="text-sm font-bold text-white mb-3">Uploaded Documents ({docs.length})</div>
-                  {docs.map((doc,i)=>{
+                  {docs.map((doc: any, i: any) =>{
                     const isReq = REQ_DOCS.includes(doc.doc_category);
                     return (
                       <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{background:"rgba(255,255,255,0.03)"}}>

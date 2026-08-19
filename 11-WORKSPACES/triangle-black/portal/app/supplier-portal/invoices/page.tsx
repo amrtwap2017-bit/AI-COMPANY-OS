@@ -40,7 +40,7 @@ export default function SupplierInvoicesPage() {
           <div className="text-center py-16 rounded-2xl border" style={{background:"#1E293B",borderColor:"rgba(255,255,255,0.08)"}}>
             <div className="text-4xl mb-3">📄</div><div className="text-white font-bold">No invoices yet</div>
           </div>
-        ) : invoices.map((inv,i)=>{
+        ) : invoices.map((inv: any, i: any) =>{
           const ps=PS[inv.payment_status]||"#94A3B8";
           const overdue = inv.due_date && new Date(inv.due_date)<new Date() && inv.payment_status!=="paid";
           return (

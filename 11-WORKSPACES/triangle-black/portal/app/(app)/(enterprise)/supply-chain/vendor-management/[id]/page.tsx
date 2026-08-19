@@ -96,7 +96,7 @@ export default function VendorDetailPage() {
       </div>
       <div className="tb-canvas">
         <div className="flex gap-2 mb-4">
-          {["overview","pos","banking","documents"].map(tab=>(
+          {["overview","pos","banking","documents"].map((tab: any) =>(
             <button key={tab} onClick={()=>setActiveTab(tab)} className={"tb-pill "+(activeTab===tab?"tb-pill--active":"")}>
               {tab==="overview"?"Overview":tab==="pos"?"Purchase Orders":tab==="banking"?"Banking":"Documents"}
             </button>
@@ -132,7 +132,7 @@ export default function VendorDetailPage() {
               <div className="tb-empty"><div className="tb-empty-icon">📦</div><div className="tb-empty-title">No POs yet</div></div>
             ) : (
               <div className="space-y-2 mt-2">
-                {pos.map((po,i)=>(
+                {pos.map((po: any, i: any) =>(
                   <button key={i} onClick={()=>router.push("/supply-chain/purchase-orders-v2/"+po.id)} className="w-full flex items-center gap-4 p-3 rounded-xl bg-base-alt hover:bg-surface border border-transparent hover:border-border transition-colors text-left">
                     <div className="flex-1"><div className="text-sm font-semibold text-primary">{po.po_number||po.id?.slice(0,12)}</div><div className="text-xs text-tertiary">{po.title}</div></div>
                     <div className="text-sm font-bold text-emerald-400">{fmtEGP(po.total_amount||0)}</div>

@@ -40,7 +40,7 @@ export default function CommandPage() {
           <div key={i} className="tb-section">
             <div className="text-label-upper text-tertiary mb-4">{section.section}</div>
             <div className="tb-grid-4">
-              {section.items.map((item,j)=>(
+              {section.items.map((item: any, j: any) =>(
                 <button key={j} onClick={()=>router.push(item.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                   <span className="text-xl">{item.icon}</span><span className="text-xs font-medium text-secondary">{item.label}</span>
                 </button>

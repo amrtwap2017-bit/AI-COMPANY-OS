@@ -27,7 +27,7 @@ export function Tabs({ tabs, active, onChange, variant = "underline", size = "md
   if (variant === "pill") {
     return (
       <div className={"flex items-center gap-1 flex-wrap " + className} role="tablist">
-        {tabs.map(tab => (
+        {tabs.map((tab: any) => (
           <button
             key={tab.key}
             role="tab"
@@ -57,7 +57,7 @@ export function Tabs({ tabs, active, onChange, variant = "underline", size = "md
   return (
     <div className={"border-b border-border " + className} role="tablist">
       <div className="flex items-end gap-0 -mb-px overflow-x-auto scrollbar-none">
-        {tabs.map(tab => (
+        {tabs.map((tab: any) => (
           <button
             key={tab.key}
             role="tab"

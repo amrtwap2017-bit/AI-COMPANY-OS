@@ -10,7 +10,7 @@ export function KpiSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className={`grid grid-cols-2 md:grid-cols-4 gap-3`}
       style={{ gridTemplateColumns: `repeat(${Math.min(count, 4)}, 1fr)` }}>
-      {Array.from({ length: count }).map((_, i) => (
+      {Array.from({ length: count }).map((_: any, i: any) => (
         <div key={i} className="bg-surface border border-border rounded-2xl p-5 space-y-3">
           <SkeletonBlock className="h-3 w-24" />
           <SkeletonBlock className="h-8 w-16" />
@@ -30,7 +30,7 @@ export function TableSkeleton({ rows = 6 }: { rows?: number }) {
         ))}
       </div>
       <div className="divide-y divide-divider">
-        {Array.from({ length: rows }).map((_, i) => (
+        {Array.from({ length: rows }).map((_: any, i: any) => (
           <div key={i} className="px-5 py-4 flex items-center gap-6">
             <SkeletonBlock className="h-4 flex-1" />
             <SkeletonBlock className="h-4 w-20" />
@@ -45,7 +45,7 @@ export function TableSkeleton({ rows = 6 }: { rows?: number }) {
 export function CardSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {Array.from({ length: count }).map((_, i) => (
+      {Array.from({ length: count }).map((_: any, i: any) => (
         <div key={i} className="bg-surface border border-border rounded-2xl p-6 space-y-4">
           <SkeletonBlock className="h-8 w-8 rounded-xl" />
           <SkeletonBlock className="h-5 w-3/4" />

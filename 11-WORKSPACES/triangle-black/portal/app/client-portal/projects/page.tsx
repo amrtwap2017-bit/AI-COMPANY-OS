@@ -39,7 +39,7 @@ export default function ClientProjectsPage() {
             <div className="text-4xl mb-3">🏗️</div>
             <div className="font-bold text-gray-700">No Active Projects</div>
           </div>
-        ) : projects.map((proj,i)=>(
+        ) : projects.map((proj: any, i: any) =>(
           <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 mb-4">
             <div className="flex justify-between items-start mb-4">
               <div>

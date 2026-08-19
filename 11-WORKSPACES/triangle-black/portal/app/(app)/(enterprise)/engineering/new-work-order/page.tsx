@@ -37,7 +37,7 @@ export default function NewWorkOrderPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Unlinked Service Requests ({unlinkedSRs.length})</div><button onClick={()=>router.push("/operations/service-requests")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {unlinkedSRs.slice(0,5).map((sr,i)=>{
+              {unlinkedSRs.slice(0,5).map((sr: any, i: any) =>{
                 const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[sr.priority]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/operations/service-requests/"+sr.id)} className="tb-action-item w-full justify-between">
@@ -52,7 +52,7 @@ export default function NewWorkOrderPage() {
           <div className="tb-section">
             <div className="tb-section-title">Available Technicians</div>
             <div className="space-y-2">
-              {techs.slice(0,5).map((tech,i)=>(
+              {techs.slice(0,5).map((tech: any, i: any) =>(
                 <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-base-alt">
                   <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-xs font-black text-secondary">{(tech.name||"?").charAt(0)}</div>
                   <div><div className="text-sm text-primary">{tech.name}</div><div className="text-xs text-tertiary">{tech.specialization||"—"}</div></div>

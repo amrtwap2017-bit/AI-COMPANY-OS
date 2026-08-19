@@ -124,7 +124,7 @@ export default function ReportsPage() {
 
           <div className="xl:col-span-1 flex flex-col gap-2">
             <div className="text-xs font-bold text-tertiary uppercase tracking-wider mb-1">Select Report</div>
-            {filteredCatalog.map(report=>(
+            {filteredCatalog.map((report: any) =>(
               <button key={report.id}
                 onClick={()=>{ setSelectedReport(report.id); setFilters({status:"",priority:"",urgency:"",vendor_id:"",site_id:"",payment_status:"",date_from:"",date_to:"",category:"",is_approved:""}); }}
                 className={`w-full text-left p-3 rounded-xl border transition-colors ${selectedReport===report.id?"border-brand bg-surface":"bg-base-alt border-default hover:border-brand/40"}`}>
@@ -235,7 +235,7 @@ export default function ReportsPage() {
                   <div className="tb-section">
                     <div className="tb-section-title">Aging Breakdown</div>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-3">
-                      {(reportData.aging_summary||[]).map((bucket,i)=>(
+                      {(reportData.aging_summary||[]).map((bucket: any, i: any) =>(
                         <div key={i} className="p-3 rounded-xl bg-surface-alt text-center">
                           <div className="text-sm font-black text-primary">{fmtEGP(bucket.amount)}</div>
                           <div className="text-xs font-bold text-secondary">{bucket.invoice_count} invoices</div>
@@ -293,7 +293,7 @@ export default function ReportsPage() {
                         <table className="tb-table">
                           <thead>
                             <tr>
-                              {columns.map((col,i)=>(
+                              {columns.map((col: any, i: any) =>(
                                 <th key={i}>{formatColumnLabel(col)}</th>
                               ))}
                             </tr>
@@ -301,7 +301,7 @@ export default function ReportsPage() {
                           <tbody>
                             {reportRows.map((row: any, ri: any) =>(
                               <tr key={ri} className="hover:bg-surface-alt transition-colors">
-                                {columns.map((col,ci)=>(
+                                {columns.map((col: any, ci: any) =>(
                                   <td key={ci} className="text-xs" style={{maxWidth:"200px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                                     {formatCellValue(col, row[col])}
                                   </td>

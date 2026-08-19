@@ -56,7 +56,7 @@ export default function PortfolioPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Projects</div><button onClick={()=>router.push("/projects-center")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {projects.filter((p: any) =>p.status==="active").slice(0,5).map((proj,i)=>(
+              {projects.filter((p: any) =>p.status==="active").slice(0,5).map((proj: any, i: any) =>(
                 <button key={i} onClick={()=>router.push("/projects-center/"+proj.id)} className="tb-action-item w-full justify-between">
                   <div className="min-w-0 flex items-center gap-2"><span className="text-base">🏗️</span><span className="text-sm text-secondary truncate">{proj.name||proj.title||"—"}</span></div>
                   <span className="text-xs text-tertiary flex-shrink-0">{proj.end_date?fmtDate(proj.end_date):"—"}</span>

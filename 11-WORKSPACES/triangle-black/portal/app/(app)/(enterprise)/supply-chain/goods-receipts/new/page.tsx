@@ -56,9 +56,9 @@ export default function GoodsReceiptNewPage() {
   }, [form.po_id, pos]);
 
   const addLine = () => setLines(l => [...l, { description:"", qty_received:1, qty_accepted:1, condition:"good", notes:"" }]);
-  const removeLine = (i: number) => setLines(l => l.filter((_,idx) => idx !== i));
+  const removeLine = (i: number) => setLines(l => l.filter((_: any, idx: any) => idx !== i));
   const updateLine = (i: number, key: string, val: any) =>
-    setLines(l => l.map((ln,idx) => idx === i ? {...ln, [key]: val} : ln));
+    setLines(l => l.map((ln: any, idx: any) => idx === i ? {...ln, [key]: val} : ln));
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -113,7 +113,7 @@ export default function GoodsReceiptNewPage() {
               <select value={form.po_id} onChange={(e: any) => setForm(f=>({...f,po_id:e.target.value}))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" required>
                 <option value="">Select PO...</option>
-                {pos.map(po => (
+                {pos.map((po: any) => (
                   <option key={po.id} value={po.id}>
                     {po.po_number || po.id.slice(0,8)} — {po.status}
                     {po.total_amount ? ` (EGP ${Number(po.total_amount).toLocaleString()})` : ""}
@@ -177,7 +177,7 @@ export default function GoodsReceiptNewPage() {
               className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add Item</button>
           </div>
           <div className="space-y-3">
-            {lines.map((line, i) => (
+            {lines.map((line: any, i: any) => (
               <div key={i} className="grid grid-cols-12 gap-2 items-end p-3 bg-gray-50 rounded-xl">
                 <div className="col-span-4">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Description</label>}

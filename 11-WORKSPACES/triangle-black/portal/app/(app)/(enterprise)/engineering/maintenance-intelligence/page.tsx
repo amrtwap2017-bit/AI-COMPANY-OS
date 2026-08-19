@@ -51,7 +51,7 @@ export default function MaintenanceIntelligencePage() {
                   <span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem"}}>FAULT</span>
                 </button>
               ))}
-              {overduePMs.slice(0,3).map((pm,i)=>(
+              {overduePMs.slice(0,3).map((pm: any, i: any) =>(
                 <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
                   <div className="flex items-center gap-2"><span>📅</span><span className="text-sm text-secondary truncate">{pm.title}</span></div>
                   <span className="tb-badge tb-badge--warning" style={{fontSize:"0.5rem"}}>OVERDUE</span>

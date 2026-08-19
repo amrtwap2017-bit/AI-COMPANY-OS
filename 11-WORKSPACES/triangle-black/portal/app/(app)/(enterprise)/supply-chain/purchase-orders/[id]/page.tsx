@@ -109,7 +109,7 @@ export default function PurchaseOrderDetailPage() {
                   { label:"Approved",  date:po.approved_at,         done:["approved","ordered","received"].includes(po.status), color:"#8D7443" },
                   { label:"Ordered",   date:po.order_date,          done:["ordered","received"].includes(po.status), color:"#B07A2A" },
                   { label:"Received",  date:po.received_date,       done:po.status==="received",       color:"#547C4D" },
-                ].map((step, i) => (
+                ].map((step: any, i: any) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{
                       width:20, height:20, borderRadius:"50%", flexShrink:0,

@@ -60,7 +60,7 @@ export default function ProjectsIntelligencePage() {
                 <YAxis tick={AXIS} axisLine={false} tickLine={false}/>
                 <Tooltip content={<WarmTooltip/>}/>
                 <Bar dataKey="value" radius={[6,6,0,0]}>
-                  {byStatus.map((_,i)=><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
+                  {byStatus.map((_: any, i: any) =><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

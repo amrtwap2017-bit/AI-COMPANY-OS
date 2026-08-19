@@ -41,7 +41,7 @@ export default function WorkbenchPage() {
         <div className="tb-section">
           <div className="tb-section-title">Executive Tools</div>
           <div className="tb-grid-4">
-            {tools.map((tool,i)=>(
+            {tools.map((tool: any, i: any) =>(
               <button key={i} onClick={()=>router.push(tool.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div style={{fontSize:"1.75rem",marginBottom:8}}>{tool.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{tool.label}</div>
@@ -53,7 +53,7 @@ export default function WorkbenchPage() {
         <div className="tb-section">
           <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
           <div className="space-y-2 mt-3">
-            {activities.slice(0,5).map((act,i)=>(
+            {activities.slice(0,5).map((act: any, i: any) =>(
               <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-base-alt transition-colors">
                 <span>{act.icon}</span><div className="flex-1 min-w-0"><div className="text-xs text-secondary truncate">{act.title}</div></div>
               </div>

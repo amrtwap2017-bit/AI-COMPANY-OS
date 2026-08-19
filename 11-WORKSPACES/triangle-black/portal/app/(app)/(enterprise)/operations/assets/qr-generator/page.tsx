@@ -147,7 +147,7 @@ export default function AssetQRGeneratorPage() {
             <div className="text-center py-12 text-gray-400">No assets found</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map(asset => (
+              {filtered.map((asset: any) => (
                 <div key={asset.id}
                   className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all">
                   <div className="flex items-start justify-between gap-2 mb-3">

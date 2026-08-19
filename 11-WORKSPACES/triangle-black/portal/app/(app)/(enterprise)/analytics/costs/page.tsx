@@ -139,7 +139,7 @@ export default function AnalyticsCostsPage() {
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie data={costBreakdown} cx="50%" cy="45%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                    {costBreakdown.map((_,i)=><Cell key={i} fill={WARM_COLORS[i%WARM_COLORS.length]} />)}
+                    {costBreakdown.map((_: any, i: any) =><Cell key={i} fill={WARM_COLORS[i%WARM_COLORS.length]} />)}
                   </Pie>
                   <Tooltip content={<WarmTooltip />} />
                   <Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize:11,color:"var(--color-text-3)"}} />
@@ -163,7 +163,7 @@ export default function AnalyticsCostsPage() {
                   <YAxis type="category" dataKey="name" tick={AXIS_STYLE} axisLine={false} tickLine={false} />
                   <Tooltip content={<WarmTooltip />} />
                   <Bar dataKey="value" radius={[0,6,6,0]}>
-                    {invoiceByStatus.map((_,i)=><Cell key={i} fill={WARM_COLORS[i%WARM_COLORS.length]} />)}
+                    {invoiceByStatus.map((_: any, i: any) =><Cell key={i} fill={WARM_COLORS[i%WARM_COLORS.length]} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>

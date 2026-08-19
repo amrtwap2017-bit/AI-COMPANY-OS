@@ -125,7 +125,7 @@ export default function TechnicianDetailPage() {
                   <table className="tb-table">
                     <thead><tr><th>Work Order</th><th>Priority</th><th>Status</th><th>Due Date</th></tr></thead>
                     <tbody>
-                      {wos.map(wo => (
+                      {wos.map((wo: any) => (
                         <tr key={wo.id} onClick={() => router.push(`/operations/work-orders/${wo.id}`)} className="cursor-pointer">
                           <td>
                             <div className="font-semibold text-sm text-primary">{(wo.title||"Untitled").slice(0,50)}</div>

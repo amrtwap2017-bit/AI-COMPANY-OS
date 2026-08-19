@@ -133,7 +133,7 @@ export default function InvoiceDetailPage() {
                 <table className="tb-table">
                   <thead><tr><th>Description</th><th style={{textAlign:"center"}}>Unit</th><th style={{textAlign:"center"}}>Invoiced</th><th style={{textAlign:"center"}}>PO Qty</th><th style={{textAlign:"center"}}>GRN Qty</th><th style={{textAlign:"right"}}>Unit Price</th><th style={{textAlign:"right"}}>Total</th></tr></thead>
                   <tbody>
-                    {lines.map((line,i)=>{
+                    {lines.map((line: any, i: any) =>{
                       const isOk = line.match_status==="matched";
                       return (
                         <tr key={i} style={{borderLeft:isOk?"3px solid var(--color-success-border)":line.match_status&&line.match_status!=="matched"?"3px solid var(--color-danger-border)":"3px solid transparent"}}>
@@ -161,7 +161,7 @@ export default function InvoiceDetailPage() {
               <div className="tb-empty"><div className="tb-empty-icon">💳</div><div className="tb-empty-title">No payments recorded</div></div>
             ) : (
               <div className="flex flex-col gap-2 mt-2">
-                {payments.map((pay,i)=>(
+                {payments.map((pay: any, i: any) =>(
                   <div key={i} className="flex items-center gap-4 p-3 bg-surface-alt rounded-lg border border-default">
                     <div className="flex-1">
                       <div className="text-sm font-semibold text-primary">{fmtEGP(pay.amount||0)}</div>

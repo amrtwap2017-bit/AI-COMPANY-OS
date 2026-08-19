@@ -81,7 +81,7 @@ export default function ExecutivePage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Executive Views</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10}}>
-            {executiveNav.map((nav,i)=>(
+            {executiveNav.map((nav: any, i: any) =>(
               <button key={i} onClick={()=>router.push(nav.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{nav.icon}</span>
                 <span className="text-xs font-medium text-secondary">{nav.label}</span>

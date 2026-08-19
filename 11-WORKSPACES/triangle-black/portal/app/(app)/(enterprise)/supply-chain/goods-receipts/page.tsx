@@ -36,7 +36,7 @@ export default function GoodsReceiptsPage() {
             <div className="tb-table-head" style={{gridTemplateColumns:"1fr 120px 120px 110px"}}>
               {["Receipt","PO Reference","Value","Date"].map((h: any, i: number) =><div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>)}
             </div>
-            {filtered.map((gr,i)=>(
+            {filtered.map((gr: any, i: any) =>(
               <button key={i} onClick={()=>router.push("/supply-chain/goods-receipts/"+gr.id)} className="tb-table-row" style={{gridTemplateColumns:"1fr 120px 120px 110px"}}>
                 <div className="text-sm font-medium text-primary truncate pr-4">{gr.receipt_number||gr.id?.slice(0,16)}</div>
                 <div className="text-center text-xs text-secondary">{gr.purchase_order_id?.slice(0,12)||"—"}</div>

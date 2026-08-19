@@ -153,7 +153,7 @@ export default function FinancialDashboardPage() {
                 <div className="tb-empty" style={{padding:"24px"}}><div className="tb-empty-title">No projects</div></div>
               ) : (
                 <div className="flex flex-col gap-3 mt-3">
-                  {projects.map((proj,i)=>{
+                  {projects.map((proj: any, i: any) =>{
                     const budget     = Number(proj.budget||0);
                     const completion = Number(proj.completion_pct||0);
                     const earned     = budget * completion / 100;
@@ -214,7 +214,7 @@ export default function FinancialDashboardPage() {
                 <div className="text-center py-4 text-sm text-success font-bold">✅ No outstanding invoices</div>
               ) : (
                 <div className="flex flex-col gap-3 mt-3">
-                  {aged.map((bucket,i)=>{
+                  {aged.map((bucket: any, i: any) =>{
                     const color = (AGING_COLORS as Record<string, any>)[bucket.bucket] || "#6D5F53";
                     return (
                       <div key={i}>
@@ -282,7 +282,7 @@ export default function FinancialDashboardPage() {
                   {label:"Purchase Orders",      path:"/supply-chain/purchase-orders-v2",icon:"📦"},
                   {label:"Invoice Aging Report", path:"/reports",                      icon:"📊"},
                   {label:"Executive Dashboard",  path:"/executive/dashboard",          icon:"📈"},
-                ].map((link,i)=>(
+                ].map((link: any, i: any) =>(
                   <button key={i} onClick={()=>router.push(link.path)} className="tb-action-item w-full justify-start">
                     <span>{link.icon}</span>
                     <span className="text-sm text-secondary">{link.label}</span>

@@ -112,7 +112,7 @@ export default function PurchaseOrdersV2Page() {
                   <tr><th>PO / Vendor</th><th>Status</th><th style={{textAlign:"right"}}>Amount</th><th>Currency</th><th>Date</th></tr>
                 </thead>
                 <tbody>
-                  {filtered.map(po => (
+                  {filtered.map((po: any) => (
                     <tr key={po.id} onClick={() => router.push(`/supply-chain/purchase-orders-v2/${po.id}`)} className="cursor-pointer">
                       <td>
                         <div className="font-semibold text-sm text-primary">{po.po_number || po.id?.slice(0,12)}</div>

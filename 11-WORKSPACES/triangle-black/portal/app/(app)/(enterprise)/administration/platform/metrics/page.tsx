@@ -167,7 +167,7 @@ export default function PlatformMetricsPage() {
             { label:"Financials",   path:"/financial/balance-sheet", icon:"💰" },
             { label:"Vendors",      path:"/supply-chain/vendor-scorecards", icon:"🏢" },
             { label:"Work Orders",  path:"/operations/work-orders",  icon:"⚙️" },
-          ].map(link => (
+          ].map((link: any) => (
             <button key={link.label} onClick={() => router.push(link.path)}
               className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100">
               <span className="text-2xl">{link.icon}</span>

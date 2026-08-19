@@ -90,7 +90,7 @@ export default function LeadDetailPage() {
               <div className="tb-section">
                 <div className="tb-section-title">Pipeline Stage</div>
                 <div className="flex items-center gap-0 mt-2">
-                  {PIPELINE_STAGES.map((stage, i) => {
+                  {PIPELINE_STAGES.map((stage: any, i: any) => {
                     const isPast    = i <= stageIdx || isWon;
                     const isCurrent = i === stageIdx && !isWon;
                     const c = (STATUS_COLOR as Record<string, any>)[stage] || "#6D5F53";
@@ -156,7 +156,7 @@ export default function LeadDetailPage() {
                   <button onClick={() => router.push("/commercial/contracts")} className="tb-section-link">All →</button>
                 </div>
                 <div className="space-y-2 mt-3">
-                  {contracts.map((ct, i) => {
+                  {contracts.map((ct: any, i: any) => {
                     const csc = { active:"#547C4D", expired:"#A84A3D", pending:"#B07A2A" }[ct.status] || "#6D5F53";
                     return (
                       <button key={i}

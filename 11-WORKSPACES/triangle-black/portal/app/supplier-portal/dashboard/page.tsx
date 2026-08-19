@@ -130,7 +130,7 @@ export default function SupplierDashboard() {
                 <div className="text-center py-8 text-slate-400"><div className="text-3xl mb-2">📦</div><div className="text-sm">No POs yet</div></div>
               ) : (
                 <div className="space-y-2">
-                  {recent.map((po_item,i)=>{
+                  {recent.map((po_item: any, i: any) =>{
                     const sc=SC[po_item.status]||"#94A3B8";
                     return (
                       <div key={i} className="flex items-center gap-4 p-3 rounded-xl" style={{background:"rgba(255,255,255,0.03)"}}>
@@ -153,7 +153,7 @@ export default function SupplierDashboard() {
                 {icon:"📝",title:"Submit Quote",desc:"Respond to active RFQs",path:"/supplier-portal/rfqs",color:"#D97706"},
                 {icon:"📄",title:"View POs",desc:"See your purchase orders",path:"/supplier-portal/purchase-orders",color:"#2563EB"},
                 {icon:"🏢",title:"Update Profile",desc:"Upload documents, update info",path:"/supplier-portal/profile",color:"#7C3AED"},
-              ].map((action,i)=>(
+              ].map((action: any, i: any) =>(
                 <button key={i} onClick={()=>router.push(action.path)}
                   className="rounded-2xl p-5 border text-left hover:border-opacity-50 transition-all"
                   style={{background:"#1E293B",borderColor:"rgba(255,255,255,0.08)"}}>

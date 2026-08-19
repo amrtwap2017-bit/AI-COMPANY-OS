@@ -40,7 +40,7 @@ export default function AssetTreePage() {
   const faulted        = assets.filter((a: any) => a.status === "In Fault").length;
   const underMaint     = assets.filter((a: any) => a.status === "Under Maintenance").length;
 
-  const enriched = assets.map(asset => {
+  const enriched = assets.map((asset: any) => {
     const activeWOs = wos.filter((w: any) => w.asset_id === asset.id && w.status !== "completed");
     const assetPMs  = pms.filter((p: any) => p.asset_node_id === asset.id);
     return { ...asset, active_wos: activeWOs.length, pm_count: assetPMs.length };
@@ -150,7 +150,7 @@ export default function AssetTreePage() {
                     </button>
                     {isExpanded && (
                       <div className="divide-y divide-border">
-                        {catAssets.map((asset, i) => {
+                        {catAssets.map((asset: any, i: any) => {
                           const sc = (STATUS_COLOR as Record<string, any>)[asset.status] || "#6D5F53";
                           return (
                             <button key={i}

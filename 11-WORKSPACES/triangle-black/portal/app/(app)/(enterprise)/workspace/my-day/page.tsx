@@ -263,7 +263,7 @@ export default function MyDayPage() {
                 { label:"Dispatch Board",     href:"/operations/dispatch",              icon:"📍" },
                 { label:"View All Approvals", href:"/approvals",                        icon:"✅" },
                 { label:"Asset QR Scan",      href:"/operations/assets/qr",            icon:"📷" },
-              ].map(action => (
+              ].map((action: any) => (
                 <button key={action.href}
                   onClick={() => router.push(action.href)}
                   style={{ display:"flex", alignItems:"center", gap:10, padding:"12px 14px",

@@ -48,7 +48,7 @@ export function EnterpriseScorecardGrid({ title, subtitle, items }: EnterpriseSc
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {item.signals.map((signal, signalIndex) => (
+              {item.signals.map((signal: any, signalIndex: any) => (
                 <span
                   key={`${signal}-${signalIndex}`}
                   className="rounded-full border border-border bg-white px-3 py-1 text-xs text-primary"

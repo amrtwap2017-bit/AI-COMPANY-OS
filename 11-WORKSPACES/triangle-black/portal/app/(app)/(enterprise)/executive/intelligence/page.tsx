@@ -47,7 +47,7 @@ export default function IntelligencePage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>AI Signals</div><button onClick={()=>router.push("/connect-signals")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {sigs.slice(0,6).map((sig,i)=>(
+              {sigs.slice(0,6).map((sig: any, i: any) =>(
                 <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-base-alt">
                   <span style={{fontSize:"1rem"}}>🔮</span>
                   <div className="flex-1 min-w-0"><div className="text-xs font-semibold text-primary truncate">{sig.title||sig.message||"AI Signal"}</div></div>
@@ -60,7 +60,7 @@ export default function IntelligencePage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
             <div className="space-y-2 mt-3">
-              {activities.slice(0,6).map((act,i)=>(
+              {activities.slice(0,6).map((act: any, i: any) =>(
                 <div key={i} className="flex items-center gap-2">
                   <span style={{fontSize:"0.875rem"}}>{act.icon}</span>
                   <div className="flex-1 min-w-0"><div className="text-xs text-secondary truncate">{act.title}</div></div>

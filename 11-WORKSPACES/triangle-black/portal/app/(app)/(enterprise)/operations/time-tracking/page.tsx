@@ -77,7 +77,7 @@ export default function TimeTrackingPage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs mb-4">
-          {[{key:"log",label:"⏱ Log Time"},{key:"entries",label:"📋 All Entries"},{key:"summary",label:"📊 Summary"},{key:"utilization",label:"👷 Utilization"}].map(tab=>(
+          {[{key:"log",label:"⏱ Log Time"},{key:"entries",label:"📋 All Entries"},{key:"summary",label:"📊 Summary"},{key:"utilization",label:"👷 Utilization"}].map((tab: any) =>(
             <button key={tab.key} onClick={()=>setActiveTab(tab.key)} className={`tb-tab ${activeTab===tab.key?"active":""}`}>{tab.label}</button>
           ))}
         </div>
@@ -89,7 +89,7 @@ export default function TimeTrackingPage() {
                 <label className="tb-label">Work Order <span className="text-danger">*</span></label>
                 <select className="tb-select" value={form.work_order_id} onChange={(e: any) =>setForm({...form,work_order_id:e.target.value})}>
                   <option value="">Select work order…</option>
-                  {wos.map(wo=><option key={wo.id} value={wo.id}>{wo.title?.slice(0,40)} ({wo.priority})</option>)}
+                  {wos.map((wo: any) =><option key={wo.id} value={wo.id}>{wo.title?.slice(0,40)} ({wo.priority})</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
@@ -102,7 +102,7 @@ export default function TimeTrackingPage() {
               <div className="tb-form-group">
                 <label className="tb-label">Work Type</label>
                 <select className="tb-select" value={form.work_type} onChange={(e: any) =>setForm({...form,work_type:e.target.value})}>
-                  {WORK_TYPES.map(wt=><option key={wt.v} value={wt.v}>{wt.icon} {wt.label}</option>)}
+                  {WORK_TYPES.map((wt: any) =><option key={wt.v} value={wt.v}>{wt.icon} {wt.label}</option>)}
                 </select>
               </div>
               <div className="tb-form-group">
@@ -161,7 +161,7 @@ export default function TimeTrackingPage() {
             <SectionCard title="By Work Type">
               {byType.length===0 ? <EmptyState icon="📊" title="No data" size="sm" /> : (
                 <div className="flex flex-col gap-2">
-                  {byType.map((wt,i)=>{const type=WORK_TYPES.find((t: any) =>t.v===wt.work_type);return(
+                  {byType.map((wt: any, i: any) =>{const type=WORK_TYPES.find((t: any) =>t.v===wt.work_type);return(
                     <div key={i} className="flex items-center gap-3 p-2.5 bg-surface-alt rounded-lg">
                       <span className="text-xl">{type?.icon||"🔧"}</span>
                       <div className="flex-1 text-sm text-primary">{type?.label||wt.work_type}</div>
@@ -175,7 +175,7 @@ export default function TimeTrackingPage() {
             <SectionCard title="Top Work Orders">
               {byWO.length===0 ? <EmptyState icon="🔧" title="No data" size="sm" /> : (
                 <div className="flex flex-col gap-2">
-                  {byWO.map((wo,i)=>(
+                  {byWO.map((wo: any, i: any) =>(
                     <div key={i} className="flex items-center gap-3 p-2.5 bg-surface-alt rounded-lg">
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-primary truncate">{wo.title||"—"}</div>
@@ -195,7 +195,7 @@ export default function TimeTrackingPage() {
           <SectionCard title="Technician Utilization">
             {byTech.filter((t: any) =>t.total_hours>0).length===0 ? <EmptyState icon="👷" title="No time entries yet" size="sm" /> : (
               <div className="flex flex-col gap-3">
-                {byTech.filter((t: any) =>t.total_hours>0).map((tech,i)=>{
+                {byTech.filter((t: any) =>t.total_hours>0).map((tech: any, i: any) =>{
                   const maxH = Math.max(...byTech.map((t: any) =>Number(t.total_hours||0)),1);
                   const pct = Math.min(100,(Number(tech.total_hours||0)/maxH)*100);
                   return (

@@ -53,7 +53,7 @@ export default function AnalyticsTrends() {
   const woTrendData = Object.values(woByMonth).sort((a: any, b: any) =>new Date(a.month).getTime()-new Date(b.month).getTime()).slice(-6);
 
   const invByMonth = {};
-  inv.forEach(i => {
+  inv.forEach((i: any) => {
     if (!i.created_at) return;
     const date = new Date(i.created_at);
     const key  = monthNames[date.getMonth()];

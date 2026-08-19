@@ -127,7 +127,7 @@ export default function ClientDashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recent.map((wo_item,i)=>{
+                  {recent.map((wo_item: any, i: any) =>{
                     const pc = PC[wo_item.priority]||"#94A3B8";
                     const sc = SC[wo_item.status]||"#94A3B8";
                     return (
@@ -154,7 +154,7 @@ export default function ClientDashboardPage() {
                 {icon:"🎫",title:"Report an Issue",desc:"Submit a new service request",path:"/client-portal/request",color:"#059669"},
                 {icon:"📋",title:"Pending Approvals",desc:"Review scope of work documents",path:"/client-portal/approvals",color:"#2563EB"},
                 {icon:"🏗️",title:"Our Projects",desc:"Track ongoing project progress",path:"/client-portal/projects",color:"#7C3AED"},
-              ].map((action,i)=>(
+              ].map((action: any, i: any) =>(
                 <button key={i} onClick={()=>router.push(action.path)}
                   className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all text-left">
                   <span className="text-3xl">{action.icon}</span>

@@ -61,7 +61,7 @@ export default function EngineeringFieldReportsPage() {
       )
     ).then(results => {
       const d: Record<string,any[]> = {};
-      SECTION_CONFIG.forEach((s, i) => {
+      SECTION_CONFIG.forEach((s: any, i: any) => {
         const items = Array.isArray(results[i]) ? results[i] : results[i]?.results || [];
         d[s.key] = items;
       });

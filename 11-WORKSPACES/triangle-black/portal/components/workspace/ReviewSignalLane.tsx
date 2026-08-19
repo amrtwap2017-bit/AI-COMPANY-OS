@@ -36,13 +36,13 @@ export function ReviewSignalLane({ title, subtitle, columns }: ReviewSignalLaneP
       </div>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-4">
-        {columns.map((column, index) => (
+        {columns.map((column: any, index: any) => (
           <div key={`${column.title}-${index}`} className="rounded-2xl border border-border bg-base-alt p-4">
             <div className="text-base font-semibold text-primary">{column.title}</div>
             <div className="mt-1 text-sm text-secondary">{column.subtitle}</div>
 
             <div className="mt-4 space-y-3">
-              {column.items.map((item, itemIndex) => (
+              {column.items.map((item: any, itemIndex: any) => (
                 <div key={`${item.label}-${itemIndex}`} className={"rounded-xl border p-3 " + toneClasses(item.tone)}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="text-sm font-medium text-primary">{item.label}</div>

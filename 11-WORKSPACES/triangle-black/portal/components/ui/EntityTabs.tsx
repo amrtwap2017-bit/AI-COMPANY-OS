@@ -10,7 +10,7 @@ export function EntityTabs({ tabs }: { tabs: Tab[] }) {
   return (
     <div className="bg-white rounded-2xl border border-border overflow-hidden">
       <nav className="flex overflow-x-auto border-b border-border scrollbar-none">
-        {tabs.map(tab => (
+        {tabs.map((tab: any) => (
           <button key={tab.id} onClick={() => setActive(tab.id)}
             className={"flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors " + (
               active === tab.id

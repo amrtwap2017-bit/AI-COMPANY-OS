@@ -32,9 +32,9 @@ export default function CustomersPage() {
         <div className="tb-section">
           <div className="tb-section-title">Client List</div>
           <div className="tb-grid-3">
-            {clients.slice(0,9).map((client,i)=>{
+            {clients.slice(0,9).map((client: any, i: any) =>{
               const clientContracts = contracts.filter((c: any) =>c.client_name===client&&c.status==="active");
-              const clientRevenue = inv.filter(inv_i=>inv_i.status==="paid").reduce((s,inv_i)=>s+Number(inv_i.total_amount||0),0);
+              const clientRevenue = inv.filter((inv_i: any) =>inv_i.status==="paid").reduce((s: any, inv_i: any) =>s+Number(inv_i.total_amount||0),0);
               return (
                 <button key={i} onClick={()=>router.push("/commercial/contracts")} className="tb-section text-left hover:border-brand transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-base-alt flex items-center justify-center text-sm font-black text-secondary mb-3">{client.charAt(0).toUpperCase()}</div>

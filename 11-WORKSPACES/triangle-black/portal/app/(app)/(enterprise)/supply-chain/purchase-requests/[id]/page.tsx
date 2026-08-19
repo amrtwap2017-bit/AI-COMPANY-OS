@@ -115,7 +115,7 @@ export default function PurchaseRequestDetailPage() {
                   { label:"Submitted",  date:pr.created_at,  done:true,                               color:"#5B7C8C" },
                   { label:"Approved",   date:pr.approved_at, done:pr.status==="approved"||pr.status==="ordered", color:"#547C4D" },
                   { label:"Ordered",    date:pr.ordered_at,  done:pr.status==="ordered",              color:"#8D7443" },
-                ].map((step, i) => (
+                ].map((step: any, i: any) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{
                       width:20, height:20, borderRadius:"50%", flexShrink:0,

@@ -76,7 +76,7 @@ export function DataTable<T extends Record<string, any>>({
             </tr>
           </thead>
           <tbody>
-            {loading && Array.from({ length: 6 }).map((_, i) => (
+            {loading && Array.from({ length: 6 }).map((_: any, i: any) => (
               <tr key={i} className={"border-b border-divider " + (i % 2 === 0 ? "bg-white" : "/40")}>
                 {columns.map((col: any) => (
                   <td key={col.key} className="px-4 py-3.5">

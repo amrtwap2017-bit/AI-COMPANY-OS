@@ -32,7 +32,7 @@ export default function EngineeringPMPlansPage() {
         <div className="tb-section">
           <div className="tb-flex-between mb-4"><div className="text-sm text-secondary">{pms.length} plans</div><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link">Full View →</button></div>
           <div className="space-y-2">
-            {pms.slice(0,8).map((pm,i)=>{
+            {pms.slice(0,8).map((pm: any, i: any) =>{
               const due = pm.next_due_ts?new Date(pm.next_due_ts):null;
               const isOverdue = due&&due<now;
               const daysUntil = due?Math.ceil((due-now)/86400000):null;

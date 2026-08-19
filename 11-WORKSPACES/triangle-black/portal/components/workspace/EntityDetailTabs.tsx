@@ -18,7 +18,7 @@ type EntityDetailTabsProps = {
 export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProps) {
   const [active, setActive] = useState(tabs[0]?.key || "");
 
-  const current = tabs.find((tab) => tab.key === active) || tabs[0];
+  const current = tabs.find((tab: any) => tab.key === active) || tabs[0];
 
   return (
     <section className="rounded-3xl border border-border bg-white p-6 shadow-sm">
@@ -28,7 +28,7 @@ export function EntityDetailTabs({ title, subtitle, tabs }: EntityDetailTabsProp
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        {tabs.map((tab) => {
+        {tabs.map((tab: any) => {
           const selected = tab.key === active;
           return (
             <button

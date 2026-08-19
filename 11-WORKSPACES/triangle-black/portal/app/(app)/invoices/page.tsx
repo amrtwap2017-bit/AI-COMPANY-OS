@@ -131,7 +131,7 @@ export default function InvoicesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((inv,i)=>{
+                  {filtered.map((inv: any, i: any) =>{
                     const isOv = inv.status==="overdue";
                     return (
                       <tr key={i} onClick={()=>router.push(`/invoices/${inv.id}`)} className="cursor-pointer">

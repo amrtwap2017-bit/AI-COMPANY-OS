@@ -131,7 +131,7 @@ export default function PurchaseRequestsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((pr,i)=>{
+                  {filtered.map((pr: any, i: any) =>{
                     const sc = (STATUS_COLOR as Record<string, any>)[pr.status]||"#6D5F53";
                     const uc = (URGENCY_COLOR as Record<string, any>)[pr.urgency]||"rgba(148,163,184,0.4)";
                     return (

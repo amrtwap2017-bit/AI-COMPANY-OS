@@ -98,7 +98,7 @@ export default function AssetQRGalleryPage() {
 
         ) : viewMode==="grid" ? (
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:16}}>
-            {filtered.map((asset,i)=>(
+            {filtered.map((asset: any, i: any) =>(
               <div key={asset.id||i} className="tb-section tb-hover-lift overflow-hidden p-0">
                 <div className="bg-white flex items-center justify-center relative" style={{minHeight:170,padding:16}}>
                   <img src={`/api/v1/qr/asset/${asset.id}?size=140`} alt={`QR for ${asset.name}`}
@@ -134,7 +134,7 @@ export default function AssetQRGalleryPage() {
               <table className="tb-table">
                 <thead><tr><th>QR</th><th>Asset</th><th>Category</th><th>Site</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {filtered.map((asset,i)=>(
+                  {filtered.map((asset: any, i: any) =>(
                     <tr key={asset.id||i}>
                       <td>
                         <img src={`/api/v1/qr/asset/${asset.id}?size=60`} alt="QR"

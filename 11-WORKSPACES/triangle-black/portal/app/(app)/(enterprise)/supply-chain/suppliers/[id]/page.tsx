@@ -119,7 +119,7 @@ export default function SupplierDetailPage() {
                       <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                     ))}
                   </div>
-                  {pos.map((po, i) => {
+                  {pos.map((po: any, i: any) => {
                     const pc = (PO_STATUS_COLOR as Record<string, any>)[po.status] || "#6D5F53";
                     return (
                       <button key={i}
@@ -146,7 +146,7 @@ export default function SupplierDetailPage() {
                   <button onClick={() => router.push("/supply-chain/purchase-requests")} className="tb-section-link">All →</button>
                 </div>
                 <div className="space-y-2 mt-3">
-                  {prs.map((pr, i) => {
+                  {prs.map((pr: any, i: any) => {
                     const sc = { pending:"#5B7C8C", approved:"#547C4D", rejected:"#A84A3D" }[pr.status] || "#6D5F53";
                     return (
                       <button key={i}

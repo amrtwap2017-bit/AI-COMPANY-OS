@@ -38,8 +38,8 @@ export default function StockBalancesPage() {
   const { data: rawItems }               = useQuery({queryKey:["inventory-items-list"],  queryFn:()=>authFetch("/api/v1/inventory-items-portal").then(r=>r.json()),        staleTime:300000});
   const { data: rawWarehouses }          = useQuery({queryKey:["warehouses-list"],        queryFn:()=>authFetch("/api/v1/warehouses-portal").then(r=>r.json()),             staleTime:300000});
 
-  const itemMap = useMemo(()=>{const m=new Map();toArr(rawItems).forEach(item=>m.set(item.id,item));return m;},[rawItems]);
-  const balances = useMemo(()=>toArr(rawBalances).map(sb=>{
+  const itemMap = useMemo(()=>{const m=new Map();toArr(rawItems).forEach((item: any) =>m.set(item.id,item));return m;},[rawItems]);
+  const balances = useMemo(()=>toArr(rawBalances).map((sb: any) =>{
     const item=itemMap.get(sb.item_id)||{};
     return {...sb,category:item.category||"—",unit:item.unit_of_measure||"unit",min_stock:item.min_stock||0,reorder_qty:item.reorder_qty||0,
       status:getStockStatus(Number(sb.qty_on_hand||0),Number(item.min_stock||0),Number(item.reorder_qty||0))};

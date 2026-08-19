@@ -32,7 +32,7 @@ export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelPr
       </div>
 
       <div className="mt-6 space-y-6">
-        {series.map((s, idx) => {
+        {series.map((s: any, idx: any) => {
           const max = maxOf(s.points);
           return (
             <div key={`${s.label}-${idx}`} className="rounded-2xl border border-divider bg-base-alt p-4">
@@ -42,7 +42,7 @@ export function TrendSeriesPanel({ title, subtitle, series }: TrendSeriesPanelPr
                 <div className="mt-3 text-sm text-secondary">No trend points available.</div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {s.points.map((point, pointIdx) => (
+                  {s.points.map((point: any, pointIdx: any) => (
                     <div key={`${point.month}-${pointIdx}`}>
                       <div className="mb-1 flex items-center justify-between text-xs text-secondary">
                         <span>{point.month}</span>

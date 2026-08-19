@@ -73,7 +73,7 @@ export default function EmployeesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3">
-          {filtered.map((emp) => (
+          {filtered.map((emp: any) => (
             <div key={emp.id} className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">

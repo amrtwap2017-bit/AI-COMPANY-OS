@@ -140,7 +140,7 @@ export default function PurchaseOrdersPage() {
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
-              {filtered.map((po, i) => {
+              {filtered.map((po: any, i: any) => {
                 const sc = (STATUS_COLOR as Record<string, any>)[po.status] || "#6D5F53";
                 const supp = supps.find((s: any) => s.id === po.supplier_id);
                 return (

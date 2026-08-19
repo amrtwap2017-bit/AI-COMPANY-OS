@@ -57,7 +57,7 @@ export default function SupplierRFQsPage() {
             <div className="text-4xl mb-3">📝</div><div className="text-white font-bold">No active RFQs</div>
             <div className="text-slate-400 text-sm mt-1">You will be notified when RFQs matching your category are sent</div>
           </div>
-        ) : rfqs.map((rfq,i)=>(
+        ) : rfqs.map((rfq: any, i: any) =>(
           <div key={i} className="rounded-2xl border p-6 mb-4" style={{background:"#1E293B",borderColor:rfq.is_selected?"#34D39940":"rgba(255,255,255,0.08)"}}>
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>

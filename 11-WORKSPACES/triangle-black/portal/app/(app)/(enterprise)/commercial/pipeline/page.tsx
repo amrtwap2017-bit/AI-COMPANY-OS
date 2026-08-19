@@ -32,7 +32,7 @@ export default function PipelinePage() {
         <div className="tb-section">
           <div className="tb-section-title">Pipeline Stages</div>
           <div className="grid grid-cols-2 xl:grid-cols-6 gap-3">
-            {STAGES.map((stage,i)=>{
+            {STAGES.map((stage: any, i: any) =>{
               const stageLeads = leads.filter((l: any) =>l.status===stage.key);
               const stageVal = stageLeads.reduce((s: any, l: any) =>s+Number(l.estimated_value||l.value||0),0);
               return (

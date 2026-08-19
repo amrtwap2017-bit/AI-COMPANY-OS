@@ -40,7 +40,7 @@ export default function SupplierPurchaseOrdersPage() {
           <div className="text-center py-16 rounded-2xl border" style={{background:"#1E293B",borderColor:"rgba(255,255,255,0.08)"}}>
             <div className="text-4xl mb-3">📦</div><div className="text-white font-bold">No Purchase Orders yet</div>
           </div>
-        ) : pos.map((po,i)=>{
+        ) : pos.map((po: any, i: any) =>{
           const sc=SC[po.status]||"#94A3B8";
           return (
             <div key={i} className="rounded-2xl border p-5 mb-3" style={{background:"#1E293B",borderColor:"rgba(255,255,255,0.08)"}}>

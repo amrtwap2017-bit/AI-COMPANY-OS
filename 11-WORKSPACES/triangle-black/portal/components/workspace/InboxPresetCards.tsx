@@ -25,7 +25,7 @@ export function InboxPresetCards({ title, subtitle, presets }: InboxPresetCardsP
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {presets.map((preset, index) => (
+        {presets.map((preset: any, index: any) => (
           <div key={`${preset.title}-${index}`} className="rounded-2xl border border-border bg-base-alt p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="text-base font-semibold text-primary">{preset.title}</div>

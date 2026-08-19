@@ -157,7 +157,7 @@ export default function BalanceSheetPage() {
           { label: "Liabilities+Equity", value: fmtEGP(data?.total_liabilities_equity || 0),     color: "text-purple-700", bg: "bg-purple-50" },
           { label: "Net Income",      value: fmtEGP(netIncome),                                  color: isProfit ? "text-green-700" : "text-red-700", bg: isProfit ? "bg-green-50" : "bg-red-50" },
           { label: "Total Accounts",  value: Object.values(summary).reduce((a:any,b:any)=>a+b,0), color: "text-gray-700",   bg: "bg-gray-50" },
-        ].map(kpi => (
+        ].map((kpi: any) => (
           <div key={kpi.label} className={`${kpi.bg} border border-gray-200 rounded-xl p-4`}>
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">{kpi.label}</p>
             <p className={`text-xl font-bold ${kpi.color}`}>{kpi.value}</p>

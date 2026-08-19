@@ -107,7 +107,7 @@ export default function NotificationsPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {notifications.map((notif,i)=>{
+              {notifications.map((notif: any, i: any) =>{
                 const cfg = (TYPE_CONFIG as Record<string, any>)[notif.type]||TYPE_CONFIG.info;
                 return (
                   <div key={i}

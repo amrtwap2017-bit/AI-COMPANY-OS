@@ -76,7 +76,7 @@ export default function PredictivePage() {
             <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-desc">No assets found</div></div>
           ) : (
             <div className="flex flex-col gap-2 mt-3">
-              {predictions.map((pred,i)=>{
+              {predictions.map((pred: any, i: any) =>{
                 const c = (RISK_COLOR as Record<string, any>)[pred.risk_label]||"#6D5F53";
                 return (
                   <button key={i} onClick={()=>router.push("/maintenance/assets/"+pred.asset_id)}
@@ -124,7 +124,7 @@ export default function PredictivePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {patternList.slice(0,8).map((pat,i)=>{
+                  {patternList.slice(0,8).map((pat: any, i: any) =>{
                     const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[pat.priority]||"#6D5F53";
                     return (
                       <tr key={i}>

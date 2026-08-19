@@ -159,7 +159,7 @@ export default function WarrantyTrackingPage() {
           <tbody className="divide-y divide-gray-100">
             {filtered.length === 0 ? (
               <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No assets found</td></tr>
-            ) : filtered.map(asset => {
+            ) : filtered.map((asset: any) => {
               const ws = getWarrantyStatus(asset.warranty_expiry);
               const days = daysUntilExpiry(asset.warranty_expiry);
               return (

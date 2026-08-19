@@ -117,7 +117,7 @@ export default function WorkspacePage() {
               <div className="text-label-upper text-brand mb-1">Today's Workflow</div>
               <div className="font-bold text-primary mb-4">Recommended Order</div>
               <div className="tb-steps mb-0">
-                {config.workflow.map((step,i) => (
+                {config.workflow.map((step: any, i: any) => (
                   <button key={i} onClick={() => router.push(step.path)}
                     className="tb-action-item" style={{flex:1}}>
                     <div className="tb-step-num">{step.step}</div>
@@ -134,7 +134,7 @@ export default function WorkspacePage() {
                   <div className="font-bold text-primary">Recent Work Orders</div>
                   <button onClick={() => router.push("/operations/work-orders")} className="text-xs font-semibold text-brand bg-transparent border-0 cursor-pointer">View all →</button>
                 </div>
-                {recentWOs.map((wo,i) => (
+                {recentWOs.map((wo: any, i: any) => (
                   <button key={i} onClick={() => router.push("/operations/work-orders/"+wo.id)}
                     className="flex items-center gap-3 py-2.5 border-b border-divider w-full text-left bg-transparent cursor-pointer">
                     <div className="w-1 h-8 rounded-full flex-shrink-0" style={{background:wo.priority==="critical"?"var(--color-danger)":wo.priority==="high"?"var(--color-warning)":"var(--color-text-3)"}} />

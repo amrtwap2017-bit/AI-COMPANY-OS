@@ -41,7 +41,7 @@ export default function ScorecardPage() {
       </div>
       <div className="tb-canvas">
         <div className="tb-grid-3">
-          {kpis.map((kpi,i)=>{
+          {kpis.map((kpi: any, i: any) =>{
             const isGood = kpi.label==="Critical WOs Open" ? kpi.value===0 : kpi.value>=kpi.target;
             const c = isGood ? kpi.color : "#A84A3D";
             return (

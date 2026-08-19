@@ -64,7 +64,7 @@ export default function RFQDetailPage() {
       </div>
       <div className="tb-canvas">
         <div className="flex gap-2 mb-4">
-          {["items","comparison","details"].map(tab=>(
+          {["items","comparison","details"].map((tab: any) =>(
             <button key={tab} onClick={()=>setActiveTab(tab)} className={"tb-pill "+(activeTab===tab?"tb-pill--active":"")}>
               {tab==="items"?"RFQ Items":tab==="comparison"?"Bid Comparison":"Details"}
             </button>

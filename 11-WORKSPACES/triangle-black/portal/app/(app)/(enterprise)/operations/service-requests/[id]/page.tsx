@@ -182,7 +182,7 @@ export default function ServiceRequestDetailPage() {
                   { label:"Submitted",   date:sr.created_at,  done:true,                           color:"#5B7C8C" },
                   { label:"In Progress", date:sr.updated_at,  done:sr.status==="in_progress"||sr.status==="resolved"||sr.status==="closed", color:"#B07A2A" },
                   { label:"Resolved",    date:sr.resolved_at, done:sr.status==="resolved"||sr.status==="closed", color:"#547C4D" },
-                ].map((step, i) => (
+                ].map((step: any, i: any) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{
                       width:20, height:20, borderRadius:"50%", flexShrink:0,

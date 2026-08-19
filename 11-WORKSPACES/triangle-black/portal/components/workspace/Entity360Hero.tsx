@@ -22,7 +22,7 @@ export function Entity360Hero({ eyebrow, title, subtitle, badges }: Entity360Her
         </p>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          {badges.map((badge) => (
+          {badges.map((badge: any) => (
             <span
               key={badge}
               className="rounded-full border border-border bg-base-alt px-3 py-2 text-xs font-medium text-primary"

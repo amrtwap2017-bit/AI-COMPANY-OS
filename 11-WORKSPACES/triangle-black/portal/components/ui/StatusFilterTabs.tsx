@@ -18,7 +18,7 @@ interface StatusFilterTabsProps {
 export function StatusFilterTabs({ tabs, active, onChange, className = "" }: StatusFilterTabsProps) {
   return (
     <div className={"flex items-center gap-1 flex-wrap " + className} role="tablist">
-      {tabs.map(tab => (
+      {tabs.map((tab: any) => (
         <button
           key={tab.value}
           role="tab"

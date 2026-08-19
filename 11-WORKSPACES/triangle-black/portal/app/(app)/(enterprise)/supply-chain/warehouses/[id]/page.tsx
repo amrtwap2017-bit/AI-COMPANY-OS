@@ -67,7 +67,7 @@ export default function WarehouseDetailPage() {
             <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Stock Items ({whStocks.length})</div><button onClick={()=>router.push("/supply-chain/inventory")} className="tb-section-link">Inventory →</button></div>
             <div className="space-y-2 mt-3">
               {whStocks.slice(0,10).map((s: any, i: number) =>{
-                const item=items.find(it=>it.id===s.item_id);
+                const item=items.find((it: any) =>it.id===s.item_id);
                 const qty=Number(s.qty_on_hand||s.qty||0);
                 const min=Number(item?.minimum_quantity||item?.min_quantity||5);
                 const isLow=qty<=min;

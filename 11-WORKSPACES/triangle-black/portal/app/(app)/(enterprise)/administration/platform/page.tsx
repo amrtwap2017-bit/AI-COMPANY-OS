@@ -109,7 +109,7 @@ export default function PlatformHealthPage() {
         <div className="tb-section mb-4">
           <div className="tb-section-title">12 Hardening Programs</div>
           <div className="tb-grid-4 mt-2">
-            {PROGRAM_STATUS.map((prog)=>{
+            {PROGRAM_STATUS.map((prog: any) =>{
               const meta = (STATUS_META as Record<string, any>)[prog.status]||STATUS_META.pending;
               return (
                 <div key={prog.key} className="p-3 bg-surface-alt rounded-lg border border-default">

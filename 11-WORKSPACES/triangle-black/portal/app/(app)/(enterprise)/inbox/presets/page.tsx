@@ -34,7 +34,7 @@ export default function InboxPresetsPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Filter Presets</div>
           <div className="tb-grid-3">
-            {presets.map((preset,i)=>{
+            {presets.map((preset: any, i: any) =>{
               const count = notifs.filter((n: any) =>(n.type||"").includes(preset.filter)).length;
               const unread= notifs.filter((n: any) =>(n.type||"").includes(preset.filter)&&!n.is_read).length;
               return (

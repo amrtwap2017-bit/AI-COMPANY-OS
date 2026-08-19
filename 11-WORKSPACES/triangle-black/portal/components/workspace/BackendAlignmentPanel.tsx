@@ -38,7 +38,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-4">
           <div className="text-sm font-semibold text-primary">Current Feed Status</div>
-          {currentFeeds.map((feed, index) => (
+          {currentFeeds.map((feed: any, index: any) => (
             <div
               key={`${feed.label}-${index}`}
               className="rounded-2xl border border-divider bg-base-alt p-4"
@@ -77,7 +77,7 @@ export function BackendAlignmentPanel(props: BackendAlignmentPanelProps) {
 
         <div className="space-y-4">
           <div className="text-sm font-semibold text-primary">Target Endpoint Contract</div>
-          {targetEndpoints.map((endpoint, index) => (
+          {targetEndpoints.map((endpoint: any, index: any) => (
             <div
               key={`${endpoint.label}-${endpoint.route}-${index}`}
               className="rounded-2xl border border-divider bg-base-alt p-4"

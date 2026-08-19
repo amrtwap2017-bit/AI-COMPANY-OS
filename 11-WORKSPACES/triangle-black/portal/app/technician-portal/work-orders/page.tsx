@@ -39,7 +39,7 @@ export default function TechnicianWorkOrdersPage() {
       .finally(() => setLoading(false));
   }, [mounted]);
 
-  const filtered = workOrders.filter(wo => {
+  const filtered = workOrders.filter((wo: any) => {
     const matchFilter = filter === "all" || wo.status === filter;
     const matchSearch = !search || (wo.title || wo.description || "").toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;

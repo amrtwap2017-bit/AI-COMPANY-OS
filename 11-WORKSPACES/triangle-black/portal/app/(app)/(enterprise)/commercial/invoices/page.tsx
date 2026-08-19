@@ -56,7 +56,7 @@ export default function CommercialInvoicesPage() {
               <table className="tb-table">
                 <thead><tr><th>Invoice / Vendor</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Currency</th><th style={{textAlign:"right"}}>Amount</th><th style={{textAlign:"center"}}>Date</th></tr></thead>
                 <tbody>
-                  {filtered.map((inv,i)=>(
+                  {filtered.map((inv: any, i: any) =>(
                     <tr key={i} onClick={()=>router.push("/commercial/invoices/"+inv.id)} className="cursor-pointer">
                       <td>
                         <div className="font-semibold text-sm text-primary truncate">{inv.invoice_number||"—"}</div>

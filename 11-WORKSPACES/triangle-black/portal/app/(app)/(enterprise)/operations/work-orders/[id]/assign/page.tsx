@@ -122,7 +122,7 @@ export default function WorkOrderAssignPage() {
           <p className="text-gray-400 text-sm">No technicians available</p>
         ) : (
           <div className="space-y-2 max-h-72 overflow-y-auto">
-            {technicians.map(tech => (
+            {technicians.map((tech: any) => (
               <button
                 key={tech.id}
                 onClick={() => setSelectedTech(tech.id)}

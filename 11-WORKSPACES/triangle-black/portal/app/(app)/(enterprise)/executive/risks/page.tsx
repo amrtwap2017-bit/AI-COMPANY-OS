@@ -47,7 +47,7 @@ export default function RisksPage() {
         <div className="tb-section">
           <div className="tb-section-title">Risk Breakdown</div>
           <div className="space-y-3">
-            {risks.map((risk,i)=>{
+            {risks.map((risk: any, i: any) =>{
               const score = risk.value * risk.weight;
               const pct   = Math.min((score/Math.max(riskScore,1))*100,100);
               return (

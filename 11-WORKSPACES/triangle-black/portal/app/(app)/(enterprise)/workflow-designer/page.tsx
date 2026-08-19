@@ -35,7 +35,7 @@ export default function WorkflowDesignerPage() {
         <div className="tb-section">
           <div className="tb-section-title">Workflow Rules</div>
           <div className="tb-grid-3">
-            {workflows.map((wf,i)=>(
+            {workflows.map((wf: any, i: any) =>(
               <div key={i} className="tb-section">
                 <div className="text-lg mb-2">{wf.icon}</div>
                 <div className="text-sm font-bold text-primary mb-1">{wf.label}</div>

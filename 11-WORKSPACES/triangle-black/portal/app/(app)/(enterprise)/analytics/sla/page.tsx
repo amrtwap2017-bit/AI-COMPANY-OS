@@ -25,7 +25,7 @@ export default function AnalyticsSLA() {
   const now = new Date();
   const slaTargets = {critical:4,high:8,medium:24,low:72};
 
-  const slaData = ["critical","high","medium","low"].map(priority=>{
+  const slaData = ["critical","high","medium","low"].map((priority: any) =>{
     const group = wos.filter((w: any) =>w.priority===priority);
     const completed = group.filter((w: any) =>w.status==="completed");
     const breached = group.filter((w: any) =>w.due_date&&new Date(w.due_date)<now&&w.status!=="completed");

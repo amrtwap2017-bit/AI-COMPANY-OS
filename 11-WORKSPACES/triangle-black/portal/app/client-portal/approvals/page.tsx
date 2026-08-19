@@ -42,7 +42,7 @@ export default function ClientApprovalsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {sows.map((sow,i)=>{
+            {sows.map((sow: any, i: any) =>{
               const isPending = sow.status === "pending_approval";
               return (
                 <div key={i} className="bg-white rounded-2xl border p-6"

@@ -82,7 +82,7 @@ export default function SpendAnalyticsPage() {
               <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
                   <Pie data={spendBreakdown} cx="50%" cy="45%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-                    {spendBreakdown.map((_,i)=><Cell key={i} fill={COLORS[i%COLORS.length]} />)}
+                    {spendBreakdown.map((_: any, i: any) =><Cell key={i} fill={COLORS[i%COLORS.length]} />)}
                   </Pie>
                   <Tooltip content={<WarmTooltip />} />
                 </PieChart>

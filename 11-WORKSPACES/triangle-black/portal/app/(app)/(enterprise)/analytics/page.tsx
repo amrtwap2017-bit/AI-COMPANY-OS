@@ -109,7 +109,7 @@ function AnalyticsHubInner() {
                 <button onClick={()=>router.push(group.path)} className="tb-section-link">View →</button>
               </div>
               <div className="tb-grid-2">
-                {group.kpis.map((kpi,ki)=>{
+                {group.kpis.map((kpi: any, ki: any) =>{
                   const isGood = kpi.target===null?true:kpi.target===0?Number(kpi.value)===0:Number(kpi.value)>=kpi.target;
                   const kColor = kpi.target!==null?(isGood?"#547C4D":"#A84A3D"):"var(--color-text-1)";
                   return (

@@ -52,7 +52,7 @@ function CenterAccordion({ center, pathname, collapsed }: { center: NavCenter; p
   const [open, setOpen] = useState(pathname.startsWith(center.href));
   const Icon = (ICONS as Record<string, any>)[center.key] || LayoutDashboard;
   const anyActive = pathname === center.href || pathname.startsWith(center.href + "/");
-  const childActive = center.children?.some(c => pathname === c.href || pathname.startsWith(c.href + "/")) ?? false;
+  const childActive = center.children?.some((c: any) => pathname === c.href || pathname.startsWith(c.href + "/")) ?? false;
 
   useEffect(() => {
     if (childActive) setOpen(true);
@@ -268,7 +268,7 @@ export function EnterpriseSidebar() {
                 </div>
               )}
               <div className="space-y-0.5">
-                {centers.map(center => (
+                {centers.map((center: any) => (
                   <CenterAccordion key={center.key} center={center} pathname={pathname} collapsed={collapsed} />
                 ))}
               </div>
@@ -285,7 +285,7 @@ export function EnterpriseSidebar() {
               </span>
             </div>
             <div className="space-y-0.5">
-              {recentPaths.map((href, i) => (
+              {recentPaths.map((href: any, i: any) => (
                 <Link key={i} href={href}
                   className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all hover:bg-white/5"
                   style={{color:"#8C7A69"}}>

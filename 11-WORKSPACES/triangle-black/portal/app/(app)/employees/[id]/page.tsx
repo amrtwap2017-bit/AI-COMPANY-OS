@@ -251,7 +251,7 @@ export default function EmployeeDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {timesheets.map(ts => (
+                  {timesheets.map((ts: any) => (
                     <tr key={ts.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium">{fmtDate(ts.work_date)}</td>
                       <td className="px-4 py-3 capitalize">{ts.work_type?.replace("_"," ")}</td>

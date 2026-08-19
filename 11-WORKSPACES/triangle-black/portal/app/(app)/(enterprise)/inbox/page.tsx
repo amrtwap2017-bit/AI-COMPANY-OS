@@ -174,7 +174,7 @@ export default function InboxPage() {
               </div>
             ) : (
               <div className="space-y-2 mt-3">
-                {activities.map((act, i) => (
+                {activities.map((act: any, i: any) => (
                   <button key={i} onClick={() => act.path && router.push(act.path)}
                     className="w-full flex items-center gap-3 text-left p-2 rounded-xl hover:bg-base-alt transition-colors">
                     <div style={{width:32,height:32,borderRadius:8,flexShrink:0,

@@ -84,7 +84,7 @@ export default function InvoicesPage() {
                   <div key={i} className="tb-table-head-cell" style={{textAlign:i>0?"center":"left"}}>{h}</div>
                 ))}
               </div>
-              {invoices.map((inv,i)=>{
+              {invoices.map((inv: any, i: any) =>{
                 const sc=SC[inv.status]||"#6D5F53";
                 const mc=MC[inv.match_result]||"#6D5F53";
                 const overdue = inv.due_date && new Date(inv.due_date) < new Date() && inv.payment_status !== "paid";

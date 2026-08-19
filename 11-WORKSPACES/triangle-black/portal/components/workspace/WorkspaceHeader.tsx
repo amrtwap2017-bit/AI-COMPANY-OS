@@ -221,7 +221,7 @@ export function WorkspaceHeader({
             gap:                 8,
             marginTop:           16,
           }}>
-            {kpis.map((kpi, i) => {
+            {kpis.map((kpi: any, i: any) => {
               const c = KPI_COLOR[kpi.color || "default"];
               return (
                 <div key={i} style={{
@@ -317,7 +317,7 @@ export function WorkspaceHeader({
             paddingTop: 12,
             flexWrap:   "wrap",
           }}>
-            {tabs.map((tab, i) => (
+            {tabs.map((tab: any, i: any) => (
               <button key={i} onClick={() => router.push(tab.href)}
                 style={{
                   padding:      "5px 12px",

@@ -65,7 +65,7 @@ export default function ExceptionsPage() {
                 <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All WOs →</button>
               </div>
               <div className="flex flex-col gap-2">
-                {criticalWOs.slice(0,5).map((wo,i)=>(
+                {criticalWOs.slice(0,5).map((wo: any, i: any) =>(
                   <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-1 h-4 rounded-full flex-shrink-0 bg-danger"/>
@@ -85,7 +85,7 @@ export default function ExceptionsPage() {
                 <button onClick={()=>router.push("/analytics/sla")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">SLA →</button>
               </div>
               <div className="flex flex-col gap-2">
-                {overdueWOs.slice(0,5).map((wo,i)=>{
+                {overdueWOs.slice(0,5).map((wo: any, i: any) =>{
                   const days=Math.floor((now-new Date(wo.due_date))/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo.id)} className="tb-action-item w-full justify-between">
@@ -125,7 +125,7 @@ export default function ExceptionsPage() {
                 <button onClick={()=>router.push("/maintenance/pm-plans")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">PM Plans →</button>
               </div>
               <div className="flex flex-col gap-2">
-                {overduePMs.slice(0,5).map((pm,i)=>{
+                {overduePMs.slice(0,5).map((pm: any, i: any) =>{
                   const days=Math.floor((now-new Date(pm.next_due_ts))/86400000);
                   return (
                     <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">

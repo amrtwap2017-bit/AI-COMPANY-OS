@@ -55,7 +55,7 @@ export function PageHeader({
       {/* Breadcrumb */}
       {breadcrumb && breadcrumb.length > 0 && (
         <div className="flex items-center gap-1.5 mb-3 text-2xs text-tertiary">
-          {breadcrumb.map((crumb, i) => (
+          {breadcrumb.map((crumb: any, i: any) => (
             <span key={i} className="flex items-center gap-1.5">
               {i > 0 && <span className="text-tertiary">/</span>}
               <button

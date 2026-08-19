@@ -68,7 +68,7 @@ export default function AnalyticsScorecards() {
     {name:"Cancelled", value:inv.filter((i: any) =>i.status==="cancelled").length, fill:"var(--color-text-3)"},
   ].filter((d: any) =>d.value>0);
   const assetCategoryMap = {};
-  assets.forEach(a => { const cat=a.category||"Other"; assetCategoryMap[cat]=(assetCategoryMap[cat]||0)+1; });
+  assets.forEach((a: any) => { const cat=a.category||"Other"; assetCategoryMap[cat]=(assetCategoryMap[cat]||0)+1; });
   const assetCategoryData = Object.entries(assetCategoryMap).map(([name,value])=>({name,value})).sort((a: any, b: any) =>b.value-a.value).slice(0,6);
   const kpiData = [
     {name:"WO Completion",   value:compRate,    fill:"#547C4D"},
@@ -206,7 +206,7 @@ export default function AnalyticsScorecards() {
         </div>
 
         <div className="tb-grid-3 mb-6">
-          {kpiData.map((kpi,i)=>{
+          {kpiData.map((kpi: any, i: any) =>{
             const pct = Math.min(kpi.value,100);
             const isGood = pct>=80;
             return (

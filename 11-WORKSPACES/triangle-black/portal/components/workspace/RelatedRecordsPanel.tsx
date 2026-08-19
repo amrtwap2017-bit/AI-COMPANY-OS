@@ -57,7 +57,7 @@ export function RelatedRecordsPanel({ title, subtitle, groups }: RelatedRecordsP
 
                     {record.connections && record.connections.length > 0 ? (
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {record.connections.map((connection) => (
+                        {record.connections.map((connection: any) => (
                           <span
                             key={connection}
                             className="rounded-full border border-border bg-base-alt px-3 py-1 text-xs text-primary"

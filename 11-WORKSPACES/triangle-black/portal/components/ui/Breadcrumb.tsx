@@ -117,7 +117,7 @@ export function Breadcrumb({ className = "" }: { className?: string }) {
 
   // Build crumb list
   const crumbs = segments
-    .map((seg, i) => ({
+    .map((seg: any, i: any) => ({
       label: (LABELS as Record<string, any>)[seg] || seg.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
       href:  "/" + segments.slice(0, i + 1).join("/"),
       last:  i === segments.length - 1,
@@ -137,7 +137,7 @@ export function Breadcrumb({ className = "" }: { className?: string }) {
         <Home className="w-3 h-3" />
       </Link>
 
-      {crumbs.map((crumb, i) => (
+      {crumbs.map((crumb: any, i: any) => (
         <span key={i} className="flex items-center gap-1">
           <ChevronRight className="w-3 h-3 text-secondary" />
           {crumb.last ? (

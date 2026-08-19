@@ -32,7 +32,7 @@ export function EntityActionDock({ title, subtitle, actions }: EntityActionDockP
       </div>
 
       <div className="mt-5 space-y-3">
-        {actions.map((action) => (
+        {actions.map((action: any) => (
           <Link
             key={action.href + action.title}
             href={action.href}

@@ -118,7 +118,7 @@ export default function InvoiceMatchingPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paged.map((inv,i)=>(
+                    {paged.map((inv: any, i: any) =>(
                       <tr key={inv.id||i} onClick={()=>router.push(`/supply-chain/invoices/${inv.id}`)} className="cursor-pointer">
                         <td>
                           <div className="font-semibold text-sm text-primary">{inv.invoice_number||"—"}</div>

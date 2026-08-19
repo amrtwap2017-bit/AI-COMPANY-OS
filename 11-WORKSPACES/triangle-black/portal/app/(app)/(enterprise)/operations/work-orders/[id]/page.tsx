@@ -196,7 +196,7 @@ export default function WorkOrderDetailPage() {
                   { label:"Created",   date:wo.created_at,  done:true,        color:"#5B7C8C" },
                   { label:"Started",   date:wo.started_at,  done:!!wo.started_at,   color:"#B07A2A" },
                   { label:"Completed", date:wo.completed_at,done:wo.status==="completed", color:"#547C4D" },
-                ].map((step, i) => (
+                ].map((step: any, i: any) => (
                   <div key={i} className="flex items-center gap-3">
                     <div style={{
                       width:20, height:20, borderRadius:"50%", flexShrink:0,

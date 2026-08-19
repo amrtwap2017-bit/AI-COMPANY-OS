@@ -130,7 +130,7 @@ export default function ProjectDetailPage() {
                   <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All →</button>
                 </div>
                 <div className="space-y-2 mt-3">
-                  {wos.map((wo, i) => {
+                  {wos.map((wo: any, i: any) => {
                     const pc = { critical:"#A84A3D", high:"#B07A2A", medium:"#B07A2A", low:"#6D5F53" }[wo.priority] || "#6D5F53";
                     const sc2 = { open:"#5B7C8C", in_progress:"#B07A2A", completed:"#547C4D" }[wo.status] || "#6D5F53";
                     return (

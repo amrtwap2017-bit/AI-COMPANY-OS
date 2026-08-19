@@ -14,7 +14,7 @@ export default function AllModulesPage() {
       const centers = group.items
         .map((key: any) => enterpriseCenters.find((c: any) => c.key === key))
         .filter(Boolean)
-        .map(center => {
+        .map((center: any) => {
           const children = (center.children || []).filter((child: any) =>
             !q ||
             center.label.toLowerCase().includes(q) ||
@@ -53,7 +53,7 @@ export default function AllModulesPage() {
             <div key={group.label} className="tb-section">
               <div className="text-label-upper text-brand mb-3">{group.label}</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
-                {group.centers.map((center, i) => (
+                {group.centers.map((center: any, i: any) => (
                   <div key={center.key} className="rounded-xl p-4 bg-surface-alt border border-default">
                     <button
                       onClick={()=>router.push(center.href)}

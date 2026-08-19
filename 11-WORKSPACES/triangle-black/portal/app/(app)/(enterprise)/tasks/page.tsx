@@ -46,7 +46,7 @@ export default function TasksPage() {
           {isLoading ? <div className="space-y-3">{[1,2,3,4].map((i: any) =><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : filtered.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">No tasks</div></div>
           : <div className="space-y-2">
-            {filtered.map((sr,i)=>{
+            {filtered.map((sr: any, i: any) =>{
               const pc=PC[sr.priority]||"#6D5F53"; const sc=SC[sr.status]||"#6D5F53";
               const wo=wos.find((w: any) =>w.id===sr.work_order_id);
               return (

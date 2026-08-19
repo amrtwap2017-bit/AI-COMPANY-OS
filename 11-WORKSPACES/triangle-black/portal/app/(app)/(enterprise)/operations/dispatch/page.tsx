@@ -183,7 +183,7 @@ export default function DispatchBoardPage() {
                         <div className="tb-empty-desc">No {cfg.label.toLowerCase()} work orders</div>
                       </div>
                     ) : (
-                      wos.map(wo=>(
+                      wos.map((wo: any) =>(
                         <WOCard key={wo.id} wo={wo} techs={techs}
                           onAssign={(wo_id,tech_id)=>assignMut.mutate({wo_id,tech_id})}
                           onStatus={(wo_id,status)=>statusMut.mutate({wo_id,status})}

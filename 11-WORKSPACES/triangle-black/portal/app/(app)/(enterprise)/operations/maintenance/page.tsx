@@ -63,7 +63,7 @@ export default function MaintenanceSchedulerPage() {
           {genResult && (
             <div className={`tb-alert ${genResult.error?"tb-alert-danger":"tb-alert-success"} mb-4`}>
               <div className="font-bold text-sm">{genResult.error?`❌ Error: ${genResult.error}`:`✅ ${genResult.message}`}</div>
-              {genResult.work_orders?.length>0&&<div className="text-xs opacity-70 mt-0.5">{genResult.work_orders.map(wo=>`${wo.asset} → ${wo.technician}`).join(" · ")}</div>}
+              {genResult.work_orders?.length>0&&<div className="text-xs opacity-70 mt-0.5">{genResult.work_orders.map((wo: any) =>`${wo.asset} → ${wo.technician}`).join(" · ")}</div>}
             </div>
           )}
 
@@ -81,7 +81,7 @@ export default function MaintenanceSchedulerPage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs mb-4">
-          {[{k:"schedule",l:"📋 Maintenance Schedule"},{k:"calendar",l:"📅 30-Day Calendar"}].map(tab=>(
+          {[{k:"schedule",l:"📋 Maintenance Schedule"},{k:"calendar",l:"📅 30-Day Calendar"}].map((tab: any) =>(
             <button key={tab.k} onClick={()=>setActiveTab(tab.k)} className={`tb-tab ${activeTab===tab.k?"active":""}`}>{tab.l}</button>
           ))}
         </div>
@@ -127,7 +127,7 @@ export default function MaintenanceSchedulerPage() {
               <div className="tb-empty"><div className="tb-empty-icon">✅</div><div className="tb-empty-title">All clear!</div><div className="tb-empty-desc">No assets match this filter</div></div>
             ) : (
               <div className="flex flex-col gap-2">
-                {filtered.map((asset,i)=>{
+                {filtered.map((asset: any, i: any) =>{
                   const cfg = (STATUS_CONFIG as Record<string, any>)[asset.schedule_status]||STATUS_CONFIG.scheduled;
                   const cc = (CRIT_COLORS as Record<string, any>)[asset.criticality]||"var(--color-text-3)";
                   const hasRecentWO = (asset.recent_wo_count||0)>0;

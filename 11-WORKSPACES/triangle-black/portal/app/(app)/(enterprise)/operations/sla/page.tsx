@@ -53,7 +53,7 @@ export default function SLADashboardPage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs mb-4">
-          {[{k:"overview",l:"📊 Overview"},{k:"sites",l:"📍 By Site"},{k:"breaches",l:"🚨 Breaches"},{k:"targets",l:"⏱ SLA Targets"}].map(tab=>(
+          {[{k:"overview",l:"📊 Overview"},{k:"sites",l:"📍 By Site"},{k:"breaches",l:"🚨 Breaches"},{k:"targets",l:"⏱ SLA Targets"}].map((tab: any) =>(
             <button key={tab.k} onClick={()=>setActiveTab(tab.k)} className={`tb-tab ${activeTab===tab.k?"active":""}`}>{tab.l}</button>
           ))}
         </div>
@@ -64,7 +64,7 @@ export default function SLADashboardPage() {
               <div className="tb-section-title">SLA Compliance by Site</div>
               {isLoading ? <div className="flex flex-col gap-2">{[1,2,3,4].map((i: any) =><div key={i} className="tb-shimmer tb-shimmer-block" style={{height:80}} />)}</div> : (
                 <div className="tb-grid-2 mt-3">
-                  {siteSLA.map((site,i)=>{
+                  {siteSLA.map((site: any, i: any) =>{
                     const score = site.sla_score||0;
                     const grade = site.sla_grade||"D";
                     const gc = (GRADE_COLOR as Record<string, any>)[grade]||"var(--color-text-3)";
@@ -84,7 +84,7 @@ export default function SLADashboardPage() {
                           <div className="tb-progress-bar" style={{width:`${score}%`,background:gc}} />
                         </div>
                         <div className="tb-grid-3 text-center">
-                          {[{label:"Critical",value:site.critical||0,color:"var(--color-danger)"},{label:"Resolved",value:site.resolved||0,color:"var(--color-success)"},{label:"Rate",value:`${site.resolution_rate_pct||0}%`,color:"var(--color-info)"}].map((stat,si)=>(
+                          {[{label:"Critical",value:site.critical||0,color:"var(--color-danger)"},{label:"Resolved",value:site.resolved||0,color:"var(--color-success)"},{label:"Rate",value:`${site.resolution_rate_pct||0}%`,color:"var(--color-info)"}].map((stat: any, si: any) =>(
                             <div key={si} className="bg-base rounded-lg p-2">
                               <div className="text-sm font-black" style={{color:stat.color}}>{stat.value}</div>
                               <div className="text-xs text-tertiary">{stat.label}</div>
@@ -132,7 +132,7 @@ export default function SLADashboardPage() {
 
         {activeTab==="sites" && (
           <div className="flex flex-col gap-4">
-            {siteSLA.map((site,i)=>(
+            {siteSLA.map((site: any, i: any) =>(
               <div key={i} className="tb-section">
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -145,7 +145,7 @@ export default function SLADashboardPage() {
                   </div>
                 </div>
                 <div className="tb-grid-4">
-                  {[{label:"Open",value:site.open_count||0,color:"var(--color-info)"},{label:"In Progress",value:site.in_progress||0,color:"var(--color-warning)"},{label:"Resolved",value:site.resolved||0,color:"var(--color-success)"},{label:"Avg Resolution",value:site.avg_resolution_hours?`${Number(site.avg_resolution_hours).toFixed(1)}h`:"—"}].map((stat,si)=>(
+                  {[{label:"Open",value:site.open_count||0,color:"var(--color-info)"},{label:"In Progress",value:site.in_progress||0,color:"var(--color-warning)"},{label:"Resolved",value:site.resolved||0,color:"var(--color-success)"},{label:"Avg Resolution",value:site.avg_resolution_hours?`${Number(site.avg_resolution_hours).toFixed(1)}h`:"—"}].map((stat: any, si: any) =>(
                     <div key={si} className="p-3 bg-surface-alt rounded-xl text-center">
                       <div className="text-xl font-black" style={{color:stat.color||"var(--color-text-1)"}}>{stat.value}</div>
                       <div className="text-xs text-tertiary">{stat.label}</div>
@@ -186,7 +186,7 @@ export default function SLADashboardPage() {
           <div className="tb-section">
             <div className="tb-section-title">SLA Targets — Triangle Black Standard</div>
             <div className="flex flex-col gap-3 mt-4">
-              {[{priority:"critical",response:2,resolution:8,color:"var(--color-danger)",desc:"Safety / Guest impact"},{priority:"high",response:4,resolution:24,color:"var(--color-warning)",desc:"Operations affected"},{priority:"medium",response:8,resolution:48,color:"var(--color-warning)",desc:"Non-critical issue"},{priority:"low",response:24,resolution:72,color:"var(--color-success)",desc:"Planned / Cosmetic"}].map((tier,i)=>(
+              {[{priority:"critical",response:2,resolution:8,color:"var(--color-danger)",desc:"Safety / Guest impact"},{priority:"high",response:4,resolution:24,color:"var(--color-warning)",desc:"Operations affected"},{priority:"medium",response:8,resolution:48,color:"var(--color-warning)",desc:"Non-critical issue"},{priority:"low",response:24,resolution:72,color:"var(--color-success)",desc:"Planned / Cosmetic"}].map((tier: any, i: any) =>(
                 <div key={i} className="flex items-center gap-4 p-4 bg-surface-alt rounded-xl border border-default">
                   <span className="tb-badge flex-shrink-0" style={{background:`${tier.color}18`,color:tier.color,minWidth:"70px",textAlign:"center",fontSize:"9px"}}>{tier.priority.toUpperCase()}</span>
                   <div className="flex-1 text-sm text-secondary">{tier.desc}</div>

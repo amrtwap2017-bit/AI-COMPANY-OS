@@ -108,7 +108,7 @@ export default function POv2DetailPage() {
 
       <div className="tb-canvas">
         <div className="tb-tabs mb-4">
-          {["lines","grns","details","documents"].map(tab=>(
+          {["lines","grns","details","documents"].map((tab: any) =>(
             <button key={tab} onClick={()=>setActiveTab(tab)} className={`tb-tab ${activeTab===tab?"active":""}`}>
               {tab==="lines"?"Line Items":tab==="grns"?"GRN History":tab==="details"?"Details":"Documents"}
               {tab==="grns"&&grns.length>0&&<span className="ml-1 opacity-60">{grns.length}</span>}
@@ -162,7 +162,7 @@ export default function POv2DetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {lines.map((line,i)=>(
+                    {lines.map((line: any, i: any) =>(
                       <tr key={i}>
                         <td className="text-xs text-tertiary">{line.line_number||i+1}</td>
                         <td className="text-sm text-primary truncate" style={{maxWidth:"240px"}}>{line.description}</td>

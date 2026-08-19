@@ -136,7 +136,7 @@ export default function SOWCreatePage() {
                   <div className="text-center text-sm text-secondary">{item.quantity}</div>
                   <div className="text-center text-sm text-secondary">{Number(item.unit_rate||0).toLocaleString()}</div>
                   <div className="text-center text-sm font-bold text-emerald-400">{fmtEGP(Number(item.quantity||0)*Number(item.unit_rate||0))}</div>
-                  <button onClick={()=>setBoqItems(boqItems.filter((_,j)=>j!==i))} className="text-xs text-red-400 hover:text-red-300">✕</button>
+                  <button onClick={()=>setBoqItems(boqItems.filter((_: any, j: any) =>j!==i))} className="text-xs text-red-400 hover:text-red-300">✕</button>
                 </div>
               ))}
               <div className="tb-table-row" style={{gridTemplateColumns:"40px 1fr 70px 70px 100px 110px 40px",background:"rgba(255,255,255,0.03)"}}>

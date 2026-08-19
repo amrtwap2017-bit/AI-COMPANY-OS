@@ -118,7 +118,7 @@ export default function AssetDetailPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {wos.map((wo,i)=>{
+                      {wos.map((wo: any, i: any) =>{
                         const pc  = (PRIORITY_COLOR as Record<string, any>)[wo.priority]  || "#6D5F53";
                         const wsc = (WO_STATUS_COLOR as Record<string, any>)[wo.status]   || "#6D5F53";
                         return (
@@ -152,7 +152,7 @@ export default function AssetDetailPage() {
                   <button onClick={()=>router.push("/maintenance/pm-plans")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All →</button>
                 </div>
                 <div className="flex flex-col gap-2 mt-3">
-                  {pms.map((pm,i)=>{
+                  {pms.map((pm: any, i: any) =>{
                     const now = new Date();
                     const due = pm.next_due_ts ? new Date(pm.next_due_ts) : null;
                     const isOvd = due && due < now;

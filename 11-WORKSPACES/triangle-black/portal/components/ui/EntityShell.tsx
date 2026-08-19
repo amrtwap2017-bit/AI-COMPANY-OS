@@ -72,7 +72,7 @@ export function EntityShell({
                 Refresh
               </Button>
             )}
-            {actions.map(action => (
+            {actions.map((action: any) => (
               <Button key={action.label} variant={action.variant || "secondary"} size="sm" onClick={action.onClick}>
                 {action.label}
               </Button>
@@ -97,7 +97,7 @@ export function EntityShell({
 
         {/* Tab bar */}
         <div className="flex items-center gap-0 -mb-px">
-          {tabs.map(tab => (
+          {tabs.map((tab: any) => (
             <button key={tab.key} onClick={() => onTabChange(tab.key)}
               className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key

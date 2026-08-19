@@ -190,7 +190,7 @@ export default function ProcurementHub() {
               "Goods Receipt",
               "→",
               "Invoice",
-            ].map((step, i) => (
+            ].map((step: any, i: any) => (
               <span
                 key={i}
                 className={step === "→" ? "text-tertiary text-lg" : "tb-badge"}

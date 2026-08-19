@@ -109,7 +109,7 @@ export default function ExecutiveDashboardPage() {
                   <span className="tb-badge tb-badge-danger" style={{fontSize:"9px"}}>{(ops.critical_work_orders||[]).length} ACTIVE</span>
                 </div>
                 <div className="flex flex-col gap-2">
-                  {(ops.critical_work_orders||[]).map((wo_item,i)=>(
+                  {(ops.critical_work_orders||[]).map((wo_item: any, i: any) =>(
                     <button key={i} onClick={()=>router.push("/operations/work-orders/"+wo_item.id)}
                       className="tb-action-item">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:"var(--color-danger)"}} />
@@ -136,7 +136,7 @@ export default function ExecutiveDashboardPage() {
                 <div className="tb-empty" style={{padding:"16px"}}><div className="tb-empty-title">No open service requests</div></div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {(ops.recent_service_requests||[]).map((sr_item,i)=>(
+                  {(ops.recent_service_requests||[]).map((sr_item: any, i: any) =>(
                     <button key={i} onClick={()=>router.push("/operations/service-requests/"+sr_item.id)} className="tb-action-item">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:sr_item.urgency==="critical"?"var(--color-danger)":sr_item.urgency==="high"?"var(--color-warning)":"var(--color-info)"}} />
                       <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ export default function ExecutiveDashboardPage() {
               <div className="tb-section">
                 <div className="tb-section-title">Pending Payment</div>
                 <div className="flex flex-col gap-2">
-                  {(fin.outstanding_invoices||[]).map((inv_item,i)=>{
+                  {(fin.outstanding_invoices||[]).map((inv_item: any, i: any) =>{
                     const overdue = inv_item.due_date&&new Date(inv_item.due_date)<new Date();
                     return (
                       <button key={i} onClick={()=>router.push("/supply-chain/invoices/"+inv_item.id)} className="tb-action-item">
@@ -204,7 +204,7 @@ export default function ExecutiveDashboardPage() {
               <button onClick={()=>router.push("/operations/sla")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">SLA Dashboard →</button>
             </div>
             <div className="flex flex-col gap-2">
-              {siteSla.map((site,i)=>{
+              {siteSla.map((site: any, i: any) =>{
                 const gc = site.sla_grade==="A"?"var(--color-success)":site.sla_grade==="B"?"var(--color-info)":site.sla_grade==="C"?"var(--color-warning)":"var(--color-danger)";
                 return (
                   <div key={i} className="flex items-center gap-3 p-3 bg-surface-alt rounded-lg">
@@ -245,7 +245,7 @@ export default function ExecutiveDashboardPage() {
             </div>
             <div className="text-xs text-tertiary mb-2 font-semibold">Top Technicians</div>
             <div className="flex flex-col gap-1.5">
-              {topTechs.map((tech,i)=>(
+              {topTechs.map((tech: any, i: any) =>(
                 <div key={i} className="flex items-center gap-2 py-1.5">
                   <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-black flex-shrink-0 bg-surface-alt text-tertiary">{i+1}</div>
                   <div className="flex-1 min-w-0"><div className="text-xs text-primary truncate">{tech.name}</div></div>

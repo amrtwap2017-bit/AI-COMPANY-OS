@@ -119,7 +119,7 @@ export default function ServiceRequestsPage() {
                 <table className="tb-table">
                   <thead><tr><th>Request</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Requester</th><th style={{textAlign:"center"}}>Date</th><th style={{textAlign:"center"}}>Work Order</th></tr></thead>
                   <tbody>
-                    {paged.map((sr,i)=>{
+                    {paged.map((sr: any, i: any) =>{
                       const linkedWO = wos.find((w: any) =>w.id===sr.work_order_id);
                       return (
                         <tr key={i} onClick={()=>router.push(`/operations/service-requests/${sr.id}`)} className="cursor-pointer">
@@ -153,7 +153,7 @@ export default function ServiceRequestsPage() {
           <div className="tb-section">
             <div className="tb-section-title">By Status</div>
             <div className="flex flex-col gap-2">
-              {["open","in_progress","resolved","closed"].map((s: any) =>{const cnt=srs.filter(sr=>sr.status===s).length;const pct=srs.length>0?(cnt/srs.length)*100:0;return(<div key={s}><div className="flex justify-between mb-1"><span className="text-xs text-secondary capitalize">{s.replace("_"," ")}</span><span className="text-xs font-bold text-primary">{cnt}</span></div><div className="tb-progress"><div className="tb-progress-bar" style={{background:(STATUS_COLOR as Record<string, any>)[s],width:`${pct}%`}}/></div></div>);})}
+              {["open","in_progress","resolved","closed"].map((s: any) =>{const cnt=srs.filter((sr: any) =>sr.status===s).length;const pct=srs.length>0?(cnt/srs.length)*100:0;return(<div key={s}><div className="flex justify-between mb-1"><span className="text-xs text-secondary capitalize">{s.replace("_"," ")}</span><span className="text-xs font-bold text-primary">{cnt}</span></div><div className="tb-progress"><div className="tb-progress-bar" style={{background:(STATUS_COLOR as Record<string, any>)[s],width:`${pct}%`}}/></div></div>);})}
             </div>
           </div>
           <div className="tb-section">

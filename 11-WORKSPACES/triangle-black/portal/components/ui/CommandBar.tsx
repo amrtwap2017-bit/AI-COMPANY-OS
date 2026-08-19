@@ -236,7 +236,7 @@ export function CommandBar({ open: externalOpen, onClose }: CommandBarProps = {}
               <div style={{padding:"10px 20px 4px", fontSize:"0.625rem", fontWeight:700, color:"rgba(148,163,184,0.4)", textTransform:"uppercase", letterSpacing:"0.1em"}}>
                 Navigation
               </div>
-              {NAV_COMMANDS.map((cmd, i) => {
+              {NAV_COMMANDS.map((cmd: any, i: any) => {
                 const Icon      = cmd.icon;
                 const isSelected = i === selected;
                 const isCreate   = cmd.type === "create";

@@ -162,7 +162,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
         </div>
       ) : (
         <div className="space-y-2">
-          {docs.map((doc, i) => (
+          {docs.map((doc: any, i: any) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-base-alt border border-border hover:border-border/80 transition-colors">
               <span style={{fontSize:"1.25rem"}}>{(CAT_ICONS as Record<string, any>)[doc.doc_category]||"📎"}</span>
               <div className="flex-1 min-w-0">

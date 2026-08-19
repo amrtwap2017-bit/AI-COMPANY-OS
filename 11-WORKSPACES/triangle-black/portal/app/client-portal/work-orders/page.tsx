@@ -61,7 +61,7 @@ export default function ClientWorkOrdersPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map((wo,i)=>{
+            {filtered.map((wo: any, i: any) =>{
               const pc=PC[wo.priority]||"#94A3B8";
               const sc=SC[wo.status]||"#94A3B8";
               return (

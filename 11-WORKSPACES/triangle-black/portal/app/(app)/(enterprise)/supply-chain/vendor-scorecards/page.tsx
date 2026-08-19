@@ -89,7 +89,7 @@ export default function VendorScorecardPage() {
           { label: "Avg On-Time %",     value: fmtPct(avg("on_time_pct")),     icon: "🚚", color: "bg-green-50" },
           { label: "Avg Quality Score", value: fmtScore(avg("quality_score")), icon: "✅", color: "bg-purple-50" },
           { label: "Total Vendors",     value: scorecards.length,              icon: "🏢", color: "bg-gray-50" },
-        ].map(kpi => (
+        ].map((kpi: any) => (
           <div key={kpi.label} className={`${kpi.color} border border-gray-200 rounded-xl p-4`}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-lg">{kpi.icon}</span>

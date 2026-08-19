@@ -130,7 +130,7 @@ export default function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((lead) => (
+              {filtered.map((lead: any) => (
                 <tr
                   key={lead.id}
                   onClick={() => router.push(`/leads/${lead.id}`)}

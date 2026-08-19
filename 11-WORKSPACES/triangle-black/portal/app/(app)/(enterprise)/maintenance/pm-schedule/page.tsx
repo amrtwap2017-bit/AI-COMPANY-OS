@@ -69,7 +69,7 @@ export default function PMSchedulePage() {
   });
 
   // Sort each group by due date
-  groups.forEach(g => g.plans.sort((a: any, b: any) => new Date(a.next_due_ts||0).getTime() - new Date(b.next_due_ts||0).getTime()));
+  groups.forEach((g: any) => g.plans.sort((a: any, b: any) => new Date(a.next_due_ts||0).getTime() - new Date(b.next_due_ts||0).getTime()));
 
   const totalOverdue = plans.filter((p: any) => classify(p) === "overdue").length;
   const totalWeek    = plans.filter((p: any) => classify(p) === "week").length;
@@ -139,7 +139,7 @@ export default function PMSchedulePage() {
                 </div>
               ) : (
                 <div className="bg-white divide-y divide-gray-50">
-                  {group.plans.map(plan => (
+                  {group.plans.map((plan: any) => (
                     <div key={plan.id}
                       onClick={() => router.push(`/maintenance/pm-plans/${plan.id}`)}
                       className={`flex items-center justify-between px-5 py-3 hover:bg-gray-50 cursor-pointer ${(FREQ_COLOR as Record<string, any>)[plan.frequency] || "border-l-4 border-gray-300"}`}>

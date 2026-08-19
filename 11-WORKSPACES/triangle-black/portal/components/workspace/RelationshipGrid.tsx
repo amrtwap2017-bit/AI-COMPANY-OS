@@ -31,7 +31,7 @@ export function RelationshipGrid({ title, subtitle, items }: RelationshipGridPro
             <div className="mt-3 text-sm leading-6 text-secondary">{item.detail}</div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {item.links.map((link) => (
+              {item.links.map((link: any) => (
                 <span
                   key={link}
                   className="rounded-full border border-border bg-white px-3 py-1 text-xs text-primary"

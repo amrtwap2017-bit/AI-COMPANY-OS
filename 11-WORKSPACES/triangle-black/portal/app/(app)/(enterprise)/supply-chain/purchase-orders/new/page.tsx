@@ -41,9 +41,9 @@ export default function PurchaseOrderNewPage() {
   }, [mounted]);
 
   const addLine = () => setLines(l => [...l, { description:"", qty:1, unit_price:0, unit:"pcs" }]);
-  const removeLine = (i: number) => setLines(l => l.filter((_,idx) => idx !== i));
+  const removeLine = (i: number) => setLines(l => l.filter((_: any, idx: any) => idx !== i));
   const updateLine = (i: number, key: string, val: any) =>
-    setLines(l => l.map((ln,idx) => idx === i ? {...ln, [key]: val} : ln));
+    setLines(l => l.map((ln: any, idx: any) => idx === i ? {...ln, [key]: val} : ln));
 
   const subtotal  = lines.reduce((s: any, l: any) => s + (Number(l.qty)||0) * (Number(l.unit_price)||0), 0);
   const vat       = subtotal * (Number(form.vat_pct)||0) / 100;
@@ -145,7 +145,7 @@ export default function PurchaseOrderNewPage() {
               className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add Line</button>
           </div>
           <div className="space-y-3">
-            {lines.map((line, i) => (
+            {lines.map((line: any, i: any) => (
               <div key={i} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-5">
                   {i === 0 && <label className="block text-xs text-gray-500 mb-1">Description</label>}

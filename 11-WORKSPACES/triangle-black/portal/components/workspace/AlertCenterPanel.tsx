@@ -30,7 +30,7 @@ export function AlertCenterPanel({ title, subtitle, alerts }: AlertCenterPanelPr
         )}
       </div>
       <div className="space-y-2.5">
-        {alerts.map((alert, i) => {
+        {alerts.map((alert: any, i: any) => {
           const s = severityMap[alert.severity];
           const Icon = s.icon;
           return (

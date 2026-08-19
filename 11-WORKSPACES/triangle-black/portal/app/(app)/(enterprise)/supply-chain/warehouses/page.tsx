@@ -34,7 +34,7 @@ export default function WarehousesPage() {
           {isLoading ? <div className="space-y-3">{[1,2,3].map((i: any) =><div key={i} className="h-14 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : whs.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">🏗️</div><div className="tb-empty-title">No warehouses found</div></div>
           : <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            {whs.map((wh,i)=>{
+            {whs.map((wh: any, i: any) =>{
               const whStocks = stocks.filter((s: any) =>s.warehouse_id===wh.id);
               return (
                 <button key={i} onClick={()=>router.push("/supply-chain/warehouses/"+wh.id)} className="tb-section text-left hover:border-brand transition-colors">
