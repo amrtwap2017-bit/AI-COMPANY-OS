@@ -239,3 +239,53 @@ def project_twin_event(
                 "entity_type": entity_type, "entity_id": entity_id}
     except Exception as e:
         return {"ok": False, "hotel_id": hotel_id, "error": str(e)}
+
+
+# ── T-011: Digital Twin Projection Endpoints ──────────────────────────────────
+
+@router.post("/project/bootstrap")
+def bootstrap_twin_from_data(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Seed the Digital Twin graph from existing OLTP data."""
+    from src.commercial.digital_twin.projector import DigitalTwinProjector
+    projector = DigitalTwinProjector(db=db, hotel_id=hotel_id)
+    return projector.project_from_existing_data()
+
+
+@router.get("/asset/{asset_id}/impact")
+def get_asset_impact(
+    asset_id: str,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Return all twin entities connected to this asset."""
+    from src.commercial.digital_twin.projector import DigitalTwinProjector
+    projector = DigitalTwinProjector(db=db, hotel_id=hotel_id)
+    return projector.get_node_impact("asset", asset_id)
+
+
+@router.get("/work-order/{wo_id}/impact")
+def get_wo_impact(
+    wo_id: str,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Return all twin entities connected to this work order."""
+    from src.commercial.digital_twin.projector import DigitalTwinProjector
+    projector = DigitalTwinProjector(db=db, hotel_id=hotel_id)
+    return projector.get_node_impact("work_order", wo_id)
+
+
+@router.post("/project/event")
+def project_single_event(
+    event: dict,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Project a single domain event into the twin graph."""
+    from src.commercial.digital_twin.projector import DigitalTwinProjector
+    projector = DigitalTwinProjector(db=db, hotel_id=hotel_id)
+    projected = projector.project_event(event)
+    return {"projected": projected, "hotel_id": hotel_id}
