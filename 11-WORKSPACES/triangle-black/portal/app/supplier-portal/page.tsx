@@ -16,7 +16,7 @@ export default function LoginPage() {
     setLoading(true); setError("");
     try {
       const res = await fetch("/api/v1/supplier/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,pin})});
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.access_token) {
         if (typeof window!=="undefined") {
           localStorage.setItem("tb_supplier_token",data.access_token);

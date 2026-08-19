@@ -75,7 +75,7 @@ export default function GoodsReceiptNewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.grn_number) {
         toast.success(`GRN ${data.grn_number || "created"} successfully`);
         router.push(`/supply-chain/goods-receipts/${data.id || ""}`);

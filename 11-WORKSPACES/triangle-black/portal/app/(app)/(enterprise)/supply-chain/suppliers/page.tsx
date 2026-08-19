@@ -20,11 +20,11 @@ export default function SuppliersPage() {
 
   const { data: suppRaw, isLoading } = useQuery(
     ["supp-list"],
-    () => authFetch("/api/v1/suppliers/").then(r => r.json()),
+    () => authFetch("/api/v1/suppliers/").then(r => (r as any).data ?? r),
     { refetchInterval: 60000 }
   );
-  const { data: poRaw } = useQuery(["supp-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r => r.json()));
-  const { data: prRaw } = useQuery(["supp-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r => r.json()));
+  const { data: poRaw } = useQuery(["supp-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r => (r as any).data ?? r));
+  const { data: prRaw } = useQuery(["supp-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r => (r as any).data ?? r));
 
   const supps = toArr(suppRaw);
   const pos   = toArr(poRaw);

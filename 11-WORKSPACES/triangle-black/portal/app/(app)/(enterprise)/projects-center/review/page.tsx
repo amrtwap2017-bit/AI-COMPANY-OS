@@ -13,7 +13,7 @@ const fmtEGP = (n: any) => n?"EGP "+Number(n).toLocaleString():"—";
 
 export default function ProjectsReviewPage() {
   const router = useRouter();
-  const { data: raw, isLoading } = useQuery({queryKey:["proj-review"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r => r.json()),staleTime:60000});
+  const { data: raw, isLoading } = useQuery({queryKey:["proj-review"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r => (r as any).data ?? r),staleTime:60000});
   const projects = toArr(raw);
   const now = new Date();
   const needsReview = projects.filter((p: any) =>["active","in_progress","on_hold"].includes(p.status));

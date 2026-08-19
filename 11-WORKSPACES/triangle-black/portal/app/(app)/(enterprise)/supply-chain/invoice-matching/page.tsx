@@ -20,8 +20,8 @@ export default function InvoiceMatchingPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: dash, isLoading: loadingDash } = useQuery({ queryKey:["inv-dash"], queryFn:()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.json()), staleTime:60000 });
-  const { data: rawInv, isLoading: loadingInv } = useQuery({ queryKey:["inv-list-matching"], queryFn:()=>authFetch("/api/v1/supplier-invoices/").then(r => r.json()), staleTime:60000 });
+  const { data: dash, isLoading: loadingDash } = useQuery({ queryKey:["inv-dash"], queryFn:()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r => (r as any).data ?? r), staleTime:60000 });
+  const { data: rawInv, isLoading: loadingInv } = useQuery({ queryKey:["inv-list-matching"], queryFn:()=>authFetch("/api/v1/supplier-invoices/").then(r => (r as any).data ?? r), staleTime:60000 });
 
   const invoices = toArr(rawInv);
   const totals = dash?.totals||{};

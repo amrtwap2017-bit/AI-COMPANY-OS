@@ -8,7 +8,7 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function AdministrationPage() {
   const router = useRouter();
   const { is_admin, role } = useRole();
-  const { data: twin } = useQuery(["adm-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()));
+  const { data: twin } = useQuery(["adm-twin"], () => authFetch("/api/v1/twin/state").then(r => (r as any).data ?? r));
   const score = twin?.health_score||0;
   const modules = [
     {label:"Hotels / Sites",    icon:"🏨", path:"/administration/hotels",      desc:"Hotel and site configuration"},

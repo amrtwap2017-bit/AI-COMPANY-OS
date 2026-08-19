@@ -14,9 +14,9 @@ export default function InventoryPage() {
   const [filterCat,   setFilterCat]   = useState("all");
   const [filterStock, setFilterStock] = useState("all");
 
-  const { data: itemRaw, isLoading } = useQuery(["inv-items"],  ()=>authFetch("/api/v1/inventory-items-portal").then(r => r.json()),{refetchInterval:60000});
-  const { data: stockRaw }           = useQuery(["inv-stock"],  ()=>authFetch("/api/v1/stock-balances/").then(r => r.json()));
-  const { data: whRaw }              = useQuery(["inv-wh"],     ()=>authFetch("/api/v1/warehouses-portal").then(r => r.json()));
+  const { data: itemRaw, isLoading } = useQuery(["inv-items"],  ()=>authFetch("/api/v1/inventory-items-portal").then(r => (r as any).data ?? r),{refetchInterval:60000});
+  const { data: stockRaw }           = useQuery(["inv-stock"],  ()=>authFetch("/api/v1/stock-balances/").then(r => (r as any).data ?? r));
+  const { data: whRaw }              = useQuery(["inv-wh"],     ()=>authFetch("/api/v1/warehouses-portal").then(r => (r as any).data ?? r));
 
   const items  = toArr(itemRaw);
   const stocks = toArr(stockRaw);

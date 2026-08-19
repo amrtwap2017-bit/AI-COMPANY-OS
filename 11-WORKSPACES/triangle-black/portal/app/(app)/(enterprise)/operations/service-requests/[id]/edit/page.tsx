@@ -64,7 +64,7 @@ export default function ServiceRequestEditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.status || res.ok) {
         toast.success("Service request updated");
         router.push(`/operations/service-requests/${id}`);

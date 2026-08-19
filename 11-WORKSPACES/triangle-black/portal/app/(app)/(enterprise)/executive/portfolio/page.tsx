@@ -8,9 +8,9 @@ const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function PortfolioPage() {
   const router = useRouter();
-  const { data: contRaw } = useQuery(["pf-conts"], () => authFetch("/api/v1/contracts/").then(r => r.json()));
-  const { data: projRaw } = useQuery(["pf-projs"], () => authFetch("/api/v1/projects/").then(r => r.json()));
-  const { data: invRaw }  = useQuery(["pf-inv"],   () => authFetch("/api/v1/invoices/").then(r => r.json()));
+  const { data: contRaw } = useQuery(["pf-conts"], () => authFetch("/api/v1/contracts/").then(r => (r as any).data ?? r));
+  const { data: projRaw } = useQuery(["pf-projs"], () => authFetch("/api/v1/projects/").then(r => (r as any).data ?? r));
+  const { data: invRaw }  = useQuery(["pf-inv"],   () => authFetch("/api/v1/invoices/").then(r => (r as any).data ?? r));
   const contracts = toArr(contRaw); const projects = toArr(projRaw); const inv = toArr(invRaw);
   const activeContracts = contracts.filter((c: any) =>c.status==="active");
   const contractValue   = activeContracts.reduce((s: any, c: any) =>s+Number(c.total_value||c.value||0),0);

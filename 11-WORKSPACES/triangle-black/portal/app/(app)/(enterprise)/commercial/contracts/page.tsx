@@ -21,7 +21,7 @@ function ContractsPageInner() {
   const [statusF, setStatusF] = useState("all");
 
   const { data: raw, isLoading } = useQuery(
-    ["contracts-list"],()=>authFetch("/api/v1/contracts/").then(r => r.json()),{refetchInterval:120000}
+    ["contracts-list"],()=>authFetch("/api/v1/contracts/").then(r => (r as any).data ?? r),{refetchInterval:120000}
   );
   const contracts = toArr(raw);
   const now   = new Date();

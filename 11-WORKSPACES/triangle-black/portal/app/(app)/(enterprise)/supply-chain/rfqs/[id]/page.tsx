@@ -47,7 +47,7 @@ export default function RFQDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "closed" }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || res.ok) {
         toast.success("RFQ closed");
         setRfq((r: any) => ({ ...r, status: "closed" }));

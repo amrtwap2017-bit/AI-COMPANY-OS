@@ -18,7 +18,7 @@ export function EnterpriseTopbar() {
   const fetchSignals = useCallback(async () => {
     try {
       const res = await fetch("/api/v1/ai/signals/summary", { credentials: "include" });
-      if (res.ok) { const data = await res.json(); setSignalSummary(data); }
+      if (res.ok) { const data = res.data ?? res; setSignalSummary(data); }
     } catch {}
   }, []);
   useEffect(() => {
@@ -36,7 +36,7 @@ export function EnterpriseTopbar() {
   useEffect(() => {
     const token = tokenManager.getToken() || "";
     if (token) {
-      authFetch("/api/v1/platform-notif/?limit=5").then(r => r.json()).then((d: any) => {
+      authFetch("/api/v1/platform-notif/?limit=5").then(r => (r as any).data ?? r).then((d: any) => {
         setNotifBadge(d?.unread_count || 0);
         setRealNotifs((d?.notifications||[]).map((n:any)=>({
           id:n.id, type:n.type==="alert"?"error":n.type==="warning"?"warning":n.type==="success"?"success":"info",

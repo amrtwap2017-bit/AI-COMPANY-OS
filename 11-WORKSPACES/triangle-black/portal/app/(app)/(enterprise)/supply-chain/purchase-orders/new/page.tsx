@@ -66,7 +66,7 @@ export default function PurchaseOrderNewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.po_number) {
         toast.success(`PO ${data.po_number || data.id?.slice(0,8)} created`);
         router.push(`/supply-chain/purchase-orders/${data.id}`);

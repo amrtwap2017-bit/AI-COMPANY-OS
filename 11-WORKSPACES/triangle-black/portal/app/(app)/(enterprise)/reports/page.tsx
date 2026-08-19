@@ -41,7 +41,7 @@ export default function ReportsPage() {
 
   const { data: catalogData } = useQuery(
     ["reports-catalog"],
-    () => authFetch("/api/v1/report-engine/catalog").then(r => r.json()),
+    () => authFetch("/api/v1/report-engine/catalog").then(r => (r as any).data ?? r),
     { staleTime: 300000 }
   );
   const catalog = catalogData?.reports || [];
@@ -55,7 +55,7 @@ export default function ReportsPage() {
 
   const { data: reportData, isLoading: reportLoading, refetch } = useQuery(
     ["report-data", selectedReport, filters],
-    () => authFetch(`/api/v1/report-engine/${selectedReport}?${buildQueryString()}`).then(r => r.json()),
+    () => authFetch(`/api/v1/report-engine/${selectedReport}?${buildQueryString()}`).then(r => (r as any).data ?? r),
     { enabled: !!selectedReport, staleTime: 30000 }
   );
 

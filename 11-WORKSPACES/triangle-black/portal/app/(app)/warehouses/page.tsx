@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function WarehousesPage() {
   const router = useRouter();
-  const { data: whRaw, isLoading } = useQuery(["wh-list"], () => authFetch("/api/v1/warehouses-portal").then(r => r.json()));
-  const { data: stockRaw } = useQuery(["wh-stock"], () => authFetch("/api/v1/stock-balances/").then(r => r.json()));
+  const { data: whRaw, isLoading } = useQuery(["wh-list"], () => authFetch("/api/v1/warehouses-portal").then(r => (r as any).data ?? r));
+  const { data: stockRaw } = useQuery(["wh-stock"], () => authFetch("/api/v1/stock-balances/").then(r => (r as any).data ?? r));
   const whs = toArr(whRaw); const stocks = toArr(stockRaw);
   return (
     <div className="min-h-screen bg-base">

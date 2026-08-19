@@ -29,7 +29,7 @@ export default function SOWDetailPage() {
 
   const { data: sow, isLoading } = useQuery({
     queryKey: ["sow-detail", id],
-    queryFn: () => authFetch(`/api/v1/scope-of-work/${id}`).then(r => r.json()),
+    queryFn: () => authFetch(`/api/v1/scope-of-work/${id}`).then(r => (r as any).data ?? r),
     staleTime: 30000,
     enabled: !!id,
   });

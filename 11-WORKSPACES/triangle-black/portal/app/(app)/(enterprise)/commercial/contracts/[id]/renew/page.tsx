@@ -71,7 +71,7 @@ export default function ContractRenewPage() {
           renewal_of:  id,
         }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id) {
         toast.success("Contract renewal created successfully");
         router.push(`/commercial/contracts/${data.id}`);

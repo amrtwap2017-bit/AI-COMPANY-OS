@@ -10,7 +10,7 @@ const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function GoodsReceiptsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const { data: grRaw, isLoading } = useQuery(["gr-list"], () => authFetch("/api/v1/goods-receipts-portal").then(r => r.json()));
+  const { data: grRaw, isLoading } = useQuery(["gr-list"], () => authFetch("/api/v1/goods-receipts-portal").then(r => (r as any).data ?? r));
   const grs = toArr(grRaw);
   const filtered = grs.filter((g: any) => !search || (g.receipt_number||g.id||"").toLowerCase().includes(search.toLowerCase()));
   return (

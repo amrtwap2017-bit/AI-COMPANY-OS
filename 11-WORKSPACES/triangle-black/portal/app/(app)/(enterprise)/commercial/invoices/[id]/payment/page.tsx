@@ -57,7 +57,7 @@ export default function InvoicePaymentPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, amount: Number(form.amount) }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.payment_id || res.ok) {
         toast.success(`Payment of ${fmtEGP(form.amount)} recorded`);
         setPayments(prev => [...prev, data]);

@@ -21,12 +21,12 @@ function ProjectsCenterPageInner() {
   const qc = useQueryClient();
 
   const createProj = useMutation(
-    (payload)=>authFetch("/api/v1/projects/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.json()),
+    (payload)=>authFetch("/api/v1/projects/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => (r as any).data ?? r),
     {onSuccess:(d)=>{if(d.id){toast.success("Project created");setShowNewProject(false);qc.invalidateQueries(["projects-list"]);}else{toast.error("Failed");}},onError:()=>toast.error("Error")}
   );
 
-  const { data: raw, isLoading } = useQuery(["proj-list"],()=>authFetch("/api/v1/projects/").then(r => r.json()));
-  const { data: woRaw } = useQuery(["proj-wos"],()=>authFetch("/api/v1/work-orders/").then(r => r.json()));
+  const { data: raw, isLoading } = useQuery(["proj-list"],()=>authFetch("/api/v1/projects/").then(r => (r as any).data ?? r));
+  const { data: woRaw } = useQuery(["proj-wos"],()=>authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const projects = toArr(raw);
   const wos = toArr(woRaw);
 

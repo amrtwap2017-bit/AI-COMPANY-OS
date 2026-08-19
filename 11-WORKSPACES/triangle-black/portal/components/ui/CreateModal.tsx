@@ -63,7 +63,7 @@ export function CreateModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (!res.ok) throw new Error(data.detail || data.message || "Failed to create");
 
       // Invalidate queries to refresh lists

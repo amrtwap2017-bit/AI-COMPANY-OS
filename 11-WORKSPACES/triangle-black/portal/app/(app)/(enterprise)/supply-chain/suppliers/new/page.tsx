@@ -50,7 +50,7 @@ export default function SupplierNewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, lead_time_days: Number(form.lead_time_days), credit_limit: Number(form.credit_limit) }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.ok) {
         toast.success(`Supplier "${form.company_name}" created`);
         router.push(`/supply-chain/suppliers/${data.id}`);

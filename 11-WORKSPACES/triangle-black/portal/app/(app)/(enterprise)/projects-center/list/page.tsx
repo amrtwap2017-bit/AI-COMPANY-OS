@@ -20,7 +20,7 @@ export default function ProjectsListPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: raw, isLoading } = useQuery({queryKey:["projects-list"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r => r.json()),staleTime:60000});
+  const { data: raw, isLoading } = useQuery({queryKey:["projects-list"],queryFn:()=>authFetch("/api/v1/projects-portal").then(r => (r as any).data ?? r),staleTime:60000});
   const projects = toArr(raw);
   const active = projects.filter((p: any) =>p.status==="active"||p.status==="in_progress");
   const completed = projects.filter((p: any) =>p.status==="completed");

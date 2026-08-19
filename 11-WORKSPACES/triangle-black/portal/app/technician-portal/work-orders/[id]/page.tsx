@@ -42,7 +42,7 @@ export default function TechnicianWODetail() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus, notes }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.status) {
         toast.success("Work order updated");
         setWo(data);

@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function OperationsPage() {
   const router = useRouter();
-  const { data: woRaw }   = useQuery(["ops-wos"],   () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: techRaw } = useQuery(["ops-techs"], () => authFetch("/api/v1/technicians/").then(r => r.json()));
-  const { data: srRaw }   = useQuery(["ops-srs"],   () => authFetch("/api/v1/service-requests/").then(r => r.json()));
+  const { data: woRaw }   = useQuery(["ops-wos"],   () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
+  const { data: techRaw } = useQuery(["ops-techs"], () => authFetch("/api/v1/technicians/").then(r => (r as any).data ?? r));
+  const { data: srRaw }   = useQuery(["ops-srs"],   () => authFetch("/api/v1/service-requests/").then(r => (r as any).data ?? r));
   const wos = toArr(woRaw); const techs = toArr(techRaw); const srs = toArr(srRaw);
   const openWOs    = wos.filter((w: any) =>w.status==="open").length;
   const inProgWOs  = wos.filter((w: any) =>w.status==="in_progress").length;

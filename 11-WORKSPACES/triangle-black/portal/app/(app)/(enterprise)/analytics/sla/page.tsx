@@ -19,8 +19,8 @@ const WarmTooltip = ({active,payload,label}: any) => {
 
 export default function AnalyticsSLA() {
   const router = useRouter();
-  const { data: woRaw } = useQuery(["sla-wos"],()=>authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: slaDash } = useQuery(["sla-dash"],()=>authFetch("/api/v1/sla/dashboard").then(r => r.json()),{staleTime:60000});
+  const { data: woRaw } = useQuery(["sla-wos"],()=>authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
+  const { data: slaDash } = useQuery(["sla-dash"],()=>authFetch("/api/v1/sla/dashboard").then(r => (r as any).data ?? r),{staleTime:60000});
   const wos = toArr(woRaw);
   const now = new Date();
   const slaTargets = {critical:4,high:8,medium:24,low:72};

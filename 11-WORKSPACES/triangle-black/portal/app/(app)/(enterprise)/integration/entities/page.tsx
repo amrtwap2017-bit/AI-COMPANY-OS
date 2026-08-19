@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function IntegrationEntitiesPage() {
   const router = useRouter();
-  const { data: assetRaw } = useQuery(["ie-assets"], () => authFetch("/api/v1/assets/").then(r => r.json()));
-  const { data: woRaw }    = useQuery(["ie-wos"],    () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: contRaw }  = useQuery(["ie-conts"],  () => authFetch("/api/v1/contracts/").then(r => r.json()));
+  const { data: assetRaw } = useQuery(["ie-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
+  const { data: woRaw }    = useQuery(["ie-wos"],    () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
+  const { data: contRaw }  = useQuery(["ie-conts"],  () => authFetch("/api/v1/contracts/").then(r => (r as any).data ?? r));
   const assets = toArr(assetRaw); const wos = toArr(woRaw); const contracts = toArr(contRaw);
   const entities = [
     {name:"Assets",       count:assets.length,     api:"/api/v1/assets/",           icon:"⚙️",  path:"/maintenance/assets"},

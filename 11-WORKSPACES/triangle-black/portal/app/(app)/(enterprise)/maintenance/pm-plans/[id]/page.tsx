@@ -50,7 +50,7 @@ export default function PMPlanDetailPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.ok) {
         toast.success(`✅ Completed! Next due: ${fmtDate(data.next_due)}`);
         setCompleted(true);

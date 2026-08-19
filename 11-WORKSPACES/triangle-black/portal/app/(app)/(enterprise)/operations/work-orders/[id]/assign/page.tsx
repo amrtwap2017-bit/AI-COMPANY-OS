@@ -42,7 +42,7 @@ export default function WorkOrderAssignPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ technician_id: selectedTech }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (res.ok || data.id || data.technician_id) {
         const tech = technicians.find((t: any) => t.id === selectedTech);
         toast.success(`Assigned to ${tech?.name || selectedTech}`);

@@ -20,7 +20,7 @@ export default function QuotationsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: rawRFQs, isLoading } = useQuery({queryKey:["quot-rfqs"],queryFn:()=>authFetch("/api/v1/rfq/").then(r => r.json()),staleTime:60000});
+  const { data: rawRFQs, isLoading } = useQuery({queryKey:["quot-rfqs"],queryFn:()=>authFetch("/api/v1/rfq/").then(r => (r as any).data ?? r),staleTime:60000});
   const rfqs = toArr(rawRFQs);
   const withQuotes = rfqs.filter((r: any) =>r.quotation_count>0||["responses_received","evaluated","awarded"].includes(r.status));
   const totalQuotes = rfqs.reduce((s: any, r: any) =>s+(r.quotation_count||0),0);

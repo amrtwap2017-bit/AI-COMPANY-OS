@@ -24,7 +24,7 @@ export function ClientInit() {
           body: form.toString(),
         });
         if (res.ok) {
-          const data = await res.json();
+          const data = res.data ?? res;
           const token = data.access_token;
           if (token) {
             sessionStorage.setItem("tb_access_token", token);

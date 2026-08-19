@@ -7,10 +7,10 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function ScorecardPage() {
   const router = useRouter();
-  const { data: twin }   = useQuery(["sc2-twin"],  () => authFetch("/api/v1/twin/state").then(r => r.json()));
-  const { data: woRaw }  = useQuery(["sc2-wos"],   () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: invRaw } = useQuery(["sc2-inv"],   () => authFetch("/api/v1/invoices/").then(r => r.json()));
-  const { data: pmRaw }  = useQuery(["sc2-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
+  const { data: twin }   = useQuery(["sc2-twin"],  () => authFetch("/api/v1/twin/state").then(r => (r as any).data ?? r));
+  const { data: woRaw }  = useQuery(["sc2-wos"],   () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
+  const { data: invRaw } = useQuery(["sc2-inv"],   () => authFetch("/api/v1/invoices/").then(r => (r as any).data ?? r));
+  const { data: pmRaw }  = useQuery(["sc2-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
   const wos = toArr(woRaw); const inv = toArr(invRaw); const pms = toArr(pmRaw);
   const score = twin?.health_score||0;
   const now = new Date();

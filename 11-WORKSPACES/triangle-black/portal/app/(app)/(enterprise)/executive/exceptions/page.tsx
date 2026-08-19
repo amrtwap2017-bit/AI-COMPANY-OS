@@ -9,10 +9,10 @@ const fmtDate= (d) => { try { return new Date(d).toLocaleDateString("en-GB"); } 
 
 export default function ExceptionsPage() {
   const router = useRouter();
-  const { data: woRaw }    = useQuery(["exc-wos"],   ()=>authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: contRaw }  = useQuery(["exc-conts"], ()=>authFetch("/api/v1/contracts/").then(r => r.json()));
-  const { data: pmRaw }    = useQuery(["exc-pms"],   ()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-  const { data: notifRaw } = useQuery(["exc-notifs"],()=>authFetch("/api/v1/notifications-portal?limit=100").then(r => r.json()));
+  const { data: woRaw }    = useQuery(["exc-wos"],   ()=>authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
+  const { data: contRaw }  = useQuery(["exc-conts"], ()=>authFetch("/api/v1/contracts/").then(r => (r as any).data ?? r));
+  const { data: pmRaw }    = useQuery(["exc-pms"],   ()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
+  const { data: notifRaw } = useQuery(["exc-notifs"],()=>authFetch("/api/v1/notifications-portal?limit=100").then(r => (r as any).data ?? r));
 
   const wos       = toArr(woRaw);
   const contracts = toArr(contRaw);

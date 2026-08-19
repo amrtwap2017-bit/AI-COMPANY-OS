@@ -7,8 +7,8 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function EngineeringPMPlansPage() {
   const router = useRouter();
-  const { data: pmRaw }    = useQuery(["epmp-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
-  const { data: assetRaw } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets/").then(r => r.json()));
+  const { data: pmRaw }    = useQuery(["epmp-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
+  const { data: assetRaw } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const pms = toArr(pmRaw); const assets = toArr(assetRaw);
   const now = new Date();
   const overdue = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);

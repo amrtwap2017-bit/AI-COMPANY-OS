@@ -20,7 +20,7 @@ export default function WorkHistoryPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: rawWOs, isLoading } = useQuery({queryKey:["maint-wo-history"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=200").then(r => r.json()),staleTime:60000});
+  const { data: rawWOs, isLoading } = useQuery({queryKey:["maint-wo-history"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=200").then(r => (r as any).data ?? r),staleTime:60000});
 
   const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
   const completed = wos.filter((w: any) =>w.status==="completed");

@@ -61,7 +61,7 @@ export default function EmployeeEditPage() {
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(form),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id || data.name) {
         toast.success("Employee updated successfully");
         router.push(`/employees/${id}`);

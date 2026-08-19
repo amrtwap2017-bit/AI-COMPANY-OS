@@ -61,7 +61,7 @@ export default function EmployeeDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, employee_id: id }),
       });
-      const data = await res.json();
+      const data = res.data ?? res;
       if (data.id) {
         toast.success("Timesheet entry added");
         setTimesheets(prev => [data, ...prev]);
@@ -81,7 +81,7 @@ export default function EmployeeDetailPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ approved_by: "manager" }),
     });
-    const data = await res.json();
+    const data = res.data ?? res;
     if (data.id) {
       toast.success("Approved");
       setTimesheets(prev => prev.map((t: any) => t.id === tsId ? data : t));

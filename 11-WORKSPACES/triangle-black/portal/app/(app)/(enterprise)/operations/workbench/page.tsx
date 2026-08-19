@@ -11,9 +11,9 @@ const fmtDate = (d: any) => { try { return d?new Date(d).toLocaleDateString("en-
 
 export default function OperationsWorkbenchPage() {
   const router = useRouter();
-  const { data: rawWOs, isLoading } = useQuery({queryKey:["wb-wos"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=50").then(r => r.json()),staleTime:30000,refetchInterval:60000});
-  const { data: dispatch } = useQuery({queryKey:["wb-dispatch"],queryFn:()=>authFetch("/api/v1/dispatch/board").then(r => r.json()),staleTime:30000});
-  const { data: sla } = useQuery({queryKey:["wb-sla"],queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => r.json()),staleTime:60000});
+  const { data: rawWOs, isLoading } = useQuery({queryKey:["wb-wos"],queryFn:()=>authFetch("/api/v1/work-orders/?limit=50").then(r => (r as any).data ?? r),staleTime:30000,refetchInterval:60000});
+  const { data: dispatch } = useQuery({queryKey:["wb-dispatch"],queryFn:()=>authFetch("/api/v1/dispatch/board").then(r => (r as any).data ?? r),staleTime:30000});
+  const { data: sla } = useQuery({queryKey:["wb-sla"],queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => (r as any).data ?? r),staleTime:60000});
 
   const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
   const open = wos.filter((w: any) =>w.status==="open");

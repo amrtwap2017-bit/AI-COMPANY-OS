@@ -33,11 +33,11 @@ export default function WorkspacePage() {
   const role = user?.role || "viewer";
   const config = (ROLE_CONFIG as Record<string, any>)[role] || ROLE_CONFIG.viewer;
 
-  const { data: execDash } = useQuery({ queryKey:["workspace-exec"], queryFn:()=>authFetch("/api/v1/executive/dashboard").then(r => r.json()), staleTime:60000 });
-  const { data: approvalRaw } = useQuery({ queryKey:["workspace-approvals"], queryFn:()=>authFetch("/api/v1/approval-requests/").then(r => r.json()), staleTime:30000 });
-  const { data: woRaw } = useQuery({ queryKey:["workspace-wos"], queryFn:()=>authFetch("/api/v1/work-orders/?limit=5").then(r => r.json()), staleTime:30000 });
-  const { data: slaDash } = useQuery({ queryKey:["workspace-sla"], queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => r.json()), staleTime:60000 });
-  const { data: timeDash } = useQuery({ queryKey:["workspace-time"], queryFn:()=>authFetch("/api/v1/time-entries/summary").then(r => r.json()), staleTime:60000 });
+  const { data: execDash } = useQuery({ queryKey:["workspace-exec"], queryFn:()=>authFetch("/api/v1/executive/dashboard").then(r => (r as any).data ?? r), staleTime:60000 });
+  const { data: approvalRaw } = useQuery({ queryKey:["workspace-approvals"], queryFn:()=>authFetch("/api/v1/approval-requests/").then(r => (r as any).data ?? r), staleTime:30000 });
+  const { data: woRaw } = useQuery({ queryKey:["workspace-wos"], queryFn:()=>authFetch("/api/v1/work-orders/?limit=5").then(r => (r as any).data ?? r), staleTime:30000 });
+  const { data: slaDash } = useQuery({ queryKey:["workspace-sla"], queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => (r as any).data ?? r), staleTime:60000 });
+  const { data: timeDash } = useQuery({ queryKey:["workspace-time"], queryFn:()=>authFetch("/api/v1/time-entries/summary").then(r => (r as any).data ?? r), staleTime:60000 });
 
   const ops = execDash?.operations?.work_orders || {};
   const fin = execDash?.financial?.invoices || {};

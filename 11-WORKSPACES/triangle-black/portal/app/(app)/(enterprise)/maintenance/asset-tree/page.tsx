@@ -25,11 +25,11 @@ export default function AssetTreePage() {
 
   const { data: assetRaw, isLoading } = useQuery(
     ["tree-assets"],
-    () => authFetch("/api/v1/assets/").then(r => r.json()),
+    () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r),
     { refetchInterval: 60000 }
   );
-  const { data: woRaw } = useQuery(["tree-wos"], () => authFetch("/api/v1/work-orders/").then(r => r.json()));
-  const { data: pmRaw } = useQuery(["tree-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
+  const { data: woRaw } = useQuery(["tree-wos"], () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
+  const { data: pmRaw } = useQuery(["tree-pms"], () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
 
   const assets = toArr(assetRaw);
   const wos    = toArr(woRaw);
