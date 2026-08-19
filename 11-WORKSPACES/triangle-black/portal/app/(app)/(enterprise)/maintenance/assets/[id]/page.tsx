@@ -18,7 +18,7 @@ export default function AssetDetailPage() {
 
   const { data: asset, isLoading } = useQuery(
     ["asset-detail", id],
-    () => authFetch(`/api/v1/assets/${id}`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/assets/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 

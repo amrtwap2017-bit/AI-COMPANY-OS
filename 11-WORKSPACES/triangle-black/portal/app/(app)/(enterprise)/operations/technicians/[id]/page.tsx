@@ -15,8 +15,8 @@ export default function TechnicianDetailPage() {
   const params = useParams();
   const id = params?.id as string;
 
-  const { data: tech, isLoading } = useQuery({ queryKey:["tech-detail",id], queryFn:()=>authFetch(`/api/v1/technicians/${id}`).then(r => r.data ?? r), enabled:!!id });
-  const { data: rawWOs, isLoading: wosLoading } = useQuery({ queryKey:["tech-wos",id], queryFn:()=>authFetch(`/api/v1/technicians/${id}/work-orders`).then(r => r.data ?? r), enabled:!!id });
+  const { data: tech, isLoading } = useQuery({ queryKey:["tech-detail",id], queryFn:()=>authFetch(`/api/v1/technicians/${id}`).then(r => r.json()), enabled:!!id });
+  const { data: rawWOs, isLoading: wosLoading } = useQuery({ queryKey:["tech-wos",id], queryFn:()=>authFetch(`/api/v1/technicians/${id}/work-orders`).then(r => r.json()), enabled:!!id });
 
   const wos = toArr(rawWOs).filter((w: any) => !w.deleted_at);
   const activeWOs = wos.filter((w: any) => ["open","in_progress"].includes(w.status));

@@ -43,12 +43,12 @@ export default function AuditTrailPage() {
 
   const { data: recent, isLoading } = useQuery(
     ["audit-recent", filterType],
-    () => authFetch("/api/v1/audit-log/recent?limit=100" + (filterType !== "all" ? "&entity_type=" + filterType : "")).then(r => r.data ?? r),
+    () => authFetch("/api/v1/audit-log/recent?limit=100" + (filterType !== "all" ? "&entity_type=" + filterType : "")).then(r => r.json()),
     { staleTime: 15000 }
   );
   const { data: summary } = useQuery(
     ["audit-summary"],
-    () => authFetch("/api/v1/audit-log/summary").then(r => r.data ?? r),
+    () => authFetch("/api/v1/audit-log/summary").then(r => r.json()),
     { staleTime: 30000 }
   );
 

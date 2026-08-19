@@ -21,11 +21,11 @@ export default function PurchaseOrdersPage() {
 
   const { data: poRaw, isLoading } = useQuery(
     ["po-list"],
-    () => authFetch("/api/v1/purchase-orders-portal").then(r => r.data ?? r),
+    () => authFetch("/api/v1/purchase-orders-portal").then(r => r.json()),
     { refetchInterval: 60000 }
   );
-  const { data: suppRaw } = useQuery(["po-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.data ?? r));
-  const { data: prRaw }   = useQuery(["po-prs"],   () => authFetch("/api/v1/purchase-requests-portal").then(r => r.data ?? r));
+  const { data: suppRaw } = useQuery(["po-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.json()));
+  const { data: prRaw }   = useQuery(["po-prs"],   () => authFetch("/api/v1/purchase-requests-portal").then(r => r.json()));
 
   const pos   = toArr(poRaw);
   const supps = toArr(suppRaw);

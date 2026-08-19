@@ -15,8 +15,8 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function CommercialInvoicesPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
-  const { data: raw, isLoading } = useQuery(["comm-inv"],()=>authFetch("/api/v1/supplier-invoices/").then(r => r.data ?? r),{staleTime:30000});
-  const { data: dash } = useQuery(["comm-inv-dash"],()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.data ?? r),{staleTime:60000});
+  const { data: raw, isLoading } = useQuery(["comm-inv"],()=>authFetch("/api/v1/supplier-invoices/").then(r => r.json()),{staleTime:30000});
+  const { data: dash } = useQuery(["comm-inv-dash"],()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.json()),{staleTime:60000});
   const invoices = toArr(raw);
   const filtered = filter==="all"?invoices:invoices.filter((i: any) =>i.status===filter);
   const totals = dash?.totals||{};

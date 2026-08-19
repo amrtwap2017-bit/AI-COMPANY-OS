@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 export default function PlatformMaturityPage() {
-  const { data: twin } = useQuery(["mat-twin"], () => authFetch("/api/v1/twin/state").then(r => r.data ?? r), {staleTime:30000});
-  const { data: health } = useQuery(["mat-health"], () => authFetch("/api/v1/health").then(r => r.data ?? r), {staleTime:30000});
+  const { data: twin } = useQuery(["mat-twin"], () => authFetch("/api/v1/twin/state").then(r => r.json()), {staleTime:30000});
+  const { data: health } = useQuery(["mat-health"], () => authFetch("/api/v1/health").then(r => r.json()), {staleTime:30000});
   const score = twin?.health_score||0;
   const sc = score>=90?"#547C4D":score>=70?"#B07A2A":"#A84A3D";
   return (

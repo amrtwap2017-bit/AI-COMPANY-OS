@@ -16,7 +16,7 @@ export default function VendorsPage() {
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("all");
 
-  const { data: raw, isLoading } = useQuery({queryKey:["vendors-list"],queryFn:()=>authFetch("/api/v1/vendors/").then(r => r.data ?? r)});
+  const { data: raw, isLoading } = useQuery({queryKey:["vendors-list"],queryFn:()=>authFetch("/api/v1/vendors/").then(r => r.json())});
   const all = toArr(raw).filter((v: any) =>!v.deleted_at);
   const categories = ["all",...Array.from(new Set(all.map((v: any) =>v.category).filter(Boolean)))];
   const filtered = all.filter((v: any) =>{

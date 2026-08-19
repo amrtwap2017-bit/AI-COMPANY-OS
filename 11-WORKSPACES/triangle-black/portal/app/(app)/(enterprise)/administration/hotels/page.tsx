@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function HotelsPage() {
   const router = useRouter();
-  const { data: siteRaw, isLoading } = useQuery(["hotels-sites"], () => authFetch("/api/v1/sites-portal").then(r => r.data ?? r));
-  const { data: assetRaw } = useQuery(["hotels-assets"], () => authFetch("/api/v1/assets/").then(r => r.data ?? r));
+  const { data: siteRaw, isLoading } = useQuery(["hotels-sites"], () => authFetch("/api/v1/sites-portal").then(r => r.json()));
+  const { data: assetRaw } = useQuery(["hotels-assets"], () => authFetch("/api/v1/assets/").then(r => r.json()));
   const sites = toArr(siteRaw); const assets = toArr(assetRaw);
   return (
     <div className="min-h-screen bg-base">

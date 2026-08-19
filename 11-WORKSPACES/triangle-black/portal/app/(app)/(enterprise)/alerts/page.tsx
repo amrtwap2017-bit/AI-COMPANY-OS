@@ -9,9 +9,9 @@ const fmtRel = (d: any) => { if (!d) return ""; try { const h=Math.floor((Date.n
 
 export default function AlertsPage() {
   const router = useRouter();
-  const { data: breaches } = useQuery(["alerts-breaches"], ()=>authFetch("/api/v1/sla/breaches").then(r => r.data ?? r), {staleTime:30000});
-  const { data: notifs }   = useQuery(["alerts-notifs"],   ()=>authFetch("/api/v1/platform-notif/?limit=20").then(r => r.data ?? r), {staleTime:30000});
-  const { data: slaDash }  = useQuery(["alerts-sla"],      ()=>authFetch("/api/v1/sla/dashboard").then(r => r.data ?? r), {staleTime:60000});
+  const { data: breaches } = useQuery(["alerts-breaches"], ()=>authFetch("/api/v1/sla/breaches").then(r => r.json()), {staleTime:30000});
+  const { data: notifs }   = useQuery(["alerts-notifs"],   ()=>authFetch("/api/v1/platform-notif/?limit=20").then(r => r.json()), {staleTime:30000});
+  const { data: slaDash }  = useQuery(["alerts-sla"],      ()=>authFetch("/api/v1/sla/dashboard").then(r => r.json()), {staleTime:60000});
 
   const breachList = toArr(breaches);
   const notifList  = notifs?.notifications||[];

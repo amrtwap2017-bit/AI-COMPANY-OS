@@ -62,12 +62,12 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
 
   const { data: docs = [], isLoading } = useQuery(
     ["documents", entityType, entityId],
-    () => authFetch(`/api/v1/documents/?entity_type=${entityType}&entity_id=${entityId}`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/documents/?entity_type=${entityType}&entity_id=${entityId}`).then(r => r.json()),
     { staleTime: 30000, enabled: !!entityId }
   );
 
   const deleteMut = useMutation(
-    (docId) => authFetch(`/api/v1/documents/v2/${docId}`, { method: "DELETE" }).then(r => r.data ?? r),
+    (docId) => authFetch(`/api/v1/documents/v2/${docId}`, { method: "DELETE" }).then(r => r.json()),
     { onSuccess: () => qc.invalidateQueries(["documents", entityType, entityId]) }
   );
 

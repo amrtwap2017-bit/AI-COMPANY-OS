@@ -16,8 +16,8 @@ export default function CreateInvoicePage() {
     subtotal:0, vat_pct:14, withholding_tax_pct:0,
     po_total:0, grn_total:0, notes:"", submitted_by:"amr@triangleblack.com"
   });
-  const { data: vendorsRaw } = useQuery(["vendors-inv"], () => authFetch("/api/v1/vendors/").then(r => r.data ?? r), {staleTime:60000});
-  const { data: posRaw } = useQuery(["pos-inv"], () => authFetch("/api/v1/purchase-orders-v2/").then(r => r.data ?? r), {staleTime:60000});
+  const { data: vendorsRaw } = useQuery(["vendors-inv"], () => authFetch("/api/v1/vendors/").then(r => r.json()), {staleTime:60000});
+  const { data: posRaw } = useQuery(["pos-inv"], () => authFetch("/api/v1/purchase-orders-v2/").then(r => r.json()), {staleTime:60000});
   const vendors = toArr(vendorsRaw);
   const pos = toArr(posRaw);
   const vat_amount = Number(form.subtotal) * (Number(form.vat_pct)/100);

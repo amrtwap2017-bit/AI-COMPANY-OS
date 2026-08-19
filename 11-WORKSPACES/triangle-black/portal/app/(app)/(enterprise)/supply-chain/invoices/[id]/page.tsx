@@ -17,10 +17,10 @@ export default function InvoiceDetailPage() {
   const [payForm, setPayForm] = useState({amount:"",method:"bank_transfer",reference:"",notes:""});
   const [showPay, setShowPay] = useState(false);
 
-  const { data: inv, isLoading } = useQuery(["invoice-detail",id], ()=>authFetch(`/api/v1/supplier-invoices/${id}`).then(r => r.data ?? r), {staleTime:30000});
-  const matchMut   = useMutation(()=>authFetch(`/api/v1/supplier-invoices/${id}/match`,{method:"POST"}).then(r => r.data ?? r), {onSuccess:()=>qc.invalidateQueries(["invoice-detail",id])});
-  const approveMut = useMutation((action)=>authFetch(`/api/v1/supplier-invoices/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,approved_by:"amr@triangleblack.com"})}).then(r => r.data ?? r), {onSuccess:()=>qc.invalidateQueries(["invoice-detail",id])});
-  const payMut     = useMutation((payload)=>authFetch(`/api/v1/supplier-invoices/${id}/pay`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.data ?? r), {onSuccess:()=>{qc.invalidateQueries(["invoice-detail",id]);setShowPay(false);setPayForm({amount:"",method:"bank_transfer",reference:"",notes:""});}});
+  const { data: inv, isLoading } = useQuery(["invoice-detail",id], ()=>authFetch(`/api/v1/supplier-invoices/${id}`).then(r => r.json()), {staleTime:30000});
+  const matchMut   = useMutation(()=>authFetch(`/api/v1/supplier-invoices/${id}/match`,{method:"POST"}).then(r => r.json()), {onSuccess:()=>qc.invalidateQueries(["invoice-detail",id])});
+  const approveMut = useMutation((action)=>authFetch(`/api/v1/supplier-invoices/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,approved_by:"amr@triangleblack.com"})}).then(r => r.json()), {onSuccess:()=>qc.invalidateQueries(["invoice-detail",id])});
+  const payMut     = useMutation((payload)=>authFetch(`/api/v1/supplier-invoices/${id}/pay`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.json()), {onSuccess:()=>{qc.invalidateQueries(["invoice-detail",id]);setShowPay(false);setPayForm({amount:"",method:"bank_transfer",reference:"",notes:""});}});
   const deleteMut  = useMutation(()=>authFetch(`/api/v1/supplier-invoices/v2/${id}`,{method:"DELETE"}), {onSuccess:()=>router.push("/supply-chain/invoices")});
 
   if (isLoading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="text-secondary">Loading invoice…</div></div>;

@@ -7,9 +7,9 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function WorkbenchPage() {
   const router = useRouter();
-  const { data: twin }    = useQuery(["wb-twin"],   () => authFetch("/api/v1/twin/state").then(r => r.data ?? r));
-  const { data: dash }    = useQuery(["wb-dash"],   () => authFetch("/api/v1/dashboard/summary").then(r => r.data ?? r));
-  const { data: actRaw }  = useQuery(["wb-act"],    () => authFetch("/api/v1/activity-feed?limit=10").then(r => r.data ?? r));
+  const { data: twin }    = useQuery(["wb-twin"],   () => authFetch("/api/v1/twin/state").then(r => r.json()));
+  const { data: dash }    = useQuery(["wb-dash"],   () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
+  const { data: actRaw }  = useQuery(["wb-act"],    () => authFetch("/api/v1/activity-feed?limit=10").then(r => r.json()));
   const score = twin?.health_score||0;
   const d = dash||{};
   const activities = actRaw?.activities||[];

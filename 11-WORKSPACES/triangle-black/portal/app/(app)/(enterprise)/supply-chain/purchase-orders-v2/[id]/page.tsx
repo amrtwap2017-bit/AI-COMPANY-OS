@@ -22,15 +22,15 @@ export default function POv2DetailPage() {
 
   const { data: po, isLoading } = useQuery(
     ["po-v2-detail", id],
-    ()=>authFetch(`/api/v1/purchase-orders-v2/${id}`).then(r => r.data ?? r),
+    ()=>authFetch(`/api/v1/purchase-orders-v2/${id}`).then(r => r.json()),
     {staleTime:30000}
   );
   const statusMut = useMutation(
-    (status)=>authFetch(`/api/v1/purchase-orders-v2/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status,approved_by:status==="approved"?"amr@triangleblack.com":undefined})}).then(r => r.data ?? r),
+    (status)=>authFetch(`/api/v1/purchase-orders-v2/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status,approved_by:status==="approved"?"amr@triangleblack.com":undefined})}).then(r => r.json()),
     {onSuccess:()=>{toast.success("Purchase order updated");qc.invalidateQueries(["po-v2-detail",id]);}}
   );
   const addLineMut = useMutation(
-    (line)=>authFetch(`/api/v1/purchase-orders-v2/${id}/line-items`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(line)}).then(r => r.data ?? r),
+    (line)=>authFetch(`/api/v1/purchase-orders-v2/${id}/line-items`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(line)}).then(r => r.json()),
     {onSuccess:()=>{qc.invalidateQueries(["po-v2-detail",id]);setNewLine({...EMPTY_LINE});setShowAddLine(false);}}
   );
   const deleteMut = useMutation(

@@ -7,9 +7,9 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function CommercialWorkbenchPage() {
   const router = useRouter();
-  const { data: finDash } = useQuery(["cw-fin"], () => authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r), {staleTime:60000});
-  const { data: contracts } = useQuery(["cw-contracts"], () => authFetch("/api/v1/contracts/").then(r => r.data ?? r), {staleTime:60000});
-  const { data: leads } = useQuery(["cw-leads"], () => authFetch("/api/v1/leads/").then(r => r.data ?? r), {staleTime:60000});
+  const { data: finDash } = useQuery(["cw-fin"], () => authFetch("/api/v1/financial/dashboard").then(r => r.json()), {staleTime:60000});
+  const { data: contracts } = useQuery(["cw-contracts"], () => authFetch("/api/v1/contracts/").then(r => r.json()), {staleTime:60000});
+  const { data: leads } = useQuery(["cw-leads"], () => authFetch("/api/v1/leads/").then(r => r.json()), {staleTime:60000});
   const rev = finDash?.revenue || {};
   const cl = toArr(contracts);
   const ld = toArr(leads);

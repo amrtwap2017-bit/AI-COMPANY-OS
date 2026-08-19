@@ -20,7 +20,7 @@ export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: raw, isLoading } = useQuery({queryKey:["leads-v2"],queryFn:()=>authFetch("/api/v1/leads-portal-v2").then(r => r.data ?? r),staleTime:60000});
+  const { data: raw, isLoading } = useQuery({queryKey:["leads-v2"],queryFn:()=>authFetch("/api/v1/leads-portal-v2").then(r => r.json()),staleTime:60000});
   const leads = toArr(raw);
   const active = leads.filter((l: any) =>l.status==="active"||l.status==="won");
   const totalValue = leads.reduce((s: any, l: any) =>s+Number(l.contract_value||l.deal_value||0),0);

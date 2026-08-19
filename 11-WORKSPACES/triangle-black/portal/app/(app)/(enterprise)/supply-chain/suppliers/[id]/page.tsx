@@ -20,7 +20,7 @@ export default function SupplierDetailPage() {
 
   const { data: supplier, isLoading } = useQuery(
     ["supplier-detail", id],
-    () => authFetch(`/api/v1/suppliers/${id}`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/suppliers/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 

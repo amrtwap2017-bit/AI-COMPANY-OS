@@ -36,7 +36,7 @@ export function EnterpriseTopbar() {
   useEffect(() => {
     const token = tokenManager.getToken() || "";
     if (token) {
-      authFetch("/api/v1/platform-notif/?limit=5").then(r => r.data ?? r).then((d: any) => {
+      authFetch("/api/v1/platform-notif/?limit=5").then(r => r.json()).then((d: any) => {
         setNotifBadge(d?.unread_count || 0);
         setRealNotifs((d?.notifications||[]).map((n:any)=>({
           id:n.id, type:n.type==="alert"?"error":n.type==="warning"?"warning":n.type==="success"?"success":"info",

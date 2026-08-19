@@ -16,7 +16,7 @@ export default function RFQDetailPage() {
   const [awardingId, setAwardingId] = useState<any>(null);
   const { data: rfq, isLoading } = useQuery(
     ["rfq-detail", id],
-    () => authFetch(`/api/v1/rfq/${id}/bid-comparison`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/rfq/${id}/bid-comparison`).then(r => r.json()),
     { staleTime: 30000 }
   );
   const awardMut = useMutation(

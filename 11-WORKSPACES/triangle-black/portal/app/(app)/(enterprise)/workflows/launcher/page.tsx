@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function WorkflowLauncherPage() {
   const router = useRouter();
-  const { data: autoRaw } = useQuery(["wl-auto"], () => authFetch("/api/v1/automation/status").then(r => r.data ?? r));
+  const { data: autoRaw } = useQuery(["wl-auto"], () => authFetch("/api/v1/automation/status").then(r => r.json()));
   const pending = autoRaw?.pending_actions||{};
   const total = Object.values(pending).reduce((s: any, v: any) =>s+Number(v),0);
   const actions = [

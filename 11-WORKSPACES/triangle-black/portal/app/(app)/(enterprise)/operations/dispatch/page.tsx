@@ -86,7 +86,7 @@ export default function DispatchBoardPage() {
       const params = new URLSearchParams();
       if (filterSite)     params.set("site_id",  filterSite);
       if (filterPriority) params.set("priority", filterPriority);
-      return authFetch(`/api/v1/dispatch/board?${params}`).then(r => r.data ?? r);
+      return authFetch(`/api/v1/dispatch/board?${params}`).then(r => r.json());
     },
     {staleTime:15000, refetchInterval:30000}
   );
@@ -96,11 +96,11 @@ export default function DispatchBoardPage() {
   const techs  = boardData?.technicians  || [];
 
   const assignMut = useMutation(
-    ({wo_id,tech_id})=>authFetch(`/api/v1/work-orders/${wo_id}/assign`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({technician_id:tech_id})}).then(r => r.data ?? r),
+    ({wo_id,tech_id})=>authFetch(`/api/v1/work-orders/${wo_id}/assign`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({technician_id:tech_id})}).then(r => r.json()),
     {onSuccess:()=>qc.invalidateQueries(["dispatch-board"])}
   );
   const statusMut = useMutation(
-    ({wo_id,status})=>authFetch(`/api/v1/work-orders/${wo_id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})}).then(r => r.data ?? r),
+    ({wo_id,status})=>authFetch(`/api/v1/work-orders/${wo_id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})}).then(r => r.json()),
     {onSuccess:()=>qc.invalidateQueries(["dispatch-board"])}
   );
 

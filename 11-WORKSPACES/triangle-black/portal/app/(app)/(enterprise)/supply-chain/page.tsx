@@ -10,10 +10,10 @@ function SupplyChainHubInner() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter();
   useEffect(() => { setMounted(true) }, [])
-  const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r => r.data ?? r));
-  const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r => r.data ?? r));
-  const { data: invRaw } = useQuery(["sc-hub-inv"], () => authFetch("/api/v1/inventory-items-portal").then(r => r.data ?? r));
-  const { data: suppRaw } = useQuery(["sc-hub-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.data ?? r));
+  const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r => r.json()));
+  const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r => r.json()));
+  const { data: invRaw } = useQuery(["sc-hub-inv"], () => authFetch("/api/v1/inventory-items-portal").then(r => r.json()));
+  const { data: suppRaw } = useQuery(["sc-hub-supps"], () => authFetch("/api/v1/suppliers/").then(r => r.json()));
   const pos = toArr(poRaw); const prs = toArr(prRaw);
   const inv = toArr(invRaw); const supps = toArr(suppRaw);
   const modules = [

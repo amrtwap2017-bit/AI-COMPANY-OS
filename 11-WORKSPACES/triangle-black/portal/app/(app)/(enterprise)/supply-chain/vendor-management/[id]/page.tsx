@@ -15,12 +15,12 @@ export default function VendorDetailPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const { data: vendor, isLoading } = useQuery(
     ["vendor-detail", id],
-    () => authFetch(`/api/v1/vendors/${id}`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/vendors/${id}`).then(r => r.json()),
     { staleTime: 30000 }
   );
   const { data: docStatus } = useQuery(
     ["vendor-doc-status", id],
-    () => authFetch(`/api/v1/vendors/${id}/doc-status`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/vendors/${id}/doc-status`).then(r => r.json()),
     { staleTime: 30000, enabled: !!id }
   );
   const approveMut = useMutation(

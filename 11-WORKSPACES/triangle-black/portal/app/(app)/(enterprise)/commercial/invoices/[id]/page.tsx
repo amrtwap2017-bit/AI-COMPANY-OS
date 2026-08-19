@@ -12,13 +12,13 @@ const fmtDate = (d: any) => { if (!d) return "—"; try { const dt=new Date(d); 
 export default function InvoiceDetailPage() {
   const router = useRouter();
   const { id } = useParams();
-  const { data: inv, isLoading } = useQuery(["inv-detail",id], ()=>authFetch(`/api/v1/supplier-invoices/${id}`).then(r => r.data ?? r), {enabled:!!id});
+  const { data: inv, isLoading } = useQuery(["inv-detail",id], ()=>authFetch(`/api/v1/supplier-invoices/${id}`).then(r => r.json()), {enabled:!!id});
   const approve = useMutation({
-    mutationFn: ()=>authFetch(`/api/v1/supplier-invoices/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"approve"})}).then(r => r.data ?? r),
+    mutationFn: ()=>authFetch(`/api/v1/supplier-invoices/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"approve"})}).then(r => r.json()),
     onSuccess: ()=>{ toast.success("Invoice approved"); window.location.reload(); },
   });
   const pay = useMutation({
-    mutationFn: ()=>authFetch(`/api/v1/supplier-invoices/${id}/pay`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount:inv?.total_amount,payment_method:"bank_transfer"})}).then(r => r.data ?? r),
+    mutationFn: ()=>authFetch(`/api/v1/supplier-invoices/${id}/pay`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount:inv?.total_amount,payment_method:"bank_transfer"})}).then(r => r.json()),
     onSuccess: ()=>{ toast.success("Payment recorded"); window.location.reload(); },
   });
 

@@ -14,7 +14,7 @@ export default function ApprovalsCenterPage() {
   const qc = useQueryClient();
   const { data: raw, isLoading } = useQuery(
     ["approvals-list"],
-    () => authFetch("/api/v1/approval-requests/").then(r => r.data ?? r),
+    () => authFetch("/api/v1/approval-requests/").then(r => r.json()),
     { staleTime: 30000, refetchInterval: 30000 }
   );
   const approvals = toArr(raw);

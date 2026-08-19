@@ -34,9 +34,9 @@ export default function StockBalancesPage() {
   const [page,            setPage]            = useState(1);
   const [pageSize,        setPageSize]        = useState(25);
 
-  const { data: rawBalances,  isLoading } = useQuery({queryKey:["stock-balances-list"],  queryFn:()=>authFetch("/api/v1/stock-balances/").then(r => r.data ?? r),               staleTime:60000});
-  const { data: rawItems }               = useQuery({queryKey:["inventory-items-list"],  queryFn:()=>authFetch("/api/v1/inventory-items-portal").then(r => r.data ?? r),        staleTime:300000});
-  const { data: rawWarehouses }          = useQuery({queryKey:["warehouses-list"],        queryFn:()=>authFetch("/api/v1/warehouses-portal").then(r => r.data ?? r),             staleTime:300000});
+  const { data: rawBalances,  isLoading } = useQuery({queryKey:["stock-balances-list"],  queryFn:()=>authFetch("/api/v1/stock-balances/").then(r => r.json()),               staleTime:60000});
+  const { data: rawItems }               = useQuery({queryKey:["inventory-items-list"],  queryFn:()=>authFetch("/api/v1/inventory-items-portal").then(r => r.json()),        staleTime:300000});
+  const { data: rawWarehouses }          = useQuery({queryKey:["warehouses-list"],        queryFn:()=>authFetch("/api/v1/warehouses-portal").then(r => r.json()),             staleTime:300000});
 
   const itemMap = useMemo(()=>{const m=new Map();toArr(rawItems).forEach((item: any) =>m.set(item.id,item));return m;},[rawItems]);
   const balances = useMemo(()=>toArr(rawBalances).map((sb: any) =>{

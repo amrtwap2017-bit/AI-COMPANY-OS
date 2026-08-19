@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function ConnectSignalsPage() {
   const router = useRouter();
-  const { data: sigRaw }  = useQuery(["cs-signals"], () => authFetch("/api/v1/ai/signals").then(r => r.data ?? r));
-  const { data: twin }    = useQuery(["cs-twin"],    () => authFetch("/api/v1/twin/state").then(r => r.data ?? r));
-  const { data: actRaw }  = useQuery(["cs-act"],     () => authFetch("/api/v1/activity-feed?limit=20").then(r => r.data ?? r));
+  const { data: sigRaw }  = useQuery(["cs-signals"], () => authFetch("/api/v1/ai/signals").then(r => r.json()));
+  const { data: twin }    = useQuery(["cs-twin"],    () => authFetch("/api/v1/twin/state").then(r => r.json()));
+  const { data: actRaw }  = useQuery(["cs-act"],     () => authFetch("/api/v1/activity-feed?limit=20").then(r => r.json()));
   const signals = toArr(sigRaw?.signals||sigRaw);
   const score = twin?.health_score||0;
   const activities = actRaw?.activities||[];

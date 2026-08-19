@@ -10,10 +10,10 @@ const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 export default function CommercialCommandPage() {
   const router = useRouter();
-  const { data: finDash, isLoading } = useQuery({queryKey:["cc-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r),staleTime:60000});
-  const { data: rawLeads } = useQuery({queryKey:["cc-leads"],queryFn:()=>authFetch("/api/v1/leads-portal-v2").then(r => r.data ?? r),staleTime:60000});
-  const { data: rawContracts } = useQuery({queryKey:["cc-contracts"],queryFn:()=>authFetch("/api/v1/contracts-portal").then(r => r.data ?? r),staleTime:60000});
-  const { data: rawInv } = useQuery({queryKey:["cc-inv"],queryFn:()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.data ?? r),staleTime:60000});
+  const { data: finDash, isLoading } = useQuery({queryKey:["cc-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => r.json()),staleTime:60000});
+  const { data: rawLeads } = useQuery({queryKey:["cc-leads"],queryFn:()=>authFetch("/api/v1/leads-portal-v2").then(r => r.json()),staleTime:60000});
+  const { data: rawContracts } = useQuery({queryKey:["cc-contracts"],queryFn:()=>authFetch("/api/v1/contracts-portal").then(r => r.json()),staleTime:60000});
+  const { data: rawInv } = useQuery({queryKey:["cc-inv"],queryFn:()=>authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.json()),staleTime:60000});
 
   const leads = toArr(rawLeads);
   const contracts = toArr(rawContracts);

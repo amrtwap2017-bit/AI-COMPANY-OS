@@ -21,7 +21,7 @@ export default function Assets360Page() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: raw, isLoading } = useQuery({ queryKey:["assets-360"], queryFn:()=>authFetch("/api/v1/assets-portal").then(r => r.data ?? r), staleTime:60000 });
+  const { data: raw, isLoading } = useQuery({ queryKey:["assets-360"], queryFn:()=>authFetch("/api/v1/assets-portal").then(r => r.json()), staleTime:60000 });
   const assets = toArr(raw).filter((a: any) =>!a.deleted_at);
   const cats = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.category).filter(Boolean)))],[assets]);
   const crits = useMemo(()=>["all",...Array.from(new Set(assets.map((a: any) =>a.criticality).filter(Boolean)))],[assets]);

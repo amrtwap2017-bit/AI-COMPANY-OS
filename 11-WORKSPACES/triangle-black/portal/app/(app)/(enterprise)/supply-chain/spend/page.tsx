@@ -22,8 +22,8 @@ const WarmTooltip = ({active,payload,label}: any) => {
 
 export default function SpendAnalyticsPage() {
   const router = useRouter();
-  const { data: proc, isLoading } = useQuery({queryKey:["spend-proc"],queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r => r.data ?? r),staleTime:60000});
-  const { data: finDash } = useQuery({queryKey:["spend-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r),staleTime:60000});
+  const { data: proc, isLoading } = useQuery({queryKey:["spend-proc"],queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r => r.json()),staleTime:60000});
+  const { data: finDash } = useQuery({queryKey:["spend-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => r.json()),staleTime:60000});
 
   const sow = proc?.sow||{};
   const vendors = proc?.vendors||{};

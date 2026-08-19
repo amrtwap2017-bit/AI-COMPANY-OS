@@ -41,10 +41,10 @@ export default function AnalyticsCostsPage() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
 
-  const { data: finDash } = useQuery({queryKey:["costs-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => r.data ?? r),staleTime:60000});
-  const { data: timeDash } = useQuery({queryKey:["costs-time"],queryFn:()=>authFetch("/api/v1/time-entries/summary").then(r => r.data ?? r),staleTime:60000});
-  const { data: procDash } = useQuery({queryKey:["costs-proc"],queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r => r.data ?? r),staleTime:60000});
-  const { data: invRaw }   = useQuery({queryKey:["costs-inv"],queryFn:()=>authFetch("/api/v1/supplier-invoices/").then(r => r.data ?? r),staleTime:60000});
+  const { data: finDash } = useQuery({queryKey:["costs-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => r.json()),staleTime:60000});
+  const { data: timeDash } = useQuery({queryKey:["costs-time"],queryFn:()=>authFetch("/api/v1/time-entries/summary").then(r => r.json()),staleTime:60000});
+  const { data: procDash } = useQuery({queryKey:["costs-proc"],queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r => r.json()),staleTime:60000});
+  const { data: invRaw }   = useQuery({queryKey:["costs-inv"],queryFn:()=>authFetch("/api/v1/supplier-invoices/").then(r => r.json()),staleTime:60000});
 
   const allInvoices = toArr(invRaw);
 

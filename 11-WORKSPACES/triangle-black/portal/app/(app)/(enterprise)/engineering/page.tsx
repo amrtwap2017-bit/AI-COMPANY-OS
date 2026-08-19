@@ -9,9 +9,9 @@ const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 export default function EngineeringHubPage() {
   const router = useRouter();
-  const { data: execDash } = useQuery(["eng-exec"], () => authFetch("/api/v1/executive/dashboard").then(r => r.data ?? r), {staleTime:60000});
-  const { data: timeDash } = useQuery(["eng-time"], () => authFetch("/api/v1/time-entries/summary").then(r => r.data ?? r), {staleTime:60000});
-  const { data: woRaw } = useQuery(["eng-wos"], () => authFetch("/api/v1/work-orders/?limit=10").then(r => r.data ?? r), {staleTime:30000});
+  const { data: execDash } = useQuery(["eng-exec"], () => authFetch("/api/v1/executive/dashboard").then(r => r.json()), {staleTime:60000});
+  const { data: timeDash } = useQuery(["eng-time"], () => authFetch("/api/v1/time-entries/summary").then(r => r.json()), {staleTime:60000});
+  const { data: woRaw } = useQuery(["eng-wos"], () => authFetch("/api/v1/work-orders/?limit=10").then(r => r.json()), {staleTime:30000});
   const ops = execDash?.operations?.work_orders || {};
   const time = timeDash?.totals || {};
   const wos = toArr(woRaw).slice(0,5);

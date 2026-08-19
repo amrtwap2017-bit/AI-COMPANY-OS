@@ -22,10 +22,10 @@ import { LoadingState } from "@/components/ui/LoadingState";
 import { DataTable }   from "@/components/ui/DataTable";
 
 // ── Fetch helpers ─────────────────────────────────────────────────────────────
-const fetchMyDay    = () => authFetch("/api/v1/workspace/my-day").then(r => r.data ?? r);
-const fetchApprovals = () => authFetch("/api/v1/approval-requests/").then(r => r.data ?? r);
-const fetchSLA      = () => authFetch("/api/v1/sla/breaches").then(r => r.data ?? r);
-const fetchWOs      = () => authFetch("/api/v1/work-orders/?limit=10&status=open").then(r => r.data ?? r);
+const fetchMyDay    = () => authFetch("/api/v1/workspace/my-day").then(r => r.json());
+const fetchApprovals = () => authFetch("/api/v1/approval-requests/").then(r => r.json());
+const fetchSLA      = () => authFetch("/api/v1/sla/breaches").then(r => r.json());
+const fetchWOs      = () => authFetch("/api/v1/work-orders/?limit=10&status=open").then(r => r.json());
 
 export default function MyDayPage() {
   const { user } = useAuth();

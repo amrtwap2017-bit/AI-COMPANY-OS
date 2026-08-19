@@ -20,7 +20,7 @@ export default function ProjectDetailPage() {
 
   const { data: proj, isLoading } = useQuery(
     ["proj-detail", id],
-    () => authFetch(`/api/v1/projects/${id}`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/projects/${id}`).then(r => r.json()),
     { enabled: !!id }
   );
 

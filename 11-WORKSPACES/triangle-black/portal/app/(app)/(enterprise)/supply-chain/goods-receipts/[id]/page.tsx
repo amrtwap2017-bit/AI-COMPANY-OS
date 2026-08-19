@@ -15,8 +15,8 @@ export default function GRNDetailPage() {
   const router = useRouter();
   const { id } = useParams();
 
-  const { data: grn, isLoading } = useQuery({ queryKey:["grn-detail",id], queryFn:()=>authFetch(`/api/v1/goods-receipt-notes/${id}`).then(r => r.data ?? r), enabled:!!id, staleTime:30000 });
-  const { data: rawItems } = useQuery({ queryKey:["grn-items",id], queryFn:()=>authFetch(`/api/v1/goods-receipt-notes/${id}/items`).then(r => r.data ?? r).catch(()=>[]), enabled:!!id, staleTime:30000 });
+  const { data: grn, isLoading } = useQuery({ queryKey:["grn-detail",id], queryFn:()=>authFetch(`/api/v1/goods-receipt-notes/${id}`).then(r => r.json()), enabled:!!id, staleTime:30000 });
+  const { data: rawItems } = useQuery({ queryKey:["grn-items",id], queryFn:()=>authFetch(`/api/v1/goods-receipt-notes/${id}/items`).then(r => r.json()).catch(()=>[]), enabled:!!id, staleTime:30000 });
 
   if (isLoading) return (
     <div className="min-h-screen bg-base flex items-center justify-center">

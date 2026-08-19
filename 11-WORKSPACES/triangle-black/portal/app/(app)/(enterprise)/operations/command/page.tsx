@@ -11,9 +11,9 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function OperationsCommandPage() {
   const router = useRouter();
 
-  const { data: dispatch, isLoading: loadD } = useQuery({ queryKey:["cmd-dispatch"], queryFn:()=>authFetch("/api/v1/dispatch/board").then(r => r.data ?? r), staleTime:30000, refetchInterval:60000 });
-  const { data: sla, isLoading: loadS } = useQuery({ queryKey:["cmd-sla"], queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => r.data ?? r), staleTime:60000 });
-  const { data: rawWOs } = useQuery({ queryKey:["cmd-wos"], queryFn:()=>authFetch("/api/v1/work-orders/?limit=50").then(r => r.data ?? r), staleTime:30000 });
+  const { data: dispatch, isLoading: loadD } = useQuery({ queryKey:["cmd-dispatch"], queryFn:()=>authFetch("/api/v1/dispatch/board").then(r => r.json()), staleTime:30000, refetchInterval:60000 });
+  const { data: sla, isLoading: loadS } = useQuery({ queryKey:["cmd-sla"], queryFn:()=>authFetch("/api/v1/sla/dashboard").then(r => r.json()), staleTime:60000 });
+  const { data: rawWOs } = useQuery({ queryKey:["cmd-wos"], queryFn:()=>authFetch("/api/v1/work-orders/?limit=50").then(r => r.json()), staleTime:30000 });
 
   const techs = toArr(dispatch?.technicians);
   const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);

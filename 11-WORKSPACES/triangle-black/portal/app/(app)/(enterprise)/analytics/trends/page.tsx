@@ -27,10 +27,10 @@ const WarmTooltip = ({ active, payload, label }: any) => {
 
 export default function AnalyticsTrends() {
   const router = useRouter();
-  const { data: woRaw }   = useQuery(["tr-wos"],   () => authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
-  const { data: invRaw }  = useQuery(["tr-inv"],   () => authFetch("/api/v1/invoices/").then(r => r.data ?? r));
-  const { data: pmRaw }   = useQuery(["tr-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r));
-  const { data: leadRaw } = useQuery(["tr-leads"], () => authFetch("/api/v1/leads-portal").then(r => r.data ?? r));
+  const { data: woRaw }   = useQuery(["tr-wos"],   () => authFetch("/api/v1/work-orders/").then(r => r.json()));
+  const { data: invRaw }  = useQuery(["tr-inv"],   () => authFetch("/api/v1/invoices/").then(r => r.json()));
+  const { data: pmRaw }   = useQuery(["tr-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
+  const { data: leadRaw } = useQuery(["tr-leads"], () => authFetch("/api/v1/leads-portal").then(r => r.json()));
 
   const wos   = toArr(woRaw);
   const inv   = toArr(invRaw);

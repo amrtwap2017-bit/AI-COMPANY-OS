@@ -18,10 +18,10 @@ export default function InvoicesPage() {
   const [filter, setFilter] = useState("all");
   const { data: raw, isLoading } = useQuery(
     ["invoices-list", filter],
-    () => authFetch(`/api/v1/supplier-invoices/${filter !== "all" ? `?status=${filter}` : ""}`).then(r => r.data ?? r),
+    () => authFetch(`/api/v1/supplier-invoices/${filter !== "all" ? `?status=${filter}` : ""}`).then(r => r.json()),
     { staleTime: 30000 }
   );
-  const { data: dash } = useQuery(["invoice-dash"], () => authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.data ?? r), { staleTime: 60000 });
+  const { data: dash } = useQuery(["invoice-dash"], () => authFetch("/api/v1/supplier-invoices/dashboard").then(r => r.json()), { staleTime: 60000 });
   const invoices = toArr(raw);
   const handleExport = (url: string) => {
     import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(url))

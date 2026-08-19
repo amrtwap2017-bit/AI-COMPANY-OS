@@ -20,8 +20,8 @@ export default function InspectionDashboardPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const { data: rawPlans, isLoading } = useQuery({ queryKey:["pm-plans-inspection"], queryFn:()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r), staleTime:60000 });
-  const { data: stats } = useQuery({ queryKey:["pm-stats-insp"], queryFn:()=>authFetch("/api/v1/pm-schedule/stats").then(r => r.data ?? r), staleTime:60000 });
+  const { data: rawPlans, isLoading } = useQuery({ queryKey:["pm-plans-inspection"], queryFn:()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()), staleTime:60000 });
+  const { data: stats } = useQuery({ queryKey:["pm-stats-insp"], queryFn:()=>authFetch("/api/v1/pm-schedule/stats").then(r => r.json()), staleTime:60000 });
 
   const plans = toArr(rawPlans);
   const now = new Date();

@@ -16,7 +16,7 @@ export default function PMPlansPage() {
   const [dueFilter,  setDueFilter]  = useState("all");
 
   const { data: raw, isLoading } = useQuery(
-    ["pm-list"],()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r),{refetchInterval:120000}
+    ["pm-list"],()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()),{refetchInterval:120000}
   );
   const plans = toArr(raw);
   const now   = new Date();

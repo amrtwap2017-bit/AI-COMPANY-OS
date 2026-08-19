@@ -20,7 +20,7 @@ export default function PurchaseRequestDetailPage() {
 
   const { data: pr, isLoading } = useQuery(
     ["pr-detail", id],
-    () => authFetch("/api/v1/purchase-requests-portal" + id).then(r => r.data ?? r),
+    () => authFetch("/api/v1/purchase-requests-portal" + id).then(r => r.json()),
     { enabled: !!id }
   );
 

@@ -27,13 +27,13 @@ const WarmTooltip = ({ active, payload, label }: any) => {
 
 export default function AnalyticsScorecards() {
   const router = useRouter();
-  const { data: dash }     = useQuery(["sc-dash"],    () => authFetch("/api/v1/dashboard/summary").then(r => r.data ?? r));
-  const { data: twin }     = useQuery(["sc-twin"],    () => authFetch("/api/v1/twin/state").then(r => r.data ?? r));
-  const { data: woRaw }    = useQuery(["sc-wos"],     () => authFetch("/api/v1/work-orders/").then(r => r.data ?? r));
-  const { data: invRaw }   = useQuery(["sc-inv"],     () => authFetch("/api/v1/invoices/").then(r => r.data ?? r));
-  const { data: assetRaw } = useQuery(["sc-assets"],  () => authFetch("/api/v1/assets/").then(r => r.data ?? r));
-  const { data: pmRaw }    = useQuery(["sc-pms"],     () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.data ?? r));
-  const { data: techRaw }  = useQuery(["sc-techs"],   () => authFetch("/api/v1/technicians/").then(r => r.data ?? r));
+  const { data: dash }     = useQuery(["sc-dash"],    () => authFetch("/api/v1/dashboard/summary").then(r => r.json()));
+  const { data: twin }     = useQuery(["sc-twin"],    () => authFetch("/api/v1/twin/state").then(r => r.json()));
+  const { data: woRaw }    = useQuery(["sc-wos"],     () => authFetch("/api/v1/work-orders/").then(r => r.json()));
+  const { data: invRaw }   = useQuery(["sc-inv"],     () => authFetch("/api/v1/invoices/").then(r => r.json()));
+  const { data: assetRaw } = useQuery(["sc-assets"],  () => authFetch("/api/v1/assets/").then(r => r.json()));
+  const { data: pmRaw }    = useQuery(["sc-pms"],     () => authFetch("/api/v1/maintenance/pm-plans/").then(r => r.json()));
+  const { data: techRaw }  = useQuery(["sc-techs"],   () => authFetch("/api/v1/technicians/").then(r => r.json()));
 
   const wos    = toArr(woRaw);
   const inv    = toArr(invRaw);

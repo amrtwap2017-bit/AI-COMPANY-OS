@@ -23,12 +23,12 @@ export default function ScopeOfWorkPage() {
   const [showNewSOW, setShowNewSOW] = useState(false);
   const [newSOW, setNewSOW] = useState({title:"",type:"service",client_name:"",currency:"EGP",estimated_days:7,labor_cost:0,materials_cost:0,overhead_pct:15,profit_margin_pct:10});
 
-  const { data: raw, isLoading } = useQuery(["sow-list"],()=>authFetch("/api/v1/scope-of-work/").then(r => r.data ?? r),{staleTime:60000});
+  const { data: raw, isLoading } = useQuery(["sow-list"],()=>authFetch("/api/v1/scope-of-work/").then(r => r.json()),{staleTime:60000});
   const sows = toArr(raw);
   const filtered = filter==="all"?sows:sows.filter((s: any) =>s.status===filter);
 
   const createSOW = useMutation(
-    (payload)=>authFetch("/api/v1/scope-of-work/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.data ?? r),
+    (payload)=>authFetch("/api/v1/scope-of-work/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(r => r.json()),
     {onSuccess:(data)=>{if(data.id||data.sow_number){toast.success("Scope of Work created");setShowNewSOW(false);setNewSOW({title:"",type:"service",client_name:"",currency:"EGP",estimated_days:7,labor_cost:0,materials_cost:0,overhead_pct:15,profit_margin_pct:10});qc.invalidateQueries(["sow-list"]);}else{toast.error(data.detail||"Failed to create SOW");}},onError:()=>toast.error("Connection error")}
   );
 

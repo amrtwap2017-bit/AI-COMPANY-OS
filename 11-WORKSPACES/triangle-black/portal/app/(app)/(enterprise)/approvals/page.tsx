@@ -14,13 +14,13 @@ export default function ApprovalsPage() {
   const router = useRouter();
   const qc = useQueryClient();
 
-  const { data: raw, isLoading } = useQuery(["approvals-all"], ()=>authFetch("/api/v1/approval-requests/").then(r => r.data ?? r), {staleTime:20000});
+  const { data: raw, isLoading } = useQuery(["approvals-all"], ()=>authFetch("/api/v1/approval-requests/").then(r => r.json()), {staleTime:20000});
   const approvals = toArr(raw);
   const pending = approvals.filter((a: any) =>a.status==="pending");
   const done = approvals.filter((a: any) =>a.status!=="pending");
 
   const approve = useMutation({
-    mutationFn: (id)=>authFetch(`/api/v1/approval-requests/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved_by:"amr@triangleblack.com"})}).then(r => r.data ?? r),
+    mutationFn: (id)=>authFetch(`/api/v1/approval-requests/${id}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approved_by:"amr@triangleblack.com"})}).then(r => r.json()),
     onSuccess: ()=>{ toast.success("Approval recorded successfully"); qc.invalidateQueries(["approvals-all"]); },
   });
 
