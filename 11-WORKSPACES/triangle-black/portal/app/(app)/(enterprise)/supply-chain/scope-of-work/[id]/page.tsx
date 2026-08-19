@@ -106,7 +106,7 @@ export default function SOWDetailPage() {
   };
 
   const handleCreateRFQ = () => {
-    const e = {};
+    const e: Record<string, any> = {};
     if (!rfqForm.title.trim()) e.title = "Title is required";
     if (!rfqForm.submission_deadline) e.submission_deadline = "Deadline is required";
     if (Object.keys(e).length) { setRFQErrors(e); return; }

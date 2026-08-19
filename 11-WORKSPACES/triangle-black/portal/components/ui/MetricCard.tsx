@@ -32,7 +32,7 @@ export function MetricCard({
   label, value, sub, icon, trend, trendValue,
   color = "amber", highlight, onClick, loading = false,
 }: Props) {
-  const c = colorMap[color] ?? colorMap.amber;
+  const c = (colorMap as Record<string, any>)[color] ?? colorMap.amber;
 
   if (loading) {
     return (

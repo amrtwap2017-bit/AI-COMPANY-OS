@@ -49,7 +49,7 @@ export default function PurchaseOrdersV2Page() {
   });
 
   const handleSubmit = () => {
-    const e = {};
+    const e: Record<string, any> = {};
     if (!form.vendor_id) e.vendor_id = "Vendor is required";
     if (!form.title.trim()) e.title = "Title is required";
     if (Object.keys(e).length) { setErrors(e); return; }

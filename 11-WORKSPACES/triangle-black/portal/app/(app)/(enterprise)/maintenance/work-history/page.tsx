@@ -24,7 +24,7 @@ export default function WorkHistoryPage() {
 
   const wos = toArr(rawWOs).filter((w: any) =>!w.deleted_at);
   const completed = wos.filter((w: any) =>w.status==="completed");
-  const byType = useMemo(()=>{const m={};wos.forEach((w: any) =>{m[w.type||"corrective"]=(m[w.type||"corrective"]||0)+1;});return m;},[wos]);
+  const byType = useMemo(()=>{const m: Record<string, any> = {};wos.forEach((w: any) =>{m[w.type||"corrective"]=(m[w.type||"corrective"]||0)+1;});return m;},[wos]);
   const types = ["all",...Object.keys(byType)];
   const compRate = wos.length>0?Math.round(completed.length/wos.length*100):0;
 

@@ -39,7 +39,7 @@ export default function AnalyticsTrends() {
   const now   = new Date();
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  const woByMonth = {};
+  const woByMonth: Record<string, any> = {};
   wos.forEach((w: any) => {
     if (!w.created_at) return;
     const date = new Date(w.created_at);
@@ -52,7 +52,7 @@ export default function AnalyticsTrends() {
   });
   const woTrendData = Object.values(woByMonth).sort((a: any, b: any) =>new Date(a.month).getTime()-new Date(b.month).getTime()).slice(-6);
 
-  const invByMonth = {};
+  const invByMonth: Record<string, any> = {};
   inv.forEach((i: any) => {
     if (!i.created_at) return;
     const date = new Date(i.created_at);

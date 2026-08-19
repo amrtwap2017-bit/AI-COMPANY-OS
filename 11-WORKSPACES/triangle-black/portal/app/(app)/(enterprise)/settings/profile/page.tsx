@@ -35,7 +35,7 @@ export default function ProfilePage() {
   });
 
   const handlePasswordChange = () => {
-    const e = {};
+    const e: Record<string, any> = {};
     if (!pwd.current) e.current = "Current password is required";
     if (!pwd.new_) e.new_ = "New password is required";
     else if (pwd.new_.length < 8) e.new_ = "Minimum 8 characters";

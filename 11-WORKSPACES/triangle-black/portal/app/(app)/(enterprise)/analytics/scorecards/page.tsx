@@ -67,8 +67,8 @@ export default function AnalyticsScorecards() {
     {name:"Overdue",   value:inv.filter((i: any) =>i.status==="overdue").length,   fill:"#A84A3D"},
     {name:"Cancelled", value:inv.filter((i: any) =>i.status==="cancelled").length, fill:"var(--color-text-3)"},
   ].filter((d: any) =>d.value>0);
-  const assetCategoryMap = {};
-  assets.forEach((a: any) => { const cat=a.category||"Other"; assetCategoryMap[cat]=(assetCategoryMap[cat]||0)+1; });
+  const assetCategoryMap: Record<string, any> = {};
+  assets.forEach((a: any) => { const cat=a.category||"Other"; (assetCategoryMap as Record<string, any>)[cat]=((assetCategoryMap as Record<string, any>)[cat]||0)+1; });
   const assetCategoryData = Object.entries(assetCategoryMap).map(([name,value])=>({name,value})).sort((a: any, b: any) =>b.value-a.value).slice(0,6);
   const kpiData = [
     {name:"WO Completion",   value:compRate,    fill:"#547C4D"},

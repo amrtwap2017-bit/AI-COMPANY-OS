@@ -31,7 +31,7 @@ export default function ServiceRequestsPage() {
   );
 
   const handleCreateSR = () => {
-    const errors = {};
+    const errors: Record<string, any> = {};
     if (!newSR.title?.trim()) errors.title = "Title is required";
     if (!newSR.submitted_by?.trim()) errors.submitted_by = "Requester name is required";
     if (Object.keys(errors).length) { setSrErrors(errors); toast.error("Please fix the errors"); return; }

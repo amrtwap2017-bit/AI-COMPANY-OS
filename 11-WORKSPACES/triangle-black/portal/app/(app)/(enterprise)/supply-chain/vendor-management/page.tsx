@@ -31,7 +31,7 @@ export default function VendorManagementPage() {
   );
 
   const handleCreateVendor = () => {
-    const errors = {};
+    const errors: Record<string, any> = {};
     if (!newV.company_name?.trim()) errors.company_name = "Company name is required";
     if (Object.keys(errors).length) { setVErrors(errors); return; }
     setVErrors({});

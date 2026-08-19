@@ -256,7 +256,7 @@ export function EnterpriseSidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
         {filteredGroups.map((group: any, gi: any) => {
-          const centers = group.items.map((k: any) => centerMap[k]).filter(Boolean);
+          const centers = group.items.map((k: any) => (centerMap as Record<string, any>)[k]).filter(Boolean);
           if (centers.length === 0) return null;
           return (
             <div key={group.label} className={gi > 0 ? "pt-3" : "pt-1"}>
