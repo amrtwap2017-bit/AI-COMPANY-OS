@@ -129,7 +129,7 @@ export default function AssetTreePage() {
             <div className="space-y-3">{[1,2,3].map((i: any) => <div key={i} className="h-16 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           ) : (
             <div className="space-y-3">
-              {cats.filter(cat => (groupedByCat[cat]||[]).length > 0).map(cat => {
+              {cats.filter((cat: any) => (groupedByCat[cat]||[]).length > 0).map((cat: any) => {
                 const catAssets   = groupedByCat[cat] || [];
                 const isExpanded  = expandedCats[cat] !== false;
                 const catFaulted  = catAssets.filter((a: any) => a.status === "In Fault").length;

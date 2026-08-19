@@ -68,8 +68,8 @@ export default function ReportsPage() {
   const exportCSV = () => {
     if (!reportRows.length) return;
     const headers = columns.join(",");
-    const rows = reportRows.map(row =>
-      columns.map(col => {
+    const rows = reportRows.map((row: any) =>
+      columns.map((col: any) => {
         const v = row[col];
         if (v === null || v === undefined) return "";
         const s = String(v).replace(/"/g,'""');
@@ -109,7 +109,7 @@ export default function ReportsPage() {
             )}
           </div>
           <div className="flex gap-2 flex-wrap">
-            {CATEGORIES.map(cat=>(
+            {CATEGORIES.map((cat: any) =>(
               <button key={cat} onClick={()=>setActiveCategory(cat)}
                 className={`tb-btn tb-btn-sm ${activeCategory===cat?"tb-btn-primary":"tb-btn-ghost"}`}>
                 {cat}

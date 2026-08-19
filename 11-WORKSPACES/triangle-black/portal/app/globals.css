@@ -1387,7 +1387,7 @@
 }
 
 /* IVORY OPERATIONS — Warm parchment luxury light (default) */
-[data-theme="ivory"],
+[data-theme="ivory"], /* #F4F4F2 compat */
 [data-theme="light"],
 [data-theme="corporate"],
 :root:not([data-theme]) {

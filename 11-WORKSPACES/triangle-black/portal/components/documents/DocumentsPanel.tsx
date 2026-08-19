@@ -125,7 +125,7 @@ export default function DocumentsPanel({ entityType, entityId, title = "Document
             <div>
               <label className="text-xs text-tertiary block mb-1">Category *</label>
               <select className="tb-input w-full" value={form.doc_category} onChange={(e: any) =>setForm({...form,doc_category:e.target.value})}>
-                {(categories.length > 0 ? categories : Object.keys(CAT_LABELS)).map(cat=>(
+                {(categories.length > 0 ? categories : Object.keys(CAT_LABELS)).map((cat: any) =>(
                   <option key={cat} value={cat}>{(CAT_LABELS as Record<string, any>)[cat]||cat}</option>
                 ))}
               </select>

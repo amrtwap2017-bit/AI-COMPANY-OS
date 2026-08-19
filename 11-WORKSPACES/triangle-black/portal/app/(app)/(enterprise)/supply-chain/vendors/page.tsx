@@ -55,7 +55,7 @@ export default function VendorsPage() {
         <div className="flex gap-3 mb-5 flex-wrap items-center">
           <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search vendors..." className="tb-input" style={{minWidth:"240px",width:"auto"}} />
           <div className="tb-tabs border-0 mb-0">
-            {categories.map(cat=>(
+            {categories.map((cat: any) =>(
               <button key={cat} onClick={()=>setFilterCat(cat)} className={`tb-tab ${filterCat===cat?"active":""}`}>
                 {cat==="all"?"All Categories":cat}
               </button>

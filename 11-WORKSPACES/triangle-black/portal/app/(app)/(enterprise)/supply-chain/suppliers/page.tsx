@@ -153,7 +153,7 @@ export default function SuppliersPage() {
           <div className="tb-section">
             <div className="tb-section-title">Suppliers by Category</div>
             <div className="space-y-2">
-              {cats.map(cat => {
+              {cats.map((cat: any) => {
                 const cnt = supps.filter((s: any) => s.category === cat).length;
                 const pct = supps.length > 0 ? (cnt / supps.length) * 100 : 0;
                 const c = CATEGORY_COLOR[cat?.toLowerCase()] || "#6D5F53";

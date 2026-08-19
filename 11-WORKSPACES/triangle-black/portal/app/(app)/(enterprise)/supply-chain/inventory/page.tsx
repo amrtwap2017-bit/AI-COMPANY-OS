@@ -170,7 +170,7 @@ export default function InventoryPage() {
           <div className="tb-section">
             <div className="tb-section-title">Items by Category</div>
             <div className="flex flex-col gap-2">
-              {cats.map(cat=>{
+              {cats.map((cat: any) =>{
                 const cnt = items.filter((i: any) =>i.category===cat).length;
                 const pct = items.length>0?(cnt/items.length)*100:0;
                 const low = enriched.filter((i: any) =>i.category===cat&&i.is_low).length;

@@ -53,7 +53,7 @@ export default function AnalyticsCostsPage() {
     if (datePreset==="custom"&&customFrom) { from=new Date(customFrom); if(customTo) to=new Date(customTo); }
     else { const range=getPresetRange(datePreset); from=range.from; to=range.to; }
     if (!from) return allInvoices;
-    return allInvoices.filter(inv=>{const d=new Date(inv.created_at||inv.updated_at||0);return d>=from&&d<=to;});
+    return allInvoices.filter((inv: any) =>{const d=new Date(inv.created_at||inv.updated_at||0);return d>=from&&d<=to;});
   },[allInvoices,datePreset,customFrom,customTo]);
 
   const rev = finDash?.revenue||{};

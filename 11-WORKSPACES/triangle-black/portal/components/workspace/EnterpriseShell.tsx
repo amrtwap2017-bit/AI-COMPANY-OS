@@ -23,7 +23,7 @@ export function EnterpriseShell({ children, rail }: EnterpriseShellProps) {
   const [commandOpen, setCommandOpen] = useState(false);
   const pathname = usePathname();
 
-  const centerKey = Object.keys(CENTER_SUB_NAV).find(key =>
+  const centerKey = Object.keys(CENTER_SUB_NAV).find((key: any) =>
     pathname.startsWith("/" + key)
   );
   const subNavItems = centerKey ? (CENTER_SUB_NAV as Record<string, any>)[centerKey] : [];

@@ -29,7 +29,7 @@ export default function InvoiceMatchingPage() {
   const overdue = toArr(dash?.overdue);
   const isLoading = loadingDash||loadingInv;
 
-  const filtered = useMemo(()=>invoices.filter(inv=>{
+  const filtered = useMemo(()=>invoices.filter((inv: any) =>{
     const q = search.toLowerCase();
     return (!search||(inv.invoice_number||"").toLowerCase().includes(q)||(inv.vendor_name||inv.supplier_name||"").toLowerCase().includes(q))
       && (filterStatus==="all"||inv.status===filterStatus);

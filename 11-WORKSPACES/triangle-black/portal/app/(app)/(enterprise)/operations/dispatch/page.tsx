@@ -159,7 +159,7 @@ export default function DispatchBoardPage() {
           <div className="tb-grid-3">{[1,2,3].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:384}}/>)}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {COLUMNS.map(col=>{
+            {COLUMNS.map((col: any) =>{
               const cfg = (STATUS_CONFIG as Record<string, any>)[col];
               const wos = board[col] || [];
               return (

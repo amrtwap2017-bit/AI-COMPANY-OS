@@ -67,7 +67,7 @@ export function CreateModal({
       if (!res.ok) throw new Error(data.detail || data.message || "Failed to create");
 
       // Invalidate queries to refresh lists
-      invalidateKeys.forEach(key => qc.invalidateQueries([key]));
+      invalidateKeys.forEach((key: any) => qc.invalidateQueries([key]));
       setCreated(data);
       setDone(true);
       if (onSuccess) onSuccess(data);
@@ -161,7 +161,7 @@ export function CreateModal({
                       onFocus={(e: any) => e.target.style.borderColor="var(--color-brand)"}
                       onBlur={(e: any) => e.target.style.borderColor="var(--color-border)"}>
                       <option value="">— Select {field.label} —</option>
-                      {(field.options||[]).map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                      {(field.options||[]).map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                   ) : field.type === "textarea" ? (
                     <textarea

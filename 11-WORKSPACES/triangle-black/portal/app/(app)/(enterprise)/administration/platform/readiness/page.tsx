@@ -140,7 +140,7 @@ export default function PlatformReadinessPage() {
       <div className="space-y-4">
         <h2 className="font-bold text-[var(--color-text-1)] text-lg">Platform Capabilities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {PLATFORM_CAPABILITIES.map(cat => (
+          {PLATFORM_CAPABILITIES.map((cat: any) => (
             <div key={cat.category} className="bg-white border border-gray-200 rounded-xl p-4">
               <p className="font-semibold text-[var(--color-text-1)] mb-3">{cat.category}</p>
               <div className="space-y-1.5">

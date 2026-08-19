@@ -74,7 +74,7 @@ export function ActionBar({ search, filters=[], actions=[], count, onClear, hasF
             cursor:       "pointer",
             fontWeight:   f.value !== "all" ? 600 : 400,
           }}>
-          {f.options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          {f.options.map((opt: any) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
       ))}
 

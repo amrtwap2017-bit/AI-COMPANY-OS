@@ -30,7 +30,7 @@ export default function InvoicesPage() {
   const overdueValue = overdue.reduce((s: any, i: any) =>s+Number(i.total_amount||0),0);
   const collRate     = totalValue>0?Math.round(paidValue/totalValue*100):0;
 
-  const filtered = invoices.filter(inv=>{
+  const filtered = invoices.filter((inv: any) =>{
     const ms = !search||inv.invoice_number?.toLowerCase().includes(search.toLowerCase())||inv.id?.slice(0,8).includes(search);
     return ms&&(statusF==="all"||inv.status===statusF);
   }).sort((a: any, b: any) =>{const o={overdue:0,pending:1,paid:2,cancelled:3};return(o[a.status]??2)-(o[b.status]??2);});

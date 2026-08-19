@@ -50,7 +50,7 @@ export function DataTable<T extends Record<string, any>>({
         <table className="w-full border-collapse">
           <thead>
             <tr className={"border-b " + (stickyHeader ? "sticky top-0 z-10" : "")}>
-              {columns.map(col => (
+              {columns.map((col: any) => (
                 <th
                   key={col.key}
                   style={col.width ? { width: col.width } : undefined}
@@ -78,7 +78,7 @@ export function DataTable<T extends Record<string, any>>({
           <tbody>
             {loading && Array.from({ length: 6 }).map((_, i) => (
               <tr key={i} className={"border-b border-divider " + (i % 2 === 0 ? "bg-white" : "/40")}>
-                {columns.map(col => (
+                {columns.map((col: any) => (
                   <td key={col.key} className="px-4 py-3.5">
                     <div className="skeleton h-3.5 rounded" style={{ width: (50 + (i * 13) % 40) + "%" }} />
                   </td>
@@ -103,7 +103,7 @@ export function DataTable<T extends Record<string, any>>({
                   (onRow ? " cursor-pointer hover:bg-amber-50/60" : " hover:")
                 }
               >
-                {columns.map(col => (
+                {columns.map((col: any) => (
                   <td
                     key={col.key}
                     className={
