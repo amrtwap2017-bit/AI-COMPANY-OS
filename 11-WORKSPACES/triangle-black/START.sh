@@ -26,3 +26,16 @@ curl -s http://localhost:8030/health | python3 -c "import json,sys; d=json.load(
 curl -s http://localhost:3000/api/v1/ai/signals/summary | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'Portal proxy OK: critical={d[\"critical\"]} high={d[\"high\"]}')" 2>/dev/null
 echo ""
 echo "Open: http://localhost:3000"
+
+# ── REDIS (optional — Sprint-205) ────────────────────────────
+if command -v redis-cli &> /dev/null && redis-cli ping &> /dev/null; then
+  echo "Redis: already running on 6379"
+  export REDIS_URL=redis://localhost:6379/0
+  export ENABLE_TENANT_RATE_LIMIT=1
+elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q tb-redis; then
+  echo "Redis: running in Docker"
+  export REDIS_URL=redis://localhost:6379/0
+  export ENABLE_TENANT_RATE_LIMIT=1
+else
+  echo "Redis: not running — using in-memory cache fallback"
+fi
