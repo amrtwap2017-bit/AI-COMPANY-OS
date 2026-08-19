@@ -41,9 +41,9 @@ export default function EmployeeDetailPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     Promise.all([
-      tbFetch(`/api/v1/employees/${id}`).then(r => r.json()),
-      tbFetch(`/api/v1/timesheets/?employee_id=${id}&limit=100`).then(r => r.json()),
-      tbFetch(`/api/v1/timesheets/employee/${id}/summary`).then(r => r.json()),
+      tbFetch(`/api/v1/employees/${id}`).then(r => r.data ?? r),
+      tbFetch(`/api/v1/timesheets/?employee_id=${id}&limit=100`).then(r => r.data ?? r),
+      tbFetch(`/api/v1/timesheets/employee/${id}/summary`).then(r => r.data ?? r),
     ]).then(([emp, ts, sum]) => {
       setEmployee(emp);
       setTimesheets(Array.isArray(ts.results) ? ts.results : []);

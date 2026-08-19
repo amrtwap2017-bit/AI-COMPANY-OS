@@ -16,7 +16,7 @@ function AISignalsPageInner() {
 
   const loadData = () => {
     setLoading(true);
-    tbFetch("/api/v1/ai/signals/summary").then(r => r.json())
+    tbFetch("/api/v1/ai/signals/summary").then(r => r.data ?? r)
       .then(d => { setSummary(d); setLast(new Date().toLocaleTimeString("en-GB")); })
       .catch(() => {})
       .finally(() => setLoading(false));

@@ -25,10 +25,10 @@ export default function MaintenanceReportsPage() {
   useEffect(() => {
     if (!mounted) return;
     Promise.all([
-      tbFetch("/api/v1/maintenance/downtime").then(r => r.json()).catch(() => ({})),
-      tbFetch("/api/v1/maintenance/costs").then(r => r.json()).catch(() => ({})),
-      tbFetch("/api/v1/maintenance/work-items").then(r => r.json()).catch(() => ({})),
-      tbFetch("/api/v1/maintenance/dashboard").then(r => r.json()).catch(() => ({})),
+      tbFetch("/api/v1/maintenance/downtime").then(r => r.data ?? r).catch(() => ({})),
+      tbFetch("/api/v1/maintenance/costs").then(r => r.data ?? r).catch(() => ({})),
+      tbFetch("/api/v1/maintenance/work-items").then(r => r.data ?? r).catch(() => ({})),
+      tbFetch("/api/v1/maintenance/dashboard").then(r => r.data ?? r).catch(() => ({})),
     ]).then(([dt, c, wi, dash]) => {
       setDowntime(dt);
       setCosts(c);

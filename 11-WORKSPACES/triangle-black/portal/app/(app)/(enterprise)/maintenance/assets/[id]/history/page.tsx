@@ -38,9 +38,9 @@ export default function AssetHistoryPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     Promise.all([
-      tbFetch(`/api/v1/assets/${id}`).then(r => r.json()).catch(() => null),
-      tbFetch(`/api/v1/maintenance/pm-plans/`).then(r => r.json()).catch(() => []),
-      tbFetch(`/api/v1/work-orders/?limit=200`).then(r => r.json()).catch(() => []),
+      tbFetch(`/api/v1/assets/${id}`).then(r => r.data ?? r).catch(() => null),
+      tbFetch(`/api/v1/maintenance/pm-plans/`).then(r => r.data ?? r).catch(() => []),
+      tbFetch(`/api/v1/work-orders/?limit=200`).then(r => r.data ?? r).catch(() => []),
     ]).then(([a, plans, wos]) => {
       setAsset(a);
       const plist = Array.isArray(plans) ? plans : plans?.plans || [];

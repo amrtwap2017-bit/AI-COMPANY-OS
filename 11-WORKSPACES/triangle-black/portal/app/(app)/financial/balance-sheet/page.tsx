@@ -143,7 +143,7 @@ export default function BalanceSheetPage() {
           {genAt && <p className="text-xs text-gray-400 mt-1">Generated: {genAt}</p>}
         </div>
         <button
-          onClick={() => { setLoading(true); tbFetch("/api/v1/financial/gl/balance-sheet").then(r=>r.json()).then(setData).finally(()=>setLoading(false)); }}
+          onClick={() => { setLoading(true); tbFetch("/api/v1/financial/gl/balance-sheet").then(r => r.data ?? r).then(setData).finally(()=>setLoading(false)); }}
           className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
         >
           ↻ Refresh

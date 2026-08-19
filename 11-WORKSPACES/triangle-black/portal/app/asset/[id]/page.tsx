@@ -30,8 +30,8 @@ export default function AssetScanPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     Promise.all([
-      tbFetch(`/api/v1/assets/${id}`).then(r => r.json()).catch(() => null),
-      tbFetch(`/api/v1/work-orders/?limit=10`).then(r => r.json()).catch(() => []),
+      tbFetch(`/api/v1/assets/${id}`).then(r => r.data ?? r).catch(() => null),
+      tbFetch(`/api/v1/work-orders/?limit=10`).then(r => r.data ?? r).catch(() => []),
     ]).then(([a, wos]) => {
       setAsset(a);
       const items = Array.isArray(wos) ? wos : wos?.results || wos?.items || [];

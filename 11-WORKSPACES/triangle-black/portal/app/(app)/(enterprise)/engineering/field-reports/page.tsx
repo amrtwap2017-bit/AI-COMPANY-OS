@@ -57,7 +57,7 @@ export default function EngineeringFieldReportsPage() {
     if (!mounted) return;
     Promise.all(
       SECTION_CONFIG.map(s =>
-        tbFetch(`${s.endpoint}?limit=20`).then(r => r.json()).catch(() => [])
+        tbFetch(`${s.endpoint}?limit=20`).then(r => r.data ?? r).catch(() => [])
       )
     ).then(results => {
       const d: Record<string,any[]> = {};

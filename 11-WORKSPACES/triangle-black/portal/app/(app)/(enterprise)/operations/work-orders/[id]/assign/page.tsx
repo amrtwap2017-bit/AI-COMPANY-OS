@@ -22,8 +22,8 @@ export default function WorkOrderAssignPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     Promise.all([
-      tbFetch(`/api/v1/work-orders/${id}`).then(r => r.json()),
-      tbFetch("/api/v1/technicians/?limit=100").then(r => r.json()),
+      tbFetch(`/api/v1/work-orders/${id}`).then(r => r.data ?? r),
+      tbFetch("/api/v1/technicians/?limit=100").then(r => r.data ?? r),
     ]).then(([woData, techData]) => {
       setWo(woData);
       const techs = Array.isArray(techData) ? techData : techData?.results || techData?.items || [];

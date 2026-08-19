@@ -54,9 +54,9 @@ export default function PlatformMetricsPage() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      tbFetch("/api/v1/executive-kpi/summary").then(r => r.json()).catch(() => ({})),
-      tbFetch("/api/v1/executive-kpi/scorecard").then(r => r.json()).catch(() => ({})),
-      tbFetch("/api/v1/maintenance/dashboard").then(r => r.json()).catch(() => ({})),
+      tbFetch("/api/v1/executive-kpi/summary").then(r => r.data ?? r).catch(() => ({})),
+      tbFetch("/api/v1/executive-kpi/scorecard").then(r => r.data ?? r).catch(() => ({})),
+      tbFetch("/api/v1/maintenance/dashboard").then(r => r.data ?? r).catch(() => ({})),
     ]).then(([kpi, sc, maint]) => {
       setKpiSummary(kpi);
       setScorecard(sc);

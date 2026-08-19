@@ -15,7 +15,7 @@ export default function TechnicianProfilePage() {
 
   useEffect(() => {
     if (!mounted) return;
-    tbFetch("/api/v1/auth/me").then(r => r.json()).then(setProfile).catch(() => {});
+    tbFetch("/api/v1/auth/me").then(r => r.data ?? r).then(setProfile).catch(() => {});
   }, [mounted]);
 
   const handleLogout = () => {

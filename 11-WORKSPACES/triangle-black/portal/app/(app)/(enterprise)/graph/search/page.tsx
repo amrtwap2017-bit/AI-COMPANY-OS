@@ -28,7 +28,7 @@ export default function KnowledgeGraphSearchPage() {
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     if (!mounted) return;
-    tbFetch("/api/v1/knowledge-graph/").then(r=>r.json()).then(setSummary).catch(()=>{});
+    tbFetch("/api/v1/knowledge-graph/").then(r => r.data ?? r).then(setSummary).catch(()=>{});
   }, [mounted]);
 
   const search = async (q: string) => {

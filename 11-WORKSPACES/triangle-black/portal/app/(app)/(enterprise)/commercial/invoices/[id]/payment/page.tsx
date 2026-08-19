@@ -34,8 +34,8 @@ export default function InvoicePaymentPage() {
   useEffect(() => {
     if (!mounted || !id) return;
     Promise.all([
-      tbFetch(`/api/v1/invoices/${id}`).then(r => r.json()),
-      tbFetch(`/api/v1/invoices/${id}/payments`).then(r => r.json()).catch(() => []),
+      tbFetch(`/api/v1/invoices/${id}`).then(r => r.data ?? r),
+      tbFetch(`/api/v1/invoices/${id}/payments`).then(r => r.data ?? r).catch(() => []),
     ]).then(([inv, pmts]) => {
       setInvoice(inv);
       const plist = Array.isArray(pmts) ? pmts : pmts?.payments || pmts?.results || [];
