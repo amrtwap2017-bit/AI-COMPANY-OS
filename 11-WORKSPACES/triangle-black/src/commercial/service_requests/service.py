@@ -262,3 +262,13 @@ class ServiceRequestService:
             )
         except Exception:
             pass  # Never block on audit failure
+
+    # ── Compatibility Aliases for T-017 ──
+    def get_by_id(self, sr_id: str, hotel_id: str) -> Optional[Dict[str, Any]]:
+        return self.get(sr_id, hotel_id)
+
+    def list_by_status(self, hotel_id: str, status: str, limit: int = 50, skip: int = 0) -> Dict[str, Any]:
+        return self.list(hotel_id, status=status, limit=limit, skip=skip)
+
+    def update_status(self, sr_id: str, hotel_id: str, actor_id: str, new_status: str) -> Dict[str, Any]:
+        return self.transition(sr_id, hotel_id, actor_id, new_status)

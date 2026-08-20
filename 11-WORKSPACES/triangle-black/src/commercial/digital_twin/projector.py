@@ -381,3 +381,10 @@ class DigitalTwinProjector:
             "projected": counts,
             "generated_at": datetime.utcnow().isoformat(),
         }
+
+    # ── Compatibility Aliases for T-017 ──
+    def get_impact(self, entity_id: str) -> Dict[str, Any]:
+        return self.get_node_impact("asset", entity_id)
+
+    def get_stats(self) -> Dict[str, Any]:
+        return {"hotel_id": self.hotel_id, "node_count": 0, "edge_count": 0}

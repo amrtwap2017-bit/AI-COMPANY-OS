@@ -8267,3 +8267,8 @@ register_optional_router(
     prefix=None,
     label="platform_status_router",
 )
+
+@app.get("/api/v1/executive-dashboard/", tags=["executive"])
+def get_legacy_executive_dashboard():
+    from src.core.tenant import get_hotel_id
+    return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}

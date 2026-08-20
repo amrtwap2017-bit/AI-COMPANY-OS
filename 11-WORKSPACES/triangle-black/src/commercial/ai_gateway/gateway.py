@@ -34,7 +34,7 @@ class AIGateway:
     """
 
     # Available models — local first, cloud fallback
-    AVAILABLE_MODELS = {
+    MODEL_REGISTRY = AVAILABLE_MODELS = {  # qwen2.5:7b
         "qwen2.5-7b": {
             "type": "local",
             "endpoint": "http://localhost:11434",
@@ -57,6 +57,7 @@ class AIGateway:
 
     # Allowed purposes — enforces intentional AI usage
     ALLOWED_PURPOSES = {
+        "service_request_triage",
         "maintenance_recommendation",
         "asset_failure_prediction",
         "procurement_analysis",

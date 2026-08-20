@@ -158,3 +158,12 @@ def list_allowed_purposes(
         "hotel_id": hotel_id,
         "purposes": sorted(AIGateway.ALLOWED_PURPOSES),
     }
+
+@router.get("/registry")
+def get_ai_registry(hotel_id: str = Depends(get_hotel_id)):
+    """Compatibility registry endpoint."""
+    return {
+        "models": ["qwen2.5:7b", "default"],
+        "purposes": sorted(AIGateway.ALLOWED_PURPOSES),
+        "hotel_id": hotel_id,
+    }

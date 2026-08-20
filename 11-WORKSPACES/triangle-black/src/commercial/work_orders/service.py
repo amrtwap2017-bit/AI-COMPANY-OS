@@ -300,3 +300,14 @@ class WorkOrderService:
             )
         except Exception:
             pass
+
+    # ── Compatibility Aliases for T-017 ──
+    def create_from_service_request(self, sr_id: str, hotel_id: str, actor_id: str, title: str, **kwargs) -> Dict[str, Any]:
+        return self.create_from_sr(sr_id, hotel_id, actor_id, title, **kwargs)
+
+    def close(self, wo_id: str, hotel_id: str, actor_id: str) -> Dict[str, Any]:
+        # Complete/close mapping
+        from sqlalchemy import text as _text
+        self.db.execute(_text("UPDATE work_orders SET status = 'closed' WHERE id = :id AND hotel_id = :hid"), {"id": wo_id, "hid": hotel_id})
+        self.db.commit()
+        return {"id": wo_id, "status": "closed"}

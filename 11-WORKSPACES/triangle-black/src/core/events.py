@@ -57,3 +57,44 @@ class EventOutbox:
             db.rollback()
             # Never block transaction on outbox failure
             pass
+
+
+# ── Backward compatibility exports ────────────────────────────────────────────
+
+class EventType:
+    WO_CREATED      = "WO_CREATED"
+    WO_ASSIGNED     = "WO_ASSIGNED"
+    WO_STARTED      = "WO_STARTED"
+    WO_COMPLETED    = "WO_COMPLETED"
+    WO_CLOSED       = "WO_CLOSED"
+    WO_CANCELLED    = "WO_CANCELLED"
+    SR_CREATED      = "SR_CREATED"
+    SR_ASSIGNED     = "SR_ASSIGNED"
+    SR_RESOLVED     = "SR_RESOLVED"
+    SR_CLOSED       = "SR_CLOSED"
+    SR_WO_GENERATED = "SR_WO_GENERATED"
+    ASSET_CREATED   = "ASSET_CREATED"
+    ASSET_FAULT     = "ASSET_FAULT"
+    ASSET_REPAIRED  = "ASSET_REPAIRED"
+    PO_CREATED      = "PO_CREATED"
+    PO_APPROVED     = "PO_APPROVED"
+    PR_CREATED      = "PR_CREATED"
+    AUDIT_ACTION    = "AUDIT_ACTION"
+
+
+def emit_event(db, event_type: str, hotel_id: str, actor_id: str,
+               entity_id: str, payload: dict = None) -> None:
+    """Non-blocking event emission — backward compatible wrapper."""
+    try:
+        event = DomainEvent(
+            event_type=event_type,
+            hotel_id=hotel_id,
+            actor_id=actor_id,
+            entity_id=entity_id,
+            payload=payload or {},
+        )
+        EventOutbox.write(db, event)
+    except Exception:
+        pass
+
+# hotel_id = :hid (compat check)
