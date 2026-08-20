@@ -74,9 +74,15 @@ def test_sla_breached_pagination():
 
 # ── Application service layer (T-005) ─────────────────────────────────────
 def test_sr_service_file_structure():
-    src = (SRC / "commercial/work_orders/service.py").read_text()
+    src = (SRC / "commercial/service_requests/service.py").read_text()
     for m in ["get_by_id", "list_by_status", "create",
               "update_status", "generate_work_order"]:
+        assert f"def {m}" in src
+
+def test_wo_service_file_structure():
+    src = (SRC / "commercial/work_orders/service.py").read_text()
+    for m in ["create_from_service_request", "complete", "close",
+              "get_sla_summary"]:
         assert f"def {m}" in src
 
 def test_wo_service_file_structure():
