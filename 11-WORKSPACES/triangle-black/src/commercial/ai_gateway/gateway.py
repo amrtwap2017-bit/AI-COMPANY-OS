@@ -172,6 +172,7 @@ class AIGateway:
             "actor_id": self.actor_id,
             "created_at": datetime.utcnow().isoformat(),
             "status": "success",
+            "success": True,
         }
 
         # 7. Audit
@@ -282,6 +283,7 @@ Keep response under 300 words. Be specific and operational."""
             "actor_id": self.actor_id,
             "created_at": datetime.utcnow().isoformat(),
             "status": status,
+            "success": False,
             "error": error,
         }
 

@@ -21,7 +21,6 @@ Triangle Black — Main FastAPI Application v1.4.0
 Hotel Engineering Platform — Multi-hotel tenant isolation
 """
 from src.commercial.executive_intelligence.router import router as executive_intelligence_router
-from src.commercial.ai_gateway.router import router as ai_gateway_router
 from fastapi import Depends, FastAPI, Form, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import logging
