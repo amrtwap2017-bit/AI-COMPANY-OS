@@ -8,7 +8,7 @@ pkill -f "next-server|next dev" 2>/dev/null
 sleep 2
 
 # Start Backend
-export DISABLE_RATE_LIMIT=1
+export TB_SECRET_KEY="${TB_SECRET_KEY:-triangle-black-dev-secret-2026}" DISABLE_RATE_LIMIT=1
 cd "$TB" && nohup .venv/bin/python3 -m uvicorn src.main:app \
     --host 0.0.0.0 --port 8030 --workers 1 --log-level warning \
     > /tmp/tb_backend.log 2>&1 &
