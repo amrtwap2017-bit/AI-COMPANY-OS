@@ -153,3 +153,15 @@ Last updated: August 18, 2026
 
 ## Next Sprint: T-009 — Organization ID Migration
 Awaiting GO signal.
+
+## U-001 — DONE (Clean Test Baseline)
+
+| Item | Result |
+|------|--------|
+| Target Test Group | 189+ PASS (0 failures) |
+| E2E Suite | 195 PASS |
+| Auth Fallback Gap | Documented in test assertions & warnings |
+| TB_SECRET_KEY | Stabilized in START.sh |
+
+## Next Sprint: U-002 — Complete DDD for 15 Router-Only Business Modules
+Awaiting GO signal.
