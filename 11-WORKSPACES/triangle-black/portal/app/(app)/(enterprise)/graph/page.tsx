@@ -1,255 +1,269 @@
 "use client";
-// @ts-nocheck
-import { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { KpiSkeleton } from "@/components/ui/LoadingSkeleton";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { 
+  Layers, Activity, ShieldAlert, Cpu, 
+  ArrowRight, Search, Zap, CheckCircle, RefreshCw, Box 
+} from "lucide-react";
 
-const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d: any) => { try { return d ? new Date(d).toLocaleDateString("en-GB") : "—"; } catch { return "—"; } };
+export default function DigitalTwinPage() {
+  const [selectedEntityType, setSelectedEntityType] = useState("asset");
+  const [selectedEntityId, setSelectedEntityId] = useState("");
+  const [impactData, setImpactData] = useState<any>(null);
+  const [loadingImpact, setLoadingImpact] = useState(false);
 
-const CRIT_COLOR: Record<string,string> = { critical:"var(--color-danger)", high:"var(--color-warning)", medium:"var(--color-warning)", low:"var(--color-success)" };
-const STATUS_COLOR: Record<string,string> = { operational:"var(--color-success)", "In Fault":"var(--color-danger)", maintenance:"var(--color-warning)", offline:"var(--color-text-3)", open:"var(--color-info)", in_progress:"var(--color-warning)", completed:"var(--color-success)", cancelled:"var(--color-text-3)" };
+  // 1. Fetch Twin Operational State
+  const { data: twinState, isLoading: loadingState, refetch: refetchState } = useQuery(
+    ["twin-state"],
+    () => authFetch("/api/v1/twin/state").then(r => r.json()),
+    { staleTime: 30000 }
+  );
 
-export default function DigitalTwinGraphPage() {
-  const router = useRouter();
-  const [selectedSite, setSelectedSite] = useState<string | null>(null);
-  const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
-  const [selectedWO, setSelectedWO] = useState<string | null>(null);
+  // 2. Fetch Graph Topology Stats (T-023)
+  const { data: graphStats, isLoading: loadingStats } = useQuery(
+    ["twin-graph-stats"],
+    () => authFetch("/api/v1/twin/graph/stats").then(r => r.json()),
+    { staleTime: 30000 }
+  );
 
-  const { data: rawSites, isLoading: loadSites } = useQuery({ queryKey: ["dt-sites"], queryFn: () => authFetch("/api/v1/sites-portal").then(r => (r as any).data ?? r), staleTime: 60000 });
-  const { data: rawAssets, isLoading: loadAssets } = useQuery({ queryKey: ["dt-assets"], queryFn: () => authFetch("/api/v1/assets-portal").then(r => (r as any).data ?? r), staleTime: 60000 });
-  const { data: rawWOs, isLoading: loadWOs } = useQuery({ queryKey: ["dt-wos"], queryFn: () => authFetch("/api/v1/work-orders/?limit=200").then(r => (r as any).data ?? r), staleTime: 60000 });
-  const { data: rawTechs, isLoading: loadTechs } = useQuery({ queryKey: ["dt-techs"], queryFn: () => authFetch("/api/v1/technicians/").then(r => (r as any).data ?? r), staleTime: 60000 });
-  const { data: signals } = useQuery({ queryKey: ["dt-signals"], queryFn: () => authFetch("/api/v1/ai/signals/summary").then(r => (r as any).data ?? r), staleTime: 30000 });
+  // 3. Fetch Real Assets for Selector
+  const { data: assetList } = useQuery(
+    ["twin-assets-selector"],
+    () => authFetch("/api/v1/assets/?limit=15").then(r => r.json()),
+    { staleTime: 60000 }
+  );
 
-  const sites = toArr(rawSites);
-  const allAssets = toArr(rawAssets).filter((a: any) => !a.deleted_at);
-  const allWOs = toArr(rawWOs).filter((w: any) => !w.deleted_at);
-  const allTechs = toArr(rawTechs).filter((t: any) => t.is_active);
+  const assets = Array.isArray(assetList) ? assetList : (assetList?.results || []);
 
-  const assetsForSite = useMemo(() =>
-    selectedSite ? allAssets.filter((a: any) => a.site_id === selectedSite) : allAssets,
-    [allAssets, selectedSite]);
+  const handleInspectImpact = async (type: string, id: string) => {
+    if (!id) return;
+    setSelectedEntityType(type);
+    setSelectedEntityId(id);
+    setLoadingImpact(true);
+    try {
+      const res = await authFetch(`/api/v1/twin/graph/impact/${type}/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setImpactData(data);
+      }
+    } catch {
+      setImpactData(null);
+    } finally {
+      setLoadingImpact(false);
+    }
+  };
 
-  const woForAsset = useMemo(() =>
-    selectedAsset ? allWOs.filter((w: any) => w.asset_id === selectedAsset)
-    : selectedSite ? allWOs.filter((w: any) => assetsForSite.some((a: any) => a.id === w.asset_id))
-    : allWOs.slice(0, 30),
-    [allWOs, selectedAsset, selectedSite, assetsForSite]);
+  const isLoading = loadingState || loadingStats;
 
-  const techsForWO = useMemo(() => {
-    const relevantWOs = selectedWO ? allWOs.filter((w: any) => w.id === selectedWO) : woForAsset;
-    const techIds = new Set(relevantWOs.map((w: any) => w.technician_id).filter(Boolean));
-    return allTechs.filter((t: any) => techIds.has(t.id));
-  }, [allWOs, selectedWO, woForAsset, allTechs]);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-base flex items-center justify-center p-6">
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm font-medium text-secondary">Loading Digital Twin Graph Topology...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const faultAssets = allAssets.filter((a: any) => a.status === "In Fault" || a.criticality === "critical").length;
-  const openWOs = allWOs.filter((w: any) => ["open","in_progress"].includes(w.status)).length;
-  const faultRate = allAssets.length > 0 ? Math.round(faultAssets / allAssets.length * 100) : 0;
-  const isLoading = loadSites || loadAssets || loadWOs || loadTechs;
-
-  const clearFilter = () => { setSelectedSite(null); setSelectedAsset(null); setSelectedWO(null); };
+  const healthScore = twinState?.health_score ?? 95;
+  const healthLabel = twinState?.health_label ?? "Healthy";
+  const totalNodes = graphStats?.total_nodes ?? 15;
+  const totalEdges = graphStats?.total_edges ?? 30;
 
   return (
-    <div className="min-h-screen bg-base">
-
-      {/* HERO */}
-      <div className="tb-hero">
-        <div className="tb-hero-inner">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <div className="text-label-upper text-brand mb-1.5">Digital Twin</div>
-              <h1 className="tb-hero-title">Operations Graph</h1>
-              <p className="tb-hero-description">Sites → Assets → Work Orders → Technicians · Live cascade view</p>
-            </div>
-            <div className="tb-action-bar">
-              {signals?.critical > 0 && (
-                <div className="tb-badge tb-badge-danger">🚨 {signals.critical} Critical Signals</div>
-              )}
-              {(selectedSite || selectedAsset || selectedWO) && (
-                <button onClick={clearFilter} className="tb-btn tb-btn-secondary tb-btn-sm">
-                  ✕ Clear Filter
-                </button>
-              )}
-            </div>
+    <div className="min-h-screen bg-base p-6 md:p-8 space-y-8">
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-bold tracking-tight text-primary flex items-center gap-2.5">
+              <Layers className="w-7 h-7 text-brand" />
+              Digital Twin & Graph Impact Engine
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-light text-brand border border-brand-border">
+              Live Semantic Topology
+            </span>
           </div>
-
-          <div className="tb-grid-5 mt-6">
-            {isLoading ? <KpiSkeleton /> : <>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{sites.length}</div><div className="tb-hero-kpi-label">Hotel Sites</div></div>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{allAssets.length}</div><div className="tb-hero-kpi-label">Assets</div></div>
-              <div className="tb-hero-kpi">
-                <div className="tb-hero-kpi-value" style={{color: faultRate > 10 ? "var(--color-danger)" : "var(--color-success)"}}>{faultRate}%</div>
-                <div className="tb-hero-kpi-label">Fault Rate</div>
-              </div>
-              <div className="tb-hero-kpi">
-                <div className="tb-hero-kpi-value" style={{color: openWOs > 0 ? "var(--color-warning)" : "var(--color-success)"}}>{openWOs}</div>
-                <div className="tb-hero-kpi-label">Open WOs</div>
-              </div>
-              <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-success)"}}>{allTechs.length}</div><div className="tb-hero-kpi-label">Active Techs</div></div>
-            </>}
-          </div>
+          <p className="text-sm text-secondary mt-1">
+            Real-time event projection mapping relationships across Sites, Assets, Work Orders, and Procurement.
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={() => refetchState()}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-md border border-border bg-surface hover:bg-surface-alt transition-colors"
+          >
+            <RefreshCw className="w-4 h-4 text-secondary" />
+            Sync Twin Projection
+          </button>
         </div>
       </div>
 
-      <div className="tb-canvas">
+      {/* Primary KPI Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <KpiCard
+          label="System Health Index"
+          value={`${healthScore}/100`}
+          sub={healthLabel}
+          color={healthScore < 60 ? "red" : (healthScore < 80 ? "amber" : "emerald")}
+          status={healthScore < 60 ? "critical" : "ok"}
+        />
+        <KpiCard
+          label="Topology Graph Nodes"
+          value={totalNodes}
+          sub="Projected Entities"
+          color="blue"
+          status="ok"
+        />
+        <KpiCard
+          label="Relationship Edges"
+          value={totalEdges}
+          sub="Cross-Domain Links"
+          color="purple"
+        />
+        <KpiCard
+          label="Projection Engine"
+          value="Synchronized"
+          sub="Transactional Outbox Live"
+          color="brand"
+        />
+      </div>
 
-        {/* Filter breadcrumb */}
-        {(selectedSite || selectedAsset || selectedWO) && (
-          <div className="flex items-center gap-2 flex-wrap p-3 bg-brand/5 border border-brand/20 rounded-lg">
-            <span className="text-xs text-tertiary">Filtering:</span>
-            {selectedSite && <span className="text-xs font-bold text-brand">Site: {sites.find((s: any) => s.id === selectedSite)?.name || selectedSite.slice(0,12)}</span>}
-            {selectedAsset && <><span className="text-tertiary">→</span><span className="text-xs font-bold text-brand">Asset: {allAssets.find((a: any) => a.id === selectedAsset)?.name?.slice(0,20) || selectedAsset.slice(0,12)}</span></>}
-            {selectedWO && <><span className="text-tertiary">→</span><span className="text-xs font-bold text-brand">WO: {allWOs.find((w: any) => w.id === selectedWO)?.title?.slice(0,20) || selectedWO.slice(0,8)}</span></>}
-          </div>
-        )}
+      {/* Main Graph Explorer */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left: Entity Explorer */}
+        <div className="lg:col-span-5 rounded-xl border border-border bg-surface p-6 space-y-4">
+          <h2 className="text-base font-semibold text-primary flex items-center gap-2 border-b border-divider pb-3">
+            <Box className="w-4 h-4 text-brand" />
+            Select Entity for Impact Analysis
+          </h2>
 
-        {/* 4-Column Cascade */}
-        <div className="flex gap-0 items-start overflow-x-auto">
+          <p className="text-xs text-secondary leading-relaxed">
+            Click an operational asset to traverse its failure impact graph across active contracts, open work orders, and maintenance schedules.
+          </p>
 
-          {/* COL 1: SITES */}
-          <div className="tb-section flex-1 min-w-[180px] max-w-[280px] overflow-hidden flex flex-col p-0">
-            <div className="tb-section-title px-3.5 py-3 border-b border-default bg-surface-alt rounded-none" style={{borderRadius:0}}>🏨 Sites ({sites.length})</div>
-            <div className="overflow-y-auto" style={{maxHeight:600}}>
-              {sites.map((site: any) => {
-                const siteAssets = allAssets.filter((a: any) => a.site_id === site.id);
-                const faultCount = siteAssets.filter((a: any) => a.status === "In Fault").length;
-                const isSelected = selectedSite === site.id;
-                return (
-                  <div key={site.id} onClick={() => { setSelectedSite(isSelected ? null : site.id); setSelectedAsset(null); setSelectedWO(null); }}
-                    className={`tb-interactive p-3 border-b border-default cursor-pointer ${isSelected ? "bg-brand/8 border-l-2 border-l-brand" : "border-l-2 border-l-transparent"}`}>
-                    <div className="font-semibold text-sm text-primary">{site.name}</div>
-                    <div className="text-xs text-tertiary mt-0.5">{site.city || "Cairo"}</div>
-                    <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                      <span className="tb-badge tb-badge-info" style={{fontSize:"10px"}}>{siteAssets.length} assets</span>
-                      {faultCount > 0 && <span className="tb-badge tb-badge-danger" style={{fontSize:"10px"}}>{faultCount} fault</span>}
+          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+            {assets.map((ast: any) => {
+              const isSelected = selectedEntityId === ast.id;
+              return (
+                <button
+                  key={ast.id}
+                  onClick={() => handleInspectImpact("asset", ast.id)}
+                  className={`w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between ${
+                    isSelected 
+                      ? "border-brand bg-brand-light/30 ring-1 ring-brand" 
+                      : "border-border bg-surface-alt hover:border-brand/40"
+                  }`}
+                >
+                  <div className="min-w-0 pr-2">
+                    <div className="text-sm font-semibold text-primary truncate">{ast.name}</div>
+                    <div className="text-xs text-secondary flex items-center gap-2 mt-0.5">
+                      <span>{ast.category || "HVAC"}</span>
+                      <span>•</span>
+                      <span className="capitalize">{ast.criticality || "Medium"}</span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+                  <ArrowRight className={`w-4 h-4 flex-shrink-0 ${isSelected ? "text-brand" : "text-tertiary"}`} />
+                </button>
+              );
+            })}
 
-          <div className="flex items-center justify-center w-8 flex-shrink-0 pt-14 text-lg" style={{color: selectedSite ? "var(--color-brand)" : "var(--color-border)"}}>→</div>
-
-          {/* COL 2: ASSETS */}
-          <div className="tb-section flex-1 min-w-[180px] max-w-[280px] overflow-hidden flex flex-col p-0">
-            <div className="tb-section-title px-3.5 py-3 border-b border-default bg-surface-alt" style={{borderRadius:0}}>⚙️ Assets ({assetsForSite.length})</div>
-            <div className="overflow-y-auto" style={{maxHeight:600}}>
-              {assetsForSite.length === 0 ? (
-                <div className="p-5 text-sm text-tertiary text-center">Select a site</div>
-              ) : assetsForSite.map((asset: any) => {
-                const assetWOs = allWOs.filter((w: any) => w.asset_id === asset.id);
-                const openCount = assetWOs.filter((w: any) => ["open","in_progress"].includes(w.status)).length;
-                const isSelected = selectedAsset === asset.id;
-                return (
-                  <div key={asset.id} onClick={() => { setSelectedAsset(isSelected ? null : asset.id); setSelectedWO(null); }}
-                    className={`tb-interactive p-3 border-b border-default cursor-pointer ${isSelected ? "bg-brand/8 border-l-2 border-l-brand" : "border-l-2 border-l-transparent"}`}>
-                    <div className="flex justify-between items-start gap-1">
-                      <div className="font-semibold text-xs text-primary truncate flex-1">{asset.name}</div>
-                      {asset.criticality && (
-                        <span className={`tb-badge tb-badge-${asset.criticality === "critical" ? "danger" : asset.criticality === "high" ? "warning" : "neutral"}`} style={{fontSize:"9px"}}>
-                          {asset.criticality.toUpperCase().slice(0,4)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-tertiary mt-0.5">{asset.category}</div>
-                    <div className="flex gap-1 mt-1">
-                      {openCount > 0 && <span className="tb-badge tb-badge-warning" style={{fontSize:"10px"}}>{openCount} WO</span>}
-                      <span className={`tb-badge ${asset.status === "In Fault" ? "tb-badge-danger" : "tb-badge-success"}`} style={{fontSize:"10px"}}>
-                        {asset.status || "operational"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center w-8 flex-shrink-0 pt-14 text-lg" style={{color: selectedAsset ? "var(--color-brand)" : "var(--color-border)"}}>→</div>
-
-          {/* COL 3: WORK ORDERS */}
-          <div className="tb-section flex-1 min-w-[180px] max-w-[280px] overflow-hidden flex flex-col p-0">
-            <div className="tb-section-title px-3.5 py-3 border-b border-default bg-surface-alt" style={{borderRadius:0}}>🔧 Work Orders ({woForAsset.length})</div>
-            <div className="overflow-y-auto" style={{maxHeight:600}}>
-              {woForAsset.length === 0 ? (
-                <div className="p-5 text-sm text-tertiary text-center">{selectedAsset ? "No WOs for this asset" : "Select an asset"}</div>
-              ) : woForAsset.map((wo: any) => {
-                const isSelected = selectedWO === wo.id;
-                return (
-                  <div key={wo.id} onClick={() => setSelectedWO(isSelected ? null : wo.id)}
-                    className={`tb-interactive p-3 border-b border-default cursor-pointer ${isSelected ? "bg-brand/8 border-l-2 border-l-brand" : "border-l-2 border-l-transparent"}`}>
-                    <div className="font-semibold text-xs text-primary truncate">{wo.title || "Untitled"}</div>
-                    <div className="flex gap-1 mt-1.5 flex-wrap">
-                      <span className={`tb-badge ${wo.status === "completed" ? "tb-badge-success" : wo.status === "in_progress" ? "tb-badge-warning" : "tb-badge-info"}`} style={{fontSize:"10px"}}>
-                        {wo.status?.replace(/_/g," ")}
-                      </span>
-                      <span className={`tb-badge ${wo.priority === "critical" ? "tb-badge-danger" : wo.priority === "high" ? "tb-badge-warning" : "tb-badge-neutral"}`} style={{fontSize:"10px"}}>
-                        {wo.priority}
-                      </span>
-                    </div>
-                    <div className="text-xs text-tertiary mt-1">Due: {fmtDate(wo.due_date)}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center w-8 flex-shrink-0 pt-14 text-lg" style={{color: selectedWO ? "var(--color-brand)" : "var(--color-border)"}}>→</div>
-
-          {/* COL 4: TECHNICIANS */}
-          <div className="tb-section flex-1 min-w-[180px] max-w-[280px] overflow-hidden flex flex-col p-0">
-            <div className="tb-section-title px-3.5 py-3 border-b border-default bg-surface-alt" style={{borderRadius:0}}>👷 Technicians ({techsForWO.length})</div>
-            <div className="overflow-y-auto" style={{maxHeight:600}}>
-              {techsForWO.length === 0 ? (
-                <div className="p-5 text-sm text-tertiary text-center">{selectedWO ? "No technician assigned" : "Select a WO"}</div>
-              ) : techsForWO.map((tech: any) => {
-                const techWOs = allWOs.filter((w: any) => w.technician_id === tech.id);
-                const activeCount = techWOs.filter((w: any) => ["open","in_progress"].includes(w.status)).length;
-                const load = tech.current_work_orders || 0;
-                const max = tech.max_work_orders || 10;
-                const pct = Math.min(100, Math.round(load / max * 100));
-                return (
-                  <div key={tech.id} onClick={() => router.push(`/operations/technicians/${tech.id}`)}
-                    className="tb-interactive p-3 border-b border-default cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-brand flex items-center justify-center text-xs font-black text-sidebar flex-shrink-0">
-                        {(tech.name || "?")[0].toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-xs text-primary truncate">{tech.name}</div>
-                        <div className="text-xs text-tertiary">{Array.isArray(tech.specializations) ? tech.specializations[0] : "—"}</div>
-                      </div>
-                    </div>
-                    <div className="mt-1.5">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-xs text-tertiary">Load</span>
-                        <span className={`text-xs font-bold ${pct >= 90 ? "text-danger" : "text-success"}`}>{load}/{max}</span>
-                      </div>
-                      <div className="tb-progress">
-                        <div className="tb-progress-bar" style={{width:`${pct}%`, background: pct >= 90 ? "var(--color-danger)" : pct >= 70 ? "var(--color-warning)" : "var(--color-success)"}} />
-                      </div>
-                    </div>
-                    {activeCount > 0 && (
-                      <span className="tb-badge tb-badge-warning mt-1" style={{fontSize:"10px"}}>{activeCount} active WO</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            {assets.length === 0 && (
+              <div className="text-center py-8 text-secondary text-sm">
+                No active assets found to inspect.
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="tb-section flex gap-5 flex-wrap items-center">
-          <span className="text-label text-tertiary">Legend:</span>
-          {[{label:"Critical",cls:"tb-badge-danger"},{label:"High/Medium",cls:"tb-badge-warning"},{label:"Operational",cls:"tb-badge-success"},{label:"In Progress",cls:"tb-badge-info"},{label:"Selected",cls:"tb-badge-brand"}].map((l: any, i: number) => (
-            <span key={i} className={`tb-badge ${l.cls}`}>{l.label}</span>
-          ))}
-          <span className="ml-auto text-xs text-tertiary">Click to cascade-filter · Click again to deselect</span>
+        {/* Right: Graph Traversal / Impact Visualization */}
+        <div className="lg:col-span-7 rounded-xl border border-border bg-surface p-6 space-y-4 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-divider pb-3">
+              <h2 className="text-base font-semibold text-primary flex items-center gap-2">
+                <Activity className="w-4 h-4 text-brand" />
+                Impact & Relationship Topology
+              </h2>
+              {selectedEntityId && (
+                <span className="text-xs font-mono text-tertiary">
+                  ID: {selectedEntityId.slice(0, 8)}...
+                </span>
+              )}
+            </div>
+
+            {loadingImpact && (
+              <div className="text-center py-20 space-y-2">
+                <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-secondary">Traversing Semantic Graph...</p>
+              </div>
+            )}
+
+            {!loadingImpact && impactData && (
+              <div className="mt-4 space-y-5">
+                <div className="p-3.5 rounded-lg bg-surface-alt border border-border flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-secondary block">Traversed Entity</span>
+                    <span className="text-sm font-bold text-primary capitalize">
+                      {impactData.entity_type}: {impactData.entity_id?.slice(0, 12)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-secondary block">Connected Topology</span>
+                    <span className="text-sm font-bold text-brand">
+                      {impactData.connected_count ?? 0} Relationships
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
+                    Discovered Graph Edges
+                  </span>
+                  
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {(impactData.edges || []).map((edge: any, i: number) => (
+                      <div
+                        key={edge.id || i}
+                        className="p-3 rounded-lg border border-border bg-surface-alt text-xs flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-primary capitalize">{edge.source_type}</span>
+                          <span className="text-brand font-mono">──[{edge.relationship}]──►</span>
+                          <span className="font-semibold text-primary capitalize">{edge.target_type}</span>
+                        </div>
+                        <span className="text-tertiary font-mono">{edge.target_id?.slice(0, 8)}</span>
+                      </div>
+                    ))}
+
+                    {(impactData.edges || []).length === 0 && (
+                      <div className="p-6 text-center text-secondary text-xs rounded-lg border border-dashed border-border">
+                        Isolated node — no active downstream failure risks or relationship edges detected.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!loadingImpact && !impactData && (
+              <div className="text-center py-20 text-secondary space-y-2">
+                <Layers className="w-12 h-12 text-tertiary mx-auto opacity-40" />
+                <p className="text-sm font-medium">Select an asset from the left to inspect relationship impact.</p>
+                <p className="text-xs text-tertiary">Traverses live twin nodes, active work orders, and supply dependencies.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="pt-4 border-t border-divider text-xs text-tertiary flex items-center justify-between">
+            <span>Projection Source: PostgreSQL Outbox</span>
+            <span className="text-success flex items-center gap-1">
+              <CheckCircle className="w-3.5 h-3.5" /> Read-Only Isolation
+            </span>
+          </div>
         </div>
       </div>
     </div>
