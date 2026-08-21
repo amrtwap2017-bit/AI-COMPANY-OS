@@ -85,12 +85,6 @@ def test_wo_service_file_structure():
               "get_sla_summary"]:
         assert f"def {m}" in src
 
-def test_wo_service_file_structure():
-    src = (SRC / "commercial/service_requests/service.py").read_text()
-    for m in ["create_from_service_request", "complete", "close",
-              "get_sla_summary"]:
-        assert f"def {m}" in src
-
 # ── Event outbox (T-006) ──────────────────────────────────────────────────
 def test_events_migration_applied():
     from src.core.database import engine

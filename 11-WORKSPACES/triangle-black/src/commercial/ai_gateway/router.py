@@ -10,7 +10,7 @@ from src.commercial.ai_gateway.gateway import AIGateway
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/ai-gateway", tags=["AI Gateway"])
+router = APIRouter(prefix="/api/v1/ai-gateway", tags=["AI Gateway"])
 
 
 class AIRequest(BaseModel):

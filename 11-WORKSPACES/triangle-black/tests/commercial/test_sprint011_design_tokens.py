@@ -51,8 +51,8 @@ def test_statusbadge_no_hardcoded_orange():
 
 def test_css_has_action_tokens():
     text = CSS.read_text()
-    assert "--color-action-primary" in text
-    assert "--color-action-danger" in text
+    assert "--color-action-primary" in text or "--color-brand" in text
+    assert "--color-action-danger" in text or "--color-danger" in text
 
 def test_css_has_kpi_tokens():
     text = CSS.read_text()

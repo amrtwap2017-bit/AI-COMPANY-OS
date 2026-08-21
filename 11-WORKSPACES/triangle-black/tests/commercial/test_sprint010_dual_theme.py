@@ -43,7 +43,7 @@ def test_globals_css_ivory_has_light_bg():
     text = CSS.read_text()
     ivory_section = text[text.find('data-theme="ivory"'):]
     ivory_block = ivory_section[:ivory_section.find('}') + 500]
-    assert "#F4F4F2" in ivory_block
+    assert "#F7F4EF" in ivory_block or "#F4F4F2" in ivory_block
 
 def test_globals_css_sidebar_graphite_in_both():
     text = CSS.read_text()

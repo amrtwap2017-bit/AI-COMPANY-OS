@@ -8230,6 +8230,7 @@ async def performance_tracking_middleware(request: Request, call_next):
     return response
 
 
+
 # ── T-018: Safe Optional Router Registration Seam ─────────────────────────────
 def register_optional_router(import_path: str, router_attr: str = "router", prefix: str | None = "/api/v1", label: str | None = None):
     """Safely import and register optional routers without fragile inline try blocks."""
