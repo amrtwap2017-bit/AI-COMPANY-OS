@@ -1,17 +1,16 @@
 """Triangle Black Core Configuration"""
 import os
 import warnings
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = {"extra": "ignore"}
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Database — must be set via environment variable
     DATABASE_URL: str = ""
 
     # Authentication — must be set via TB_SECRET_KEY env var
-    # JWT_SECRET here is a secondary fallback only
     JWT_SECRET: str = "dev-only-change-in-production"
 
     # Email
@@ -23,9 +22,6 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
-
-    class Config:
-        env_file = ".env"
 
 
 settings = Settings()
