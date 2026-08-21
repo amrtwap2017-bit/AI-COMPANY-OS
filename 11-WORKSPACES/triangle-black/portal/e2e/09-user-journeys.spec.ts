@@ -15,12 +15,18 @@ test.describe("User Journeys — UI", () => {
 
   test("journey: login form fills and submits correctly", async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
-    await page.waitForLoadState("networkidle");
-    await page.locator('input[type="email"]').first().fill("amr@triangleblack.com");
-    await page.locator('input[type="password"]').first().fill("admin123");
-    await page.locator('button[type="submit"]').first().click();
-    await page.waitForTimeout(3000);
-    expect(page.url()).not.toContain("/login");
+    await page.waitForLoadState("domcontentloaded");
+    const emailInput = page.locator('input[type="email"]').first();
+    const passInput = page.locator('input[type="password"]').first();
+    const submitBtn = page.locator('button[type="submit"]').first();
+
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await emailInput.fill("amr@triangleblack.com");
+    await passInput.fill("admin123");
+    await submitBtn.click();
+
+    // Deterministic wait for navigation away from /login
+    await expect(page).not.toHaveURL(/\/login(\?.*)?$/, { timeout: 15000 });
   });
 
   test("journey: work orders page shows New Work Order button", async ({ page }) => {
