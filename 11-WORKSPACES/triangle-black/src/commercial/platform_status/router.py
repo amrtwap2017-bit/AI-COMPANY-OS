@@ -13,7 +13,13 @@ def get_platform_status(
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
-    return {
+    from src.core.cache import cache_get, cache_set, make_cache_key
+    cache_key = make_cache_key("platform_status", hotel_id)
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+
+    res = {
         "hotel_id": hotel_id,
         "subsystems": {
             "database":     _db_health(db),
@@ -24,6 +30,8 @@ def get_platform_status(
             "operations":   _operations_stats(db, hotel_id),
         }
     }
+    cache_set(cache_key, res, ttl=15)
+    return res
 
 
 @router.get("/events")
@@ -198,10 +206,18 @@ def get_procurement_dashboard(
     db: Session = Depends(get_db)
 ):
     """Procurement KPI read model — T-020"""
+    from src.core.cache import cache_get, cache_set, make_cache_key
+    cache_key = make_cache_key("platform_procurement", hotel_id)
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+
     try:
         from src.commercial.executive_dashboard.procurement_read_models import ProcurementReadModel
         rm = ProcurementReadModel(db=db, hotel_id=hotel_id)
-        return rm.get_full_procurement_dashboard()
+        res = rm.get_full_procurement_dashboard()
+        cache_set(cache_key, res, ttl=30)
+        return res
     except Exception as e:
         return {"hotel_id": hotel_id, "error": str(e)}
 
@@ -211,9 +227,17 @@ def get_asset_dashboard(
     db: Session = Depends(get_db)
 ):
     """Asset and maintenance KPI read model — T-022"""
+    from src.core.cache import cache_get, cache_set, make_cache_key
+    cache_key = make_cache_key("platform_assets", hotel_id)
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+
     try:
         from src.commercial.executive_dashboard.asset_read_models import AssetReadModel
         rm = AssetReadModel(db=db, hotel_id=hotel_id)
-        return rm.get_full_asset_dashboard()
+        res = rm.get_full_asset_dashboard()
+        cache_set(cache_key, res, ttl=30)
+        return res
     except Exception as e:
         return {"hotel_id": hotel_id, "error": str(e)}
