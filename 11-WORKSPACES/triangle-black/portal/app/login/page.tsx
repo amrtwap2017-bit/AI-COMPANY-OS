@@ -15,8 +15,9 @@ export default function LoginPage() {
     setLoading(true); setError("");
     try {
       const res = await fetch("/api/v1/auth/login",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({username:email,password})});
-      const data = res.data ?? res;
-      if (data.access_token) {
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
         if (typeof window!=="undefined") {
           localStorage.setItem("tb_access_token",data.access_token);
           localStorage.setItem("tb_token",data.access_token);
@@ -28,7 +29,10 @@ export default function LoginPage() {
           document.cookie="tb_access_token="+data.access_token+"; path=/; max-age=86400";
         }
         router.push("/workspace");
-      } else { setError(data.detail||"Invalid credentials"); }
+        } else { setError(data.detail||"Invalid credentials"); }
+      } else {
+        setError("Invalid credentials or server error");
+      }
     } catch { setError("Connection error — please check your network"); }
     finally { setLoading(false); }
   };

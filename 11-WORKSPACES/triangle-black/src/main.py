@@ -8261,6 +8261,13 @@ register_optional_router(
 )
 
 register_optional_router(
+    "src.commercial.email_service.router",
+    router_attr="router",
+    prefix=None,
+    label="email_service_router",
+)
+
+register_optional_router(
     "src.commercial.platform_status.router",
     router_attr="router",
     prefix=None,
