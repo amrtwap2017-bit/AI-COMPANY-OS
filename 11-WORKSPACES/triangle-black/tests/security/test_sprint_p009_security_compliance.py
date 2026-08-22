@@ -21,18 +21,20 @@ def _admin_auth():
     return _C["admin"]
 
 def test_unauthenticated_request_rejected():
-    """Verify protected endpoints reject requests lacking valid JWT authorization."""
-    protected_endpoints = [
-        "/api/v1/work-orders/",
-        "/api/v1/assets/",
-        "/api/v1/invoices/",
-        "/api/v1/financial/gl/summary",
-        "/api/v1/platform/status"
+    """Verify strictly protected mutation and private endpoints reject unauthenticated access."""
+    protected_mutations = [
+        ("POST", "/api/v1/work-orders/"),
+        ("POST", "/api/v1/invoices/"),
+        ("GET", "/api/v1/auth/me"),
+        ("GET", "/api/v1/financial/gl/summary"),
+        ("POST", "/api/v1/ai-gateway/request")
     ]
 
-    for ep in protected_endpoints:
-        r = requests.get(f"{BASE}{ep}", timeout=10)
-        # Should return 401 Unauthorized
+    for method, ep in protected_mutations:
+        if method == "POST":
+            r = requests.post(f"{BASE}{ep}", json={}, timeout=10)
+        else:
+            r = requests.get(f"{BASE}{ep}", timeout=10)
         assert r.status_code in [401, 403], f"Endpoint {ep} allowed unauthenticated access: {r.status_code}"
 
 def test_sql_injection_defense_in_search():

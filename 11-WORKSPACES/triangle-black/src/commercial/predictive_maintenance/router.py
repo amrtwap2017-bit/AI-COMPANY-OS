@@ -248,3 +248,29 @@ def risk_summary(db: Session = Depends(get_db)):
         "at_risk_total": sum(1 for a in assets if a["health_score"] < 40),
         "generated_at":  datetime.datetime.utcnow().isoformat(),
     }
+
+
+@router.post("/director/analyze", tags=["predictive_maintenance"])
+def analyze_asset_predictive_health(
+    payload: dict,
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """AI Maintenance Director — Analyzes equipment health and returns governed recommendations."""
+    from src.commercial.predictive_maintenance.director import AIMaintenanceDirector
+
+    asset_id = payload.get("asset_id", "ast-001")
+    asset_name = payload.get("asset_name", "Chiller Unit A")
+    failures_90d = int(payload.get("failures_90d", 0))
+    pm_compliance = float(payload.get("pm_compliance", 100.0))
+    vibration_spike = bool(payload.get("vibration_spike", False))
+
+    analysis = AIMaintenanceDirector.analyze_asset_health(
+        asset_id=asset_id,
+        hotel_id=hotel_id,
+        asset_name=asset_name,
+        failures_90d=failures_90d,
+        pm_compliance=pm_compliance,
+        vibration_spike=vibration_spike
+    )
+    return analysis
