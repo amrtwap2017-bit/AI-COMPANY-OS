@@ -25,7 +25,14 @@
 - **N-009:** Design System 3.0 & Enterprise Polish ✅ COMPLETE
 - **N-010:** Customer Onboarding & Provisioning Wizard ✅ COMPLETE
 - **N-011:** Data Import Engine (Excel/CSV Migration) ✅ COMPLETE
-- **N-012:** Demo Environment (Red Sea Grand Resort Scenarios) ← NEXT
+- **N-012:** Demo Environment (Red Sea Grand Resort Scenarios) ✅ COMPLETE
+
+## 💼 STAGE C — COMMERCIAL (v5.2 → v5.5)
+
+- **N-013:** Dedicated Marketing Website & Brand Experience ← NEXT
+- **N-014:** Commercial Pilot Program (3 Target Properties)
+- **N-015:** Customer Feedback Loop & Triage
+- **N-016:** Packaging, Tiers & SaaS Pricing Model
 - **N-011:** Data Import Engine
 - **N-012:** Demo Environment
 - **N-006:** Golden Vertical Slice 2.0 Showcase
