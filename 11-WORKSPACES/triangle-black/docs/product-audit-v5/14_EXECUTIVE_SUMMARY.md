@@ -12,6 +12,7 @@
 ## STAGE A — TRUST (v5.0 → v5.1)
 
 - **N-001:** Production Reality & Commercial Readiness Audit ✅ COMPLETE
-- **N-002:** Release & Operations Hardening ← NEXT
+- **N-002:** Release & Operations Hardening ✅ COMPLETE
+- **N-003:** Security Verification 2.0 (OWASP ASVS 5.0) ← NEXT
 - **N-003:** Security Verification 2.0 (OWASP ASVS 5.0)
 - **N-004:** Observability & Telemetry Platform
