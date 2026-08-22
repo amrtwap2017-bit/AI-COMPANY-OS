@@ -8314,6 +8314,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: onboarding_router: {_e}")
 
+
+try:
+    from src.commercial.data_import.router import router as _data_import_r
+    app.include_router(_data_import_r, prefix="/api/v1")
+    logger.info("  OK: data_import_router")
+except Exception as _e:
+    logger.warning(f"WARN: data_import_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     from src.core.tenant import get_hotel_id
