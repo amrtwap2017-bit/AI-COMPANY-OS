@@ -8,7 +8,7 @@ from __future__ import annotations
 from alembic import op
 import sqlalchemy as sa
 
-revision: str = "mt002_hotels"
+revision: str = None
 down_revision: str = "b2c3d4e5f6a7"
 branch_labels = None
 depends_on = None
