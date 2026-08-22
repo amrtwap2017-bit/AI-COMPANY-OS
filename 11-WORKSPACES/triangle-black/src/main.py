@@ -8306,6 +8306,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: ai_directors_router: {_e}")
 
+
+try:
+    from src.commercial.onboarding.router import router as _onboarding_r
+    app.include_router(_onboarding_r, prefix="/api/v1")
+    logger.info("  OK: onboarding_router")
+except Exception as _e:
+    logger.warning(f"WARN: onboarding_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     from src.core.tenant import get_hotel_id
