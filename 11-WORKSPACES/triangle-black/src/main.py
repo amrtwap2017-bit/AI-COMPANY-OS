@@ -7409,6 +7409,7 @@ from starlette.responses import JSONResponse as _JR302
 
 _PUBLIC_PATHS_302 = {
     "/api/v1/auth/login",
+    "/api/v1/onboarding/provision-property",
     "/api/v1/client/login",
     "/api/v1/supplier/login",
     "/api/v1/health",
@@ -8181,7 +8182,8 @@ _LOGIN_WINDOW_SECONDS = 60  # 1 minute
 async def login_rate_limit_middleware(request: Request, call_next):
     """Tight rate limit on login endpoints to prevent brute force."""
     path = request.url.path
-    is_login = path in ("/api/v1/auth/login", "/api/v1/client/login", "/api/v1/supplier/login")
+    is_login = path in ("/api/v1/auth/login",
+    "/api/v1/onboarding/provision-property", "/api/v1/client/login", "/api/v1/supplier/login")
 
     if not is_login or request.method != "POST":
         return await call_next(request)
@@ -8321,6 +8323,14 @@ try:
     logger.info("  OK: data_import_router")
 except Exception as _e:
     logger.warning(f"WARN: data_import_router: {_e}")
+
+
+try:
+    from src.commercial.demo_scenarios.router import router as _demo_r
+    app.include_router(_demo_r, prefix="/api/v1")
+    logger.info("  OK: demo_scenarios_router")
+except Exception as _e:
+    logger.warning(f"WARN: demo_scenarios_router: {_e}")
 
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
