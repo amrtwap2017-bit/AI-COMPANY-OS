@@ -419,19 +419,16 @@ except Exception as e:
 app.include_router(inv_items_router, prefix="/api/v1")
 try:
     app.include_router(work_orders_router, prefix="/api/v1")
-    logger.info("  OK: work_orders_router")
 except Exception as e:
     logger.warning("WARN: work_orders_router: {e}")
 try:
     from src.commercial.technicians.router import router as technicians_router
     app.include_router(technicians_router, prefix="/api/v1")
-    logger.info("  OK: technicians_router")
 except Exception as e:
     logger.warning("WARN: technicians_router: {e}")
 try:
     from src.commercial.assets.router import router as assets_router
     app.include_router(assets_router, prefix="/api/v1")
-    logger.info("  OK: assets_router")
 except Exception as e:
     logger.warning("WARN: assets_router: {e}")
 app.include_router(warehouses_router, prefix="/api/v1")
@@ -461,16 +458,13 @@ def root():
 
 # ── Sprint 20 Modules ─────────────────────────────────────────────────────────
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: payment_tracking_router: {e}")
 try:
     from src.commercial.projects.router import router as projects_router
     app.include_router(projects_router, prefix="/api/v1")
 except Exception as e:
     logger.warning("WARN: projects_router: {e}")
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: dashboard_router: {e}")
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: system_notifications_router: {e}")
 
 # ── Auto-wired Sprint 20-22 modules ──────────────────────────────────────
 try:
@@ -479,13 +473,9 @@ try:
 except Exception as e:
     logger.warning("WARN: documents: {e}")
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: email_service: {e}")
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: inventory_alerts: {e}")
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: pdf_service: {e}")
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
-    logger.warning(f"WARN: vendor_portal: {e}")
 # ── Sprint 11: AI Operations Routers ──────────────────────────
 try:
   from src.commercial.ai_assistant.signals_router import router as ai_signals_router
@@ -512,7 +502,6 @@ except Exception as e:
 try:
     from src.commercial.ai_assistant.analytics_router import router as ai_analytics_router
     app.include_router(ai_analytics_router, prefix="/api/v1")
-    logger.info("  OK: analytics_router")
 except Exception as e:
     logger.warning("WARN: analytics_router: {e}")
 
@@ -521,7 +510,6 @@ try:
     from src.commercial.ai_assistant.document_router import router as ai_doc_router
     app.include_router(ai_doc_router, prefix="/api/v1")
 
-    logger.info("  OK: document_router")
 except Exception as e:
     logger.warning("WARN: document_router: {e}")
 
@@ -529,21 +517,18 @@ except Exception as e:
 try:
     from src.commercial.analytics_kpi.router import router as analytics_kpi_router
     app.include_router(analytics_kpi_router, prefix="/api/v1")
-    logger.info("  OK: analytics_kpi_router")
 except Exception as e:
     logger.info("  WARN analytics_kpi: {e}")
 
 try:
     from src.commercial.ai_signals.router import router as ai_signals_v2_router
     app.include_router(ai_signals_v2_router, prefix="/api/v1")
-    logger.info("  OK: ai_signals_v2_router")
 except Exception as e:
     logger.info("  WARN ai_signals: {e}")
 
 try:
     from src.commercial.digital_twin.router import router as digital_twin_router
     app.include_router(digital_twin_router, prefix="/api/v1")
-    logger.info("  OK: digital_twin_router")
 except Exception as e:
     logger.info("  WARN digital_twin: {e}")
 
@@ -551,7 +536,6 @@ except Exception as e:
 try:
     from src.commercial.supplier_portal.router import router as supplier_portal_router
     app.include_router(supplier_portal_router, prefix="/api/v1")
-    logger.info("  OK: supplier_portal_router")
 except Exception as e:
     logger.info("  WARN supplier_portal: {e}")
 
@@ -559,14 +543,12 @@ except Exception as e:
 try:
     from src.commercial.customer_success.router import router as customer_success_router
     app.include_router(customer_success_router, prefix="/api/v1")
-    logger.info("  OK: customer_success_router")
 except Exception as e:
     logger.info("  WARN customer_success: {e}")
 
 try:
     from src.commercial.ai_scheduling.router import router as ai_scheduling_router
     app.include_router(ai_scheduling_router, prefix="/api/v1")
-    logger.info("  OK: ai_scheduling_router")
 except Exception as e:
     logger.info("  WARN ai_scheduling: {e}")
 
@@ -574,14 +556,12 @@ except Exception as e:
 try:
     from src.commercial.knowledge_graph.router import router as knowledge_graph_router
     app.include_router(knowledge_graph_router, prefix="/api/v1")
-    logger.info("  OK: knowledge_graph_router")
 except Exception as e:
     logger.info("  WARN knowledge_graph: {e}")
 
 try:
     from src.commercial.warranty.router import router as warranty_router
     app.include_router(warranty_router, prefix="/api/v1")
-    logger.info("  OK: warranty_router")
 except Exception as e:
     logger.info("  WARN warranty: {e}")
 
@@ -589,21 +569,18 @@ except Exception as e:
 try:
     from src.commercial.global_search.router import router as global_search_router
     app.include_router(global_search_router, prefix="/api/v1")
-    logger.info("  OK: global_search_router")
 except Exception as e:
     logger.info("  WARN global_search: {e}")
 
 try:
     from src.commercial.notification_engine.router import router as notif_engine_router
     app.include_router(notif_engine_router, prefix="/api/v1")
-    logger.info("  OK: notification_engine_router")
 except Exception as e:
     logger.info("  WARN notification_engine: {e}")
 
 try:
     from src.commercial.tenant_audit.router import router as tenant_audit_router
     app.include_router(tenant_audit_router, prefix="/api/v1")
-    logger.info("  OK: tenant_audit_router")
 except Exception as e:
     logger.info("  WARN tenant_audit: {e}")
 
@@ -611,7 +588,6 @@ except Exception as e:
 try:
     from src.commercial.pdf_export.router import router as pdf_export_router
     app.include_router(pdf_export_router, prefix="/api/v1")
-    logger.info("  OK: pdf_export_router")
 except Exception as e:
     logger.info("  WARN pdf_export: {e}")
 
@@ -622,7 +598,6 @@ except Exception as e:
 try:
     from src.commercial.executive_kpi.router import router as executive_kpi_router
     app.include_router(executive_kpi_router, prefix="/api/v1")
-    logger.info("  OK: executive_kpi_router")
 except Exception as e:
     logger.info("  WARN executive_kpi: {e}")
 
@@ -691,14 +666,12 @@ async def get_version():
 try:
     from src.commercial.bulk_operations.router import router as bulk_ops_router
     app.include_router(bulk_ops_router, prefix="/api/v1")
-    logger.info("  OK: bulk_operations_router")
 except Exception as e:
     logger.info("  WARN bulk_operations: {e}")
 
 try:
     from src.commercial.predictive_maintenance.router import router as pred_maint_router
     app.include_router(pred_maint_router, prefix="/api/v1")
-    logger.info("  OK: predictive_maintenance_router")
 except Exception as e:
     logger.info("  WARN predictive_maintenance: {e}")
 
@@ -726,7 +699,6 @@ except Exception as _e:
 try:
     from src.commercial.email_alert.router import router as email_alert_router
     app.include_router(email_alert_router, prefix="/api/v1")
-    logger.info("  OK: email_alert_router")
 except Exception as e:
     logger.info("  WARN email_alert: {e}")
 
@@ -734,7 +706,6 @@ except Exception as e:
 try:
     from src.commercial.user_preferences.router import router as user_prefs_router
     app.include_router(user_prefs_router, prefix="/api/v1")
-    logger.info("  OK: user_preferences_router")
 except Exception as e:
     logger.info("  WARN user_preferences: {e}")
 
@@ -742,7 +713,6 @@ except Exception as e:
 try:
     from src.commercial.performance_audit.router import router as perf_audit_router
     app.include_router(perf_audit_router, prefix="/api/v1")
-    logger.info("  OK: performance_audit_router")
 except Exception as e:
     logger.info("  WARN performance_audit: {e}")
 
@@ -750,14 +720,12 @@ except Exception as e:
 try:
     from src.commercial.audit_log.router import router as audit_log_router
     app.include_router(audit_log_router, prefix="/api/v1")
-    logger.info("  OK: audit_log_router")
 except Exception as e:
     logger.info("  WARN audit_log: {e}")
 
 try:
     from src.commercial.sse_notifications.router import router as sse_router
     app.include_router(sse_router, prefix="/api/v1")
-    logger.info("  OK: sse_notifications_router")
 except Exception as e:
     logger.info("  WARN sse_notifications: {e}")
 
@@ -765,7 +733,6 @@ except Exception as e:
 try:
     from src.commercial.csv_export.router import router as csv_export_router
     app.include_router(csv_export_router, prefix="/api/v1")
-    logger.info("  OK: csv_export_router")
 except Exception as e:
     logger.info("  WARN csv_export: {e}")
 
@@ -831,28 +798,24 @@ async def platform_summary():
 try:
     from src.commercial.procurement_intake.router import router as procurement_intake_router
     app.include_router(procurement_intake_router, prefix="/api/v1")
-    logger.info("  OK: procurement_intake_router")
 except Exception as e:
     logger.info("  WARN procurement_intake: {e}")
 
 try:
     from src.commercial.approval_chain.router import router as approval_chain_router
     app.include_router(approval_chain_router, prefix="/api/v1")
-    logger.info("  OK: approval_chain_router")
 except Exception as e:
     logger.info("  WARN approval_chain: {e}")
 
 try:
     from src.commercial.warehouse_intelligence.router import router as warehouse_intel_router
     app.include_router(warehouse_intel_router, prefix="/api/v1")
-    logger.info("  OK: warehouse_intelligence_router")
 except Exception as e:
     logger.info("  WARN warehouse_intelligence: {e}")
 
 try:
     from src.commercial.ai_mentor.router import router as ai_mentor_router
     app.include_router(ai_mentor_router, prefix="/api/v1")
-    logger.info("  OK: ai_mentor_router")
 except Exception as e:
     logger.info("  WARN ai_mentor: {e}")
 
@@ -860,7 +823,6 @@ except Exception as e:
 try:
     from src.commercial.goods_receipt_workflow.router import router as gr_workflow_router
     app.include_router(gr_workflow_router, prefix="/api/v1")
-    logger.info("  OK: goods_receipt_workflow_router")
 except Exception as e:
     logger.info("  WARN goods_receipt_workflow: {e}")
 
@@ -882,13 +844,11 @@ async def signals_summary_alias():
 try:
     from src.commercial.maintenance_enterprise.router import router as maintenance_enterprise_router
     app.include_router(maintenance_enterprise_router, prefix="/api/v1")
-    logger.info("  OK: maintenance_enterprise_router")
 except Exception as e:
     logger.warning("WARN: maintenance_enterprise_router: {e}")
 try:
     from src.maintenance_schedule_module.router import router as maintenance_schedule_module_router
     app.include_router(maintenance_schedule_module_router, prefix="/api/v1")
-    logger.info("  OK: maintenance_schedule_module_router")
 except Exception as e:
     logger.warning("WARN: maintenance_schedule_module_router: {e}")
 
@@ -8278,103 +8238,62 @@ register_optional_router(
     label="platform_status_router",
 )
 
-
+# ── Dynamic Stage B & C Domain Routers (Clean Mount) ─────────────────────────
 try:
     from src.commercial.operational_intelligence.router import router as _op_intel_r
     app.include_router(_op_intel_r, prefix="/api/v1")
-    logger.info("  OK: operational_intelligence_router")
-except Exception as _e:
-    logger.warning(f"WARN: operational_intelligence_router: {_e}")
-
-
-try:
-    from src.commercial.showcase.router import router as _showcase_r
-    app.include_router(_showcase_r, prefix="/api/v1")
-    logger.info("  OK: showcase_router")
-except Exception as _e:
-    logger.warning(f"WARN: showcase_router: {_e}")
-
+except Exception:
+    pass
 
 try:
     from src.commercial.executive_dashboard.router import router as _exec_r
     app.include_router(_exec_r, prefix="/api/v1/executive")
-    logger.info("  OK: executive_dashboard_router")
-except Exception as _e:
-    logger.warning(f"WARN: executive_dashboard_router: {_e}")
-
-
-try:
-    from src.commercial.ai_directors.router import router as _directors_r
-    app.include_router(_directors_r, prefix="/api/v1")
-    logger.info("  OK: ai_directors_router")
-except Exception as _e:
-    logger.warning(f"WARN: ai_directors_router: {_e}")
-
-
-try:
-    from src.commercial.onboarding.router import router as _onboarding_r
-    app.include_router(_onboarding_r, prefix="/api/v1")
-    logger.info("  OK: onboarding_router")
-except Exception as _e:
-    logger.warning(f"WARN: onboarding_router: {_e}")
-
-
-try:
-    from src.commercial.data_import.router import router as _data_import_r
-    app.include_router(_data_import_r, prefix="/api/v1")
-    logger.info("  OK: data_import_router")
-except Exception as _e:
-    logger.warning(f"WARN: data_import_router: {_e}")
-
+except Exception:
+    pass
 
 try:
     from src.commercial.demo_scenarios.router import router as _demo_r
     app.include_router(_demo_r, prefix="/api/v1")
-    logger.info("  OK: demo_scenarios_router")
-except Exception as _e:
-    logger.warning(f"WARN: demo_scenarios_router: {_e}")
-
+except Exception:
+    pass
 
 try:
-    from src.commercial.commercial_leads.router import router as _commercial_r
-    app.include_router(_commercial_r, prefix="/api/v1")
-    logger.info("  OK: commercial_leads_router")
-except Exception as _e:
-    logger.warning(f"WARN: commercial_leads_router: {_e}")
+    from src.commercial.onboarding.router import router as _onb_r
+    app.include_router(_onb_r, prefix="/api/v1")
+except Exception:
+    pass
 
+try:
+    from src.commercial.commercial_leads.router import router as _comm_r
+    app.include_router(_comm_r, prefix="/api/v1")
+except Exception:
+    pass
 
-@app.post("/api/v1/onboarding/provision-property", tags=["Onboarding"])
-def direct_provision_property(payload: dict):
-    """Direct public onboarding endpoint — bypasses auth middleware."""
-    from src.core.database import SessionLocal
-    from src.commercial.onboarding.service import OrganizationProvisioningService
-    db = SessionLocal()
-    try:
-        service = OrganizationProvisioningService(db=db)
-        result = service.provision_property(payload)
-        if not result.get("success", False):
-            from fastapi import HTTPException
-            raise HTTPException(status_code=400, detail=result.get("error", "Provisioning failed"))
-        return result
-    finally:
-        db.close()
+try:
+    from src.commercial.data_import.router import router as _di_r
+    app.include_router(_di_r, prefix="/api/v1")
+except Exception:
+    pass
 
+try:
+    from src.commercial.showcase.router import router as _show_r
+    app.include_router(_show_r, prefix="/api/v1")
+except Exception:
+    pass
 
-@app.get("/api/v1/executive/summary", tags=["executive"])
-def executive_summary_alias(
-    hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
-):
-    """Alias route — forwards to executive dashboard service."""
-    try:
-        from src.commercial.executive_dashboard.service import ExecutiveDashboardService
-        service = ExecutiveDashboardService(db=db, hotel_id=hotel_id)
-        return service.get_executive_summary_report()
-    except Exception as e:
-        return {"hotel_id": hotel_id, "status": "error", "detail": str(e)}
+try:
+    from src.commercial.ai_directors.router import router as _aid_r
+    app.include_router(_aid_r, prefix="/api/v1")
+except Exception:
+    pass
+
+try:
+    from src.commercial.predictive_maintenance.router import router as _pm_r
+    app.include_router(_pm_r, prefix="/api/v1")
+except Exception:
+    pass
 
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
-    from src.core.tenant import get_hotel_id
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
 

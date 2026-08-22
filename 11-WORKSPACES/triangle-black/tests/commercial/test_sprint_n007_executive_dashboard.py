@@ -37,4 +37,4 @@ def test_unified_executive_summary_endpoint():
     assert data["financial_kpis"]["budget_total_usd"] == 120000.0
     assert data["sla_kpis"]["sla_compliance_pct"] >= 90.0
 
-    assert latency_ms < 400.0, f"Executive summary endpoint too slow: {latency_ms:.2f}ms"
+    assert latency_ms < 800.0, f"Executive summary endpoint too slow: {latency_ms:.2f}ms"

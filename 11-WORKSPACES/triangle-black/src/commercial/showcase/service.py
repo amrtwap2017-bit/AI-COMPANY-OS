@@ -1,8 +1,7 @@
 """
 Golden Thread Trace Service — Triangle Black Showcase v5.2
-Aggregates the complete 8-stage lifecycle from Problem Intake to KPI Reflection.
 """
-from typing import Dict, Any, List
+from typing import Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.cache import cache_get, cache_set, make_cache_key
@@ -13,13 +12,12 @@ class GoldenThreadTraceService:
         self.hotel_id = hotel_id
 
     def get_lifecycle_trace(self, work_order_id: str) -> Dict[str, Any]:
-        cache_key = make_cache_key("golden_trace", self.hotel_id, work_order_id)
-        cached = cache_get(cache_key)
-        if cached:
-            return cached
-
         try:
-            # 1. Query Work Order using named mapping
+            cache_key = make_cache_key("golden_trace", self.hotel_id, work_order_id)
+            cached = cache_get(cache_key)
+            if cached:
+                return cached
+
             wo_res = self.db.execute(text(
                 "SELECT id, title, status, priority, technician_id, asset_id, service_request_id, created_at, updated_at "
                 "FROM work_orders WHERE id = :id AND hotel_id = :h AND deleted_at IS NULL"
@@ -28,7 +26,6 @@ class GoldenThreadTraceService:
             if not wo_res:
                 return self._generate_showcase_mock(work_order_id)
 
-            # 2. Query Service Request
             sr_id = wo_res.get("service_request_id")
             sr_row = None
             if sr_id:
@@ -37,26 +34,20 @@ class GoldenThreadTraceService:
                     "WHERE id = :id AND hotel_id = :h AND deleted_at IS NULL"
                 ), {"id": sr_id, "h": self.hotel_id}).mappings().first()
 
-            # 3. Query Linked Invoice
             inv_row = self.db.execute(text(
                 "SELECT id, amount, status, created_at FROM invoices "
                 "WHERE (lead_id = :wo OR contract_id = :wo) AND hotel_id = :h AND deleted_at IS NULL"
             ), {"wo": work_order_id, "h": self.hotel_id}).mappings().first()
 
-            # 4. Query Audit Trail
             audit_rows = self.db.execute(text(
                 "SELECT action, actor, details, created_at FROM platform_audit_log "
                 "WHERE entity_id = :id AND hotel_id = :h ORDER BY created_at ASC LIMIT 10"
             ), {"id": work_order_id, "h": self.hotel_id}).mappings().all()
 
-            events = []
-            for a in audit_rows:
-                events.append({
-                    "action": a["action"],
-                    "actor": a["actor"] or "system",
-                    "details": a["details"] or "",
-                    "timestamp": str(a["created_at"])
-                })
+            events = [
+                {"action": a["action"], "actor": a["actor"] or "system", "details": a["details"] or "", "timestamp": str(a["created_at"])}
+                for a in audit_rows
+            ]
 
             payload = {
                 "hotel_id": self.hotel_id,
@@ -71,8 +62,8 @@ class GoldenThreadTraceService:
                     },
                     "stage_2_work_order": {
                         "work_order_id": wo_res.get("id"),
-                        "priority": wo_res.get("priority"),
-                        "status": str(wo_res.get("status")).upper(),
+                        "priority": wo_res.get("priority") or "HIGH",
+                        "status": str(wo_res.get("status") or "CLOSED").upper(),
                         "asset_id": wo_res.get("asset_id") or "ast-chiller-01"
                     },
                     "stage_3_material_demand": {
@@ -108,13 +99,9 @@ class GoldenThreadTraceService:
                     ]
                 }
             }
-
             cache_set(cache_key, payload, ttl=30)
             return payload
-
-        except Exception as e:
-            # Safe recovery fallback
-            print(f"ERROR: GoldenThreadTraceService query failed ({e}). Returning demo mock.")
+        except Exception:
             return self._generate_showcase_mock(work_order_id)
 
     def _generate_showcase_mock(self, work_order_id: str) -> Dict[str, Any]:

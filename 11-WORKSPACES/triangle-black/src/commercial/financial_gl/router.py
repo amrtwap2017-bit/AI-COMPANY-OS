@@ -1,5 +1,5 @@
-from src.core.auth import require_manager, require_agent
 from __future__ import annotations
+from src.core.auth import require_manager, require_agent
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session

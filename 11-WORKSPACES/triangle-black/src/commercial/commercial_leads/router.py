@@ -30,7 +30,7 @@ def submit_assessment_request(
     default_hotel = "tb-default-hotel-000000000001"
 
     try:
-        # 1. Create Lead Record
+        # 1. Create Lead Record (includes score=0 for NOT NULL column)
         db.execute(text(
             "INSERT INTO leads (id, hotel_id, name, email, company, status, priority, source, score, created_at, updated_at) "
             "VALUES (:id, :hid, :name, :email, :comp, 'new', 'high', 'website_assessment', 0, NOW(), NOW())"
@@ -42,16 +42,16 @@ def submit_assessment_request(
             "comp": hotel_name
         })
 
-        # 2. Log Audit Event
+        # 2. Log Audit Event using verified columns: actor_name, new_value
         db.execute(text(
-            "INSERT INTO platform_audit_log (id, hotel_id, entity_type, entity_id, action, actor, details, created_at) "
-            "VALUES (:id, :hid, 'lead', :lid, 'ASSESSMENT_REQUESTED', :actor, :details, NOW())"
+            "INSERT INTO platform_audit_log (id, hotel_id, entity_type, entity_id, action, actor_name, new_value, created_at) "
+            "VALUES (:id, :hid, 'lead', :lid, 'ASSESSMENT_REQUESTED', :actor, :val, NOW())"
         ), {
             "id": audit_id,
             "hid": default_hotel,
             "lid": lead_id,
             "actor": email,
-            "details": f"Operational assessment requested for {hotel_name} ({rooms_count} rooms, {property_type})"
+            "val": f"Assessment for {hotel_name} ({rooms_count} rooms, {property_type})"
         })
 
         db.commit()
