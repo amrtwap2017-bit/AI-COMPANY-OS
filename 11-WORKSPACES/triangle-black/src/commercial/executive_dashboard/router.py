@@ -179,3 +179,14 @@ def get_executive_legacy(
 ):
     """Legacy endpoint — delegates to /executive/dashboard for backward compat."""
     return get_executive_dashboard(hotel_id, db)
+
+
+@router.get("/summary", tags=["executive"])
+def get_unified_executive_summary(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Unified high-performance read model for Executive Control Center v5.2"""
+    from src.commercial.executive_dashboard.service import ExecutiveDashboardService
+    service = ExecutiveDashboardService(db=db, hotel_id=hotel_id)
+    return service.get_executive_summary_report()
