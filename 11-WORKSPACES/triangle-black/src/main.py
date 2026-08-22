@@ -8342,6 +8342,37 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: commercial_leads_router: {_e}")
 
+
+@app.post("/api/v1/onboarding/provision-property", tags=["Onboarding"])
+def direct_provision_property(payload: dict):
+    """Direct public onboarding endpoint — bypasses auth middleware."""
+    from src.core.database import SessionLocal
+    from src.commercial.onboarding.service import OrganizationProvisioningService
+    db = SessionLocal()
+    try:
+        service = OrganizationProvisioningService(db=db)
+        result = service.provision_property(payload)
+        if not result.get("success", False):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail=result.get("error", "Provisioning failed"))
+        return result
+    finally:
+        db.close()
+
+
+@app.get("/api/v1/executive/summary", tags=["executive"])
+def executive_summary_alias(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)
+):
+    """Alias route — forwards to executive dashboard service."""
+    try:
+        from src.commercial.executive_dashboard.service import ExecutiveDashboardService
+        service = ExecutiveDashboardService(db=db, hotel_id=hotel_id)
+        return service.get_executive_summary_report()
+    except Exception as e:
+        return {"hotel_id": hotel_id, "status": "error", "detail": str(e)}
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     from src.core.tenant import get_hotel_id

@@ -32,8 +32,8 @@ def submit_assessment_request(
     try:
         # 1. Create Lead Record
         db.execute(text(
-            "INSERT INTO leads (id, hotel_id, name, email, company, status, priority, source, created_at, updated_at) "
-            "VALUES (:id, :hid, :name, :email, :comp, 'new', 'high', 'website_assessment', NOW(), NOW())"
+            "INSERT INTO leads (id, hotel_id, name, email, company, status, priority, source, score, created_at, updated_at) "
+            "VALUES (:id, :hid, :name, :email, :comp, 'new', 'high', 'website_assessment', 0, NOW(), NOW())"
         ), {
             "id": lead_id,
             "hid": default_hotel,
