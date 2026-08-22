@@ -241,3 +241,15 @@ def get_asset_dashboard(
         return res
     except Exception as e:
         return {"hotel_id": hotel_id, "error": str(e)}
+
+
+@router.get("/telemetry", tags=["Platform Status"])
+def get_observability_telemetry(
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Observability & Telemetry Platform — N-004"""
+    from src.core.observability import telemetry_store
+    report = telemetry_store.get_telemetry_report()
+    report["hotel_id"] = hotel_id
+    report["status"] = "operational"
+    return report
