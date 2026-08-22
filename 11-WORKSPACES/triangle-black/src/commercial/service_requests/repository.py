@@ -1,78 +1,70 @@
-from __future__ import annotations
-from datetime import datetime
-
-from datetime import datetime
 """
-ServiceRequest repository — Triangle Black
+Service Request Repository — Triangle Black Enterprise OS
+Standard DDD Repository Pattern with strict hotel_id tenant scoping.
 """
-import uuid
-from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from .models import ServiceRequest
-
-DEFAULT_HOTEL = "tb-default-hotel-000000000001"
-
+from src.commercial.service_requests.models import ServiceRequest
 
 class ServiceRequestRepository:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session):
         self.db = db
 
-    def create(self, data: dict) -> ServiceRequest:
-        data.setdefault("hotel_id", DEFAULT_HOTEL)
-        # Auto-generate work_order_number if applicable
-        if "work_order_number" in ServiceRequest.__table__.columns.keys() and "work_order_number" not in data:
-            now = datetime.utcnow()
-            prefix = f"TB-WO-{now.strftime('%Y%m')}-"
-            count = self.db.query(ServiceRequest).filter(
-                ServiceRequest.work_order_number.like(f"{prefix}%")
-            ).count()
-            data["work_order_number"] = f"{prefix}{str(count + 1).zfill(4)}"
-        obj = ServiceRequest(
-            id=str(uuid.uuid4()),
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            **{k: v for k, v in data.items()
-               if k not in ("id", "created_at", "updated_at")},
+    def list_requests(
+        self,
+        hotel_id: str,
+        status: Optional[str] = None,
+        urgency: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0
+    ) -> List[ServiceRequest]:
+        query = self.db.query(ServiceRequest).filter(
+            ServiceRequest.hotel_id == hotel_id,
+            ServiceRequest.deleted_at.is_(None) if hasattr(ServiceRequest, "deleted_at") else True
         )
-        self.db.add(obj)
+        if status:
+            query = query.filter(ServiceRequest.status == status)
+        if urgency:
+            query = query.filter(ServiceRequest.urgency == urgency)
+        return query.order_by(ServiceRequest.created_at.desc()).offset(offset).limit(limit).all()
+
+    def get_by_id(self, sr_id: str, hotel_id: str) -> Optional[ServiceRequest]:
+        return self.db.query(ServiceRequest).filter(
+            ServiceRequest.id == sr_id,
+            ServiceRequest.hotel_id == hotel_id,
+            ServiceRequest.deleted_at.is_(None) if hasattr(ServiceRequest, "deleted_at") else True
+        ).first()
+
+    def create(self, hotel_id: str, data: Dict[str, Any]) -> ServiceRequest:
+        data["hotel_id"] = hotel_id
+        sr = ServiceRequest(**data)
+        self.db.add(sr)
         self.db.commit()
-        self.db.refresh(obj)
-        return obj
+        self.db.refresh(sr)
+        return sr
 
-    def get(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> Optional[ServiceRequest]:
-        return (
-            self.db.query(ServiceRequest)
-            .filter(ServiceRequest.id == obj_id, ServiceRequest.hotel_id == hotel_id)
-            .first()
-        )
-
-    def list(self, skip: int = 0, limit: int = 100,
-             hotel_id: str = DEFAULT_HOTEL) -> List[ServiceRequest]:
-        return (
-            self.db.query(ServiceRequest)
-            .filter(ServiceRequest.hotel_id == hotel_id)
-            .order_by(ServiceRequest.created_at.desc())
-            .offset(skip).limit(limit).all()
-        )
-
-    def update(self, obj_id: str, data: dict,
-               hotel_id: str = DEFAULT_HOTEL) -> Optional[ServiceRequest]:
-        obj = self.get(obj_id, hotel_id=hotel_id)
-        if not obj:
+    def update_status(self, sr_id: str, hotel_id: str, status: str) -> Optional[ServiceRequest]:
+        sr = self.get_by_id(sr_id, hotel_id)
+        if not sr:
             return None
-        for k, v in data.items():
-            if v is not None and k not in ("id", "hotel_id", "created_at"):
-                setattr(obj, k, v)
-        obj.updated_at = datetime.utcnow()
+        sr.status = status
         self.db.commit()
-        self.db.refresh(obj)
-        return obj
+        self.db.refresh(sr)
+        return sr
 
-    def delete(self, obj_id: str, hotel_id: str = DEFAULT_HOTEL) -> bool:
-        obj = self.get(obj_id, hotel_id=hotel_id)
-        if not obj:
-            return False
-        self.db.delete(obj)
-        self.db.commit()
-        return True
+    def get_triage_summary(self, hotel_id: str) -> Dict[str, Any]:
+        base = self.db.query(ServiceRequest).filter(
+            ServiceRequest.hotel_id == hotel_id,
+            ServiceRequest.deleted_at.is_(None) if hasattr(ServiceRequest, "deleted_at") else True
+        )
+        total = base.count()
+        pending = base.filter(ServiceRequest.status == "pending").count()
+        triaged = base.filter(ServiceRequest.status == "triaged").count()
+        converted = base.filter(ServiceRequest.status == "converted_to_wo").count()
+
+        return {
+            "total_requests": total,
+            "pending_triage": pending,
+            "triaged": triaged,
+            "converted_to_wo": converted
+        }
