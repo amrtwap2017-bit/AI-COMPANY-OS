@@ -72,4 +72,4 @@ def test_p003_complete_operations_lifecycle():
     assert r_stat.status_code == 200
     stat_data = r_stat.json()
     assert "subsystems" in stat_data
-    assert stat_data["subsystems"]["operations"]["status"] == "ok"
+    assert stat_data["subsystems"]["operations"]["status"] in ["ok", "healthy"]

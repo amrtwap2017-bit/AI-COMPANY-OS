@@ -276,3 +276,24 @@ def workflow_stats(
             "total_definitions": 0, "work_order_instances": 0, "sr_instances": 0,
             "generated_at": _now().isoformat(), "error": str(e),
         }
+
+
+@router.post("/evaluate-policy", tags=["workflow_engine"])
+def evaluate_workflow_policy(
+    payload: dict,
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Evaluates transition requirements against financial thresholds."""
+    from src.commercial.workflow_engine.policy import WorkflowPolicyEngine
+    entity_type = payload.get("entity_type", "work_order")
+    amount = float(payload.get("amount", 0.0))
+    current_state = payload.get("current_state", "draft")
+
+    result = WorkflowPolicyEngine.evaluate_approval_policy(
+        hotel_id=hotel_id,
+        entity_type=entity_type,
+        amount=amount,
+        current_state=current_state
+    )
+    result["hotel_id"] = hotel_id
+    return result
