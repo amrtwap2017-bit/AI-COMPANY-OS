@@ -8290,6 +8290,22 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: showcase_router: {_e}")
 
+
+try:
+    from src.commercial.executive_dashboard.router import router as _exec_r
+    app.include_router(_exec_r, prefix="/api/v1/executive")
+    logger.info("  OK: executive_dashboard_router")
+except Exception as _e:
+    logger.warning(f"WARN: executive_dashboard_router: {_e}")
+
+
+try:
+    from src.commercial.ai_directors.router import router as _directors_r
+    app.include_router(_directors_r, prefix="/api/v1")
+    logger.info("  OK: ai_directors_router")
+except Exception as _e:
+    logger.warning(f"WARN: ai_directors_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     from src.core.tenant import get_hotel_id
