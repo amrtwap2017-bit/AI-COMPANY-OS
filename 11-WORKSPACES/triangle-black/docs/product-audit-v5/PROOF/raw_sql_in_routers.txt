@@ -1,0 +1,462 @@
+src/commercial/ai_scheduling/router.py:28:        rows = db.execute(text("""
+src/commercial/ai_scheduling/router.py:78:        techs = db.execute(text("""
+src/commercial/ai_scheduling/router.py:134:        open_wos = db.execute(text("""
+src/commercial/ai_scheduling/router.py:146:        techs = db.execute(text("""
+src/commercial/ai_scheduling/router.py:165:        unassigned = db.execute(text("""
+src/commercial/ai_scheduling/repository.py:13:        rows = self.db.execute(text("""
+src/commercial/ai_scheduling/repository.py:23:        rows = self.db.execute(text("""
+src/commercial/workflow_engine/router.py:74:        rows = db.execute(text(q), params).fetchall()
+src/commercial/workflow_engine/router.py:93:        row = db.execute(text(
+src/commercial/workflow_engine/router.py:103:        transitions = db.execute(text("""
+src/commercial/workflow_engine/router.py:131:        inst = db.execute(text(
+src/commercial/workflow_engine/router.py:138:        rows = db.execute(text("""
+src/commercial/workflow_engine/router.py:164:        rows = db.execute(text(
+src/commercial/workflow_engine/router.py:194:        db.execute(text("""
+src/commercial/workflow_engine/router.py:230:        row = db.execute(text("""
+src/commercial/workflow_engine/router.py:245:            transitions = db.execute(text(
+src/commercial/workflow_engine/router.py:253:            definitions = db.execute(text(
+src/commercial/workflow_engine/engine.py:142:            db.execute(text("""
+src/commercial/workflow_engine/engine.py:150:            db.execute(text("""
+src/commercial/workflow_engine/engine.py:212:            db.execute(text("""
+src/commercial/audit_log/router.py:16:    db.execute(text("""
+src/commercial/audit_log/router.py:46:    db.execute(text("""
+src/commercial/audit_log/router.py:84:        rows = db.execute(text("""
+src/commercial/audit_log/router.py:118:        rows = db.execute(text(f"""
+src/commercial/audit_log/router.py:138:        row = db.execute(text("""
+src/commercial/audit_log/router.py:149:        by_type = db.execute(text("""
+src/commercial/audit_log/repository.py:27:    db.execute(text("""
+src/commercial/audit_log/repository.py:65:    rows = db.execute(text(f"""
+src/commercial/audit_log/repository.py:82:    rows = db.execute(text(f"""
+src/commercial/customer_success/router.py:16:    db.execute(text("""
+src/commercial/customer_success/router.py:32:        contracts = db.execute(text("""
+src/commercial/customer_success/router.py:47:        at_risk = db.execute(text("""
+src/commercial/customer_success/router.py:60:        nps_row = db.execute(text(
+src/commercial/customer_success/router.py:81:        rows = db.execute(text("""
+src/commercial/customer_success/router.py:123:    db.execute(text("""
+src/commercial/customer_success/router.py:145:        row = db.execute(text("""
+src/commercial/customer_success/router.py:176:        rows = db.execute(text("""
+src/commercial/customer_success/repository.py:13:        row = self.db.execute(text("""
+src/commercial/customer_success/repository.py:26:        rows = self.db.execute(text("""
+src/commercial/csv_export/router.py:60:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:89:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:119:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:144:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:165:        rows = db.execute(text("""
+src/commercial/csv_export/router.py:193:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:225:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:260:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:294:        rows = db.execute(text(f"""
+src/commercial/csv_export/router.py:327:        rows = db.execute(text(f"""
+src/commercial/email_alert/router.py:158:            row = db.execute(text(sql)).fetchone()
+src/commercial/inventory_items/router.py:91:        rows = db.execute(text("""
+src/commercial/inventory_items/router.py:112:            vendors = db.execute(text("""
+src/commercial/inventory_items/router.py:139:        rows = db.execute(text("""
+src/commercial/inventory_items/router.py:161:            db.execute(text("""
+src/commercial/purchase_orders/service.py:18:        row = self.db.execute(text("""
+src/commercial/purchase_orders/service.py:32:        rows = self.db.execute(text(query), params).fetchall()
+src/commercial/purchase_orders/service.py:39:        self.db.execute(text("""
+src/commercial/notification_engine/router.py:16:    db.execute(text("""
+src/commercial/notification_engine/router.py:41:        rows = db.execute(text("""
+src/commercial/notification_engine/router.py:67:        rows = db.execute(text("""
+src/commercial/notification_engine/router.py:91:        rows = db.execute(text("""
+src/commercial/notification_engine/router.py:116:        rows = db.execute(text("""
+src/commercial/notification_engine/router.py:140:        rows = db.execute(text("""
+src/commercial/notification_engine/router.py:195:        db.execute(text(
+src/commercial/notification_engine/repository.py:24:    rows = db.execute(text(f"""
+src/commercial/notification_engine/repository.py:37:    result = db.execute(text("""
+src/commercial/notification_engine/repository.py:57:    result = db.execute(text(f"""
+src/commercial/notification_engine/repository.py:77:    db.execute(text("""
+src/commercial/service_requests/router.py:40:    rows = db.execute(text(q), params).fetchall()
+src/commercial/service_requests/router.py:45:    row = db.execute(text("SELECT * FROM service_requests WHERE id = :id"), {"id": sr_id}).fetchone()
+src/commercial/service_requests/router.py:53:    db.execute(text(
+src/commercial/service_requests/router.py:77:    db.execute(text(
+src/commercial/service_requests/router.py:91:    db.execute(text("UPDATE service_requests SET status='converted', updated_at=:now WHERE id=:id"), {"now":now,"id":sr_id})
+src/commercial/service_requests/router.py:169:    sr_row = db.execute(text("SELECT * FROM service_requests WHERE id = :id"), {"id": sr_id}).fetchone()
+src/commercial/service_requests/router.py:182:    db.execute(text("""
+src/commercial/service_requests/router.py:201:    db.execute(text("""
+src/commercial/invoices/router.py:20:        rows = db.execute(text(
+src/commercial/invoices/router.py:50:        inv_row = db.execute(text("""
+src/commercial/invoices/router.py:65:        pay_row = db.execute(text(
+src/commercial/invoices/router.py:119:    db.execute(text("""
+src/commercial/invoices/router.py:153:    db.execute(text("""
+src/commercial/invoices/router.py:174:    total_paid_row = db.execute(text(
+src/commercial/invoices/router.py:187:        db.execute(text(
+src/commercial/invoices/router.py:211:        rows = db.execute(text("""
+src/commercial/digital_twin/router.py:24:        row = db.execute(text(sql), params or {}).fetchone()
+src/commercial/sales_pipeline/router.py:19:    leads = rows(db.execute(text(
+src/commercial/sales_pipeline/router.py:24:        quotes = rows(db.execute(text(
+src/commercial/sales_pipeline/router.py:31:        contracts = rows(db.execute(text(
+src/commercial/sales_pipeline/router.py:38:        revenue = rows(db.execute(text(
+src/commercial/sales_pipeline/router.py:63:    total_leads = db.execute(text("SELECT count(*) FROM leads")).scalar() or 1
+src/commercial/sales_pipeline/router.py:64:    total_quotes = db.execute(text("SELECT count(*) FROM quotes")).scalar() or 0
+src/commercial/sales_pipeline/router.py:65:    won_quotes = db.execute(text("SELECT count(*) FROM quotes WHERE status='approved'")).scalar() or 0
+src/commercial/sales_pipeline/router.py:66:    total_contracts = db.execute(text("SELECT count(*) FROM contracts")).scalar() or 0
+src/commercial/sales_pipeline/router.py:67:    active_contracts = db.execute(text("SELECT count(*) FROM contracts WHERE status='active'")).scalar() or 0
+src/commercial/sales_pipeline/repository.py:13:        rows = self.db.execute(text("""
+src/commercial/sales_pipeline/repository.py:25:        row = self.db.execute(text("""
+src/commercial/dashboard/router.py:16:    return db.execute("SELECT COUNT(*) FROM leads WHERE hotel_id = :hotel_id", {'hotel_id': hotel_id}).scalar()
+src/commercial/dashboard/router.py:25:    active_leads = db.execute("SELECT COUNT(*) FROM leads WHERE hotel_id = :hotel_id", query_params).scalar()
+src/commercial/dashboard/router.py:26:    quotes_pending_approval = db.execute("SELECT COUNT(*) FROM quotes WHERE hotel_id = :hotel_id AND status = 'pending'", query_params).scalar()
+src/commercial/dashboard/router.py:27:    active_contracts = db.execute("SELECT COUNT(*) FROM contracts WHERE hotel_id = :hotel_id AND status = 'active'", query_params).scalar()
+src/commercial/dashboard/router.py:28:    open_work_orders = db.execute("SELECT COUNT(*) FROM work_orders WHERE hotel_id = :hotel_id AND status = 'open'", query_params).scalar()
+src/commercial/dashboard/router.py:29:    overdue_invoices_count = db.execute("SELECT COUNT(*) FROM invoices WHERE hotel_id = :hotel_id AND due_date < NOW()", query_params).scalar()
+src/commercial/dashboard/router.py:30:    overdue_invoices_amount = db.execute("SELECT SUM(amount) FROM invoices WHERE hotel_id = :hotel_id AND due_date < NOW()", query_params).scalar()
+src/commercial/dashboard/router.py:31:    pending_purchase_orders = db.execute("SELECT COUNT(*) FROM purchase_orders WHERE hotel_id = :hotel_id AND status = 'pending'", query_params).scalar()
+src/commercial/dashboard/router.py:32:    low_stock_items = db.execute("SELECT COUNT(*) FROM inventory WHERE hotel_id = :hotel_id AND stock < 10", query_params).scalar()
+src/commercial/ai_assistant/dispatch_router.py:58:        rows = db.execute(text(
+src/commercial/ai_assistant/router.py:124:        row = db.execute(text(
+src/commercial/ai_assistant/router.py:159:    db.execute(text(
+src/commercial/ai_assistant/analytics_router.py:14:        row = db.execute(text("""
+src/commercial/ai_assistant/analytics_router.py:90:        wo = db.execute(text(
+src/commercial/ai_assistant/analytics_router.py:98:        tech = db.execute(text(
+src/commercial/ai_assistant/analytics_router.py:106:        inv = db.execute(text(
+src/commercial/ai_assistant/analytics_router.py:113:        po = db.execute(text(
+src/commercial/ai_assistant/analytics_router.py:151:        rows = db.execute(text("""
+src/commercial/ai_assistant/analytics_router.py:199:        count = db.execute(text("SELECT count(*) FROM work_orders")).scalar()
+src/commercial/ai_assistant/document_router.py:45:        db.execute(text(
+src/commercial/analytics_kpi/router.py:35:    wo = db.execute(text("""
+src/commercial/analytics_kpi/router.py:53:    tech = db.execute(text("""
+src/commercial/analytics_kpi/router.py:63:    inv = db.execute(text("""
+src/commercial/analytics_kpi/router.py:75:    con = db.execute(text("""
+src/commercial/analytics_kpi/router.py:86:    sla = db.execute(text("""
+src/commercial/analytics_kpi/router.py:165:        inflow_row = db.execute(text("""
+src/commercial/analytics_kpi/router.py:172:        outflow_row = db.execute(text("""
+src/commercial/analytics_kpi/router.py:223:        rev = db.execute(text("""
+src/commercial/analytics_kpi/router.py:228:        leads_won = db.execute(text("""
+src/commercial/analytics_kpi/router.py:233:        leads_total = db.execute(text("""
+src/commercial/analytics_kpi/repository.py:14:        total_leads = self.db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:15:        won_leads = self.db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id AND status='won' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:16:        total_wos = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:17:        completed_wos = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='completed' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:18:        active_contracts = self.db.execute(text("SELECT COUNT(*) FROM contracts WHERE hotel_id=:hotel_id AND status='active' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:19:        total_inv_value = self.db.execute(text("SELECT COALESCE(SUM(total_amount),0) FROM invoices WHERE hotel_id=:hotel_id AND status='paid' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:20:        active_techs = self.db.execute(text("SELECT COUNT(*) FROM technicians WHERE hotel_id=:hotel_id AND is_active=true"), h).scalar() or 0
+src/commercial/analytics_kpi/repository.py:39:        rows = self.db.execute(text("""
+src/commercial/analytics_platform/router.py:27:    total_leads       = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:28:    won_leads         = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id AND status='won'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:29:    total_wos         = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:30:    completed_wos     = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='completed'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:31:    active_contracts  = db.execute(text("SELECT COUNT(*) FROM contracts WHERE hotel_id=:hotel_id AND status='active'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:32:    total_inv_value   = db.execute(text("SELECT COALESCE(SUM(total_amount),0) FROM invoices WHERE hotel_id=:hotel_id AND status='paid'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:33:    active_techs      = db.execute(text("SELECT COUNT(*) FROM technicians WHERE hotel_id=:hotel_id AND is_active=true"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:57:    kpi_rows = rows(db.execute(text("SELECT * FROM kpi_snapshots ORDER BY created_at DESC LIMIT 20")).fetchall())
+src/commercial/analytics_platform/router.py:58:    total_leads  = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:59:    won_leads    = db.execute(text("SELECT COUNT(*) FROM leads WHERE hotel_id=:hotel_id AND status='won'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:60:    total_wos    = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:61:    done_wos     = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='completed'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:72:    total_wos     = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id"), h).scalar() or 1
+src/commercial/analytics_platform/router.py:73:    completed_wos = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='completed'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:74:    critical_open = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND priority='critical' AND status!='completed'"), h).scalar() or 0
+src/commercial/analytics_platform/router.py:89:    monthly_leads = rows(db.execute(text(
+src/commercial/analytics_platform/router.py:94:    monthly_wos = rows(db.execute(text(
+src/commercial/analytics_platform/repository.py:14:        row = self.db.execute(text("""
+src/commercial/analytics_platform/repository.py:27:        rows = self.db.execute(text("""
+src/commercial/technicians/router.py:35:    rows = db.execute(text(q), params).fetchall()
+src/commercial/technicians/router.py:53:    rows = db.execute(text(q), params).fetchall()
+src/commercial/technicians/router.py:58:    row = db.execute(text("SELECT * FROM technicians WHERE id = :id"), {"id": technician_id}).fetchone()
+src/commercial/technicians/router.py:67:    db.execute(text(
+src/commercial/technicians/router.py:97:    db.execute(text(f"UPDATE technicians SET {set_clause} WHERE id = :id"), updates)
+src/commercial/technicians/router.py:103:    rows = db.execute(text(
+src/commercial/executive_intelligence/repository.py:14:        open_wos = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND status NOT IN ('completed','closed','cancelled') AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/executive_intelligence/repository.py:15:        critical_wos = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND priority='critical' AND status NOT IN ('completed','closed') AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/executive_intelligence/repository.py:20:        unpaid = self.db.execute(text("SELECT COALESCE(SUM(total_amount),0) FROM invoices WHERE hotel_id=:hid AND status IN ('unpaid','pending','overdue') AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0.0
+src/commercial/executive_kpi/router.py:31:        row = db.execute(text("""
+src/commercial/executive_kpi/router.py:45:        row = db.execute(text("""
+src/commercial/executive_kpi/router.py:61:        row = db.execute(text("""
+src/commercial/executive_kpi/router.py:75:        row = db.execute(text("""
+src/commercial/executive_kpi/router.py:106:        rows = db.execute(text("""
+src/commercial/executive_kpi/router.py:132:        rows = db.execute(text("""
+src/commercial/executive_kpi/repository.py:14:        rev = self.db.execute(text("SELECT COALESCE(SUM(total_amount),0) FROM invoices WHERE hotel_id=:hid AND status='paid' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0.0
+src/commercial/executive_kpi/repository.py:15:        contracts = self.db.execute(text("SELECT COUNT(*) FROM contracts WHERE hotel_id=:hid AND status='active' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/executive_kpi/repository.py:16:        wos_done = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND status='completed' AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/executive_kpi/repository.py:17:        wos_total = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/executive_kpi/repository.py:18:        wos_breached = self.db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND (sla_breached=TRUE OR sla_status='breached') AND (deleted_at IS NULL OR deleted_at > NOW())"), h).scalar() or 0
+src/commercial/executive_kpi/repository.py:19:        techs = self.db.execute(text("SELECT COUNT(*) FROM technicians WHERE hotel_id=:hid AND is_active=true"), h).scalar() or 0
+src/commercial/executive_kpi/repository.py:34:        rows = self.db.execute(text("""
+src/commercial/bulk_operations/router.py:56:            db.execute(text("""
+src/commercial/bulk_operations/router.py:69:        db.execute(text("""
+src/commercial/bulk_operations/router.py:124:            db.execute(text(f"""
+src/commercial/bulk_operations/router.py:167:            result = db.execute(text("""
+src/commercial/bulk_operations/router.py:218:            row = db.execute(text(sql)).fetchone()
+src/commercial/approval_chain/router.py:28:    db.execute(text("""
+src/commercial/approval_chain/router.py:58:        db.execute(text("""
+src/commercial/approval_chain/router.py:86:    existing = db.execute(text(
+src/commercial/approval_chain/router.py:93:        db.execute(text("""
+src/commercial/approval_chain/router.py:129:    db.execute(text("""
+src/commercial/approval_chain/router.py:143:        db.execute(text("""
+src/commercial/approval_chain/router.py:147:        db.execute(text("""
+src/commercial/approval_chain/router.py:161:        db.execute(text("""
+src/commercial/approval_chain/router.py:182:    db.execute(text("""
+src/commercial/approval_chain/router.py:188:    db.execute(text("""
+src/commercial/approval_chain/router.py:193:    db.execute(text("""
+src/commercial/approval_chain/router.py:229:        db.execute(text("""
+src/commercial/approval_chain/router.py:245:        db.execute(text("""
+src/commercial/approval_chain/router.py:299:        steps = db.execute(text(
+src/commercial/approval_chain/repository.py:9:    rows = db.execute(text("""
+src/commercial/approval_chain/repository.py:20:    db.execute(text("""
+src/commercial/approval_chain/repository.py:33:    result = db.execute(text("""
+src/commercial/sla_dashboard/router.py:31:        row = db.execute(text("""
+src/commercial/sla_dashboard/router.py:83:        rows = db.execute(text("""
+src/commercial/sla_dashboard/router.py:122:        rows = db.execute(text("""
+src/commercial/sla_dashboard/router.py:158:        rows = db.execute(text("""
+src/commercial/sla_dashboard/repository.py:13:        row = self.db.execute(text("""
+src/commercial/sla_dashboard/repository.py:35:        rows = self.db.execute(text("""
+src/commercial/sla_dashboard/repository.py:54:        rows = self.db.execute(text("""
+src/commercial/warehouse_intelligence/router.py:85:        rows = db.execute(text(f"""
+src/commercial/warehouse_intelligence/router.py:219:        rows = db.execute(text(f"""
+src/commercial/warehouse_intelligence/repository.py:13:        row = self.db.execute(text("""
+src/commercial/warehouse_intelligence/repository.py:27:        rows = self.db.execute(text("""
+src/commercial/user_preferences/router.py:16:    db.execute(text("""
+src/commercial/user_preferences/router.py:33:        rows = db.execute(text(
+src/commercial/user_preferences/router.py:56:    db.execute(text("""
+src/commercial/user_preferences/router.py:88:        db.execute(text("""
+src/commercial/user_preferences/router.py:108:    db.execute(text(
+src/commercial/user_preferences/repository.py:8:    rows = db.execute(text(
+src/commercial/user_preferences/repository.py:15:    db.execute(text("""
+src/commercial/user_preferences/repository.py:25:    result = db.execute(text(
+src/commercial/platform_status/router.py:54:        rows = db.execute(text(q), params).fetchall()
+src/commercial/platform_status/router.py:58:        count = db.execute(text(count_q), params).fetchone()
+src/commercial/platform_status/router.py:78:        db.execute(text("SELECT 1")).fetchone()
+src/commercial/platform_status/router.py:86:        row = db.execute(text("""
+src/commercial/platform_status/router.py:108:        row = db.execute(text("""
+src/commercial/platform_status/router.py:129:        row = db.execute(text("""
+src/commercial/platform_status/router.py:152:        nodes = db.execute(text("SELECT COUNT(*) FROM twin_nodes WHERE hotel_id=:hid"), {"hid": hotel_id}).fetchone()
+src/commercial/platform_status/router.py:153:        edges = db.execute(text("SELECT COUNT(*) FROM twin_edges WHERE hotel_id=:hid"), {"hid": hotel_id}).fetchone()
+src/commercial/platform_status/router.py:161:        wo = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND status='open' AND deleted_at IS NULL"), {"hid": hotel_id}).fetchone()
+src/commercial/platform_status/router.py:162:        sr = db.execute(text("SELECT COUNT(*) FROM service_requests WHERE hotel_id=:hid AND status='open'"), {"hid": hotel_id}).fetchone()
+src/commercial/platform_status/router.py:163:        assets = db.execute(text("SELECT COUNT(*) FROM assets WHERE hotel_id=:hid AND status='operational' AND deleted_at IS NULL"), {"hid": hotel_id}).fetchone()
+src/commercial/assets/router.py:52:    rows = db.execute(text(q), params).fetchall()
+src/commercial/assets/router.py:83:    rows = db.execute(text(q), params).fetchall()
+src/commercial/assets/router.py:94:    rows = db.execute(text(q), params).fetchall()
+src/commercial/assets/router.py:104:    row = db.execute(text("SELECT * FROM assets WHERE id = :id"), {"id": asset_id}).fetchone()
+src/commercial/assets/router.py:112:    db.execute(text(
+src/commercial/assets/router.py:153:    db.execute(text(f"UPDATE assets SET {set_clause} WHERE id = :id"), updates)
+src/commercial/assets/router.py:164:    rows = db.execute(text(
+src/commercial/work_orders/router.py:57:    rows = db.execute(text(q), params).fetchall()
+src/commercial/work_orders/router.py:90:    rows = db.execute(text(q), params).fetchall()
+src/commercial/work_orders/router.py:155:    row = db.execute(text("SELECT * FROM work_orders WHERE id = :id"), {"id": work_order_id}).fetchone()
+src/commercial/work_orders/router.py:163:    db.execute(text(
+src/commercial/work_orders/router.py:200:    db.execute(text(f"UPDATE work_orders SET {set_clause} WHERE id = :id"), updates)
+src/commercial/work_orders/router.py:211:    db.execute(text("DELETE FROM work_orders WHERE id = :id"), {"id": work_order_id})
+src/commercial/work_orders/router.py:220:    rows = db.execute(text(
+src/commercial/work_orders/router.py:247:    db.execute(text("""
+src/commercial/work_orders/router.py:314:    db.execute(text(f"UPDATE work_orders SET {set_clause} WHERE id = :id"), updates)
+src/commercial/work_orders/router.py:319:        db.execute(text("""
+src/commercial/work_orders/router.py:339:        db.execute(text("SELECT * FROM work_orders WHERE id = :id"),
+src/commercial/work_orders/router.py:374:        rows = db.execute(text("""
+src/commercial/work_orders/router.py:473:    wo_row = db.execute(text("""
+src/commercial/work_orders/router.py:486:        inv_check = db.execute(text("""
+src/commercial/work_orders/router.py:501:    db.execute(text("""
+src/commercial/work_orders/router.py:512:    existing = db.execute(text("""
+src/commercial/work_orders/router.py:521:        db.execute(text("""
+src/commercial/suppliers/repository.py:14:    rows = db.execute(text(f"SELECT * FROM suppliers {where} ORDER BY created_at DESC LIMIT :limit OFFSET :offset"), params).fetchall()
+src/commercial/suppliers/repository.py:15:    count = db.execute(text(f"SELECT COUNT(*) FROM suppliers {where}"), {k:v for k,v in params.items() if k not in ("limit","offset")}).scalar()
+src/commercial/suppliers/repository.py:19:    row = db.execute(text("SELECT * FROM suppliers WHERE id = :id AND hotel_id = :hotel_id"), {"id": supplier_id, "hotel_id": hotel_id}).fetchone()
+src/commercial/suppliers/repository.py:30:    db.execute(text(f"INSERT INTO suppliers ({cols}) VALUES ({vals})"), d)
+src/commercial/suppliers/repository.py:45:    db.execute(text(f"UPDATE suppliers SET {set_clause} WHERE id = :id AND hotel_id = :hotel_id"), updates)
+src/commercial/predictive_maintenance/router.py:125:        assets = db.execute(text(f"""
+src/commercial/predictive_maintenance/repository.py:13:        rows = self.db.execute(text("""
+src/commercial/scope_of_work/router.py:16:    count = db.execute(text("SELECT count(*) FROM scope_of_work")).scalar() or 0
+src/commercial/scope_of_work/router.py:29:    rows = db.execute(text(q), params).fetchall()
+src/commercial/scope_of_work/router.py:44:    db.execute(text("""
+src/commercial/scope_of_work/router.py:84:    row = db.execute(text("SELECT * FROM scope_of_work WHERE id = :id"), {"id": sow_id}).fetchone()
+src/commercial/scope_of_work/router.py:90:    row = db.execute(text("SELECT * FROM scope_of_work WHERE id = :id"), {"id": sow_id}).fetchone()
+src/commercial/scope_of_work/router.py:114:        row = db.execute(text("SELECT * FROM scope_of_work WHERE id = :id"), {"id": sow_id}).fetchone()
+src/commercial/scope_of_work/router.py:132:    db.execute(text(f"UPDATE scope_of_work SET {set_clause}, updated_at = NOW() WHERE id = :id"), params)
+src/commercial/scope_of_work/router.py:134:    row = db.execute(text("SELECT * FROM scope_of_work WHERE id = :id"), {"id": sow_id}).fetchone()
+src/commercial/scope_of_work/router.py:142:    sow = db.execute(text("SELECT id FROM scope_of_work WHERE id = :id"), {"id": sow_id}).fetchone()
+src/commercial/scope_of_work/router.py:152:    db.execute(text("""
+src/commercial/scope_of_work/router.py:173:    row = db.execute(text("SELECT * FROM boq_items WHERE id = :id"), {"id": item_id}).fetchone()
+src/commercial/scope_of_work/router.py:179:    sow = db.execute(text("SELECT * FROM scope_of_work WHERE id = :id"), {"id": sow_id}).fetchone()
+src/commercial/scope_of_work/router.py:190:    db.execute(text("""
+src/commercial/scope_of_work/repository.py:19:    rows = db.execute(text(f"""
+src/commercial/scope_of_work/repository.py:26:    row = db.execute(text(
+src/commercial/scope_of_work/repository.py:39:    db.execute(text(f"INSERT INTO scope_of_work ({cols}) VALUES ({vals})"), params)
+src/commercial/approval_requests/router.py:33:    rows = db.execute(text(q), params).fetchall()
+src/commercial/approval_requests/router.py:70:    db.execute(text("""
+src/commercial/approval_requests/router.py:79:        db.execute(text("""
+src/commercial/approval_requests/router.py:84:        db.execute(text("""
+src/commercial/approval_requests/router.py:89:        db.execute(text("""
+src/commercial/approval_requests/router.py:108:    db.execute(text("""
+src/commercial/approval_requests/router.py:117:        db.execute(text("UPDATE scope_of_work SET status = 'rejected', updated_at = NOW() WHERE id = :id"), {"id": doc_id})
+src/commercial/approval_requests/router.py:119:        db.execute(text("UPDATE purchase_orders SET status = 'rejected', updated_at = NOW() WHERE id = :id"), {"id": doc_id})
+src/commercial/approval_requests/repository.py:19:    rows = db.execute(text(f"""
+src/commercial/approval_requests/repository.py:26:    row = db.execute(text(
+src/commercial/approval_requests/repository.py:35:    result = db.execute(text("""
+src/commercial/approval_requests/repository.py:43:    result = db.execute(text("""
+src/commercial/global_search/router.py:35:        rows = db.execute(text("""
+src/commercial/global_search/router.py:53:        rows = db.execute(text("""
+src/commercial/global_search/router.py:71:        rows = db.execute(text("""
+src/commercial/global_search/router.py:88:        rows = db.execute(text("""
+src/commercial/global_search/router.py:105:        rows = db.execute(text("""
+src/commercial/global_search/router.py:122:        rows = db.execute(text("""
+src/commercial/global_search/router.py:140:        rows = db.execute(text("""
+src/commercial/global_search/router.py:157:        rows = db.execute(text("""
+src/commercial/sse_notifications/router.py:31:        rows = db.execute(text(f"""
+src/commercial/sse_notifications/router.py:51:        rows = db.execute(text("""
+src/commercial/sse_notifications/router.py:69:        rows = db.execute(text("""
+src/commercial/sse_notifications/router.py:86:        rows = db.execute(text("""
+src/commercial/sse_notifications/router.py:155:            row = db.execute(text(sql)).fetchone()
+src/commercial/tenant_audit/router.py:31:            col_check = db.execute(text("""
+src/commercial/tenant_audit/router.py:40:                row = db.execute(text(f"""
+src/commercial/tenant_audit/router.py:51:                hotels_row = db.execute(text(
+src/commercial/tenant_audit/router.py:96:            rows = db.execute(text(f"""
+src/commercial/warranty/router.py:16:    db.execute(text("""
+src/commercial/warranty/router.py:37:        row = db.execute(text("""
+src/commercial/warranty/router.py:64:    db.execute(text("""
+src/commercial/warranty/router.py:89:        rows = db.execute(text("""
+src/commercial/warranty/router.py:116:        rows = db.execute(text("""
+src/commercial/warranty/repository.py:14:    rows = db.execute(text(f"SELECT * FROM asset_warranties {where} ORDER BY created_at DESC LIMIT :limit"), params).fetchall()
+src/commercial/warranty/repository.py:18:    row = db.execute(text("SELECT * FROM asset_warranties WHERE id = :id AND hotel_id = :hotel_id"), {"id": warranty_id, "hotel_id": hotel_id}).fetchone()
+src/commercial/warranty/repository.py:27:    db.execute(text(f"INSERT INTO asset_warranties ({cols}) VALUES ({vals})"), params)
+src/commercial/ai_signals/router.py:25:    rows = db.execute(text("""
+src/commercial/ai_signals/router.py:63:    rows = db.execute(text("""
+src/commercial/ai_signals/router.py:103:    rows = db.execute(text("""
+src/commercial/ai_signals/router.py:142:    rows = db.execute(text("""
+src/commercial/ai_signals/router.py:176:    rows = db.execute(text("""
+src/commercial/ai_signals/router.py:216:    rows = db.execute(text("""
+src/commercial/ai_signals/repository.py:13:        rows = self.db.execute(text("""
+src/commercial/ai_signals/repository.py:33:        rows = self.db.execute(text("""
+src/commercial/projects/router.py:39:    return rows(db.execute(text(q), p).fetchall())
+src/commercial/projects/router.py:47:    total     = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id"), h).scalar() or 0
+src/commercial/projects/router.py:48:    active    = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id AND status='active'"), h).scalar() or 0
+src/commercial/projects/router.py:49:    completed = db.execute(text("SELECT COUNT(*) FROM projects WHERE hotel_id=:hotel_id AND status='completed'"), h).scalar() or 0
+src/commercial/projects/router.py:50:    at_risk   = rows(db.execute(text("SELECT * FROM project_risks WHERE status='open' ORDER BY created_at DESC LIMIT 5")).fetchall())
+src/commercial/projects/router.py:58:    db.execute(text(
+src/commercial/projects/router.py:82:    at_risk  = rows(db.execute(text("SELECT * FROM project_risks WHERE status='open' ORDER BY created_at DESC LIMIT 10")).fetchall())
+src/commercial/projects/router.py:83:    overdue  = rows(db.execute(text("SELECT * FROM project_milestones WHERE due_date < NOW() AND status!='completed' ORDER BY due_date LIMIT 10")).fetchall())
+src/commercial/projects/router.py:106:        rows = db.execute(text("""
+src/commercial/projects/router.py:116:            rows = db.execute(text("SELECT id, status FROM projects LIMIT 50")).fetchall()
+src/commercial/projects/router.py:149:    r = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": project_id}).fetchone()
+src/commercial/projects/router.py:156:    return rows(db.execute(text("SELECT * FROM project_phases WHERE project_id=:id ORDER BY created_at"), {"id": project_id}).fetchall())
+src/commercial/projects/router.py:161:    return rows(db.execute(text("SELECT * FROM project_risks WHERE project_id=:id ORDER BY created_at DESC"), {"id": project_id}).fetchall())
+src/commercial/projects/router.py:166:    return rows(db.execute(text("SELECT * FROM project_milestones WHERE project_id=:id ORDER BY due_date"), {"id": project_id}).fetchall())
+src/commercial/projects/router.py:173:        project = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": pid}).fetchone()
+src/commercial/projects/router.py:185:        db.execute(text("UPDATE projects SET status=:status, updated_at=:updated_at WHERE id=:id"),
+src/commercial/projects/router.py:189:        db.execute(text("INSERT INTO project_transition_logs (id, project_id, from_status, to_status, comment, changed_by, created_at) "
+src/commercial/projects/router.py:209:        project = db.execute(text("SELECT * FROM projects WHERE id=:id"), {"id": pid}).fetchone()
+src/commercial/projects/router.py:248:        ac_row = db.execute(text("""
+src/commercial/projects/router.py:256:            wo_count = db.execute(text(
+src/commercial/scheduler/jobs.py:79:        rows = db.execute(text(
+src/commercial/scheduler/jobs.py:99:                db.execute(text(
+src/commercial/scheduler/jobs.py:138:        row = db.execute(text(
+src/commercial/scheduler/jobs.py:167:        row = db.execute(text(
+src/commercial/executive_dashboard/asset_read_models.py:35:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/asset_read_models.py:61:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/asset_read_models.py:89:            rows = self.db.execute(text("""
+src/commercial/executive_dashboard/asset_read_models.py:105:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/asset_read_models.py:128:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:39:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:55:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:70:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:88:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:102:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:116:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/read_models.py:135:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/router.py:38:        row = db.execute(text("""
+src/commercial/executive_dashboard/router.py:69:        row = db.execute(text("""
+src/commercial/executive_dashboard/router.py:86:        row = db.execute(text("""
+src/commercial/executive_dashboard/router.py:108:        row = db.execute(text("""
+src/commercial/executive_dashboard/router.py:128:        row = db.execute(text("""
+src/commercial/executive_dashboard/procurement_read_models.py:36:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/procurement_read_models.py:64:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/procurement_read_models.py:85:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/procurement_read_models.py:108:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/procurement_read_models.py:129:            row = self.db.execute(text("""
+src/commercial/executive_dashboard/procurement_read_models.py:148:            po_row = self.db.execute(text("""
+src/commercial/procurement_intake/router.py:70:    db.execute(text("""
+src/commercial/procurement_intake/router.py:118:            rows = db.execute(text(f"""
+src/commercial/procurement_intake/router.py:157:                vendors = db.execute(text(f"""
+src/commercial/procurement_intake/router.py:205:        db.execute(text("""
+src/commercial/procurement_intake/router.py:279:        db.execute(text("""
+src/commercial/procurement_intake/router.py:293:                db.execute(text("""
+src/commercial/procurement_intake/router.py:326:        row = db.execute(text(
+src/commercial/procurement_intake/router.py:335:            pr_row = db.execute(text(
+src/commercial/procurement_intake/repository.py:9:    rows = db.execute(text("""
+src/commercial/procurement_intake/repository.py:22:    db.execute(text("""
+src/commercial/customer360/router.py:28:    lead = row_to_dict(db.execute(text(
+src/commercial/customer360/router.py:36:    result["contracts"] = rows(db.execute(text(
+src/commercial/customer360/router.py:44:        result["work_orders"] = rows(db.execute(text(
+src/commercial/customer360/router.py:51:    result["invoices"] = rows(db.execute(text(
+src/commercial/customer360/router.py:56:    result["cs_health"] = row_to_dict(db.execute(text(
+src/commercial/customer360/router.py:98:        return rows(db.execute(text(q), p).fetchall())
+src/commercial/customer360/repository.py:19:        row = self.db.execute(text(sql), params).fetchone()
+src/commercial/customer360/repository.py:29:        rows = self.db.execute(text(sql), params).fetchall()
+src/commercial/customer360/repository.py:36:        rows = self.db.execute(text(f"""
+src/commercial/customer360/repository.py:47:        rows = self.db.execute(text(f"""
+src/commercial/performance_audit/router.py:19:        rows = db.execute(text(sql), params or {}).fetchall()
+src/commercial/performance_audit/router.py:71:        rows = db.execute(text("""
+src/commercial/performance_audit/router.py:85:            rows = db.execute(text("""
+src/commercial/performance_audit/router.py:130:        idx_rows = db.execute(text("""
+src/commercial/pdf_export/router.py:208:            row = db.execute(text(f"SELECT count(*) as n FROM {{table}}")).fetchone()
+src/commercial/pdf_export/router.py:214:        rev_row = db.execute(text(
+src/commercial/pdf_export/router.py:280:        h = db.execute(text("SELECT name FROM hotels WHERE id=:id"),
+src/commercial/pdf_export/router.py:297:            row = db.execute(text(f"SELECT count(*) as n FROM {table}")).fetchone()
+src/commercial/pdf_export/router.py:302:        rev_row = db.execute(text(
+src/commercial/ai_mentor/router.py:31:    db.execute(text("""
+src/commercial/ai_mentor/router.py:115:            row = db.execute(text("""
+src/commercial/ai_mentor/router.py:133:            row = db.execute(text("""
+src/commercial/ai_mentor/router.py:147:            row = db.execute(text("""
+src/commercial/ai_mentor/router.py:183:    db.execute(text("""
+src/commercial/ai_mentor/router.py:212:    db.execute(text("""
+src/commercial/ai_mentor/router.py:236:        rows = db.execute(text(f"""
+src/commercial/ai_mentor/repository.py:17:            self.db.execute(text("""
+src/commercial/knowledge_graph/router.py:38:            row = db.execute(text(f"SELECT count(*) as cnt FROM {table}")).fetchone()
+src/commercial/knowledge_graph/router.py:88:                    a = db.execute(text("SELECT id,name,category FROM assets WHERE id=:id"),
+src/commercial/knowledge_graph/router.py:94:                    t = db.execute(text("SELECT id,name,specializations FROM technicians WHERE id=:id"),
+src/commercial/knowledge_graph/router.py:100:                    h = db.execute(text("SELECT id,name FROM hotels WHERE id=:id"),
+src/commercial/knowledge_graph/router.py:113:                wos = db.execute(text("""
+src/commercial/knowledge_graph/router.py:121:                pms = db.execute(text("""
+src/commercial/knowledge_graph/router.py:138:                    h = db.execute(text("SELECT id,name,city FROM hotels WHERE id=:id"),
+src/commercial/knowledge_graph/router.py:143:                invs = db.execute(text("""
+src/commercial/knowledge_graph/router.py:159:                wos = db.execute(text("""
+src/commercial/knowledge_graph/router.py:225:            row = db.execute(text(f"SELECT count(*) as n FROM {t}")).fetchone()
+src/commercial/knowledge_graph/repository.py:13:        nodes_cnt = self.db.execute(text("SELECT COUNT(*) FROM twin_nodes WHERE hotel_id=:hid"), {"hid": hotel_id}).scalar() or 0
+src/commercial/knowledge_graph/repository.py:14:        edges_cnt = self.db.execute(text("SELECT COUNT(*) FROM twin_edges WHERE hotel_id=:hid"), {"hid": hotel_id}).scalar() or 0
+src/commercial/knowledge_graph/repository.py:18:        rows = self.db.execute(text("""
+src/commercial/maintenance_enterprise/router.py:28:    total_assets  = db.execute(text("SELECT COUNT(*) FROM assets WHERE hotel_id=:hotel_id"), h).scalar() or 0
+src/commercial/maintenance_enterprise/router.py:29:    open_wos      = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='open'"), h).scalar() or 0
+src/commercial/maintenance_enterprise/router.py:30:    in_prog_wos   = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='in_progress'"), h).scalar() or 0
+src/commercial/maintenance_enterprise/router.py:31:    critical_wos  = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND priority IN ('critical','high')"), h).scalar() or 0
+src/commercial/maintenance_enterprise/router.py:32:    active_plans  = db.execute(text("SELECT COUNT(*) FROM maintenance_plans WHERE status='active'")).scalar() or 0
+src/commercial/maintenance_enterprise/router.py:33:    due_today     = db.execute(text("SELECT COUNT(*) FROM maintenance_plans WHERE next_due_date = CURRENT_DATE::text")).scalar() or 0
+src/commercial/maintenance_enterprise/router.py:58:    return rows(db.execute(text(q), p).fetchall())
+src/commercial/maintenance_enterprise/router.py:63:    r = db.execute(text("SELECT * FROM maintenance_plans WHERE id=:id"), {"id": plan_id}).fetchone()
+src/commercial/maintenance_enterprise/router.py:72:    db.execute(text(
+src/commercial/maintenance_enterprise/router.py:105:    return rows(db.execute(text(q), p).fetchall())
+src/commercial/maintenance_enterprise/router.py:111:    r = rows(db.execute(text(
+src/commercial/maintenance_enterprise/router.py:121:    asset_rows = rows(db.execute(text(
+src/commercial/maintenance_enterprise/router.py:137:    critical = rows(db.execute(text(
+src/commercial/maintenance_enterprise/router.py:140:    overdue_plans = rows(db.execute(text(
+src/commercial/maintenance_enterprise/router.py:157:    open_wos = rows(db.execute(text(
+src/commercial/maintenance_enterprise/router.py:166:    cost_rows = rows(db.execute(text(
+src/commercial/maintenance_enterprise/router.py:176:    r = rows(db.execute(text(
+src/commercial/maintenance_enterprise/repository.py:13:        row = self.db.execute(text("""
+src/commercial/maintenance_enterprise/repository.py:24:        rows = self.db.execute(text("""
+src/commercial/approval_center/router.py:41:    q_quotes = rows(db.execute(text(
+src/commercial/approval_center/router.py:50:    q_prs = rows(db.execute(text(
+src/commercial/approval_center/router.py:60:    q_pos = rows(db.execute(text(
+src/commercial/approval_center/router.py:99:    quotes = db.execute(text(
+src/commercial/approval_center/router.py:102:    prs = db.execute(text(
+src/commercial/approval_center/router.py:105:    pos = db.execute(text(
+src/commercial/approval_center/repository.py:34:        rows = db.execute(text("""
+src/commercial/approval_center/repository.py:46:        rows = db.execute(text("""
+src/commercial/approval_center/repository.py:59:        rows = db.execute(text("""
+src/commercial/approval_center/repository.py:84:        counts["pending_quotes"] = db.execute(text(
+src/commercial/approval_center/repository.py:92:        counts["pending_prs"] = db.execute(text(
+src/commercial/approval_center/repository.py:100:        counts["pending_pos"] = db.execute(text(
+src/commercial/approval_center/repository.py:128:        result = db.execute(text(f"""
+src/commercial/approval_center/repository.py:156:        result = db.execute(text(f"""
+src/commercial/goods_receipt_workflow/router.py:33:        db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:75:        db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:104:            existing = db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:113:                db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:118:                db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:129:            db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:158:    db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:194:        db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:216:        rows = db.execute(text(f"""
+src/commercial/goods_receipt_workflow/router.py:260:        po_row = db.execute(text("""
+src/commercial/goods_receipt_workflow/router.py:277:            gr_row = db.execute(text("""
+src/commercial/goods_receipt_workflow/repository.py:13:        rows = self.db.execute(text("""
+src/commercial/goods_receipt_workflow/repository.py:23:        row = self.db.execute(text("""

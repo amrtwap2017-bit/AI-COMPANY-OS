@@ -1,0 +1,302 @@
+  OK: employees_router
+  OK: timesheets_router
+  OK: financial_gl_router
+  OK: eta_router
+  OK: signals_router
+  OK: dispatch_router
+  OK: supply_automation_router
+  OK: workflow_engine_router
+  OK: ai_gateway_router
+  OK: email_service_router
+  OK: platform_status_router
+TOTAL ROUTES: 289
+
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+                       
+  GET                  /
+  GET                  /api/v1/activity-feed
+  GET                  /api/v1/ai/signals/summary
+  GET                  /api/v1/approval-requests/
+  GET                  /api/v1/assets-portal
+  DELETE               /api/v1/assets/{asset_id}
+  GET                  /api/v1/assets/{asset_id}
+  POST                 /api/v1/auth/change-password
+  GET                  /api/v1/automation/run
+  POST                 /api/v1/automation/run
+  GET                  /api/v1/automation/status
+  POST                 /api/v1/cache/invalidate/{hotel_id}
+  GET                  /api/v1/cache/status
+  GET                  /api/v1/client-portal/dashboard
+  GET                  /api/v1/client-portal/projects
+  GET                  /api/v1/client-portal/projects/
+  GET                  /api/v1/client-portal/service-requests
+  GET                  /api/v1/client-portal/service-requests/
+  POST                 /api/v1/client-portal/service-requests/
+  GET                  /api/v1/client-portal/work-orders
+  GET                  /api/v1/client-portal/work-orders/
+  GET                  /api/v1/client/dashboard
+  POST                 /api/v1/client/login
+  GET                  /api/v1/client/projects
+  POST                 /api/v1/client/service-requests
+  GET                  /api/v1/client/sow-approvals
+  GET                  /api/v1/client/work-orders
+  GET                  /api/v1/contracts-portal
+  GET                  /api/v1/contracts/{contract_id}
+  POST                 /api/v1/contracts/{contract_id}/renew
+  GET                  /api/v1/dashboard/
+  GET                  /api/v1/dashboard/summary
+  GET                  /api/v1/dashboard/summary/
+  POST                 /api/v1/debug/upload-test
+  GET                  /api/v1/dispatch/board
+  GET                  /api/v1/documents/
+  GET                  /api/v1/documents/categories
+  POST                 /api/v1/documents/v2/upload
+  DELETE               /api/v1/documents/v2/{doc_id}
+  GET                  /api/v1/documents/{doc_id}/view
+  GET                  /api/v1/engineering/punch-list
+  GET                  /api/v1/engineering/punch-list/
+  GET                  /api/v1/engineering/quality-records
+  GET                  /api/v1/engineering/quality-records/
+  GET                  /api/v1/engineering/safety-records
+  GET                  /api/v1/engineering/safety-records/
+  GET                  /api/v1/engineering/site-visits
+  GET                  /api/v1/engineering/site-visits/
+  GET                  /api/v1/executive-dashboard/
+  GET                  /api/v1/executive/dashboard
+  GET                  /api/v1/features/
+  POST                 /api/v1/features/invalidate
+  GET                  /api/v1/financial/cash-flow
+  GET                  /api/v1/financial/dashboard
+  GET                  /api/v1/financial/project-pl
+  GET                  /api/v1/goods-receipt-notes/
+  POST                 /api/v1/goods-receipt-notes/
+  GET                  /api/v1/goods-receipts-portal
+  GET                  /api/v1/health
+  GET                  /api/v1/health/detailed
+  GET                  /api/v1/health/live
+  GET                  /api/v1/health/ready
+  GET                  /api/v1/health/routes
+  GET                  /api/v1/health/triggers
+  GET                  /api/v1/health/typescript
+  GET                  /api/v1/health/v2
+  GET                  /api/v1/inspections
+  GET                  /api/v1/inspections/
+  GET                  /api/v1/inspections/{insp_id}
+  GET                  /api/v1/inventory-items-portal
+  GET                  /api/v1/invoices/{invoice_id}
+  GET                  /api/v1/knowledge-graph
+  GET                  /api/v1/knowledge-graph/
+  GET                  /api/v1/knowledge-graph/search
+  GET                  /api/v1/leads-portal
+  GET                  /api/v1/leads-portal-v2
+  GET                  /api/v1/leads-portal-v2/{lead_id}
+  POST                 /api/v1/leads/
+  GET                  /api/v1/leads/{lead_id}
+  POST                 /api/v1/leads/{lead_id}/status
+  GET                  /api/v1/maintenance/pm-plans
+  GET                  /api/v1/maintenance/pm-plans/
+  GET                  /api/v1/maintenance/pm-plans/{plan_id}
+  GET                  /api/v1/maintenance/pm-plans/{plan_id}
+  GET                  /api/v1/me
+  GET                  /api/v1/me
+  GET                  /api/v1/notifications-portal
+  GET                  /api/v1/payment-tracking
+  GET                  /api/v1/payment-tracking/
+  GET                  /api/v1/pdf/invoice/{invoice_id}
+  GET                  /api/v1/pdf/purchase-order/{po_id}
+  GET                  /api/v1/pdf/report/{report_type}
+  GET                  /api/v1/pdf/scope-of-work/{sow_id}
+  GET                  /api/v1/pdf/work-order/{wo_id}
+  GET                  /api/v1/platform-notif/
+  DELETE               /api/v1/platform-notif/cleanup
+  POST                 /api/v1/platform-notif/generate
+  POST                 /api/v1/platform-notif/mark-all-read
+  POST                 /api/v1/platform-notif/{notif_id}/read
+  GET                  /api/v1/platform/summary
+  GET                  /api/v1/pm-schedule/assets
+  GET                  /api/v1/pm-schedule/calendar
+  POST                 /api/v1/pm-schedule/generate
+  GET                  /api/v1/pm-schedule/stats
+  GET                  /api/v1/procurement/dashboard
+  GET                  /api/v1/projects-portal
+  GET                  /api/v1/projects/{project_id}
+  GET                  /api/v1/purchase-orders-portal
+  GET                  /api/v1/purchase-orders-v2/
+  POST                 /api/v1/purchase-orders-v2/
+  DELETE               /api/v1/purchase-orders-v2/v2/{po_id}
+  POST                 /api/v1/purchase-orders-v2/{po_id}/line-items
+  PATCH                /api/v1/purchase-orders-v2/{po_id}/line-items/{line_id}
+  GET                  /api/v1/purchase-requests-portal
+  POST                 /api/v1/purchase-requests/
+  POST                 /api/v1/purchase-requests/{pr_id}/approve
+  GET                  /api/v1/qr/asset/{asset_id}
+  GET                  /api/v1/qr/asset/{asset_id}/data
+  GET                  /api/v1/qr/asset/{asset_id}/print-sheet
+  GET                  /api/v1/qr/assets/list
+  GET                  /api/v1/rbac/permissions
+  GET                  /api/v1/rbac/roles
+  GET                  /api/v1/rbac/users
+  POST                 /api/v1/rbac/users/{user_id}/role
+  GET                  /api/v1/report-engine/catalog
+  GET                  /api/v1/report-engine/{report_type}
+  GET                  /api/v1/reports/assets
+  GET                  /api/v1/reports/contracts
+  GET                  /api/v1/reports/daily-summary
+  GET                  /api/v1/reports/work-orders
+  GET                  /api/v1/rfq/
+  POST                 /api/v1/rfq/{rfq_id}/award
+  GET                  /api/v1/rfq/{rfq_id}/bid-comparison
+  GET                  /api/v1/rfqs
+  GET                  /api/v1/rfqs-portal
+  GET                  /api/v1/rfqs/
+  GET                  /api/v1/scope-of-work/
+  DELETE               /api/v1/scope-of-work/v2/{sow_id}
+  GET                  /api/v1/scope-of-work/{sow_id}
+  PATCH                /api/v1/scope-of-work/{sow_id}
+  POST                 /api/v1/scope-of-work/{sow_id}/approve
+  POST                 /api/v1/scope-of-work/{sow_id}/boq-items
+  GET                  /api/v1/search
+  POST                 /api/v1/secure/auth/change-password
+  POST                 /api/v1/secure/contracts/{contract_id}/renew
+  POST                 /api/v1/secure/purchase-requests/{pr_id}/approve
+  PATCH                /api/v1/secure/rbac/users/{user_id}/role
+  POST                 /api/v1/secure/rfq/{rfq_id}/award
+  POST                 /api/v1/secure/scope-of-work/{sow_id}/approve
+  GET                  /api/v1/secure/security/status
+  GET                  /api/v1/security/audit
+  POST                 /api/v1/service-requests/
+  DELETE               /api/v1/service-requests/{sr_id}
+  POST                 /api/v1/service-requests/{sr_id}/create-work-order
+  POST                 /api/v1/service-requests/{sr_id}/status
+  GET                  /api/v1/service-requests/{sr_id}/work-order
+  GET                  /api/v1/sites-portal
+  GET                  /api/v1/sla/breaches
+  GET                  /api/v1/sla/dashboard
+  GET                  /api/v1/stock-balances
+  GET                  /api/v1/stock-balances/
+  GET                  /api/v1/supplier-invoices/
+  POST                 /api/v1/supplier-invoices/
+  GET                  /api/v1/supplier-invoices/dashboard
+  DELETE               /api/v1/supplier-invoices/v2/{invoice_id}
+  GET                  /api/v1/supplier-invoices/{invoice_id}
+  POST                 /api/v1/supplier-invoices/{invoice_id}/approve
+  POST                 /api/v1/supplier-invoices/{invoice_id}/match
+  POST                 /api/v1/supplier-invoices/{invoice_id}/pay
+  GET                  /api/v1/supplier/dashboard
+  GET                  /api/v1/supplier/invoices
+  POST                 /api/v1/supplier/login
+  GET                  /api/v1/supplier/profile
+  GET                  /api/v1/supplier/purchase-orders
+  POST                 /api/v1/supplier/quotes
+  GET                  /api/v1/supplier/rfqs
+  GET                  /api/v1/suppliers
+  GET                  /api/v1/suppliers/
+  POST                 /api/v1/suppliers/
+  GET                  /api/v1/suppliers/{supplier_id}
+  GET                  /api/v1/technicians/{tech_id}
+  GET                  /api/v1/tenants/
+  GET                  /api/v1/tenants/current
+  GET                  /api/v1/tenants/{tenant_id}/features
+  GET                  /api/v1/time-entries/
+  POST                 /api/v1/time-entries/
+  GET                  /api/v1/time-entries/summary
+  GET                  /api/v1/users/
+  PATCH                /api/v1/users/{user_id}/role
+  GET                  /api/v1/vendor-scorecards
+  GET                  /api/v1/vendor-scorecards/
+  GET                  /api/v1/vendors/
+  POST                 /api/v1/vendors/
+  DELETE               /api/v1/vendors/v2/{vendor_id}
+  GET                  /api/v1/vendors/{vendor_id}
+  PATCH                /api/v1/vendors/{vendor_id}
+  GET                  /api/v1/vendors/{vendor_id}/doc-status
+  GET                  /api/v1/version
+  GET                  /api/v1/warehouses-portal
+  GET                  /api/v1/work-orders-sync/assets
+  DELETE               /api/v1/work-orders-v2/{wo_id}
+  POST                 /api/v1/work-orders/
+  DELETE               /api/v1/work-orders/{wo_id}
+  GET                  /api/v1/work-orders/{wo_id}
+  PATCH                /api/v1/work-orders/{wo_id}/assign
+  POST                 /api/v1/work-orders/{wo_id}/complete
+  PATCH                /api/v1/work-orders/{wo_id}/status
+  POST                 /api/v1/work-orders/{wo_id}/status
+  GET                  /api/v1/workspace/my-day
+  HEAD,GET             /docs
+  HEAD,GET             /docs/oauth2-redirect
+  GET                  /health
+  GET                  /health
+  HEAD,GET             /openapi.json
+  HEAD,GET             /redoc

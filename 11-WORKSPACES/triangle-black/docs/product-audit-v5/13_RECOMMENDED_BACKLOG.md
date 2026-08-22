@@ -1,0 +1,13 @@
+# Recommended Enterprise Backlog (P-002 -> P-012)
+
+1. **P-002:** Domain & API Contract Cleanup (Clean router SQL into DDD Repositories)
+2. **P-003:** Operations Vertical Slice 2.0 (SR -> WO -> Report -> Close -> Invoice -> KPI)
+3. **P-004:** Workflow & Approval Hardening (Configurable rules & multi-stage approvals)
+4. **P-005:** Multi-Tenant SaaS Hardening (`organization_id` abstraction & cross-tenant security)
+5. **P-006:** Enterprise UX 3.0 (Eliminate remaining inline styles and standardise forms)
+6. **P-007:** Design System 3.0 (TBDL 3.0 tokens & dark/light theme perfection)
+7. **P-008:** Performance & Reliability (DB query budget enforcement & caching)
+8. **P-009:** Security & Enterprise Compliance (OWASP audit & ABAC scopes)
+9. **P-010:** AI Operational Intelligence (Predictive maintenance recommendations)
+10. **P-011:** Product & Marketing Experience (Subdomain routing & commercial demo seeder)
+11. **P-012:** Production Certification (Final 17-point quality gate release)
