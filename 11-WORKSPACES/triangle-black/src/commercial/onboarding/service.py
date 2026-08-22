@@ -27,6 +27,7 @@ class OrganizationProvisioningService:
         hotel_slug = f"{clean_slug}-{unique_suffix}"
         new_hotel_id = f"tb-hotel-{hotel_slug}"
         new_site_id = f"site-{unique_suffix}"
+        site_code = f"SITE-{clean_slug[:4].upper()}-{unique_suffix[:4].upper()}"
         user_id = str(uuid.uuid4())
 
         try:
@@ -42,15 +43,14 @@ class OrganizationProvisioningService:
                 "brand": brand
             })
 
-            # 2. Insert Site record
+            # 2. Insert Site record (without invalid location column)
             self.db.execute(text(
-                "INSERT INTO sites (id, hotel_id, name, location, is_active, created_at, updated_at) "
-                "VALUES (:id, :hid, :name, :loc, true, NOW(), NOW())"
+                "INSERT INTO sites (id, hotel_id, name, is_active, created_at, updated_at) "
+                "VALUES (:id, :hid, :name, true, NOW(), NOW())"
             ), {
                 "id": new_site_id,
                 "hid": new_hotel_id,
-                "name": site_name,
-                "loc": "South Sinai, Sharm El-Sheikh"
+                "name": site_name
             })
 
             # 3. Create Admin User
