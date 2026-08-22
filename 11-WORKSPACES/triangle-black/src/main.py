@@ -8274,7 +8274,16 @@ register_optional_router(
     label="platform_status_router",
 )
 
+
+try:
+    from src.commercial.operational_intelligence.router import router as _op_intel_r
+    app.include_router(_op_intel_r, prefix="/api/v1")
+    logger.info("  OK: operational_intelligence_router")
+except Exception as _e:
+    logger.warning(f"WARN: operational_intelligence_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     from src.core.tenant import get_hotel_id
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
+
