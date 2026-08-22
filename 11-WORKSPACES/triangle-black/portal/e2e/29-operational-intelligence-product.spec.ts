@@ -23,6 +23,6 @@ test.describe('Operational Intelligence Commercial Product (Sprint N-005)', () =
 
     // 4. Verify Financial Leakage & Executive Action Plan Panels
     await expect(page.locator('text=Financial Leakage Identification')).toBeVisible();
-    await expect(page.locator('text=Governed Executive Action Plan')).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'Governed Executive Action Plan' })).toBeVisible();
   });
 });
