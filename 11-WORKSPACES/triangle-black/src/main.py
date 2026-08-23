@@ -8368,6 +8368,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: forecaster_router: {_e}")
 
+
+try:
+    from src.commercial.production_gate.router import router as _prod_gate_r
+    app.include_router(_prod_gate_r, prefix="/api/v1")
+    logger.info("  OK: production_gate_router")
+except Exception as _e:
+    logger.warning(f"WARN: production_gate_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
