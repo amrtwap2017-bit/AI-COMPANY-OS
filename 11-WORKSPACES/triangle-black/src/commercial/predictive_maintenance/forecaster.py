@@ -14,7 +14,7 @@ class PredictiveFailureService:
         self.hotel_id = hotel_id
 
     def forecast_asset_failures(self, horizon_days: int = 30) -> List[Dict[str, Any]]:
-        cache_key = make_cache_key("ai_failure_forecast", self.hotel_id, str(horizon_days))
+        cache_key = f"ai_failure_forecast:{self.hotel_id}:{horizon_days}"
         cached = cache_get(cache_key)
         if cached:
             return cached
