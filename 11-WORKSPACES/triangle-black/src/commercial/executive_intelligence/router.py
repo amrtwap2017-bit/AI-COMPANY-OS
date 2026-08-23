@@ -1,57 +1,47 @@
 """
-T-007: Executive Intelligence Router
-Uses read models — no direct OLTP queries.
+Executive Intelligence Router — Triangle Black Enterprise OS v6.0
 """
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
-from src.commercial.executive_intelligence.read_models import ExecutiveKPIReadModel
+from src.commercial.executive_intelligence.service import ExecutiveIntelligenceService
 
 router = APIRouter(prefix="/executive-intelligence", tags=["Executive Intelligence"])
 
 
-@router.get("/summary")
-def get_executive_summary(
-    hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
+@router.get("/briefing")
+def get_executive_briefing(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
 ):
-    """Full executive KPI summary — operations + maintenance + procurement + financial."""
-    model = ExecutiveKPIReadModel(db, hotel_id)
-    return model.get_full_summary()
+    """Full C-suite executive briefing — financial, risk, SLA, supplier, AI actions."""
+    service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
+    return service.get_executive_briefing()
 
 
-@router.get("/operations")
-def get_operations_kpi(
-    hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
+@router.get("/top-risks")
+def get_top_risks(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
 ):
-    """Operations KPIs — work orders, SLA, priorities."""
-    return ExecutiveKPIReadModel(db, hotel_id).get_operations_kpi()
+    service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
+    return {"risks": service._top_risks()}
 
 
-@router.get("/maintenance")
-def get_maintenance_kpi(
-    hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
+@router.get("/recommended-actions")
+def get_recommended_actions(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
 ):
-    """Maintenance KPIs — assets, PM compliance, reliability."""
-    return ExecutiveKPIReadModel(db, hotel_id).get_maintenance_kpi()
+    service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
+    return {"actions": service._recommended_actions()}
 
 
-@router.get("/procurement")
-def get_procurement_kpi(
-    hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
+@router.get("/portfolio-health")
+def get_portfolio_health(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
 ):
-    """Procurement KPIs — PO status, spend, supplier performance."""
-    return ExecutiveKPIReadModel(db, hotel_id).get_procurement_kpi()
-
-
-@router.get("/financial")
-def get_financial_kpi(
-    hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
-):
-    """Financial KPIs — invoices, AR/AP, collections."""
-    return ExecutiveKPIReadModel(db, hotel_id).get_financial_kpi()
+    service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
+    return service._portfolio_health_index()
