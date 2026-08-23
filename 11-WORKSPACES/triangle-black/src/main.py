@@ -8352,6 +8352,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: sso_scim_routers: {_e}")
 
+
+try:
+    from src.commercial.billing.router import router as _billing_r
+    app.include_router(_billing_r, prefix="/api/v1")
+    logger.info("  OK: billing_router")
+except Exception as _e:
+    logger.warning(f"WARN: billing_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
