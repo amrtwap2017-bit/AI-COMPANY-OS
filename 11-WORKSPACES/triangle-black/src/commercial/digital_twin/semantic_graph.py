@@ -1,7 +1,6 @@
 """
 Digital Twin 2.0 Semantic Graph Service — Triangle Black Enterprise OS v6.0
-Traverses multi-hop operational relationships and simulates asset failure blast radiuses.
-Corrected: work_orders has no asset_id column — use site_id join instead.
+Full defensive try/except on all DB operations. No asset_id column on work_orders.
 """
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
@@ -15,147 +14,110 @@ class SemanticGraphService:
         self.hotel_id = hotel_id
 
     def traverse_entity_graph(self, entity_type: str, entity_id: str, depth: int = 2) -> Dict[str, Any]:
-        cache_key = make_cache_key("dt_semantic_traverse", self.hotel_id, entity_type, entity_id)
-        cached = cache_get(cache_key)
-        if cached:
-            return cached
+        try:
+            ck = make_cache_key("dt_graph", self.hotel_id, entity_type, str(entity_id))
+            cached = cache_get(ck)
+            if cached:
+                return cached
+        except Exception:
+            ck = None
 
         nodes: List[Dict] = []
         edges: List[Dict] = []
+        eid = str(entity_id)
+        etype = str(entity_type)
 
-        # 1. Base Node — always present
+        # 1. Root node
         nodes.append({
-            "id": str(entity_id),
-            "type": str(entity_type),
-            "label": f"{str(entity_type).upper()}: {str(entity_id)[:12]}",
-            "criticality": "critical" if "chiller" in str(entity_id).lower() else "high"
+            "id": eid,
+            "type": etype,
+            "label": f"{etype.upper()}: {eid[:12]}",
+            "criticality": "critical" if "chiller" in eid.lower() else "high"
         })
 
-        # 2. Linked Work Orders (NO asset_id column — use hotel scope)
+        # 2. Work Orders (hotel scope — no asset_id column)
         try:
-            wo_rows = self.db.execute(text(
+            for row in self.db.execute(text(
                 "SELECT id, title, status FROM work_orders "
                 "WHERE hotel_id = :h AND deleted_at IS NULL "
                 "ORDER BY created_at DESC LIMIT 4"
-            ), {"h": self.hotel_id}).fetchall()
-
-            for wo in wo_rows:
-                wo_node_id = str(wo[0])
-                wo_title = str(wo[1] or "Work Order")[:25]
-                wo_status = str(wo[2] or "open")
-                nodes.append({
-                    "id": wo_node_id,
-                    "type": "work_order",
-                    "label": f"WO: {wo_title}",
-                    "status": wo_status
-                })
-                edges.append({
-                    "source": str(entity_id),
-                    "target": wo_node_id,
-                    "relationship": "MAINTAINED_BY"
-                })
+            ), {"h": self.hotel_id}).fetchall():
+                nid = str(row[0])
+                nodes.append({"id": nid, "type": "work_order",
+                               "label": f"WO: {str(row[1] or 'WO')[:25]}",
+                               "status": str(row[2] or "open")})
+                edges.append({"source": eid, "target": nid, "relationship": "MAINTAINED_BY"})
         except Exception:
             pass
 
-        # 3. Linked Suppliers
+        # 3. Suppliers
         try:
-            sup_rows = self.db.execute(text(
+            for row in self.db.execute(text(
                 "SELECT id, company_name, category FROM suppliers "
                 "WHERE hotel_id = :h LIMIT 2"
-            ), {"h": self.hotel_id}).fetchall()
-
-            for s in sup_rows:
-                sup_node_id = str(s[0])
-                sup_name = str(s[1] or "Supplier")
-                sup_cat = str(s[2] or "general")
-                nodes.append({
-                    "id": sup_node_id,
-                    "type": "supplier",
-                    "label": f"SUP: {sup_name}",
-                    "category": sup_cat
-                })
-                edges.append({
-                    "source": str(entity_id),
-                    "target": sup_node_id,
-                    "relationship": "PARTS_SUPPLIED_BY"
-                })
+            ), {"h": self.hotel_id}).fetchall():
+                nid = str(row[0])
+                nodes.append({"id": nid, "type": "supplier",
+                               "label": f"SUP: {str(row[1] or 'Supplier')}",
+                               "category": str(row[2] or "general")})
+                edges.append({"source": eid, "target": nid, "relationship": "PARTS_SUPPLIED_BY"})
         except Exception:
             pass
 
-        # 4. Downstream Guest Impact Zones (static topology enrichment)
-        zone_nodes = [
-            ("zone-tower-b", "Tower B"),
-            ("zone-central-kitchen", "Central Kitchen"),
-            ("zone-banquet-hall", "Banquet Hall")
-        ]
-        for z_id, z_label in zone_nodes:
-            nodes.append({
-                "id": z_id,
-                "type": "hospitality_zone",
-                "label": f"ZONE: {z_label}",
-                "occupancy_impact": "high"
-            })
-            edges.append({
-                "source": str(entity_id),
-                "target": z_id,
-                "relationship": "COOLS_AND_SERVES"
-            })
+        # 4. Static hospitality zones
+        for z_id, z_label in [("zone-tower-b", "Tower B"), ("zone-kitchen", "Central Kitchen"), ("zone-ballroom", "Ballroom")]:
+            nodes.append({"id": z_id, "type": "hospitality_zone", "label": f"ZONE: {z_label}", "occupancy_impact": "high"})
+            edges.append({"source": eid, "target": z_id, "relationship": "COOLS_AND_SERVES"})
 
         payload = {
             "hotel_id": self.hotel_id,
-            "root_entity": {"type": str(entity_type), "id": str(entity_id)},
+            "root_entity": {"type": etype, "id": eid},
             "total_nodes": len(nodes),
             "total_edges": len(edges),
             "nodes": nodes,
             "edges": edges
         }
 
-        cache_set(cache_key, payload, ttl=30)
+        try:
+            if ck:
+                cache_set(ck, payload, ttl=30)
+        except Exception:
+            pass
+
         return payload
 
     def simulate_failure_blast_radius(self, asset_id: str) -> Dict[str, Any]:
-        """Simulates failure propagation and calculates financial and guest impact."""
-        asset_name = "Primary Chiller Unit"
-        category = "HVAC"
-        criticality = "critical"
-
+        asset_name, category, criticality = "Primary Chiller Unit", "HVAC", "critical"
         try:
-            asset_row = self.db.execute(text(
-                "SELECT name, category, criticality FROM assets "
-                "WHERE id = :id AND hotel_id = :h LIMIT 1"
+            row = self.db.execute(text(
+                "SELECT name, category, criticality FROM assets WHERE id = :id AND hotel_id = :h LIMIT 1"
             ), {"id": str(asset_id), "h": self.hotel_id}).fetchone()
-
-            if asset_row and asset_row[0]:
-                asset_name = str(asset_row[0])
-                category = str(asset_row[1] or "HVAC")
-                criticality = str(asset_row[2] or "critical")
+            if row and row[0]:
+                asset_name = str(row[0])
+                category = str(row[1] or "HVAC")
+                criticality = str(row[2] or "critical")
         except Exception:
             pass
 
         is_critical = criticality.lower() == "critical" or "chiller" in asset_name.lower()
-
-        affected_zones = [
+        zones = ([
             {"zone": "Tower B Guest Rooms 1-10", "guest_impact": "Loss of Climate Control", "severity": "HIGH"},
             {"zone": "Main Dining Restaurant", "guest_impact": "Temperature Spike", "severity": "MEDIUM"},
             {"zone": "Grand Ballroom", "guest_impact": "HVAC Airflow Reduction", "severity": "MEDIUM"}
         ] if is_critical else [
             {"zone": "Secondary Plant Room", "guest_impact": "Minor Pressure Drop", "severity": "LOW"}
-        ]
+        ])
 
         return {
-            "hotel_id": self.hotel_id,
-            "asset_id": str(asset_id),
-            "asset_name": asset_name,
-            "category": category,
-            "criticality": criticality,
+            "hotel_id": self.hotel_id, "asset_id": str(asset_id),
+            "asset_name": asset_name, "category": category, "criticality": criticality,
             "simulation_status": "COMPLETED",
             "blast_radius": {
-                "affected_zones_count": len(affected_zones),
-                "affected_zones": affected_zones,
+                "affected_zones_count": len(zones), "affected_zones": zones,
                 "estimated_unplanned_cost_usd": 15200.0 if is_critical else 1200.0,
                 "estimated_guest_compensation_usd": 4500.0 if is_critical else 0.0,
                 "sla_breach_probability_pct": 92.0 if is_critical else 15.0,
-                "required_parts": ["Compressor Bearing Overhaul Kit", "R-410A Refrigerant 10kg"],
+                "required_parts": ["Compressor Bearing Kit", "R-410A Refrigerant 10kg"],
                 "recommended_mitigation": "Dispatch emergency HVAC vendor within 2h and shift load to backup chiller."
             }
         }
