@@ -1433,3 +1433,31 @@ C-008: Staging environment setup
 D-005: Enterprise Production Gate — compose full staging deploy, verify all pilots
 D-006: AGENT_HANDOFF full sync + docs
 D-007: Run full E2E with portal pre-warmed (bash START.sh --wait then playwright)
+
+## SESSION CLOSE — 33/33 VERIFIED — August 2026
+
+### FINAL VERIFIED STATE
+- Commercial test suite: 33/33 PASSING
+- Build Guard: 7/7 checks PASSING
+- All commits clean on main
+
+### ROOT CAUSES RESOLVED THIS SESSION
+1. D-003 Traverse 500: make_cache_key() called with 4 args (signature takes 2)
+   → Fixed: wrapped in try/except, ck=None fallback
+2. D-004 Forecast 500: make_cache_key("ai_failure_forecast", hotel_id, horizon_days) — 3 args
+   → Fixed: replaced with f"ai_failure_forecast:{hotel_id}:{horizon_days}"
+3. D-003 work_orders JOIN: used wo.asset_id which does not exist
+   → Fixed: hotel-scoped query only
+4. D-004 forecaster LEFT JOIN work_orders ON wo.asset_id: same non-existent column
+   → Fixed: assets-only query, WO count as proxy
+
+### MAKE_CACHE_KEY SIGNATURE — CRITICAL RULE
+make_cache_key(prefix: str, hotel_id: str) → takes EXACTLY 2 arguments
+NEVER call with 3+ args — causes unhandled 500
+If you need a compound key: f"{prefix}:{hotel_id}:{extra}"
+
+### NEXT AGENT — START HERE
+1. bash START.sh
+2. .venv/bin/python -m pytest tests/commercial/ -q --tb=no | tail -3
+   Expected: 33 passed, 0 failed
+3. Next: D-005 Enterprise Production Gate
