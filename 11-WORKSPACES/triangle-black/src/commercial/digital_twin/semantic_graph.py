@@ -25,7 +25,7 @@ class SemanticGraphService:
         nodes.append({
             "id": entity_id,
             "type": entity_type,
-            "label": f"{entity_type.upper()}: {entity_id[:12]}",
+            "label": f"{entity_type.upper()}: {str(entity_id)[:12]}",
             "criticality": "critical" if "chiller" in str(entity_id).lower() else "high"
         })
 
@@ -38,11 +38,12 @@ class SemanticGraphService:
 
             for wo in wo_rows:
                 wo_node_id = str(wo[0])
+                wo_title = str(wo[1] or "Untitled")[:25]
                 nodes.append({
                     "id": wo_node_id,
                     "type": "work_order",
-                    "label": f"WO: {wo[1][:25]}",
-                    "status": wo[2]
+                    "label": f"WO: {wo_title}",
+                    "status": str(wo[2] or "open")
                 })
                 edges.append({
                     "source": entity_id,
@@ -58,11 +59,13 @@ class SemanticGraphService:
 
             for s in sup_rows:
                 sup_node_id = str(s[0])
+                sup_name = str(s[1] or "Unknown Supplier")
+                sup_cat = str(s[2] or "general")
                 nodes.append({
                     "id": sup_node_id,
                     "type": "supplier",
-                    "label": f"SUP: {s[1]}",
-                    "category": s[2]
+                    "label": f"SUP: {sup_name}",
+                    "category": sup_cat
                 })
                 edges.append({
                     "source": entity_id,
@@ -102,14 +105,16 @@ class SemanticGraphService:
 
     def simulate_failure_blast_radius(self, asset_id: str) -> Dict[str, Any]:
         """Simulates failure propagation for an asset and calculates financial & guest impact."""
-        # Query asset details
-        asset_row = self.db.execute(text(
-            "SELECT name, category, criticality FROM assets WHERE id = :id AND hotel_id = :h LIMIT 1"
-        ), {"id": asset_id, "h": self.hotel_id}).fetchone()
+        try:
+            asset_row = self.db.execute(text(
+                "SELECT name, category, criticality FROM assets WHERE id = :id AND hotel_id = :h LIMIT 1"
+            ), {"id": asset_id, "h": self.hotel_id}).fetchone()
+        except Exception:
+            asset_row = None
 
-        asset_name = asset_row[0] if asset_row else "Primary Chiller Unit"
-        category = asset_row[1] if asset_row else "HVAC"
-        criticality = asset_row[2] if asset_row else "critical"
+        asset_name = str(asset_row[0]) if asset_row and asset_row[0] else "Primary Chiller Unit"
+        category = str(asset_row[1]) if asset_row and asset_row[1] else "HVAC"
+        criticality = str(asset_row[2]) if asset_row and asset_row[2] else "critical"
 
         is_critical = criticality.lower() == "critical" or "chiller" in asset_name.lower()
 
