@@ -30,9 +30,11 @@ class OrganizationProvisioningService:
         new_hotel_id = f"tb-hotel-{hotel_slug}"
         new_site_id = f"site-{unique_suffix}"
         user_id = str(uuid.uuid4())
+        wf_id = str(uuid.uuid4())
+        audit_id = str(uuid.uuid4())
 
         try:
-            # 1. Insert Hotel record (with slug and settings JSON)
+            # 1. Insert Hotel record
             self.db.execute(text(
                 "INSERT INTO hotels (id, hotel_id, slug, name, brand, is_active, settings, created_at, updated_at) "
                 "VALUES (:id, :hid, :slug, :name, :brand, true, :settings, NOW(), NOW())"
@@ -55,11 +57,11 @@ class OrganizationProvisioningService:
                 "name": site_name
             })
 
-            # 3. Create Admin User (using column 'name')
+            # 3. Create Admin User (all NOT NULL fields satisfied)
             hashed_pw = hash_password(admin_password)
             self.db.execute(text(
-                "INSERT INTO users (id, hotel_id, email, hashed_password, name, role, is_active, created_at) "
-                "VALUES (:id, :hid, :email, :pw, :name, 'manager', true, NOW())"
+                "INSERT INTO users (id, hotel_id, email, hashed_password, name, role, is_active, created_at, updated_at) "
+                "VALUES (:id, :hid, :email, :pw, :name, 'manager', true, NOW(), NOW())"
             ), {
                 "id": user_id,
                 "hid": new_hotel_id,
@@ -68,18 +70,18 @@ class OrganizationProvisioningService:
                 "name": admin_name
             })
 
-            # 4. Seed Default Workflow Definition
-            wf_id = str(uuid.uuid4())
+            # 4. Seed Workflow Definition (matching exact NOT NULL columns: version, state_machine_json, is_active, updated_at)
+            sm_json = json.dumps({"states": ["open", "assigned", "in_progress", "completed", "closed"]})
             self.db.execute(text(
-                "INSERT INTO workflow_definitions (id, hotel_id, entity_type, name, initial_state, states, is_active, created_at) "
-                "VALUES (:id, :hid, 'work_order', 'Standard Maintenance Flow', 'open', '[\"open\", \"assigned\", \"in_progress\", \"completed\", \"closed\"]', true, NOW())"
+                "INSERT INTO workflow_definitions (id, hotel_id, entity_type, name, version, state_machine_json, is_active, created_at, updated_at) "
+                "VALUES (:id, :hid, 'work_order', 'Standard Maintenance Flow', '1.0.0', :sm_json, 'active', NOW(), NOW())"
             ), {
                 "id": wf_id,
-                "hid": new_hotel_id
+                "hid": new_hotel_id,
+                "sm_json": sm_json
             })
 
             # 5. Log audit entry
-            audit_id = str(uuid.uuid4())
             self.db.execute(text(
                 "INSERT INTO platform_audit_log (id, hotel_id, entity_type, entity_id, action, actor_name, new_value, created_at) "
                 "VALUES (:id, :hid, 'organization', :hid, 'ORGANIZATION_PROVISIONED', :actor, :val, NOW())"
