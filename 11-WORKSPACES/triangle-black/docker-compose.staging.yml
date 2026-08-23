@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8030:8030"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/triangle_black
+      - TB_SECRET_KEY=staging-secret-key-2026
+      - DISABLE_RATE_LIMIT=0
+      - ENABLE_TENANT_RATE_LIMIT=1
+      - TENANT_RATE_LIMIT_MAX=500
+      - LOG_FORMAT=json
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  portal:
+    build:
+      context: ./portal
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8030
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: triangle_black
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - staging_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  staging_pg_data:

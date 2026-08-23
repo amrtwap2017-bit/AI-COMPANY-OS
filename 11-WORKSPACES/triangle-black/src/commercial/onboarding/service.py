@@ -70,11 +70,11 @@ class OrganizationProvisioningService:
                 "name": admin_name
             })
 
-            # 4. Seed Workflow Definition (matching exact NOT NULL columns: version, state_machine_json, is_active, updated_at)
+            # 4. Seed Workflow Definition (is_active='true' fits within VARCHAR(5))
             sm_json = json.dumps({"states": ["open", "assigned", "in_progress", "completed", "closed"]})
             self.db.execute(text(
                 "INSERT INTO workflow_definitions (id, hotel_id, entity_type, name, version, state_machine_json, is_active, created_at, updated_at) "
-                "VALUES (:id, :hid, 'work_order', 'Standard Maintenance Flow', '1.0.0', :sm_json, 'active', NOW(), NOW())"
+                "VALUES (:id, :hid, 'work_order', 'Standard Maintenance Flow', '1.0', :sm_json, 'true', NOW(), NOW())"
             ), {
                 "id": wf_id,
                 "hid": new_hotel_id,
