@@ -21,7 +21,8 @@ def create_entry(payload: JournalEntryCreate, hotel_id: str = Depends(get_hotel_
     return JournalRepository(db).create(payload.model_dump(exclude_none=True), hotel_id)
 
 @router.get("/summary")
-def get_summary(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db)):
+def get_summary(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db),
+    current_user=Depends(require_manager)):
     return JournalRepository(db).summary(hotel_id)
 
 

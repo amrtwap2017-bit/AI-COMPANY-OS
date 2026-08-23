@@ -18,6 +18,7 @@ def list_employees(
     department: Optional[str] = None,
     status: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
 ):
     return EmployeeRepository(db).list(hotel_id, skip, limit, department, status)
 
@@ -26,6 +27,7 @@ def create_employee(
     payload: EmployeeCreate,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
 ):
     result = EmployeeRepository(db).create(payload.model_dump(exclude_none=True), hotel_id)
     try:
@@ -42,6 +44,7 @@ def get_employee(
     emp_id: str,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
+    current_user=Depends(require_manager),
 ):
     obj = EmployeeRepository(db).get(emp_id, hotel_id)
     if not obj: raise HTTPException(404, "Employee not found")

@@ -68,10 +68,8 @@ def _get_redis():
     return _redis_client if _redis_available else None
 
 # ── Public cache API ──────────────────────────────────────────────────────────
-def make_cache_key(prefix: str, hotel_id: str, **kwargs) -> str:
-    parts = json.dumps(kwargs, sort_keys=True, default=str)
-    digest = hashlib.md5(parts.encode()).hexdigest()[:12]
-    return f"tb:{hotel_id}:{prefix}:{digest}"
+def make_cache_key(prefix: str, hotel_id: str, *extra_args) -> str:
+    return ":".join([str(x) for x in [prefix, hotel_id] + list(extra_args)])
 
 def cache_get(key: str) -> Optional[Any]:
     r = _get_redis()

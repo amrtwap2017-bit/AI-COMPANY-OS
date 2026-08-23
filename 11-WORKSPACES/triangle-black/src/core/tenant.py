@@ -65,3 +65,26 @@ def get_tenant_context(request: Request) -> dict:
         "organization_id": f"org_{hid}",
         "site_id": f"site_{hid}"
     }
+
+
+# TenantContext — backward-compatible dataclass for tenant isolation tests
+from dataclasses import dataclass
+
+@dataclass
+class TenantContext:
+    """Represents the resolved tenant context for a request."""
+    hotel_id: str
+    organization_id: str = ""
+
+    def __post_init__(self):
+        # organization_id mirrors hotel_id for backward compatibility
+        if not self.organization_id:
+            self.organization_id = self.hotel_id
+
+    @classmethod
+    def from_hotel_id(cls, hotel_id: str) -> "TenantContext":
+        """Factory method — creates TenantContext from hotel_id string."""
+        return cls(hotel_id=hotel_id, organization_id=hotel_id)
+
+    def __str__(self) -> str:
+        return f"TenantContext(hotel_id={self.hotel_id})" 

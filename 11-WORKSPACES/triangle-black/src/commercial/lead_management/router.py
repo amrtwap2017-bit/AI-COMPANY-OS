@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import require_manager
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
@@ -24,7 +25,7 @@ def create_lead(payload: LeadCreate, db: Session = Depends(get_db), hotel_id: st
     return result
 
 @router.get('/')
-def list_leads(name: str = None, status: str = None, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
+def list_leads(name: str = None, status: str = None, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id), current_user=Depends(require_manager)):
     lead_repo = LeadRepository(db)
     leads = lead_repo.list_leads(name=name, status=status)
     if not leads: return []
