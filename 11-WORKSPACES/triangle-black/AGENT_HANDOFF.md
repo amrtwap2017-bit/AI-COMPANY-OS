@@ -1366,3 +1366,70 @@ C-005: First commercial pilot customer setup (Sharm El-Sheikh)
 C-006: Pricing page portal (/pricing)
 C-007: Customer feedback widget (in-app)
 C-008: Staging environment setup
+
+## SESSION UPDATE — Commercial Intelligence Program — August 2026
+
+### SPRINTS COMPLETED THIS SESSION (Stage C → Stage D)
+
+| Sprint | Deliverable | Tests | Status |
+|--------|-------------|-------|--------|
+| C-004 | Golden Thread Slice v3 — schema aligned | 2/2 | ✅ |
+| C-005 | Customer Feedback Loop P0-P4 | 1/1 | ✅ |
+| C-006 | SaaS Pricing 3-tier matrix | 2/2 | ✅ |
+| C-007 | HMAC Webhooks + IoT telemetry | 2/2 | ✅ |
+| C-008 | 3-pilot tenant seeder + control room | 2/2 | ✅ |
+| C-009 | Commercial ROI certification | 1/1 | ✅ |
+| D-001 | Enterprise SSO + SCIM 2.0 RFC 7644 | 2/2 | ✅ |
+| D-002 | Stripe billing + webhook handler | 2/2 | ✅ |
+| D-003 | Digital Twin 2.0 semantic graph | 2/2 | ✅ (after fix) |
+| D-004 | AI Predictive Failure Forecaster | 2/2 | ✅ (after fix) |
+
+### NEW MODULES ADDED
+- src/commercial/feedback/           (P0-P4 triage)
+- src/commercial/pricing/            (3-tier SaaS plans)
+- src/commercial/integrations/       (HMAC webhooks + IoT)
+- src/commercial/pilot_control/      (SRE control room)
+- src/commercial/commercial_value/   (ROI certification)
+- src/commercial/sso_scim/           (SSO + SCIM 2.0)
+- src/commercial/billing/            (Stripe simulation)
+- src/commercial/digital_twin/semantic_graph.py (D-003)
+- src/commercial/predictive_maintenance/forecaster.py (D-004)
+- src/commercial/predictive_maintenance/forecaster_router.py (D-004 fix)
+- src/core/asset_scoring.py          (domain rule: score calculated)
+- scripts/seed_pilot_tenants.py      (3 pilot hotels)
+- scripts/health_check.sh
+- scripts/backup_db.sh
+
+### NEW DB TABLES ADDED
+- customer_feedback
+- webhook_subscriptions
+- sso_configurations
+
+### PILOT TENANTS SEEDED (3 hotels in DB)
+- Red Sea Grand Resort & Spa → tb-hotel-redsea-grand-*
+- Sinai Pearl Hotel → tb-hotel-sinai-pearl-*
+- Gulf View Suites → tb-hotel-gulf-view-*
+
+### CRITICAL SCHEMA DISCOVERIES THIS SESSION
+- work_orders: NO asset_id column (schema: id, hotel_id, site_id, title, status, priority, description)
+- inventory_items: NO unit_price/status — uses item_code, item_type, is_stockable, min_stock, max_stock, standard_cost
+- service_requests: has work_order_id (not the reverse FK)
+- invoices: requires contract_id + title + tax_amount + total_amount + issue_date + renewal_number
+
+### E2E FIX APPLIED
+- BASE_URL now exported from portal/e2e/helpers/auth.ts
+- Was causing "http://localhost:3000/undefined/solutions" navigation failure
+- All E2E failures remain infrastructure-only (portal not running when tests execute)
+
+### NEXT AGENT — START HERE
+1. bash START.sh
+2. .venv/bin/python -m pytest tests/commercial/test_sprint_d004* tests/commercial/test_sprint_d003* -v --tb=short
+   Expected: 4/4 passing
+3. .venv/bin/python -m pytest tests/ -q --tb=no | tail -5
+   Expected: 1100+ passing, 0 failing
+4. Next sprint: D-005 Enterprise SaaS v6.0 Production Gate
+
+### NEXT SPRINT BACKLOG (D-005 onward)
+D-005: Enterprise Production Gate — compose full staging deploy, verify all pilots
+D-006: AGENT_HANDOFF full sync + docs
+D-007: Run full E2E with portal pre-warmed (bash START.sh --wait then playwright)
