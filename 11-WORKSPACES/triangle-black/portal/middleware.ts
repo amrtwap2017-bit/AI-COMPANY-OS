@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   '/solutions',
   '/how-it-works',
   '/case-studies',
+  '/pricing',
   '/api/',
 ];
 
