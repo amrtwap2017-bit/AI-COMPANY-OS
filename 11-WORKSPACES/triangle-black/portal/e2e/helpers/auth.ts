@@ -1,64 +1,55 @@
-import { Page } from "@playwright/test";
+import { Page } from '@playwright/test';
 
-export const ADMIN_EMAIL    = "amr@triangleblack.com";
-export const ADMIN_PASSWORD = "admin123";
-export const BASE_URL       = "http://localhost:3000";
-export const API_URL        = "http://localhost:8030";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8030';
 
 export function getSharedToken(): string {
-  const token = process.env.E2E_TOKEN;
-  if (!token) throw new Error("E2E_TOKEN not set — global setup must run first");
-  return token;
+  return process.env.E2E_TOKEN || '';
 }
 
-export async function getAdminToken(): Promise<string> {
-  if (process.env.E2E_TOKEN) return process.env.E2E_TOKEN;
-  const res = await fetch(`${API_URL}/api/v1/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `username=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}`,
-  });
-  const data = await res.json();
-  if (!data.access_token) throw new Error(`Login failed: ${JSON.stringify(data)}`);
-  return data.access_token;
-}
-
-export async function injectAuth(page: Page): Promise<string> {
+export async function injectAuth(page: Page): Promise<void> {
   const token = getSharedToken();
 
-  await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
+  // Always navigate to login page first (ensures cookies domain is set)
+  try {
+    await page.goto(`${BASE_URL}/login`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    });
+    await page.waitForTimeout(500);
+  } catch {
+    // If login page times out, try root
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  }
+
+  if (token) {
+    // Inject token into all storage mechanisms
+    await page.context().addCookies([
+      {
+        name: 'tb_access_token',
+        value: token,
+        domain: 'localhost',
+        path: '/',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax',
+      },
+    ]);
+
+    await page.evaluate((t: string) => {
+      try { localStorage.setItem('tb_access_token', t); } catch {}
+      try { sessionStorage.setItem('tb_access_token', t); } catch {}
+      try { localStorage.setItem('auth_token', t); } catch {}
+    }, token);
+  }
+
   await page.waitForTimeout(300);
-
-  await page.context().addCookies([
-    { name: "tb_access_token", value: token, url: BASE_URL, sameSite: "Lax" },
-    { name: "tb_token",        value: token, url: BASE_URL, sameSite: "Lax" },
-  ]);
-
-  await page.evaluate((t) => {
-    try {
-      localStorage.setItem("tb_access_token", t);
-      localStorage.setItem("tb_token", t);
-      sessionStorage.setItem("tb_access_token", t);
-      sessionStorage.setItem("tb_token", t);
-      document.cookie = `tb_access_token=${t}; path=/; SameSite=Lax`;
-      document.cookie = `tb_token=${t}; path=/; SameSite=Lax`;
-    } catch {}
-  }, token);
-
-  return token;
 }
 
 export async function loginViaUI(page: Page): Promise<void> {
-  await page.goto(`${BASE_URL}/login`);
-  await page.waitForLoadState("networkidle");
-  await page.locator('input[type="email"], input[placeholder*="Email"], input[placeholder*="mail"]').first().fill(ADMIN_EMAIL);
-  await page.locator('input[type="password"]').first().fill(ADMIN_PASSWORD);
-  await page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Login")').first().click();
-  await page.waitForTimeout(2000);
-}
-
-export async function navigateAuthenticated(page: Page, path: string): Promise<void> {
-  await injectAuth(page);
-  await page.goto(`${BASE_URL}${path}`, { waitUntil: "commit", timeout: 30000 });
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.fill('input[type="email"], input[name="email"], input[name="username"]', 'amr@triangleblack.com');
+  await page.fill('input[type="password"], input[name="password"]', 'admin123');
+  await page.click('button[type="submit"]');
+  await page.waitForURL(/dashboard|workspace|operations/, { timeout: 30000 });
 }

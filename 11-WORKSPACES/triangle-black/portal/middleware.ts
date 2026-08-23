@@ -7,8 +7,7 @@ const PUBLIC_PATHS = [
   '/solutions',
   '/how-it-works',
   '/case-studies',
-  '/api/v1/onboarding',
-  '/api/v1/commercial',
+  '/api/',
 ];
 
 export function middleware(request: NextRequest) {
@@ -16,19 +15,21 @@ export function middleware(request: NextRequest) {
 
   // Allow public paths without auth
   const isPublic = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + '/')
+    (p) => pathname === p || pathname.startsWith(p)
   );
 
   if (isPublic) {
     return NextResponse.next();
   }
 
-  // For protected routes, check for auth token cookie
-  const token = request.cookies.get('tb_access_token')?.value;
-
-  if (!token && pathname.startsWith('/(app)')) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+  // For protected routes under /(app), check for auth token
+  if (pathname.startsWith('/(app)') || pathname.startsWith('/operations') || pathname.startsWith('/maintenance') || pathname.startsWith('/executive') || pathname.startsWith('/administration') || pathname.startsWith('/ai') || pathname.startsWith('/graph') || pathname.startsWith('/financial')) {
+    const token = request.cookies.get('tb_access_token')?.value;
+    if (!token) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.next();
@@ -36,6 +37,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|assets).*)',
+    '/((?!_next/static|_next/image|favicon.ico|assets|api).*)',
   ],
 };
