@@ -1,8 +1,10 @@
 """
 Organization Provisioning Service — Triangle Black SaaS v5.2
+Atomic customer onboarding matching exact PostgreSQL public schemas.
 """
 import uuid
 import re
+import json
 from typing import Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -21,29 +23,29 @@ class OrganizationProvisioningService:
         admin_name = payload.get("admin_name", "Property General Manager")
         admin_password = payload.get("admin_password", "AdminPass123!")
 
-        # Generate slug and unique IDs
+        # Generate unique IDs & slug
         clean_slug = re.sub(r'[^a-zA-Z0-9]', '', hotel_name.lower())[:12] or "hotel"
         unique_suffix = str(uuid.uuid4())[:8]
         hotel_slug = f"{clean_slug}-{unique_suffix}"
         new_hotel_id = f"tb-hotel-{hotel_slug}"
         new_site_id = f"site-{unique_suffix}"
-        site_code = f"SITE-{clean_slug[:4].upper()}-{unique_suffix[:4].upper()}"
         user_id = str(uuid.uuid4())
 
         try:
-            # 1. Insert Hotel record (including slug)
+            # 1. Insert Hotel record (with slug and settings JSON)
             self.db.execute(text(
-                "INSERT INTO hotels (id, hotel_id, slug, name, brand, is_active, created_at, updated_at) "
-                "VALUES (:id, :hid, :slug, :name, :brand, true, NOW(), NOW())"
+                "INSERT INTO hotels (id, hotel_id, slug, name, brand, is_active, settings, created_at, updated_at) "
+                "VALUES (:id, :hid, :slug, :name, :brand, true, :settings, NOW(), NOW())"
             ), {
                 "id": new_hotel_id,
                 "hid": new_hotel_id,
                 "slug": hotel_slug,
                 "name": hotel_name,
-                "brand": brand
+                "brand": brand,
+                "settings": json.dumps({"company": company_name})
             })
 
-            # 2. Insert Site record (without invalid location column)
+            # 2. Insert Site record
             self.db.execute(text(
                 "INSERT INTO sites (id, hotel_id, name, is_active, created_at, updated_at) "
                 "VALUES (:id, :hid, :name, true, NOW(), NOW())"
@@ -53,10 +55,10 @@ class OrganizationProvisioningService:
                 "name": site_name
             })
 
-            # 3. Create Admin User
+            # 3. Create Admin User (using column 'name')
             hashed_pw = hash_password(admin_password)
             self.db.execute(text(
-                "INSERT INTO users (id, hotel_id, email, hashed_password, full_name, role, is_active, created_at) "
+                "INSERT INTO users (id, hotel_id, email, hashed_password, name, role, is_active, created_at) "
                 "VALUES (:id, :hid, :email, :pw, :name, 'manager', true, NOW())"
             ), {
                 "id": user_id,
