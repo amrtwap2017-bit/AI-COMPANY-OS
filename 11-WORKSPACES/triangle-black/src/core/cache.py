@@ -69,7 +69,8 @@ def _get_redis():
 
 # ── Public cache API ──────────────────────────────────────────────────────────
 def make_cache_key(prefix: str, hotel_id: str, *extra_args) -> str:
-    return ":".join([str(x) for x in [prefix, hotel_id] + list(extra_args)])
+    suffix = ":".join([str(a) for a in extra_args])
+    return f"tenant:{hotel_id}:{prefix}:{suffix}" if suffix else f"tenant:{hotel_id}:{prefix}"
 
 def cache_get(key: str) -> Optional[Any]:
     r = _get_redis()
