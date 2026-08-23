@@ -149,7 +149,7 @@ def seed_pilot(conn, pilot):
     for sname, scat, srating in SUPPLIER_TEMPLATES:
         supid = f"sup-{uuid.uuid4().hex[:8]}"
         conn.execute(text(
-            "INSERT INTO suppliers (id, hotel_id, name, category, rating, status, created_at, updated_at) "
+            "INSERT INTO suppliers (id, hotel_id, company_name, category, rating, status, created_at, updated_at) "
             "VALUES (:id, :hid, :name, :cat, :rating, 'active', NOW(), NOW())"
         ), {"id": supid, "hid": hotel_id, "name": sname, "cat": scat, "rating": srating})
 

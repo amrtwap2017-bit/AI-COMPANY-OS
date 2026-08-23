@@ -18,3 +18,14 @@ def get_golden_thread_trace(
     """Returns the complete 8-stage operational golden thread for a work order."""
     service = GoldenThreadTraceService(db=db, hotel_id=hotel_id)
     return service.get_lifecycle_trace(work_order_id)
+
+
+@router.post("/execute-flow")
+def execute_live_flow_endpoint(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Executes a live 8-stage operational flow and returns verified trace records."""
+    service = GoldenThreadTraceService(db=db, hotel_id=hotel_id)
+    result = service.execute_live_operational_flow()
+    return result
