@@ -79,11 +79,11 @@ SUPPLIER_TEMPLATES = [
 ]
 
 INVENTORY_TEMPLATES = [
-    ("R-410A Refrigerant 10kg", "HVAC", "kg", 850.0),
-    ("Compressor Bearing Kit", "Mechanical", "set", 1200.0),
-    ("AHU Filter 20x25x4", "HVAC", "pcs", 45.0),
-    ("Copper Pipe 22mm", "Plumbing", "m", 35.0),
-    ("Circuit Breaker 63A", "Electrical", "pcs", 120.0),
+    ("ITEM-R410", "R-410A Refrigerant 10kg", "HVAC", "kg", 850.0),
+    ("ITEM-BEAR", "Compressor Bearing Kit", "Mechanical", "set", 1200.0),
+    ("ITEM-FILT", "AHU Filter 20x25x4", "HVAC", "pcs", 45.0),
+    ("ITEM-PIPE", "Copper Pipe 22mm", "Plumbing", "m", 35.0),
+    ("ITEM-BREK", "Circuit Breaker 63A", "Electrical", "pcs", 120.0),
 ]
 
 def seed_pilot(conn, pilot):
@@ -157,14 +157,16 @@ def seed_pilot(conn, pilot):
             "name": sname, "cat": scat, "rating": srating
         })
 
-    # 7. Inventory Items (5 per pilot)
-    for iname, icat, iuom, iprice in INVENTORY_TEMPLATES:
+    # 7. Inventory Items (Satisfying all mandatory constraints including min/max_stock, item_code, and costs)
+    for icode, iname, icat, iuom, iprice in INVENTORY_TEMPLATES:
         iid = f"inv-{uuid.uuid4().hex[:8]}"
         conn.execute(text(
-            "INSERT INTO inventory_items (id, hotel_id, name, category, unit_of_measure, status, created_at, updated_at) "
-            "VALUES (:id, :hid, :name, :cat, :uom, 'active', NOW(), NOW())"
-        ), {"id": iid, "hid": hotel_id, "name": iname, "cat": icat,
-            "uom": iuom, "price": iprice})
+            "INSERT INTO inventory_items (id, hotel_id, item_code, name, category, unit_of_measure, item_type, is_stockable, min_stock, max_stock, reorder_qty, lead_time_days, standard_cost, last_purchase_cost, average_cost, vat_pct, is_active, created_at, updated_at) "
+            "VALUES (:id, :hid, :code, :name, :cat, :uom, 'material', true, 10.0, 100.0, 20.0, 5, :price, :price, :price, 14.0, true, NOW(), NOW())"
+        ), {
+            "id": iid, "hid": hotel_id, "code": f"{icode}-{suffix[:4]}",
+            "name": iname, "cat": icat, "uom": iuom, "price": iprice
+        })
 
     return hotel_id
 
