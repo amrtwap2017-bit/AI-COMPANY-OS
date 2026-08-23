@@ -1,6 +1,6 @@
 """
 Triangle Black — Commercial Pilot Tenant Seeder
-Seeds 3 realistic Sharm El-Sheikh hotel pilot datasets.
+Seeds 3 realistic Sharm El-Sheikh hotel pilot datasets matching all PostgreSQL constraints.
 """
 import uuid
 import json
@@ -73,9 +73,9 @@ ASSET_TEMPLATES = [
 ]
 
 SUPPLIER_TEMPLATES = [
-    ("Delta Electro-Mechanical", "electrical", 4.5),
-    ("Sinai HVAC Solutions", "HVAC", 4.2),
-    ("Red Sea Plumbing Co.", "plumbing", 3.8),
+    ("SUP-DELTA-01", "Delta Electro-Mechanical", "electrical", 4.5),
+    ("SUP-SINAI-02", "Sinai HVAC Solutions", "HVAC", 4.2),
+    ("SUP-REDSEA-03", "Red Sea Plumbing Co.", "plumbing", 3.8),
 ]
 
 INVENTORY_TEMPLATES = [
@@ -89,6 +89,7 @@ INVENTORY_TEMPLATES = [
 def seed_pilot(conn, pilot):
     suffix = uuid.uuid4().hex[:8]
     hotel_id = f"tb-hotel-{pilot['slug']}-{suffix}"
+    hotel_slug = f"{pilot['slug']}-{suffix}"
     pw = hash_password("PilotPass2026!")
 
     # 1. Hotel
@@ -96,7 +97,7 @@ def seed_pilot(conn, pilot):
         "INSERT INTO hotels (id, hotel_id, slug, name, brand, stars, rooms, city, is_active, settings, created_at, updated_at) "
         "VALUES (:id, :hid, :slug, :name, :brand, :stars, :rooms, :city, true, :settings, NOW(), NOW())"
     ), {
-        "id": hotel_id, "hid": hotel_id, "slug": f"{pilot['slug']}-{suffix}",
+        "id": hotel_id, "hid": hotel_id, "slug": hotel_slug,
         "name": pilot["name"], "brand": pilot["brand"],
         "stars": pilot["stars"], "rooms": pilot["rooms"], "city": pilot["city"],
         "settings": json.dumps({"pilot": True, "city": pilot["city"]})
@@ -136,22 +137,25 @@ def seed_pilot(conn, pilot):
     for i in range(5):
         woid = f"wo-{uuid.uuid4().hex[:12]}"
         conn.execute(text(
-            "INSERT INTO work_orders (id, hotel_id, title, status, priority, description, created_at, updated_at) "
-            "VALUES (:id, :hid, :title, :status, 'high', :desc, NOW(), NOW())"
+            "INSERT INTO work_orders (id, hotel_id, site_id, title, status, priority, description, created_at, updated_at) "
+            "VALUES (:id, :hid, :sid, :title, :status, 'high', :desc, NOW(), NOW())"
         ), {
-            "id": woid, "hid": hotel_id,
+            "id": woid, "hid": hotel_id, "sid": site_ids[0],
             "title": f"WO-{i+1}: {ASSET_TEMPLATES[i][0]} maintenance",
             "status": statuses[i],
             "desc": f"Scheduled maintenance for {ASSET_TEMPLATES[i][0]}"
         })
 
-    # 6. Suppliers (3 per pilot)
-    for sname, scat, srating in SUPPLIER_TEMPLATES:
+    # 6. Suppliers (All NOT NULL fields satisfied)
+    for scode, sname, scat, srating in SUPPLIER_TEMPLATES:
         supid = f"sup-{uuid.uuid4().hex[:8]}"
         conn.execute(text(
-            "INSERT INTO suppliers (id, hotel_id, company_name, category, rating, status, created_at, updated_at) "
-            "VALUES (:id, :hid, :name, :cat, :rating, 'active', NOW(), NOW())"
-        ), {"id": supid, "hid": hotel_id, "name": sname, "cat": scat, "rating": srating})
+            "INSERT INTO suppliers (id, hotel_id, supplier_code, company_name, category, rating, status, supplier_type, preferred_flag, risk_level, created_at, updated_at) "
+            "VALUES (:id, :hid, :code, :name, :cat, :rating, 'active', 'service', false, 'low', NOW(), NOW())"
+        ), {
+            "id": supid, "hid": hotel_id, "code": f"{scode}-{suffix[:4]}",
+            "name": sname, "cat": scat, "rating": srating
+        })
 
     # 7. Inventory Items (5 per pilot)
     for iname, icat, iuom, iprice in INVENTORY_TEMPLATES:
@@ -166,12 +170,12 @@ def seed_pilot(conn, pilot):
 
 def main():
     with engine.connect() as conn:
-        print("Seeding 3 pilot tenants...")
+        print("Seeding 3 pilot tenants with complete constraint mappings...")
         for pilot in PILOTS:
             hid = seed_pilot(conn, pilot)
-            print(f"  Seeded: {pilot['name']} -> {hid}")
+            print(f"  ✅ Seeded: {pilot['name']} -> {hid}")
         conn.commit()
-        print("All pilot tenants seeded successfully!")
+        print("All 3 pilot tenants committed to database successfully!")
 
 if __name__ == "__main__":
     main()
