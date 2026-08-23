@@ -289,3 +289,29 @@ def project_single_event(
     projector = DigitalTwinProjector(db=db, hotel_id=hotel_id)
     projected = projector.project_event(event)
     return {"projected": projected, "hotel_id": hotel_id}
+
+
+# ── Digital Twin 2.0 Semantic Graph Endpoints (Sprint D-003) ────────────────
+@router.get("/semantic-graph/traverse/{entity_type}/{entity_id}", tags=["Digital Twin"])
+def traverse_semantic_graph_endpoint(
+    entity_type: str,
+    entity_id: str,
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Traverses multi-hop operational relationships across assets, WOs, suppliers, and zones."""
+    from src.commercial.digital_twin.semantic_graph import SemanticGraphService
+    service = SemanticGraphService(db=db, hotel_id=hotel_id)
+    return service.traverse_entity_graph(entity_type=entity_type, entity_id=entity_id)
+
+@router.post("/semantic-graph/simulate-failure", tags=["Digital Twin"])
+def simulate_failure_endpoint(
+    payload: dict,
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Simulates downstream blast radius and SLA financial penalties for asset failure."""
+    from src.commercial.digital_twin.semantic_graph import SemanticGraphService
+    asset_id = payload.get("asset_id", "ast-chiller-01")
+    service = SemanticGraphService(db=db, hotel_id=hotel_id)
+    return service.simulate_failure_blast_radius(asset_id=asset_id)

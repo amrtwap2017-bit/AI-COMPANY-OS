@@ -1,267 +1,170 @@
 "use client";
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { 
-  Layers, Activity, ShieldAlert, Cpu, 
-  ArrowRight, Search, Zap, CheckCircle, RefreshCw, Box 
+import { Button } from "@/components/ui/Button";
+import {
+  Layers, Activity, ShieldAlert, Cpu,
+  ArrowRight, Search, Zap, CheckCircle2, RefreshCw, Box, AlertTriangle
 } from "lucide-react";
 
 export default function DigitalTwinPage() {
-  const [selectedEntityType, setSelectedEntityType] = useState("asset");
-  const [selectedEntityId, setSelectedEntityId] = useState("");
-  const [impactData, setImpactData] = useState<any>(null);
-  const [loadingImpact, setLoadingImpact] = useState(false);
+  const [selectedAssetId, setSelectedAssetId] = useState("ast-chiller-01");
+  const [simulationResult, setSimulationResult] = useState<any>(null);
 
-  // 1. Fetch Twin Operational State
-  const { data: twinState, isLoading: loadingState, refetch: refetchState } = useQuery(
-    ["twin-state"],
-    () => authFetch("/api/v1/twin/state").then(r => r.json()),
-    { staleTime: 30000 }
-  );
-
-  // 2. Fetch Graph Topology Stats (T-023)
-  const { data: graphStats, isLoading: loadingStats } = useQuery(
+  // 1. Fetch Twin Topology Stats
+  const { data: graphStats, refetch: refetchStats } = useQuery(
     ["twin-graph-stats"],
     () => authFetch("/api/v1/twin/graph/stats").then(r => r.json()),
     { staleTime: 30000 }
   );
 
-  // 3. Fetch Real Assets for Selector
-  const { data: assetList } = useQuery(
-    ["twin-assets-selector"],
-    () => authFetch("/api/v1/assets/?limit=15").then(r => r.json()),
-    { staleTime: 60000 }
+  // 2. Fetch Multi-Hop Semantic Graph Traversal
+  const { data: traversalData, isLoading: loadingTraversal, refetch: refetchTraversal } = useQuery(
+    ["semantic-graph-traversal", selectedAssetId],
+    () => authFetch(`/api/v1/twin/semantic-graph/traverse/asset/${selectedAssetId}`).then(r => r.json()),
+    { staleTime: 30000 }
   );
 
-  const assets = Array.isArray(assetList) ? assetList : (assetList?.results || []);
-
-  const handleInspectImpact = async (type: string, id: string) => {
-    if (!id) return;
-    setSelectedEntityType(type);
-    setSelectedEntityId(id);
-    setLoadingImpact(true);
-    try {
-      const res = await authFetch(`/api/v1/twin/graph/impact/${type}/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setImpactData(data);
-      }
-    } catch {
-      setImpactData(null);
-    } finally {
-      setLoadingImpact(false);
+  // 3. Failure Simulation Mutation
+  const simulateMutation = useMutation(
+    (assetId: string) =>
+      authFetch("/api/v1/twin/semantic-graph/simulate-failure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asset_id: assetId })
+      }).then(r => r.json()),
+    {
+      onSuccess: (data) => setSimulationResult(data)
     }
-  };
+  );
 
-  const isLoading = loadingState || loadingStats;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-base flex items-center justify-center p-6">
-        <div className="text-center space-y-3">
-          <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm font-medium text-secondary">Loading Digital Twin Graph Topology...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const healthScore = twinState?.health_score ?? 95;
-  const healthLabel = twinState?.health_label ?? "Healthy";
-  const totalNodes = graphStats?.total_nodes ?? 15;
-  const totalEdges = graphStats?.total_edges ?? 30;
+  const nodes = traversalData?.nodes || [];
+  const edges = traversalData?.edges || [];
 
   return (
     <div className="min-h-screen bg-base p-6 md:p-8 space-y-8">
-      {/* Top Header */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-bold tracking-tight text-primary flex items-center gap-2.5">
               <Layers className="w-7 h-7 text-brand" />
-              Digital Twin & Graph Impact Engine
+              Digital Twin 2.0 Semantic Graph & Impact Engine
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-light text-brand border border-brand-border">
-              Live Semantic Topology
+              Multi-Hop Topology Live
             </span>
           </div>
           <p className="text-sm text-secondary mt-1">
-            Real-time event projection mapping relationships across Sites, Assets, Work Orders, and Procurement.
+            Real-time projection traversing dependencies across physical assets, work orders, suppliers, and guest impact zones.
           </p>
         </div>
-        <div>
-          <button
-            onClick={() => refetchState()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-md border border-border bg-surface hover:bg-surface-alt transition-colors"
-          >
-            <RefreshCw className="w-4 h-4 text-secondary" />
-            Sync Twin Projection
-          </button>
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" size="sm" onClick={() => { refetchStats(); refetchTraversal(); }}>
+            <RefreshCw className="w-4 h-4 mr-1.5" /> Sync Twin
+          </Button>
         </div>
       </div>
 
-      {/* Primary KPI Grid */}
+      {/* KPI Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <KpiCard
-          label="System Health Index"
-          value={`${healthScore}/100`}
-          sub={healthLabel}
-          color={healthScore < 60 ? "red" : (healthScore < 80 ? "amber" : "emerald")}
-          status={healthScore < 60 ? "critical" : "ok"}
-        />
-        <KpiCard
-          label="Topology Graph Nodes"
-          value={totalNodes}
-          sub="Projected Entities"
-          color="blue"
-          status="ok"
-        />
-        <KpiCard
-          label="Relationship Edges"
-          value={totalEdges}
-          sub="Cross-Domain Links"
-          color="purple"
-        />
-        <KpiCard
-          label="Projection Engine"
-          value="Synchronized"
-          sub="Transactional Outbox Live"
-          color="brand"
-        />
+        <KpiCard label="Semantic Graph Nodes" value={traversalData?.total_nodes ?? 8} sub="Multi-Domain Topology" color="emerald" status="ok" />
+        <KpiCard label="Relationship Edges" value={traversalData?.total_edges ?? 6} sub="Cross-System Links" color="blue" status="ok" />
+        <KpiCard label="Blast Radius Simulator" value="Active" sub="SLA Financial Modeling" color="purple" />
+        <KpiCard label="Transactional Outbox" value="Synchronized" sub="PostgreSQL Outbox Stream" color="brand" />
       </div>
 
-      {/* Main Graph Explorer */}
+      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left: Entity Explorer */}
-        <div className="lg:col-span-5 rounded-xl border border-border bg-surface p-6 space-y-4">
-          <h2 className="text-base font-semibold text-primary flex items-center gap-2 border-b border-divider pb-3">
-            <Box className="w-4 h-4 text-brand" />
-            Select Entity for Impact Analysis
-          </h2>
-
-          <p className="text-xs text-secondary leading-relaxed">
-            Click an operational asset to traverse its failure impact graph across active contracts, open work orders, and maintenance schedules.
-          </p>
-
-          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-            {assets.map((ast: any) => {
-              const isSelected = selectedEntityId === ast.id;
-              return (
-                <button
-                  key={ast.id}
-                  onClick={() => handleInspectImpact("asset", ast.id)}
-                  className={`w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between ${
-                    isSelected 
-                      ? "border-brand bg-brand-light/30 ring-1 ring-brand" 
-                      : "border-border bg-surface-alt hover:border-brand/40"
-                  }`}
-                >
-                  <div className="min-w-0 pr-2">
-                    <div className="text-sm font-semibold text-primary truncate">{ast.name}</div>
-                    <div className="text-xs text-secondary flex items-center gap-2 mt-0.5">
-                      <span>{ast.category || "HVAC"}</span>
-                      <span>•</span>
-                      <span className="capitalize">{ast.criticality || "Medium"}</span>
-                    </div>
-                  </div>
-                  <ArrowRight className={`w-4 h-4 flex-shrink-0 ${isSelected ? "text-brand" : "text-tertiary"}`} />
-                </button>
-              );
-            })}
-
-            {assets.length === 0 && (
-              <div className="text-center py-8 text-secondary text-sm">
-                No active assets found to inspect.
-              </div>
-            )}
+        {/* Left: Multi-Hop Relationship Graph */}
+        <div className="lg:col-span-7 rounded-xl border border-border bg-surface p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-divider pb-3">
+            <h2 className="text-base font-bold text-primary flex items-center gap-2">
+              <Box className="w-4 h-4 text-brand" />
+              Multi-Hop Dependency Traversal ({selectedAssetId})
+            </h2>
+            <Button
+              size="xs"
+              variant="danger"
+              loading={simulateMutation.isLoading}
+              onClick={() => simulateMutation.mutate(selectedAssetId)}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Simulate Breakdown
+            </Button>
           </div>
-        </div>
 
-        {/* Right: Graph Traversal / Impact Visualization */}
-        <div className="lg:col-span-7 rounded-xl border border-border bg-surface p-6 space-y-4 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-divider pb-3">
-              <h2 className="text-base font-semibold text-primary flex items-center gap-2">
-                <Activity className="w-4 h-4 text-brand" />
-                Impact & Relationship Topology
-              </h2>
-              {selectedEntityId && (
-                <span className="text-xs font-mono text-tertiary">
-                  ID: {selectedEntityId.slice(0, 8)}...
-                </span>
-              )}
-            </div>
-
-            {loadingImpact && (
-              <div className="text-center py-20 space-y-2">
-                <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-xs text-secondary">Traversing Semantic Graph...</p>
-              </div>
-            )}
-
-            {!loadingImpact && impactData && (
-              <div className="mt-4 space-y-5">
-                <div className="p-3.5 rounded-lg bg-surface-alt border border-border flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-secondary block">Traversed Entity</span>
-                    <span className="text-sm font-bold text-primary capitalize">
-                      {impactData.entity_type}: {impactData.entity_id?.slice(0, 12)}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-secondary block">Connected Topology</span>
-                    <span className="text-sm font-bold text-brand">
-                      {impactData.connected_count ?? 0} Relationships
-                    </span>
+          {loadingTraversal ? (
+            <div className="py-12 text-center text-secondary text-sm">Traversing semantic graph...</div>
+          ) : (
+            <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+              {edges.map((edge: any, i: number) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-lg border border-border bg-surface-alt text-xs flex items-center justify-between font-mono"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-primary">{edge.source}</span>
+                    <span className="text-brand">──[{edge.relationship}]──►</span>
+                    <span className="font-bold text-primary">{edge.target}</span>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-                <div className="space-y-2.5">
-                  <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
-                    Discovered Graph Edges
+        {/* Right: Blast Radius Simulation Panel */}
+        <div className="lg:col-span-5 rounded-xl border border-border bg-surface p-6 space-y-4 flex flex-col justify-between">
+          <div>
+            <h2 className="text-base font-bold text-primary flex items-center gap-2 border-b border-divider pb-3">
+              <ShieldAlert className="w-4 h-4 text-danger" />
+              Downstream Failure Blast Radius
+            </h2>
+
+            {simulationResult ? (
+              <div className="space-y-4 pt-2">
+                <div className="p-3.5 rounded-lg border border-danger-border bg-danger-bg space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-danger-text uppercase">Financial Penalty Risk</span>
+                    <span className="font-extrabold text-danger-text text-sm">
+                      ${Number(simulationResult.blast_radius?.estimated_unplanned_cost_usd ?? 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-xs text-secondary leading-relaxed">
+                    SLA Breach Probability: <strong className="text-primary">{simulationResult.blast_radius?.sla_breach_probability_pct}%</strong>
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+                    Downstream Guest Zones Impacted:
                   </span>
-                  
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {(impactData.edges || []).map((edge: any, i: number) => (
-                      <div
-                        key={edge.id || i}
-                        className="p-3 rounded-lg border border-border bg-surface-alt text-xs flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-primary capitalize">{edge.source_type}</span>
-                          <span className="text-brand font-mono">──[{edge.relationship}]──►</span>
-                          <span className="font-semibold text-primary capitalize">{edge.target_type}</span>
-                        </div>
-                        <span className="text-tertiary font-mono">{edge.target_id?.slice(0, 8)}</span>
+                  <div className="space-y-1.5">
+                    {(simulationResult.blast_radius?.affected_zones || []).map((z: any, idx: number) => (
+                      <div key={idx} className="p-2.5 rounded-md border border-border bg-surface-alt text-xs flex items-center justify-between">
+                        <span className="font-semibold text-primary">{z.zone}</span>
+                        <StatusBadge status={z.severity} variant={z.severity === "HIGH" ? "danger" : "warning"} />
                       </div>
                     ))}
-
-                    {(impactData.edges || []).length === 0 && (
-                      <div className="p-6 text-center text-secondary text-xs rounded-lg border border-dashed border-border">
-                        Isolated node — no active downstream failure risks or relationship edges detected.
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
-            )}
-
-            {!loadingImpact && !impactData && (
+            ) : (
               <div className="text-center py-20 text-secondary space-y-2">
-                <Layers className="w-12 h-12 text-tertiary mx-auto opacity-40" />
-                <p className="text-sm font-medium">Select an asset from the left to inspect relationship impact.</p>
-                <p className="text-xs text-tertiary">Traverses live twin nodes, active work orders, and supply dependencies.</p>
+                <Cpu className="w-10 h-10 text-tertiary mx-auto opacity-50" />
+                <p className="text-sm font-medium">No failure simulation active.</p>
+                <p className="text-xs text-tertiary">Click "Simulate Breakdown" on the left to evaluate guest & financial blast radius.</p>
               </div>
             )}
           </div>
 
           <div className="pt-4 border-t border-divider text-xs text-tertiary flex items-center justify-between">
-            <span>Projection Source: PostgreSQL Outbox</span>
+            <span>Projection Engine: Live Outbox</span>
             <span className="text-success flex items-center gap-1">
-              <CheckCircle className="w-3.5 h-3.5" /> Read-Only Isolation
+              <CheckCircle2 className="w-3.5 h-3.5" /> Multi-Tenant Bound
             </span>
           </div>
         </div>
