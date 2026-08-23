@@ -8319,6 +8319,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: pricing_router: {_e}")
 
+
+try:
+    from src.commercial.integrations.router import router as _integrations_r
+    app.include_router(_integrations_r, prefix="/api/v1")
+    logger.info("  OK: integrations_router")
+except Exception as _e:
+    logger.warning(f"WARN: integrations_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
