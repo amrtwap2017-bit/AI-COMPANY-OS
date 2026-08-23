@@ -161,8 +161,8 @@ def seed_pilot(conn, pilot):
     for iname, icat, iuom, iprice in INVENTORY_TEMPLATES:
         iid = f"inv-{uuid.uuid4().hex[:8]}"
         conn.execute(text(
-            "INSERT INTO inventory_items (id, hotel_id, name, category, unit_of_measure, unit_price, status, created_at, updated_at) "
-            "VALUES (:id, :hid, :name, :cat, :uom, :price, 'active', NOW(), NOW())"
+            "INSERT INTO inventory_items (id, hotel_id, name, category, unit_of_measure, status, created_at, updated_at) "
+            "VALUES (:id, :hid, :name, :cat, :uom, 'active', NOW(), NOW())"
         ), {"id": iid, "hid": hotel_id, "name": iname, "cat": icat,
             "uom": iuom, "price": iprice})
 

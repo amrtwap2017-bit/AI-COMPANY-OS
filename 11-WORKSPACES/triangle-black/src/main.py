@@ -8343,6 +8343,15 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: commercial_value_router: {_e}")
 
+
+try:
+    from src.commercial.sso_scim.router import router as _sso_r, scim_router as _scim_r
+    app.include_router(_sso_r, prefix="/api/v1")
+    app.include_router(_scim_r, prefix="/api/v1")
+    logger.info("  OK: sso_scim_routers")
+except Exception as _e:
+    logger.warning(f"WARN: sso_scim_routers: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
