@@ -36,7 +36,9 @@
 - **C-003:** Commercial Pilot Foundation ✅ COMPLETE
 - **C-004:** Golden Vertical Slice 3.0 (End-to-End Demo Flow) ✅ COMPLETE
 - **C-005:** Customer Feedback Loop & In-App Triage ✅ COMPLETE
-- **C-006:** SaaS Pricing, Packaging & Feature Tier Matrix ← NEXT
+- **C-006:** SaaS Pricing, Packaging & Feature Tier Matrix ✅ COMPLETE
+- **C-007:** Paid Integration Architecture (Webhooks & Connectors) ← NEXT
+- **C-008:** Commercial Pilot Program Rollout (3 Live Properties)
 - **C-006:** SaaS Pricing & Packaging Matrix
 - **C-005:** Customer Feedback Loop
 - **C-006:** SaaS Pricing & Packaging
