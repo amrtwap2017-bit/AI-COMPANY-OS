@@ -274,3 +274,26 @@ def analyze_asset_predictive_health(
         vibration_spike=vibration_spike
     )
     return analysis
+
+
+# ── AI Predictive Failure Forecaster Endpoints (Sprint D-004) ────────────────
+@router.get("/forecast")
+def forecast_failures_endpoint(
+    horizon_days: int = 30,
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Forecasts asset failure probabilities within the specified horizon."""
+    from src.commercial.predictive_maintenance.forecaster import PredictiveFailureService
+    service = PredictiveFailureService(db=db, hotel_id=hotel_id)
+    return {"forecasts": service.forecast_asset_failures(horizon_days=horizon_days)}
+
+@router.get("/anomalies")
+def detect_anomalies_endpoint(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Detects statistical anomalies in asset operational telemetry."""
+    from src.commercial.predictive_maintenance.forecaster import PredictiveFailureService
+    service = PredictiveFailureService(db=db, hotel_id=hotel_id)
+    return {"anomalies": service.detect_anomalies()}
