@@ -1,41 +1,126 @@
 #!/bin/bash
-echo "=== STARTING TRIANGLE BLACK ==="
-TB=/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+# Triangle Black — Full Stack Startup Script
+# Usage: bash START.sh [--backend-only] [--portal-only] [--wait]
 
-# Kill existing
-pkill -f "uvicorn src.main" 2>/dev/null
-pkill -f "next-server|next dev" 2>/dev/null
-sleep 2
+set -e
 
-# Start Backend
-export TB_SECRET_KEY="${TB_SECRET_KEY:-triangle-black-dev-secret-2026}" DISABLE_RATE_LIMIT=1
-cd "$TB" && nohup .venv/bin/python3 -m uvicorn src.main:app \
-    --host 0.0.0.0 --port 8030 --workers 1 --log-level warning \
-    > /tmp/tb_backend.log 2>&1 &
-echo "Backend PID: $!"
-sleep 5
+BACKEND_PORT=8030
+PORTAL_PORT=3000
+LOG_DIR=/tmp
+BACKEND_LOG=$LOG_DIR/tb_server.log
+PORTAL_LOG=$LOG_DIR/tb_portal.log
+MAX_WAIT=120
+TB_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Start Portal
-cd "$TB/portal" && nohup npx next dev --port 3000 \
-    > /tmp/tb_portal.log 2>&1 &
-echo "Portal PID: $!"
-sleep 12
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-# Verify
-curl -s http://localhost:8030/health | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'Backend: {d[\"service\"]} {d[\"version\"]} OK')" 2>/dev/null
-curl -s http://localhost:3000/api/v1/ai/signals/summary | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'Portal proxy OK: critical={d[\"critical\"]} high={d[\"high\"]}')" 2>/dev/null
+log() { echo -e "${BLUE}[TB]${NC} $1"; }
+ok()  { echo -e "${GREEN}[✓]${NC}  $1"; }
+warn(){ echo -e "${YELLOW}[!]${NC}  $1"; }
+err() { echo -e "${RED}[✗]${NC}  $1"; }
+
+wait_for_url() {
+  local url=$1
+  local label=$2
+  local elapsed=0
+  while [ $elapsed -lt $MAX_WAIT ]; do
+    status=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+    if [ "$status" != "000" ] && [ "$status" != "502" ] && [ "$status" != "503" ]; then
+      ok "$label is LIVE (HTTP $status)"
+      return 0
+    fi
+    sleep 3
+    elapsed=$((elapsed + 3))
+    log "  Waiting for $label... (${elapsed}s)"
+  done
+  err "$label did not start within ${MAX_WAIT}s"
+  return 1
+}
+
+BACKEND_ONLY=false
+PORTAL_ONLY=false
+WAIT_FLAG=false
+
+for arg in "$@"; do
+  case $arg in
+    --backend-only) BACKEND_ONLY=true ;;
+    --portal-only)  PORTAL_ONLY=true ;;
+    --wait)         WAIT_FLAG=true ;;
+  esac
+done
+
 echo ""
-echo "Open: http://localhost:3000"
+echo "  ████████╗██████╗ "
+echo "  ╚══██╔══╝██╔══██╗"
+echo "     ██║   ██████╔╝"
+echo "     ██║   ██╔══██╗"
+echo "     ██║   ██████╔╝"
+echo "     ╚═╝   ╚═════╝ "
+echo "  Triangle Black — Enterprise Operations OS"
+echo ""
 
-# ── REDIS (optional — Sprint-205) ────────────────────────────
-if command -v redis-cli &> /dev/null && redis-cli ping &> /dev/null; then
-  echo "Redis: already running on 6379"
-  export REDIS_URL=redis://localhost:6379/0
-  export ENABLE_TENANT_RATE_LIMIT=1
-elif docker ps --format '{{.Names}}' 2>/dev/null | grep -q tb-redis; then
-  echo "Redis: running in Docker"
-  export REDIS_URL=redis://localhost:6379/0
-  export ENABLE_TENANT_RATE_LIMIT=1
-else
-  echo "Redis: not running — using in-memory cache fallback"
+cd "$TB_DIR"
+
+# --- BACKEND ---
+if [ "$PORTAL_ONLY" = false ]; then
+  log "Starting backend API on :$BACKEND_PORT..."
+  pkill -f "uvicorn src.main" 2>/dev/null || true
+  sleep 1
+
+  # Detect DB URL from .env or environment
+  if [ -f "$TB_DIR/.env" ]; then
+    export $(grep -v '^#' "$TB_DIR/.env" | xargs -d '\n' 2>/dev/null) 2>/dev/null || true
+  fi
+
+  export TB_SECRET_KEY="${TB_SECRET_KEY:-triangle-black-dev-secret-2026}"
+  export DISABLE_RATE_LIMIT=1
+
+  .venv/bin/uvicorn src.main:app \
+    --host 0.0.0.0 \
+    --port $BACKEND_PORT \
+    --log-level warning \
+    > "$BACKEND_LOG" 2>&1 &
+
+  BACKEND_PID=$!
+  echo $BACKEND_PID > /tmp/tb_backend.pid
+  log "Backend PID: $BACKEND_PID"
+
+  wait_for_url "http://localhost:$BACKEND_PORT/api/v1/health/live" "Backend API"
 fi
+
+# --- PORTAL ---
+if [ "$BACKEND_ONLY" = false ]; then
+  log "Starting Next.js portal on :$PORTAL_PORT..."
+  pkill -f "next dev" 2>/dev/null || true
+  sleep 1
+
+  cd "$TB_DIR/portal"
+  npx next dev -p $PORTAL_PORT > "$PORTAL_LOG" 2>&1 &
+  PORTAL_PID=$!
+  echo $PORTAL_PID > /tmp/tb_portal.pid
+  log "Portal PID: $PORTAL_PID"
+  cd "$TB_DIR"
+
+  wait_for_url "http://localhost:$PORTAL_PORT" "Next.js Portal"
+fi
+
+echo ""
+ok "Triangle Black is LIVE"
+echo ""
+echo "  Backend:  http://localhost:$BACKEND_PORT"
+echo "  Portal:   http://localhost:$PORTAL_PORT"
+echo "  API Docs: http://localhost:$BACKEND_PORT/docs"
+echo "  Health:   http://localhost:$BACKEND_PORT/api/v1/health/ready"
+echo ""
+echo "  Logs:"
+echo "    tail -f $BACKEND_LOG"
+echo "    tail -f $PORTAL_LOG"
+echo ""
+echo "  Tests:"
+echo "    .venv/bin/python -m pytest tests/ -q --tb=no | tail -5"
+echo "    cd portal && npx playwright test e2e/ --reporter=list"
+echo ""

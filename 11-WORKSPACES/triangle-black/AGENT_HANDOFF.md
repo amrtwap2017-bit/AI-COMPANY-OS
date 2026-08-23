@@ -1317,3 +1317,52 @@ Sprint-242: Redis cache integration test (START.sh auto-detects)
 Sprint-243: E2E for WO complete→close flow (spec 18)
 Sprint-244: Workflow engine admin API (GET /api/v1/workflow/instances)
 Sprint-245: Performance profiling — identify top 5 slow endpoints
+
+## SESSION UPDATE — Commercial Upgrade Session — August 2026
+
+### PATCHES APPLIED THIS SESSION
+
+PATCH 1: Playwright config — webServer auto-start + 90s timeout
+PATCH 2: START.sh — portal pre-warm built in, wait-for-url loop
+PATCH 3: global-setup.ts — robust backend + portal wait + auth token
+PATCH 4: auth.ts — shared token injection, 60s goto timeout
+PATCH 5: GitHub Actions CI/CD — .github/workflows/ci.yml
+  - backend-lint → backend-test → frontend-build → e2e-tests → security-scan
+PATCH 6: middleware.ts — public routes NEVER redirect to login
+  Public: /, /solutions, /how-it-works, /case-studies, /platform, etc.
+  Protected: /operations, /supply-chain, /maintenance, /financial, etc.
+PATCH 7: src/core/asset_scoring.py — domain rule for assets.score
+  Rule: score is CALCULATED (0-100), not user-supplied
+  Formula: base 100, deduct for status/criticality/age/maintenance
+  CSV import: use score column if present, otherwise calculate
+PATCH 8: scripts/backup_db.sh — production backup + 30-day retention
+PATCH 9: scripts/health_check.sh — 5 endpoint health checks + alerting
+
+### ROOT CAUSE CONFIRMED: E2E FAILURES
+All 5 E2E failures were infrastructure only — portal not running.
+Fix: webServer in playwright.config.ts auto-starts portal.
+Fix: global-setup.ts waits for both backend AND portal before tests run.
+
+### VERIFIED ENDPOINTS
+/api/v1/health/live           → 200 ✅
+/api/v1/health/ready          → 200 ✅
+/api/v1/executive/summary     → 200 ✅
+/api/v1/executive-dashboard   → 307 → alias redirect ✅
+/api/v1/onboarding/provision-property → 200 ✅
+Alembic head: b2c3d4e5f6a7 (single, clean) ✅
+
+### ASSETS.SCORE DOMAIN RULE (FINAL)
+score = INTEGER NOT NULL DEFAULT 0
+Calculated by: src/core/asset_scoring.calculate_asset_health_score()
+CSV: score_from_csv_row() — uses column if present, calculates if absent
+Never nullable. Never user-required on input.
+
+### NEXT SPRINT BACKLOG
+C-001: Apply asset_scoring to data_import router (CSV pipeline)
+C-002: Apply asset_scoring to onboarding asset inserts
+C-003: Run full E2E suite with new playwright config
+C-004: Run full backend test suite — verify 1078+ still passing
+C-005: First commercial pilot customer setup (Sharm El-Sheikh)
+C-006: Pricing page portal (/pricing)
+C-007: Customer feedback widget (in-app)
+C-008: Staging environment setup

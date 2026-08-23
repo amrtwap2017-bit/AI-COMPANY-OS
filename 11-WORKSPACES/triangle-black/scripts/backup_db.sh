@@ -1,49 +1,58 @@
 #!/bin/bash
-# Triangle Black Database Backup Script
+# Triangle Black — Production Database Backup
+# Schedule: 0 2 * * * bash /path/to/scripts/backup_db.sh
 
 set -e
 
-PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-BACKUP_DIR="$PROJECT_DIR/backups"
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_FILE="$BACKUP_DIR/triangle_black_${TIMESTAMP}.sql.gz"
+TB_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BACKUP_DIR="${BACKUP_DIR:-$TB_DIR/backups/db}"
+RETENTION_DAYS=30
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="$BACKUP_DIR/tb_backup_$TIMESTAMP.sql.gz"
 
-echo "=== Triangle Black Database Backup ==="
-echo "Output: $BACKUP_FILE"
+# Load env
+if [ -f "$TB_DIR/.env" ]; then
+  export $(grep -v '^#' "$TB_DIR/.env" | xargs -d '\n' 2>/dev/null) || true
+fi
+
+DB_URL="${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/triangle_black}"
+
+# Parse DB URL
+DB_HOST=$(echo "$DB_URL" | sed -n 's|.*@\([^:/]*\).*|\1|p')
+DB_PORT=$(echo "$DB_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+DB_NAME=$(echo "$DB_URL" | sed -n 's|.*/\([^?]*\).*|\1|p')
+DB_USER=$(echo "$DB_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
+DB_PASS=$(echo "$DB_URL" | sed -n 's|.*://[^:]*:\([^@]*\)@.*|\1|p')
 
 mkdir -p "$BACKUP_DIR"
 
-if [ -f "$PROJECT_DIR/.env" ]; then
-    set -a
-    source "$PROJECT_DIR/.env" 2>/dev/null || true
-    set +a
-fi
-
-DB_URL="${DATABASE_URL:-}"
-if [ -z "$DB_URL" ]; then
-    echo "ERROR: DATABASE_URL not set"
-    exit 1
-fi
-
-DB_NAME=$(echo "$DB_URL" | sed 's|.*/||' | sed 's|?.*||')
-DB_HOST=$(echo "$DB_URL" | sed 's|.*@||' | sed 's|/.*||' | cut -d: -f1)
-DB_PORT=$(echo "$DB_URL" | sed 's|.*@||' | sed 's|/.*||' | grep -o ':[0-9]*' | tr -d ':')
-DB_USER=$(echo "$DB_URL" | sed 's|.*://||' | sed 's|:.*||')
-DB_PASS=$(echo "$DB_URL" | sed 's|.*://[^:]*:||' | sed 's|@.*||')
-
-echo "Database: $DB_NAME @ $DB_HOST:${DB_PORT:-5432}"
+echo "[$(date)] Starting backup → $BACKUP_FILE"
 
 PGPASSWORD="$DB_PASS" pg_dump \
-    -h "$DB_HOST" \
-    -p "${DB_PORT:-5432}" \
-    -U "$DB_USER" \
-    -d "$DB_NAME" \
-    --format=plain \
-    --no-owner \
-    --no-acl \
-    | gzip > "$BACKUP_FILE"
+  -h "$DB_HOST" \
+  -p "${DB_PORT:-5432}" \
+  -U "$DB_USER" \
+  -d "$DB_NAME" \
+  --no-password \
+  --verbose \
+  --format=plain \
+  | gzip > "$BACKUP_FILE"
 
-SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
-echo "Backup complete: $BACKUP_FILE ($SIZE)"
-find "$BACKUP_DIR" -name "triangle_black_*.sql.gz" -mtime +7 -delete 2>/dev/null || true
-echo "=== DONE ==="
+BACKUP_SIZE=$(du -sh "$BACKUP_FILE" | cut -f1)
+echo "[$(date)] Backup complete: $BACKUP_FILE ($BACKUP_SIZE)"
+
+# Verify backup
+if [ ! -s "$BACKUP_FILE" ]; then
+  echo "[ERROR] Backup file is empty! Aborting."
+  exit 1
+fi
+
+# Cleanup old backups
+find "$BACKUP_DIR" -name "tb_backup_*.sql.gz" -mtime "+$RETENTION_DAYS" -delete
+echo "[$(date)] Cleanup: removed backups older than $RETENTION_DAYS days"
+
+# Write latest symlink
+ln -sf "$BACKUP_FILE" "$BACKUP_DIR/tb_backup_latest.sql.gz"
+echo "[$(date)] Latest symlink: $BACKUP_DIR/tb_backup_latest.sql.gz"
+
+echo "[$(date)] ✅ Backup job complete"
