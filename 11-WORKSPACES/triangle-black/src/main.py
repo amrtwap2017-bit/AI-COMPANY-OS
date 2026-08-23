@@ -8301,6 +8301,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: pilot_config_router: {_e}")
 
+
+try:
+    from src.commercial.feedback.router import router as _feedback_r
+    app.include_router(_feedback_r, prefix="/api/v1")
+    logger.info("  OK: feedback_router")
+except Exception as _e:
+    logger.warning(f"WARN: feedback_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
