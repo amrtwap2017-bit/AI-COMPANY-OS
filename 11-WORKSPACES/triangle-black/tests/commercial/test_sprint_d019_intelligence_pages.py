@@ -61,3 +61,16 @@ def test_supplier_scorecards_structure():
     assert len(d["scorecards"]) >= 1
     s = d["scorecards"][0]
     assert s["recommendation"] in ["PREFERRED", "APPROVED", "REVIEW"]
+
+
+def test_supplier_intelligence_full_report():
+    h = _auth()
+    r = requests.get(f"{BASE}/api/v1/supplier-intelligence/report", headers=h, timeout=15)
+    assert r.status_code == 200
+    d = r.json()
+    assert d["report_type"] == "PROCUREMENT_INTELLIGENCE_REPORT"
+    assert "vendor_network" in d
+    assert "spend_analysis" in d
+    assert "savings_opportunities" in d
+    total_savings = sum(o["estimated_savings_usd"] for o in d["savings_opportunities"])
+    assert total_savings > 0
