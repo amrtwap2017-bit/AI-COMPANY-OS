@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Link from "next/link";
 import { FileQuestion, Home } from "lucide-react";
 
