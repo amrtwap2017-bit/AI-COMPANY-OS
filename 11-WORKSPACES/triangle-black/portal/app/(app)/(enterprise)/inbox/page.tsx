@@ -93,7 +93,7 @@ export default function InboxPage() {
             <div className="tb-section-header">
               <div>
                 <div className="text-label-upper text-tertiary mb-1">Alerts</div>
-                <div className="tb-section-title" style={{marginBottom:0}}>
+                <div className="tb-section-title" className="mb-0">
                   Unread ({unread.length})
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function InboxPage() {
             <div className="tb-section-header">
               <div>
                 <div className="text-label-upper text-tertiary mb-1">Feed</div>
-                <div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div>
+                <div className="tb-section-title" className="mb-0">Recent Activity</div>
               </div>
               <button onClick={() => router.push("/workspace")} className="tb-section-link">
                 Workspace →

@@ -86,7 +86,7 @@ export default function InventoryItemDetailPage() {
           <div className="tb-section" style={{borderColor:"#A84A3D40",background:"#A84A3D08"}}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span style={{fontSize:"1.25rem"}}>⚠️</span>
+                <span className="text-xl">⚠️</span>
                 <span className="text-sm font-semibold text-red-400">
                   Stock below minimum — {qty} remaining (min: {minQty})
                 </span>

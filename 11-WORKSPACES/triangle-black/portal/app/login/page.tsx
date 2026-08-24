@@ -54,7 +54,7 @@ export default function LoginPage() {
         </div>
 
         <div className="rounded-2xl px-7 py-8" style={{background:"#2D2723",border:"1px solid #3D352F",boxShadow:"0 20px 40px rgba(0,0,0,0.35)"}}>
-          <h2 className="text-lg font-bold mb-1" style={{color:"#F3EFE8"}}>Sign in</h2>
+          <h2 className="text-lg font-bold mb-1" className="text-primary">Sign in</h2>
           <p className="text-xs mb-7" style={{color:"#6D5F53"}}>Enter your credentials to continue</p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">

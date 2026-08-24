@@ -108,7 +108,7 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-4">
             <div className="tb-section">
               <div className="flex justify-between items-center mb-4">
-                <div className="tb-section-title" style={{margin:0}}>Security</div>
+                <div className="tb-section-title" className="m-0">Security</div>
                 {!editPwd && <button onClick={()=>setEditPwd(true)} className="tb-btn tb-btn-primary tb-btn-sm">Change Password</button>}
               </div>
 

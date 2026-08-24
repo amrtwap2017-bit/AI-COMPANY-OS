@@ -123,10 +123,10 @@ export default function InvoicesPage() {
                 <thead>
                   <tr>
                     <th>Invoice</th>
-                    <th style={{textAlign:"center"}}>Status</th>
-                    <th style={{textAlign:"right"}}>Amount</th>
-                    <th style={{textAlign:"center"}}>Due Date</th>
-                    <th style={{textAlign:"center"}}>Created</th>
+                    <th className="text-center">Status</th>
+                    <th className="text-right">Amount</th>
+                    <th className="text-center">Due Date</th>
+                    <th className="text-center">Created</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -27,14 +27,14 @@ export default function NewWorkOrderPage() {
       <div className="tb-canvas">
         <div className="tb-section" style={{borderColor:"#5B7C8C40",background:"#5B7C8C08"}}>
           <div className="flex items-center gap-3 flex-wrap">
-            <span style={{fontSize:"1.25rem"}}>💡</span>
+            <span className="text-xl">💡</span>
             <div className="flex-1"><div className="text-sm font-semibold text-primary">Work Order Creation</div><div className="text-xs text-tertiary">Navigate to Work Orders to create a new WO</div></div>
             <button onClick={()=>router.push("/operations/work-orders")} className="tb-btn-primary" style={{fontSize:"0.875rem",padding:"8px 16px"}}>Go to Work Orders →</button>
           </div>
         </div>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Unlinked Service Requests ({unlinkedSRs.length})</div><button onClick={()=>router.push("/operations/service-requests")} className="tb-section-link">All →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Unlinked Service Requests ({unlinkedSRs.length})</div><button onClick={()=>router.push("/operations/service-requests")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {unlinkedSRs.slice(0,5).map((sr: any, i: any) =>{
                 const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[sr.priority]||"#6D5F53";

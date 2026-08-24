@@ -134,8 +134,8 @@ export default function InvoiceDetailPage() {
                   <thead>
                     <tr>
                       <th>Description</th>
-                      <th style={{textAlign:"center"}}>Type</th>
-                      <th style={{textAlign:"right"}}>Amount</th>
+                      <th className="text-center">Type</th>
+                      <th className="text-right">Amount</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -28,12 +28,12 @@ export default function ConnectSignalsPage() {
       <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>AI Signals</div></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">AI Signals</div></div>
             <div className="space-y-2 mt-3">
               {signals.length===0 ? <div className="tb-empty" style={{padding:"24px 0"}}><div className="tb-empty-icon" style={{fontSize:"2rem"}}>📡</div><div className="tb-empty-desc">No active signals</div></div>
               : signals.slice(0,8).map((sig: any, i: any) =>(
                 <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-base-alt">
-                  <span style={{fontSize:"1rem"}}>🔮</span>
+                  <span className="text-base">🔮</span>
                   <div className="flex-1 min-w-0"><div className="text-xs font-semibold text-primary truncate">{sig.title||sig.message||"Signal"}</div><div className="text-xs text-tertiary">{sig.type||"AI"}</div></div>
                   <span className="tb-badge" style={{fontSize:"0.5rem",color:"#8D7443"}}>{sig.severity||"info"}</span>
                 </div>
@@ -41,7 +41,7 @@ export default function ConnectSignalsPage() {
             </div>
           </div>
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Events</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Recent Events</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
             <div className="space-y-2 mt-3">
               {activities.slice(0,8).map((act: any, i: any) =>(
                 <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-base-alt transition-colors">

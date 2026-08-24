@@ -51,7 +51,7 @@ export default function HotelDetailPage() {
             </div>
           </div>
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Assets</div><button onClick={()=>router.push("/maintenance/assets")} className="tb-section-link">All →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Assets</div><button onClick={()=>router.push("/maintenance/assets")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {siteAssets.slice(0,6).map((a: any, i: number)=>{
                 const sc=({"Operational":"#547C4D","In Fault":"#A84A3D","Under Maintenance":"#B07A2A"} as Record<string,string>)[a.status]||"#6D5F53";

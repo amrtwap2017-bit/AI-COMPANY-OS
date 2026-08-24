@@ -102,7 +102,7 @@ export default function SLADashboardPage() {
                 <div className="tb-section-title">Work Order Response SLA (Last 30 Days)</div>
                 <div className="tb-table-wrap mt-3">
                   <table className="tb-table">
-                    <thead><tr><th>Priority</th><th style={{textAlign:"center"}}>Total</th><th style={{textAlign:"center"}}>Started</th><th style={{textAlign:"center"}}>Avg Response</th><th style={{textAlign:"center"}}>Breached</th></tr></thead>
+                    <thead><tr><th>Priority</th><th className="text-center">Total</th><th className="text-center">Started</th><th className="text-center">Avg Response</th><th className="text-center">Breached</th></tr></thead>
                     <tbody>
                       {woSLA.map((row: any, i: any) =>{
                         const target = (sla?.sla_targets||{critical:8,high:24,medium:48,low:72})[row.priority]||24;
@@ -135,7 +135,7 @@ export default function SLADashboardPage() {
               <div key={i} className="tb-section">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <div className="tb-section-title" style={{margin:0}}>{site.site_name||"—"}</div>
+                    <div className="tb-section-title" className="m-0">{site.site_name||"—"}</div>
                     <div className="text-xs text-tertiary">{site.total_requests||0} requests total</div>
                   </div>
                   <div className="text-right">

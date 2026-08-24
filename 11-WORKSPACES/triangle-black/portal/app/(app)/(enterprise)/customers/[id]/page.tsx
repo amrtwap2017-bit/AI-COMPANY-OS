@@ -37,7 +37,7 @@ export default function CustomerDetailPage() {
       </div>
       <div className="tb-canvas">
         <div className="tb-section">
-          <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Contracts ({contracts.length})</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
+          <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Contracts ({contracts.length})</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
           {isLoading ? <div className="space-y-2">{[1,2,3].map((i: any) =><div key={i} className="h-12 bg-base-alt rounded-xl animate-pulse"/>)}</div>
           : <div className="space-y-2 mt-3">
             {contracts.slice(0,8).map((c: any, i: number) =>{

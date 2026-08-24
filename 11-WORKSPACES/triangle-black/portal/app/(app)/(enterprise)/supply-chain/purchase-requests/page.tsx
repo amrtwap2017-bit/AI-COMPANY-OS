@@ -100,7 +100,7 @@ export default function PurchaseRequestsPage() {
               </button>
             ))}
           </div>
-          <select value={urgencyF} onChange={(e: any) =>setUrgencyF(e.target.value)} className="tb-select" style={{width:"auto"}}>
+          <select value={urgencyF} onChange={(e: any) =>setUrgencyF(e.target.value)} className="tb-select" className="w-auto">
             <option value="all">All Urgency</option>
             {["urgent","high","normal","low"].map((u: any) =><option key={u} value={u}>{u.charAt(0).toUpperCase()+u.slice(1)}</option>)}
           </select>
@@ -122,11 +122,11 @@ export default function PurchaseRequestsPage() {
                 <thead>
                   <tr>
                     <th>Request</th>
-                    <th style={{textAlign:"center"}}>PR Number</th>
-                    <th style={{textAlign:"center"}}>Status</th>
-                    <th style={{textAlign:"center"}}>Urgency</th>
-                    <th style={{textAlign:"center"}}>Department</th>
-                    <th style={{textAlign:"center"}}>Required By</th>
+                    <th className="text-center">PR Number</th>
+                    <th className="text-center">Status</th>
+                    <th className="text-center">Urgency</th>
+                    <th className="text-center">Department</th>
+                    <th className="text-center">Required By</th>
                   </tr>
                 </thead>
                 <tbody>

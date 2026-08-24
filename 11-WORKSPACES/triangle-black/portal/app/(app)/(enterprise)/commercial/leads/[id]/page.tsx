@@ -151,7 +151,7 @@ export default function LeadDetailPage() {
             {contracts.length > 0 && (
               <div className="tb-section">
                 <div className="tb-section-header">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Contracts ({contracts.length})</div>
+                  <div className="tb-section-title" className="mb-0">Contracts ({contracts.length})</div>
                   <button onClick={() => router.push("/commercial/contracts")} className="tb-section-link">All →</button>
                 </div>
                 <div className="space-y-2 mt-3">

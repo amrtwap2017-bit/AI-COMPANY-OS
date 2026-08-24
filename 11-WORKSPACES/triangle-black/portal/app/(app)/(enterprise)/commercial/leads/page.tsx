@@ -115,10 +115,10 @@ function LeadsPageInner() {
                 <thead>
                   <tr>
                     <th>Lead</th>
-                    <th style={{textAlign:"center"}}>Company</th>
-                    <th style={{textAlign:"center"}}>Stage</th>
-                    <th style={{textAlign:"center"}}>Score</th>
-                    <th style={{textAlign:"center"}}>Updated</th>
+                    <th className="text-center">Company</th>
+                    <th className="text-center">Stage</th>
+                    <th className="text-center">Score</th>
+                    <th className="text-center">Updated</th>
                   </tr>
                 </thead>
                 <tbody>

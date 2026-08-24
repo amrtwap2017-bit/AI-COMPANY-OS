@@ -37,8 +37,8 @@ test.describe("Authentication", () => {
     expect(page.url()).toContain("/login");
   });
 
-  test("backend login API returns token", async ({ page }) => {
-    const res = await page.request.post(`${API_URL}/api/v1/auth/login`, {
+  test("backend login API returns token", async ({ request }) => {
+    const res = await request.post(`${BACKEND_URL}/api/v1/auth/login`, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       data: `username=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}`,
     });

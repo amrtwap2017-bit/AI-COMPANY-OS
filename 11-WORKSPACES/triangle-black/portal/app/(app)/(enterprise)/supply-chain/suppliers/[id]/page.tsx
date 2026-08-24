@@ -109,7 +109,7 @@ export default function SupplierDetailPage() {
             {pos.length > 0 && (
               <div className="tb-section">
                 <div className="tb-section-header">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Purchase Orders ({pos.length})</div>
+                  <div className="tb-section-title" className="mb-0">Purchase Orders ({pos.length})</div>
                   <button onClick={() => router.push("/supply-chain/purchase-orders")} className="tb-section-link">All →</button>
                 </div>
                 <div className="tb-table" style={{borderRadius:12,overflow:"hidden",marginTop:12}}>
@@ -141,7 +141,7 @@ export default function SupplierDetailPage() {
             {prs.length > 0 && (
               <div className="tb-section">
                 <div className="tb-section-header">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Purchase Requests ({prs.length})</div>
+                  <div className="tb-section-title" className="mb-0">Purchase Requests ({prs.length})</div>
                   <button onClick={() => router.push("/supply-chain/purchase-requests")} className="tb-section-link">All →</button>
                 </div>
                 <div className="space-y-2 mt-3">

@@ -87,7 +87,7 @@ export default function PMPlansPage() {
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
           <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search PM plans..."
             className="tb-input" style={{maxWidth:"320px"}}/>
-          <select value={typeFilter} onChange={(e: any) =>setTypeFilter(e.target.value)} className="tb-select" style={{width:"auto"}}>
+          <select value={typeFilter} onChange={(e: any) =>setTypeFilter(e.target.value)} className="tb-select" className="w-auto">
             <option value="all">All Types</option>
             {types.map((t: any) =><option key={t} value={t}>{t}</option>)}
           </select>
@@ -111,10 +111,10 @@ export default function PMPlansPage() {
                 <thead>
                   <tr>
                     <th>Plan</th>
-                    <th style={{textAlign:"center"}}>Type</th>
-                    <th style={{textAlign:"center"}}>Frequency</th>
-                    <th style={{textAlign:"center"}}>Next Due</th>
-                    <th style={{textAlign:"center"}}>Owner</th>
+                    <th className="text-center">Type</th>
+                    <th className="text-center">Frequency</th>
+                    <th className="text-center">Next Due</th>
+                    <th className="text-center">Owner</th>
                   </tr>
                 </thead>
                 <tbody>

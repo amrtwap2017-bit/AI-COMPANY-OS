@@ -69,7 +69,7 @@ export default function AnalyticsSLA() {
         <div className="tb-grid-2 mb-4">
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{margin:0}}>SLA Compliance Rate</div>
+              <div className="tb-section-title" className="m-0">SLA Compliance Rate</div>
               <span className="text-xs text-tertiary">Target: 85%</span>
             </div>
             <ResponsiveContainer width="100%" height={260}>
@@ -88,7 +88,7 @@ export default function AnalyticsSLA() {
 
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{margin:0}}>WO Volume by Priority</div>
+              <div className="tb-section-title" className="m-0">WO Volume by Priority</div>
               <span className="text-xs text-tertiary">Total: {wos.length} WOs</span>
             </div>
             <ResponsiveContainer width="100%" height={260}>
@@ -124,7 +124,7 @@ export default function AnalyticsSLA() {
 
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{margin:0}}>SLA Breached Work Orders ({breachedWOs.length})</div>
+            <div className="tb-section-title" className="m-0">SLA Breached Work Orders ({breachedWOs.length})</div>
             <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All WOs →</button>
           </div>
           {breachedWOs.length===0 ? (
@@ -132,7 +132,7 @@ export default function AnalyticsSLA() {
           ) : (
             <div className="tb-table-wrap">
               <table className="tb-table">
-                <thead><tr><th>Work Order</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Overdue By</th></tr></thead>
+                <thead><tr><th>Work Order</th><th className="text-center">Priority</th><th className="text-center">Status</th><th className="text-center">Overdue By</th></tr></thead>
                 <tbody>
                   {breachedWOs.map((w: any, i: number) =>{
                     const daysOver = Math.floor((now.getTime()-new Date(w.due_date).getTime())/86400000);

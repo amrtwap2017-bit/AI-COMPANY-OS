@@ -118,10 +118,10 @@ export default function StockBalancesPage() {
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}}
               placeholder="Search items..." className="tb-input" style={{minWidth:"200px",width:"auto"}}/>
-            <select value={filterWarehouse} onChange={(e: any) =>{setFilterWarehouse(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterWarehouse} onChange={(e: any) =>{setFilterWarehouse(e.target.value);setPage(1);}} className="tb-select" className="w-auto">
               {warehouseNames.map((w: any) =><option key={w} value={w}>{w==="all"?"All Warehouses":w}</option>)}
             </select>
-            <select value={filterCategory} onChange={(e: any) =>{setFilterCategory(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterCategory} onChange={(e: any) =>{setFilterCategory(e.target.value);setPage(1);}} className="tb-select" className="w-auto">
               {categories.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
             <div className="flex gap-1.5">
@@ -140,7 +140,7 @@ export default function StockBalancesPage() {
 
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{margin:0}}>Inventory Stock Levels</div>
+            <div className="tb-section-title" className="m-0">Inventory Stock Levels</div>
             <span className="text-sm font-bold text-brand">{fmtEGP(filtered.reduce((s: any, b: any) =>s+Number(b.total_value||0),0))} total</span>
           </div>
           {isLoading ? <TableSkeleton /> : filtered.length===0 ? (
@@ -156,12 +156,12 @@ export default function StockBalancesPage() {
                       <th>Item</th>
                       <th>Category</th>
                       <th>Warehouse</th>
-                      <th style={{textAlign:"right"}}>On Hand</th>
-                      <th style={{textAlign:"right"}}>Reserved</th>
-                      <th style={{textAlign:"right"}}>Available</th>
-                      <th style={{textAlign:"right"}}>Reorder At</th>
+                      <th className="text-right">On Hand</th>
+                      <th className="text-right">Reserved</th>
+                      <th className="text-right">Available</th>
+                      <th className="text-right">Reorder At</th>
                       <th>Status</th>
-                      <th style={{textAlign:"center"}}>Action</th>
+                      <th className="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>

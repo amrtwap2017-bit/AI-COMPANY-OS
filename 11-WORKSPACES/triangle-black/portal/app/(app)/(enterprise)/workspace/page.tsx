@@ -118,7 +118,7 @@ export default function WorkspacePage() {
               <div className="tb-steps mb-0">
                 {config.workflow.map((step: any, i: any) => (
                   <button key={i} onClick={() => router.push(step.path)}
-                    className="tb-action-item" style={{flex:1}}>
+                    className="tb-action-item" className="flex-1">
                     <div className="tb-step-num">{step.step}</div>
                     <span className="font-semibold text-sm text-primary">{step.label}</span>
                     <span className="ml-auto text-brand text-sm">→</span>

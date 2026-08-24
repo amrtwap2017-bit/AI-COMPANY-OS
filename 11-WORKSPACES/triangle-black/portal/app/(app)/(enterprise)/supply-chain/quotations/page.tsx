@@ -77,7 +77,7 @@ export default function QuotationsPage() {
             <>
               <div className="tb-table-wrap">
                 <table className="tb-table">
-                  <thead><tr><th>RFQ</th><th>Title</th><th>Status</th><th>Quotes</th><th style={{textAlign:"right"}}>Lowest Bid</th><th>Deadline</th><th></th></tr></thead>
+                  <thead><tr><th>RFQ</th><th>Title</th><th>Status</th><th>Quotes</th><th className="text-right">Lowest Bid</th><th>Deadline</th><th></th></tr></thead>
                   <tbody>
                     {paged.map((r: any, i: number) =>{
                       const isExpired = r.submission_deadline&&new Date(r.submission_deadline)<new Date();

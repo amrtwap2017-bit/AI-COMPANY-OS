@@ -74,7 +74,7 @@ export default function GRNDetailPage() {
               ) : (
                 <div className="tb-table-wrap">
                   <table className="tb-table">
-                    <thead><tr><th>Item</th><th style={{textAlign:"right"}}>Ordered</th><th style={{textAlign:"right"}}>Received</th><th style={{textAlign:"right"}}>Rejected</th><th>Unit</th><th>Notes</th></tr></thead>
+                    <thead><tr><th>Item</th><th className="text-right">Ordered</th><th className="text-right">Received</th><th className="text-right">Rejected</th><th>Unit</th><th>Notes</th></tr></thead>
                     <tbody>
                       {items.map((item: any, i: number) => {
                         const hasRej = (item.qty_rejected||0) > 0;

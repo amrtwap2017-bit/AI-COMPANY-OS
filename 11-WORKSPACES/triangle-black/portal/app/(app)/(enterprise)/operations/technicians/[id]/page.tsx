@@ -112,7 +112,7 @@ export default function TechnicianDetailPage() {
 
             <div className="tb-section">
               <div className="flex justify-between items-center mb-4">
-                <div className="tb-section-title" style={{margin:0}}>
+                <div className="tb-section-title" className="m-0">
                   Work Orders <span className="ml-2 text-sm font-normal text-tertiary">{wos.length}</span>
                 </div>
                 <button onClick={() => router.push("/operations/work-orders")} className="text-sm text-brand font-semibold bg-transparent border-0 cursor-pointer">All WOs →</button>

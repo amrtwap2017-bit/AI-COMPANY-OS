@@ -78,7 +78,7 @@ export default function ProjectsIntelligencePage() {
 
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{margin:0}}>Top Projects by Completion</div>
+            <div className="tb-section-title" className="m-0">Top Projects by Completion</div>
             <button onClick={()=>router.push("/projects-center/list")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View All →</button>
           </div>
           {projects.sort((a: any, b: any) =>(b.completion_pct||0)-(a.completion_pct||0)).slice(0,8).map((p: any, i: number) =>(

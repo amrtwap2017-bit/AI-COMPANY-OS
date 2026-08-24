@@ -45,7 +45,7 @@ export default function OperationsWorkbenchPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {isLoading ? <KpiSkeleton /> : <>
-              <div className="tb-hero-kpi" onClick={()=>router.push("/operations/work-orders")} style={{cursor:"pointer"}}>
+              <div className="tb-hero-kpi" onClick={()=>router.push("/operations/work-orders")} className="cursor-pointer">
                 <div className="tb-hero-kpi-value">{open.length}</div><div className="tb-hero-kpi-label">Open</div>
               </div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-warning)"}}>{inProg.length}</div><div className="tb-hero-kpi-label">In Progress</div></div>

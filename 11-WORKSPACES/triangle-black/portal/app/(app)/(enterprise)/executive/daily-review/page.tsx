@@ -39,7 +39,7 @@ export default function DailyReviewPage() {
       <div className="tb-canvas">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Today's Priorities</div><button onClick={()=>router.push("/executive/exceptions")} className="tb-section-link">Exceptions →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Today's Priorities</div><button onClick={()=>router.push("/executive/exceptions")} className="tb-section-link">Exceptions →</button></div>
             {critical.length===0&&overdue.length===0 ? (
               <div className="tb-empty" style={{padding:"24px 0"}}><div className="tb-empty-icon" style={{fontSize:"2rem"}}>✅</div><div className="tb-empty-desc">No critical items today</div></div>
             ) : (
@@ -54,11 +54,11 @@ export default function DailyReviewPage() {
             )}
           </div>
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
             <div className="space-y-2 mt-3">
               {activities.slice(0,6).map((act: any, i: any) =>(
                 <div key={i} className="flex items-center gap-2">
-                  <span style={{fontSize:"1rem"}}>{act.icon}</span>
+                  <span className="text-base">{act.icon}</span>
                   <div className="flex-1 min-w-0"><div className="text-xs text-secondary truncate">{act.title}</div></div>
                 </div>
               ))}

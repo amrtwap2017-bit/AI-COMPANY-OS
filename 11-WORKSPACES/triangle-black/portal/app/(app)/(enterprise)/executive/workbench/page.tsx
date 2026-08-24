@@ -50,7 +50,7 @@ export default function WorkbenchPage() {
           </div>
         </div>
         <div className="tb-section">
-          <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
+          <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Recent Activity</div><button onClick={()=>router.push("/inbox")} className="tb-section-link">Inbox →</button></div>
           <div className="space-y-2 mt-3">
             {activities.slice(0,5).map((act: any, i: any) =>(
               <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-base-alt transition-colors">

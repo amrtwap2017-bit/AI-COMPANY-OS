@@ -38,7 +38,7 @@ export default function EngineeringPMPlansPage() {
               const c = isOverdue?"#A84A3D":daysUntil!==null&&daysUntil<=7?"#B07A2A":"#547C4D";
               return (
                 <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
-                  <div className="flex items-center gap-2 min-w-0"><span style={{fontSize:"1rem"}}>📅</span><div className="min-w-0"><div className="text-sm text-secondary truncate">{pm.title||"—"}</div><div className="text-xs text-tertiary">{pm.plan_type||"—"}</div></div></div>
+                  <div className="flex items-center gap-2 min-w-0"><span className="text-base">📅</span><div className="min-w-0"><div className="text-sm text-secondary truncate">{pm.title||"—"}</div><div className="text-xs text-tertiary">{pm.plan_type||"—"}</div></div></div>
                   <div className="flex-shrink-0 text-right"><div className="text-xs font-bold" style={{color:c}}>{isOverdue?"OVERDUE":daysUntil!==null?daysUntil+"d":"—"}</div><div className="text-xs text-tertiary">{fmtDate(pm.next_due_ts)}</div></div>
                 </button>
               );

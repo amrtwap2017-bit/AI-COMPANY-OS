@@ -105,7 +105,7 @@ export default function ExecutiveReportsPage() {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <div className="text-label-upper text-tertiary mb-1">Daily Operations</div>
-                <div className="tb-section-title" style={{margin:0}}>Summary — {daily.date}</div>
+                <div className="tb-section-title" className="m-0">Summary — {daily.date}</div>
               </div>
               <button onClick={()=>handlePrint("daily")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
@@ -136,7 +136,7 @@ export default function ExecutiveReportsPage() {
         {activeReport==="work-orders"&&woReport&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{margin:0}}>Work Orders Report</div>
+              <div className="tb-section-title" className="m-0">Work Orders Report</div>
               <button onClick={()=>handlePrint("work-orders")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
@@ -149,7 +149,7 @@ export default function ExecutiveReportsPage() {
             </div>
             <div className="tb-table-wrap">
               <table className="tb-table">
-                <thead><tr><th>Work Order</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th>Technician</th><th>Date</th></tr></thead>
+                <thead><tr><th>Work Order</th><th className="text-center">Priority</th><th className="text-center">Status</th><th>Technician</th><th>Date</th></tr></thead>
                 <tbody>
                   {toArr(woReport.recent).slice(0,10).map((w: any, i: number) =>(
                     <tr key={i}>
@@ -169,7 +169,7 @@ export default function ExecutiveReportsPage() {
         {activeReport==="assets"&&assetRpt&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{margin:0}}>Asset Register ({toArr(assetRpt.assets).length} assets)</div>
+              <div className="tb-section-title" className="m-0">Asset Register ({toArr(assetRpt.assets).length} assets)</div>
               <button onClick={()=>handlePrint("assets")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
@@ -182,7 +182,7 @@ export default function ExecutiveReportsPage() {
             </div>
             <div className="tb-table-wrap">
               <table className="tb-table">
-                <thead><tr><th>Asset</th><th>Category</th><th>Status</th><th>Location</th><th style={{textAlign:"center"}}>WOs</th></tr></thead>
+                <thead><tr><th>Asset</th><th>Category</th><th>Status</th><th>Location</th><th className="text-center">WOs</th></tr></thead>
                 <tbody>
                   {toArr(assetRpt.assets).slice(0,15).map((a: any, i: number) =>(
                     <tr key={i}>
@@ -202,7 +202,7 @@ export default function ExecutiveReportsPage() {
         {activeReport==="contracts"&&contRpt&&(
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{margin:0}}>Contracts Portfolio</div>
+              <div className="tb-section-title" className="m-0">Contracts Portfolio</div>
               <button onClick={()=>handlePrint("contracts")} className="tb-btn tb-btn-primary">🖨️ Print PDF</button>
             </div>
             <div className="tb-grid-4 mb-4">
@@ -215,7 +215,7 @@ export default function ExecutiveReportsPage() {
             </div>
             <div className="tb-table-wrap">
               <table className="tb-table">
-                <thead><tr><th>Contract</th><th>Status</th><th style={{textAlign:"right"}}>Value</th><th>Expires</th><th style={{textAlign:"center"}}>Days Left</th></tr></thead>
+                <thead><tr><th>Contract</th><th>Status</th><th className="text-right">Value</th><th>Expires</th><th className="text-center">Days Left</th></tr></thead>
                 <tbody>
                   {toArr(contRpt.contracts).slice(0,15).map((c: any, i: number) =>{
                     const days=Math.round(c.days_remaining||0);

@@ -111,9 +111,9 @@ export default function InvoiceMatchingPage() {
                 <table className="tb-table">
                   <thead>
                     <tr>
-                      <th>Invoice</th><th>Vendor</th><th style={{textAlign:"right"}}>Amount</th>
-                      <th style={{textAlign:"right"}}>PO Link</th><th style={{textAlign:"right"}}>Status</th>
-                      <th style={{textAlign:"right"}}>Date</th><th style={{textAlign:"right"}}>Action</th>
+                      <th>Invoice</th><th>Vendor</th><th className="text-right">Amount</th>
+                      <th className="text-right">PO Link</th><th className="text-right">Status</th>
+                      <th className="text-right">Date</th><th className="text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>

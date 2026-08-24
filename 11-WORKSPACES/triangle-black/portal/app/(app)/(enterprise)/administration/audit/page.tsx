@@ -119,7 +119,7 @@ export default function AuditTrailPage() {
           <div className="xl:col-span-3">
             <div className="tb-section">
               <div className="tb-flex-between mb-4">
-                <div className="tb-section-title" style={{marginBottom:0}}>Activity Timeline ({events.length} events)</div>
+                <div className="tb-section-title" className="mb-0">Activity Timeline ({events.length} events)</div>
               </div>
 
               {isLoading ? (

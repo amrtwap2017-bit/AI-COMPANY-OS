@@ -66,7 +66,7 @@ export default function PredictivePage() {
 
         <div className="tb-section mb-4">
           <div className="flex justify-between items-center mb-3">
-            <div className="tb-section-title" style={{marginBottom:0}}>Asset Risk Scores</div>
+            <div className="tb-section-title" className="mb-0">Asset Risk Scores</div>
             <button onClick={()=>router.push("/maintenance/assets")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All Assets →</button>
           </div>
           {isLoading ? (
@@ -109,7 +109,7 @@ export default function PredictivePage() {
         {patternList.length>0&&(
           <div className="tb-section mb-4">
             <div className="flex justify-between items-center mb-3">
-              <div className="tb-section-title" style={{marginBottom:0}}>Recurring Issue Patterns</div>
+              <div className="tb-section-title" className="mb-0">Recurring Issue Patterns</div>
               <span className="text-xs text-tertiary">{patternList.length} patterns detected</span>
             </div>
             <div className="tb-table-wrap mt-3">
@@ -117,9 +117,9 @@ export default function PredictivePage() {
                 <thead>
                   <tr>
                     <th>Asset</th>
-                    <th style={{textAlign:"center"}}>Category</th>
-                    <th style={{textAlign:"center"}}>Count</th>
-                    <th style={{textAlign:"center"}}>Avg Resolution</th>
+                    <th className="text-center">Category</th>
+                    <th className="text-center">Count</th>
+                    <th className="text-center">Avg Resolution</th>
                   </tr>
                 </thead>
                 <tbody>

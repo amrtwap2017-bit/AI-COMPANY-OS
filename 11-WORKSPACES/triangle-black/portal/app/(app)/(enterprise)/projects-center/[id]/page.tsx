@@ -125,7 +125,7 @@ export default function ProjectDetailPage() {
             {wos.length > 0 && (
               <div className="tb-section">
                 <div className="tb-section-header">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Work Orders ({wos.length})</div>
+                  <div className="tb-section-title" className="mb-0">Work Orders ({wos.length})</div>
                   <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">All →</button>
                 </div>
                 <div className="space-y-2 mt-3">

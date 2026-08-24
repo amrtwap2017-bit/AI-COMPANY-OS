@@ -46,10 +46,10 @@ export default function OperationsCommandPage() {
           </div>
           <div className="tb-grid-4 mt-6">
             {isLoading ? <KpiSkeleton /> : <>
-              <div className="tb-hero-kpi" onClick={()=>router.push("/operations/work-orders")} style={{cursor:"pointer"}}>
+              <div className="tb-hero-kpi" onClick={()=>router.push("/operations/work-orders")} className="cursor-pointer">
                 <div className="tb-hero-kpi-value">{open.length}</div><div className="tb-hero-kpi-label">Open WOs</div>
               </div>
-              <div className="tb-hero-kpi" onClick={()=>router.push("/operations/dispatch")} style={{cursor:"pointer"}}>
+              <div className="tb-hero-kpi" onClick={()=>router.push("/operations/dispatch")} className="cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:"var(--color-warning)"}}>{inProg.length}</div><div className="tb-hero-kpi-label">In Progress</div>
               </div>
               <div className="tb-hero-kpi">
@@ -92,7 +92,7 @@ export default function OperationsCommandPage() {
 
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{margin:0}}>Field Team Status</div>
+            <div className="tb-section-title" className="m-0">Field Team Status</div>
             <button onClick={()=>router.push("/operations/dispatch")} className="text-sm text-brand font-semibold bg-transparent border-0 cursor-pointer">Full Dispatch →</button>
           </div>
           {techs.length===0 ? (

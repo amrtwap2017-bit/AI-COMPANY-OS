@@ -79,7 +79,7 @@ export default function CustomersPage() {
             <>
               <div className="tb-table-wrap">
                 <table className="tb-table">
-                  <thead><tr><th>Customer</th><th>Status</th><th>Contact</th><th style={{textAlign:"right"}}>Value</th><th>Created</th><th></th></tr></thead>
+                  <thead><tr><th>Customer</th><th>Status</th><th>Contact</th><th className="text-right">Value</th><th>Created</th><th></th></tr></thead>
                   <tbody>
                     {paged.map((l: any, i: number) =>(
                       <tr key={l.id||i} onClick={()=>router.push(`/commercial/leads/${l.id}`)} className="cursor-pointer">

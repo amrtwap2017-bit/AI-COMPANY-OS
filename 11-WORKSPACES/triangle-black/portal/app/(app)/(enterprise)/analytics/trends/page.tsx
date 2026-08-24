@@ -112,7 +112,7 @@ export default function AnalyticsTrends() {
           <div className="flex justify-between items-center mb-4">
             <div>
               <div className="text-label-upper text-tertiary mb-1">Operations</div>
-              <div className="tb-section-title" style={{marginBottom:0}}>Work Order Volume Trend</div>
+              <div className="tb-section-title" className="mb-0">Work Order Volume Trend</div>
             </div>
             <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View WOs →</button>
           </div>
@@ -151,7 +151,7 @@ export default function AnalyticsTrends() {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <div className="text-label-upper text-tertiary mb-1">Finance</div>
-                <div className="tb-section-title" style={{marginBottom:0}}>Revenue by Period</div>
+                <div className="tb-section-title" className="mb-0">Revenue by Period</div>
               </div>
               <button onClick={()=>router.push("/invoices")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Invoices →</button>
             </div>
@@ -177,7 +177,7 @@ export default function AnalyticsTrends() {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <div className="text-label-upper text-tertiary mb-1">Commercial</div>
-                <div className="tb-section-title" style={{marginBottom:0}}>Lead Pipeline</div>
+                <div className="tb-section-title" className="mb-0">Lead Pipeline</div>
               </div>
               <button onClick={()=>router.push("/commercial/leads")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Pipeline →</button>
             </div>

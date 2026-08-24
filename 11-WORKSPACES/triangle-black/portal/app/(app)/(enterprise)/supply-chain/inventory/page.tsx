@@ -118,11 +118,11 @@ export default function InventoryPage() {
                 <thead>
                   <tr>
                     <th>Item / SKU</th>
-                    <th style={{textAlign:"center"}}>Category</th>
-                    <th style={{textAlign:"center"}}>On Hand</th>
-                    <th style={{textAlign:"center"}}>Min</th>
-                    <th style={{textAlign:"center"}}>Unit Price</th>
-                    <th style={{textAlign:"center"}}>Stock</th>
+                    <th className="text-center">Category</th>
+                    <th className="text-center">On Hand</th>
+                    <th className="text-center">Min</th>
+                    <th className="text-center">Unit Price</th>
+                    <th className="text-center">Stock</th>
                   </tr>
                 </thead>
                 <tbody>

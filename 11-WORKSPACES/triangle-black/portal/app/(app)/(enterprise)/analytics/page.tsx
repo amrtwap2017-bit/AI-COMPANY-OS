@@ -103,7 +103,7 @@ function AnalyticsHubInner() {
               <div className="tb-section-header">
                 <div>
                   <div className="text-label-upper mb-1" style={{color:group.color}}>{group.section}</div>
-                  <div className="tb-section-title" style={{marginBottom:0}}>{group.section} KPIs</div>
+                  <div className="tb-section-title" className="mb-0">{group.section} KPIs</div>
                 </div>
                 <button onClick={()=>router.push(group.path)} className="tb-section-link">View →</button>
               </div>
@@ -132,7 +132,7 @@ function AnalyticsHubInner() {
         {/* Twin domain matrix */}
         <div className="tb-section">
           <div className="tb-section-header">
-            <div className="tb-section-title" style={{marginBottom:0}}>Digital Twin — All 8 Domains</div>
+            <div className="tb-section-title" className="mb-0">Digital Twin — All 8 Domains</div>
             <button onClick={()=>router.push("/executive/intelligence")} className="tb-section-link">Full report →</button>
           </div>
           <div className="tb-grid-8">

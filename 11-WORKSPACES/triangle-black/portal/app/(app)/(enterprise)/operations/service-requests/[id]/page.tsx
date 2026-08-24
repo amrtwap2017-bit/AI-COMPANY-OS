@@ -163,7 +163,7 @@ export default function ServiceRequestDetailPage() {
               <div className="tb-section" style={{borderColor:"#B07A2A30",background:"#B07A2A08"}}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span style={{fontSize:"1.125rem"}}>⚠️</span>
+                    <span className="text-lg">⚠️</span>
                     <span className="text-sm text-secondary">No work order linked to this request</span>
                   </div>
                   <button onClick={() => router.push("/operations/work-orders")} className="tb-section-link">

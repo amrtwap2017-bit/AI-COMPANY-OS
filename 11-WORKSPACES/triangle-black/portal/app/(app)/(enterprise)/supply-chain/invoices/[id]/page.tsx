@@ -130,7 +130,7 @@ export default function InvoiceDetailPage() {
             {lines.length===0 ? <div className="tb-empty"><div className="tb-empty-icon">📋</div><div className="tb-empty-title">No line items</div></div> : (
               <div className="tb-table-wrap">
                 <table className="tb-table">
-                  <thead><tr><th>Description</th><th style={{textAlign:"center"}}>Unit</th><th style={{textAlign:"center"}}>Invoiced</th><th style={{textAlign:"center"}}>PO Qty</th><th style={{textAlign:"center"}}>GRN Qty</th><th style={{textAlign:"right"}}>Unit Price</th><th style={{textAlign:"right"}}>Total</th></tr></thead>
+                  <thead><tr><th>Description</th><th className="text-center">Unit</th><th className="text-center">Invoiced</th><th className="text-center">PO Qty</th><th className="text-center">GRN Qty</th><th className="text-right">Unit Price</th><th className="text-right">Total</th></tr></thead>
                   <tbody>
                     {lines.map((line: any, i: any) =>{
                       const isOk = line.match_status==="matched";

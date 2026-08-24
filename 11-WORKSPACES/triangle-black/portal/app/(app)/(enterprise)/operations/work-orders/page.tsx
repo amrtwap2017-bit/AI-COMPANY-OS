@@ -135,7 +135,7 @@ export default function WorkOrdersPage() {
             <>
               <div className="tb-table-wrap">
                 <table className="tb-table">
-                  <thead><tr><th>Work Order</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Due Date</th><th style={{textAlign:"center"}}>Created</th></tr></thead>
+                  <thead><tr><th>Work Order</th><th className="text-center">Priority</th><th className="text-center">Status</th><th className="text-center">Due Date</th><th className="text-center">Created</th></tr></thead>
                   <tbody>
                     {paged.map((w: any, i: number) =>{
                       const isOverdue = w.due_date&&new Date(w.due_date)<now&&w.status!=="completed";

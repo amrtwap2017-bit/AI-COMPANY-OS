@@ -82,7 +82,7 @@ export default function ProjectsListPage() {
             <>
               <div className="tb-table-wrap">
                 <table className="tb-table">
-                  <thead><tr><th>Project</th><th>Status</th><th>Progress</th><th style={{textAlign:"right"}}>Budget</th><th>Start</th><th>End</th></tr></thead>
+                  <thead><tr><th>Project</th><th>Status</th><th>Progress</th><th className="text-right">Budget</th><th>Start</th><th>End</th></tr></thead>
                   <tbody>
                     {paged.map((p: any, i: number) =>{
                       const isOverdue = p.end_date&&new Date(p.end_date)<new Date()&&p.status!=="completed";

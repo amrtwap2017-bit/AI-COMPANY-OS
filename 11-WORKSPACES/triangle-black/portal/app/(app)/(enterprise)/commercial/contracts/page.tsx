@@ -113,10 +113,10 @@ function ContractsPageInner() {
                 <thead>
                   <tr>
                     <th>Contract</th>
-                    <th style={{textAlign:"center"}}>Status</th>
-                    <th style={{textAlign:"center"}}>Value</th>
-                    <th style={{textAlign:"center"}}>Start Date</th>
-                    <th style={{textAlign:"center"}}>End Date</th>
+                    <th className="text-center">Status</th>
+                    <th className="text-center">Value</th>
+                    <th className="text-center">Start Date</th>
+                    <th className="text-center">End Date</th>
                   </tr>
                 </thead>
                 <tbody>

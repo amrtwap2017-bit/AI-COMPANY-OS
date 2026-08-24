@@ -272,7 +272,7 @@ export default function ReportsPage() {
                 {columns.length > 0 && (
                   <div className="tb-section">
                     <div className="flex justify-between items-center mb-3">
-                      <div className="tb-section-title" style={{marginBottom:0}}>
+                      <div className="tb-section-title" className="mb-0">
                         {reportLoading ? "Loading…" : `${reportRows.length} Records`}
                       </div>
                       {reportRows.length > 0 && (

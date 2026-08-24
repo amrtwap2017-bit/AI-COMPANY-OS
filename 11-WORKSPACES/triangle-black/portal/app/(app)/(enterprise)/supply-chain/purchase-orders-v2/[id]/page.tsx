@@ -118,7 +118,7 @@ export default function POv2DetailPage() {
         {activeTab==="lines" && (
           <div className="tb-section">
             <div className="flex justify-between items-center mb-3">
-              <div className="tb-section-title" style={{marginBottom:0}}>Line Items</div>
+              <div className="tb-section-title" className="mb-0">Line Items</div>
               {["draft","pending_approval"].includes(po.status)&&(
                 <button onClick={()=>setShowAddLine(!showAddLine)} className="tb-btn tb-btn-primary tb-btn-sm">+ Add Line</button>
               )}
@@ -153,11 +153,11 @@ export default function POv2DetailPage() {
                   <thead>
                     <tr>
                       <th>#</th><th>Description</th>
-                      <th style={{textAlign:"center"}}>Unit</th>
-                      <th style={{textAlign:"center"}}>Qty</th>
-                      <th style={{textAlign:"center"}}>Unit Price</th>
-                      <th style={{textAlign:"center"}}>VAT</th>
-                      <th style={{textAlign:"center"}}>Total</th>
+                      <th className="text-center">Unit</th>
+                      <th className="text-center">Qty</th>
+                      <th className="text-center">Unit Price</th>
+                      <th className="text-center">VAT</th>
+                      <th className="text-center">Total</th>
                     </tr>
                   </thead>
                   <tbody>

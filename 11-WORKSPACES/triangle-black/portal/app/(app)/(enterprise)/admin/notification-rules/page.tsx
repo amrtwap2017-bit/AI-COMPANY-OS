@@ -32,7 +32,7 @@ export default function NotificationRulesPage() {
       </div>
       <div className="tb-canvas">
         <div className="tb-section">
-          <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Notification Types</div><button onClick={()=>router.push("/notifications")} className="tb-section-link">All →</button></div>
+          <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Active Notification Types</div><button onClick={()=>router.push("/notifications")} className="tb-section-link">All →</button></div>
           <div className="tb-grid-3 mt-4">
             {types.map((type: any,i: number)=>{
               const meta = TYPE_META[type as string]||{icon:"🔔",color:"#6D5F53",label:type};

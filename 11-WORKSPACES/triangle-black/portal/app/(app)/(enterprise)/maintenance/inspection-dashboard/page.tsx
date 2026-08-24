@@ -72,10 +72,10 @@ export default function InspectionDashboardPage() {
         <div className="tb-section" style={{padding:"12px 16px"}}>
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search plans..." className="tb-input" style={{minWidth:"220px",width:"auto"}} />
-            <select value={filterType} onChange={(e: any) =>{setFilterType(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterType} onChange={(e: any) =>{setFilterType(e.target.value);setPage(1);}} className="tb-select" className="w-auto">
               {types.map((t: any) =><option key={t} value={t}>{t==="all"?"All Types":t}</option>)}
             </select>
-            <select value={filterStatus} onChange={(e: any) =>{setFilterStatus(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterStatus} onChange={(e: any) =>{setFilterStatus(e.target.value);setPage(1);}} className="tb-select" className="w-auto">
               {statuses.map((s: any) =><option key={s} value={s}>{s==="all"?"All Statuses":s}</option>)}
             </select>
             {hasFilters&&<button onClick={clearFilters} className="tb-btn tb-btn-ghost tb-btn-sm">✕ Clear</button>}

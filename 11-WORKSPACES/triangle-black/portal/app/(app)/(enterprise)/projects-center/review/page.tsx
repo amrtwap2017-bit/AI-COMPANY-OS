@@ -57,7 +57,7 @@ export default function ProjectsReviewPage() {
           ) : (
             <div className="tb-table-wrap">
               <table className="tb-table">
-                <thead><tr><th>Project</th><th>Status</th><th>Completion</th><th>End Date</th><th style={{textAlign:"right"}}>Budget</th><th>Risk</th></tr></thead>
+                <thead><tr><th>Project</th><th>Status</th><th>Completion</th><th>End Date</th><th className="text-right">Budget</th><th>Risk</th></tr></thead>
                 <tbody>
                   {needsReview.map((p: any, i: number) =>{
                     const isOvd = p.end_date&&new Date(p.end_date)<now;

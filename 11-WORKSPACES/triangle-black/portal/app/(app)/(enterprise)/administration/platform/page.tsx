@@ -137,7 +137,7 @@ export default function PlatformHealthPage() {
 
           <div className="tb-section">
             <div className="flex justify-between items-center mb-3">
-              <div className="tb-section-title" style={{margin:0}}>Recent Audit Events</div>
+              <div className="tb-section-title" className="m-0">Recent Audit Events</div>
               <button onClick={()=>router.push("/administration/audit")} className="text-xs font-semibold text-brand bg-transparent border-0 cursor-pointer">All Events →</button>
             </div>
             {auditEvents.length===0 ? (

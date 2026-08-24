@@ -38,7 +38,7 @@ export default function PortfolioPage() {
         )}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Contracts</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Active Contracts</div><button onClick={()=>router.push("/commercial/contracts")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {activeContracts.slice(0,5).map((c: any, i: number) =>{
                 const days = c.end_date?Math.ceil((new Date(c.end_date).getTime() -now)/86400000):null;
@@ -53,7 +53,7 @@ export default function PortfolioPage() {
             </div>
           </div>
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Active Projects</div><button onClick={()=>router.push("/projects-center")} className="tb-section-link">All →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Active Projects</div><button onClick={()=>router.push("/projects-center")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
               {projects.filter((p: any) =>p.status==="active").slice(0,5).map((proj: any, i: any) =>(
                 <button key={i} onClick={()=>router.push("/projects-center/"+proj.id)} className="tb-action-item w-full justify-between">

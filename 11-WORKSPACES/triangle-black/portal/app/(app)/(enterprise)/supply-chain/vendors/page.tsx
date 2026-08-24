@@ -64,7 +64,7 @@ export default function VendorsPage() {
 
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{margin:0}}>
+            <div className="tb-section-title" className="m-0">
               Vendors <span className="ml-2 text-sm font-normal text-tertiary">{filtered.length} of {all.length}</span>
             </div>
           </div>

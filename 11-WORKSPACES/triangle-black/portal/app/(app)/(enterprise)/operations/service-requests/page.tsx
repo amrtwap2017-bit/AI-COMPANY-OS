@@ -116,7 +116,7 @@ export default function ServiceRequestsPage() {
             <>
               <div className="tb-table-wrap">
                 <table className="tb-table">
-                  <thead><tr><th>Request</th><th style={{textAlign:"center"}}>Priority</th><th style={{textAlign:"center"}}>Status</th><th style={{textAlign:"center"}}>Requester</th><th style={{textAlign:"center"}}>Date</th><th style={{textAlign:"center"}}>Work Order</th></tr></thead>
+                  <thead><tr><th>Request</th><th className="text-center">Priority</th><th className="text-center">Status</th><th className="text-center">Requester</th><th className="text-center">Date</th><th className="text-center">Work Order</th></tr></thead>
                   <tbody>
                     {paged.map((sr: any, i: any) =>{
                       const linkedWO = wos.find((w: any) =>w.id===sr.work_order_id);

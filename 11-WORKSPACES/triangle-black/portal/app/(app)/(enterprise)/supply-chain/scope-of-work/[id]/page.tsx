@@ -241,7 +241,7 @@ export default function SOWDetailPage() {
         {activeTab === "boq" && (
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{margin:0}}>Bill of Quantities</div>
+              <div className="tb-section-title" className="m-0">Bill of Quantities</div>
               <span className="text-sm font-bold text-brand">{fmtEGP(boqTotal)}</span>
             </div>
             {boqItems.length === 0 ? (
@@ -254,10 +254,10 @@ export default function SOWDetailPage() {
                     <tr>
                       <th>#</th>
                       <th>Description</th>
-                      <th style={{textAlign:"center"}}>QTY</th>
+                      <th className="text-center">QTY</th>
                       <th>Unit</th>
-                      <th style={{textAlign:"right"}}>Unit Price</th>
-                      <th style={{textAlign:"right"}}>Total</th>
+                      <th className="text-right">Unit Price</th>
+                      <th className="text-right">Total</th>
                     </tr>
                   </thead>
                   <tbody>

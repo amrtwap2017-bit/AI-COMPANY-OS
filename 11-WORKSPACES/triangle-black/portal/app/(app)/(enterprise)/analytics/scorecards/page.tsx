@@ -115,7 +115,7 @@ export default function AnalyticsScorecards() {
         <div className="tb-grid-2 mb-6">
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{marginBottom:0}}>KPI vs Target</div>
+              <div className="tb-section-title" className="mb-0">KPI vs Target</div>
               <button onClick={()=>router.push("/analytics")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Hub →</button>
             </div>
             <ResponsiveContainer width="100%" height={280}>
@@ -130,7 +130,7 @@ export default function AnalyticsScorecards() {
           </div>
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{marginBottom:0}}>Work Orders by Status</div>
+              <div className="tb-section-title" className="mb-0">Work Orders by Status</div>
               <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View →</button>
             </div>
             <ResponsiveContainer width="100%" height={280}>
@@ -148,7 +148,7 @@ export default function AnalyticsScorecards() {
         <div className="tb-grid-2 mb-6">
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{marginBottom:0}}>Work Orders by Priority</div>
+              <div className="tb-section-title" className="mb-0">Work Orders by Priority</div>
               <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View →</button>
             </div>
             <ResponsiveContainer width="100%" height={250}>
@@ -163,7 +163,7 @@ export default function AnalyticsScorecards() {
           </div>
           <div className="tb-section">
             <div className="flex justify-between items-center mb-4">
-              <div className="tb-section-title" style={{marginBottom:0}}>Invoice Status Distribution</div>
+              <div className="tb-section-title" className="mb-0">Invoice Status Distribution</div>
               <button onClick={()=>router.push("/invoices")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View →</button>
             </div>
             <div className="flex items-center gap-6">
@@ -192,7 +192,7 @@ export default function AnalyticsScorecards() {
 
         <div className="tb-section mb-6">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{marginBottom:0}}>Assets by Category</div>
+            <div className="tb-section-title" className="mb-0">Assets by Category</div>
             <button onClick={()=>router.push("/maintenance/assets")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">View All →</button>
           </div>
           <ResponsiveContainer width="100%" height={220}>

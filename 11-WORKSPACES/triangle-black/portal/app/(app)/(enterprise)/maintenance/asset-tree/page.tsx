@@ -137,7 +137,7 @@ export default function AssetTreePage() {
                   <div key={cat} className="border border-border rounded-xl overflow-hidden">
                     <button onClick={() => toggleCat(cat)}
                       className="w-full flex items-center gap-3 p-3 bg-base-alt hover:bg-surface transition-colors text-left">
-                      <span style={{fontSize:"1.125rem"}}>{catIcon}</span>
+                      <span className="text-lg">{catIcon}</span>
                       <div className="flex-1">
                         <div className="text-sm font-bold text-primary">{cat}</div>
                         <div className="text-xs text-tertiary">{catAssets.length} assets</div>

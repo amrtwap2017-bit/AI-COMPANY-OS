@@ -79,11 +79,11 @@ function AssetsPageInner() {
 
         <div className="flex gap-2.5 flex-wrap items-center mb-4">
           <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search assets by name or serial..." className="tb-input" style={{maxWidth:"320px"}} />
-          <select value={catF} onChange={(e: any) =>setCatF(e.target.value)} className="tb-select" style={{width:"auto"}}>
+          <select value={catF} onChange={(e: any) =>setCatF(e.target.value)} className="tb-select" className="w-auto">
             <option value="all">All Categories</option>
             {cats.map((c: any) =><option key={c} value={c}>{c}</option>)}
           </select>
-          <select value={critF} onChange={(e: any) =>setCritF(e.target.value)} className="tb-select" style={{width:"auto"}}>
+          <select value={critF} onChange={(e: any) =>setCritF(e.target.value)} className="tb-select" className="w-auto">
             <option value="all">All Criticality</option>
             {["critical","high","medium","low"].map((c: any) =><option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
           </select>

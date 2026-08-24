@@ -63,7 +63,7 @@ export default function WarehouseDetailPage() {
         </div>
         {whStocks.length>0&&(
           <div className="tb-section">
-            <div className="tb-section-header"><div className="tb-section-title" style={{marginBottom:0}}>Stock Items ({whStocks.length})</div><button onClick={()=>router.push("/supply-chain/inventory")} className="tb-section-link">Inventory →</button></div>
+            <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Stock Items ({whStocks.length})</div><button onClick={()=>router.push("/supply-chain/inventory")} className="tb-section-link">Inventory →</button></div>
             <div className="space-y-2 mt-3">
               {whStocks.slice(0,10).map((s: any, i: number) =>{
                 const item=items.find((it: any) =>it.id===s.item_id);

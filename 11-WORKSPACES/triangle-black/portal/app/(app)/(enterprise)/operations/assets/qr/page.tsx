@@ -72,13 +72,13 @@ export default function AssetQRGalleryPage() {
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={(e: any) =>setSearch(e.target.value)} placeholder="Search assets..."
               className="tb-input" style={{minWidth:"200px",width:"auto"}}/>
-            <select value={filterSite} onChange={(e: any) =>setFilterSite(e.target.value)} className="tb-select" style={{width:"auto"}}>
+            <select value={filterSite} onChange={(e: any) =>setFilterSite(e.target.value)} className="tb-select" className="w-auto">
               {sites.map((s: any) =><option key={s} value={s}>{s==="all"?"All Sites":s.split(" ").slice(0,3).join(" ")}</option>)}
             </select>
-            <select value={filterCat} onChange={(e: any) =>setFilterCat(e.target.value)} className="tb-select" style={{width:"auto"}}>
+            <select value={filterCat} onChange={(e: any) =>setFilterCat(e.target.value)} className="tb-select" className="w-auto">
               {cats.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
-            <select value={filterCrit} onChange={(e: any) =>setFilterCrit(e.target.value)} className="tb-select" style={{width:"auto"}}>
+            <select value={filterCrit} onChange={(e: any) =>setFilterCrit(e.target.value)} className="tb-select" className="w-auto">
               {crits.map((c: any) =><option key={c} value={c}>{c==="all"?"All Criticality":c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
             </select>
             {hasFilters&&<button onClick={clearFilters} className="tb-btn tb-btn-ghost tb-btn-sm">✕ Clear</button>}

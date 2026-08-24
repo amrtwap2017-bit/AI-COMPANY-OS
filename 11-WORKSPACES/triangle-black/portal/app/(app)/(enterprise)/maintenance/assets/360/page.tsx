@@ -57,7 +57,7 @@ export default function Assets360Page() {
           <div className="tb-grid-4 mt-6">
             {isLoading ? <KpiSkeleton /> : <>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value">{assets.length}</div><div className="tb-hero-kpi-label">Total Assets</div></div>
-              <div className="tb-hero-kpi" onClick={()=>{setFilterCrit("critical");setPage(1);}} style={{cursor:"pointer"}}>
+              <div className="tb-hero-kpi" onClick={()=>{setFilterCrit("critical");setPage(1);}} className="cursor-pointer">
                 <div className="tb-hero-kpi-value" style={{color:"var(--color-danger)"}}>{criticalCount}</div><div className="tb-hero-kpi-label">Critical</div>
               </div>
               <div className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:"var(--color-warning)"}}>{overdueAssets.length}</div><div className="tb-hero-kpi-label">Overdue PM</div></div>
@@ -78,10 +78,10 @@ export default function Assets360Page() {
         <div className="tb-section" style={{padding:"12px 16px"}}>
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search assets..." className="tb-input" style={{minWidth:"200px",width:"auto"}} />
-            <select value={filterCat} onChange={(e: any) =>{setFilterCat(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterCat} onChange={(e: any) =>{setFilterCat(e.target.value);setPage(1);}} className="tb-select" className="w-auto">
               {cats.map((c: any) =><option key={c} value={c}>{c==="all"?"All Categories":c}</option>)}
             </select>
-            <select value={filterCrit} onChange={(e: any) =>{setFilterCrit(e.target.value);setPage(1);}} className="tb-select" style={{width:"auto"}}>
+            <select value={filterCrit} onChange={(e: any) =>{setFilterCrit(e.target.value);setPage(1);}} className="tb-select" className="w-auto">
               {crits.map((c: any) =><option key={c} value={c}>{c==="all"?"All Criticality":c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
             </select>
             <div className="tb-tabs border-0 mb-0">

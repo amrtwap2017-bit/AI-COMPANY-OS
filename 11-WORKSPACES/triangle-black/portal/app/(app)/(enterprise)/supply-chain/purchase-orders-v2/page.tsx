@@ -93,7 +93,7 @@ export default function PurchaseOrdersV2Page() {
 
         <div className="tb-section">
           <div className="flex justify-between items-center mb-4">
-            <div className="tb-section-title" style={{margin:0}}>
+            <div className="tb-section-title" className="m-0">
               Purchase Orders
               <span className="ml-2 text-sm font-normal text-tertiary">{filtered.length} of {pos.length}</span>
             </div>
@@ -108,7 +108,7 @@ export default function PurchaseOrdersV2Page() {
             <div className="tb-table-wrap">
               <table className="tb-table">
                 <thead>
-                  <tr><th>PO / Vendor</th><th>Status</th><th style={{textAlign:"right"}}>Amount</th><th>Currency</th><th>Date</th></tr>
+                  <tr><th>PO / Vendor</th><th>Status</th><th className="text-right">Amount</th><th>Currency</th><th>Date</th></tr>
                 </thead>
                 <tbody>
                   {filtered.map((po: any) => (

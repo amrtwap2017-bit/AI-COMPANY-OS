@@ -93,7 +93,7 @@ export default function ExecutivePage() {
           <div className="flex flex-col gap-4">
             <div className="tb-section">
               <div className="flex justify-between items-center mb-3">
-                <div className="tb-section-title" style={{margin:0}}>Executive Alerts</div>
+                <div className="tb-section-title" className="m-0">Executive Alerts</div>
                 <button onClick={()=>router.push("/executive/exceptions")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All →</button>
               </div>
               {criticalWOs.length===0&&expiringContracts.length===0 ? (
@@ -138,7 +138,7 @@ export default function ExecutivePage() {
               <div className="flex justify-between items-center mb-4">
                 <div>
                   <div className="text-label-upper text-tertiary mb-1">Digital Twin</div>
-                  <div className="tb-section-title" style={{margin:0}}>Domain Health — {score}/100</div>
+                  <div className="tb-section-title" className="m-0">Domain Health — {score}/100</div>
                 </div>
                 <button onClick={()=>router.push("/executive/intelligence")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Intelligence →</button>
               </div>
@@ -162,7 +162,7 @@ export default function ExecutivePage() {
               <div className="flex justify-between items-center mb-4">
                 <div>
                   <div className="text-label-upper text-tertiary mb-1">Finance</div>
-                  <div className="tb-section-title" style={{margin:0}}>Revenue Snapshot</div>
+                  <div className="tb-section-title" className="m-0">Revenue Snapshot</div>
                 </div>
                 <button onClick={()=>router.push("/invoices")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">Full report →</button>
               </div>

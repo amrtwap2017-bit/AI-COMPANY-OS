@@ -103,7 +103,7 @@ export default function AssetDetailPage() {
             {wos.length > 0 && (
               <div className="tb-section">
                 <div className="flex justify-between items-center mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0}}>Work Order History ({wos.length})</div>
+                  <div className="tb-section-title" className="mb-0">Work Order History ({wos.length})</div>
                   <button onClick={()=>router.push("/operations/work-orders")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All →</button>
                 </div>
                 <div className="tb-table-wrap mt-3">
@@ -111,9 +111,9 @@ export default function AssetDetailPage() {
                     <thead>
                       <tr>
                         <th>Work Order</th>
-                        <th style={{textAlign:"center"}}>Priority</th>
-                        <th style={{textAlign:"center"}}>Status</th>
-                        <th style={{textAlign:"center"}}>Date</th>
+                        <th className="text-center">Priority</th>
+                        <th className="text-center">Status</th>
+                        <th className="text-center">Date</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -147,7 +147,7 @@ export default function AssetDetailPage() {
             {pms.length > 0 && (
               <div className="tb-section">
                 <div className="flex justify-between items-center mb-3">
-                  <div className="tb-section-title" style={{marginBottom:0}}>PM Plans ({pms.length})</div>
+                  <div className="tb-section-title" className="mb-0">PM Plans ({pms.length})</div>
                   <button onClick={()=>router.push("/maintenance/pm-plans")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All →</button>
                 </div>
                 <div className="flex flex-col gap-2 mt-3">
