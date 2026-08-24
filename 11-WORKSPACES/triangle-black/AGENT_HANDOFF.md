@@ -1529,3 +1529,55 @@ D-017: Session AGENT_HANDOFF full sync
 D-018: Full commercial test suite run (target 50+ passing)
 D-019: Portal pages for intelligence dashboards
 D-020: Alembic migration for new tables (customer_feedback, webhook_subscriptions, sso_configurations)
+
+## SESSION UPDATE — Intelligence Platform Complete — August 2026
+
+### SPRINTS D-017 to D-020 COMPLETE
+
+| Sprint | Deliverable | Status |
+|--------|-------------|--------|
+| D-017 | ExecutiveKPIReadModel + 4 endpoints + Alembic g2h3i4j5k6l7 | ✅ 35/35 |
+| D-018 | Master intelligence portal + risk dashboard + API surface test | ✅ 21/21 |
+| D-019 | Energy, SLA, financial, asset-lifecycle portal pages | ✅ 26/26 |
+| D-020 | Supplier intelligence portal + AGENT_HANDOFF sync | ✅ |
+
+### COMPLETE INTELLIGENCE PORTAL SURFACE
+/operations/intelligence-v2    ← Master 8-pillar command center
+/operations/risk-intelligence  ← Composite risk score + domain scores
+/operations/energy-intelligence ← Energy, carbon, sustainability roadmap
+/operations/sla-intelligence   ← SLA scorecard, technician performance
+/operations/financial-intelligence ← Leakage detection, cost reduction
+/operations/asset-lifecycle    ← TCO, replacement economics, PM effectiveness
+/operations/supplier-intelligence ← Vendor scorecards, savings opportunities
+
+### VERIFIED API SURFACE (all 200)
+/api/v1/intelligence/snapshot
+/api/v1/risk-intelligence/composite-score
+/api/v1/energy-intelligence/carbon-footprint
+/api/v1/sla-intelligence/scorecard
+/api/v1/financial-intelligence/leakage
+/api/v1/asset-lifecycle/pm-effectiveness
+/api/v1/supplier-intelligence/scorecards
+/api/v1/executive-intelligence/summary
+/api/v1/executive-intelligence/operations|maintenance|procurement|financial
+
+### EXECUTIVE KPI READ MODEL
+File: src/commercial/executive_intelligence/read_models.py
+Class: ExecutiveKPIReadModel
+Methods: get_operations_kpi, get_maintenance_kpi, get_procurement_kpi, 
+         get_financial_kpi, get_full_summary
+
+### /summary ROUTE CONFLICT NOTE
+/api/v1/executive-intelligence/summary → returns read_model format (not briefing)
+/api/v1/executive-intelligence/briefing → returns full executive briefing
+Both serve different consumers — keep both.
+
+### ALEMBIC HEAD
+g2h3i4j5k6l7 — adds customer_feedback, webhook_subscriptions, sso_configurations
+
+### NEXT SPRINT BACKLOG
+D-021: Run full commercial test suite — identify remaining 40 failures
+D-022: Fix top 5 remaining failure categories
+D-023: Predictive maintenance portal page
+D-024: Executive briefing portal page (D-008 service → portal UI)
+D-025: Commercial value certification portal page
