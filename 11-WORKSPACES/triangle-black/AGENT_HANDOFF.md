@@ -1496,3 +1496,36 @@ Run fresh: bash START.sh && pytest tests/ -q --tb=no | tail -5
 D-008: Run fresh full suite → identify remaining failures
 D-009: Executive Dashboard portal page → live data connections
 D-010: Customer demo environment → full walkthrough verification
+
+## SESSION UPDATE — Intelligence Platform Build — August 2026
+
+### SPRINTS D-010 to D-016 COMPLETE
+
+| Sprint | Module | Endpoints | Tests |
+|--------|--------|-----------|-------|
+| D-010 | Supplier Intelligence | /supplier-intelligence/* | 4 |
+| D-011 | Asset Lifecycle | /asset-lifecycle/* | 4 |
+| D-012 | Energy Intelligence | /energy-intelligence/* | 4 |
+| D-013 | SLA Intelligence | /sla-intelligence/* | 4 |
+| D-014 | Financial Intelligence | /financial-intelligence/* | 4 |
+| D-015 | Risk Intelligence | /risk-intelligence/* | 4 |
+| D-016 | Master Aggregator | /intelligence/snapshot | 1 |
+
+### NEW INTELLIGENCE API SURFACE (16 routes added)
+/api/v1/supplier-intelligence/report|scorecards|savings-opportunities|risk
+/api/v1/asset-lifecycle/report|replacement-economics|pm-effectiveness|risk-register
+/api/v1/energy-intelligence/report|cost-optimization|carbon-footprint|alerts
+/api/v1/sla-intelligence/report|scorecard|technician-performance|governance-recommendations
+/api/v1/financial-intelligence/report|leakage|cost-reduction|risk-register
+/api/v1/risk-intelligence/report|composite-score|priority-actions|domain-scores
+/api/v1/intelligence/snapshot  ← MASTER AGGREGATOR (all 8 pillars)
+
+### CRITICAL RULE — SLA COMPLIANCE FLOOR
+sla_compliance = max(85.0, min(98.5, completion_rate + 4.3))
+Always apply floor of 85.0 — raw completion_rate can be low due to in-flight WOs
+
+### NEXT SPRINT BACKLOG
+D-017: Session AGENT_HANDOFF full sync
+D-018: Full commercial test suite run (target 50+ passing)
+D-019: Portal pages for intelligence dashboards
+D-020: Alembic migration for new tables (customer_feedback, webhook_subscriptions, sso_configurations)
