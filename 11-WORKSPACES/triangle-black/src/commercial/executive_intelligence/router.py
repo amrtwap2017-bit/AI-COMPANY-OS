@@ -45,3 +45,13 @@ def get_portfolio_health(
 ):
     service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
     return service._portfolio_health_index()
+
+
+@router.get("/summary")
+def get_executive_summary_alias(
+    db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id)
+):
+    """Alias for /briefing — backward compatibility with demo tenant tests."""
+    service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
+    return service.get_executive_briefing()
