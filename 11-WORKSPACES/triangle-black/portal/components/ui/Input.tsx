@@ -1,5 +1,5 @@
 "use client";
-/* design-tokens: color-danger color-border-focus */
+/* design-tokens: color-danger color-border-focus color-text-1 */
 import React, { InputHTMLAttributes, forwardRef } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
