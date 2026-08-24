@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authFetch } from "@/lib/hooks/useAuthFetch";

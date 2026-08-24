@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — My Day Command Center
 // Sprint 302: Program A — Component Library Adoption
 // Migrated: inline KPIs → KpiCard, inline status → StatusBadge,

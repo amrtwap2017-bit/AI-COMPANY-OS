@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { ExportButton } from "@/components/ui/ExportButton";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";

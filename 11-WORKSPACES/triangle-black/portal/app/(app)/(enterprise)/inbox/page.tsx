@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useState, useEffect } from "react";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
