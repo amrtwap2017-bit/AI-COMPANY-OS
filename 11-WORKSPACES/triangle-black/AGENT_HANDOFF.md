@@ -1620,3 +1620,50 @@ D-027: Pilot Control Room portal page
 D-028: IoT telemetry ingestion portal
 D-029: Production monitoring dashboard
 D-030: Full AGENT_HANDOFF final sync
+
+## SESSION FINAL — D-026 to D-027 COMPLETE — August 2026
+
+### SPRINTS COMPLETED
+
+| Sprint | Portal | Tests |
+|--------|--------|-------|
+| D-026 | Pilot Control Room v2 + IoT Telemetry Gateway | 13/13 |
+| D-027 | Operational Command Center (master nav hub) | — |
+
+### COMPLETE PORTAL INVENTORY (All built this session)
+INTELLIGENCE:
+  /operations/command-center        ← Master hub — links all modules
+  /operations/intelligence-v2       ← Master 8-pillar snapshot
+  /operations/risk-intelligence     ← Risk composite + domain scores
+  /operations/energy-intelligence   ← Energy, carbon, sustainability
+  /operations/sla-intelligence      ← SLA scorecard + technician perf
+  /operations/financial-intelligence ← Leakage detection + cost reduction
+  /operations/asset-lifecycle       ← TCO + replacement economics
+  /operations/supplier-intelligence ← Vendor scorecards + savings
+  /operations/iot-telemetry         ← Live sensor ingestion + anomaly
+  /maintenance/predictive           ← 30-day failure forecasts
+
+EXECUTIVE:
+  /executive/intelligence           ← Full C-suite briefing
+
+ADMINISTRATION:
+  /administration/pilot-control-v2  ← SRE multi-tenant control room
+  /administration/value-certification-v2 ← ROI certification
+  /administration/demo-environment  ← 6-stage customer walkthrough
+  /administration/subscription      ← SaaS tier management
+  /administration/webhooks          ← HMAC webhook management
+  /administration/identity          ← SSO + SCIM 2.0
+
+### FULL INTELLIGENCE API SURFACE (All 200 ✅)
+20 endpoints verified in test_sprint_d027_command_center.py
+
+### NEXT AGENT — START HERE
+1. bash START.sh
+2. .venv/bin/python -m pytest tests/commercial/test_sprint_d027_command_center.py -v
+   Expected: 3 passed
+3. .venv/bin/python -m pytest tests/commercial/ -q --tb=no --timeout=30 | tail -3
+
+### NEXT SPRINT BACKLOG
+D-028: Production monitoring dashboard (health, response times, DB)
+D-029: Commercial test suite full baseline (identify remaining failures)
+D-030: Final AGENT_HANDOFF v2 comprehensive sync
