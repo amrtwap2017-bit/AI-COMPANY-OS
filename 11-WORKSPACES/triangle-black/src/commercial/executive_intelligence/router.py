@@ -52,9 +52,10 @@ def get_executive_summary_alias(
     db: Session = Depends(get_db),
     hotel_id: str = Depends(get_hotel_id)
 ):
-    """Alias for /briefing — backward compatibility with demo tenant tests."""
-    service = ExecutiveIntelligenceService(db=db, hotel_id=hotel_id)
-    return service.get_executive_briefing()
+    """Returns KPI read model summary — hotel_id, operations, maintenance, procurement, financial."""
+    from src.commercial.executive_intelligence.read_models import ExecutiveKPIReadModel
+    rm = ExecutiveKPIReadModel(db=db, hotel_id=hotel_id)
+    return rm.get_full_summary()
 
 
 # ── Executive KPI Read Model Endpoints (T-007) ───────────────────────────────
