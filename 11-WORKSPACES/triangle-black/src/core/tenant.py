@@ -86,5 +86,17 @@ class TenantContext:
         """Factory method — creates TenantContext from hotel_id string."""
         return cls(hotel_id=hotel_id, organization_id=hotel_id)
 
+    def to_dict(self) -> dict:
+        """Serializes TenantContext to dictionary."""
+        return {
+            "hotel_id": self.hotel_id,
+            "organization_id": self.organization_id
+        }
+
     def __str__(self) -> str:
         return f"TenantContext(hotel_id={self.hotel_id})" 
+
+
+def get_organization_id(request) -> str:
+    """Extracts organization_id from request — mirrors hotel_id for single-org tenants."""
+    return get_hotel_id(request)
