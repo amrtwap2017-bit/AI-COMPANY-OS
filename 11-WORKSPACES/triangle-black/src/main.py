@@ -8376,6 +8376,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: production_gate_router: {_e}")
 
+
+try:
+    from src.commercial.demo_environment.router import router as _demo_env_r
+    app.include_router(_demo_env_r, prefix="/api/v1")
+    logger.info("  OK: demo_environment_router")
+except Exception as _e:
+    logger.warning(f"WARN: demo_environment_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
