@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Goods Receipt Note (GRN) Create
 // Sprint-040: GRN Create Form
 import { useState, useEffect } from "react";

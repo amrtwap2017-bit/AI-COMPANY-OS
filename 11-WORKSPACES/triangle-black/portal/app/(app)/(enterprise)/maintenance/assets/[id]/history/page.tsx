@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Asset Maintenance History
 // Sprint-038: Asset History Portal
 import { useState, useEffect } from "react";

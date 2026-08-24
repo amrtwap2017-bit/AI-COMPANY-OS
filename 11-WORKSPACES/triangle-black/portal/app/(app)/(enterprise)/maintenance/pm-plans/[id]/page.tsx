@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — PM Plan Detail + Complete Workflow
 // Sprint-030: PM Completion
 import { useState, useEffect } from "react";

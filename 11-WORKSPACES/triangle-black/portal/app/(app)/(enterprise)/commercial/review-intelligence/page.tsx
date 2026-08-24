@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();

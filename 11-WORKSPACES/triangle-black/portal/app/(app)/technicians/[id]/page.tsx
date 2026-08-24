@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 export default function Redirect() {

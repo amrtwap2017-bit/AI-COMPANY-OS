@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Asset QR Landing Page
 // Sprint-028: Scanned by technician in field
 import { useState, useEffect } from "react";

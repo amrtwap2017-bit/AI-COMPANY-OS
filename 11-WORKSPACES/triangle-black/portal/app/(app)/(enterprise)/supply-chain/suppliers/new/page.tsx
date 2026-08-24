@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Supplier Create
 // Sprint-041: Supplier Create Form
 import { useState, useEffect } from "react";

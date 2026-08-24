@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Invoice Payment Recording
 // Sprint-036: Invoice Payment Workflow
 import { useState, useEffect } from "react";

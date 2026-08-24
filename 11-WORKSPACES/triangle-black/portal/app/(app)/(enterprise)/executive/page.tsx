@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { RoleBadge } from "@/components/ui/RoleBadge";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";

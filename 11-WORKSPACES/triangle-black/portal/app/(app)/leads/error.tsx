@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Triangle Black - Error Boundary
 // TB-002: Self-contained — no external hook imports allowed in error.tsx
 "use client";

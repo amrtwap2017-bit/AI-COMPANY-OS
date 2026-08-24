@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { toast } from "@/lib/toast";

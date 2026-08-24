@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Employee Edit
 // Sprint-014: Employee Detail/Edit Portal
 import { useState, useEffect } from "react";

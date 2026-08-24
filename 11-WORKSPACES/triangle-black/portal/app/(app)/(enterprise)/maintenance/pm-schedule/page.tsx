@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — PM Maintenance Schedule Calendar
 // Sprint-032: Maintenance Schedule View
 import { useState, useEffect } from "react";

@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";

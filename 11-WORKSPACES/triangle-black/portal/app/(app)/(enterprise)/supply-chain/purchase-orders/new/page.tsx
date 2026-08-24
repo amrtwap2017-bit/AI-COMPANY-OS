@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Create Purchase Order
 // Sprint-035: PO Create Form
 import { useState, useEffect } from "react";

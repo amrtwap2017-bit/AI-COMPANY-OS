@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-// @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";

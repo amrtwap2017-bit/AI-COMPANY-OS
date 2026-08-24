@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Engineering Field Reports
 // Sprint-046: Engineering Data Portal
 import { useState, useEffect } from "react";

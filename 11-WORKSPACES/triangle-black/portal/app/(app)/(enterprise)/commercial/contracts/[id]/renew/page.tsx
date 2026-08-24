@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Contract Renewal
 // Sprint-037: Contract Renewal Portal
 import { useState, useEffect } from "react";

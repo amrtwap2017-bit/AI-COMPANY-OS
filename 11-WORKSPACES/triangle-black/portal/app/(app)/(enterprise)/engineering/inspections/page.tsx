@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Engineering Inspections
 // Sprint-045: Inspection Management
 import { useState, useEffect } from "react";

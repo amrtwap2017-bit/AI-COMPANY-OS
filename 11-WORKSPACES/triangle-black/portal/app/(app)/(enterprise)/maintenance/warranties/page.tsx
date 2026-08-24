@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Warranty Tracking Dashboard
 // Sprint-043: Asset Warranty Management
 import { useState, useEffect } from "react";

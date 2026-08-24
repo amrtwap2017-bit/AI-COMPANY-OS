@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — RFQ Detail
 // Sprint-042: RFQ Portal
 import { useState, useEffect } from "react";

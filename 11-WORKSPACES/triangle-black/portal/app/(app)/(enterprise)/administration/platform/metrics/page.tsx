@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Platform Metrics Dashboard
 // Sprint-039: Real-time Platform Health
 import { useState, useEffect } from "react";

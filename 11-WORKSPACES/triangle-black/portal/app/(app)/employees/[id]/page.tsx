@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Employee Detail + Timesheets
 // Sprint-013: Employee Timesheets
 import { useState, useEffect } from "react";

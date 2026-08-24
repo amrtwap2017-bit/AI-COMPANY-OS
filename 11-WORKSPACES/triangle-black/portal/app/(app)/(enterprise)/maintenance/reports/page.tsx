@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Maintenance Reports Dashboard
 // Sprint-047: Downtime + Cost Reports
 import { useState, useEffect } from "react";

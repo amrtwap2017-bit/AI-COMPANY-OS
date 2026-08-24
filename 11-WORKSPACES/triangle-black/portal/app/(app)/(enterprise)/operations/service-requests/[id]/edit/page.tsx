@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Service Request Update
 // Sprint-033: SR Status Management
 import { useState, useEffect } from "react";

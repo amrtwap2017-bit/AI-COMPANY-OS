@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Platform Readiness Assessment
 // Sprint-050: Enterprise Readiness Score
 import { useState, useEffect } from "react";

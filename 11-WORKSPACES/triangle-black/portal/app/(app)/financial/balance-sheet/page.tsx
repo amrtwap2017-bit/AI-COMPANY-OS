@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Financial GL Balance Sheet
 // Sprint-027: Balance Sheet Portal Page
 import { useState, useEffect } from "react";

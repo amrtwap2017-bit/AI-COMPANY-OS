@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Work Order Technician Assignment
 // Sprint-024: WO Assignment Portal Page
 import { useState, useEffect } from "react";

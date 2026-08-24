@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Notifications Center
 // Sprint-052
 import { useState, useEffect } from "react";

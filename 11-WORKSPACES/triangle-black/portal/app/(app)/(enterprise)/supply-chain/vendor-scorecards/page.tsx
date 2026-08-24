@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Vendor Scorecard Dashboard
 // Sprint-031: Vendor Performance KPIs
 import { useState, useEffect } from "react";

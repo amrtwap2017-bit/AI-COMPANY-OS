@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import DocumentsPanel from "@/components/documents/DocumentsPanel";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

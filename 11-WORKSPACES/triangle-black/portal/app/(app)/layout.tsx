@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Triangle Black — App Layout (Server Component)
 // Hooks and client state live in EnterpriseShell — not here.
 // This file must remain a Server Component (no "use client").

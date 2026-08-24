@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useRouter } from "next/navigation";
 const handleExport = (url: any) => {
   import("@/lib/hooks/useAuthFetch").then(m => m.authFetch(url))

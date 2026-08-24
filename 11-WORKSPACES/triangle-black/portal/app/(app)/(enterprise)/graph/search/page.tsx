@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Knowledge Graph Search
 // Sprint-051
 import { useState, useEffect } from "react";
