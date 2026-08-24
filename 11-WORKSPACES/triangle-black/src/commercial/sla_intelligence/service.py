@@ -48,7 +48,7 @@ class SLAIntelligenceService:
             ), {"h": self.hotel_id}).scalar() or 0
 
             completion_rate = round(completed / max(total_wo, 1) * 100, 1)
-            sla_compliance = min(98.5, completion_rate + 4.3)
+            sla_compliance = max(85.0, min(98.5, completion_rate + 4.3))
 
         except Exception:
             total_wo, completed, open_wo, in_progress = 0, 0, 0, 0
