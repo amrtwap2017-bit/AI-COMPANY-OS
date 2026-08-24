@@ -8408,6 +8408,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: energy_intelligence_router: {_e}")
 
+
+try:
+    from src.commercial.sla_intelligence.router import router as _sla_intel_r
+    app.include_router(_sla_intel_r, prefix="/api/v1")
+    logger.info("  OK: sla_intelligence_router")
+except Exception as _e:
+    logger.warning(f"WARN: sla_intelligence_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
