@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 // Triangle Black — Technician Dashboard (Mobile)
 // Sprint-018: Mobile Technician Portal
 import { useState, useEffect } from "react";

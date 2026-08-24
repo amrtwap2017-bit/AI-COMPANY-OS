@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
