@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: 1,
   reporter: 'list',
-  globalSetup: './e2e/global-setup.ts',
+  globalSetup: './e2e/helpers/global-setup.ts',
   timeout: 60000,
   expect: {
     timeout: 15000,
