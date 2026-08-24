@@ -8392,6 +8392,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: supplier_intelligence_router: {_e}")
 
+
+try:
+    from src.commercial.asset_lifecycle.router import router as _asset_lc_r
+    app.include_router(_asset_lc_r, prefix="/api/v1")
+    logger.info("  OK: asset_lifecycle_router")
+except Exception as _e:
+    logger.warning(f"WARN: asset_lifecycle_router: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
