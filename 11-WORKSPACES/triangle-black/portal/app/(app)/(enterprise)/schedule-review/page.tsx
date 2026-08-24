@@ -40,7 +40,7 @@ export default function ScheduleReviewPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Due This Week ({dueWeek.length})</div><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {dueWeek.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No PMs due this week</div></div>
+              {dueWeek.length===0 ? <div className="tb-empty" className="py-4"><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No PMs due this week</div></div>
               : dueWeek.map((pm: any, i: any) =>{
                 const days=Math.ceil((new Date(pm.next_due_ts).getTime() -now)/86400000);
                 return (
@@ -55,7 +55,7 @@ export default function ScheduleReviewPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" className="mb-0">WOs Due Soon ({wosDue.length})</div><button onClick={()=>router.push("/operations/work-orders")} className="tb-section-link">All →</button></div>
             <div className="space-y-2 mt-3">
-              {wosDue.length===0 ? <div className="tb-empty" style={{padding:"16px 0"}}><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No WOs due this week</div></div>
+              {wosDue.length===0 ? <div className="tb-empty" className="py-4"><div className="tb-empty-icon" style={{fontSize:"1.5rem"}}>✅</div><div className="tb-empty-desc">No WOs due this week</div></div>
               : wosDue.map((wo: any, i: any) =>{
                 const days=Math.ceil((new Date(wo.due_date).getTime() -now)/86400000);
                 const pc={critical:"#A84A3D",high:"#B07A2A",medium:"#B07A2A",low:"#6D5F53"}[wo.priority]||"#6D5F53";

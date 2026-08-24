@@ -73,7 +73,7 @@ export default function WorkHistoryPage() {
           </div>
         )}
 
-        <div className="tb-section" style={{padding:"12px 16px"}}>
+        <div className="tb-section" className="px-4 py-3">
           <div className="flex gap-2.5 flex-wrap items-center">
             <input value={search} onChange={(e: any) =>{setSearch(e.target.value);setPage(1);}} placeholder="Search work orders..." className="tb-input" style={{minWidth:"220px",width:"auto"}} />
             <div className="tb-tabs border-0 mb-0">

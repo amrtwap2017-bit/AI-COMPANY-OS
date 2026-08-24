@@ -41,7 +41,7 @@ export default function DailyReviewPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" className="mb-0">Today's Priorities</div><button onClick={()=>router.push("/executive/exceptions")} className="tb-section-link">Exceptions →</button></div>
             {critical.length===0&&overdue.length===0 ? (
-              <div className="tb-empty" style={{padding:"24px 0"}}><div className="tb-empty-icon" style={{fontSize:"2rem"}}>✅</div><div className="tb-empty-desc">No critical items today</div></div>
+              <div className="tb-empty" className="py-6"><div className="tb-empty-icon" style={{fontSize:"2rem"}}>✅</div><div className="tb-empty-desc">No critical items today</div></div>
             ) : (
               <div className="space-y-2 mt-3">
                 {[...critical.slice(0,3),...overdue.slice(0,3)].map((wo: any, i: any) =>(

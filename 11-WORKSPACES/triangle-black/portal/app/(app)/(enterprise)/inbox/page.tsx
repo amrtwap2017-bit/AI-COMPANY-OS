@@ -109,7 +109,7 @@ export default function InboxPage() {
                 ))}
               </div>
             ) : unread.length === 0 ? (
-              <div className="tb-empty" style={{padding:"24px 0"}}>
+              <div className="tb-empty" className="py-6">
                 <div style={{fontSize:"2.5rem"}}>✅</div>
                 <div className="tb-empty-desc">Inbox clear</div>
               </div>
@@ -167,7 +167,7 @@ export default function InboxPage() {
                 ))}
               </div>
             ) : activities.length === 0 ? (
-              <div className="tb-empty" style={{padding:"24px 0"}}>
+              <div className="tb-empty" className="py-6">
                 <div style={{fontSize:"2rem"}}>📋</div>
                 <div className="tb-empty-desc">No recent activity</div>
               </div>

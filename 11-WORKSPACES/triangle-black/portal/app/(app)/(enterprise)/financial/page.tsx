@@ -149,7 +149,7 @@ export default function FinancialDashboardPage() {
             <div className="tb-section">
               <div className="tb-section-title">Project P&L Overview</div>
               {projects.length === 0 ? (
-                <div className="tb-empty" style={{padding:"24px"}}><div className="tb-empty-title">No projects</div></div>
+                <div className="tb-empty" className="p-6"><div className="tb-empty-title">No projects</div></div>
               ) : (
                 <div className="flex flex-col gap-3 mt-3">
                   {projects.map((proj: any, i: any) =>{

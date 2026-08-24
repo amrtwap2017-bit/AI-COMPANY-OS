@@ -77,15 +77,15 @@ test.describe("Authentication", () => {
     expect(hasAccessCookie || hasTokenCookie).toBeTruthy();
   });
 
-  test("health check endpoint is reachable", async ({ page }) => {
-    const res = await page.request.get(`${API_URL}/api/v1/health/live`);
+  test("health check endpoint is reachable", async ({ request }) => {
+    const res = await request.get(`${BACKEND_URL}/api/v1/health/live`);
     expect(res.status()).toBe(200);
     const data = await res.json();
     expect(data.status).toBe("live");
   });
 
-  test("health ready endpoint confirms DB connected", async ({ page }) => {
-    const res = await page.request.get(`${API_URL}/api/v1/health/ready`);
+  test("health ready endpoint confirms DB connected", async ({ request }) => {
+    const res = await request.get(`${BACKEND_URL}/api/v1/health/ready`);
     expect(res.status()).toBe(200);
     const data = await res.json();
     expect(data.status).toBe("ready");

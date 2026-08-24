@@ -30,7 +30,7 @@ export default function ConnectSignalsPage() {
           <div className="tb-section">
             <div className="tb-section-header"><div className="tb-section-title" className="mb-0">AI Signals</div></div>
             <div className="space-y-2 mt-3">
-              {signals.length===0 ? <div className="tb-empty" style={{padding:"24px 0"}}><div className="tb-empty-icon" style={{fontSize:"2rem"}}>📡</div><div className="tb-empty-desc">No active signals</div></div>
+              {signals.length===0 ? <div className="tb-empty" className="py-6"><div className="tb-empty-icon" style={{fontSize:"2rem"}}>📡</div><div className="tb-empty-desc">No active signals</div></div>
               : signals.slice(0,8).map((sig: any, i: any) =>(
                 <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-base-alt">
                   <span className="text-base">🔮</span>

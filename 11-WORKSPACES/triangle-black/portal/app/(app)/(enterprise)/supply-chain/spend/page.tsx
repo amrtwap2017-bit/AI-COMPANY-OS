@@ -67,7 +67,7 @@ export default function SpendAnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="name" tick={AXIS} axisLine={false} tickLine={false} />
                 <YAxis tick={AXIS} axisLine={false} tickLine={false} tickFormatter={fmtK} />
-                <Tooltip content={({active,payload,label})=>{if(!active||!payload?.length) return null;return<div className="tb-section shadow-lg" style={{padding:"8px 12px"}}><div className="text-xs text-tertiary">{label}</div><div className="text-sm font-bold text-primary">{payload[0].value} items</div></div>;}} />
+                <Tooltip content={({active,payload,label})=>{if(!active||!payload?.length) return null;return<div className="tb-section shadow-lg" className="px-3 py-2"><div className="text-xs text-tertiary">{label}</div><div className="text-sm font-bold text-primary">{payload[0].value} items</div></div>;}} />
                 <Bar dataKey="value" radius={[6,6,0,0]}>
                   {procPipeline.map((e: any, i: number) =><Cell key={i} fill={e.fill} />)}
                 </Bar>

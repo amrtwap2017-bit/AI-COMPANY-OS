@@ -13,7 +13,7 @@ const AXIS    = {fontSize:11,fill:"var(--color-text-3)"};
 const WarmTooltip = ({active,payload,label}: any) => {
   if (!active||!payload?.length) return null;
   return (
-    <div className="tb-section shadow-lg" style={{padding:"8px 12px"}}>
+    <div className="tb-section shadow-lg" className="px-3 py-2">
       {label&&<div className="text-xs text-tertiary mb-1">{label}</div>}
       {payload.map((p: any, i: number) =><div key={i} className="text-sm font-bold text-primary">{p.name}: {p.value}</div>)}
     </div>

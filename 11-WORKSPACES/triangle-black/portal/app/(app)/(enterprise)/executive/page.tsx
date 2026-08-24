@@ -97,7 +97,7 @@ export default function ExecutivePage() {
                 <button onClick={()=>router.push("/executive/exceptions")} className="text-xs text-brand font-semibold bg-transparent border-0 cursor-pointer">All →</button>
               </div>
               {criticalWOs.length===0&&expiringContracts.length===0 ? (
-                <div className="tb-empty" style={{padding:"24px 0"}}>
+                <div className="tb-empty" className="py-6">
                   <div className="tb-empty-icon text-4xl opacity-40">✅</div>
                   <div className="tb-empty-desc">No executive alerts</div>
                 </div>

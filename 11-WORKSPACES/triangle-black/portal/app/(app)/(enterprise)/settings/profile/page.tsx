@@ -88,7 +88,7 @@ export default function ProfilePage() {
               {[["Full Name",displayName],["Email",displayEmail],["Role",displayRole],["Hotel ID",me?.hotel_id||"—"],["User ID",me?.id||"—"],["Member Since",fmtDate(me?.created_at)],["Last Updated",fmtDate(me?.updated_at)]].map(([label,value],i,arr)=>(
                 <div key={i} className="tb-detail-row">
                   <span className="tb-detail-key">{label}</span>
-                  <span className="tb-detail-value" style={{wordBreak:"break-all"}}>{value}</span>
+                  <span className="tb-detail-value" className="break-all">{value}</span>
                 </div>
               ))}
             </div>
