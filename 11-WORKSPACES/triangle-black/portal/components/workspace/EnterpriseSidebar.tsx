@@ -48,33 +48,19 @@ const ICONS: Record<string, any> = {
   monitoring: MonitorCheck,
 };
 
-// Child item icon map — key matches nav.ts icon string
+// Child item icon map — keys match Lucide component names used in nav.ts
 const CHILD_ICONS: Record<string, any> = {
-  // Operations
-  "work-orders": ClipboardList,
-  "dispatch": Map,
-  "service-requests": MessageSquare,
-  "sla": Gauge,
-  "technicians": UserCheck,
-  "sites": Map,
-  "time-tracking": Clock,
-  "calendar": Calendar,
-  "bulk": Zap,
-  "contracts": FileText,
-  "workflows": Workflow,
-  // Engineering
-  "pm-plans": Calendar,
-  "maintenance-intelligence": Brain,
-  "engineering-ai": Bot,
-  "work-history": FileText,
-  // Assets
-  "asset-registry": Building2,
-  "asset-tree": GitBranch,
-  "qr-scanner": ScanLine,
-  "inspection": Search,
-  "downtime": AlertTriangle,
-  "costs": Coins,
-  // Intelligence
+  // All 55 Lucide icon names used in nav.ts
+  AlertTriangle, Award, BarChart2, BarChart3, Bell, Bot, Brain,
+  Briefcase, Building2, Calendar, CheckCircle2, CheckSquare,
+  ClipboardList, Clock, Coins, CreditCard, FileText, FolderKanban,
+  Gauge, GitBranch, HardDrive, Home, KeyRound, Layers, LayoutDashboard,
+  Leaf, Lock, Map, MessageSquare, Milestone, MonitorCheck, Network,
+  Package, PieChart, Play, Radio, Receipt, RefreshCw, ScanLine,
+  Search, Settings, Shield, ShoppingCart, Star, Target, TrendingDown,
+  TrendingUp, Truck, UserCheck, Users, Warehouse, Webhook, Workflow,
+  Wrench, Zap,
+  // Also keep hyphenated keys for backward compatibility
   "command-center": LayoutDashboard,
   "risk-intelligence": Shield,
   "energy-intelligence": Leaf,
@@ -83,38 +69,6 @@ const CHILD_ICONS: Record<string, any> = {
   "asset-lifecycle": HardDrive,
   "supplier-intelligence": Truck,
   "iot-telemetry": Radio,
-  "predictive": Brain,
-  "master-intelligence": Layers,
-  // Executive
-  "executive-dashboard": BarChart3,
-  "scorecard": Target,
-  "portfolio": Briefcase,
-  "predictive-analytics": TrendingUp,
-  "risk-dashboard": AlertTriangle,
-  "daily-review": Calendar,
-  "exceptions": Bell,
-  "intelligence": Brain,
-  // Supply chain
-  "procurement": ShoppingCart,
-  "rfq": FileText,
-  "bid-comparison": BarChart2,
-  "vendors": Truck,
-  "purchase-orders": Package,
-  "goods-receipts": CheckCircle2,
-  "invoice-matching": Receipt,
-  "inventory": Warehouse,
-  "warehouses": Warehouse,
-  "spend": Coins,
-  "approvals": CheckSquare,
-  // Administration
-  "admin-hub": Settings,
-  "hotels-sites": Building2,
-  "audit-log": FileText,
-  "platform-maturity": Gauge,
-  "data-exports": FileText,
-  "notification-rules": Bell,
-  "actions-center": Zap,
-  // New D-series
   "platform-monitoring": MonitorCheck,
   "pilot-control": Layers,
   "value-certification": Award,
@@ -122,7 +76,7 @@ const CHILD_ICONS: Record<string, any> = {
   "subscription": CreditCard,
   "webhooks": Webhook,
   "identity": KeyRound,
-  "feedback": MessageSquare,
+  "predictive": Brain,
 };
 
 function badgeClass(badge: string): string {

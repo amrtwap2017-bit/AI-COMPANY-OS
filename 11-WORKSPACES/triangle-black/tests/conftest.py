@@ -164,6 +164,29 @@ def wait_for_heavy_modules(request):
             "test_sprint246_hydration_fix",
             "test_sprint247_248_dashboard_stats",
             "test_sprint249_indexes_isolation",
+            # D-series intelligence platform sprints
+            "test_sprint_d001","test_sprint_d002","test_sprint_d003","test_sprint_d004",
+            "test_sprint_d005","test_sprint_d006","test_sprint_d007","test_sprint_d008",
+            "test_sprint_d009","test_sprint_d010","test_sprint_d011","test_sprint_d012",
+            "test_sprint_d013","test_sprint_d014","test_sprint_d015","test_sprint_d016",
+            "test_sprint_d017","test_sprint_d018","test_sprint_d019","test_sprint_d020",
+            "test_sprint_d021","test_sprint_d022","test_sprint_d023","test_sprint_d024",
+            "test_sprint_d025","test_sprint_d026","test_sprint_d027","test_sprint_d028",
+            # C-series commercial sprints
+            "test_sprint_c001","test_sprint_c002","test_sprint_c003","test_sprint_c004",
+            "test_sprint_c005","test_sprint_c006","test_sprint_c007","test_sprint_c008",
+            "test_sprint_c009",
+            # T-series tenant/platform sprints
+            "test_sprint_t001","test_sprint_t002","test_sprint_t004",
+            # U-series DDD expansion
+            "test_sprint_u001","test_sprint_u002",
+            # Security suite
+            "test_sprint_p004","test_sprint_p005","test_sprint_p009",
+            # Platform sprints 195+
+            "test_sprint195","test_sprint196","test_sprint197","test_sprint198",
+            "test_sprint199","test_sprint200",
+            # Sprint012 component tokens
+            "test_sprint012",
         ]
         for h in HEAVY:
             if h in fname and fname not in _waited_heavy:
