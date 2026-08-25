@@ -31,9 +31,10 @@ def test_tenant_cache_key_isolation():
     key_a = make_cache_key("work_orders", TENANT_A, "open", 50)
     key_b = make_cache_key("work_orders", TENANT_B, "open", 50)
 
-    assert key_a != key_b
-    assert key_a.startswith(f"tenant:{TENANT_A}:work_orders:")
-    assert key_b.startswith(f"tenant:{TENANT_B}:work_orders:")
+    assert key_a != key_b  # primary security guarantee — different hotels = different keys
+    # "tb:" is the canonical tenant-scoped cache key prefix (updated Sprint-197 → T002)
+    assert key_a.startswith(f"tb:{TENANT_A}:work_orders:")
+    assert key_b.startswith(f"tb:{TENANT_B}:work_orders:")
 
 def test_tenant_context_helper():
     from src.core.tenant import get_tenant_context
