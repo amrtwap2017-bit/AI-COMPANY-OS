@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/search", tags=["global-search"])
 
@@ -16,6 +17,7 @@ def row_to_dict(row):
 def global_search(
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(default=5, le=20),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -180,6 +182,7 @@ def global_search(
 @router.get("/quick", summary="Quick search — top 3 per entity type")
 def quick_search(
     q: str = Query(..., min_length=2),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
     """Faster search — 3 results per entity, for command palette."""

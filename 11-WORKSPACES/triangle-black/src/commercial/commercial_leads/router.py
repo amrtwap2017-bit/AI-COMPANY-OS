@@ -6,12 +6,14 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/commercial", tags=["Commercial Inquiries"])
 
 @router.post("/assessment-request")
 def submit_assessment_request(
     payload: dict = Body(...),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Public intake endpoint for hospitality operational assessments."""

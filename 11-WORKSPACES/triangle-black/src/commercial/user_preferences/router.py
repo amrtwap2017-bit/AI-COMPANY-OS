@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/user-preferences", tags=["user-preferences"])
 
@@ -26,7 +27,8 @@ def _ensure_prefs_table(db):
     db.commit()
 
 @router.get("/{user_id}", summary="Get all preferences for user")
-def get_preferences(user_id: str, db: Session = Depends(get_db)):
+def get_preferences(user_id: str, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Returns all saved preferences for a user as a flat key-value map."""
     _ensure_prefs_table(db)
     try:
@@ -42,7 +44,8 @@ def get_preferences(user_id: str, db: Session = Depends(get_db)):
         return {"user_id": user_id, "preferences": {}, "error": str(e)}
 
 @router.put("/{user_id}/{key}", summary="Set a user preference")
-def set_preference(user_id: str, key: str, data: dict, db: Session = Depends(get_db)):
+def set_preference(user_id: str, key: str, data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Set or update a single preference key."""
     _ensure_prefs_table(db)
     import json as _json
@@ -70,7 +73,8 @@ def set_preference(user_id: str, key: str, data: dict, db: Session = Depends(get
     }
 
 @router.post("/{user_id}/bulk", summary="Set multiple preferences at once")
-def set_preferences_bulk(user_id: str, data: dict, db: Session = Depends(get_db)):
+def set_preferences_bulk(user_id: str, data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Save multiple preference key-value pairs in one call."""
     _ensure_prefs_table(db)
     import json as _json
@@ -102,7 +106,8 @@ def set_preferences_bulk(user_id: str, data: dict, db: Session = Depends(get_db)
     }
 
 @router.delete("/{user_id}/{key}", summary="Delete a user preference")
-def delete_preference(user_id: str, key: str, db: Session = Depends(get_db)):
+def delete_preference(user_id: str, key: str, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Remove a single preference key."""
     _ensure_prefs_table(db)
     db.execute(text(

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/procurement/intake", tags=["procurement-intake"])
 
@@ -83,7 +84,8 @@ def _ensure_intake_table(db):
     db.commit()
 
 @router.post("/parse", summary="Parse procurement request from any channel")
-def parse_request(data: dict, db: Session = Depends(get_db)):
+def parse_request(data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Accept raw request from any channel (WhatsApp, email, form, scan).
     Parse natural language items, check inventory, recommend vendors.
@@ -236,7 +238,8 @@ def parse_request(data: dict, db: Session = Depends(get_db)):
     }
 
 @router.post("/create-pr", summary="Auto-create PR from intake result")
-def create_pr_from_intake(data: dict, db: Session = Depends(get_db)):
+def create_pr_from_intake(data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Create Purchase Request from parsed intake.
     Pre-fills all fields including vendor recommendations.
@@ -319,7 +322,8 @@ def create_pr_from_intake(data: dict, db: Session = Depends(get_db)):
     }
 
 @router.get("/status/{intake_id}", summary="Full intake journey status")
-def get_intake_status(intake_id: str, db: Session = Depends(get_db)):
+def get_intake_status(intake_id: str, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Track the full journey of a procurement request."""
     _ensure_intake_table(db)
     try:

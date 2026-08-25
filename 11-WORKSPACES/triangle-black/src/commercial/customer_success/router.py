@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/customer-success", tags=["customer-success"])
 
@@ -27,7 +28,8 @@ def _ensure_nps_table(db):
     db.commit()
 
 @router.get("/overview", summary="Customer success overview")
-def customer_success_overview(db: Session = Depends(get_db)):
+def customer_success_overview(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         contracts = db.execute(text("""
             SELECT
@@ -76,7 +78,8 @@ def customer_success_overview(db: Session = Depends(get_db)):
     }
 
 @router.get("/renewals", summary="Contracts expiring in 90 days")
-def get_renewals(db: Session = Depends(get_db)):
+def get_renewals(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         rows = db.execute(text("""
             SELECT c.id, c.title, c.end_date, c.total_value, c.status,
@@ -104,7 +107,8 @@ def get_renewals(db: Session = Depends(get_db)):
     return {"renewals": renewals, "total": len(renewals)}
 
 @router.post("/nps", summary="Submit NPS survey response")
-def submit_nps(data: dict, db: Session = Depends(get_db)):
+def submit_nps(data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     hotel_id    = data.get("hotel_id")
     score       = data.get("score")
     comment     = data.get("comment", "")
@@ -139,7 +143,8 @@ def submit_nps(data: dict, db: Session = Depends(get_db)):
     }
 
 @router.get("/nps/summary", summary="NPS score summary")
-def nps_summary(db: Session = Depends(get_db)):
+def nps_summary(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         _ensure_nps_table(db)
         row = db.execute(text("""
@@ -171,7 +176,8 @@ def nps_summary(db: Session = Depends(get_db)):
     }
 
 @router.get("/at-risk", summary="At-risk clients by critical WO count")
-def get_at_risk_clients(db: Session = Depends(get_db)):
+def get_at_risk_clients(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         rows = db.execute(text("""
             SELECT wo.hotel_id,

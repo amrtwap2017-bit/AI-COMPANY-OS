@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/sla", tags=["sla-dashboard"])
 
@@ -21,7 +22,8 @@ def _safe_float(v):
     except: return 0.0
 
 @router.get("/overview", summary="SLA compliance overview")
-def sla_overview(db: Session = Depends(get_db)):
+def sla_overview(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Program B — SLA Dashboard.
     Calculates SLA compliance from work_orders data.
@@ -77,7 +79,8 @@ def sla_overview(db: Session = Depends(get_db)):
     }
 
 @router.get("/by-hotel", summary="SLA compliance per hotel")
-def sla_by_hotel(db: Session = Depends(get_db)):
+def sla_by_hotel(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """SLA breakdown by hotel — shows which clients have highest breach rates."""
     try:
         rows = db.execute(text("""
@@ -116,7 +119,8 @@ def sla_by_hotel(db: Session = Depends(get_db)):
             "generated_at": datetime.datetime.utcnow().isoformat()}
 
 @router.get("/by-priority", summary="SLA compliance by priority")
-def sla_by_priority(db: Session = Depends(get_db)):
+def sla_by_priority(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Resolution time and compliance by work order priority."""
     try:
         rows = db.execute(text("""
@@ -152,7 +156,8 @@ def sla_by_priority(db: Session = Depends(get_db)):
     return {"by_priority": result, "generated_at": datetime.datetime.utcnow().isoformat()}
 
 @router.get("/trends", summary="SLA trend last 6 months")
-def sla_trends(db: Session = Depends(get_db)):
+def sla_trends(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Monthly SLA compliance trend for charts."""
     try:
         rows = db.execute(text("""

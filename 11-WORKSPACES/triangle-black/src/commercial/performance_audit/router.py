@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/performance", tags=["performance-audit"])
 
@@ -25,7 +26,8 @@ def _timed_query(db, sql, params=None, label=""):
                 "status": "error", "error": str(e)[:100]}
 
 @router.get("/query-audit", summary="Audit critical query performance")
-def query_audit(db: Session = Depends(get_db)):
+def query_audit(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Times critical queries across all modules.
     Returns duration in ms — flags queries > 500ms as slow.
@@ -65,7 +67,8 @@ def query_audit(db: Session = Depends(get_db)):
     }
 
 @router.get("/table-sizes", summary="Database table sizes and row counts")
-def table_sizes(db: Session = Depends(get_db)):
+def table_sizes(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Returns row counts and estimated sizes for all tables."""
     try:
         rows = db.execute(text("""
@@ -102,7 +105,8 @@ def table_sizes(db: Session = Depends(get_db)):
     }
 
 @router.get("/index-check", summary="Check for missing indexes on key columns")
-def index_check(db: Session = Depends(get_db)):
+def index_check(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Identifies tables that likely need indexes based on query patterns.
     Checks for indexes on: hotel_id, status, priority, asset_id, technician_id.

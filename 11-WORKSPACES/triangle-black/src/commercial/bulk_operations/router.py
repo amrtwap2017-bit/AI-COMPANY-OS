@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from typing import List
 
 router = APIRouter(prefix="/bulk", tags=["bulk-operations"])
@@ -14,7 +15,8 @@ def row_to_dict(row):
     return {}
 
 @router.post("/work-orders/assign", summary="Bulk assign work orders to technician")
-def bulk_assign_work_orders(data: dict, db: Session = Depends(get_db)):
+def bulk_assign_work_orders(data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Bulk assign multiple work orders to one technician.
     Body: { wo_ids: ["id1","id2",...], technician_id: "tech_id" }
@@ -85,7 +87,8 @@ def bulk_assign_work_orders(data: dict, db: Session = Depends(get_db)):
     }
 
 @router.post("/work-orders/update-status", summary="Bulk update work order status")
-def bulk_update_status(data: dict, db: Session = Depends(get_db)):
+def bulk_update_status(data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Bulk update status for multiple work orders.
     Body: { wo_ids: [...], status: "completed" }
@@ -144,7 +147,8 @@ def bulk_update_status(data: dict, db: Session = Depends(get_db)):
     }
 
 @router.post("/purchase-requests/approve", summary="Bulk approve purchase requests")
-def bulk_approve_prs(data: dict, db: Session = Depends(get_db)):
+def bulk_approve_prs(data: dict, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Bulk approve multiple purchase requests.
     Body: { pr_ids: [...], approved_by: "user_id", comment: "..." }
@@ -193,7 +197,8 @@ def bulk_approve_prs(data: dict, db: Session = Depends(get_db)):
     }
 
 @router.get("/summary", summary="Bulk operations summary")
-def bulk_summary(db: Session = Depends(get_db)):
+def bulk_summary(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Returns counts of items available for bulk operations."""
     results = {}
     queries = {

@@ -75,7 +75,7 @@ def create_supplier(data: dict, db: Session = Depends(get_db),
 # ── Sprint-058: Suppliers GET endpoints (fixes 500 on GET /api/v1/suppliers/) ─
 @router.get("/", summary="List suppliers")
 def list_suppliers(
-    hotel_id: str = "tb-default-hotel-000000000001",
+    hotel_id: str = Depends(get_hotel_id),
     status: str = None,
     limit: int = 100,
     offset: int = 0,
@@ -116,7 +116,7 @@ def list_suppliers(
 @router.get("/{supplier_id}", summary="Get supplier detail")
 def get_supplier(
     supplier_id: str,
-    hotel_id: str = "tb-default-hotel-000000000001",
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Get a single supplier by ID."""

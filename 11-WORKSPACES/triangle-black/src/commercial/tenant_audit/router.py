@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/tenant-audit", tags=["tenant-audit"])
 
@@ -19,7 +20,8 @@ HOTEL_SCOPED_TABLES = [
 ]
 
 @router.get("/isolation-check", summary="Multi-hotel data isolation audit")
-def isolation_check(db: Session = Depends(get_db)):
+def isolation_check(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Audits which tables have hotel_id scoping.
     Identifies any records without hotel_id (isolation risk).
@@ -88,7 +90,8 @@ def isolation_check(db: Session = Depends(get_db)):
     }
 
 @router.get("/hotel-breakdown", summary="Data volume per hotel")
-def hotel_breakdown(db: Session = Depends(get_db)):
+def hotel_breakdown(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Shows data distribution across hotels."""
     breakdown = {}
     for table in ["work_orders", "assets", "technicians", "invoices", "projects"]:

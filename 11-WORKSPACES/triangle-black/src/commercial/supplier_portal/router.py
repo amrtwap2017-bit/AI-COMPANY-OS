@@ -5,12 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from src.models import inventory_vendors, rfqs, rfq_vendor_quotes, purchase_orders
 
 router = APIRouter(prefix="/supplier-portal")
 
 @router.get("/vendors/{vendor_id}/dashboard")
-def get_supplier_dashboard(vendor_id: int, db: Session = Depends(get_db)):
+def get_supplier_dashboard(vendor_id: int, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         vendor_query = text("""
             SELECT 
@@ -50,7 +52,8 @@ def get_supplier_dashboard(vendor_id: int, db: Session = Depends(get_db)):
         return {"error": str(e)}
 
 @router.get("/vendors/{vendor_id}/rfqs")
-def get_supplier_rfqs(vendor_id: int, db: Session = Depends(get_db)):
+def get_supplier_rfqs(vendor_id: int, hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         rfq_query = text("""
             SELECT 
@@ -71,7 +74,8 @@ def get_supplier_rfqs(vendor_id: int, db: Session = Depends(get_db)):
         return {"error": str(e)}
 
 @router.post("/vendors/{vendor_id}/quote")
-def post_supplier_quote(vendor_id: int, data: Dict[str, Any], db: Session = Depends(get_db)):
+def post_supplier_quote(vendor_id: int, data: Dict[str, Any], hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     try:
         quote_query = text("""
             INSERT INTO rfq_vendor_quotes (id, rfq_id, vendor_id, unit_price, total_price, lead_time_days, notes, status)

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/knowledge-graph", tags=["knowledge-graph"])
 
@@ -23,7 +24,8 @@ def _qdrant_collections():
         return []
 
 @router.get("/overview", summary="Knowledge graph overview")
-def knowledge_graph_overview(db: Session = Depends(get_db)):
+def knowledge_graph_overview(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """
     Program N — Knowledge Graph.
     Returns entity counts and Qdrant vector collections.
@@ -60,6 +62,7 @@ def knowledge_graph_overview(db: Session = Depends(get_db)):
 def get_entity_relationships(
     entity_type: str,
     entity_id: str,
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -181,6 +184,7 @@ def graph_path(
     from_type: str,
     from_id: str,
     to_type: str,
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -210,7 +214,8 @@ def graph_path(
     }
 
 @router.get("/stats", summary="Graph statistics")
-def graph_stats(db: Session = Depends(get_db)):
+def graph_stats(hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db)):
     """Total entity count + relationship density across all tables."""
     stats = {}
     tables = [
