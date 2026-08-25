@@ -5,7 +5,8 @@ Since WOs do not have contract_id, costs are distributed proportionally
 by contract value share within the same hotel.
 """
 from __future__ import annotations
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+from src.core.database import SessionLocal
 from datetime import datetime
 
 # ── Cost Configuration (EGP) ──────────────────────────────────
@@ -67,7 +68,7 @@ def compute_wo_cost(wo: dict) -> dict:
 
 def generate_cost_report(db_url: str) -> dict:
     """Full cost and profitability report from live DB."""
-    engine = create_engine(db_url)
+    db = SessionLocal()
     report = {
         "generated_at": datetime.utcnow().isoformat(),
         "work_orders":  [],

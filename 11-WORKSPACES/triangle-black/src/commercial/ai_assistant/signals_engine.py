@@ -1,9 +1,10 @@
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+from src.core.database import SessionLocal
 from datetime import datetime
 
 
 def generate_signals(db_url: str) -> list:
-    engine = create_engine(db_url)
+    db = SessionLocal()
     signals = []
 
     with engine.connect() as conn:

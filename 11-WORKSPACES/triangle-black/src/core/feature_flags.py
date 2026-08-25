@@ -38,12 +38,8 @@ _DEFAULT_FLAGS: Dict[str, bool] = {
 def _load_flags_from_db(hotel_id: str) -> Dict[str, bool]:
     """Load feature flags from DB for a hotel. Returns defaults on error."""
     try:
-        import os
-        from sqlalchemy import text, create_engine
-        from sqlalchemy.orm import Session
-        db_url = os.environ.get("DATABASE_URL", "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black")
-        eng = create_engine(db_url, pool_pre_ping=True)
-        with Session(eng) as db:
+        from src.core.database import SessionLocal
+        with SessionLocal() as db:
             rows = db.execute(text("""
                 SELECT ff.feature, ff.is_enabled
                 FROM tenant_feature_flags ff
