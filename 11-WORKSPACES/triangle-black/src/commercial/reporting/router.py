@@ -8,6 +8,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 from src.core.auth import require_manager
 from .schemas import ReportCreate, ReportUpdate, ReportResponse
 from .repository import ReportRepository

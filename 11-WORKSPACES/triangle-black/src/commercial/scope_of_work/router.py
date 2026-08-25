@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 import uuid, math
 
 router = APIRouter(prefix="/scope-of-work", tags=["scope-of-work"])

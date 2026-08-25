@@ -1,17 +1,21 @@
 
 
 from src.core.audit import audit_create, audit_update
+from src.core.tenant import get_hotel_id
+from src.core.database import get_db as _get_db
+from sqlalchemy.orm import Session
 
 # ── Sprint-041: Supplier Create ───────────────────────────────────────────────
 @router.post("/", status_code=201, summary="Create supplier")
-def create_supplier(data: dict, db: Session = Depends(get_db)):
+def create_supplier(data: dict, db: Session = Depends(get_db),
+                    hotel_id: str = Depends(get_hotel_id)):
     """Create a new supplier."""
     from sqlalchemy import text as _t
     import uuid as _u, datetime as _d
     try:
         sid = str(_u.uuid4())
         now = _d.datetime.utcnow()
-        hotel_id = data.get("hotel_id", "tb-default-hotel-000000000001")
+        # hotel_id comes from JWT, not request body — security fix A-003
         
         db.execute(_t("""
             INSERT INTO suppliers (
