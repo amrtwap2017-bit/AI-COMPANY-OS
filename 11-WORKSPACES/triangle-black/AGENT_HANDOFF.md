@@ -1764,3 +1764,37 @@ D-044: Full backend suite baseline (fresh server, 2293+ passing target)
 D-045: Customer feedback admin portal page
 D-046: Predictive intelligence 2.0 (real ML foundation)
 D-047: CI/CD GitHub Actions pipeline
+
+## A-000 TRUTH AUDIT — August 2026 (VERIFIED FROM GIT HEAD)
+
+### Real Numbers (Not Estimated)
+| Metric | Value | Status |
+|--------|-------|--------|
+| src/main.py lines | 8,454 | ⚠️ Large — freeze new logic |
+| Route decorators in main.py | 211 | ⚠️ Extract progressively |
+| Raw SQL in main.py | 309 | ⚠️ Migrate progressively |
+| Engine creations | 152 | 🔴 Fix — single engine |
+| Broad except blocks | 86 | ⚠️ Fix critical ones |
+| Tenant coverage | 67/107 = 62% | 🔴 38% gap = security risk |
+| Modules without tenant | 40 | 🔴 Fix before first customer |
+| Router files with raw SQL | 51 | ⚠️ Fix progressively |
+| @ts-nocheck | 2 | ✅ |
+| Inline styles | 1,022 | ✅ All irreducible |
+| E2E full suite | 126/126 | ✅ VERIFIED |
+| Intelligence modules | 10/10 | ✅ VERIFIED |
+
+### Top 3 Actual Risks
+1. GAP-001: 40 modules no tenant dependency → cross-tenant data leak possible
+2. GAP-002/003: Raw SQL in routers + main.py → unmaintainable, unauditable
+3. GAP-006/007: No CI/CD, no staging → no production safety net
+
+### Priority Fix Order
+A-001: Fix critical 31 backend failures + marketing route auth
+A-002: Fix 152 engine creations → single DB engine
+A-003: Add tenant to 40 missing modules (business data only)
+A-004: CI/CD GitHub Actions minimum pipeline
+A-005: Staging environment
+A-006: Observability (correlation IDs exist, SLOs missing)
+A-007: Raw SQL migration (progressive, by business value)
+A-008: Customer onboarding E2E
+A-009: Data import 2.0 (assets.score domain rule)
