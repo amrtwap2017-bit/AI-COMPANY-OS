@@ -8523,6 +8523,21 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: asset_api: {_e}")
 
+
+try:
+    from src.commercial.analytics_api.router import router as _analytics_api_r
+    app.include_router(_analytics_api_r, prefix="/api/v1")
+    logger.info("  OK: analytics_api (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: analytics_api: {_e}")
+
+try:
+    from src.commercial.reporting_api.router import router as _reporting_api_r
+    app.include_router(_reporting_api_r, prefix="/api/v1")
+    logger.info("  OK: reporting_api (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: reporting_api: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
