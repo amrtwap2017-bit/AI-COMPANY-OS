@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { ADMIN_EMAIL, ADMIN_PASSWORD, BASE_URL, API_URL, injectAuth } from "./helpers/auth";
+import { ADMIN_EMAIL, ADMIN_PASSWORD, BASE_URL, API_URL, BACKEND_URL, injectAuth } from "./helpers/auth";
 
 test.describe("Authentication", () => {
 
