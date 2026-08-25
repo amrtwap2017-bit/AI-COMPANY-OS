@@ -8555,6 +8555,38 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: baseline_report: {_e}")
 
+
+try:
+    from src.commercial.pm_plan_api.router import router as _pm_alias_r
+    from fastapi import APIRouter as _AR
+    _pm_alias = _AR()
+
+    @_pm_alias.get("/pm-plans/", tags=["maintenance"])
+    @_pm_alias.get("/pm-plans", tags=["maintenance"])
+    def _pm_plans_alias(
+        hotel_id: str = _Depends(_get_hotel_id),
+        db=_Depends(_get_db),
+        status: str = None,
+        limit: int = 50,
+    ):
+        """Alias for /maintenance/pm-plans — canonical route."""
+        from sqlalchemy import text as _t
+        try:
+            rows = db.execute(_t(
+                "SELECT * FROM maintenance_plans WHERE hotel_id = :hid "
+                + ("AND status = :s " if status else "")
+                + "ORDER BY next_due_date LIMIT :lim"
+            ), {"hid": hotel_id, "s": status, "lim": limit} if status
+               else {"hid": hotel_id, "lim": limit}).fetchall()
+            return [dict(r._mapping) for r in rows]
+        except Exception:
+            return []
+
+    app.include_router(_pm_alias, prefix="/api/v1")
+    logger.info("  OK: pm-plans alias route (A-001 fix)")
+except Exception as _e:
+    logger.warning(f"WARN: pm-plans alias: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}

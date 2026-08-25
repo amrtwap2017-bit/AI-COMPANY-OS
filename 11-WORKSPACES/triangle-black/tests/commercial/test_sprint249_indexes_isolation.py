@@ -35,11 +35,46 @@ def test_composite_index_migration_idempotent():
     assert "IF NOT EXISTS" in text or "_idx_exists" in text
 
 def test_alembic_head_is_e2f3a4b5c6d7():
-    """Verify alembic migrations are stamped and valid."""
+    """Verify alembic migration chain is healthy and composite index migration was applied.
+
+    Originally checked for e2f3a4b5c6d7 as head. That migration has since been
+    superseded by later migrations (current head: g2h3i4j5k6l7). This test now
+    verifies migration chain health rather than a pinned revision string.
+    """
     import subprocess
-    res = subprocess.run([".venv/bin/alembic", "heads"], capture_output=True, text=True)
-    assert res.returncode == 0, f"Alembic heads error: {res.stderr}"
-    assert "e1f2a3b4c5d6" in res.stdout or "e2f3a4b5c6d7" in res.stdout
+
+    # 1. Chain must be valid — exit 0
+    heads = subprocess.run(
+        [".venv/bin/alembic", "heads"],
+        capture_output=True, text=True
+    )
+    assert heads.returncode == 0, f"Alembic heads error: {heads.stderr}"
+
+    # 2. Exactly one head — no divergent branches
+    head_lines = [l.strip() for l in heads.stdout.strip().splitlines() if l.strip()]
+    assert len(head_lines) == 1, (
+        f"Expected 1 alembic head, found {len(head_lines)}: {head_lines}"
+    )
+
+    # 3. DB must be stamped at current head
+    current = subprocess.run(
+        [".venv/bin/alembic", "current"],
+        capture_output=True, text=True
+    )
+    assert current.returncode == 0, f"Alembic current error: {current.stderr}"
+    head_rev = head_lines[0].split()[0]
+    assert head_rev in current.stdout, (
+        f"DB not at head. Head={head_rev}, current={current.stdout.strip()}"
+    )
+
+    # 4. Composite index migration must appear in history (was applied)
+    history = subprocess.run(
+        [".venv/bin/alembic", "history", "--verbose"],
+        capture_output=True, text=True
+    )
+    assert "e2f3a4b5c6d7" in history.stdout, (
+        "Composite index migration e2f3a4b5c6d7 not found in alembic history"
+    )
 
 def test_hotel_status_composite_index_exists():
     from src.core.database import engine
