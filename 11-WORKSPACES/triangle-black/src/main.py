@@ -8547,6 +8547,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: executive_api: {_e}")
 
+
+try:
+    from src.commercial.baseline_report.router import router as _baseline_r
+    app.include_router(_baseline_r, prefix="/api/v1")
+    logger.info("  OK: baseline_report (A-010-B)")
+except Exception as _e:
+    logger.warning(f"WARN: baseline_report: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}

@@ -7,7 +7,7 @@ Classifies documents by type, domain, and importance.
 import json
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.parent
@@ -40,6 +40,7 @@ RULES = [
 ]
 
 EXCLUDE_PATHS = [
+    "10-ENGINEERING-HUB",
     ".venv", "node_modules", "90-ARCHIVE", "00-MIGRATION",
     ".git", "dist", ".next", "build", "backups", "playwright",
     "__pycache__"
@@ -83,10 +84,18 @@ def main():
     docs = []
     active_docs_file = AI_DIR / "intelligence" / "active-docs.txt"
 
+    # Include brain files explicitly
+    brain_dir = ROOT / "brains"
+    brain_paths = list(brain_dir.rglob("*.md")) if brain_dir.exists() else []
+
     if active_docs_file.exists():
         paths = [Path(p.strip()) for p in active_docs_file.read_text().splitlines() if p.strip()]
+        # Add brain files not already in active-docs.txt
+        for bp in brain_paths:
+            if bp not in paths:
+                paths.append(bp)
     else:
-        paths = list(ROOT.rglob("*.md"))
+        paths = list(ROOT.rglob("*.md")) + brain_paths
 
     for path in paths:
         path_str = str(path)
@@ -115,7 +124,7 @@ def main():
     docs.sort(key=lambda d: (order.get(d["importance"], 9), d["path"]))
 
     index = {
-        "generated": datetime.utcnow().isoformat() + "Z",
+        "generated": datetime.now(timezone.utc).isoformat() + "Z",
         "total_documents": len(docs),
         "by_type": {},
         "by_domain": {},

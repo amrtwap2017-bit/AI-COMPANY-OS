@@ -1,48 +1,56 @@
 {
-  "project": "AI-COMPANY-OS / Triangle Black",
-  "description": "Enterprise AI Company OS with Triangle Black as primary workspace. FastAPI backend + Next.js frontend + PostgreSQL. Local AI engineering via Ollama/OpenCode/Qwen.",
-  "phase": "ENGINEERING_OS_BUILD",
+  "project": "Triangle Black Enterprise Operations OS",
+  "description": "Multi-tenant Enterprise SaaS for hospitality engineering. FastAPI + Next.js + PostgreSQL. Primary market: Egypt / Sharm El-Sheikh.",
+  "phase": "COMMERCIAL_VALIDATION",
   "active_sprint": null,
   "active_task": null,
   "status": "ACTIVE",
   "last_checkpoint": null,
-  "last_commit": "fc06bdd7",
-  "last_updated": "2026-08-25T16:45:06.475943Z",
+  "last_commit": "4fb04a1a",
+  "last_updated": "2026-08-25T20:04:54.500431+00:00",
   "tests": {
-    "status": "REQUIRES_VALIDATION",
-    "runner": "pytest (workspace venv)",
+    "status": "PASSING",
+    "runner": ".venv/bin/python -m pytest tests/ -q --tb=no (from workspace)",
     "test_files": 356,
-    "passed": 0,
+    "passed": 158,
     "failed": 0,
     "skipped": 0,
-    "note": "Run from 11-WORKSPACES/triangle-black with .venv activated"
+    "note": "158+ passing. Run from 11-WORKSPACES/triangle-black/. Use absolute venv path."
   },
-  "architecture_status": "REQUIRES_VALIDATION",
-  "security_status": "REQUIRES_VALIDATION",
+  "architecture_status": "CERTIFIED",
+  "security_status": "CERTIFIED",
   "documentation_status": "INDEXED",
   "known_blockers": [
-    "Root-level pytest runs without workspace venv \u2014 use ai-verify which is now workspace-aware",
-    "529 commits unpushed to origin \u2014 do not assume remote is current"
+    "portal/components/ui/GlobalSearch.tsx \u2014 pre-existing TS syntax errors",
+    "portal/components/ui/icons.tsx \u2014 pre-existing TS syntax errors",
+    "Alembic migrations for employees/gl/eta created via direct SQL (needs migration repair)",
+    "hub/mcp/server.mjs referenced in OpenCode config but does not exist",
+    "530+ commits unpushed to origin/main"
   ],
   "next_actions": [
-    "Run: bash scripts/ai/ai-scan",
-    "Run: python3 scripts/ai/ai-index-docs",
-    "Read: 11-WORKSPACES/triangle-black/CLAUDE.md",
-    "Fill: .ai/context/project.md with verified project data",
-    "Define: SPRINT-AI-OS-001 for validation task"
+    "N-FIX: Fix onboarding, data import, executive API consistency",
+    "N-014: Commercial Pilot deployment",
+    "Fix portal TypeScript bugs (GlobalSearch.tsx, icons.tsx)",
+    "Repair Alembic migrations for employees/gl/eta tables",
+    "Complete employee timesheet module",
+    "Increase test coverage: 158 \u2192 200+"
   ],
   "forbidden_areas": [
     "11-WORKSPACES/triangle-black/.venv/",
     "90-ARCHIVE/",
     ".git/",
-    "backups/"
+    "backups/",
+    "11-WORKSPACES/triangle-black/agent/.chromadb/"
   ],
   "critical_files": [
     "AGENTS.md",
     ".ai/constitution/engineering-rules.md",
     ".ai/state/project-state.json",
     ".ai/reports/checkpoints/LATEST.md",
-    "11-WORKSPACES/triangle-black/CLAUDE.md"
+    "11-WORKSPACES/triangle-black/CLAUDE.md",
+    "11-WORKSPACES/triangle-black/AGENT_HANDOFF.md",
+    "brains/triangle-black/AGENT-BOOTSTRAP.md",
+    "brains/triangle-black/01-PROJECT-IDENTITY.md"
   ],
   "stack": {
     "backend": "FastAPI 0.139+ / SQLAlchemy 2.0+ / Alembic 1.18+",
@@ -62,5 +70,22 @@
     "commits_ahead_origin": 530,
     "working_tree": "clean",
     "pre_commit_hook": "Build Guard v1.0 (7 Next.js checks)"
+  },
+  "known_issues": {
+    "portal_ts_bugs": [
+      "components/ui/GlobalSearch.tsx:91 \u2014 TS1109 Expression expected",
+      "components/ui/icons.tsx:236 \u2014 TS1128 Declaration expected"
+    ]
+  },
+  "workspace_state": {
+    "backend_port": 8030,
+    "portal_port": 3000,
+    "client_portal_port": 3201,
+    "admin_portal_port": 3202,
+    "db_name": "triangle_black",
+    "tenancy_field": "hotel_id",
+    "test_user": "amr@triangleblack.com",
+    "vector_db": "ChromaDB (live at agent/.chromadb/)",
+    "start_command": "bash 11-WORKSPACES/triangle-black/START.sh"
   }
 }

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-AI-COMPANY-OS — Sprint Planner
-Reads current state and generates a structured sprint plan.
+AI-COMPANY-OS — Sprint Planner v2
+Creates sprint file AND updates sprint-state.json + project-state.json.
 Usage: python3 scripts/ai/ai-plan-sprint SPRINT-ID "Sprint Title"
 """
 import json
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).parent.parent.parent
 AI_DIR = ROOT / ".ai"
@@ -18,6 +18,15 @@ def load_json(path):
     except Exception:
         return {}
 
+def save_json(path, data):
+    path.write_text(json.dumps(data, indent=2))
+
+def now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+def nowiso():
+    return datetime.now(timezone.utc).isoformat()
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: ai-plan-sprint SPRINT-ID 'Sprint Title'")
@@ -26,7 +35,7 @@ def main():
     sprint_id = sys.argv[1]
     sprint_title = sys.argv[2]
     state = load_json(AI_DIR / "state" / "project-state.json")
-    today = datetime.utcnow().strftime("%Y-%m-%d")
+    today = now()
 
     sprint_dir = AI_DIR / "sprints" / "active"
     sprint_dir.mkdir(parents=True, exist_ok=True)
@@ -61,6 +70,7 @@ def main():
 - [ ] Working tree clean
 - [ ] Tests passing at sprint start
 - [ ] Security check passed at sprint start
+- [ ] `bash scripts/ai/ai-security-check` passes
 
 ## Scope
 [List what IS included]
@@ -71,8 +81,8 @@ def main():
 ## Tasks
 | ID | Title | Status | Risk | Files |
 |----|-------|--------|------|-------|
-| TASK-001 | | READY | LOW | |
-| TASK-002 | | READY | MEDIUM | |
+| {sprint_id}-T001 | | READY | LOW | |
+| {sprint_id}-T002 | | READY | MEDIUM | |
 
 ## Acceptance Criteria
 - [ ] AC-001
@@ -80,55 +90,87 @@ def main():
 - [ ] AC-003
 
 ## Test Plan
-Which tests must pass at sprint close?
-- [ ] Unit tests: all passing
+- [ ] Unit tests: all passing (158+ baseline maintained)
 - [ ] Integration tests: all passing
 - [ ] E2E: affected flows passing
-- [ ] Regression: no regressions
+- [ ] Regression: no regressions from baseline
 
 ## Security Checks
-- [ ] Security preflight: `bash scripts/ai/ai-security-check`
+- [ ] `bash scripts/ai/ai-security-check` PASSES
+- [ ] hotel_id tenant isolation preserved on all new queries
 - [ ] No new secrets committed
 - [ ] Authorization unchanged or reviewed
 
 ## Architecture Checks
 - [ ] No domain leakage
-- [ ] No bypassed repository pattern
+- [ ] No raw SQL bypassing repository layer
 - [ ] ADR created if architectural decision made
+- [ ] No uv→pip regression
 
 ## Documentation Requirements
 - [ ] .ai/context/project.md updated if needed
-- [ ] Relevant AGENTS.md updated if needed
+- [ ] brains/triangle-black/ updated if needed
 - [ ] ADR created if needed
 
 ## Risk Register
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| venv mismatch | LOW | HIGH | Always use TB venv for tests |
-| Context overflow | MEDIUM | MEDIUM | Use ai-context script |
+| venv context error | LOW | HIGH | Always use absolute venv path |
+| hotel_id missing from new query | MEDIUM | CRITICAL | Run tenant isolation check |
+| Context overflow (32K) | MEDIUM | MEDIUM | Use ai-context script per task |
 
 ## Rollback Strategy
-`git revert` individual task commits if needed.
-Sprint branch can be abandoned and recreated.
+`git revert` individual task commits.
 
 ## Definition of Done
 - [ ] All P0 tasks DONE
 - [ ] All acceptance criteria satisfied
-- [ ] All tests passing
+- [ ] 158+ tests still passing (no regression)
 - [ ] `bash scripts/ai/ai-security-check` PASSES
+- [ ] `bash scripts/ai/ai-verify` PASSES
 - [ ] Architecture review done
 - [ ] Documentation updated
 - [ ] `bash scripts/ai/ai-checkpoint {sprint_id}-CLOSE COMPLETE` run
 - [ ] Git state clean
 - [ ] Sprint report generated
 """
-
     sprint_file.write_text(template)
+
+    # Update sprint-state.json
+    sprint_state = load_json(AI_DIR / "state" / "sprint-state.json")
+    sprint_state.update({
+        "current_sprint": sprint_id,
+        "sprint_status": "PLANNED",
+        "sprint_started": None,
+        "sprint_target_end": None,
+        "tasks_total": 0,
+        "tasks_complete": 0,
+        "tasks_in_progress": 0,
+        "tasks_blocked": 0,
+        "tasks_remaining": 0,
+        "acceptance_criteria_met": False,
+        "tests_passing": False,
+        "security_check": "PENDING",
+        "architecture_check": "PENDING",
+        "documentation_updated": False,
+        "checkpoint_created": False,
+        "ready_to_close": False
+    })
+    save_json(AI_DIR / "state" / "sprint-state.json", sprint_state)
+
+    # Update project-state.json
+    project_state = load_json(AI_DIR / "state" / "project-state.json")
+    project_state["active_sprint"] = sprint_id
+    project_state["last_updated"] = nowiso()
+    save_json(AI_DIR / "state" / "project-state.json", project_state)
+
     print(f"Sprint plan created: {sprint_file}")
+    print(f"sprint-state.json updated: current_sprint = {sprint_id}")
+    print(f"project-state.json updated: active_sprint = {sprint_id}")
     print(f"\nNext steps:")
-    print(f"  1. Edit {sprint_file} to fill in objectives and tasks")
-    print(f"  2. Create task files in .ai/tasks/ready/")
-    print(f"  3. Run: bash scripts/ai/ai-sprint-status")
+    print(f"  1. Edit {sprint_file}")
+    print(f"  2. python3 scripts/ai/ai-task-create {sprint_id}-T001 {sprint_id} 'Title' LOW")
+    print(f"  3. bash scripts/ai/ai-sprint-status")
 
 if __name__ == "__main__":
     main()

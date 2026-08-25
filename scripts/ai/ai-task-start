@@ -3,10 +3,11 @@ set -euo pipefail
 
 TASK_ID="${1:?Usage: ai-task-start TASK-ID}"
 TASK_FILE=".ai/tasks/ready/${TASK_ID}.md"
+ROOT="$(pwd)"
 
 if [ ! -f "$TASK_FILE" ]; then
   echo "ERROR: Task file not found: $TASK_FILE"
-  echo "Available tasks:"
+  echo "Available tasks in ready/:"
   ls .ai/tasks/ready/ 2>/dev/null || echo "  (none)"
   exit 1
 fi
@@ -17,20 +18,63 @@ echo "Starting task: $TASK_ID"
 cp "$TASK_FILE" ".ai/tasks/active/${TASK_ID}.md"
 sed -i "s/Status | READY/Status | ACTIVE/" ".ai/tasks/active/${TASK_ID}.md"
 
-# Update agent state
-python3 -c "
-import json, datetime
-with open('.ai/state/agent-state.json') as f:
-    s = json.load(f)
-s['current_task'] = '$TASK_ID'
-s['current_mode'] = 'IMPLEMENT'
-s['current_step'] = 'DISCOVER'
-s['session_started'] = datetime.datetime.utcnow().isoformat()
-with open('.ai/state/agent-state.json', 'w') as f:
-    json.dump(s, f, indent=2)
-print('Agent state updated.')
-" 2>/dev/null || echo "agent-state.json not updated (python3 error)"
+# Update all state files
+python3 - << PYEOF
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+root = Path(".")
+ai = root / ".ai"
+
+# Update agent-state.json
+agent_state_file = ai / "state" / "agent-state.json"
+try:
+    s = json.loads(agent_state_file.read_text())
+    s["current_task"] = "$TASK_ID"
+    s["current_mode"] = "DISCOVER"
+    s["current_step"] = "READ"
+    s["session_started"] = now()
+    s["repair_attempts"] = 0
+    s["files_modified"] = []
+    s["verification_status"] = "NOT_RUN"
+    agent_state_file.write_text(json.dumps(s, indent=2))
+    print("  agent-state.json: updated")
+except Exception as e:
+    print(f"  agent-state.json: ERROR — {e}")
+
+# Update project-state.json
+proj_state_file = ai / "state" / "project-state.json"
+try:
+    s = json.loads(proj_state_file.read_text())
+    s["active_task"] = "$TASK_ID"
+    s["last_updated"] = now()
+    proj_state_file.write_text(json.dumps(s, indent=2))
+    print("  project-state.json: active_task = $TASK_ID")
+except Exception as e:
+    print(f"  project-state.json: ERROR — {e}")
+
+# Update sprint-state.json
+sprint_state_file = ai / "state" / "sprint-state.json"
+try:
+    s = json.loads(sprint_state_file.read_text())
+    s["tasks_in_progress"] = s.get("tasks_in_progress", 0) + 1
+    if s.get("sprint_status") == "PLANNED":
+        s["sprint_status"] = "ACTIVE"
+        s["sprint_started"] = now()
+    sprint_state_file.write_text(json.dumps(s, indent=2))
+    print(f"  sprint-state.json: status = {s['sprint_status']}")
+except Exception as e:
+    print(f"  sprint-state.json: ERROR — {e}")
+PYEOF
 
 echo ""
-echo "Task context:"
+echo "Task context loaded:"
+echo "────────────────────────────────────"
 cat ".ai/tasks/active/${TASK_ID}.md"
+echo ""
+echo "────────────────────────────────────"
+echo "Run context builder: python3 scripts/ai/ai-context ${TASK_ID} --save"

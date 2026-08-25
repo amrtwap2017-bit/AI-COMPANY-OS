@@ -34,3 +34,20 @@ LOW     — CSS, copy, UI-only, no logic
 MEDIUM  — Business logic, API changes
 HIGH    — Database, migrations, auth-adjacent
 CRITICAL — Authentication, authorization, tenant isolation, billing, data deletion
+
+## Triangle Black Specific Security Rules
+
+### Tenancy (CRITICAL)
+- hotel_id MUST come from JWT via get_hotel_id() in src/core/tenant.py
+- NEVER accept hotel_id from request body or URL parameters alone
+- Every SQLAlchemy query on operational data MUST include .filter_by(hotel_id=hotel_id)
+- IDOR prevention: verify ownership before returning any resource
+
+### Authentication
+- Token key: tb_access_token in localStorage (portal)
+- Use tbFetch from portal/lib/api/tb-client.ts for all portal API calls
+- Never create new login fixtures in tests — use auth_headers from conftest.py
+
+### Known Pre-existing Issues (do not regress)
+- portal/components/ui/GlobalSearch.tsx — TypeScript syntax errors (tracked)
+- portal/components/ui/icons.tsx — TypeScript syntax errors (tracked)

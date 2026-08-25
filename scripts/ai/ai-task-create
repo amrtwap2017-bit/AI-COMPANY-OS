@@ -6,7 +6,7 @@ Usage: python3 scripts/ai/ai-task-create TASK-ID SPRINT-ID "Title" LOW|MEDIUM|HI
 """
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).parent.parent.parent
 AI_DIR = ROOT / ".ai"
@@ -21,7 +21,7 @@ def main():
     sprint_id = sys.argv[2]
     title = sys.argv[3]
     risk = sys.argv[4].upper()
-    today = datetime.utcnow().strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     task_dir = AI_DIR / "tasks" / "ready"
     task_dir.mkdir(parents=True, exist_ok=True)

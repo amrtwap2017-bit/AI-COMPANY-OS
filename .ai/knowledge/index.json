@@ -1,33 +1,33 @@
 {
-  "generated": "2026-08-25T16:44:23.310300Z",
-  "total_documents": 2036,
+  "generated": "2026-08-25T20:06:10.775343+00:00Z",
+  "total_documents": 2053,
   "by_type": {
     "security": 57,
-    "handoff": 4,
+    "handoff": 5,
     "agent": 11,
     "roadmap": 26,
-    "architecture": 110,
+    "architecture": 111,
     "checkpoint": 1,
-    "sprint": 224,
+    "sprint": 225,
     "adr": 16,
     "api": 47,
     "database": 55,
     "ops": 24,
     "readme": 111,
-    "task": 32,
+    "task": 34,
     "testing": 51,
-    "general": 1267
+    "general": 1279
   },
   "by_domain": {
     "security": 57,
-    "session": 5,
+    "session": 6,
     "ai-protocol": 11,
-    "planning": 282,
-    "architecture": 126,
+    "planning": 285,
+    "architecture": 127,
     "api": 47,
     "data": 55,
     "infrastructure": 24,
-    "general": 1378,
+    "general": 1390,
     "testing": 51
   },
   "documents": [
@@ -38,7 +38,7 @@
       "importance": "critical",
       "when_to_load": "security_review",
       "summary": "SECURITY RULES \u2014 - NEVER expose secrets, tokens, passwords in any file",
-      "size_bytes": 1077,
+      "size_bytes": 1861,
       "related_files": [],
       "keywords": []
     },
@@ -50,6 +50,17 @@
       "when_to_load": "session_start",
       "summary": "AI SESSION HANDOFF \u2014 Generated: 2026-08-25T16:31:47Z",
       "size_bytes": 1978,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": ".ai/sessions/HANDOFF-2026-08-25T16-47-05Z.md",
+      "type": "handoff",
+      "domain": "session",
+      "importance": "critical",
+      "when_to_load": "session_start",
+      "summary": "AI SESSION HANDOFF \u2014 Generated: 2026-08-25T16:47:05Z",
+      "size_bytes": 3631,
       "related_files": [],
       "keywords": []
     },
@@ -1139,6 +1150,17 @@
       "when_to_load": "sprint_start",
       "summary": "SPRINT-XXX \u2014 TITLE \u2014 | Field | Value |",
       "size_bytes": 1330,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": ".ai/sprints/active/SPRINT-AI-OS-001.md",
+      "type": "sprint",
+      "domain": "planning",
+      "importance": "high",
+      "when_to_load": "sprint_start",
+      "summary": "SPRINT-AI-OS-001 \u2014 AI Engineering OS \u2014 Validation Sprint \u2014 | Field | Value |",
+      "size_bytes": 2258,
       "related_files": [],
       "keywords": []
     },
@@ -4399,6 +4421,17 @@
       "keywords": []
     },
     {
+      "path": "brains/triangle-black/02-ARCHITECTURE-SUMMARY.md",
+      "type": "architecture",
+      "domain": "architecture",
+      "importance": "high",
+      "when_to_load": "architecture_tasks",
+      "summary": "TRIANGLE BLACK \u2014 ARCHITECTURE SUMMARY \u2014 src/",
+      "size_bytes": 4091,
+      "related_files": [],
+      "keywords": []
+    },
+    {
       "path": "docs/local-ai-engineering-audit/15_TARGET_ARCHITECTURE.md",
       "type": "architecture",
       "domain": "architecture",
@@ -6395,8 +6428,8 @@
       "domain": "testing",
       "importance": "medium",
       "when_to_load": "test_tasks",
-      "summary": "AI SESSION HANDOFF \u2014 Generated: 2026-08-25T16:31:47Z",
-      "size_bytes": 1978,
+      "summary": "AI SESSION HANDOFF \u2014 Generated: 2026-08-25T16:47:05Z",
+      "size_bytes": 3631,
       "related_files": [],
       "keywords": []
     },
@@ -6408,6 +6441,28 @@
       "when_to_load": "task_execution",
       "summary": "TASK-XXX \u2014 TITLE \u2014 | Field | Value |",
       "size_bytes": 770,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": ".ai/tasks/active/TASK-AI-OS-001.md",
+      "type": "task",
+      "domain": "planning",
+      "importance": "medium",
+      "when_to_load": "task_execution",
+      "summary": "TASK-AI-OS-001 \u2014 Add project utility: health_check module with unit test \u2014 | Field | Value |",
+      "size_bytes": 1541,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": ".ai/tasks/ready/TASK-AI-OS-001.md",
+      "type": "task",
+      "domain": "planning",
+      "importance": "medium",
+      "when_to_load": "task_execution",
+      "summary": "TASK-AI-OS-001 \u2014 Add project utility: health_check module with unit test \u2014 | Field | Value |",
+      "size_bytes": 1540,
       "related_files": [],
       "keywords": []
     },
@@ -8496,8 +8551,8 @@
       "domain": "general",
       "importance": "low",
       "when_to_load": "on_demand",
-      "summary": "ENGINEERING CONSTITUTION \u2014 Status: ACTIVE",
-      "size_bytes": 957,
+      "summary": "ENGINEERING CONSTITUTION \u2014 Product: Triangle Black Enterprise Operations OS",
+      "size_bytes": 2505,
       "related_files": [],
       "keywords": []
     },
@@ -8518,8 +8573,30 @@
       "domain": "general",
       "importance": "low",
       "when_to_load": "on_demand",
-      "summary": "PROJECT MASTER CONTEXT \u2014 UNKNOWN \u2014 REQUIRES_VALIDATION",
-      "size_bytes": 866,
+      "summary": "PROJECT MASTER CONTEXT",
+      "size_bytes": 3857,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": ".ai/memory/discoveries/DISC-001-portal-ts-bugs.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "DISCOVERY-001 \u2014 Pre-existing TypeScript Bugs in portal/ \u2014 Discovered: 2026-08-25",
+      "size_bytes": 1002,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": ".ai/memory/discoveries/DISC-002-hub-mcp-missing.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "DISCOVERY-002 \u2014 hub/mcp/server.mjs Does Not Exist \u2014 Discovered: 2026-08-25",
+      "size_bytes": 907,
       "related_files": [],
       "keywords": []
     },
@@ -21834,13 +21911,46 @@
       "keywords": []
     },
     {
+      "path": "brains/triangle-black/00-BRAIN-BOOTSTRAP.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 BRAIN BOOTSTRAP \u2014 Triangle Black is a full-stack commercial CRM + Service Operations platform",
+      "size_bytes": 1410,
+      "related_files": [],
+      "keywords": []
+    },
+    {
       "path": "brains/triangle-black/01-PROJECT-IDENTITY.md",
       "type": "general",
       "domain": "general",
       "importance": "low",
       "when_to_load": "on_demand",
-      "summary": "TRIANGLE BLACK \u2014 PROJECT IDENTITY \u2014 Name:     Triangle Black",
-      "size_bytes": 1387,
+      "summary": "TRIANGLE BLACK \u2014 PROJECT IDENTITY & EXECUTION CONTEXT \u2014 **Document:** `PROJECT-IDENTITY.md`",
+      "size_bytes": 26153,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/01-PROJECT-IDENTITY.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 PROJECT IDENTITY & EXECUTION CONTEXT \u2014 **Document:** `PROJECT-IDENTITY.md`",
+      "size_bytes": 26153,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/03-BUSINESS-SUMMARY.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 BUSINESS SUMMARY \u2014 lead.create",
+      "size_bytes": 1993,
       "related_files": [],
       "keywords": []
     },
@@ -21867,6 +21977,17 @@
       "keywords": []
     },
     {
+      "path": "brains/triangle-black/04-CURRENT-IMPLEMENTATION.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 CURRENT IMPLEMENTATION STATUS \u2014 API           \u2192 http://127.0.0.1:8020   (FastAPI)",
+      "size_bytes": 3688,
+      "related_files": [],
+      "keywords": []
+    },
+    {
       "path": "brains/triangle-black/05-ENGINEERING-RULES.md",
       "type": "general",
       "domain": "general",
@@ -21874,6 +21995,28 @@
       "when_to_load": "on_demand",
       "summary": "TRIANGLE BLACK \u2014 ENGINEERING RULES \u2014 1. Use uv not pip: uv pip install --python .venv/bin/python <pkg>",
       "size_bytes": 2545,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/05-ENGINEERING-RULES.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 ENGINEERING RULES \u2014 1. Use uv not pip: uv pip install --python .venv/bin/python <pkg>",
+      "size_bytes": 2545,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/06-DEPENDENCY-GRAPH.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 DEPENDENCY GRAPH \u2014 src.core.base          \u2190 imported by ALL models",
+      "size_bytes": 2209,
       "related_files": [],
       "keywords": []
     },
@@ -21900,6 +22043,28 @@
       "keywords": []
     },
     {
+      "path": "brains/triangle-black/07-KNOWLEDGE-GRAPH.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 KNOWLEDGE GRAPH \u2014 Capability: Capture hotel leads, qualify, assign to agents",
+      "size_bytes": 3910,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/08-CURRENT-BACKLOG.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 CURRENT BACKLOG \u2014 Problem: stock_movements table records movements but stock_balances",
+      "size_bytes": 2329,
+      "related_files": [],
+      "keywords": []
+    },
+    {
       "path": "brains/triangle-black/08-CURRENT-BACKLOG.md",
       "type": "general",
       "domain": "general",
@@ -21918,6 +22083,28 @@
       "when_to_load": "on_demand",
       "summary": "TRIANGLE BLACK \u2014 CURRENT BLOCKERS \u2014 All queries use DEFAULT_HOTEL = \"tb-default-hotel-000000000001\"",
       "size_bytes": 1350,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/09-CURRENT-BLOCKERS.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 CURRENT BLOCKERS \u2014 All queries use DEFAULT_HOTEL = \"tb-default-hotel-000000000001\"",
+      "size_bytes": 1350,
+      "related_files": [],
+      "keywords": []
+    },
+    {
+      "path": "brains/triangle-black/AGENT-BOOTSTRAP.md",
+      "type": "general",
+      "domain": "general",
+      "importance": "low",
+      "when_to_load": "on_demand",
+      "summary": "TRIANGLE BLACK \u2014 AGENT BOOTSTRAP \u2014 You are a senior engineer on Triangle Black.",
+      "size_bytes": 1229,
       "related_files": [],
       "keywords": []
     },

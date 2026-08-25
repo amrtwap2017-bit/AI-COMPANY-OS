@@ -6,7 +6,7 @@
     "importance": "critical",
     "when_to_load": "security_review",
     "summary": "SECURITY RULES \u2014 - NEVER expose secrets, tokens, passwords in any file",
-    "size_bytes": 1077,
+    "size_bytes": 1861,
     "related_files": [],
     "keywords": []
   },
@@ -18,6 +18,17 @@
     "when_to_load": "session_start",
     "summary": "AI SESSION HANDOFF \u2014 Generated: 2026-08-25T16:31:47Z",
     "size_bytes": 1978,
+    "related_files": [],
+    "keywords": []
+  },
+  {
+    "path": ".ai/sessions/HANDOFF-2026-08-25T16-47-05Z.md",
+    "type": "handoff",
+    "domain": "session",
+    "importance": "critical",
+    "when_to_load": "session_start",
+    "summary": "AI SESSION HANDOFF \u2014 Generated: 2026-08-25T16:47:05Z",
+    "size_bytes": 3631,
     "related_files": [],
     "keywords": []
   },

@@ -9,7 +9,7 @@ import json
 import sys
 import argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).parent.parent.parent
 AI_DIR = ROOT / ".ai"
@@ -134,7 +134,7 @@ Tasks Done: {sprint_state.get('tasks_complete',0)}/{sprint_state.get('tasks_tota
 Task: {task_id}
 Budget: {budget} tokens
 Used: ~{used_tokens} tokens
-Generated: {datetime.utcnow().isoformat()}Z
+Generated: {datetime.now(timezone.utc).isoformat()}Z
 Sections: {len(sections)}
 
 ## OPERATING MODE

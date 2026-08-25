@@ -898,6 +898,7 @@
 ./11-WORKSPACES/triangle-black-frontend/public/vercel.svg
 ./11-WORKSPACES/triangle-black-frontend/public/window.svg
 ./11-WORKSPACES/triangle-black-frontend/tsconfig.json
+./11-WORKSPACES/triangle-black-frontend/tsconfig.tsbuildinfo
 ./11-WORKSPACES/triangle-black/ -o -name 
 ./11-WORKSPACES/triangle-black/.dockerignore
 ./11-WORKSPACES/triangle-black/.env
@@ -2499,6 +2500,7 @@
 ./11-WORKSPACES/triangle-black/admin-portal/public/vercel.svg
 ./11-WORKSPACES/triangle-black/admin-portal/public/window.svg
 ./11-WORKSPACES/triangle-black/admin-portal/tsconfig.json
+./11-WORKSPACES/triangle-black/admin-portal/tsconfig.tsbuildinfo
 ./11-WORKSPACES/triangle-black/agent/.chromadb/8772147a-934c-4a98-8512-72e504db2310/data_level0.bin
 ./11-WORKSPACES/triangle-black/agent/.chromadb/8772147a-934c-4a98-8512-72e504db2310/header.bin
 ./11-WORKSPACES/triangle-black/agent/.chromadb/8772147a-934c-4a98-8512-72e504db2310/length.bin
@@ -5855,6 +5857,7 @@
 ./hub/vectors/__pycache__/vector_builder.cpython-314.pyc
 ./hub/watcher/__pycache__/__init__.cpython-314.pyc
 ./hub/watcher/__pycache__/file_watcher.cpython-314.pyc
+./opencode.json
 ./pyproject.toml
 ./reports/ai-portal-review-20260720.md
 ./reports/api-integration-plan-2026-07-20.md
@@ -5902,11 +5905,17 @@
 ./reports/triangle-black-review-2026-07-19.md
 ./run_api.py
 ./scripts/ai/ai-checkpoint
+./scripts/ai/ai-context
 ./scripts/ai/ai-handoff
+./scripts/ai/ai-index-docs
+./scripts/ai/ai-plan-sprint
 ./scripts/ai/ai-scan
 ./scripts/ai/ai-security-check
 ./scripts/ai/ai-sprint-status
 ./scripts/ai/ai-status
+./scripts/ai/ai-task-block
+./scripts/ai/ai-task-create
+./scripts/ai/ai-task-done
 ./scripts/ai/ai-task-start
 ./scripts/ai/ai-verify
 ./scripts/audit_triangle_black.py

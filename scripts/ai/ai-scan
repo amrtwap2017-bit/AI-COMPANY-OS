@@ -1,29 +1,27 @@
 #!/usr/bin/env bash
-# AI-COMPANY-OS — Repository Intelligence Scanner v2
+# AI-COMPANY-OS — Repository Intelligence Scanner v3
 # Generates .ai/intelligence/ files for the active workspace
 set -euo pipefail
 
 ROOT="$(pwd)"
 TB="11-WORKSPACES/triangle-black"
+BRAIN="brains"
 OUT=".ai/intelligence"
 TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 echo "╔══════════════════════════════════════════╗"
-echo "║     REPOSITORY INTELLIGENCE SCANNER      ║"
+echo "║   REPOSITORY INTELLIGENCE SCANNER v3     ║"
 echo "╚══════════════════════════════════════════╝"
-echo "Root: $ROOT"
-echo "Timestamp: $TIMESTAMP"
+echo "Root: $ROOT | Timestamp: $TIMESTAMP"
 echo ""
 
 mkdir -p "$OUT"
 
-# ── 1. Active file list (tight exclusions) ──────────────────
-echo "── Scanning active files..."
+echo "── [1/9] Active files (tight exclusions)..."
 find . \
   -not -path "./.git/*" \
   -not -path "*/node_modules/*" \
   -not -path "*/.venv/*" \
-  -not -path "*/venv/*" \
   -not -path "./.ai/*" \
   -not -path "./90-ARCHIVE/*" \
   -not -path "./00-MIGRATION/*" \
@@ -32,28 +30,20 @@ find . \
   -not -path "*/.next/*" \
   -not -path "*/build/*" \
   -not -path "*/backups/*" \
-  -not -path "*/playwright/*" \
-  -type f \
-  | sort > "$OUT/active-files.txt"
+  -not -path "*/playwright-report/*" \
+  -type f | sort > "$OUT/active-files.txt"
 ACTIVE_COUNT=$(wc -l < "$OUT/active-files.txt" | tr -d '[:space:]')
 echo "  Active files: $ACTIVE_COUNT"
 
-# ── 2. Python source files (workspace only) ──────────────────
-echo "── Scanning Python sources..."
-find "$TB" \
-  -not -path "*/.venv/*" \
-  -not -path "*/__pycache__/*" \
+echo "── [2/9] Python sources (workspace)..."
+find "$TB" -not -path "*/.venv/*" -not -path "*/__pycache__/*" \
   -name "*.py" | sort > "$OUT/python-sources.txt"
 PY_COUNT=$(wc -l < "$OUT/python-sources.txt" | tr -d '[:space:]')
-echo "  Python source files (workspace): $PY_COUNT"
+echo "  Python files (workspace): $PY_COUNT"
 
-# ── 3. Test files ────────────────────────────────────────────
-echo "── Scanning test files..."
-find . \
-  -not -path "*/.venv/*" \
-  -not -path "*/node_modules/*" \
-  -not -path "./90-ARCHIVE/*" \
-  -not -path "./00-MIGRATION/*" \
+echo "── [3/9] Test files..."
+find . -not -path "*/.venv/*" -not -path "*/node_modules/*" \
+  -not -path "./90-ARCHIVE/*" -not -path "./00-MIGRATION/*" \
   \( -name "test_*.py" -o -name "*_test.py" \
      -o -name "*.test.ts" -o -name "*.spec.ts" \
      -o -name "*.test.tsx" -o -name "*.spec.tsx" \) \
@@ -61,108 +51,112 @@ find . \
 TEST_COUNT=$(wc -l < "$OUT/test-files.txt" | tr -d '[:space:]')
 echo "  Test files: $TEST_COUNT"
 
-# ── 4. API route map ─────────────────────────────────────────
-echo "── Mapping API routes..."
+echo "── [4/9] API routes..."
 {
-  echo "# API ROUTE MAP"
-  echo "# Generated: $TIMESTAMP"
+  echo "# API ROUTE MAP — Generated: $TIMESTAMP"
   echo ""
-  grep -rn "@router\.\|@app\." \
-    --include="*.py" "$TB" 2>/dev/null \
-    | grep -v ".venv" \
-    | grep -v "__pycache__" \
+  grep -rn "@router\.\|@app\." --include="*.py" "$TB" 2>/dev/null \
+    | grep -v ".venv" | grep -v "__pycache__" \
     | grep -E "(get|post|put|delete|patch)\(" \
-    | head -200
+    | head -300
 } > "$OUT/api-routes.txt"
-ROUTE_COUNT=$(grep -c "^$TB" "$OUT/api-routes.txt" 2>/dev/null | tr -d '[:space:]') || ROUTE_COUNT=0
-echo "  API routes found: $ROUTE_COUNT"
+ROUTE_COUNT=$(grep -c "@" "$OUT/api-routes.txt" 2>/dev/null | tr -d '[:space:]') || ROUTE_COUNT=0
+echo "  API routes captured: $ROUTE_COUNT"
 
-# ── 5. Database/migration map ────────────────────────────────
-echo "── Mapping database..."
+echo "── [5/9] Database map..."
 {
-  echo "# DATABASE MAP"
-  echo "# Generated: $TIMESTAMP"
+  echo "# DATABASE MAP — Generated: $TIMESTAMP"
   echo ""
-  echo "## Alembic Migrations"
+  echo "## Alembic"
   find . -not -path "*/.venv/*" -name "alembic.ini" 2>/dev/null
-  find . -not -path "*/.venv/*" -path "*/migrations/*.py" 2>/dev/null | head -50
+  find . -not -path "*/.venv/*" -path "*/alembic/versions/*.py" 2>/dev/null | head -30
   echo ""
   echo "## SQLAlchemy Models"
   grep -rln "class.*Base\|declarative_base\|mapped_column" \
-    --include="*.py" "$TB" 2>/dev/null \
-    | grep -v ".venv" | head -30
+    --include="*.py" "$TB" 2>/dev/null | grep -v ".venv" | head -30
   echo ""
-  echo "## Prisma Schema"
-  find . -name "schema.prisma" 2>/dev/null | head -5
+  echo "## Prisma"
+  find . -name "schema.prisma" 2>/dev/null | head -3
 } > "$OUT/database-map.txt"
 echo "  Database map written."
 
-# ── 6. Markdown documentation (active only) ──────────────────
-echo "── Indexing active documentation..."
-find . \
-  -not -path "*/.venv/*" \
-  -not -path "*/node_modules/*" \
-  -not -path "./90-ARCHIVE/*" \
-  -not -path "./.ai/*" \
+echo "── [6/9] Active documentation..."
+find . -not -path "*/.venv/*" -not -path "*/node_modules/*" \
+  -not -path "./90-ARCHIVE/*" -not -path "./.ai/*" \
   -name "*.md" | sort > "$OUT/active-docs.txt"
 DOC_COUNT=$(wc -l < "$OUT/active-docs.txt" | tr -d '[:space:]')
-echo "  Active documentation files: $DOC_COUNT"
+echo "  Active docs: $DOC_COUNT"
 
-# ── 7. Git health ────────────────────────────────────────────
-echo "── Checking Git state..."
+echo "── [7/9] Brain files..."
 {
-  echo "# GIT STATE"
-  echo "# Generated: $TIMESTAMP"
-  echo ""
+  if [ -d "$BRAIN" ]; then
+    find "$BRAIN" -type f | sort
+  fi
+} > "$OUT/brain-files.txt"
+BRAIN_COUNT=$(wc -l < "$OUT/brain-files.txt" | tr -d '[:space:]')
+echo "  Brain files: $BRAIN_COUNT"
+
+echo "── [8/9] Hub intelligence modules..."
+{
+  echo "# HUB STRUCTURE — Generated: $TIMESTAMP"
+  ls -1 hub/ 2>/dev/null | head -40 || echo "hub/ not found"
+} > "$OUT/hub-structure.txt"
+echo "  Hub structure written."
+
+echo "── [9/9] Git state..."
+{
+  echo "# GIT STATE — Generated: $TIMESTAMP"
   echo "Branch: $(git branch --show-current 2>/dev/null)"
-  echo "HEAD: $(git rev-parse HEAD 2>/dev/null)"
-  echo "Short: $(git rev-parse --short HEAD 2>/dev/null)"
-  echo "Status: $(git status --short 2>/dev/null | wc -l | tr -d '[:space:]') changed files"
+  echo "HEAD: $(git rev-parse --short HEAD 2>/dev/null)"
+  echo "Changed: $(git status --short 2>/dev/null | wc -l | tr -d '[:space:]') files"
   echo ""
   echo "## Last 10 commits"
   git log --oneline -10 2>/dev/null
 } > "$OUT/git-state.txt"
 
-# ── 8. Write repo-map.json ───────────────────────────────────
-{
+# Write repo-map.json
 python3 - << PYEOF
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 data = {
-    "generated": "$TIMESTAMP",
-    "root": "$ROOT",
-    "workspace": "$TB",
-    "active_files": int("$ACTIVE_COUNT"),
-    "python_workspace_files": int("$PY_COUNT"),
-    "test_files": int("$TEST_COUNT"),
-    "active_docs": int("$DOC_COUNT"),
+    "generated": "${TIMESTAMP}",
+    "root": "${ROOT}",
+    "workspace": "${TB}",
+    "active_files": int("${ACTIVE_COUNT}"),
+    "python_workspace_files": int("${PY_COUNT}"),
+    "test_files": int("${TEST_COUNT}"),
+    "active_docs": int("${DOC_COUNT}"),
+    "brain_files": int("${BRAIN_COUNT}"),
+    "api_routes": int("${ROUTE_COUNT}"),
     "stack": {
-        "backend": "FastAPI + SQLAlchemy + Alembic",
-        "frontend": "Next.js (detected via Build Guard hooks)",
-        "database": "PostgreSQL",
-        "runtime": "Python 3.12 (workspace), Python 3.14 (root)",
+        "backend": "FastAPI + SQLAlchemy 2.0 + Alembic",
+        "frontend": "Next.js App Router + Tailwind + React Query",
+        "database": "PostgreSQL (pgvector) + Redis + ChromaDB",
+        "python": "3.12 (uv managed, .venv at workspace)",
+        "node": "24.18.0",
+        "tenancy": "hotel_id (from JWT via get_hotel_id())",
         "local_ai": "Ollama 0.31.1 + qwen2.5-coder-32k",
-        "coding_agent": "OpenCode 1.18.18"
+        "agent": "OpenCode 1.18.18",
+        "package_manager": "uv (never pip)"
     },
-    "embedding_models": [
-        "nomic-embed-text:latest",
-        "bge-m3:latest",
-        "granite-embedding:latest"
-    ],
+    "ports": {
+        "backend": 8030,
+        "portal": 3000,
+        "client_portal": 3201,
+        "admin_portal": 3202
+    },
+    "test_baseline": 158,
     "status": "GENERATED"
 }
 print(json.dumps(data, indent=2))
 PYEOF
-} > "$OUT/repo-map.json"
-
 echo ""
 echo "══════════════════════════════════════════"
-echo "  Active files    : $ACTIVE_COUNT"
-echo "  Python (workspace): $PY_COUNT"
-echo "  Test files      : $TEST_COUNT"
-echo "  Active docs     : $DOC_COUNT"
+echo "  Active files   : $ACTIVE_COUNT"
+echo "  Python (TB)    : $PY_COUNT"
+echo "  Test files     : $TEST_COUNT"
+echo "  Active docs    : $DOC_COUNT"
+echo "  Brain files    : $BRAIN_COUNT"
+echo "  API routes     : $ROUTE_COUNT"
 echo "══════════════════════════════════════════"
-echo ""
-echo "Intelligence written to: $OUT/"
-cat "$OUT/repo-map.json"

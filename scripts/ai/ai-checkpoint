@@ -7,9 +7,7 @@ TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo NO_COMMIT)"
 OUTFILE=".ai/reports/checkpoints/CHECKPOINT-${TASK_ID}-${TIMESTAMP//[:]/-}.md"
 
-echo "Creating checkpoint for task: $TASK_ID"
-echo "Status: $STATUS"
-echo "Commit: $COMMIT"
+echo "Creating checkpoint: $TASK_ID | $STATUS | $COMMIT"
 
 {
 echo "# CHECKPOINT"
@@ -29,10 +27,43 @@ echo "## Git Status"
 git status --short 2>/dev/null || echo "No git status"
 echo ""
 echo "## Next Steps"
-echo "See .ai/state/project-state.json for next_actions"
+echo "See .ai/state/project-state.json → next_actions"
 } > "$OUTFILE"
 
 cp "$OUTFILE" .ai/reports/checkpoints/LATEST.md
+
+# Update project-state.json with latest commit and checkpoint
+python3 - << PYEOF
+import json, subprocess
+from pathlib import Path
+from datetime import datetime, timezone
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+state_file = Path(".ai/state/project-state.json")
+try:
+    s = json.loads(state_file.read_text())
+    s["last_checkpoint"] = "$TIMESTAMP"
+    s["last_commit"] = "$COMMIT"
+    s["last_updated"] = now()
+    if "$STATUS" == "COMPLETE":
+        s["active_task"] = None
+    state_file.write_text(json.dumps(s, indent=2))
+    print("  project-state.json: last_commit + last_checkpoint updated")
+except Exception as e:
+    print(f"  project-state.json: ERROR — {e}")
+
+# Update sprint-state checkpoint flag
+sprint_file = Path(".ai/state/sprint-state.json")
+try:
+    s = json.loads(sprint_file.read_text())
+    s["checkpoint_created"] = True
+    sprint_file.write_text(json.dumps(s, indent=2))
+    print("  sprint-state.json: checkpoint_created = true")
+except Exception as e:
+    print(f"  sprint-state.json: ERROR — {e}")
+PYEOF
 
 echo "Checkpoint written: $OUTFILE"
 echo "LATEST.md updated."
