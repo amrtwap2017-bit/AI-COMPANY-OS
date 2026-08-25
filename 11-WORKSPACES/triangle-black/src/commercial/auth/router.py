@@ -66,7 +66,7 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
     return TokenOut(
-        access_token=create_access_token(user.id, user.email, user.role),
+        access_token=create_access_token(user.id, user.email, user.role, hotel_id=getattr(user, "hotel_id", None)),
         refresh_token=create_refresh_token(user.id),
         user_id=user.id, name=user.name, email=user.email, role=user.role,
     )
@@ -80,7 +80,7 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is inactive")
     return TokenOut(
-        access_token=create_access_token(user.id, user.email, user.role),
+        access_token=create_access_token(user.id, user.email, user.role, hotel_id=getattr(user, "hotel_id", None)),
         refresh_token=create_refresh_token(user.id),
         user_id=user.id, name=user.name, email=user.email, role=user.role,
     )
@@ -94,7 +94,7 @@ def refresh(payload: RefreshIn, db: Session = Depends(get_db)):
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
     return TokenOut(
-        access_token=create_access_token(user.id, user.email, user.role),
+        access_token=create_access_token(user.id, user.email, user.role, hotel_id=getattr(user, "hotel_id", None)),
         refresh_token=create_refresh_token(user.id),
         user_id=user.id, name=user.name, email=user.email, role=user.role,
     )
@@ -152,7 +152,7 @@ async def login_json(request: Request, db: Session = Depends(get_db)):
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account is inactive")
     return TokenOut(
-        access_token=create_access_token(user.id, user.email, user.role),
+        access_token=create_access_token(user.id, user.email, user.role, hotel_id=getattr(user, "hotel_id", None)),
         refresh_token=create_refresh_token(user.id),
         user_id=user.id, name=user.name, email=user.email, role=user.role,
     )

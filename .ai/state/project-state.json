@@ -3,11 +3,11 @@
   "description": "Multi-tenant Enterprise SaaS for hospitality engineering. FastAPI + Next.js + PostgreSQL. Primary market: Egypt / Sharm El-Sheikh.",
   "phase": "COMMERCIAL_VALIDATION",
   "active_sprint": "SPRINT-N-FIX",
-  "active_task": null,
+  "active_task": "SPRINT-N-FIX-T001",
   "status": "ACTIVE",
   "last_checkpoint": "2026-08-25T21:24:28Z",
   "last_commit": "f5b58ad7",
-  "last_updated": "2026-08-25T21:25:14.698792+00:00",
+  "last_updated": "2026-08-25T21:25:38.967453+00:00",
   "tests": {
     "status": "PARTIAL_FAILURE",
     "runner": ".venv/bin/python -m pytest tests/ -q --tb=short -m 'not live_http'",
