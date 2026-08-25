@@ -8463,6 +8463,21 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: pm_plan_api_router: {_e}")
 
+
+try:
+    from src.commercial.payment_tracking_api.router import router as _pt_api_r
+    app.include_router(_pt_api_r, prefix="/api/v1")
+    logger.info("  OK: payment_tracking_api_router (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: payment_tracking_api: {_e}")
+
+try:
+    from src.commercial.work_order_actions.router import router as _wo_act_r
+    app.include_router(_wo_act_r, prefix="/api/v1")
+    logger.info("  OK: work_order_actions_router (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: work_order_actions: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
