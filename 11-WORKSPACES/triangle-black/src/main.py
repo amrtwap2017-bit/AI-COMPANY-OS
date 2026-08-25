@@ -8478,6 +8478,21 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: work_order_actions: {_e}")
 
+
+try:
+    from src.commercial.service_request_actions.router import router as _sr_act_r
+    app.include_router(_sr_act_r, prefix="/api/v1")
+    logger.info("  OK: service_request_actions (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: service_request_actions: {_e}")
+
+try:
+    from src.commercial.stock_api.router import router as _stock_api_r
+    app.include_router(_stock_api_r, prefix="/api/v1")
+    logger.info("  OK: stock_api (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: stock_api: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
