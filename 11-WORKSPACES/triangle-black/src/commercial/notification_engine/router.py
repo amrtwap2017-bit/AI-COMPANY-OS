@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/notifications/live", tags=["notification-engine"])
 
@@ -188,7 +189,9 @@ def get_live_notifications(
     }
 
 @router.post("/mark-read/{notification_id}", summary="Mark notification read")
-def mark_read(notification_id: str, db: Session = Depends(get_db)):
+def mark_read(notification_id: str,
+              hotel_id: str = Depends(get_hotel_id),
+              db: Session = Depends(get_db)):
     """Mark a stored notification as read."""
     _ensure_notif_table(db)
     try:
@@ -201,7 +204,8 @@ def mark_read(notification_id: str, db: Session = Depends(get_db)):
     return {"success": True, "notification_id": notification_id}
 
 @router.get("/count", summary="Unread notification count")
-def notification_count(db: Session = Depends(get_db)):
+def notification_count(hotel_id: str = Depends(get_hotel_id),
+                       db: Session = Depends(get_db)):
     """Quick count for notification badge in UI."""
     notifications = _generate_live_notifications(db)
     critical = sum(1 for n in notifications if n.get("priority") == "critical")

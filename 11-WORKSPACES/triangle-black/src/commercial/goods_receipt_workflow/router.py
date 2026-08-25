@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 import logging
 
 logger = logging.getLogger("tb.goods_receipt")
@@ -45,7 +46,9 @@ def _notify_receipt(po_id, message, db):
         pass
 
 @router.post("/receive/{po_id}", summary="Record goods receipt for PO")
-def receive_goods(po_id: str, data: dict, db: Session = Depends(get_db)):
+def receive_goods(po_id: str, data: dict,
+                   hotel_id: str = Depends(get_hotel_id),
+                   db: Session = Depends(get_db)):
     """
     STEP 6 of procurement cycle: Receive goods from vendor.
     Updates stock balances and notifies requester.
@@ -185,7 +188,9 @@ def receive_goods(po_id: str, data: dict, db: Session = Depends(get_db)):
     }
 
 @router.post("/partial-receive/{po_id}", summary="Partial delivery receipt")
-def partial_receive(po_id: str, data: dict, db: Session = Depends(get_db)):
+def partial_receive(po_id: str, data: dict,
+                    hotel_id: str = Depends(get_hotel_id),
+                    db: Session = Depends(get_db)):
     """Receive partial delivery - PO stays open until fully received."""
     # Use same logic but mark PO as 'partial_delivery'
     result = receive_goods(po_id, data, db)
@@ -241,7 +246,9 @@ def pending_receipts(
     }
 
 @router.get("/cycle-status/{pr_id}", summary="Complete procurement cycle status")
-def cycle_status(pr_id: str, db: Session = Depends(get_db)):
+def cycle_status(pr_id: str,
+                 hotel_id: str = Depends(get_hotel_id),
+                 db: Session = Depends(get_db)):
     """
     Full procurement cycle view for a PR.
     Shows every step from intake to goods received.
