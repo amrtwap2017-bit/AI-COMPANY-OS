@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/warehouse-intelligence", tags=["warehouse-intelligence"])
 
@@ -70,7 +71,7 @@ BRAND_GUIDE = {
 
 @router.get("/stock-health", summary="Complete stock health dashboard")
 def stock_health(
-    hotel_id:  str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Complete warehouse stock health with sourcing guidance per category."""
@@ -204,7 +205,7 @@ def brand_guide(category: str):
 
 @router.get("/auto-reorder-plan", summary="Auto-generate reorder plan")
 def auto_reorder_plan(
-    hotel_id: str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Generate complete reorder plan grouped by vendor category."""

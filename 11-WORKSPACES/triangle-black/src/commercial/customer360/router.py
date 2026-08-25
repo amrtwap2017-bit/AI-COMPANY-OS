@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/customer-360", tags=["customer-360"])
 
@@ -15,7 +16,7 @@ def rows(result): return [row_to_dict(r) for r in result]
 @router.get("/{customer_id}")
 def get_customer_360(
     customer_id: str,
-    hotel_id: str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -72,7 +73,7 @@ def get_customer_360(
 
 @router.get("/")
 def list_customers(
-    hotel_id: str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     limit: int = Query(default=50),
     db: Session = Depends(get_db)
 ):

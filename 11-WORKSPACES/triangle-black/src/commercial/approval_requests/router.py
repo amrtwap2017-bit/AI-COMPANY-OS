@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 import uuid
 
 router = APIRouter(prefix="/approval-requests", tags=["approval-requests"])
@@ -18,6 +19,7 @@ def list_approvals(
     status: str = None,
     document_type: str = None,
     limit: int = 100,
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     q = "SELECT * FROM approval_requests WHERE 1=1"

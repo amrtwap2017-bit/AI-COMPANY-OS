@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/sales-pipeline", tags=["sales-pipeline"])
 
@@ -10,11 +11,11 @@ def rows(result):
 
 @router.get("/")
 def get_full_pipeline(
-    hotel_id: str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Complete sales funnel: Leads → Quotes → Contracts → Revenue"""
-    p = {"hotel_id": hotel_id or "tb-default-hotel-000000000001"}
+    p = {"hotel_id": hotel_id}
 
     leads = rows(db.execute(text(
         "SELECT status, count(*) as count FROM leads GROUP BY status"

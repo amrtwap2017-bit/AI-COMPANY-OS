@@ -7,6 +7,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.tenant import get_hotel_id
 
 router = APIRouter(prefix="/export", tags=["csv-export"])
 
@@ -46,7 +47,7 @@ def _csv_response(content: str, filename: str) -> StreamingResponse:
 def export_work_orders(
     status:   str = Query(default=None),
     priority: str = Query(default=None),
-    hotel_id: str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Download all work orders as CSV file."""
@@ -75,7 +76,7 @@ def export_work_orders(
 
 @router.get("/assets", summary="Export assets as CSV")
 def export_assets(
-    hotel_id:    str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     criticality: str = Query(default=None),
     db: Session = Depends(get_db)
 ):
@@ -106,7 +107,7 @@ def export_assets(
 @router.get("/invoices", summary="Export invoices as CSV")
 def export_invoices(
     status:   str = Query(default=None),
-    hotel_id: str = Query(default=None),
+    hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)
 ):
     """Download all invoices as CSV file."""
