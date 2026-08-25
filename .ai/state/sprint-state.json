@@ -1,0 +1,18 @@
+{
+  "current_sprint": null,
+  "sprint_status": "NOT_STARTED",
+  "sprint_started": null,
+  "sprint_target_end": null,
+  "tasks_total": 0,
+  "tasks_complete": 0,
+  "tasks_in_progress": 0,
+  "tasks_blocked": 0,
+  "tasks_remaining": 0,
+  "acceptance_criteria_met": false,
+  "tests_passing": false,
+  "security_check": "PENDING",
+  "architecture_check": "PENDING",
+  "documentation_updated": false,
+  "checkpoint_created": false,
+  "ready_to_close": false
+}

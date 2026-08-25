@@ -1,0 +1,52 @@
+# DOCUMENT DISCOVERY REPORT
+
+Generated: 2026-08-25T16:29:12Z
+
+## Total Documents
+
+Markdown: 2244
+YAML:     1113
+JSON:     2838
+
+## Documentation Directories
+
+./11-WORKSPACES/triangle-black/docs
+./11-WORKSPACES/triangle-black/portal/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/00-CONSTITUTION/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/01-CONTEXT-PLATFORM/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/02-MCP-GATEWAY/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/03-IDE-INTEGRATION/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/04-AGENT-PLATFORM/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/05-KNOWLEDGE-PLATFORM/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/06-BUILDER/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/07-OBSERVABILITY/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/08-AUTOMATION/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/09-DEVELOPER-PORTAL/docs
+./90-ARCHIVE/AI-ENGINEERING-HUB-archived/docs
+./90-ARCHIVE/Workspace-archived/apps/docs
+./90-ARCHIVE/Workspace-archived/docs
+./docs
+
+## Architecture Documents
+
+
+## ADR Documents
+
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-001-Technology-Stack.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-002-Database-Selection.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-003-Frontend-Framework.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-004-Backend-Framework.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-005-MultiTenancy.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-006-API-Design.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-007-Authentication.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-008-File-Storage.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-009-Deployment.md
+./11-WORKSPACES/triangle-black/00-ARCHITECT/DECISIONS/ADR-010-AI-Integration.md
+./11-WORKSPACES/triangle-black/08-OPERATIONS/READINESS/ENGINEERING/ADR-Review.md
+./11-WORKSPACES/triangle-black/10-AI/GOVERNANCE/ADR-Workflow.md
+./11-WORKSPACES/triangle-black/12-SHARED/TEMPLATES/ADR-Template.md
+./11-WORKSPACES/triangle-black/docs/adr/ADR-002-NOTIFICATION-CONSOLIDATION.md
+./11-WORKSPACES/triangle-black/docs/adr/ADR-003-APPROVAL-CONSOLIDATION.md
+./11-WORKSPACES/triangle-black/docs/transformation-v4/ADR-001-TENANCY.md
+
+## Status: REQUIRES_VALIDATION

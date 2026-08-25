@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "╔══════════════════════════════════════╗"
+echo "║     LOCAL AI ENGINEERING STATUS      ║"
+echo "╚══════════════════════════════════════╝"
+echo ""
+
+PROJECT_STATE=".ai/state/project-state.json"
+SPRINT_STATE=".ai/state/sprint-state.json"
+
+if [ -f "$PROJECT_STATE" ]; then
+  echo "── PROJECT ────────────────────────────"
+  python3 -c "
+import json, sys
+with open('$PROJECT_STATE') as f:
+    s = json.load(f)
+print(f'  Project : {s.get(\"project\",\"UNKNOWN\")}')
+print(f'  Phase   : {s.get(\"phase\",\"UNKNOWN\")}')
+print(f'  Status  : {s.get(\"status\",\"UNKNOWN\")}')
+print(f'  Sprint  : {s.get(\"active_sprint\",\"NONE\")}')
+print(f'  Task    : {s.get(\"active_task\",\"NONE\")}')
+print(f'  Updated : {s.get(\"last_updated\",\"NEVER\")}')
+" 2>/dev/null || cat "$PROJECT_STATE"
+else
+  echo "  project-state.json NOT FOUND"
+fi
+
+echo ""
+echo "── TESTS ──────────────────────────────"
+if [ -f "$PROJECT_STATE" ]; then
+  python3 -c "
+import json
+with open('$PROJECT_STATE') as f:
+    s = json.load(f)
+t = s.get('tests', {})
+print(f'  Status : {t.get(\"status\",\"UNKNOWN\")}')
+print(f'  Passed : {t.get(\"passed\",0)}')
+print(f'  Failed : {t.get(\"failed\",0)}')
+" 2>/dev/null || echo "  parse error"
+fi
+
+echo ""
+echo "── CHECKPOINT ─────────────────────────"
+if [ -f ".ai/reports/checkpoints/LATEST.md" ]; then
+  head -6 .ai/reports/checkpoints/LATEST.md
+else
+  echo "  No checkpoint found."
+fi
+
+echo ""
+echo "── GIT ────────────────────────────────"
+git status --short 2>/dev/null | head -10 || echo "  Not a git repo"
+echo "  Branch: $(git branch --show-current 2>/dev/null || echo UNKNOWN)"
+echo ""

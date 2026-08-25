@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "╔══════════════════════════════════╗"
+echo "║     VERIFICATION ENGINE         ║"
+echo "╚══════════════════════════════════╝"
+echo ""
+
+PASS=0
+FAIL=0
+
+run_gate() {
+  local gate="$1"
+  local cmd="$2"
+  echo "── GATE: $gate ────────────────────"
+  if eval "$cmd" 2>&1; then
+    echo "  ✓ PASSED"
+    PASS=$((PASS+1))
+  else
+    echo "  ✗ FAILED"
+    FAIL=$((FAIL+1))
+  fi
+  echo ""
+}
+
+# Python
+if [ -f "pyproject.toml" ] || [ -f "setup.cfg" ]; then
+  command -v ruff &>/dev/null && run_gate "Python Lint (ruff)" "ruff check ."
+  command -v mypy &>/dev/null && run_gate "Python Types (mypy)" "mypy . --ignore-missing-imports"
+  command -v pytest &>/dev/null && run_gate "Python Tests (pytest)" "pytest -x -q 2>&1 | tail -20"
+fi
+
+# Node/TypeScript
+if [ -f "package.json" ]; then
+  command -v tsc &>/dev/null && run_gate "TypeScript Check" "tsc --noEmit"
+  grep -q '"test"' package.json && run_gate "Node Tests" "npm test -- --passWithNoTests 2>&1 | tail -20"
+fi
+
+echo "══════════════════════════════════"
+echo "GATES PASSED: $PASS"
+echo "GATES FAILED: $FAIL"
+echo ""
+
+if [ "$FAIL" -gt 0 ]; then
+  echo "RESULT: ✗ VERIFICATION FAILED"
+  exit 1
+else
+  echo "RESULT: ✓ VERIFICATION PASSED"
+  exit 0
+fi

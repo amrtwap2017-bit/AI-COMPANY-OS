@@ -1,0 +1,29 @@
+{
+  "project": "",
+  "description": "",
+  "phase": "AUDIT",
+  "active_sprint": null,
+  "active_task": null,
+  "status": "INITIALIZING",
+  "last_checkpoint": null,
+  "last_commit": null,
+  "last_updated": "",
+  "tests": {
+    "status": "UNKNOWN",
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "architecture_status": "UNKNOWN",
+  "security_status": "UNKNOWN",
+  "documentation_status": "UNKNOWN",
+  "known_blockers": [],
+  "next_actions": [
+    "Complete baseline audit",
+    "Run repository scanner",
+    "Build documentation index",
+    "Define master roadmap"
+  ],
+  "forbidden_areas": [],
+  "critical_files": []
+}

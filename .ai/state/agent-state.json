@@ -1,0 +1,17 @@
+{
+  "session_id": "",
+  "session_started": "",
+  "current_mode": "IDLE",
+  "current_task": null,
+  "current_step": null,
+  "context_loaded": [],
+  "files_modified": [],
+  "files_reviewed": [],
+  "repair_attempts": 0,
+  "max_repair_attempts": 3,
+  "last_verification": null,
+  "verification_status": "NOT_RUN",
+  "confidence": "UNKNOWN",
+  "blockers": [],
+  "notes": []
+}

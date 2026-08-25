@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "╔══════════════════════════════════╗"
+echo "║       SPRINT STATUS             ║"
+echo "╚══════════════════════════════════╝"
+echo ""
+
+python3 -c "
+import json
+with open('.ai/state/sprint-state.json') as f:
+    s = json.load(f)
+print(f'  Sprint   : {s.get(\"current_sprint\", \"NONE\")}')
+print(f'  Status   : {s.get(\"sprint_status\", \"UNKNOWN\")}')
+print(f'  Total    : {s.get(\"tasks_total\", 0)}')
+print(f'  Done     : {s.get(\"tasks_complete\", 0)}')
+print(f'  Active   : {s.get(\"tasks_in_progress\", 0)}')
+print(f'  Blocked  : {s.get(\"tasks_blocked\", 0)}')
+print(f'  Remaining: {s.get(\"tasks_remaining\", 0)}')
+" 2>/dev/null || cat .ai/state/sprint-state.json
+
+echo ""
+echo "── Active Tasks ───────────────────"
+ls .ai/tasks/active/ 2>/dev/null | head -10 || echo "  (none)"
+
+echo ""
+echo "── Blocked Tasks ──────────────────"
+ls .ai/tasks/blocked/ 2>/dev/null | head -10 || echo "  (none)"
+
+echo ""
+echo "── Completed Tasks ────────────────"
+ls .ai/tasks/completed/ 2>/dev/null | wc -l

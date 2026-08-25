@@ -1,0 +1,16 @@
+{
+  "generated": "",
+  "total_documents": 0,
+  "documents": [
+    {
+      "path": "",
+      "type": "architecture|requirements|adr|standards|product|operations|sprint|task",
+      "domain": "",
+      "importance": "critical|high|medium|low",
+      "summary": "",
+      "when_to_load": "",
+      "related_files": [],
+      "keywords": []
+    }
+  ]
+}

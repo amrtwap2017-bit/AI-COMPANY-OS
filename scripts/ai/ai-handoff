@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+OUTFILE=".ai/sessions/HANDOFF-${TIMESTAMP//[:]/-}.md"
+
+{
+echo "# AI SESSION HANDOFF"
+echo ""
+echo "Generated: $TIMESTAMP"
+echo "Commit: $(git rev-parse --short HEAD 2>/dev/null || echo NONE)"
+echo "Branch: $(git branch --show-current 2>/dev/null || echo UNKNOWN)"
+echo ""
+echo "## Current State"
+cat .ai/state/project-state.json 2>/dev/null || echo "No project state"
+echo ""
+echo "## Sprint State"
+cat .ai/state/sprint-state.json 2>/dev/null || echo "No sprint state"
+echo ""
+echo "## Active Tasks"
+ls .ai/tasks/active/ 2>/dev/null || echo "None"
+echo ""
+echo "## Blocked Tasks"
+ls .ai/tasks/blocked/ 2>/dev/null || echo "None"
+echo ""
+echo "## Last Checkpoint"
+cat .ai/reports/checkpoints/LATEST.md 2>/dev/null || echo "No checkpoint"
+echo ""
+echo "## Git Status"
+git status --short 2>/dev/null || echo "Not a git repo"
+echo ""
+echo "## Next Agent Instructions"
+echo "1. Read .ai/constitution/engineering-rules.md"
+echo "2. Read .ai/state/project-state.json"
+echo "3. Read .ai/reports/checkpoints/LATEST.md"
+echo "4. Run: scripts/ai/ai-status"
+echo "5. Run: scripts/ai/ai-sprint-status"
+echo "6. Continue from the active task"
+} > "$OUTFILE"
+
+cp "$OUTFILE" .ai/sessions/LATEST-HANDOFF.md
+
+echo "Handoff written: $OUTFILE"
+echo "LATEST-HANDOFF.md updated."

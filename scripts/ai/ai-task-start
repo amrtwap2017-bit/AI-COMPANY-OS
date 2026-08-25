@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASK_ID="${1:?Usage: ai-task-start TASK-ID}"
+TASK_FILE=".ai/tasks/ready/${TASK_ID}.md"
+
+if [ ! -f "$TASK_FILE" ]; then
+  echo "ERROR: Task file not found: $TASK_FILE"
+  echo "Available tasks:"
+  ls .ai/tasks/ready/ 2>/dev/null || echo "  (none)"
+  exit 1
+fi
+
+echo "Starting task: $TASK_ID"
+
+# Move to active
+cp "$TASK_FILE" ".ai/tasks/active/${TASK_ID}.md"
+sed -i "s/Status | READY/Status | ACTIVE/" ".ai/tasks/active/${TASK_ID}.md"
+
+# Update agent state
+python3 -c "
+import json, datetime
+with open('.ai/state/agent-state.json') as f:
+    s = json.load(f)
+s['current_task'] = '$TASK_ID'
+s['current_mode'] = 'IMPLEMENT'
+s['current_step'] = 'DISCOVER'
+s['session_started'] = datetime.datetime.utcnow().isoformat()
+with open('.ai/state/agent-state.json', 'w') as f:
+    json.dump(s, f, indent=2)
+print('Agent state updated.')
+" 2>/dev/null || echo "agent-state.json not updated (python3 error)"
+
+echo ""
+echo "Task context:"
+cat ".ai/tasks/active/${TASK_ID}.md"

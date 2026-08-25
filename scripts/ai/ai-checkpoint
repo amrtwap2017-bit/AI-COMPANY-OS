@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASK_ID="${1:-UNKNOWN}"
+STATUS="${2:-COMPLETE}"
+TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo NO_COMMIT)"
+OUTFILE=".ai/reports/checkpoints/CHECKPOINT-${TASK_ID}-${TIMESTAMP//[:]/-}.md"
+
+echo "Creating checkpoint for task: $TASK_ID"
+echo "Status: $STATUS"
+echo "Commit: $COMMIT"
+
+{
+echo "# CHECKPOINT"
+echo ""
+echo "## Metadata"
+echo "| Field | Value |"
+echo "|-------|-------|"
+echo "| Task | $TASK_ID |"
+echo "| Status | $STATUS |"
+echo "| Timestamp | $TIMESTAMP |"
+echo "| Commit | $COMMIT |"
+echo ""
+echo "## Files Changed"
+git diff --name-only HEAD 2>/dev/null || echo "No git diff available"
+echo ""
+echo "## Git Status"
+git status --short 2>/dev/null || echo "No git status"
+echo ""
+echo "## Next Steps"
+echo "See .ai/state/project-state.json for next_actions"
+} > "$OUTFILE"
+
+cp "$OUTFILE" .ai/reports/checkpoints/LATEST.md
+
+echo "Checkpoint written: $OUTFILE"
+echo "LATEST.md updated."

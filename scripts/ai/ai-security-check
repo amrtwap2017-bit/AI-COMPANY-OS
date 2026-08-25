@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "╔══════════════════════════════════╗"
+echo "║     SECURITY PREFLIGHT CHECK    ║"
+echo "╚══════════════════════════════════╝"
+echo ""
+
+FAIL=0
+
+check() {
+  local label="$1"
+  local result="$2"
+  if [ "$result" -eq 0 ]; then
+    echo "  ✓ PASS — $label"
+  else
+    echo "  ✗ FAIL — $label"
+    FAIL=1
+  fi
+}
+
+echo "── Secrets Scan ───────────────────"
+SECRET_HITS=$(git diff HEAD 2>/dev/null | grep -iE "(password|secret|token|api_key|private_key)\s*=\s*['\"][^'\"]{5}" | wc -l || echo 0)
+check "No secrets in diff" "$([ "$SECRET_HITS" -eq 0 ] && echo 0 || echo 1)"
+
+echo ""
+echo "── .env in staging area ───────────"
+ENV_STAGED=$(git diff --cached --name-only 2>/dev/null | grep -c "\.env$" || echo 0)
+check "No .env files staged" "$([ "$ENV_STAGED" -eq 0 ] && echo 0 || echo 1)"
+
+echo ""
+echo "── Hardcoded localhost credentials "
+LOCALHOST_CRED=$(git diff HEAD 2>/dev/null | grep -cE "(password|secret).*localhost" || echo 0)
+check "No hardcoded localhost credentials" "$([ "$LOCALHOST_CRED" -eq 0 ] && echo 0 || echo 1)"
+
+echo ""
+if [ "$FAIL" -eq 1 ]; then
+  echo "RESULT: ✗ SECURITY CHECK FAILED — do not commit"
+  exit 1
+else
+  echo "RESULT: ✓ SECURITY CHECK PASSED"
+  exit 0
+fi
