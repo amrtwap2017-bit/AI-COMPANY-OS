@@ -3,6 +3,8 @@ import { Page } from '@playwright/test';
 export const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 export const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8030';
 export const API_URL = BACKEND_URL; // alias for E2E tests
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'amr@triangleblack.com';
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
 export function getSharedToken(): string {
   return process.env.E2E_TOKEN || '';
