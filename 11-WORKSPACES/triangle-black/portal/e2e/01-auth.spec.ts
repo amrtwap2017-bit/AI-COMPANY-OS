@@ -39,7 +39,7 @@ test.describe("Authentication", () => {
 
   test("backend login API returns token", async ({ request }) => {
     const res = await request.post(`${BACKEND_URL}/api/v1/auth/login/json`, {
-      data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
+      data: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD }),
       headers: { "Content-Type": "application/json" },
     });
     expect(res.status()).toBe(200);
