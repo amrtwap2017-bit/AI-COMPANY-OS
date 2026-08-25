@@ -1,6 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, Query, HTTPException
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+from src.core.database import SessionLocal
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -32,8 +33,8 @@ def inventory_check(
     out_of_stock = []
 
     try:
-        engine = create_engine(DB_URL)
-        with engine.connect() as conn:
+        db = SessionLocal()
+        with db as session:
             cat_params = {"hotel_id": hotel_id}
             where_parts = []
             for i, c in enumerate(categories):
@@ -42,7 +43,7 @@ def inventory_check(
                 where_parts.append(f"LOWER(ii.category) LIKE LOWER(:{key})")
             where_clause = " OR ".join(where_parts)
 
-            rows = conn.execute(text(
+            rows = session.execute(text(
                 "SELECT ii.id, ii.name, ii.category, ii.unit_of_measure, "
                 "ii.min_stock, ii.max_stock, ii.reorder_qty, "
                 "COALESCE(sb.qty_on_hand, 0) as qty_on_hand, "
@@ -101,9 +102,9 @@ class AutoPRRequest(BaseModel):
 @router.post("/supply/auto-pr", summary="Auto-create Purchase Request from Work Order")
 def auto_create_pr(body: AutoPRRequest):
     try:
-        engine = create_engine(DB_URL)
-        with engine.connect() as conn:
-            wo = conn.execute(text(
+        db = SessionLocal()
+        with db as session:
+            wo = session.execute(text(
                 "SELECT id, hotel_id, title, type, priority FROM work_orders WHERE id = :wid"
             ), {"wid": body.work_order_id}).fetchone()
 
@@ -120,7 +121,7 @@ def auto_create_pr(body: AutoPRRequest):
                 f"{body.notes}"
             ).strip()
 
-            conn.execute(text(
+            session.execute(text(
                 "INSERT INTO purchase_requests "
                 "(id, hotel_id, pr_number, requester, department, urgency, "
                 "status, priority, justification, lines, request_type, created_at, updated_at) "
