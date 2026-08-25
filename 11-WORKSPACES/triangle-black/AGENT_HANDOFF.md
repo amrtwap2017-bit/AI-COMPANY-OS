@@ -1798,3 +1798,59 @@ A-006: Observability (correlation IDs exist, SLOs missing)
 A-007: Raw SQL migration (progressive, by business value)
 A-008: Customer onboarding E2E
 A-009: Data import 2.0 (assets.score domain rule)
+
+## FINAL SESSION CLOSE — A-000 to A-004 — August 2026
+
+### GAPS CLOSED THIS SESSION
+| GAP | Description | Before | After | Status |
+|-----|-------------|--------|-------|--------|
+| GAP-001 | Tenant isolation | 62% | 100% | ✅ CLOSED |
+| GAP-004 | Rogue engines (ai_assistant, feature_flags) | 4 files | 0 files | ✅ CLOSED |
+| GAP-004 | main.py inline engines | 307 calls | 307 (deferred) | ⚠️ A-007 |
+
+### VERIFIED WORKING (This Session)
+- E2E full suite: 126/126 ✅
+- Targeted backend: 11/11 ✅
+- Build Guard: ✅ every commit
+- Tenant coverage: 107/107 = 100% ✅
+
+### MAIN.PY ENGINE DEBT — Action Required
+main.py has 307 create_engine() calls inside inline @app route functions.
+Pattern: each route handler does:
+  from sqlalchemy import text, create_engine
+  from sqlalchemy.orm import Session
+  import os
+  eng = create_engine(os.environ.get("DATABASE_URL","..."))
+  with eng.connect() as conn: ...
+
+THIS IS NOT EXTRACTED YET — deferred to A-007.
+Risk: connection pool exhaustion under load.
+Fix approach: Extract each inline route to proper router file using SessionLocal.
+
+### NEXT SPRINT SEQUENCE
+A-005: CI/CD GitHub Actions (HIGHEST VALUE — enables safe releases)
+A-006: Observability (OpenTelemetry + SLOs)
+A-007: main.py inline engine extraction (progressive — 10 routes/sprint)
+A-008: Customer onboarding E2E validation
+A-009: Data import 2.0 (assets.score domain rule)
+
+### HOW TO RUN NEXT SESSION
+bash START.sh
+curl -s http://localhost:8030/api/v1/health/ready
+.venv/bin/python -m pytest tests/test_health.py tests/commercial/test_sprint_d027_command_center.py -q --tb=no
+# Expected: 7 passed
+
+cd portal && npx playwright test e2e/01-auth.spec.ts --reporter=list
+# Expected: 9 passed
+
+### GAP REGISTER STATUS
+GAP-001 Tenant isolation:          ✅ CLOSED
+GAP-002 Raw SQL in routers:        ⚠️ Known, A-007
+GAP-003 main.py 307 SQL calls:     ⚠️ Known, A-007
+GAP-004 Rogue engine creations:    ✅ CLOSED (external) ⚠️ main.py A-007
+GAP-005 86 broad except blocks:    ⚠️ Known, A-007
+GAP-006 CI/CD:                     🔴 A-005 NEXT
+GAP-007 Staging:                   🔴 A-005
+GAP-008 Observability:             🔴 A-006
+GAP-009 Customer onboarding E2E:   🔴 A-008
+GAP-010 assets.score domain rule:  🔴 A-009
