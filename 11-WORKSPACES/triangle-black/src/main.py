@@ -8493,6 +8493,21 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: stock_api: {_e}")
 
+
+try:
+    from src.commercial.maintenance_api.router import router as _maint_api_r
+    app.include_router(_maint_api_r, prefix="/api/v1")
+    logger.info("  OK: maintenance_api (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: maintenance_api: {_e}")
+
+try:
+    from src.commercial.financial_api.router import router as _fin_api_r
+    app.include_router(_fin_api_r, prefix="/api/v1")
+    logger.info("  OK: financial_api (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: financial_api: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
