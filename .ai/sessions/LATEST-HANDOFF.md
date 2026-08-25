@@ -1,7 +1,7 @@
 # AI SESSION HANDOFF
 
-Generated: 2026-08-25T20:50:26Z
-Commit: ad25f0d5
+Generated: 2026-08-25T21:05:34Z
+Commit: ef00d9f3
 Branch: main
 
 ## Current State
@@ -9,20 +9,32 @@ Branch: main
   "project": "Triangle Black Enterprise Operations OS",
   "description": "Multi-tenant Enterprise SaaS for hospitality engineering. FastAPI + Next.js + PostgreSQL. Primary market: Egypt / Sharm El-Sheikh.",
   "phase": "COMMERCIAL_VALIDATION",
-  "active_sprint": null,
+  "active_sprint": "SPRINT-AI-OS-001",
   "active_task": null,
   "status": "ACTIVE",
-  "last_checkpoint": null,
-  "last_commit": "4fb04a1a",
-  "last_updated": "2026-08-25T20:04:54.500431+00:00",
+  "last_checkpoint": "2026-08-25T21:05:20Z",
+  "last_commit": "ef00d9f3",
+  "last_updated": "2026-08-25T21:05:21.047109+00:00",
   "tests": {
-    "status": "PASSING",
-    "runner": ".venv/bin/python -m pytest tests/ -q --tb=no (from workspace)",
+    "status": "PARTIAL_FAILURE",
+    "runner": ".venv/bin/python -m pytest tests/ -q --tb=short -m 'not live_http'",
     "test_files": 356,
-    "passed": 158,
-    "failed": 0,
-    "skipped": 0,
-    "note": "158+ passing. Run from 11-WORKSPACES/triangle-black/. Use absolute venv path."
+    "passed": 2387,
+    "failed": 30,
+    "skipped": 31,
+    "deselected": 78,
+    "last_run": "2026-08-25T20:59:21.218297+00:00",
+    "note": "30 failures are pre-existing and classified. 2387 passing. Baseline higher than documented in handoff.",
+    "known_failures": {
+      "test_sprint197_cache.py": "5 failures \u2014 TypeError, cache API mismatch \u2014 MEDIUM",
+      "test_sprint205_docker.py": "2 failures \u2014 Docker compose structure \u2014 LOW",
+      "test_sprint249_indexes_isolation.py": "1 failure \u2014 Alembic head mismatch \u2014 HIGH",
+      "test_sprint_c001_infrastructure.py": "1 failure \u2014 CI workflow file check \u2014 LOW",
+      "test_sprint_c002_e2e_infrastructure.py": "1 failure \u2014 Middleware whitelist \u2014 MEDIUM",
+      "test_sprint_n004_observability.py": "2 failures \u2014 Telemetry endpoint \u2014 MEDIUM",
+      "test_sprint_n005_operational_intelligence.py": "1 failure \u2014 OI endpoint \u2014 MEDIUM",
+      "test_sprint_p010_ai_operational_intelligence.py": "1 failure \u2014 AI director \u2014 MEDIUM"
+    }
   },
   "architecture_status": "CERTIFIED",
   "security_status": "CERTIFIED",
@@ -98,24 +110,23 @@ Branch: main
 }
 ## Sprint State
 {
-  "current_sprint": null,
-  "sprint_status": "NOT_STARTED",
-  "sprint_started": null,
+  "current_sprint": "SPRINT-AI-OS-001",
+  "sprint_status": "ACTIVE",
+  "sprint_started": "2026-08-25T20:59:26.966867+00:00",
   "sprint_target_end": null,
-  "tasks_total": 0,
+  "tasks_total": 1,
   "tasks_complete": 0,
-  "tasks_in_progress": 0,
+  "tasks_in_progress": 1,
   "tasks_blocked": 0,
-  "tasks_remaining": 0,
+  "tasks_remaining": 1,
   "acceptance_criteria_met": false,
   "tests_passing": false,
   "security_check": "PENDING",
   "architecture_check": "PENDING",
   "documentation_updated": false,
-  "checkpoint_created": false,
+  "checkpoint_created": true,
   "ready_to_close": false
 }
-
 ## Active Tasks
 TASK-AI-OS-001.md
 
@@ -127,44 +138,27 @@ TASK-AI-OS-001.md
 ## Metadata
 | Field | Value |
 |-------|-------|
-| Task | TASK-001 |
+| Task | TASK-AI-OS-001 |
 | Status | COMPLETE |
-| Timestamp | 2026-08-25T16:31:43Z |
-| Commit | fc06bdd7 |
+| Timestamp | 2026-08-25T21:05:20Z |
+| Commit | ef00d9f3 |
 
 ## Files Changed
+.ai/sessions/LATEST-HANDOFF.md
 
 ## Git Status
-?? .ai/reports/checkpoints/CHECKPOINT-TASK-001-2026-08-25T16-31-43Z.md
+ M .ai/sessions/LATEST-HANDOFF.md
+?? .ai/context/TASK-AI-OS-001.md
 
 ## Next Steps
-See .ai/state/project-state.json for next_actions
+See .ai/state/project-state.json → next_actions
 
 ## Git Status
-M  .ai/constitution/engineering-rules.md
-M  .ai/constitution/security-rules.md
-M  .ai/context/project.md
-M  .ai/intelligence/active-files.txt
-M  .ai/intelligence/api-routes.txt
-M  .ai/knowledge/critical-docs.json
-M  .ai/knowledge/index.json
-A  .ai/memory/discoveries/DISC-001-portal-ts-bugs.md
-A  .ai/memory/discoveries/DISC-002-hub-mcp-missing.md
-M  .ai/state/project-state.json
-A  .ai/tasks/TASK-TEMPLATE.md
-A  .ai/tasks/active/TASK-AI-OS-001.md
-A  .ai/tasks/ready/TASK-AI-OS-001.md
-M  .gitignore
- M brains/triangle-black/01-PROJECT-IDENTITY.md
-M  opencode.json
-M  scripts/ai/ai-checkpoint
-M  scripts/ai/ai-context
-M  scripts/ai/ai-index-docs
-M  scripts/ai/ai-plan-sprint
-M  scripts/ai/ai-scan
-M  scripts/ai/ai-task-create
-M  scripts/ai/ai-task-start
-M  scripts/ai/ai-verify
+ M .ai/reports/checkpoints/LATEST.md
+ M .ai/sessions/LATEST-HANDOFF.md
+ M .ai/state/project-state.json
+ M .ai/state/sprint-state.json
+?? .ai/context/TASK-AI-OS-001.md
 
 ## Next Agent Instructions
 1. Read .ai/constitution/engineering-rules.md
