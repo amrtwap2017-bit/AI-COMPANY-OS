@@ -23,7 +23,7 @@ def row_to_dict(row):
         return d
     return {}
 
-@router.get("/", summary="List work orders")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List work orders")
 def list_work_orders(
     hotel_id:      str = Depends(get_hotel_id),
     status:        Optional[str] = None,
@@ -67,30 +67,6 @@ def list_work_orders(
         pass
 
     return result
-
-
-@router.get("/", dependencies=[Depends(get_current_user)], summary="List work orders")
-def list_work_orders_root(
-    hotel_id:      str = Depends(get_hotel_id),
-    status:        Optional[str] = None,
-    priority:      Optional[str] = None,
-    technician_id: Optional[str] = None,
-    skip:          int = 0,
-    limit:         int = Query(default=500, le=1000),
-    db: Session = Depends(get_db),
-):
-    q = "SELECT * FROM work_orders WHERE 1=1"
-    params: dict = {}
-    # hotel_id always present from JWT (Sprint-249B tenant isolation)
-    q += " AND hotel_id = :hotel_id"
-    params["hotel_id"] = hotel_id
-    if status:        q += " AND status = :status";               params["status"]        = status
-    if priority:      q += " AND priority = :priority";           params["priority"]      = priority
-    if technician_id: q += " AND technician_id = :technician_id"; params["technician_id"] = technician_id
-    q += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
-    params["limit"] = limit; params["skip"] = skip
-    rows = db.execute(text(q), params).fetchall()
-    return [row_to_dict(r) for r in rows]
 
 
 @router.get("/sla-breached")

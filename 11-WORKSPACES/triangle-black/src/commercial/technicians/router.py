@@ -20,7 +20,7 @@ def row_to_dict(row):
         return d
     return {}
 
-@router.get("/", summary="List technicians")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List technicians")
 def list_technicians(
     hotel_id: str = Depends(get_hotel_id),
     is_active: Optional[bool] = None,
@@ -37,23 +37,6 @@ def list_technicians(
     rows = db.execute(text(q), params).fetchall()
     return [row_to_dict(r) for r in rows]
 
-
-@router.get("/", dependencies=[Depends(get_current_user)], summary="List technicians")
-def list_technicians_root(
-    hotel_id: str = Depends(get_hotel_id),
-    is_active: Optional[bool] = None,
-    skip:      int = 0,
-    limit:     int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-):
-    q = "SELECT * FROM technicians WHERE 1=1"
-    params: dict = {}
-    if hotel_id:             q += " AND hotel_id = :hotel_id";    params["hotel_id"]  = hotel_id
-    if is_active is not None:q += " AND is_active = :is_active";  params["is_active"] = is_active
-    q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
-    params["limit"] = limit; params["skip"] = skip
-    rows = db.execute(text(q), params).fetchall()
-    return [row_to_dict(r) for r in rows]
 
 @router.get("/{technician_id}", summary="Get technician")
 def get_technician(technician_id: str, db: Session = Depends(get_db)):

@@ -21,7 +21,7 @@ def row_to_dict(row):
         return d
     return {}
 
-@router.get("/", summary="List assets")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List assets")
 def list_assets(
     hotel_id: str = Depends(get_hotel_id),
     category: Optional[str] = None,
@@ -63,27 +63,6 @@ def list_assets(
 
     return result
 
-
-@router.get("/", dependencies=[Depends(get_current_user)], summary="List assets")
-def list_assets_root(
-    hotel_id: str = Depends(get_hotel_id),
-    category: Optional[str] = None,
-    status:   Optional[str] = None,
-    skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
-    db: Session = Depends(get_db),
-):
-    q = "SELECT * FROM assets WHERE 1=1"
-    params: dict = {}
-    # hotel_id always from JWT (Sprint-252)
-    q += " AND hotel_id = :hotel_id"
-    params["hotel_id"] = hotel_id
-    if category: q += " AND category = :category"; params["category"] = category
-    if status:   q += " AND status = :status";     params["status"]   = status
-    q += " ORDER BY name ASC LIMIT :limit OFFSET :skip"
-    params["limit"] = limit; params["skip"] = skip
-    rows = db.execute(text(q), params).fetchall()
-    return [row_to_dict(r) for r in rows]
 
 @router.get("/tree", summary="Asset hierarchy tree")
 def asset_tree(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_db)):
