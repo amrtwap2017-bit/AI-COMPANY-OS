@@ -922,29 +922,30 @@ except Exception as e:
 
 
 # ── Sprint 149: PM Plans + Payment Tracking ──────────────────────────────────
-@app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 
 @app.get("/api/v1/pm-plans/", tags=["maintenance"])
 @app.get("/api/v1/pm-plans", tags=["maintenance"])
-def list_pm_plans_alias(
-    hotel_id: str = _Depends(_get_hotel_id),
-    status: str = None,
-    limit: int = _Query(default=50, le=200),
-    db: _Session = _Depends(_get_db),
-):
-    """Alias — canonical route is /api/v1/maintenance/pm-plans"""
-    try:
-        q = "SELECT * FROM maintenance_plans WHERE hotel_id = :hid"
-        params = {"hid": hotel_id}
-        if status:
-            q += " AND status = :s"
-            params["s"] = status
-        q += " ORDER BY next_due_date LIMIT :lim"
-        params["lim"] = limit
-        rows = db.execute(_text(q), params).fetchall()
-        return [dict(r._mapping) for r in rows]
-    except Exception:
-        return []
+def list_pm_plans_short(hotel_id: str = None, status: str = None, limit: int = 50):
+    """Short alias for /api/v1/maintenance/pm-plans — A-001 fix"""
+    from sqlalchemy import text as _sql_t, create_engine as _ce
+    from sqlalchemy.orm import Session as _SS
+    import os
+    _eng = _ce(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    with _SS(_eng) as _db:
+        try:
+            _q = "SELECT * FROM maintenance_plans"
+            _p = {}
+            if hotel_id:
+                _q += " WHERE hotel_id = :hid"
+                _p["hid"] = hotel_id
+            _q += " ORDER BY created_at DESC LIMIT :l"
+            _p["l"] = limit
+            _rows = _db.execute(_sql_t(_q), _p).fetchall()
+            return [dict(r._mapping) for r in _rows]
+        except Exception:
+            return []
+
+@app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
 
 
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])

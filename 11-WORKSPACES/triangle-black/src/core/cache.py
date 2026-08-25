@@ -68,9 +68,22 @@ def _get_redis():
     return _redis_client if _redis_available else None
 
 # ── Public cache API ──────────────────────────────────────────────────────────
-def make_cache_key(prefix: str, hotel_id: str, *extra_args) -> str:
-    suffix = ":".join([str(a) for a in extra_args])
-    return f"tenant:{hotel_id}:{prefix}:{suffix}" if suffix else f"tenant:{hotel_id}:{prefix}"
+def make_cache_key(prefix: str, hotel_id: str, *extra_args, **kwargs) -> str:
+    """Build a deterministic, tenant-scoped cache key.
+
+    Accepts both positional extra args and keyword args.
+    Keyword args are sorted for determinism (same kwargs, any order = same key).
+
+    Examples:
+        make_cache_key("assets", "hotel-001")
+        make_cache_key("assets", "hotel-001", "type-A")
+        make_cache_key("work-orders", "hotel-001", limit=10, status="open")
+    """
+    parts = [str(a) for a in extra_args]
+    if kwargs:
+        parts += [f"{k}={v}" for k, v in sorted(kwargs.items())]
+    suffix = ":".join(parts)
+    return f"tb:{hotel_id}:{prefix}:{suffix}" if suffix else f"tb:{hotel_id}:{prefix}"
 
 def cache_get(key: str) -> Optional[Any]:
     r = _get_redis()
