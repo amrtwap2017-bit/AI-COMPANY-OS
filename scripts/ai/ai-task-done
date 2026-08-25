@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASK_ID="${1:?Usage: ai-task-done TASK-ID}"
+TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+echo "Completing task: $TASK_ID"
+
+ACTIVE_FILE=".ai/tasks/active/${TASK_ID}.md"
+DONE_DIR=".ai/tasks/completed"
+
+if [ ! -f "$ACTIVE_FILE" ]; then
+  echo "ERROR: Task not in active state: $ACTIVE_FILE"
+  exit 1
+fi
+
+# Move to completed
+mkdir -p "$DONE_DIR"
+cp "$ACTIVE_FILE" "$DONE_DIR/${TASK_ID}-${TIMESTAMP//[:]/-}.md"
+sed -i "s/Status | ACTIVE/Status | DONE/" "$DONE_DIR/${TASK_ID}-${TIMESTAMP//[:]/-}.md"
+rm "$ACTIVE_FILE"
+
+# Update sprint state
+python3 - << PYEOF
+import json
+from pathlib import Path
+
+state_file = Path('.ai/state/sprint-state.json')
+try:
+    s = json.loads(state_file.read_text())
+    s['tasks_complete'] = s.get('tasks_complete', 0) + 1
+    s['tasks_in_progress'] = max(0, s.get('tasks_in_progress', 0) - 1)
+    s['tasks_remaining'] = max(0, s.get('tasks_remaining', 0) - 1)
+    state_file.write_text(json.dumps(s, indent=2))
+    print(f"Sprint state updated. Completed: {s['tasks_complete']}/{s['tasks_total']}")
+except Exception as e:
+    print(f"Warning: could not update sprint state: {e}")
+PYEOF
+
+echo "Task $TASK_ID marked DONE."
+echo ""
+echo "Next steps:"
+echo "  1. bash scripts/ai/ai-checkpoint $TASK_ID COMPLETE"
+echo "  2. bash scripts/ai/ai-verify"
+echo "  3. bash scripts/ai/ai-security-check"
+echo "  4. git add && git commit"

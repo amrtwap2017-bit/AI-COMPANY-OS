@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""
+AI-COMPANY-OS — Task Creator
+Creates a structured task file from command-line arguments.
+Usage: python3 scripts/ai/ai-task-create TASK-ID SPRINT-ID "Title" LOW|MEDIUM|HIGH|CRITICAL
+"""
+import sys
+from pathlib import Path
+from datetime import datetime
+
+ROOT = Path(__file__).parent.parent.parent
+AI_DIR = ROOT / ".ai"
+
+def main():
+    if len(sys.argv) < 5:
+        print("Usage: ai-task-create TASK-ID SPRINT-ID 'Title' RISK-LEVEL")
+        print("       RISK-LEVEL: LOW | MEDIUM | HIGH | CRITICAL")
+        sys.exit(1)
+
+    task_id = sys.argv[1]
+    sprint_id = sys.argv[2]
+    title = sys.argv[3]
+    risk = sys.argv[4].upper()
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+    task_dir = AI_DIR / "tasks" / "ready"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    task_file = task_dir / f"{task_id}.md"
+
+    if task_file.exists():
+        print(f"ERROR: Task already exists: {task_file}")
+        sys.exit(1)
+
+    template = f"""# {task_id} — {title}
+
+## Metadata
+| Field | Value |
+|-------|-------|
+| ID | {task_id} |
+| Sprint | {sprint_id} |
+| Status | READY |
+| Risk | {risk} |
+| Created | {today} |
+| Updated | {today} |
+
+## Purpose
+[One sentence: what does this task accomplish?]
+
+## Files Likely Affected
+- [list specific files, e.g. 11-WORKSPACES/triangle-black/api/...]
+- [tests/...]
+
+## Files Forbidden
+- DO NOT TOUCH: [list protected files or directories]
+- DO NOT TOUCH: authentication middleware
+- DO NOT TOUCH: tenant isolation logic
+
+## Dependencies
+- [TASK-ID] must complete first, or NONE
+
+## Implementation Steps
+1. [READ] Inspect relevant files (no modifications)
+2. [PLAN] Confirm understanding with human
+3. [IMPLEMENT] Make only the listed change
+4. [TEST] Run: bash scripts/ai/ai-verify
+5. [REVIEW] Check diff: git diff
+6. [COMMIT] Only after all gates pass
+
+## Acceptance Criteria
+- [ ] AC-001: [specific, testable criterion]
+- [ ] AC-002: [specific, testable criterion]
+
+## Tests Required
+- [ ] Unit: [specific test file or function]
+- [ ] Integration: [specific test]
+- [ ] Regression: existing tests still pass
+
+## Security Considerations
+[N/A or specific security check this task requires]
+
+## Expected Output
+[Exactly what should be different when this task is done — be specific]
+
+## Repair Limit
+MAX_ATTEMPTS: 3
+If 3 consecutive attempts fail → STOP → create failure report → wait for human
+
+## Notes
+[Any additional context, links to documentation, or warnings]
+"""
+
+    task_file.write_text(template)
+    print(f"Task created: {task_file}")
+    print(f"\nNext steps:")
+    print(f"  1. Edit {task_file} to fill in details")
+    print(f"  2. Run: bash scripts/ai/ai-task-start {task_id}")
+
+if __name__ == "__main__":
+    main()

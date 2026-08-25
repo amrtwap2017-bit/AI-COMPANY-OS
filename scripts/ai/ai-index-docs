@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""
+AI-COMPANY-OS — Document Intelligence Indexer
+Builds .ai/knowledge/index.json from active documentation.
+Classifies documents by type, domain, and importance.
+"""
+import json
+import os
+import re
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+AI_DIR = ROOT / ".ai"
+KNOWLEDGE_DIR = AI_DIR / "knowledge"
+KNOWLEDGE_DIR.mkdir(parents=True, exist_ok=True)
+
+# ── Classification rules ─────────────────────────────────────
+RULES = [
+    # (pattern_in_path, type, domain, importance, when_to_load)
+    (r"AGENTS\.md$",          "agent",        "ai-protocol",    "critical", "every_session"),
+    (r"CLAUDE\.md$",          "agent",        "ai-protocol",    "critical", "every_session"),
+    (r"ADR[-_]",              "adr",          "architecture",   "high",     "architecture_tasks"),
+    (r"architecture",         "architecture", "architecture",   "high",     "architecture_tasks"),
+    (r"ARCHITECT",            "architecture", "architecture",   "high",     "architecture_tasks"),
+    (r"sprint",               "sprint",       "planning",       "high",     "sprint_start"),
+    (r"SPRINT",               "sprint",       "planning",       "high",     "sprint_start"),
+    (r"task",                 "task",         "planning",       "medium",   "task_execution"),
+    (r"TASK",                 "task",         "planning",       "medium",   "task_execution"),
+    (r"security",             "security",     "security",       "critical", "security_review"),
+    (r"SECURITY",             "security",     "security",       "critical", "security_review"),
+    (r"database|migration|schema", "database", "data",         "high",     "database_tasks"),
+    (r"api|API|route|Route",  "api",          "api",            "high",     "api_tasks"),
+    (r"test|TEST|spec",       "testing",      "testing",        "medium",   "test_tasks"),
+    (r"deploy|DEPLOY|docker|Docker", "ops",   "infrastructure", "high",     "deployment_tasks"),
+    (r"README",               "readme",       "general",        "medium",   "project_start"),
+    (r"ROADMAP|roadmap",      "roadmap",      "planning",       "critical", "sprint_planning"),
+    (r"HANDOFF|handoff",      "handoff",      "session",        "critical", "session_start"),
+    (r"checkpoint|CHECKPOINT","checkpoint",   "session",        "high",     "session_start"),
+]
+
+EXCLUDE_PATHS = [
+    ".venv", "node_modules", "90-ARCHIVE", "00-MIGRATION",
+    ".git", "dist", ".next", "build", "backups", "playwright",
+    "__pycache__"
+]
+
+def classify(path_str: str) -> dict:
+    for pattern, doc_type, domain, importance, when in RULES:
+        if re.search(pattern, path_str, re.IGNORECASE):
+            return {
+                "type": doc_type,
+                "domain": domain,
+                "importance": importance,
+                "when_to_load": when
+            }
+    return {
+        "type": "general",
+        "domain": "general",
+        "importance": "low",
+        "when_to_load": "on_demand"
+    }
+
+def extract_summary(filepath: Path) -> str:
+    try:
+        text = filepath.read_text(errors="ignore")
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        for i, line in enumerate(lines[:20]):
+            if line.startswith("#"):
+                # Return the heading + next meaningful line
+                for j in range(i+1, min(i+5, len(lines))):
+                    if lines[j] and not lines[j].startswith("#"):
+                        return f"{line.lstrip('#').strip()} — {lines[j][:80]}"
+                return line.lstrip('#').strip()[:100]
+        return lines[0][:100] if lines else ""
+    except Exception:
+        return ""
+
+def should_exclude(path_str: str) -> bool:
+    return any(ex in path_str for ex in EXCLUDE_PATHS)
+
+def main():
+    docs = []
+    active_docs_file = AI_DIR / "intelligence" / "active-docs.txt"
+
+    if active_docs_file.exists():
+        paths = [Path(p.strip()) for p in active_docs_file.read_text().splitlines() if p.strip()]
+    else:
+        paths = list(ROOT.rglob("*.md"))
+
+    for path in paths:
+        path_str = str(path)
+        if should_exclude(path_str):
+            continue
+        if not path.exists():
+            continue
+
+        classification = classify(path_str)
+        rel_path = str(path).replace(str(ROOT) + "/", "")
+
+        docs.append({
+            "path": rel_path,
+            "type": classification["type"],
+            "domain": classification["domain"],
+            "importance": classification["importance"],
+            "when_to_load": classification["when_to_load"],
+            "summary": extract_summary(path),
+            "size_bytes": path.stat().st_size,
+            "related_files": [],
+            "keywords": []
+        })
+
+    # Sort by importance
+    order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    docs.sort(key=lambda d: (order.get(d["importance"], 9), d["path"]))
+
+    index = {
+        "generated": datetime.utcnow().isoformat() + "Z",
+        "total_documents": len(docs),
+        "by_type": {},
+        "by_domain": {},
+        "documents": docs
+    }
+
+    # Stats
+    for doc in docs:
+        index["by_type"][doc["type"]] = index["by_type"].get(doc["type"], 0) + 1
+        index["by_domain"][doc["domain"]] = index["by_domain"].get(doc["domain"], 0) + 1
+
+    output = KNOWLEDGE_DIR / "index.json"
+    output.write_text(json.dumps(index, indent=2))
+
+    print(f"Document index written: {output}")
+    print(f"Total documents indexed: {len(docs)}")
+    print("\nBy type:")
+    for t, count in sorted(index["by_type"].items()):
+        print(f"  {t:20s}: {count}")
+    print("\nBy domain:")
+    for d, count in sorted(index["by_domain"].items()):
+        print(f"  {d:20s}: {count}")
+
+    # Write critical docs list separately for fast loading
+    critical = [d for d in docs if d["importance"] == "critical"]
+    (KNOWLEDGE_DIR / "critical-docs.json").write_text(
+        json.dumps(critical, indent=2)
+    )
+    print(f"\nCritical documents: {len(critical)}")
+
+if __name__ == "__main__":
+    main()

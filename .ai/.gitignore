@@ -1,0 +1,10 @@
+# Large generated intelligence files — regenerate with scripts/ai/ai-scan
+intelligence/all-files.txt
+intelligence/test-files.txt
+knowledge/all-docs.txt
+
+# Session files older than LATEST
+sessions/HANDOFF-*.md
+
+# Checkpoint files older than LATEST
+reports/checkpoints/CHECKPOINT-*.md

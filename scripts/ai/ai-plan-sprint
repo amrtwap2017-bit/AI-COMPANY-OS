@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""
+AI-COMPANY-OS — Sprint Planner
+Reads current state and generates a structured sprint plan.
+Usage: python3 scripts/ai/ai-plan-sprint SPRINT-ID "Sprint Title"
+"""
+import json
+import sys
+from pathlib import Path
+from datetime import datetime
+
+ROOT = Path(__file__).parent.parent.parent
+AI_DIR = ROOT / ".ai"
+
+def load_json(path):
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def main():
+    if len(sys.argv) < 3:
+        print("Usage: ai-plan-sprint SPRINT-ID 'Sprint Title'")
+        sys.exit(1)
+
+    sprint_id = sys.argv[1]
+    sprint_title = sys.argv[2]
+    state = load_json(AI_DIR / "state" / "project-state.json")
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+    sprint_dir = AI_DIR / "sprints" / "active"
+    sprint_dir.mkdir(parents=True, exist_ok=True)
+    sprint_file = sprint_dir / f"{sprint_id}.md"
+
+    template = f"""# {sprint_id} — {sprint_title}
+
+## Metadata
+| Field | Value |
+|-------|-------|
+| ID | {sprint_id} |
+| Status | PLANNED |
+| Started | |
+| Target End | |
+| Phase | {state.get('phase', 'UNKNOWN')} |
+| Created | {today} |
+
+## Objective
+[One sentence: what does this sprint accomplish?]
+
+## Business Outcome
+[What does the user/product gain?]
+
+## Technical Outcome
+[What does the codebase gain?]
+
+## Dependencies
+- [ ] Previous sprint gates passed
+- [ ] Architecture review complete
+
+## Preconditions
+- [ ] Working tree clean
+- [ ] Tests passing at sprint start
+- [ ] Security check passed at sprint start
+
+## Scope
+[List what IS included]
+
+## Out of Scope
+[List what is NOT included — be explicit]
+
+## Tasks
+| ID | Title | Status | Risk | Files |
+|----|-------|--------|------|-------|
+| TASK-001 | | READY | LOW | |
+| TASK-002 | | READY | MEDIUM | |
+
+## Acceptance Criteria
+- [ ] AC-001
+- [ ] AC-002
+- [ ] AC-003
+
+## Test Plan
+Which tests must pass at sprint close?
+- [ ] Unit tests: all passing
+- [ ] Integration tests: all passing
+- [ ] E2E: affected flows passing
+- [ ] Regression: no regressions
+
+## Security Checks
+- [ ] Security preflight: `bash scripts/ai/ai-security-check`
+- [ ] No new secrets committed
+- [ ] Authorization unchanged or reviewed
+
+## Architecture Checks
+- [ ] No domain leakage
+- [ ] No bypassed repository pattern
+- [ ] ADR created if architectural decision made
+
+## Documentation Requirements
+- [ ] .ai/context/project.md updated if needed
+- [ ] Relevant AGENTS.md updated if needed
+- [ ] ADR created if needed
+
+## Risk Register
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| venv mismatch | LOW | HIGH | Always use TB venv for tests |
+| Context overflow | MEDIUM | MEDIUM | Use ai-context script |
+
+## Rollback Strategy
+`git revert` individual task commits if needed.
+Sprint branch can be abandoned and recreated.
+
+## Definition of Done
+- [ ] All P0 tasks DONE
+- [ ] All acceptance criteria satisfied
+- [ ] All tests passing
+- [ ] `bash scripts/ai/ai-security-check` PASSES
+- [ ] Architecture review done
+- [ ] Documentation updated
+- [ ] `bash scripts/ai/ai-checkpoint {sprint_id}-CLOSE COMPLETE` run
+- [ ] Git state clean
+- [ ] Sprint report generated
+"""
+
+    sprint_file.write_text(template)
+    print(f"Sprint plan created: {sprint_file}")
+    print(f"\nNext steps:")
+    print(f"  1. Edit {sprint_file} to fill in objectives and tasks")
+    print(f"  2. Create task files in .ai/tasks/ready/")
+    print(f"  3. Run: bash scripts/ai/ai-sprint-status")
+
+if __name__ == "__main__":
+    main()

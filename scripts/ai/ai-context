@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""
+AI-COMPANY-OS — Task Context Builder
+Builds a focused context package for a specific task.
+Respects a token budget to avoid overflowing the model context window.
+Usage: python3 scripts/ai/ai-context TASK-ID [--budget 8000]
+"""
+import json
+import sys
+import argparse
+from pathlib import Path
+from datetime import datetime
+
+ROOT = Path(__file__).parent.parent.parent
+AI_DIR = ROOT / ".ai"
+
+# Rough token estimate: 1 token ≈ 4 chars
+def estimate_tokens(text: str) -> int:
+    return len(text) // 4
+
+def load_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+def load_text(path: Path, max_lines: int = 100) -> str:
+    try:
+        lines = path.read_text(errors="ignore").splitlines()
+        if len(lines) > max_lines:
+            return "\n".join(lines[:max_lines]) + f"\n... [{len(lines)-max_lines} lines truncated]"
+        return "\n".join(lines)
+    except Exception:
+        return f"[Could not read: {path}]"
+
+def find_task(task_id: str) -> Path | None:
+    for subdir in ["active", "ready", "review", "blocked"]:
+        p = AI_DIR / "tasks" / subdir / f"{task_id}.md"
+        if p.exists():
+            return p
+    return None
+
+def build_context(task_id: str, budget: int = 8000) -> str:
+    sections = []
+    used_tokens = 0
+
+    def add(title: str, content: str, priority: int = 5) -> bool:
+        nonlocal used_tokens
+        block = f"\n{'='*60}\n# {title}\n{'='*60}\n{content}\n"
+        tokens = estimate_tokens(block)
+        if used_tokens + tokens > budget and priority > 2:
+            sections.append(f"\n[TRUNCATED: {title} — {tokens} tokens would exceed budget]")
+            return False
+        sections.append(block)
+        used_tokens += tokens
+        return True
+
+    # ── LEVEL 0: Constitution (always loaded, priority 1) ────
+    const_path = AI_DIR / "constitution" / "engineering-rules.md"
+    if const_path.exists():
+        add("ENGINEERING CONSTITUTION", load_text(const_path, 40), priority=1)
+
+    # ── LEVEL 1: Project summary (always loaded, priority 1) ─
+    project_path = AI_DIR / "context" / "project.md"
+    if project_path.exists():
+        add("PROJECT CONTEXT", load_text(project_path, 50), priority=1)
+
+    # ── LEVEL 2: Project state (always loaded, priority 1) ───
+    state = load_json(AI_DIR / "state" / "project-state.json")
+    sprint_state = load_json(AI_DIR / "state" / "sprint-state.json")
+    state_summary = f"""Phase: {state.get('phase','UNKNOWN')}
+Status: {state.get('status','UNKNOWN')}
+Sprint: {state.get('active_sprint','NONE')}
+Task: {state.get('active_task','NONE')}
+Architecture: {state.get('architecture_status','UNKNOWN')}
+Security: {state.get('security_status','UNKNOWN')}
+Sprint Status: {sprint_state.get('sprint_status','UNKNOWN')}
+Tasks Done: {sprint_state.get('tasks_complete',0)}/{sprint_state.get('tasks_total',0)}"""
+    add("CURRENT STATE", state_summary, priority=1)
+
+    # ── LEVEL 3: Task definition (always loaded, priority 1) ─
+    task_path = find_task(task_id)
+    if task_path:
+        add(f"ACTIVE TASK: {task_id}", load_text(task_path, 150), priority=1)
+    else:
+        add(f"TASK: {task_id}", f"WARNING: Task file not found for {task_id}\nSearched: .ai/tasks/active|ready|review|blocked/", priority=1)
+
+    # ── LEVEL 4: Sprint definition ───────────────────────────
+    sprint_id = sprint_state.get("current_sprint")
+    if sprint_id:
+        sprint_path = AI_DIR / "sprints" / "active" / f"{sprint_id}.md"
+        if sprint_path.exists():
+            add(f"SPRINT: {sprint_id}", load_text(sprint_path, 80), priority=2)
+
+    # ── LEVEL 5: Last checkpoint ─────────────────────────────
+    checkpoint = AI_DIR / "reports" / "checkpoints" / "LATEST.md"
+    if checkpoint.exists():
+        add("LAST CHECKPOINT", load_text(checkpoint, 40), priority=2)
+
+    # ── LEVEL 6: Relevant files ──────────────────────────────
+    # This section reads files listed in the task under "Files Likely Affected"
+    if task_path and task_path.exists():
+        task_text = task_path.read_text(errors="ignore")
+        file_section = False
+        relevant_files = []
+        for line in task_text.splitlines():
+            if "Files Likely Affected" in line:
+                file_section = True
+                continue
+            if file_section and line.startswith("##"):
+                break
+            if file_section and line.strip().startswith("-"):
+                fpath = line.strip().lstrip("-").strip()
+                if fpath and not fpath.startswith("DO NOT"):
+                    relevant_files.append(fpath)
+
+        for fpath in relevant_files[:8]:  # Max 8 files
+            full_path = ROOT / fpath
+            if full_path.exists():
+                add(f"FILE: {fpath}", load_text(full_path, 80), priority=3)
+            else:
+                sections.append(f"\n[FILE NOT FOUND: {fpath}]")
+
+    # ── LEVEL 7: Quality gates reminder ──────────────────────
+    gates = AI_DIR / "constitution" / "quality-gates.md"
+    if gates.exists():
+        add("QUALITY GATES", load_text(gates, 30), priority=4)
+
+    # ── Footer ────────────────────────────────────────────────
+    footer = f"""
+{'='*60}
+# CONTEXT SUMMARY
+{'='*60}
+Task: {task_id}
+Budget: {budget} tokens
+Used: ~{used_tokens} tokens
+Generated: {datetime.utcnow().isoformat()}Z
+Sections: {len(sections)}
+
+## OPERATING MODE
+READ → PLAN → [APPROVE] → IMPLEMENT → VERIFY → REVIEW → COMMIT → CHECKPOINT
+
+## FORBIDDEN
+- Modify files outside task scope
+- Commit without passing all gates
+- Continue after MAX_REPAIR_ATTEMPTS=3
+- Hallucinate files, APIs, or decisions not verified by inspection
+"""
+    sections.append(footer)
+
+    return "\n".join(sections)
+
+def main():
+    parser = argparse.ArgumentParser(description="Build task context package")
+    parser.add_argument("task_id", help="Task ID (e.g. TASK-001)")
+    parser.add_argument("--budget", type=int, default=8000, help="Token budget (default: 8000)")
+    parser.add_argument("--save", action="store_true", help="Save to .ai/context/TASK-ID.md")
+    args = parser.parse_args()
+
+    context = build_context(args.task_id, args.budget)
+    print(context)
+
+    if args.save:
+        out = AI_DIR / "context" / f"{args.task_id}.md"
+        out.write_text(context)
+        print(f"\nContext saved: {out}")
+
+if __name__ == "__main__":
+    main()

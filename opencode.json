@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/qwen2.5-coder-32k",
+  "instructions": [
+    "AGENTS.md",
+    ".ai/constitution/engineering-rules.md",
+    ".ai/constitution/security-rules.md",
+    ".ai/constitution/quality-gates.md"
+  ],
+  "context": {
+    "files": [
+      ".ai/state/project-state.json",
+      ".ai/reports/checkpoints/LATEST.md",
+      ".ai/context/project.md"
+    ]
+  }
+}

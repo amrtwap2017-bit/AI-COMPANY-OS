@@ -8,33 +8,46 @@ echo ""
 
 FAIL=0
 
-check() {
-  local label="$1"
-  local result="$2"
-  if [ "$result" -eq 0 ]; then
-    echo "  ✓ PASS — $label"
-  else
-    echo "  ✗ FAIL — $label"
-    FAIL=1
-  fi
-}
+check_pass() { echo "  ✓ PASS — $1"; }
+check_fail() { echo "  ✗ FAIL — $1"; FAIL=1; }
 
 echo "── Secrets Scan ───────────────────"
-SECRET_HITS=$(git diff HEAD 2>/dev/null | grep -iE "(password|secret|token|api_key|private_key)\s*=\s*['\"][^'\"]{5}" | wc -l || echo 0)
-check "No secrets in diff" "$([ "$SECRET_HITS" -eq 0 ] && echo 0 || echo 1)"
+SECRET_HITS=$(git diff HEAD 2>/dev/null \
+  | grep -iE "(password|secret|token|api_key|private_key)\s*=\s*['\"][^'\"]{5}" \
+  | wc -l | tr -d '[:space:]') || SECRET_HITS=0
+if [ "${SECRET_HITS}" = "0" ]; then check_pass "No secrets in diff"
+else check_fail "Secrets detected in diff (${SECRET_HITS} hits)"; fi
 
 echo ""
 echo "── .env in staging area ───────────"
-ENV_STAGED=$(git diff --cached --name-only 2>/dev/null | grep -c "\.env$" || echo 0)
-check "No .env files staged" "$([ "$ENV_STAGED" -eq 0 ] && echo 0 || echo 1)"
+ENV_STAGED=$(git diff --cached --name-only 2>/dev/null \
+  | grep -c "\.env$" | tr -d '[:space:]') || ENV_STAGED=0
+if [ "${ENV_STAGED}" = "0" ]; then check_pass "No .env files staged"
+else check_fail ".env file staged for commit"; fi
 
 echo ""
-echo "── Hardcoded localhost credentials "
-LOCALHOST_CRED=$(git diff HEAD 2>/dev/null | grep -cE "(password|secret).*localhost" || echo 0)
-check "No hardcoded localhost credentials" "$([ "$LOCALHOST_CRED" -eq 0 ] && echo 0 || echo 1)"
+echo "── Hardcoded localhost credentials ─"
+LOCALHOST_CRED=$(git diff HEAD 2>/dev/null \
+  | grep -cE "(password|secret).*localhost" | tr -d '[:space:]') || LOCALHOST_CRED=0
+if [ "${LOCALHOST_CRED}" = "0" ]; then check_pass "No hardcoded localhost credentials"
+else check_fail "Localhost credentials detected"; fi
 
 echo ""
-if [ "$FAIL" -eq 1 ]; then
+echo "── .env.* files untracked ─────────"
+ENV_UNTRACKED=$(git status --short 2>/dev/null \
+  | grep -cE "^\?\? .*\.env" | tr -d '[:space:]') || ENV_UNTRACKED=0
+if [ "${ENV_UNTRACKED}" = "0" ]; then check_pass "No untracked .env files"
+else check_fail "Untracked .env files present"; fi
+
+echo ""
+echo "── Private keys in diff ───────────"
+PRIVKEY=$(git diff HEAD 2>/dev/null \
+  | grep -c "BEGIN.*PRIVATE KEY" | tr -d '[:space:]') || PRIVKEY=0
+if [ "${PRIVKEY}" = "0" ]; then check_pass "No private keys in diff"
+else check_fail "Private key detected in diff"; fi
+
+echo ""
+if [ "${FAIL}" -eq 1 ]; then
   echo "RESULT: ✗ SECURITY CHECK FAILED — do not commit"
   exit 1
 else

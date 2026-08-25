@@ -1,29 +1,66 @@
 {
-  "project": "",
-  "description": "",
-  "phase": "AUDIT",
+  "project": "AI-COMPANY-OS / Triangle Black",
+  "description": "Enterprise AI Company OS with Triangle Black as primary workspace. FastAPI backend + Next.js frontend + PostgreSQL. Local AI engineering via Ollama/OpenCode/Qwen.",
+  "phase": "ENGINEERING_OS_BUILD",
   "active_sprint": null,
   "active_task": null,
-  "status": "INITIALIZING",
+  "status": "ACTIVE",
   "last_checkpoint": null,
-  "last_commit": null,
-  "last_updated": "",
+  "last_commit": "fc06bdd7",
+  "last_updated": "2026-08-25T16:45:06.475943Z",
   "tests": {
-    "status": "UNKNOWN",
+    "status": "REQUIRES_VALIDATION",
+    "runner": "pytest (workspace venv)",
+    "test_files": 356,
     "passed": 0,
     "failed": 0,
-    "skipped": 0
+    "skipped": 0,
+    "note": "Run from 11-WORKSPACES/triangle-black with .venv activated"
   },
-  "architecture_status": "UNKNOWN",
-  "security_status": "UNKNOWN",
-  "documentation_status": "UNKNOWN",
-  "known_blockers": [],
-  "next_actions": [
-    "Complete baseline audit",
-    "Run repository scanner",
-    "Build documentation index",
-    "Define master roadmap"
+  "architecture_status": "REQUIRES_VALIDATION",
+  "security_status": "REQUIRES_VALIDATION",
+  "documentation_status": "INDEXED",
+  "known_blockers": [
+    "Root-level pytest runs without workspace venv \u2014 use ai-verify which is now workspace-aware",
+    "529 commits unpushed to origin \u2014 do not assume remote is current"
   ],
-  "forbidden_areas": [],
-  "critical_files": []
+  "next_actions": [
+    "Run: bash scripts/ai/ai-scan",
+    "Run: python3 scripts/ai/ai-index-docs",
+    "Read: 11-WORKSPACES/triangle-black/CLAUDE.md",
+    "Fill: .ai/context/project.md with verified project data",
+    "Define: SPRINT-AI-OS-001 for validation task"
+  ],
+  "forbidden_areas": [
+    "11-WORKSPACES/triangle-black/.venv/",
+    "90-ARCHIVE/",
+    ".git/",
+    "backups/"
+  ],
+  "critical_files": [
+    "AGENTS.md",
+    ".ai/constitution/engineering-rules.md",
+    ".ai/state/project-state.json",
+    ".ai/reports/checkpoints/LATEST.md",
+    "11-WORKSPACES/triangle-black/CLAUDE.md"
+  ],
+  "stack": {
+    "backend": "FastAPI 0.139+ / SQLAlchemy 2.0+ / Alembic 1.18+",
+    "frontend": "Next.js (portal / client-portal / admin-portal)",
+    "database": "PostgreSQL",
+    "python_workspace": "3.12 (11-WORKSPACES/triangle-black/.venv)",
+    "python_root": "3.14.4 (system)",
+    "node": "24.18.0",
+    "local_ai": "Ollama 0.31.1",
+    "primary_model": "qwen2.5-coder-32k:latest",
+    "agent": "OpenCode 1.18.18"
+  },
+  "workspace": "11-WORKSPACES/triangle-black",
+  "venv": "11-WORKSPACES/triangle-black/.venv",
+  "git": {
+    "branch": "main",
+    "commits_ahead_origin": 530,
+    "working_tree": "clean",
+    "pre_commit_hook": "Build Guard v1.0 (7 Next.js checks)"
+  }
 }

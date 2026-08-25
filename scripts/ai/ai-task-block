@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASK_ID="${1:?Usage: ai-task-block TASK-ID 'reason'}"
+REASON="${2:-UNSPECIFIED}"
+TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+ACTIVE_FILE=".ai/tasks/active/${TASK_ID}.md"
+BLOCKED_DIR=".ai/tasks/blocked"
+mkdir -p "$BLOCKED_DIR"
+
+if [ -f "$ACTIVE_FILE" ]; then
+  cp "$ACTIVE_FILE" "$BLOCKED_DIR/${TASK_ID}.md"
+  echo "BLOCKED: $TIMESTAMP — $REASON" >> "$BLOCKED_DIR/${TASK_ID}.md"
+  rm "$ACTIVE_FILE"
+  echo "Task $TASK_ID moved to BLOCKED."
+else
+  echo "ERROR: Task not found in active: $ACTIVE_FILE"
+  exit 1
+fi
+
+# Write failure report
+mkdir -p ".ai/memory/failures"
+cat > ".ai/memory/failures/BLOCKED-${TASK_ID}-${TIMESTAMP//[:]/-}.md" << FAILEOF
+# BLOCKED TASK: $TASK_ID
+
+Timestamp: $TIMESTAMP
+Reason: $REASON
+
+## Classification
+[ ] CODE
+[ ] TEST
+[ ] ENVIRONMENT
+[ ] DEPENDENCY
+[ ] DATABASE
+[ ] CONFIGURATION
+[ ] ARCHITECTURE
+[ ] SECURITY
+[ ] TOOLING
+[ ] MODEL_LIMITATION
+[ ] UNKNOWN
+
+## Evidence
+[Describe what failed]
+
+## Attempted Fixes
+[List what was tried]
+
+## Required Human Action
+[What decision or resource is needed to unblock]
+FAILEOF
+
+echo "Failure report: .ai/memory/failures/BLOCKED-${TASK_ID}-${TIMESTAMP//[:]/-}.md"
+echo ""
+echo "Human action required before task can be resumed."

@@ -1,50 +1,128 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "╔══════════════════════════════════╗"
-echo "║     VERIFICATION ENGINE         ║"
-echo "╚══════════════════════════════════╝"
-echo ""
+# Workspace-aware verification engine
+# Detects which project context to verify based on CWD or argument
 
+WORKSPACE="${1:-auto}"
 PASS=0
 FAIL=0
+SKIP=0
+
+echo "╔══════════════════════════════════════╗"
+echo "║      VERIFICATION ENGINE v2          ║"
+echo "╚══════════════════════════════════════╝"
+echo ""
 
 run_gate() {
   local gate="$1"
   local cmd="$2"
-  echo "── GATE: $gate ────────────────────"
-  if eval "$cmd" 2>&1; then
-    echo "  ✓ PASSED"
+  local dir="${3:-.}"
+  echo "── GATE: $gate"
+  if (cd "$dir" && eval "$cmd") 2>&1 | tail -15; then
+    echo "  ✓ PASSED: $gate"
     PASS=$((PASS+1))
   else
-    echo "  ✗ FAILED"
+    echo "  ✗ FAILED: $gate"
     FAIL=$((FAIL+1))
   fi
   echo ""
 }
 
-# Python
-if [ -f "pyproject.toml" ] || [ -f "setup.cfg" ]; then
-  command -v ruff &>/dev/null && run_gate "Python Lint (ruff)" "ruff check ."
-  command -v mypy &>/dev/null && run_gate "Python Types (mypy)" "mypy . --ignore-missing-imports"
-  command -v pytest &>/dev/null && run_gate "Python Tests (pytest)" "pytest -x -q 2>&1 | tail -20"
+skip_gate() {
+  echo "── GATE: $1 — SKIPPED (${2})"
+  SKIP=$((SKIP+1))
+  echo ""
+}
+
+# ── Detect active workspace ─────────────────────────────
+TB_DIR="11-WORKSPACES/triangle-black"
+ROOT_DIR="."
+
+echo "── ENVIRONMENT DETECTION ───────────────────────────"
+echo "  CWD: $(pwd)"
+
+if [ -d "${TB_DIR}/.venv" ]; then
+  echo "  Triangle Black venv: FOUND"
+  TB_PYTHON="${TB_DIR}/.venv/bin/python"
+  TB_PYTEST="${TB_DIR}/.venv/bin/pytest"
+  TB_RUFF="${TB_DIR}/.venv/bin/ruff"
+  TB_MYPY="${TB_DIR}/.venv/bin/mypy"
+else
+  echo "  Triangle Black venv: NOT FOUND"
+  TB_PYTHON=""
+  TB_PYTEST=""
 fi
 
-# Node/TypeScript
-if [ -f "package.json" ]; then
-  command -v tsc &>/dev/null && run_gate "TypeScript Check" "tsc --noEmit"
-  grep -q '"test"' package.json && run_gate "Node Tests" "npm test -- --passWithNoTests 2>&1 | tail -20"
+echo ""
+echo "── ROOT LEVEL CHECKS ───────────────────────────────"
+
+# Root pyproject.toml exists but venv is workspace-specific
+if [ -f "pyproject.toml" ]; then
+  if command -v ruff &>/dev/null; then
+    run_gate "Root: Ruff lint" "ruff check . --exclude 11-WORKSPACES --exclude 90-ARCHIVE --exclude 00-MIGRATION 2>&1 | tail -10"
+  else
+    skip_gate "Root: Ruff lint" "ruff not in PATH"
+  fi
+else
+  skip_gate "Root: Python lint" "no root pyproject.toml"
 fi
 
-echo "══════════════════════════════════"
-echo "GATES PASSED: $PASS"
-echo "GATES FAILED: $FAIL"
+echo ""
+echo "── TRIANGLE BLACK WORKSPACE CHECKS ─────────────────"
+
+if [ -n "${TB_PYTEST}" ] && [ -x "${TB_PYTEST}" ]; then
+  # Run pytest from workspace directory with workspace venv
+  run_gate "TB: Unit tests (pytest -x -q)" \
+    "${TB_PYTEST} -x -q --tb=short 2>&1 | tail -25" \
+    "${TB_DIR}"
+else
+  skip_gate "TB: pytest" "no .venv found at ${TB_DIR}/.venv"
+fi
+
+if [ -n "${TB_RUFF}" ] && [ -x "${TB_RUFF}" ]; then
+  run_gate "TB: Ruff lint" "${TB_RUFF} check . 2>&1 | tail -10" "${TB_DIR}"
+else
+  skip_gate "TB: Ruff lint" "no ruff in TB venv"
+fi
+
+if [ -n "${TB_MYPY}" ] && [ -x "${TB_MYPY}" ]; then
+  run_gate "TB: Mypy types" "${TB_MYPY} . --ignore-missing-imports 2>&1 | tail -10" "${TB_DIR}"
+else
+  skip_gate "TB: Mypy" "no mypy in TB venv"
+fi
+
+echo ""
+echo "── FRONTEND CHECKS ─────────────────────────────────"
+
+# Detect Next.js workspaces
+for portal_dir in \
+  "11-WORKSPACES/triangle-black/portal" \
+  "11-WORKSPACES/triangle-black/client-portal" \
+  "11-WORKSPACES/triangle-black/admin-portal" \
+  "11-WORKSPACES/triangle-black-frontend"; do
+  if [ -f "${portal_dir}/package.json" ]; then
+    echo "  Found frontend: ${portal_dir}"
+    if [ -f "${portal_dir}/node_modules/.bin/tsc" ]; then
+      run_gate "TS: ${portal_dir}" \
+        "node_modules/.bin/tsc --noEmit 2>&1 | tail -10" \
+        "${portal_dir}"
+    else
+      skip_gate "TS: ${portal_dir}" "tsc not installed"
+    fi
+  fi
+done
+
+echo "══════════════════════════════════════"
+echo "  PASSED : $PASS"
+echo "  FAILED : $FAIL"
+echo "  SKIPPED: $SKIP"
 echo ""
 
-if [ "$FAIL" -gt 0 ]; then
+if [ "${FAIL}" -gt 0 ]; then
   echo "RESULT: ✗ VERIFICATION FAILED"
   exit 1
 else
-  echo "RESULT: ✓ VERIFICATION PASSED"
+  echo "RESULT: ✓ VERIFICATION PASSED (${SKIP} gates skipped)"
   exit 0
 fi
