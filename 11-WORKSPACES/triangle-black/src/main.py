@@ -876,6 +876,7 @@ def list_stock_balances(
         return [dict(r._mapping) for r in rows]
     except Exception:
         return []
+from src.core.auth import get_current_user as _get_current_user  # A-010-A auth fix
 
 @app.get("/api/v1/suppliers/", tags=["suppliers"], dependencies=[_Depends(_get_current_user)])
 
@@ -8549,4 +8550,3 @@ except Exception as _e:
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
-
