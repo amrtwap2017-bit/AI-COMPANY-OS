@@ -1854,3 +1854,50 @@ GAP-007 Staging:                   🔴 A-005
 GAP-008 Observability:             🔴 A-006
 GAP-009 Customer onboarding E2E:   🔴 A-008
 GAP-010 assets.score domain rule:  🔴 A-009
+
+## SESSION UPDATE — A-005 to A-007 batch 5 — August 2026
+
+### GAPS CLOSED THIS SESSION
+| GAP | Status | Evidence |
+|-----|--------|---------|
+| GAP-001 Tenant | ✅ CLOSED | 107/107 = 100% |
+| GAP-004 Engines (external) | ✅ CLOSED | ai_assistant + feature_flags fixed |
+| GAP-006 CI/CD | ✅ CLOSED | .github/workflows/ci.yml (5 jobs) |
+| GAP-007 Docker | ✅ CLOSED | Dockerfile + docker-compose.production.yml |
+| GAP-008 Observability | ✅ CLOSED | OpenTelemetry + SLO tracker |
+| GAP-010 assets.score | ✅ CLARIFIED | Column does not exist — removed from imports |
+
+### A-007 PROGRESS — main.py Extraction
+Extracted routers: 10/~150 (batch 1-5)
+- rbac (RBAC user management)
+- pm_plan_api (PM Plans)
+- payment_tracking_api (Payment Tracking)
+- work_order_actions (WO Complete + Assets Sync)
+- service_request_actions (SR→WO generation)
+- stock_api (Stock Balances + Low Stock Alerts)
+- maintenance_api (Assets with WOs + Overdue PM)
+- financial_api (Spend Summary + Cost by Category)
+- supplier_api (Performance + Top Spend)
+- asset_api (Critical Summary + CSV Import row)
+
+### REMAINING A-007 WORK
+~140 routes still inline in main.py
+Strategy: continue 10/sprint until main.py < 4000 lines
+Current: 8454 lines
+Target: < 4000 lines
+
+### CRITICAL: assets.score column
+DOES NOT EXIST in database.
+The data import failure was caused by old router code referencing a non-existent column.
+Fix: asset_api/router.py import_csv_row does NOT pass score.
+If score was in CSV, just ignore it (no column exists).
+
+### VERIFIED TESTS
+- 21/21 targeted tests passing
+- All Build Guards PASSING
+- E2E: 12/12 (01-auth + 38-onboarding)
+
+### NEXT SESSION
+A-007 batch 6-15: Continue extracting 10 routes/sprint from main.py
+A-008: Full onboarding E2E test (endpoint exists, needs validation)
+Commercial: First customer outreach Sharm El-Sheikh
