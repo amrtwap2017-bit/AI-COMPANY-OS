@@ -877,9 +877,9 @@ def list_stock_balances(
     except Exception:
         return []
 
-@app.get("/api/v1/suppliers/", tags=["suppliers"])
+@app.get("/api/v1/suppliers/", tags=["suppliers"], dependencies=[_Depends(_get_current_user)])
 
-@app.get("/api/v1/suppliers", tags=["suppliers"])
+@app.get("/api/v1/suppliers", tags=["suppliers"], dependencies=[_Depends(_get_current_user)])
 def list_suppliers(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
     try:
         rows = db.execute(_text("SELECT * FROM suppliers ORDER BY company_name LIMIT :l"), {"l": limit}).fetchall()
