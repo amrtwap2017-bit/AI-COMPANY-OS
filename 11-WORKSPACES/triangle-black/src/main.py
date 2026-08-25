@@ -923,6 +923,30 @@ except Exception as e:
 
 # ── Sprint 149: PM Plans + Payment Tracking ──────────────────────────────────
 @app.get("/api/v1/maintenance/pm-plans/", tags=["maintenance"])
+
+@app.get("/api/v1/pm-plans/", tags=["maintenance"])
+@app.get("/api/v1/pm-plans", tags=["maintenance"])
+def list_pm_plans_alias(
+    hotel_id: str = _Depends(_get_hotel_id),
+    status: str = None,
+    limit: int = _Query(default=50, le=200),
+    db: _Session = _Depends(_get_db),
+):
+    """Alias — canonical route is /api/v1/maintenance/pm-plans"""
+    try:
+        q = "SELECT * FROM maintenance_plans WHERE hotel_id = :hid"
+        params = {"hid": hotel_id}
+        if status:
+            q += " AND status = :s"
+            params["s"] = status
+        q += " ORDER BY next_due_date LIMIT :lim"
+        params["lim"] = limit
+        rows = db.execute(_text(q), params).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
+
+
 @app.get("/api/v1/maintenance/pm-plans", tags=["maintenance"])
 def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
     from sqlalchemy import text, create_engine
@@ -8457,135 +8481,6 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: rbac_router: {_e}")
 
-try:
-    from src.commercial.pm_plan_api.router import router as _pm_api_r
-    app.include_router(_pm_api_r, prefix="/api/v1")
-    logger.info("  OK: pm_plan_api_router (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: pm_plan_api_router: {_e}")
-
-
-try:
-    from src.commercial.payment_tracking_api.router import router as _pt_api_r
-    app.include_router(_pt_api_r, prefix="/api/v1")
-    logger.info("  OK: payment_tracking_api_router (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: payment_tracking_api: {_e}")
-
-try:
-    from src.commercial.work_order_actions.router import router as _wo_act_r
-    app.include_router(_wo_act_r, prefix="/api/v1")
-    logger.info("  OK: work_order_actions_router (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: work_order_actions: {_e}")
-
-
-try:
-    from src.commercial.service_request_actions.router import router as _sr_act_r
-    app.include_router(_sr_act_r, prefix="/api/v1")
-    logger.info("  OK: service_request_actions (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: service_request_actions: {_e}")
-
-try:
-    from src.commercial.stock_api.router import router as _stock_api_r
-    app.include_router(_stock_api_r, prefix="/api/v1")
-    logger.info("  OK: stock_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: stock_api: {_e}")
-
-
-try:
-    from src.commercial.maintenance_api.router import router as _maint_api_r
-    app.include_router(_maint_api_r, prefix="/api/v1")
-    logger.info("  OK: maintenance_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: maintenance_api: {_e}")
-
-try:
-    from src.commercial.financial_api.router import router as _fin_api_r
-    app.include_router(_fin_api_r, prefix="/api/v1")
-    logger.info("  OK: financial_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: financial_api: {_e}")
-
-
-try:
-    from src.commercial.supplier_api.router import router as _sup_api_r
-    app.include_router(_sup_api_r, prefix="/api/v1")
-    logger.info("  OK: supplier_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: supplier_api: {_e}")
-
-try:
-    from src.commercial.asset_api.router import router as _asset_api_r
-    app.include_router(_asset_api_r, prefix="/api/v1")
-    logger.info("  OK: asset_api (A-007/A-009)")
-except Exception as _e:
-    logger.warning(f"WARN: asset_api: {_e}")
-
-
-try:
-    from src.commercial.analytics_api.router import router as _analytics_api_r
-    app.include_router(_analytics_api_r, prefix="/api/v1")
-    logger.info("  OK: analytics_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: analytics_api: {_e}")
-
-try:
-    from src.commercial.reporting_api.router import router as _reporting_api_r
-    app.include_router(_reporting_api_r, prefix="/api/v1")
-    logger.info("  OK: reporting_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: reporting_api: {_e}")
-
-
-try:
-    from src.commercial.executive_api.router import router as _exec_api_r
-    app.include_router(_exec_api_r, prefix="/api/v1")
-    logger.info("  OK: executive_api (A-007)")
-except Exception as _e:
-    logger.warning(f"WARN: executive_api: {_e}")
-
-
-try:
-    from src.commercial.baseline_report.router import router as _baseline_r
-    app.include_router(_baseline_r, prefix="/api/v1")
-    logger.info("  OK: baseline_report (A-010-B)")
-except Exception as _e:
-    logger.warning(f"WARN: baseline_report: {_e}")
-
-
-try:
-    from src.commercial.pm_plan_api.router import router as _pm_alias_r
-    from fastapi import APIRouter as _AR
-    _pm_alias = _AR()
-
-    @_pm_alias.get("/pm-plans/", tags=["maintenance"])
-    @_pm_alias.get("/pm-plans", tags=["maintenance"])
-    def _pm_plans_alias(
-        hotel_id: str = _Depends(_get_hotel_id),
-        db=_Depends(_get_db),
-        status: str = None,
-        limit: int = 50,
-    ):
-        """Alias for /maintenance/pm-plans — canonical route."""
-        from sqlalchemy import text as _t
-        try:
-            rows = db.execute(_t(
-                "SELECT * FROM maintenance_plans WHERE hotel_id = :hid "
-                + ("AND status = :s " if status else "")
-                + "ORDER BY next_due_date LIMIT :lim"
-            ), {"hid": hotel_id, "s": status, "lim": limit} if status
-               else {"hid": hotel_id, "lim": limit}).fetchall()
-            return [dict(r._mapping) for r in rows]
-        except Exception:
-            return []
-
-    app.include_router(_pm_alias, prefix="/api/v1")
-    logger.info("  OK: pm-plans alias route (A-001 fix)")
-except Exception as _e:
-    logger.warning(f"WARN: pm-plans alias: {_e}")
 
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
