@@ -73,7 +73,7 @@ def create_supplier(data: dict, db: Session = Depends(get_db),
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Sprint-058: Suppliers GET endpoints (fixes 500 on GET /api/v1/suppliers/) ─
-@router.get("/", summary="List suppliers")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List suppliers")
 def list_suppliers(
     hotel_id: str = Depends(get_hotel_id),
     status: str = None,

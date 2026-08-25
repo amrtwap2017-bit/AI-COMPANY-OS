@@ -1,4 +1,4 @@
-from src.core.auth import require_agent, require_manager
+from src.core.auth import get_current_user, require_agent, require_manager
 
 from src.commercial.auth.models import User
 
@@ -13,7 +13,7 @@ from src.core.audit import audit_create, audit_update, audit_delete
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
 
-@router.get("/", summary="List invoices")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List invoices")
 def list_invoices(db = Depends(get_db)):
     try:
         from sqlalchemy import text
@@ -234,4 +234,3 @@ def get_invoice_payments(invoice_id: str, db: Session = Depends(get_db)):
         "payments":      payments,
         "currency":      "EGP",
     }
-

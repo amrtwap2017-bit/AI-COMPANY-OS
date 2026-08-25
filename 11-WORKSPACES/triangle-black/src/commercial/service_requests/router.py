@@ -1,5 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -21,7 +23,7 @@ def row_to_dict(row):
         return d
     return {}
 
-@router.get("/", summary="List service requests")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List service requests")
 def list_service_requests(
     hotel_id: str = Depends(get_hotel_id),
     status:   Optional[str] = None,

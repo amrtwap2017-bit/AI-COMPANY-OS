@@ -1,5 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -62,7 +64,7 @@ def list_assets(
     return result
 
 
-@router.get("", summary="List assets")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List assets")
 def list_assets_root(
     hotel_id: str = Depends(get_hotel_id),
     category: Optional[str] = None,

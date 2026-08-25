@@ -104,3 +104,11 @@ require_any     = require_role("admin", "manager", "agent", "client")
 
 # Legacy alias — vendor portal compatibility
 require_vendor = require_role("admin", "manager", "agent")
+
+
+def require_authenticated(current_user=Depends(get_current_user)):
+    """
+    Minimal auth guard — requires any valid JWT.
+    Use on endpoints that need auth but no specific role.
+    """
+    return current_user

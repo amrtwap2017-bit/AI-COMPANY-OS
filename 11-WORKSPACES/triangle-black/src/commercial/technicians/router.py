@@ -1,5 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query
+from src.core.auth import get_current_user
+from src.commercial.auth.models import User
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -36,7 +38,7 @@ def list_technicians(
     return [row_to_dict(r) for r in rows]
 
 
-@router.get("", summary="List technicians")
+@router.get("/", dependencies=[Depends(get_current_user)], summary="List technicians")
 def list_technicians_root(
     hotel_id: str = Depends(get_hotel_id),
     is_active: Optional[bool] = None,

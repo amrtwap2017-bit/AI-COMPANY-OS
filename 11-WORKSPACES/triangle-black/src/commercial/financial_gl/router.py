@@ -1,5 +1,6 @@
 from __future__ import annotations
-from src.core.auth import require_manager, require_agent
+from src.core.auth import get_current_user, require_manager, require_agent
+from src.commercial.auth.models import User
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -10,7 +11,7 @@ from .schemas import JournalEntryCreate, JournalEntryResponse
 
 router = APIRouter(prefix="/financial/gl", tags=["financial-gl"])
 
-@router.get("/", response_model=List[JournalEntryResponse])
+@router.get("/", dependencies=[Depends(get_current_user)], response_model=List[JournalEntryResponse])
 def list_entries(hotel_id: str = Depends(get_hotel_id), skip: int = 0, limit: int = 100,
                  db: Session = Depends(get_db)):
     return JournalRepository(db).list(hotel_id, skip, limit)
