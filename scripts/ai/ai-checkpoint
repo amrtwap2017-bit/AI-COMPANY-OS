@@ -27,14 +27,14 @@ echo "## Git Status"
 git status --short 2>/dev/null || echo "No git status"
 echo ""
 echo "## Next Steps"
-echo "See .ai/state/project-state.json → next_actions"
+echo "See .ai/state/project-state.json next_actions"
 } > "$OUTFILE"
 
 cp "$OUTFILE" .ai/reports/checkpoints/LATEST.md
 
-# Update project-state.json with latest commit and checkpoint
+# Update project-state.json
 python3 - << PYEOF
-import json, subprocess
+import json
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -50,20 +50,38 @@ try:
     if "$STATUS" == "COMPLETE":
         s["active_task"] = None
     state_file.write_text(json.dumps(s, indent=2))
-    print("  project-state.json: last_commit + last_checkpoint updated")
+    print("  project-state.json updated")
 except Exception as e:
-    print(f"  project-state.json: ERROR — {e}")
+    print(f"  project-state.json ERROR: {e}")
 
-# Update sprint-state checkpoint flag
 sprint_file = Path(".ai/state/sprint-state.json")
 try:
     s = json.loads(sprint_file.read_text())
     s["checkpoint_created"] = True
     sprint_file.write_text(json.dumps(s, indent=2))
-    print("  sprint-state.json: checkpoint_created = true")
+    print("  sprint-state.json updated")
 except Exception as e:
-    print(f"  sprint-state.json: ERROR — {e}")
+    print(f"  sprint-state.json ERROR: {e}")
 PYEOF
 
+# Auto-stage all .ai/ runtime files
+echo ""
+echo "── Staging .ai/ runtime files..."
+git add \
+  .ai/state/ \
+  .ai/reports/checkpoints/LATEST.md \
+  .ai/reports/checkpoints/"$(basename "$OUTFILE")" \
+  .ai/context/ \
+  .ai/sessions/ \
+  .ai/memory/ \
+  .ai/sprints/ \
+  .ai/tasks/ \
+  2>/dev/null || true
+
+STAGED=$(git diff --cached --name-only 2>/dev/null | wc -l | tr -d '[:space:]')
+echo "  Staged: $STAGED files"
+echo ""
 echo "Checkpoint written: $OUTFILE"
 echo "LATEST.md updated."
+echo ""
+echo "Next: git commit -F /tmp/commit-msg.txt"
