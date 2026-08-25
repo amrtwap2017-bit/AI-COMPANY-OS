@@ -13,6 +13,6 @@
   "security_check": "PENDING",
   "architecture_check": "PENDING",
   "documentation_updated": false,
-  "checkpoint_created": false,
+  "checkpoint_created": true,
   "ready_to_close": false
 }
