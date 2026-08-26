@@ -8887,6 +8887,14 @@ try:
 except Exception as _e:
     pass
 
+
+try:
+    from src.commercial.backlog_engine.router import router as _backlog_r
+    app.include_router(_backlog_r, prefix="/api/v1")
+    logger.info("  OK: backlog_engine (A-035)")
+except Exception as _e:
+    logger.warning(f"WARN: backlog_engine: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
