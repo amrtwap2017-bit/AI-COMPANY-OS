@@ -8507,6 +8507,22 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: pm_engine: {_e}")
 
+
+try:
+    from src.commercial.supplier_api.router import router as _sup_api_r
+    app.include_router(_sup_api_r, prefix="/api/v1")
+    logger.info("  OK: supplier_api (A-006 re-register)")
+except Exception as _e:
+    logger.warning(f"WARN: supplier_api re-register: {_e}")
+
+
+try:
+    from src.commercial.supplier_engine.router import router as _sup_engine_r
+    app.include_router(_sup_engine_r, prefix="/api/v1")
+    logger.info("  OK: supplier_engine (A-006)")
+except Exception as _e:
+    logger.warning(f"WARN: supplier_engine: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
