@@ -1,29 +1,16 @@
 """
-Operational Risk Engine — Triangle Black A-012
-The intelligence layer that CONNECTS all engines into one risk view.
+Operational Risk Engine — Triangle Black A-021
+FINAL intelligence layer: composite risk scoring + predictive alerts
 
-AGGREGATES from:
-- asset_intelligence: fleet health, critical assets
-- pm_engine: overdue, unscheduled
-- sla_intelligence: breach rate, backlog
-- cost_intelligence: overdue invoices, efficiency
-- supplier_engine: blacklisted, risk levels
-- kpi_engine: OHI
+NEW:
+  /api/v1/risk-engine/summary         — composite operational risk
+  /api/v1/risk-engine/asset-risk      — per-asset predictive risk score
+  /api/v1/risk-engine/operational     — real-time operational risk
+  /api/v1/risk-engine/forecast        — 30-day risk forecast
 
-Produces:
-- Overall Operational Risk Score (0-100, lower=better)
-- Risk by domain (ASSETS/MAINTENANCE/OPERATIONS/FINANCE/PROCUREMENT)
-- Top 5 risk items requiring immediate action
-- Risk trend (improving/deteriorating/stable)
-
-SCHEMA FACTS (all verified):
-- assets: hotel_id, criticality, status, deleted_at, next_maintenance_date
-- work_orders: hotel_id, status, priority, sla_breached, deleted_at
-- invoices: hotel_id, total_amount, status (no deleted_at)
-- suppliers: hotel_id, blacklisted, risk_level, status
-- maintenance_plans: NO hotel_id (use asset join)
+Does NOT duplicate: /api/v1/risk-intelligence/* (existing)
 """
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -33,307 +20,250 @@ class RiskEngineService:
         self.db = db
         self.hid = hotel_id
 
-    def _s(self, sql: str, params: dict = None, default=0):
+    def _q(self, sql: str, params: dict = None):
+        try:
+            return self.db.execute(text(sql), params or {"hid": self.hid}).fetchall()
+        except Exception:
+            return []
+
+    def _scalar(self, sql: str, params: dict = None, default=0):
         try:
             val = self.db.execute(text(sql), params or {"hid": self.hid}).scalar()
             return val if val is not None else default
         except Exception:
             return default
 
-    def _risk_status(self, score: float) -> str:
-        if score >= 70: return "CRITICAL"
-        if score >= 50: return "HIGH"
-        if score >= 30: return "MODERATE"
-        return "LOW"
+    def asset_risk_scores(self, limit: int = 30) -> list:
+        """Predictive risk score per asset based on failure history + PM gap."""
+        rows = self._q("""
+            SELECT
+                a.id, a.name, a.category, a.criticality,
+                COUNT(wo.id) AS total_failures,
+                COUNT(wo.id) FILTER (
+                    WHERE wo.created_at >= NOW() - INTERVAL '90 days'
+                ) AS recent_failures_90d,
+                COUNT(wo.id) FILTER (
+                    WHERE LOWER(wo.priority) IN ('critical','emergency')
+                ) AS critical_failures,
+                COUNT(mp.id) AS pm_plans,
+                a.next_maintenance_date,
+                a.warranty_expiry
+            FROM assets a
+            LEFT JOIN work_orders wo ON wo.asset_id = a.id
+                AND wo.hotel_id = :hid AND wo.deleted_at IS NULL
+            LEFT JOIN maintenance_plans mp ON mp.asset_node_id = a.id
+                AND mp.hotel_id = :hid AND LOWER(mp.status) = 'active'
+            WHERE a.hotel_id = :hid AND a.deleted_at IS NULL
+            GROUP BY a.id, a.name, a.category, a.criticality,
+                     a.next_maintenance_date, a.warranty_expiry
+            ORDER BY recent_failures_90d DESC, critical_failures DESC
+            LIMIT :lim
+        """, {"hid": self.hid, "lim": limit})
 
-    def asset_risk(self) -> dict:
-        """Asset domain risk (0-100)."""
-        total = self._s("SELECT COUNT(*) FROM assets WHERE hotel_id=:hid AND deleted_at IS NULL")
-        critical = self._s("""SELECT COUNT(*) FROM assets
-            WHERE hotel_id=:hid AND deleted_at IS NULL AND criticality='critical'""")
-        non_operational = self._s("""SELECT COUNT(*) FROM assets
-            WHERE hotel_id=:hid AND deleted_at IS NULL
-            AND LOWER(status) NOT IN ('operational','active')""")
-        overdue = self._s("""SELECT COUNT(*) FROM assets
-            WHERE hotel_id=:hid AND deleted_at IS NULL
-            AND next_maintenance_date IS NOT NULL
-            AND next_maintenance_date < NOW()""")
+        today = date.today()
+        result = []
+        for r in rows:
+            d = dict(r._mapping)
+            total_fail = d.get("total_failures", 0) or 0
+            recent = d.get("recent_failures_90d", 0) or 0
+            critical = d.get("critical_failures", 0) or 0
+            pm_plans = d.get("pm_plans", 0) or 0
+            criticality = d.get("criticality", "medium") or "medium"
 
-        # Unscheduled assets (via PM join)
-        unscheduled = self._s("""
-            SELECT COUNT(a.id) FROM assets a
-            WHERE a.hotel_id=:hid AND a.deleted_at IS NULL
-            AND NOT EXISTS (
-                SELECT 1 FROM maintenance_plans mp
-                WHERE mp.asset_node_id = a.id
+            # Risk factors (each 0-100)
+            failure_risk = min(100, recent * 20 + critical * 30)
+            pm_gap_risk = 0 if pm_plans > 0 else 60
+            criticality_mult = {"critical": 1.5, "high": 1.2, "medium": 1.0, "low": 0.7}.get(criticality, 1.0)
+
+            # Maintenance currency risk
+            next_maint = d.get("next_maintenance_date")
+            maint_risk = 0
+            if next_maint:
+                try:
+                    nm = next_maint if isinstance(next_maint, date) else date.fromisoformat(str(next_maint)[:10])
+                    days_overdue = (today - nm).days
+                    maint_risk = min(100, max(0, days_overdue * 3)) if days_overdue > 0 else 0
+                except Exception:
+                    maint_risk = 30
+
+            # Composite risk score
+            raw_risk = (failure_risk * 0.40 + pm_gap_risk * 0.35 + maint_risk * 0.25) * criticality_mult
+            risk_score = min(100, round(raw_risk, 1))
+
+            risk_level = (
+                "CRITICAL" if risk_score >= 80
+                else "HIGH" if risk_score >= 60
+                else "MODERATE" if risk_score >= 35
+                else "LOW"
             )
-        """)
 
-        if total == 0:
-            return {"score": 0, "status": "LOW", "factors": []}
+            result.append({
+                "id": d["id"],
+                "name": d.get("name", ""),
+                "category": d.get("category", ""),
+                "criticality": criticality,
+                "risk_score": risk_score,
+                "risk_level": risk_level,
+                "total_failures": total_fail,
+                "recent_failures_90d": recent,
+                "critical_failures": critical,
+                "pm_coverage": pm_plans > 0,
+                "factors": {
+                    "failure_risk": round(failure_risk, 1),
+                    "pm_gap_risk": pm_gap_risk,
+                    "maintenance_overdue_risk": maint_risk,
+                }
+            })
 
-        critical_ratio = critical / total
-        non_op_ratio = non_operational / total
-        overdue_ratio = overdue / total
-        unscheduled_ratio = unscheduled / total
+        return sorted(result, key=lambda x: x["risk_score"], reverse=True)
 
-        score = round(
-            critical_ratio * 25 +
-            non_op_ratio * 25 +
-            overdue_ratio * 25 +
-            unscheduled_ratio * 25,
-            1
-        ) * 100 / 100
+    def operational_risk(self) -> dict:
+        """Real-time operational risk from SLA + WO + PM data."""
+        # SLA risk
+        open_breached = self._scalar(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
+            "AND deleted_at IS NULL AND LOWER(status) IN ('open','in_progress') "
+            "AND sla_breached=TRUE"
+        )
+        total_open = self._scalar(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
+            "AND deleted_at IS NULL AND LOWER(status) IN ('open','in_progress')"
+        )
+        sla_risk = round(open_breached / max(total_open, 1) * 100, 1)
 
-        score = round(min(score * 100, 100), 1)
+        # PM risk
+        total_plans = self._scalar(
+            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid AND LOWER(status)='active'"
+        )
+        overdue_plans = self._scalar(
+            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid "
+            "AND LOWER(status)='active' AND next_due_date < CURRENT_DATE"
+        )
+        pm_risk = round(overdue_plans / max(total_plans, 1) * 100, 1)
 
-        factors = []
-        if critical > 0:
-            factors.append(f"{critical} critical assets ({round(critical_ratio*100,1)}% of fleet)")
-        if overdue > 0:
-            factors.append(f"{overdue} assets overdue for maintenance")
-        if unscheduled > 20:
-            factors.append(f"{unscheduled} assets have no PM schedule")
+        # Asset risk
+        asset_scores = self.asset_risk_scores(limit=100)
+        critical_assets = sum(1 for a in asset_scores if a["risk_level"] in ("CRITICAL", "HIGH"))
+        asset_risk = round(critical_assets / max(len(asset_scores), 1) * 100, 1)
+
+        # Procurement risk (pending approvals)
+        pending_pos = self._scalar(
+            "SELECT COUNT(*) FROM purchase_orders WHERE hotel_id=:hid "
+            "AND LOWER(status) IN ('pending','draft') AND approved_by IS NULL"
+        )
+        total_pos = self._scalar(
+            "SELECT COUNT(*) FROM purchase_orders WHERE hotel_id=:hid"
+        )
+        proc_risk = round(pending_pos / max(total_pos, 1) * 100, 1)
+
+        # Composite operational risk
+        composite = round(
+            sla_risk * 0.35 +
+            pm_risk * 0.25 +
+            asset_risk * 0.25 +
+            proc_risk * 0.15, 1
+        )
+
+        risk_level = (
+            "CRITICAL" if composite >= 70
+            else "HIGH" if composite >= 50
+            else "MODERATE" if composite >= 30
+            else "LOW"
+        )
 
         return {
-            "domain": "ASSETS",
-            "score": score,
-            "status": self._risk_status(score),
-            "total_assets": total,
-            "critical_assets": critical,
-            "overdue_assets": overdue,
-            "unscheduled_assets": unscheduled,
-            "factors": factors
+            "composite_risk_score": composite,
+            "risk_level": risk_level,
+            "components": {
+                "sla_risk": {"score": sla_risk, "detail": f"{open_breached} breached / {total_open} open"},
+                "pm_risk": {"score": pm_risk, "detail": f"{overdue_plans} overdue / {total_plans} plans"},
+                "asset_risk": {"score": asset_risk, "detail": f"{critical_assets} critical/high"},
+                "procurement_risk": {"score": proc_risk, "detail": f"{pending_pos} pending / {total_pos} total"},
+            }
         }
 
-    def operations_risk(self) -> dict:
-        """Operations domain risk from SLA + WO data."""
-        total_wo = self._s(
-            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL")
-        breached = self._s("""SELECT COUNT(*) FROM work_orders
-            WHERE hotel_id=:hid AND deleted_at IS NULL AND sla_breached=TRUE""")
-        critical_open = self._s("""SELECT COUNT(*) FROM work_orders
+    def forecast(self) -> dict:
+        """30-day risk forecast based on current trends."""
+        today = date.today()
+        plans_due_30d = self._scalar("""
+            SELECT COUNT(*) FROM maintenance_plans
+            WHERE hotel_id=:hid AND LOWER(status)='active'
+            AND next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + 30
+        """)
+        warranties_expiring = self._scalar("""
+            SELECT COUNT(*) FROM assets
             WHERE hotel_id=:hid AND deleted_at IS NULL
-            AND LOWER(status)='open' AND LOWER(priority)='critical'""")
-        open_wo = self._s("""SELECT COUNT(*) FROM work_orders
-            WHERE hotel_id=:hid AND deleted_at IS NULL AND LOWER(status)='open'""")
-        stale = self._s("""SELECT COUNT(*) FROM work_orders
-            WHERE hotel_id=:hid AND deleted_at IS NULL AND LOWER(status)='open'
-            AND created_at < NOW() - INTERVAL '30 days'""")
+            AND warranty_expiry IS NOT NULL
+            AND warranty_expiry::DATE BETWEEN CURRENT_DATE AND CURRENT_DATE + 90
+        """)
+        avg_monthly_wos = self._scalar("""
+            SELECT COALESCE(COUNT(*) / 3.0, 0) FROM work_orders
+            WHERE hotel_id=:hid AND deleted_at IS NULL
+            AND created_at >= NOW() - INTERVAL '90 days'
+        """)
 
-        sla_breach_rate = breached / max(total_wo, 1)
-        backlog_rate = open_wo / max(total_wo, 1)
-
-        score = round(min(100, (
-            sla_breach_rate * 40 +
-            (critical_open / max(total_wo, 1)) * 30 +
-            (stale / max(open_wo, 1)) * 30
-        )), 1)
-
-        factors = []
-        if sla_breach_rate > 0.5:
-            factors.append(f"SLA breach rate: {round(sla_breach_rate*100,1)}% (target <10%)")
-        if critical_open > 0:
-            factors.append(f"{critical_open} critical WOs unresolved")
-        if stale > 20:
-            factors.append(f"{stale} WOs stale >30 days")
+        events = []
+        if plans_due_30d > 0:
+            events.append({
+                "type": "PM_DUE",
+                "severity": "MEDIUM",
+                "count": plans_due_30d,
+                "description": f"{plans_due_30d} PM plans due in next 30 days",
+                "due_date": (today + timedelta(days=30)).isoformat(),
+            })
+        if warranties_expiring > 0:
+            events.append({
+                "type": "WARRANTY_EXPIRY",
+                "severity": "MEDIUM",
+                "count": warranties_expiring,
+                "description": f"{warranties_expiring} asset warranties expiring in 90 days",
+            })
 
         return {
-            "domain": "OPERATIONS",
-            "score": score,
-            "status": self._risk_status(score),
-            "sla_breach_rate_pct": round(sla_breach_rate * 100, 1),
-            "critical_open_wos": critical_open,
-            "stale_wos": stale,
-            "factors": factors
+            "hotel_id": self.hid,
+            "forecast_period": "30_days",
+            "forecast_start": today.isoformat(),
+            "forecast_end": (today + timedelta(days=30)).isoformat(),
+            "predicted_wo_count": int(avg_monthly_wos),
+            "upcoming_events": events,
+            "risk_level": "MODERATE" if events else "LOW",
         }
 
-    def maintenance_risk(self) -> dict:
-        """Maintenance domain risk from PM data."""
-        total_plans = self._s("""
-            SELECT COUNT(mp.id) FROM maintenance_plans mp
-            JOIN assets a ON a.id = mp.asset_node_id
-            WHERE a.hotel_id=:hid
-        """)
-        completed = self._s("""
-            SELECT COUNT(mp.id) FROM maintenance_plans mp
-            JOIN assets a ON a.id = mp.asset_node_id
-            WHERE a.hotel_id=:hid AND LOWER(mp.status)='completed'
-        """)
-        overdue_plans = self._s("""
-            SELECT COUNT(mp.id) FROM maintenance_plans mp
-            JOIN assets a ON a.id = mp.asset_node_id
-            WHERE a.hotel_id=:hid
-            AND mp.next_due_date IS NOT NULL
-            AND mp.next_due_date < NOW()
-        """)
+    def summary(self) -> dict:
+        """Composite operational risk intelligence summary."""
+        asset_risks = self.asset_risk_scores(limit=100)
+        operational = self.operational_risk()
+        forecast = self.forecast()
 
-        pm_completion = completed / max(total_plans, 1)
-        overdue_rate = overdue_plans / max(total_plans, 1)
+        critical_assets = [a for a in asset_risks if a["risk_level"] == "CRITICAL"]
+        high_assets = [a for a in asset_risks if a["risk_level"] == "HIGH"]
 
-        score = round(min(100, (
-            (1 - pm_completion) * 50 +
-            overdue_rate * 50
-        )), 1)
-
-        factors = []
-        if pm_completion < 0.5:
-            factors.append(f"PM completion only {round(pm_completion*100,1)}% (target: 90%+)")
-        if overdue_plans > 0:
-            factors.append(f"{overdue_plans} PM plans overdue")
-
-        return {
-            "domain": "MAINTENANCE",
-            "score": score,
-            "status": self._risk_status(score),
-            "total_plans": total_plans,
-            "completed_plans": completed,
-            "overdue_plans": overdue_plans,
-            "pm_completion_pct": round(pm_completion * 100, 1),
-            "factors": factors
-        }
-
-    def finance_risk(self) -> dict:
-        """Finance domain risk from invoice data."""
-        total_amount = float(self._s("""
-            SELECT COALESCE(SUM(total_amount),0) FROM invoices WHERE hotel_id=:hid
-        """, default=0))
-        overdue_amount = float(self._s("""
-            SELECT COALESCE(SUM(total_amount),0) FROM invoices
-            WHERE hotel_id=:hid AND LOWER(status)='overdue'
-        """, default=0))
-        overdue_count = self._s("""
-            SELECT COUNT(*) FROM invoices
-            WHERE hotel_id=:hid AND LOWER(status)='overdue'
-        """)
-
-        overdue_rate = overdue_amount / max(total_amount, 1)
-        score = round(min(100, overdue_rate * 100), 1)
-
-        factors = []
-        if overdue_count > 0:
-            factors.append(
-                f"{overdue_count} overdue invoices totalling ${overdue_amount:,.0f}")
-        if overdue_rate > 0.2:
-            factors.append(f"Overdue rate {round(overdue_rate*100,1)}% exceeds 20% threshold")
-
-        return {
-            "domain": "FINANCE",
-            "score": score,
-            "status": self._risk_status(score),
-            "total_amount": round(total_amount, 0),
-            "overdue_amount": round(overdue_amount, 0),
-            "overdue_count": overdue_count,
-            "overdue_rate_pct": round(overdue_rate * 100, 1),
-            "factors": factors
-        }
-
-    def procurement_risk(self) -> dict:
-        """Procurement domain risk from supplier data."""
-        total_suppliers = self._s(
-            "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:hid")
-        blacklisted = self._s("""
-            SELECT COUNT(*) FROM suppliers
-            WHERE hotel_id=:hid AND blacklisted=TRUE
-        """)
-        high_risk = self._s("""
-            SELECT COUNT(*) FROM suppliers
-            WHERE hotel_id=:hid AND LOWER(risk_level) IN ('high','critical')
-        """)
-        unapproved = self._s("""
-            SELECT COUNT(*) FROM suppliers
-            WHERE hotel_id=:hid AND (is_approved=FALSE OR is_approved IS NULL)
-            AND LOWER(status)!='inactive'
-        """)
-
-        if total_suppliers == 0:
-            return {"domain": "PROCUREMENT", "score": 0, "status": "LOW", "factors": []}
-
-        blacklist_rate = blacklisted / total_suppliers
-        high_risk_rate = high_risk / total_suppliers
-
-        score = round(min(100, (
-            blacklist_rate * 50 +
-            high_risk_rate * 30 +
-            (unapproved / total_suppliers) * 20
-        )), 1)
-
-        factors = []
-        if blacklisted > 0:
-            factors.append(f"{blacklisted} blacklisted suppliers in active registry")
-        if high_risk > 0:
-            factors.append(f"{high_risk} high/critical risk suppliers ({round(high_risk_rate*100,1)}%)")
-
-        return {
-            "domain": "PROCUREMENT",
-            "score": score,
-            "status": self._risk_status(score),
-            "total_suppliers": total_suppliers,
-            "blacklisted_suppliers": blacklisted,
-            "high_risk_suppliers": high_risk,
-            "unapproved_suppliers": unapproved,
-            "factors": factors
-        }
-
-    def overall_risk(self) -> dict:
-        """
-        Composite Operational Risk Score.
-        Weights:
-        - Operations (SLA/WO): 35%
-        - Assets: 25%
-        - Maintenance: 20%
-        - Finance: 10%
-        - Procurement: 10%
-        """
-        asset = self.asset_risk()
-        ops = self.operations_risk()
-        maint = self.maintenance_risk()
-        fin = self.finance_risk()
-        proc = self.procurement_risk()
-
-        domains = [asset, ops, maint, fin, proc]
-        weights = {
-            "ASSETS": 0.25, "OPERATIONS": 0.35,
-            "MAINTENANCE": 0.20, "FINANCE": 0.10, "PROCUREMENT": 0.10
-        }
-
-        composite = round(sum(
-            d["score"] * weights.get(d["domain"], 0.1)
-            for d in domains
-        ), 1)
-
-        all_factors = []
-        for d in domains:
-            for f in d.get("factors", []):
-                all_factors.append({
-                    "domain": d["domain"],
-                    "severity": d["status"],
-                    "factor": f
-                })
-
-        all_factors.sort(key=lambda x: (
-            0 if x["severity"] == "CRITICAL"
-            else 1 if x["severity"] == "HIGH"
-            else 2 if x["severity"] == "MODERATE"
-            else 3
-        ))
+        insights = []
+        if operational["risk_level"] in ("CRITICAL", "HIGH"):
+            insights.append({
+                "type": "HIGH_OPERATIONAL_RISK",
+                "severity": operational["risk_level"],
+                "message": f"Composite operational risk score: {operational['composite_risk_score']}/100"
+            })
+        if critical_assets:
+            insights.append({
+                "type": "CRITICAL_ASSET_RISK",
+                "severity": "CRITICAL",
+                "message": f"{len(critical_assets)} assets at critical risk — immediate attention required"
+            })
 
         return {
             "hotel_id": self.hid,
             "generated_at": datetime.utcnow().isoformat(),
-            "overall_risk_score": composite,
-            "risk_grade": (
-                "CRITICAL" if composite >= 70
-                else "HIGH" if composite >= 50
-                else "MODERATE" if composite >= 30
-                else "LOW"
-            ),
-            "domain_scores": {d["domain"]: d["score"] for d in domains},
-            "domain_status": {d["domain"]: d["status"] for d in domains},
-            "top_risk_factors": all_factors[:8],
-            "domains": domains,
-            "executive_summary": (
-                f"Overall risk: {composite}/100 ({self._risk_status(composite)}). "
-                f"Highest risk domain: {max(domains, key=lambda x: x['score'])['domain']}"
-            )
+            "operational_risk": operational,
+            "asset_risk_summary": {
+                "total_scored": len(asset_risks),
+                "critical": len(critical_assets),
+                "high": len(high_assets),
+                "moderate": sum(1 for a in asset_risks if a["risk_level"] == "MODERATE"),
+                "low": sum(1 for a in asset_risks if a["risk_level"] == "LOW"),
+            },
+            "forecast": forecast,
+            "insights": insights,
+            "top_risk_assets": asset_risks[:5],
         }
