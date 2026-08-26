@@ -22,15 +22,18 @@ class ExecutiveEngineService:
     def _scalar(self, sql: str, params: dict = None, default=0):
         try:
             p = params if params is not None else {"hid": self.hid}
-            # Use bindparams for reliable named parameter binding
             from sqlalchemy import text as _text
-            stmt = _text(sql)
-            val = self.db.execute(stmt, p).scalar()
+            val = self.db.execute(_text(sql), p).scalar()
             return val if val is not None else default
         except Exception as _e:
+            # CRITICAL: rollback aborted transaction so subsequent queries work
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
             import logging
             logging.getLogger(__name__).warning(
-                f"Executive _scalar failed: {type(_e).__name__}: {_e} | hid={self.hid} | SQL: {sql[:80]}"
+                f"Executive _scalar: {type(_e).__name__} | SQL: {sql[:60]}"
             )
             return default
 
@@ -52,6 +55,10 @@ class ExecutiveEngineService:
             try:
                 return self.db.execute(_sqlt(sql), {"h": h}).scalar() or 0
             except Exception:
+                try:
+                    self.db.rollback()
+                except Exception:
+                    pass
                 return 0
 
         # SLA compliance (completed/closed WOs)
@@ -205,29 +212,36 @@ class ExecutiveEngineService:
         alert_list = self.alerts()
 
         # Key KPIs
-        # Direct query approach — bypasses _scalar parameter issues
+        # Direct query approach with rollback protection
         hid = self.hid
-        try:
-            from sqlalchemy import text as _sqlt
-            open_wos = self.db.execute(_sqlt(
-                "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h "
-                "AND deleted_at IS NULL AND status IN ('open','in_progress')"
-            ), {"h": hid}).scalar() or 0
-            completed_today = self.db.execute(_sqlt(
-                "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h "
-                "AND deleted_at IS NULL AND LOWER(status) IN ('completed','closed') "
-                "AND DATE(updated_at) = CURRENT_DATE"
-            ), {"h": hid}).scalar() or 0
-            active_suppliers = self.db.execute(_sqlt(
-                "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:h"
-            ), {"h": hid}).scalar() or 0
-            total_assets = self.db.execute(_sqlt(
-                "SELECT COUNT(*) FROM assets WHERE hotel_id=:h AND deleted_at IS NULL"
-            ), {"h": hid}).scalar() or 0
-        except Exception as _e:
-            import logging
-            logging.getLogger(__name__).error(f"daily_briefing query failed: {_e}")
-            open_wos = completed_today = active_suppliers = total_assets = 0
+        from sqlalchemy import text as _sqlt
+
+        def _safe(sql, p=None):
+            """Execute query safely, rolling back on error."""
+            try:
+                return self.db.execute(_sqlt(sql), p or {"h": hid}).scalar() or 0
+            except Exception:
+                try:
+                    self.db.rollback()
+                except Exception:
+                    pass
+                return 0
+
+        open_wos = _safe(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h "
+            "AND deleted_at IS NULL AND status IN ('open','in_progress')"
+        )
+        completed_today = _safe(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h "
+            "AND deleted_at IS NULL AND LOWER(status) IN ('completed','closed') "
+            "AND DATE(updated_at) = CURRENT_DATE"
+        )
+        active_suppliers = _safe(
+            "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:h"
+        )
+        total_assets = _safe(
+            "SELECT COUNT(*) FROM assets WHERE hotel_id=:h AND deleted_at IS NULL"
+        )
 
         critical_count = sum(
             1 for a in alert_list if a["severity"] in ("P0_CRITICAL", "P1_HIGH")
