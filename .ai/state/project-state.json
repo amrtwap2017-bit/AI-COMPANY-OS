@@ -3,11 +3,11 @@
   "description": "Multi-tenant Enterprise SaaS for hospitality engineering. FastAPI + Next.js + PostgreSQL. Primary market: Egypt / Sharm El-Sheikh.",
   "phase": "COMMERCIAL_VALIDATION",
   "active_sprint": "SPRINT-N-FIX",
-  "active_task": "SPRINT-N-FIX-T004",
+  "active_task": null,
   "status": "ACTIVE",
-  "last_checkpoint": "2026-08-26T00:39:07Z",
-  "last_commit": "1ea79965",
-  "last_updated": "2026-08-26T00:39:37.001749+00:00",
+  "last_checkpoint": "2026-08-26T01:47:50Z",
+  "last_commit": "5cac03a8",
+  "last_updated": "2026-08-26T01:47:54.913396+00:00",
   "tests": {
     "status": "PARTIAL_FAILURE",
     "runner": ".venv/bin/python -m pytest tests/ -q --tb=short -m 'not live_http'",
@@ -38,12 +38,10 @@
     "530+ commits unpushed to origin/main"
   ],
   "next_actions": [
-    "N-FIX: Fix onboarding, data import, executive API consistency",
-    "N-014: Commercial Pilot deployment",
-    "Fix portal TypeScript bugs (GlobalSearch.tsx, icons.tsx)",
-    "Repair Alembic migrations for employees/gl/eta tables",
-    "Complete employee timesheet module",
-    "Increase test coverage: 158 \u2192 200+"
+    "DECISION: Proceed to N-014 Commercial Pilot with 24 known test failures (classified)",
+    "OR: Plan SPRINT-FEATURE-001 to implement missing telemetry/intelligence endpoints",
+    "PRIORITY: Hub integration \u2014 make ai-verify auto-start server if down",
+    "PRIORITY: Reduce context loading time for large repo sessions"
   ],
   "forbidden_areas": [
     "11-WORKSPACES/triangle-black/.venv/",

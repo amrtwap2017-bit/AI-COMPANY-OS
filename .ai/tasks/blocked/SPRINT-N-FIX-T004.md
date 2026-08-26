@@ -54,3 +54,4 @@ If 3 consecutive attempts fail → STOP → create failure report → wait for h
 
 ## Notes
 [Any additional context, links to documentation, or warnings]
+BLOCKED: 2026-08-26T01:47:46Z — Feature work not simple fix — requires dedicated sprint
