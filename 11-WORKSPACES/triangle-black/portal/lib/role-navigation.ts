@@ -43,7 +43,8 @@ export const START_HERE_BY_ROLE: Record<string, {label:string; href:string}[]> =
     {label:"Approvals", href:"/approvals"},
   ],
   engineer: [
-    {label:"My Work Orders", href:"/operations/work-orders"},
+    {label:"My Work Orders", href:"/operations/command-center",label:"Command Center",icon:"⚡"},
+      {href:/operations/work-orders"},
     {label:"Log Time", href:"/operations/time-tracking"},
     {label:"Scan Asset QR", href:"/operations/assets/qr"},
   ],
