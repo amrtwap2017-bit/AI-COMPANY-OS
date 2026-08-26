@@ -8662,6 +8662,75 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: work_order_actions: {_e}")
 
+
+# A-009: Workflow Admin API
+try:
+    from sqlalchemy import text as _sqlt
+
+    @app.get("/api/v1/workflow/instances", tags=["Workflow Admin"])
+    def list_workflow_instances(
+        hotel_id: str = Depends(get_hotel_id_dep),
+        db: Session = Depends(get_db_dep),
+        current_user=Depends(get_current_user_dep),
+        limit: int = 50
+    ):
+        rows = db.execute(_sqlt("""
+            SELECT wi.id, wi.entity_type, wi.entity_id,
+                   wi.current_state, wi.hotel_id, wi.created_at,
+                   COUNT(wt.id) AS transition_count
+            FROM workflow_instances wi
+            LEFT JOIN workflow_transitions wt ON wt.instance_id = wi.id
+            WHERE wi.hotel_id = :hid
+            GROUP BY wi.id, wi.entity_type, wi.entity_id,
+                     wi.current_state, wi.hotel_id, wi.created_at
+            ORDER BY wi.created_at DESC
+            LIMIT :lim
+        """), {"hid": hotel_id, "lim": limit}).fetchall()
+        items = [dict(r._mapping) for r in rows]
+        return {"hotel_id": hotel_id, "count": len(items), "instances": items}
+
+    @app.get("/api/v1/workflow/instances/{instance_id}", tags=["Workflow Admin"])
+    def get_workflow_instance(
+        instance_id: str,
+        hotel_id: str = Depends(get_hotel_id_dep),
+        db: Session = Depends(get_db_dep),
+        current_user=Depends(get_current_user_dep),
+    ):
+        inst = db.execute(_sqlt("""
+            SELECT * FROM workflow_instances
+            WHERE id = :iid AND hotel_id = :hid
+        """), {"iid": instance_id, "hid": hotel_id}).fetchone()
+        if not inst:
+            raise HTTPException(status_code=404, detail="Instance not found")
+        transitions = db.execute(_sqlt("""
+            SELECT * FROM workflow_transitions
+            WHERE instance_id = :iid
+            ORDER BY created_at ASC
+        """), {"iid": instance_id}).fetchall()
+        return {
+            "instance": dict(inst._mapping),
+            "transitions": [dict(t._mapping) for t in transitions],
+            "transition_count": len(transitions)
+        }
+
+    @app.get("/api/v1/workflow/definitions", tags=["Workflow Admin"])
+    def list_workflow_definitions(
+        hotel_id: str = Depends(get_hotel_id_dep),
+        db: Session = Depends(get_db_dep),
+        current_user=Depends(get_current_user_dep),
+    ):
+        rows = db.execute(_sqlt("""
+            SELECT id, name, entity_type, version, is_active, created_at
+            FROM workflow_definitions WHERE hotel_id = :hid
+            ORDER BY created_at DESC
+        """), {"hid": hotel_id}).fetchall()
+        return {"hotel_id": hotel_id, "count": len(rows),
+                "definitions": [dict(r._mapping) for r in rows]}
+
+    logger.info("  OK: workflow admin API (A-009)")
+except Exception as _e:
+    logger.warning(f"WARN: workflow admin: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
