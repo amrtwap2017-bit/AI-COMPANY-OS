@@ -21,23 +21,23 @@ def _s(r, ctx=""):
 
 # ── Sprint-249A: Migration file ───────────────────────────────────────────────
 def test_composite_index_migration_exists():
-    p = ALEMBIC / "e2f3a4b5c6d7_composite_indexes_work_orders.py"
-    assert p.exists(), "Migration e2f3a4b5c6d7 missing"
+    p = ALEMBIC / "e1f2a3b4c5d6_composite_indexes_work_orders.py"
+    assert p.exists(), "Migration e1f2a3b4c5d6 missing"
 
 def test_composite_index_migration_correct_revision():
-    text = (ALEMBIC / "e2f3a4b5c6d7_composite_indexes_work_orders.py").read_text()
-    assert "e2f3a4b5c6d7" in text
+    text = (ALEMBIC / "e1f2a3b4c5d6_composite_indexes_work_orders.py").read_text()
+    assert "e1f2a3b4c5d6" in text
     assert "d1e2f3a4b5c6" in text
 
 def test_composite_index_migration_idempotent():
-    text = (ALEMBIC / "e2f3a4b5c6d7_composite_indexes_work_orders.py").read_text()
+    text = (ALEMBIC / "e1f2a3b4c5d6_composite_indexes_work_orders.py").read_text()
     assert "_idx_exists" in text
     assert "IF NOT EXISTS" in text or "_idx_exists" in text
 
-def test_alembic_head_is_e2f3a4b5c6d7():
+def test_alembic_head_is_e1f2a3b4c5d6():
     """Verify alembic migration chain is healthy and composite index migration was applied.
 
-    Originally checked for e2f3a4b5c6d7 as head. That migration has since been
+    Originally checked for e1f2a3b4c5d6 as head. That migration has since been
     superseded by later migrations (current head: g2h3i4j5k6l7). This test now
     verifies migration chain health rather than a pinned revision string.
     """
@@ -72,8 +72,8 @@ def test_alembic_head_is_e2f3a4b5c6d7():
         [".venv/bin/alembic", "history", "--verbose"],
         capture_output=True, text=True
     )
-    assert "e2f3a4b5c6d7" in history.stdout, (
-        "Composite index migration e2f3a4b5c6d7 not found in alembic history"
+    assert "e1f2a3b4c5d6" in history.stdout, (
+        "Composite index migration e1f2a3b4c5d6 not found in alembic history"
     )
 
 def test_hotel_status_composite_index_exists():
