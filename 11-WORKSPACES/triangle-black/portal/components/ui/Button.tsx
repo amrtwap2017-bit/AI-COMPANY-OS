@@ -1,4 +1,10 @@
-"use client";
+"use client"
+
+/* Triangle Black Design Tokens
+ * Primary action: var(--color-action-primary)
+ * Danger action:  var(--color-action-danger)
+ * Focus state:    focus-visible:ring-2
+ */;
 import React, { ButtonHTMLAttributes, forwardRef } from "react";
 
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";

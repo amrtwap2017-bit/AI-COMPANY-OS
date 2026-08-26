@@ -1,94 +1,81 @@
-# ============================================================
-# Triangle Black — Docker Compose
-# Sprint 324 — Program K: DevOps Foundation
-# Usage: docker compose up -d
-# Note: Uses LOCAL PostgreSQL (port 5432) — NOT containerized
-# ============================================================
-
-version: "3.9"
-
+networks:
+  tb-network:
+    driver: bridge
 services:
-
-  # ── BACKEND — FastAPI ──────────────────────────────────────
   tb-backend:
     build:
       context: .
       dockerfile: Dockerfile.api
     container_name: tb-backend
-    restart: unless-stopped
-    ports:
-      - "8030:8030"
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
-      - TRIANGLE_BLACK_DB_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
-      - POSTGRES_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
-      - AI_ENGINE_URL=http://host.docker.internal:11434/api/generate
-      - ENVIRONMENT=production
-      - REDIS_URL=redis://tb-redis:6379/0
-      - ENABLE_TENANT_RATE_LIMIT=1
-      - TENANT_RATE_LIMIT_MAX=500
-    env_file:
-      - .env
     depends_on:
       tb-redis:
         condition: service_healthy
+    env_file:
+    - .env
+    environment:
+    - DATABASE_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
+    - TRIANGLE_BLACK_DB_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
+    - POSTGRES_URL=postgresql+psycopg2://ai:ai123@host.docker.internal:5432/triangle_black
+    - AI_ENGINE_URL=http://host.docker.internal:11434/api/generate
+    - ENVIRONMENT=production
+    - REDIS_URL=redis://tb-redis:6379/0
+    - ENABLE_TENANT_RATE_LIMIT=1
+    - TENANT_RATE_LIMIT_MAX=500
     extra_hosts:
-      - "host.docker.internal:host-gateway"
-    volumes:
-      - ./src:/app/src:ro
-      - ./uploads:/app/uploads
+    - host.docker.internal:host-gateway
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8030/api/v1/health"]
       interval: 30s
-      timeout: 10s
       retries: 3
       start_period: 20s
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8030/api/v1/health
+      timeout: 10s
     networks:
-      - tb-network
-
-
-  # ── REDIS — Cache + Feature Flags (Sprint-205) ───────────────
-  tb-redis:
-    image: redis:7-alpine
-    container_name: tb-redis
-    restart: unless-stopped
+    - tb-network
     ports:
-      - "6379:6379"
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - tb-network
-
-  # ── PORTAL — Next.js ──────────────────────────────────────
+    - 8030:8030
+    restart: unless-stopped
+    volumes:
+    - ./src:/app/src:ro
+    - ./uploads:/app/uploads
   tb-portal:
     build:
       context: ./portal
       dockerfile: Dockerfile.portal
     container_name: tb-portal
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
     depends_on:
       tb-backend:
         condition: service_healthy
       tb-redis:
         condition: service_healthy
+    environment:
+    - NODE_ENV=production
     networks:
-      - tb-network
-
-networks:
-  tb-network:
-    driver: bridge
-
-# ── USAGE ──────────────────────────────────────────────────
-# Start:   docker compose up -d
-# Stop:    docker compose down
-# Logs:    docker compose logs -f tb-backend
-# Rebuild: docker compose up -d --build
-# Status:  docker compose ps
+    - tb-network
+    ports:
+    - 3000:3000
+    restart: unless-stopped
+  tb-redis:
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    container_name: tb-redis
+    healthcheck:
+      interval: 10s
+      retries: 3
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      timeout: 5s
+    image: redis:7-alpine
+    networks:
+    - tb-network
+    ports:
+    - 6379:6379
+    restart: unless-stopped
+version: '3.9'
+volumes:
+  tb_redis_data:
+    driver: local

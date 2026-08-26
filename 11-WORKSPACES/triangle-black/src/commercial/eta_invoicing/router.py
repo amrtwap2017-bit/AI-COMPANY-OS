@@ -1,3 +1,4 @@
+from src.core.auth import get_current_user
 from __future__ import annotations
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
@@ -20,7 +21,7 @@ def eta_status():
         "message": "Set ETA_CLIENT_ID and ETA_CLIENT_SECRET to enable" if not eta_service.is_configured() else "ETA configured"
     }
 
-@router.get("/invoices", response_model=List[ETAInvoiceResponse])
+@router.get("/invoices", dependencies=[Depends(get_current_user)], response_model=List[ETAInvoiceResponse])
 def list_invoices(hotel_id: str = Depends(get_hotel_id), skip: int = 0, limit: int = 100,
                   db: Session = Depends(get_db)):
     return db.query(ETAInvoice).filter(
