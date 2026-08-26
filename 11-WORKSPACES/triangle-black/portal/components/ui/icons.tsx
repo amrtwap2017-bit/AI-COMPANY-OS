@@ -232,8 +232,8 @@ export const DOMAIN_ICONS = {
   documents:     'document',
 } as const
 
-// Re-
-export individual icons for direct useexport {
+// Re-export individual icons for direct use
+export {
   ClipboardList, Wrench, Settings, CheckCircle2, AlertCircle,
   AlertTriangle, Clock, Timer, Building2, Package, BarChart3,
   User, Users, Bell, Search, Filter, Plus, Edit3, Trash2,

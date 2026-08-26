@@ -1,7 +1,8 @@
 from __future__ import annotations
 from fastapi import APIRouter, Query, HTTPException
 from sqlalchemy import text
-from src.core.database import SessionLocal
+from src.core.database import get_db
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -33,7 +34,7 @@ def inventory_check(
     out_of_stock = []
 
     try:
-        db = SessionLocal()
+        db = next(get_db())
         with db as session:
             cat_params = {"hotel_id": hotel_id}
             where_parts = []
@@ -102,7 +103,7 @@ class AutoPRRequest(BaseModel):
 @router.post("/supply/auto-pr", summary="Auto-create Purchase Request from Work Order")
 def auto_create_pr(body: AutoPRRequest):
     try:
-        db = SessionLocal()
+        db = next(get_db())
         with db as session:
             wo = session.execute(text(
                 "SELECT id, hotel_id, title, type, priority FROM work_orders WHERE id = :wid"

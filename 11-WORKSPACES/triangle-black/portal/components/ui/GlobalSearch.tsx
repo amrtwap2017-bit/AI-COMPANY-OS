@@ -77,7 +77,7 @@ export function GlobalSearch() {
               <button key={i} onClick={()=>{router.push(r.path);setOpen(false);setQuery("");}}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-base-alt transition-colors border-b border-divider last:border-0">
                 <span style={{fontSize:"1.125rem"}}>{tc.icon}</span>
-                <divclassName="flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-primary truncate">{r.title}</div>
                   <div className="text-xs text-secondary">{r.type}{r.sub?` · ${r.sub}`:""}</div>
                 </div>
