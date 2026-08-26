@@ -1,6 +1,6 @@
 from __future__ import annotations
 import datetime
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -250,33 +250,37 @@ def risk_summary(db: Session = Depends(get_db)):
     }
 
 
-@router.post("/director/analyze", tags=["predictive_maintenance"])
-def analyze_asset_predictive_health(
-    payload: dict,
+@router.post("/director/analyze",
+             summary="AI Maintenance Director — Analyze Asset Health",
+             tags=["predictive_maintenance"])
+async def analyze_asset_predictive_health(
+    request: Request,
     hotel_id: str = Depends(get_hotel_id),
-    db: Session = Depends(get_db)
 ):
-    """AI Maintenance Director — Analyzes equipment health and returns governed recommendations."""
-    from src.commercial.predictive_maintenance.director import AIMaintenanceDirector
+    """
+    AI Maintenance Director analysis.
+    Body: {asset_id, asset_name, failures_90d, pm_compliance, vibration_spike}
+    """
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
 
-    asset_id = payload.get("asset_id", "ast-001")
-    asset_name = payload.get("asset_name", "Chiller Unit A")
-    failures_90d = int(payload.get("failures_90d", 0))
-    pm_compliance = float(payload.get("pm_compliance", 100.0))
-    vibration_spike = bool(payload.get("vibration_spike", False))
+    try:
+        from src.commercial.predictive_maintenance.director import AIMaintenanceDirector
+        result = AIMaintenanceDirector.analyze_asset_health(
+            asset_id=str(payload.get("asset_id", "unknown")),
+            hotel_id=hotel_id,
+            asset_name=str(payload.get("asset_name", "Asset")),
+            failures_90d=int(payload.get("failures_90d", 0)),
+            pm_compliance=float(payload.get("pm_compliance", 100.0)),
+            vibration_spike=bool(payload.get("vibration_spike", False)),
+        )
+        return result
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=str(e))
 
-    analysis = AIMaintenanceDirector.analyze_asset_health(
-        asset_id=asset_id,
-        hotel_id=hotel_id,
-        asset_name=asset_name,
-        failures_90d=failures_90d,
-        pm_compliance=pm_compliance,
-        vibration_spike=vibration_spike
-    )
-    return analysis
-
-
-# ── AI Predictive Failure Forecaster Endpoints (Sprint D-004) ────────────────
 @router.get("/forecast")
 def forecast_failures_endpoint(
     horizon_days: int = 30,

@@ -8,11 +8,12 @@ echo ""
 
 PROJECT_STATE=".ai/state/project-state.json"
 SPRINT_STATE=".ai/state/sprint-state.json"
+TEST_RESULTS=".ai/state/test-results.json"
 
 if [ -f "$PROJECT_STATE" ]; then
   echo "── PROJECT ────────────────────────────"
   python3 -c "
-import json, sys
+import json
 with open('$PROJECT_STATE') as f:
     s = json.load(f)
 print(f'  Project : {s.get(\"project\",\"UNKNOWN\")}')
@@ -28,16 +29,85 @@ fi
 
 echo ""
 echo "── TESTS ──────────────────────────────"
-if [ -f "$PROJECT_STATE" ]; then
+if [ -f "$TEST_RESULTS" ]; then
+  python3 - << 'PYEOF'
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+try:
+    r = json.loads(Path(".ai/state/test-results.json").read_text())
+    status  = r.get("status", "UNKNOWN")
+    passed  = r.get("passed", 0)
+    failed  = r.get("failed", 0)
+    skipped = r.get("skipped", 0)
+    dur     = r.get("duration_seconds", 0)
+    srv     = r.get("server_status", "UNKNOWN")
+    last    = r.get("last_run", "")
+
+    # Compute freshness
+    freshness = "UNKNOWN"
+    badge = ""
+    if last:
+        try:
+            run_time = datetime.fromisoformat(last.replace("Z",""))
+            if run_time.tzinfo is None:
+                run_time = run_time.replace(tzinfo=timezone.utc)
+            age_seconds = int((datetime.now(timezone.utc) - run_time).total_seconds())
+            if age_seconds < 60:
+                freshness = f"{age_seconds}s ago"
+                badge = "[LIVE]"
+            elif age_seconds < 600:
+                freshness = f"{age_seconds//60}m ago"
+                badge = "[LIVE]"
+            elif age_seconds < 3600:
+                freshness = f"{age_seconds//60}m ago"
+                badge = "[RECENT]"
+            else:
+                freshness = f"{age_seconds//3600}h ago"
+                badge = "[STALE]"
+        except Exception:
+            freshness = last[:16]
+
+    print(f"  Status  : {status}")
+    print(f"  Passed  : {passed}")
+    print(f"  Failed  : {failed}")
+    print(f"  Skipped : {skipped}")
+    print(f"  Duration: {dur}s")
+    print(f"  Server  : {srv}")
+    print(f"  Last run: {freshness} {badge}")
+except Exception as e:
+    print(f"  Error reading test-results.json: {e}")
+PYEOF
+elif [ -f "$PROJECT_STATE" ]; then
+  echo "  [No live results — run: bash scripts/ai/ai-verify]"
   python3 -c "
 import json
 with open('$PROJECT_STATE') as f:
     s = json.load(f)
 t = s.get('tests', {})
-print(f'  Status : {t.get(\"status\",\"UNKNOWN\")}')
-print(f'  Passed : {t.get(\"passed\",0)}')
-print(f'  Failed : {t.get(\"failed\",0)}')
-" 2>/dev/null || echo "  parse error"
+print(f'  Cached  : {t.get(\"passed\",0)} passed / {t.get(\"failed\",0)} failed')
+" 2>/dev/null || true
+fi
+
+echo ""
+echo "── SPRINT ─────────────────────────────"
+if [ -f "$SPRINT_STATE" ]; then
+  python3 -c "
+import json
+with open('$SPRINT_STATE') as f:
+    s = json.load(f)
+sprint  = s.get('current_sprint','NONE')
+status  = s.get('sprint_status','UNKNOWN')
+total   = s.get('tasks_total',0)
+done    = s.get('tasks_complete',0)
+active  = s.get('tasks_in_progress',0)
+blocked = s.get('tasks_blocked',0)
+remain  = s.get('tasks_remaining',0)
+print(f'  Sprint  : {sprint}')
+print(f'  Status  : {status}')
+print(f'  Progress: {done}/{total} done  {active} active  {blocked} blocked  {remain} remaining')
+" 2>/dev/null || true
 fi
 
 echo ""

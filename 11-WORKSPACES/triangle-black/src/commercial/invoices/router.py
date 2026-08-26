@@ -81,7 +81,7 @@ def payment_summary(db: Session = Depends(get_db)):
         "currency":           "EGP",
         "generated_at":       datetime.datetime.utcnow().isoformat(),
     }
-@router.get("/{invoice_id}", response_model=InvoiceResponse)
+@router.get("/{invoice_id}")
 def get_invoice(
     invoice_id: str,
     db: Session = Depends(get_db),
