@@ -106,7 +106,7 @@ class ExecutiveEngineService:
         # P0: SLA breaches on open WOs
         open_breached = self._scalar(
             "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
-            "AND deleted_at IS NULL AND LOWER(status) IN ('open','in_progress') "
+            "AND deleted_at IS NULL AND status IN ('open','in_progress') "
             "AND sla_breached=TRUE"
         )
         if open_breached > 0:
@@ -122,7 +122,7 @@ class ExecutiveEngineService:
         # P1: Emergency work orders open
         emergency_open = self._scalar(
             "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
-            "AND deleted_at IS NULL AND LOWER(status) IN ('open','in_progress') "
+            "AND deleted_at IS NULL AND status IN ('open','in_progress') "
             "AND LOWER(priority) = 'emergency'"
         )
         if emergency_open > 0:
@@ -190,7 +190,7 @@ class ExecutiveEngineService:
         # Key KPIs
         open_wos = self._scalar(
             "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
-            "AND deleted_at IS NULL AND LOWER(status) IN ('open','in_progress')"
+            "AND deleted_at IS NULL AND status IN ('open','in_progress')"
         )
         completed_today = self._scalar(
             "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
@@ -198,8 +198,7 @@ class ExecutiveEngineService:
             "AND DATE(updated_at) = CURRENT_DATE"
         )
         active_suppliers = self._scalar(
-            "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:hid "
-            "AND LOWER(status) = 'active'"
+            "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:hid"
         )
         total_assets = self._scalar(
             "SELECT COUNT(*) FROM assets WHERE hotel_id=:hid AND deleted_at IS NULL"
