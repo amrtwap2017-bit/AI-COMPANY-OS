@@ -21,16 +21,16 @@ def _s(r, ctx=""):
 
 # ── Sprint-249A: Migration file ───────────────────────────────────────────────
 def test_composite_index_migration_exists():
-    p = ALEMBIC / "f2a3b4c5d6e7_composite_indexes_work_orders.py"
+    p = ALEMBIC / "e2f3a4b5c6d7_composite_indexes_work_orders.py"
     assert p.exists(), "Migration f2a3b4c5d6e7 missing"
 
 def test_composite_index_migration_correct_revision():
-    text = (ALEMBIC / "f2a3b4c5d6e7_composite_indexes_work_orders.py").read_text()
-    assert "f2a3b4c5d6e7" in text
+    text = (ALEMBIC / "e2f3a4b5c6d7_composite_indexes_work_orders.py").read_text()
+    assert "e2f3a4b5c6d7" in text
     assert "d1e2f3a4b5c6" in text
 
 def test_composite_index_migration_idempotent():
-    text = (ALEMBIC / "f2a3b4c5d6e7_composite_indexes_work_orders.py").read_text()
+    text = (ALEMBIC / "e2f3a4b5c6d7_composite_indexes_work_orders.py").read_text()
     assert "_idx_exists" in text
     assert "IF NOT EXISTS" in text or "_idx_exists" in text
 
