@@ -21,9 +21,12 @@ class ExecutiveEngineService:
 
     def _scalar(self, sql: str, params: dict = None, default=0):
         try:
-            val = self.db.execute(text(sql), params or {"hid": self.hid}).scalar()
+            p = params if params is not None else {"hid": self.hid}
+            val = self.db.execute(text(sql), p).scalar()
             return val if val is not None else default
-        except Exception:
+        except Exception as _e:
+            import logging
+            logging.getLogger(__name__).warning(f"Executive _scalar failed: {_e} | SQL: {sql[:80]}")
             return default
 
     def _q(self, sql: str, params: dict = None):

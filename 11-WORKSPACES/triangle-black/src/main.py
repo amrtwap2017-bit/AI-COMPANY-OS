@@ -8849,6 +8849,38 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: cost_engine: {_e}")
 
+
+# DEBUG: Executive Engine direct query test
+try:
+    @app.get("/api/v1/debug/executive", tags=["Debug"], include_in_schema=False)
+    def debug_executive(
+        hotel_id: str = Depends(get_hotel_id_dep),
+        db: Session = Depends(get_db_dep),
+        current_user=Depends(get_current_user_dep),
+    ):
+        """Debug endpoint to test executive engine queries directly."""
+        from sqlalchemy import text as sqlt
+        results = {}
+        queries = {
+            "total_assets": "SELECT COUNT(*) FROM assets WHERE hotel_id=:hid AND deleted_at IS NULL",
+            "open_wos": "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL AND status IN ('open','in_progress')",
+            "open_wos_lower": "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL AND LOWER(status) IN ('open','in_progress')",
+            "active_suppliers": "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:hid",
+            "hotel_id_used": hotel_id,
+        }
+        for name, sql in queries.items():
+            if name == "hotel_id_used":
+                results[name] = sql
+                continue
+            try:
+                val = db.execute(sqlt(sql), {"hid": hotel_id}).scalar()
+                results[name] = val
+            except Exception as e:
+                results[name] = f"ERROR: {str(e)[:200]}"
+        return results
+except Exception as _e:
+    pass
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
