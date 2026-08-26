@@ -8615,8 +8615,8 @@ except Exception as _e:
 # N-FIX: asset-lifecycle/report endpoint
 try:
     @app.get("/api/v1/asset-lifecycle/report", tags=["Asset Lifecycle"])
-    def asset_lifecycle_report(hotel_id: str = Depends(get_hotel_id_dep),
-                               db: Session = Depends(get_db_dep)):
+    def asset_lifecycle_report(hotel_id: str = Depends(get_hotel_id),
+                               db: Session = Depends(get_db)):
         """Asset lifecycle intelligence report."""
         from sqlalchemy import text as sqlt
         total = db.execute(sqlt(
@@ -8665,13 +8665,16 @@ except Exception as _e:
 
 # A-009: Workflow Admin API
 try:
+    from src.core.tenant import get_hotel_id
+    from src.core.database import get_db
+    from src.core.auth import get_current_user
     from sqlalchemy import text as _sqlt
 
     @app.get("/api/v1/workflow/instances", tags=["Workflow Admin"])
     def list_workflow_instances(
-        hotel_id: str = Depends(get_hotel_id_dep),
-        db: Session = Depends(get_db_dep),
-        current_user=Depends(get_current_user_dep),
+        hotel_id: str = Depends(get_hotel_id),
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user),
         limit: int = 50
     ):
         rows = db.execute(_sqlt("""
@@ -8692,9 +8695,9 @@ try:
     @app.get("/api/v1/workflow/instances/{instance_id}", tags=["Workflow Admin"])
     def get_workflow_instance(
         instance_id: str,
-        hotel_id: str = Depends(get_hotel_id_dep),
-        db: Session = Depends(get_db_dep),
-        current_user=Depends(get_current_user_dep),
+        hotel_id: str = Depends(get_hotel_id),
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user),
     ):
         inst = db.execute(_sqlt("""
             SELECT * FROM workflow_instances
@@ -8715,9 +8718,9 @@ try:
 
     @app.get("/api/v1/workflow/definitions", tags=["Workflow Admin"])
     def list_workflow_definitions(
-        hotel_id: str = Depends(get_hotel_id_dep),
-        db: Session = Depends(get_db_dep),
-        current_user=Depends(get_current_user_dep),
+        hotel_id: str = Depends(get_hotel_id),
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user),
     ):
         rows = db.execute(_sqlt("""
             SELECT id, name, entity_type, version, is_active, created_at
@@ -8734,14 +8737,17 @@ except Exception as _e:
 
 # A-013-PREP: PM Plans demo seed endpoint
 try:
+    from src.core.tenant import get_hotel_id
+    from src.core.database import get_db
+    from src.core.auth import get_current_user
     import uuid as _uuid
     from datetime import date as _date, timedelta as _td, datetime as _dt
 
     @app.post("/api/v1/demo/seed-pm-plans", tags=["Demo"])
     def seed_demo_pm_plans(
-        hotel_id: str = Depends(get_hotel_id_dep),
-        db: Session = Depends(get_db_dep),
-        current_user=Depends(get_current_user_dep),
+        hotel_id: str = Depends(get_hotel_id),
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user),
     ):
         """Seed 10 demo PM plans for the current tenant. Idempotent."""
         from sqlalchemy import text as _sqlt
@@ -8854,9 +8860,9 @@ except Exception as _e:
 try:
     @app.get("/api/v1/debug/executive", tags=["Debug"], include_in_schema=False)
     def debug_executive(
-        hotel_id: str = Depends(get_hotel_id_dep),
-        db: Session = Depends(get_db_dep),
-        current_user=Depends(get_current_user_dep),
+        hotel_id: str = Depends(get_hotel_id),
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user),
     ):
         """Debug endpoint to test executive engine queries directly."""
         from sqlalchemy import text as sqlt
