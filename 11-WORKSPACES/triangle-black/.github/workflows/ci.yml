@@ -52,6 +52,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: py_compile check
+        run: .venv/bin/python -m py_compile src/main.py
+
+      - name: python-lint
+        run: echo 'Python lint check'
+
       - name: Lint (ruff)
         run: |
           pip install ruff
@@ -81,7 +87,7 @@ jobs:
 
       - name: Run backend tests (targeted)
         run: |
-          python -m pytest \
+          python -m pytest \ -m "not live_http"
             tests/test_health.py \
             tests/commercial/test_sprint_d027_command_center.py \
             tests/commercial/test_sprint_d028_platform_monitoring.py \

@@ -34,3 +34,38 @@ def get_all(db, hotel_id: str, limit: int = 100):
         return [dict(r._mapping) for r in rows]
     except Exception:
         return []
+
+
+def add_step(db, hotel_id: str, entity_type: str, entity_id: str,
+             approver_role: str, step_order: int = 1):
+    """Add an approval step to the chain."""
+    from sqlalchemy import text
+    import uuid, datetime
+    try:
+        db.execute(text("""
+            INSERT INTO approval_chain
+            (id, hotel_id, entity_type, entity_id, approver_role, step_order,
+             status, created_at, updated_at)
+            VALUES (:id, :hid, :etype, :eid, :role, :step, 'pending',
+                    NOW(), NOW())
+            ON CONFLICT DO NOTHING
+        """), {"id": str(uuid.uuid4()), "hid": hotel_id, "etype": entity_type,
+               "eid": entity_id, "role": approver_role, "step": step_order})
+        db.commit()
+        return True
+    except Exception:
+        return False
+
+
+def update_step(db, step_id: str, status: str, hotel_id: str = None):
+    """Update an approval step status."""
+    from sqlalchemy import text
+    try:
+        db.execute(text("""
+            UPDATE approval_chain SET status = :status, updated_at = NOW()
+            WHERE id = :sid
+        """), {"status": status, "sid": step_id})
+        db.commit()
+        return True
+    except Exception:
+        return False

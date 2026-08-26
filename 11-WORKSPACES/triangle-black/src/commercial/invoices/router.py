@@ -85,12 +85,25 @@ def payment_summary(db: Session = Depends(get_db)):
 def get_invoice(
     invoice_id: str,
     db: Session = Depends(get_db),
+    hotel_id: str = Depends(get_hotel_id),
     _: User = Depends(require_manager),
 ):
-    invoice = InvoiceRepository(db).get_invoice(invoice_id)
-    if not invoice:
-        raise HTTPException(status_code=404, detail='Invoice not found')
-    return invoice
+    """Get invoice by ID — safe implementation."""
+    from sqlalchemy import text as sqlt
+    try:
+        row = db.execute(sqlt("""
+            SELECT id, invoice_number, total_amount, status, due_date, created_at,
+                   hotel_id
+            FROM invoices
+            WHERE id = :iid AND hotel_id = :hid
+        """), {"iid": invoice_id, "hid": hotel_id}).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Invoice not found")
+        return dict(row._mapping)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Invoice not found")
 
 @router.put("/{invoice_id}", response_model=InvoiceResponse)
 def update_invoice(
