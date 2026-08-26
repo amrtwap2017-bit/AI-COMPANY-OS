@@ -8554,6 +8554,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: cost_intelligence: {_e}")
 
+
+try:
+    from src.commercial.risk_engine.router import router as _risk_engine_r
+    app.include_router(_risk_engine_r, prefix="/api/v1")
+    logger.info("  OK: risk_engine (A-012)")
+except Exception as _e:
+    logger.warning(f"WARN: risk_engine: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
