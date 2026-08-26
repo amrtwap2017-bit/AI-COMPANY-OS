@@ -91,8 +91,9 @@ class ExecutiveEngineService:
 
         # Supplier score (avg rating normalized to 100)
         avg_rating = _q(
-            "SELECT ROUND(AVG(COALESCE(rating, 0)) / 5.0 * 100, 1) "
-            "FROM suppliers WHERE hotel_id=:h AND (blacklisted IS NULL OR blacklisted=FALSE)"
+            "SELECT ROUND(AVG(rating) / 5.0 * 100, 1) "
+            "FROM suppliers WHERE hotel_id=:h AND rating > 0 "
+            "AND (blacklisted IS NULL OR blacklisted=FALSE)"
         )
         supplier_pct = float(avg_rating or 0)
 
