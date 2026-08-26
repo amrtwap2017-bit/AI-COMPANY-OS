@@ -60,7 +60,7 @@ export default function UnifiedIntelligenceDashboard() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="tb-shimmer tb-shimmer-title" />
-          <div className="tb-grid-4" style={{ marginTop: "1.5rem" }}>
+          <div className="tb-grid-4" className="mt-6">
             {[1,2,3,4].map(i => <div key={i} className="tb-shimmer tb-shimmer-block" />)}
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function UnifiedIntelligenceDashboard() {
       {/* Operational Health Score */}
       <div className="tb-section">
         <h2 className="tb-section-title">Operational Health</h2>
-        <div className="tb-grid-4" style={{ marginTop: "0.75rem" }}>
+        <div className="tb-grid-4" className="mt-3">
           <div className="tb-kpi">
             <div className="tb-kpi-label">Overall Score</div>
             <div className="tb-kpi-value" style={{ color: GRADE_COLOR[health?.grade || "D"] }}>
@@ -138,11 +138,11 @@ export default function UnifiedIntelligenceDashboard() {
       {/* Intelligence Domains */}
       <div className="tb-section">
         <h2 className="tb-section-title">Domain Intelligence</h2>
-        <div className="tb-grid-3" style={{ marginTop: "0.75rem" }}>
+        <div className="tb-grid-3" className="mt-3">
 
           {/* SLA Domain */}
           <div className="tb-kpi">
-            <h3 style={{ fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.75rem" }}>
+            <h3 className="tb-section-title" style={{ fontSize: "0.85rem" }}>
               🎯 SLA Intelligence
             </h3>
             <div className="tb-detail-row">
@@ -163,7 +163,7 @@ export default function UnifiedIntelligenceDashboard() {
 
           {/* Asset Domain */}
           <div className="tb-kpi">
-            <h3 style={{ fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.75rem" }}>
+            <h3 className="tb-section-title" style={{ fontSize: "0.85rem" }}>
               🏗️ Asset Intelligence
             </h3>
             <div className="tb-detail-row">
@@ -184,7 +184,7 @@ export default function UnifiedIntelligenceDashboard() {
 
           {/* Procurement Domain */}
           <div className="tb-kpi">
-            <h3 style={{ fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.75rem" }}>
+            <h3 className="tb-section-title" style={{ fontSize: "0.85rem" }}>
               📦 Procurement Intelligence
             </h3>
             <div className="tb-detail-row">
@@ -215,7 +215,7 @@ export default function UnifiedIntelligenceDashboard() {
       {health?.components && (
         <div className="tb-section">
           <h2 className="tb-section-title">Health Score Breakdown</h2>
-          <div className="tb-grid-4" style={{ marginTop: "0.75rem" }}>
+          <div className="tb-grid-4" className="mt-3">
             {Object.entries(health.components).map(([key, val]) => (
               <div key={key} className="tb-kpi">
                 <div className="tb-kpi-label" style={{ textTransform: "capitalize" }}>
@@ -244,7 +244,7 @@ export default function UnifiedIntelligenceDashboard() {
       {alerts.length > 0 && (
         <div className="tb-section">
           <h2 className="tb-section-title">Active Alerts ({alerts.length})</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
+          <div className="tb-flex-col gap-2 mt-3">
             {alerts.map((alert, i) => (
               <div key={i} className={`tb-alert tb-alert-${
                 alert.severity.includes("CRITICAL") || alert.severity === "P0_CRITICAL" ? "danger" :

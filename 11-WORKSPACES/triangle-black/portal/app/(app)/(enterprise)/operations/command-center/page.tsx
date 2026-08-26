@@ -61,7 +61,7 @@ export default function OperationalCommandCenterPage() {
       <div className="tb-canvas">
         <div className="tb-section">
           <div className="tb-shimmer tb-shimmer-title" />
-          <div className="tb-grid-3" style={{ marginTop: "1.5rem" }}>
+          <div className="tb-grid-3" className="mt-6">
             {[1, 2, 3].map((i) => <div key={i} className="tb-shimmer tb-shimmer-block" />)}
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function OperationalCommandCenterPage() {
             <h3 className="tb-section-title" style={{ fontSize: "0.9rem" }}>
               PM Intelligence
             </h3>
-            <div style={{ marginTop: "0.75rem" }}>
+            <div className="mt-3">
               <div className="tb-detail-row">
                 <span className="tb-detail-key">Active Plans</span>
                 <span className="tb-detail-value">{pm?.total_plans ?? 0}</span>
@@ -157,7 +157,7 @@ export default function OperationalCommandCenterPage() {
             <h3 className="tb-section-title" style={{ fontSize: "0.9rem" }}>
               Supplier Intelligence
             </h3>
-            <div style={{ marginTop: "0.75rem" }}>
+            <div className="mt-3">
               <div className="tb-detail-row">
                 <span className="tb-detail-key">Total Suppliers</span>
                 <span className="tb-detail-value">{supplier?.total_suppliers ?? 0}</span>
@@ -183,7 +183,7 @@ export default function OperationalCommandCenterPage() {
             <h3 className="tb-section-title" style={{ fontSize: "0.9rem" }}>
               Workflow Intelligence
             </h3>
-            <div style={{ marginTop: "0.75rem" }}>
+            <div className="mt-3">
               <div className="tb-detail-row">
                 <span className="tb-detail-key">Active Instances</span>
                 <span className="tb-detail-value">{workflow?.count ?? 0}</span>

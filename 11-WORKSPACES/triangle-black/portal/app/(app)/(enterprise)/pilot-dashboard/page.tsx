@@ -76,8 +76,8 @@ export default function PilotCustomerDashboard() {
     return (
       <div className="tb-canvas">
         <div className="tb-section">
-          <div className="tb-shimmer tb-shimmer-title" style={{ width: "40%" }} />
-          <div className="tb-grid-4" style={{ marginTop: "1.5rem" }}>
+          <div className="tb-shimmer tb-shimmer-title" className="w-40p" />
+          <div className="tb-grid-4" className="mt-6">
             {[1,2,3,4].map(i => <div key={i} className="tb-shimmer tb-shimmer-block" />)}
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function PilotCustomerDashboard() {
       {/* 8 Priority KPIs */}
       <div className="tb-section">
         <h2 className="tb-section-title">Priority KPIs</h2>
-        <div className="tb-grid-4" style={{ marginTop: "0.75rem" }}>
+        <div className="tb-grid-4" className="mt-3">
           {/* KPI 1: SLA Compliance */}
           <div className="tb-kpi">
             <div className="tb-kpi-label">SLA Compliance</div>
@@ -216,7 +216,7 @@ export default function PilotCustomerDashboard() {
       {alerts.length > 0 && (
         <div className="tb-section">
           <h2 className="tb-section-title">Active Operational Alerts</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
+          <div className="tb-flex-col gap-2 mt-3">
             {alerts.map((alert, i) => (
               <div key={i} className={`tb-alert tb-alert-${
                 alert.severity.includes("CRITICAL") ? "danger" :
