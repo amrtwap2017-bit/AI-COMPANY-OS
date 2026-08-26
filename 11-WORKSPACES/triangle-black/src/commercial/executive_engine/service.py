@@ -85,7 +85,7 @@ class ExecutiveEngineService:
         )
         plans_ok = _q(
             "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h "
-            "AND LOWER(status)='active' AND (next_due_date IS NULL OR next_due_date >= CURRENT_DATE)"
+            "AND LOWER(status)='active' AND (next_due_date IS NULL OR next_due_date::DATE >= CURRENT_DATE)"
         )
         pm_pct = round(plans_ok / max(total_plans, 1) * 100, 1)
 
@@ -162,7 +162,7 @@ class ExecutiveEngineService:
         # P1: PM overdue
         pm_overdue = self._scalar(
             "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid "
-            "AND LOWER(status)='active' AND next_due_date < CURRENT_DATE"
+            "AND LOWER(status)='active' AND next_due_date::DATE < CURRENT_DATE"
         )
         if pm_overdue > 0:
             alerts.append({

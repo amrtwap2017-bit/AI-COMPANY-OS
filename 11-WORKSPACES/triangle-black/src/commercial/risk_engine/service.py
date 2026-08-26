@@ -137,7 +137,7 @@ class RiskEngineService:
         )
         overdue_plans = self._scalar(
             "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid "
-            "AND LOWER(status)='active' AND next_due_date < CURRENT_DATE"
+            "AND LOWER(status)='active' AND next_due_date::DATE < CURRENT_DATE"
         )
         pm_risk = round(overdue_plans / max(total_plans, 1) * 100, 1)
 
@@ -188,7 +188,7 @@ class RiskEngineService:
         plans_due_30d = self._scalar("""
             SELECT COUNT(*) FROM maintenance_plans
             WHERE hotel_id=:hid AND LOWER(status)='active'
-            AND next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + 30
+            AND next_due_date::DATE BETWEEN CURRENT_DATE AND CURRENT_DATE + 30
         """)
         warranties_expiring = self._scalar("""
             SELECT COUNT(*) FROM assets
