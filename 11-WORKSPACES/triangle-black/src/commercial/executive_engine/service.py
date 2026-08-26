@@ -22,11 +22,16 @@ class ExecutiveEngineService:
     def _scalar(self, sql: str, params: dict = None, default=0):
         try:
             p = params if params is not None else {"hid": self.hid}
-            val = self.db.execute(text(sql), p).scalar()
+            # Use bindparams for reliable named parameter binding
+            from sqlalchemy import text as _text
+            stmt = _text(sql)
+            val = self.db.execute(stmt, p).scalar()
             return val if val is not None else default
         except Exception as _e:
             import logging
-            logging.getLogger(__name__).warning(f"Executive _scalar failed: {_e} | SQL: {sql[:80]}")
+            logging.getLogger(__name__).warning(
+                f"Executive _scalar failed: {type(_e).__name__}: {_e} | hid={self.hid} | SQL: {sql[:80]}"
+            )
             return default
 
     def _q(self, sql: str, params: dict = None):
@@ -40,38 +45,47 @@ class ExecutiveEngineService:
         Operational Health Score 0-100
         SLA compliance 30% + WO completion 25% + PM compliance 25% + supplier score 20%
         """
+        from sqlalchemy import text as _sqlt
+        h = self.hid
+
+        def _q(sql):
+            try:
+                return self.db.execute(_sqlt(sql), {"h": h}).scalar() or 0
+            except Exception:
+                return 0
+
         # SLA compliance (completed/closed WOs)
-        total_closed = self._scalar(
-            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL "
+        total_closed = _q(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h AND deleted_at IS NULL "
             "AND LOWER(status) IN ('completed','closed')"
         )
-        sla_ok = self._scalar(
-            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL "
+        sla_ok = _q(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h AND deleted_at IS NULL "
             "AND LOWER(status) IN ('completed','closed') AND (sla_breached IS NULL OR sla_breached=FALSE)"
         )
         sla_pct = round(sla_ok / max(total_closed, 1) * 100, 1)
 
         # WO completion rate (completed+closed / total non-cancelled)
-        total_wo = self._scalar(
-            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL "
+        total_wo = _q(
+            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h AND deleted_at IS NULL "
             "AND LOWER(status) != 'cancelled'"
         )
         wo_completion_pct = round(total_closed / max(total_wo, 1) * 100, 1)
 
         # PM compliance (maintenance_plans with next_due_date in future vs overdue)
-        total_plans = self._scalar(
-            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid AND LOWER(status)='active'"
+        total_plans = _q(
+            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h AND LOWER(status)='active'"
         )
-        plans_ok = self._scalar(
-            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid "
+        plans_ok = _q(
+            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h "
             "AND LOWER(status)='active' AND (next_due_date IS NULL OR next_due_date >= CURRENT_DATE)"
         )
         pm_pct = round(plans_ok / max(total_plans, 1) * 100, 1)
 
         # Supplier score (avg rating normalized to 100)
-        avg_rating = self._scalar(
+        avg_rating = _q(
             "SELECT ROUND(AVG(COALESCE(rating, 0)) / 5.0 * 100, 1) "
-            "FROM suppliers WHERE hotel_id=:hid AND (blacklisted IS NULL OR blacklisted=FALSE)"
+            "FROM suppliers WHERE hotel_id=:h AND (blacklisted IS NULL OR blacklisted=FALSE)"
         )
         supplier_pct = float(avg_rating or 0)
 
@@ -191,21 +205,29 @@ class ExecutiveEngineService:
         alert_list = self.alerts()
 
         # Key KPIs
-        open_wos = self._scalar(
-            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
-            "AND deleted_at IS NULL AND status IN ('open','in_progress')"
-        )
-        completed_today = self._scalar(
-            "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid "
-            "AND deleted_at IS NULL AND LOWER(status) IN ('completed','closed') "
-            "AND DATE(updated_at) = CURRENT_DATE"
-        )
-        active_suppliers = self._scalar(
-            "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:hid"
-        )
-        total_assets = self._scalar(
-            "SELECT COUNT(*) FROM assets WHERE hotel_id=:hid AND deleted_at IS NULL"
-        )
+        # Direct query approach — bypasses _scalar parameter issues
+        hid = self.hid
+        try:
+            from sqlalchemy import text as _sqlt
+            open_wos = self.db.execute(_sqlt(
+                "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h "
+                "AND deleted_at IS NULL AND status IN ('open','in_progress')"
+            ), {"h": hid}).scalar() or 0
+            completed_today = self.db.execute(_sqlt(
+                "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h "
+                "AND deleted_at IS NULL AND LOWER(status) IN ('completed','closed') "
+                "AND DATE(updated_at) = CURRENT_DATE"
+            ), {"h": hid}).scalar() or 0
+            active_suppliers = self.db.execute(_sqlt(
+                "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:h"
+            ), {"h": hid}).scalar() or 0
+            total_assets = self.db.execute(_sqlt(
+                "SELECT COUNT(*) FROM assets WHERE hotel_id=:h AND deleted_at IS NULL"
+            ), {"h": hid}).scalar() or 0
+        except Exception as _e:
+            import logging
+            logging.getLogger(__name__).error(f"daily_briefing query failed: {_e}")
+            open_wos = completed_today = active_suppliers = total_assets = 0
 
         critical_count = sum(
             1 for a in alert_list if a["severity"] in ("P0_CRITICAL", "P1_HIGH")
