@@ -9,10 +9,11 @@ WARN=0
 ROOT="$(pwd)"
 TB_DIR="${ROOT}/11-WORKSPACES/triangle-black"
 TB_VENV="${TB_DIR}/.venv"
-TB_PYTEST="${TB_VENV}/bin/python"
+BACKEND_HEALTH="http://127.0.0.1:8030/health"
+BACKEND_LOG="/tmp/tb_server.log"
 
 echo "╔══════════════════════════════════════╗"
-echo "║      VERIFICATION ENGINE v3          ║"
+echo "║      VERIFICATION ENGINE v4          ║"
 echo "╚══════════════════════════════════════╝"
 echo "  Root   : $ROOT"
 echo "  TB Dir : $TB_DIR"
@@ -50,6 +51,56 @@ skip_gate() {
   echo ""
 }
 
+# ── Backend server health check + auto-start ──────────────────
+echo "── BACKEND SERVER ──────────────────────────────────────"
+
+SERVER_STATUS="UNKNOWN"
+BACKEND_STARTED=0
+
+check_health() {
+  local status
+  status=$(curl -s -o /dev/null -w "%{http_code}" \
+    "${BACKEND_HEALTH}" --max-time 3 2>/dev/null || echo "000")
+  [ "$status" = "200" ]
+}
+
+if check_health; then
+  echo "  ✓ [ALREADY RUNNING] Backend healthy at ${BACKEND_HEALTH}"
+  SERVER_STATUS="RUNNING"
+else
+  echo "  ⚠ Backend not responding — attempting auto-start..."
+  SERVER_STATUS="STARTING"
+
+  # Start backend only (no portal needed for tests)
+  (cd "${TB_DIR}" && bash START.sh --backend-only \
+    > "${BACKEND_LOG}" 2>&1 &)
+
+  # Wait up to 30 seconds for health
+  WAITED=0
+  MAX_WAIT=30
+  while [ $WAITED -lt $MAX_WAIT ]; do
+    sleep 3
+    WAITED=$((WAITED+3))
+    if check_health; then
+      BACKEND_STARTED=1
+      SERVER_STATUS="AUTO_STARTED"
+      echo "  ✓ [AUTO-STARTED] Backend ready after ${WAITED}s"
+      break
+    fi
+    echo "  ... waiting for backend (${WAITED}s / ${MAX_WAIT}s)"
+  done
+
+  if [ $BACKEND_STARTED -eq 0 ]; then
+    SERVER_STATUS="FAILED"
+    echo "  ⚠ Backend did not start within ${MAX_WAIT}s"
+    echo "    Check logs: tail -50 ${BACKEND_LOG}"
+    WARN=$((WARN+1))
+  fi
+fi
+
+echo "  Server status: ${SERVER_STATUS}"
+echo ""
+
 # ── TRIANGLE BLACK BACKEND ────────────────────────────────────
 echo "── BACKEND CHECKS ──────────────────────────────────────"
 
@@ -86,7 +137,6 @@ for portal_dir in \
   if [ -f "${portal_dir}/package.json" ]; then
     echo "  Found frontend: $short_name"
     if [ -f "${portal_dir}/node_modules/.bin/tsc" ]; then
-      # portal has known pre-existing TS bugs — treat as WARN not FAIL
       if [ "$short_name" = "portal" ]; then
         warn_gate "TS [KNOWN-ISSUES]: $short_name" \
           "node_modules/.bin/tsc --noEmit 2>&1 | tail -10" \
@@ -116,6 +166,7 @@ fi
 
 echo ""
 echo "══════════════════════════════════════════"
+echo "  SERVER  : ${SERVER_STATUS}"
 echo "  PASSED  : $PASS"
 echo "  FAILED  : $FAIL"
 echo "  WARNED  : $WARN (non-blocking)"
