@@ -87,33 +87,27 @@ class KPIEngineService:
             AND next_maintenance_date IS NOT NULL
             AND next_maintenance_date < NOW()""")
 
-        # KPI-08: PM Completion — maintenance_plans.hotel_id IS NULL on demo data
-        # Use two strategies: direct hotel_id query + asset join fallback
-        total_plans = self._s(
-            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:hid")
-        completed_plans = self._s("""SELECT COUNT(*) FROM maintenance_plans
-            WHERE hotel_id=:hid AND LOWER(status)='completed'""")
-
-        # Fallback: if hotel_id not set, query via asset join
-        if total_plans == 0:
-            total_plans = self._s("""
-                SELECT COUNT(mp.id) FROM maintenance_plans mp
-                JOIN assets a ON a.id = mp.asset_node_id
-                WHERE a.hotel_id=:hid
-            """)
-            completed_plans = self._s("""
-                SELECT COUNT(mp.id) FROM maintenance_plans mp
-                JOIN assets a ON a.id = mp.asset_node_id
-                WHERE a.hotel_id=:hid AND LOWER(mp.status)='completed'
-            """)
+        # KPI-08: PM Completion
+        # CONFIRMED: maintenance_plans has NO hotel_id column
+        # ALWAYS use asset join for tenant isolation
+        total_plans = self._s("""
+            SELECT COUNT(mp.id) FROM maintenance_plans mp
+            JOIN assets a ON a.id = mp.asset_node_id
+            WHERE a.hotel_id=:hid
+        """)
+        completed_plans = self._s("""
+            SELECT COUNT(mp.id) FROM maintenance_plans mp
+            JOIN assets a ON a.id = mp.asset_node_id
+            WHERE a.hotel_id=:hid AND LOWER(mp.status)='completed'
+        """)
 
         pm_pct = round(completed_plans / max(total_plans, 1) * 100, 1)
 
         # KPI-09: Maintenance spend — FIXED: use total_amount not amount
         total_spend = float(self._s("""SELECT COALESCE(SUM(total_amount),0) FROM invoices
-            WHERE hotel_id=:hid AND deleted_at IS NULL""", default=0))
+            WHERE hotel_id=:hid""", default=0))
         overdue_invoices = self._s("""SELECT COUNT(*) FROM invoices
-            WHERE hotel_id=:hid AND deleted_at IS NULL
+            WHERE hotel_id=:hid
             AND LOWER(status)='overdue'""")
 
         # KPI-10: Supplier health — is_approved IS boolean (confirmed)
@@ -121,7 +115,7 @@ class KPIEngineService:
             "SELECT COUNT(*) FROM suppliers WHERE hotel_id=:hid")
         approved_suppliers = self._s("""SELECT COUNT(*) FROM suppliers
             WHERE hotel_id=:hid
-            AND (is_approved=TRUE OR LOWER(status)='active')
+            AND LOWER(status)='active'
             AND (blacklisted IS NULL OR blacklisted=FALSE)""")
         supplier_health_pct = round(approved_suppliers / max(total_suppliers, 1) * 100, 1)
 

@@ -90,12 +90,16 @@ class PMEngineService:
         """)
 
         total_plans = self._scalar(
-            "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id = :hid"
-        )
+            """
+                SELECT COUNT(mp.id) FROM maintenance_plans mp
+                JOIN assets a ON a.id = mp.asset_node_id
+                WHERE a.hotel_id = :hid
+            """)
         completed_plans = self._scalar("""
-            SELECT COUNT(*) FROM maintenance_plans
-            WHERE hotel_id = :hid AND LOWER(status) = 'completed'
-        """)
+                SELECT COUNT(mp.id) FROM maintenance_plans mp
+                JOIN assets a ON a.id = mp.asset_node_id
+                WHERE a.hotel_id = :hid AND LOWER(mp.status) = 'completed'
+            """)
 
         overall_compliance = round(completed_plans / max(total_plans, 1) * 100, 1)
 
