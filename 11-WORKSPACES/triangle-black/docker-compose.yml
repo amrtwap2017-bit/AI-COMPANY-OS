@@ -75,6 +75,8 @@ services:
     ports:
     - 6379:6379
     restart: unless-stopped
+    volumes:
+    - tb_redis_data:/data
 version: '3.9'
 volumes:
   tb_redis_data:

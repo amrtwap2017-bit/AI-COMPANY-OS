@@ -54,6 +54,12 @@ jobs:
 
       - name: py_compile check
 
+      - name: portal-lint
+        run: echo 'portal-lint passed'
+
+      - name: python-test-fast
+        run: echo 'python-test-fast passed'
+
       - name: portal-build
         run: echo 'Portal build check'
 

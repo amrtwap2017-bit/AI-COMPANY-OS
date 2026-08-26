@@ -7,7 +7,7 @@
  */;
 import React, { ButtonHTMLAttributes, forwardRef } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
+export type ButtonVariant = "primary" /* --color-action-primary */ | "secondary" | "danger" | "ghost";
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,13 +17,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { children, variant = "primary", size = "md", loading = false, className = "", disabled, ...props },
+  { children, variant = "primary" /* --color-action-primary */, size = "md", loading = false, className = "", disabled, ...props },
   ref
 ) {
   const baseStyle = "inline-flex items-center justify-center font-semibold rounded-md border transition-all focus:outline-none focus:ring-2 focus:ring-brand/30 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
 
   const variantStyles: Record<ButtonVariant, string> = {
-    primary: "bg-brand text-white border-brand-border hover:opacity-95 shadow-sm",
+    primary: "bg-[var(--color-action-primary,_#b45309)] text-white border-transparent hover:opacity-95 shadow-sm focus-visible:ring-2",
     secondary: "bg-surface-alt text-primary border-border hover:bg-surface-alt/80",
     danger: "bg-danger text-white border-danger-border hover:opacity-95 shadow-sm",
     ghost: "bg-transparent text-secondary border-transparent hover:bg-surface-alt"
