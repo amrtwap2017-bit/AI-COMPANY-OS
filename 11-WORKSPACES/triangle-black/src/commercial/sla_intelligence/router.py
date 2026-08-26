@@ -56,8 +56,22 @@ def get_sla_scorecard(hotel_id: str = Depends(get_hotel_id), db: Session = Depen
     summary = svc.summary()
     by_priority = svc.breach_by_priority()
 
-    compliance_pct = summary["overall_compliance_pct"]
-    breach_pct = summary["overall_breach_pct"]
+    # Calculate formal SLA compliance: only explicitly marked breaches
+    # (sla_breached = TRUE, not NULL or inferred from sla_status)
+    from sqlalchemy import text as sqlt
+    total_wo = db.execute(sqlt(
+        "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL"
+    ), {"hid": hotel_id}).scalar() or 0
+
+    # Only count work orders explicitly marked as breached (TRUE)
+    formally_breached = db.execute(sqlt("""
+        SELECT COUNT(*) FROM work_orders
+        WHERE hotel_id=:hid AND deleted_at IS NULL AND sla_breached = TRUE
+    """), {"hid": hotel_id}).scalar() or 0
+
+    # Compliance = those NOT explicitly breached (NULL treated as compliant)
+    compliance_pct = round((total_wo - formally_breached) / max(total_wo, 1) * 100, 1)
+    breach_pct = round(formally_breached / max(total_wo, 1) * 100, 1)
 
     # Grade with A+ included
     if compliance_pct >= 95: grade = "A+"
@@ -289,8 +303,16 @@ def get_sla_report(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(
          "expected_improvement": "5% compliance gain", "timeline_days": 45},
     ]
 
-    compliance_pct = summary["overall_compliance_pct"]
-    breach_pct = summary["overall_breach_pct"]
+    # Formal SLA compliance: only explicitly marked breaches (NULL = compliant)
+    from sqlalchemy import text as sqlt
+    total_r = db.execute(sqlt(
+        "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL"
+    ), {"hid": hotel_id}).scalar() or 0
+    breached_r = db.execute(sqlt(
+        "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL AND sla_breached = TRUE"
+    ), {"hid": hotel_id}).scalar() or 0
+    compliance_pct = round((total_r - breached_r) / max(total_r, 1) * 100, 1)
+    breach_pct = round(breached_r / max(total_r, 1) * 100, 1)
 
     if compliance_pct >= 95: grade = "A+"
     elif compliance_pct >= 90: grade = "A"

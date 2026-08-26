@@ -80,3 +80,41 @@ def get_all(db, hotel_id: str, limit: int = 100):
         return [dict(r._mapping) for r in rows]
     except Exception:
         return []
+
+
+# ── Module-level functions required by tests ────────────────────────────────
+
+def get_by_id(db, sow_id: str, hotel_id: str = None):
+    """Module-level: Get a scope of work by ID."""
+    from sqlalchemy import text as sqlt
+    try:
+        sql = "SELECT * FROM scope_of_work WHERE id = :sid"
+        params = {"sid": sow_id}
+        if hotel_id:
+            sql += " AND hotel_id = :hid"
+            params["hid"] = hotel_id
+        row = db.execute(sqlt(sql), params).fetchone()
+        return dict(row._mapping) if row else None
+    except Exception:
+        return None
+
+
+def create(db, hotel_id: str, data: dict):
+    """Module-level: Create a new scope of work."""
+    from sqlalchemy import text as sqlt
+    import uuid
+    try:
+        sow_id = str(uuid.uuid4())
+        db.execute(sqlt("""
+            INSERT INTO scope_of_work (id, hotel_id, title, description, status,
+                created_at, updated_at)
+            VALUES (:id, :hid, :title, :desc, :status, NOW(), NOW())
+        """), {
+            "id": sow_id, "hid": hotel_id,
+            "title": data.get("title", ""), "desc": data.get("description", ""),
+            "status": data.get("status", "draft")
+        })
+        db.commit()
+        return get_by_id(db, sow_id)
+    except Exception:
+        return None

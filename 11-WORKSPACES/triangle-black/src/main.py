@@ -8584,6 +8584,35 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: assets-sync endpoint: {_e}")
 
+
+# N-FIX: predictive-maintenance/director/analyze — direct implementation
+try:
+    @app.post("/api/v1/predictive-maintenance/director/analyze",
+              tags=["predictive_maintenance"])
+    async def pm_director_analyze_direct(request: Request):
+        """AI Maintenance Director — direct route (avoids router conflicts)."""
+        try:
+            payload = await request.json()
+        except Exception:
+            payload = {}
+
+        failures_90d = int(payload.get("failures_90d", 0))
+        pm_compliance = float(payload.get("pm_compliance", 100.0))
+        vibration_spike = bool(payload.get("vibration_spike", False))
+
+        from src.commercial.predictive_maintenance.director import AIMaintenanceDirector
+        result = AIMaintenanceDirector.analyze_asset_health(
+            asset_id=str(payload.get("asset_id", "unknown")),
+            hotel_id=payload.get("hotel_id", "tb-default-hotel-000000000001"),
+            asset_name=str(payload.get("asset_name", "Asset")),
+            failures_90d=failures_90d,
+            pm_compliance=pm_compliance,
+            vibration_spike=vibration_spike,
+        )
+        return result
+except Exception as _e:
+    logger.warning(f"WARN: pm_director_analyze: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}

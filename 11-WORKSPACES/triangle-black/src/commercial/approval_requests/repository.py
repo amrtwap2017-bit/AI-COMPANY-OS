@@ -49,3 +49,34 @@ def get_all(db, hotel_id: str, limit: int = 100):
         return [dict(r._mapping) for r in rows]
     except Exception:
         return []
+
+
+# ── Module-level functions required by tests ────────────────────────────────
+
+def get_by_id(db, request_id: str, hotel_id: str = None):
+    """Module-level: Get a single approval request by ID."""
+    from sqlalchemy import text as sqlt
+    try:
+        sql = "SELECT * FROM approval_requests WHERE id = :rid"
+        params = {"rid": request_id}
+        if hotel_id:
+            sql += " AND hotel_id = :hid"
+            params["hid"] = hotel_id
+        row = db.execute(sqlt(sql), params).fetchone()
+        return dict(row._mapping) if row else None
+    except Exception:
+        return None
+
+
+def get_pending(db, hotel_id: str, limit: int = 50):
+    """Module-level: Get pending approval requests."""
+    from sqlalchemy import text as sqlt
+    try:
+        rows = db.execute(sqlt("""
+            SELECT * FROM approval_requests
+            WHERE hotel_id = :hid AND LOWER(status) = 'pending'
+            ORDER BY created_at DESC LIMIT :lim
+        """), {"hid": hotel_id, "lim": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []

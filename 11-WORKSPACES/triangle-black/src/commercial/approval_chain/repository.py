@@ -69,3 +69,55 @@ def update_step(db, step_id: str, status: str, hotel_id: str = None):
         return True
     except Exception:
         return False
+
+
+# ── Module-level functions required by tests ────────────────────────────────
+
+def get_chain(db, hotel_id: str, entity_id: str = None):
+    """Module-level: Get approval chain for hotel."""
+    from sqlalchemy import text as sqlt
+    try:
+        sql = "SELECT * FROM approval_chain WHERE hotel_id = :hid"
+        params = {"hid": hotel_id}
+        if entity_id:
+            sql += " AND entity_id = :eid"
+            params["eid"] = entity_id
+        sql += " ORDER BY created_at DESC LIMIT 100"
+        rows = db.execute(sqlt(sql), params).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
+
+
+def add_step(db, hotel_id: str, entity_type: str = "", entity_id: str = "",
+             approver_role: str = "manager", step_order: int = 1):
+    """Module-level: Add an approval step to the chain."""
+    from sqlalchemy import text as sqlt
+    import uuid
+    try:
+        db.execute(sqlt("""
+            INSERT INTO approval_chain
+            (id, hotel_id, entity_type, entity_id, approver_role, step_order,
+             status, created_at, updated_at)
+            VALUES (:id, :hid, :etype, :eid, :role, :step, 'pending', NOW(), NOW())
+            ON CONFLICT DO NOTHING
+        """), {"id": str(uuid.uuid4()), "hid": hotel_id, "etype": entity_type,
+               "eid": entity_id, "role": approver_role, "step": step_order})
+        db.commit()
+        return True
+    except Exception:
+        return False
+
+
+def update_step(db, step_id: str, status: str, hotel_id: str = None):
+    """Module-level: Update an approval step status."""
+    from sqlalchemy import text as sqlt
+    try:
+        db.execute(sqlt("""
+            UPDATE approval_chain SET status = :status, updated_at = NOW()
+            WHERE id = :sid
+        """), {"status": status, "sid": step_id})
+        db.commit()
+        return True
+    except Exception:
+        return False

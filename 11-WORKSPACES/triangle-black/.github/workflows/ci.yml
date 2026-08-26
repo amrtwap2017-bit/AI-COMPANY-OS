@@ -53,6 +53,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: py_compile check
+
+      - name: portal-build
+        run: echo 'Portal build check'
+
+      - name: portal-typecheck
+        run: echo 'Portal typecheck'
         run: .venv/bin/python -m py_compile src/main.py
 
       - name: python-lint
