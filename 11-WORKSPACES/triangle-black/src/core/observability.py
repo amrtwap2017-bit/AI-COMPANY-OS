@@ -187,3 +187,94 @@ def get_observability_summary() -> dict:
         "slo_report": slo_tracker.get_slo_report(),
         "slo_check": slo_tracker.check_slos(),
     }
+
+
+# ─── TelemetryStore — added for N-004 test compatibility ───────────────────
+import threading as _threading
+from collections import deque as _deque
+
+class _TelemetryStore:
+    """In-memory telemetry accumulator. Thread-safe. Singleton via module."""
+
+    def __init__(self):
+        self._lock = _threading.Lock()
+        self._start_time = time.time()
+        self._requests: list = []
+        self._cache_hits = 0
+        self._cache_misses = 0
+        self._ai_requests: list = []
+
+    def record_request(self, status_code: int, latency_ms: float, db_queries: int = 0):
+        with self._lock:
+            self._requests.append({
+                "status": status_code,
+                "latency_ms": latency_ms,
+                "db_queries": db_queries,
+                "ts": time.time(),
+            })
+            # Keep last 10000 only
+            if len(self._requests) > 10000:
+                self._requests = self._requests[-5000:]
+
+    def record_cache(self, hit: bool):
+        with self._lock:
+            if hit:
+                self._cache_hits += 1
+            else:
+                self._cache_misses += 1
+
+    def record_ai_request(self, latency_ms: float):
+        with self._lock:
+            self._ai_requests.append({"latency_ms": latency_ms, "ts": time.time()})
+            if len(self._ai_requests) > 1000:
+                self._ai_requests = self._ai_requests[-500:]
+
+    def get_telemetry_report(self) -> dict:
+        with self._lock:
+            reqs = list(self._requests)
+            ai_reqs = list(self._ai_requests)
+            cache_hits = self._cache_hits
+            cache_misses = self._cache_misses
+            uptime = time.time() - self._start_time
+
+        total = len(reqs)
+        errors = sum(1 for r in reqs if r["status"] >= 500)
+        latencies = [r["latency_ms"] for r in reqs]
+        avg_latency = sum(latencies) / max(len(latencies), 1)
+        p95 = sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0
+
+        total_cache = cache_hits + cache_misses
+        cache_hit_rate = round(cache_hits / max(total_cache, 1) * 100, 1)
+
+        ai_latencies = [r["latency_ms"] for r in ai_reqs]
+        avg_ai_latency = sum(ai_latencies) / max(len(ai_latencies), 1)
+
+        return {
+            "status": "operational",
+            "uptime_seconds": round(uptime, 1),
+            "traffic": {
+                "total_requests": total,
+                "error_count": errors,
+                "error_rate_pct": round(errors / max(total, 1) * 100, 2),
+            },
+            "performance": {
+                "avg_latency_ms": round(avg_latency, 2),
+                "p95_latency_ms": round(p95, 2),
+                "avg_db_queries": round(
+                    sum(r["db_queries"] for r in reqs) / max(total, 1), 2
+                ),
+            },
+            "cache": {
+                "hits": cache_hits,
+                "misses": cache_misses,
+                "hit_rate_pct": cache_hit_rate,
+            },
+            "ai_telemetry": {
+                "total_requests": len(ai_reqs),
+                "avg_latency_ms": round(avg_ai_latency, 2),
+            },
+        }
+
+
+# Module-level singleton
+telemetry_store = _TelemetryStore()

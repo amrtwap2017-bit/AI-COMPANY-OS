@@ -240,11 +240,19 @@ class SLAIntelligenceService:
 
         total = self._s(
             "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hid AND deleted_at IS NULL")
+        # sla_breached can be TRUE/FALSE/NULL — count only explicit TRUE as breached
         breached = self._s("""
             SELECT COUNT(*) FROM work_orders
-            WHERE hotel_id=:hid AND deleted_at IS NULL AND sla_breached=TRUE
+            WHERE hotel_id=:hid AND deleted_at IS NULL
+            AND sla_breached = TRUE
         """)
-        compliance_pct = round((total - breached) / max(total, 1) * 100, 1)
+        # compliance = those NOT breached (FALSE or NULL = compliant)
+        not_breached = self._s("""
+            SELECT COUNT(*) FROM work_orders
+            WHERE hotel_id=:hid AND deleted_at IS NULL
+            AND (sla_breached = FALSE OR sla_breached IS NULL)
+        """)
+        compliance_pct = round(not_breached / max(total, 1) * 100, 1)
 
         return {
             "hotel_id": self.hid,

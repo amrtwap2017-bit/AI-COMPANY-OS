@@ -52,6 +52,7 @@ export const enterpriseCenters: NavCenter[] = [
       { label: "Daily Review",          href: "/executive/daily-review",       icon: "Calendar" },
       { label: "Exception Report",      href: "/executive/exceptions",         icon: "Bell" },
       { label: "Intelligence Briefing", href: "/executive/intelligence",       icon: "Brain" },
+        { href: "/operations/cost-intelligence", label: "Cost Intelligence", icon: "DollarSign" },
       { label: "Financial P&L",         href: "/financial",                    icon: "Coins" },
       { label: "Notifications",         href: "/notifications",                icon: "Bell" },
     ],

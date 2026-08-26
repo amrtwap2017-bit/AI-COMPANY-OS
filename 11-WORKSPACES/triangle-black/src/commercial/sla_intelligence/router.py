@@ -77,3 +77,84 @@ def get_recommendations(
         "count": len(recs),
         "recommendations": recs
     }
+
+
+@router.get("/scorecard", summary="SLA Scorecard — Compliance Summary")
+def get_sla_scorecard(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """SLA scorecard with compliance %, breach count, grade."""
+    svc = SLAIntelligenceService(db=db, hotel_id=hotel_id)
+    summary = svc.summary()
+    return {
+        "hotel_id": hotel_id,
+        "overall_compliance_pct": summary["overall_compliance_pct"],
+        "overall_breach_pct": summary["overall_breach_pct"],
+        "compliance_grade": summary["compliance_grade"],
+        "total_work_orders": summary["total_work_orders"],
+        "total_breached": summary["total_breached"],
+        "by_priority": summary["by_priority"],
+    }
+
+
+@router.get("/governance", summary="SLA Governance Report")
+def get_sla_governance(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """SLA governance — breach analysis, recommendations, compliance grade."""
+    svc = SLAIntelligenceService(db=db, hotel_id=hotel_id)
+    summary = svc.summary()
+    return {
+        "hotel_id": hotel_id,
+        "compliance_grade": summary["compliance_grade"],
+        "overall_compliance_pct": summary["overall_compliance_pct"],
+        "recommendations": summary["recommendations"],
+        "by_category": summary["by_category"],
+        "backlog": summary["backlog"],
+    }
+
+
+@router.get("/report", summary="Full SLA Intelligence Report")
+def get_sla_report(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Full SLA report — all data combined."""
+    svc = SLAIntelligenceService(db=db, hotel_id=hotel_id)
+    return svc.summary()
+
+
+@router.get("/technician-performance", summary="Technician SLA Performance")
+def get_technician_performance(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Per-technician SLA completion (uses work_orders.assigned_to if available)."""
+    from sqlalchemy import text as sqlt
+    from src.core.database import get_db as _get_db
+    try:
+        rows = db.execute(sqlt("""
+            SELECT
+                COALESCE(assigned_to, 'unassigned') AS technician,
+                COUNT(*) AS total_assigned,
+                COUNT(*) FILTER (WHERE sla_breached = TRUE) AS breached,
+                COUNT(*) FILTER (WHERE LOWER(status) IN ('completed','closed')) AS completed,
+                ROUND(
+                    COUNT(*) FILTER (WHERE sla_breached = FALSE OR sla_breached IS NULL)::numeric
+                    / NULLIF(COUNT(*),0) * 100, 1
+                ) AS compliance_pct
+            FROM work_orders
+            WHERE hotel_id = :hid AND deleted_at IS NULL
+            GROUP BY assigned_to
+            ORDER BY breached DESC
+            LIMIT 20
+        """), {"hid": hotel_id}).fetchall()
+        return {
+            "hotel_id": hotel_id,
+            "technicians": [dict(r._mapping) for r in rows],
+            "count": len(rows),
+        }
+    except Exception:
+        return {"hotel_id": hotel_id, "technicians": [], "count": 0}

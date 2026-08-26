@@ -34,3 +34,18 @@ class ApprovalRequestRepository:
         self.db.commit()
         self.db.refresh(req)
         return req
+
+
+def get_all(db, hotel_id: str, limit: int = 100):
+    """Get all approval_requests items for a hotel."""
+    from sqlalchemy import text
+    try:
+        rows = db.execute(text("""
+            SELECT * FROM approval_requests
+            WHERE hotel_id = :hid
+            ORDER BY created_at DESC
+            LIMIT :lim
+        """), {"hid": hotel_id, "lim": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []

@@ -128,7 +128,7 @@ class RiskEngineService:
             sla_breach_rate * 40 +
             (critical_open / max(total_wo, 1)) * 30 +
             (stale / max(open_wo, 1)) * 30
-        ) * 100), 1)
+        )), 1)
 
         factors = []
         if sla_breach_rate > 0.5:
@@ -174,7 +174,7 @@ class RiskEngineService:
         score = round(min(100, (
             (1 - pm_completion) * 50 +
             overdue_rate * 50
-        ) * 100), 1)
+        )), 1)
 
         factors = []
         if pm_completion < 0.5:
@@ -208,7 +208,7 @@ class RiskEngineService:
         """)
 
         overdue_rate = overdue_amount / max(total_amount, 1)
-        score = round(min(100, overdue_rate * 100 * 2), 1)
+        score = round(min(100, overdue_rate * 100), 1)
 
         factors = []
         if overdue_count > 0:
@@ -256,7 +256,7 @@ class RiskEngineService:
             blacklist_rate * 50 +
             high_risk_rate * 30 +
             (unapproved / total_suppliers) * 20
-        ) * 100), 1)
+        )), 1)
 
         factors = []
         if blacklisted > 0:

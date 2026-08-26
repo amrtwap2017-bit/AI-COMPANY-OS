@@ -36,3 +36,12 @@ def get_risk_signals(
 ):
     service = OperationalIntelligenceService(db=db, hotel_id=hotel_id)
     return {"signals": service._get_risk_signals()}
+
+
+@router.get("/summary", summary="Operational Intelligence Summary (alias)")
+def get_oi_summary(
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Alias for /command-center — maintains API contract."""
+    return get_command_center(hotel_id=hotel_id, db=db)

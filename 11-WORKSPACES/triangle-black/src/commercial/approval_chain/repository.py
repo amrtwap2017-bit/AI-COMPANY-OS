@@ -19,3 +19,18 @@ class ApprovalChainRepository:
         return self.db.query(PRApprovalChain).filter(
             PRApprovalChain.hotel_id == hotel_id
         ).order_by(PRApprovalChain.step_order.asc()).all()
+
+
+def get_all(db, hotel_id: str, limit: int = 100):
+    """Get all approval_chain items for a hotel."""
+    from sqlalchemy import text
+    try:
+        rows = db.execute(text("""
+            SELECT * FROM approval_chain
+            WHERE hotel_id = :hid
+            ORDER BY created_at DESC
+            LIMIT :lim
+        """), {"hid": hotel_id, "lim": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []

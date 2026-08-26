@@ -65,3 +65,18 @@ class ScopeOfWorkRepository:
             "draft_sow": draft,
             "approved_sow": approved
         }
+
+
+def get_all(db, hotel_id: str, limit: int = 100):
+    """Get all scope of work items for a hotel."""
+    from sqlalchemy import text
+    try:
+        rows = db.execute(text("""
+            SELECT * FROM scope_of_work
+            WHERE hotel_id = :hid
+            ORDER BY created_at DESC
+            LIMIT :lim
+        """), {"hid": hotel_id, "lim": limit}).fetchall()
+        return [dict(r._mapping) for r in rows]
+    except Exception:
+        return []
