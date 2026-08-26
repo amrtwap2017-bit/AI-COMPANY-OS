@@ -8731,6 +8731,84 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: workflow admin: {_e}")
 
+
+# A-013-PREP: PM Plans demo seed endpoint
+try:
+    import uuid as _uuid
+    from datetime import date as _date, timedelta as _td, datetime as _dt
+
+    @app.post("/api/v1/demo/seed-pm-plans", tags=["Demo"])
+    def seed_demo_pm_plans(
+        hotel_id: str = Depends(get_hotel_id_dep),
+        db: Session = Depends(get_db_dep),
+        current_user=Depends(get_current_user_dep),
+    ):
+        """Seed 10 demo PM plans for the current tenant. Idempotent."""
+        from sqlalchemy import text as _sqlt
+
+        today = _date.today()
+        plans = [
+            ("HVAC Monthly Filter Check",    "monthly",   "Inspect and replace HVAC filters across all zones",           -15),
+            ("Elevator Safety Inspection",   "quarterly", "Full elevator safety inspection per Egyptian code",            -45),
+            ("Fire Suppression System Test", "monthly",   "Test all fire suppression heads and sprinkler pressure",         5),
+            ("Generator Load Test",          "monthly",   "Run generator under 75% load for 2 hours, check fuel levels",  -30),
+            ("Pool Chemical Balance",        "weekly",    "Test and adjust chlorine, pH and alkalinity levels",              2),
+            ("Electrical Panel Inspection",  "quarterly", "Inspect all distribution panels, check for overheating",         14),
+            ("Plumbing Pressure Test",       "biannual",  "Full building pressure test, check for leaks",                   60),
+            ("Kitchen Equipment Service",    "monthly",   "Deep clean and lubricate all commercial kitchen equipment",     -10),
+            ("Roof Drain Clearance",         "monthly",   "Clear all roof drains, inspect waterproofing membrane",           7),
+            ("BMS Calibration Check",        "quarterly", "Calibrate all Building Management System sensors",               30),
+        ]
+
+        # Discover actual columns
+        cols = [r[0] for r in db.execute(_sqlt("""
+            SELECT column_name FROM information_schema.columns
+            WHERE table_name = 'maintenance_plans'
+        """)).fetchall()]
+
+        seeded, skipped, errors = 0, 0, 0
+        for title, freq, desc, day_offset in plans:
+            plan_id = str(_uuid.uuid4())
+            next_due = (today + _td(days=day_offset)).isoformat()
+            now_ts = _dt.utcnow().isoformat()
+
+            base_cols = ["id", "hotel_id", "title", "description",
+                         "frequency", "status", "created_at", "updated_at"]
+            base_vals = [plan_id, hotel_id, title, desc, freq, "active", now_ts, now_ts]
+
+            if "next_due_date" in cols:
+                base_cols.append("next_due_date")
+                base_vals.append(next_due)
+
+            col_str = ", ".join(base_cols)
+            val_str = ", ".join([f":col_{i}" for i in range(len(base_cols))])
+            params = {f"col_{i}": v for i, v in enumerate(base_vals)}
+
+            try:
+                r = db.execute(_sqlt(
+                    f"INSERT INTO maintenance_plans ({col_str}) VALUES ({val_str}) ON CONFLICT DO NOTHING"
+                ), params)
+                if r.rowcount > 0:
+                    seeded += 1
+                else:
+                    skipped += 1
+            except Exception as e:
+                errors += 1
+
+        db.commit()
+        return {
+            "hotel_id": hotel_id,
+            "seeded": seeded,
+            "skipped": skipped,
+            "errors": errors,
+            "total_attempted": len(plans),
+            "message": f"PM plan seeding complete: {seeded} new, {skipped} existing"
+        }
+
+    logger.info("  OK: demo/seed-pm-plans (A-013-prep)")
+except Exception as _e:
+    logger.warning(f"WARN: demo seed: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
