@@ -8833,6 +8833,14 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: asset_engine: {_e}")
 
+
+try:
+    from src.commercial.procurement_engine.router import router as _proc_engine_r
+    app.include_router(_proc_engine_r, prefix="/api/v1")
+    logger.info("  OK: procurement_engine (A-016)")
+except Exception as _e:
+    logger.warning(f"WARN: procurement_engine: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
