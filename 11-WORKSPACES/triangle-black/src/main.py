@@ -8523,6 +8523,29 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: supplier_engine: {_e}")
 
+
+try:
+    from src.commercial.executive_api.router import router as _exec_api_r
+    app.include_router(_exec_api_r, prefix="/api/v1")
+    logger.info("  OK: executive_api (A-007 re-register)")
+except Exception as _e:
+    logger.warning(f"WARN: executive_api: {_e}")
+
+try:
+    from src.commercial.analytics_api.router import router as _analytics_api_r2
+    app.include_router(_analytics_api_r2, prefix="/api/v1")
+    logger.info("  OK: analytics_api (A-007 re-register)")
+except Exception as _e:
+    logger.warning(f"WARN: analytics_api: {_e}")
+
+
+try:
+    from src.commercial.kpi_engine.router import router as _kpi_engine_r
+    app.include_router(_kpi_engine_r, prefix="/api/v1")
+    logger.info("  OK: kpi_engine (A-007)")
+except Exception as _e:
+    logger.warning(f"WARN: kpi_engine: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
