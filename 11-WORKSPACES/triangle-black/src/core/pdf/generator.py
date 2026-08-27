@@ -197,6 +197,7 @@ def generate_quote_pdf(
     lead_phone: str = "",
     lead_company: str = "",
     prepared_by: str = "Triangle Black Engineering Team",
+    generated_by: str = "",
 ) -> bytes:
 
     buf = io.BytesIO()

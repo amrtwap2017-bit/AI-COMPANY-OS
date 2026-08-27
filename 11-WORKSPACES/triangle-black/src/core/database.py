@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 # Credentials: Docker ai-postgres container
 # User: ai | Pass: ai123 | DB: triangle_black
@@ -14,6 +14,9 @@ _DB_URL = os.environ.get(
 )
 
 engine = create_engine(_DB_URL, pool_pre_ping=True, pool_size=5, max_overflow=10)
+
+# SessionLocal for compatibility with feature_flags and legacy code
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def check_connection() -> bool:

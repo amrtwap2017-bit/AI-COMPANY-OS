@@ -88,6 +88,7 @@ def get_instance(
     instance_id: str,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get one workflow instance with its full transition history."""
     try:
@@ -125,6 +126,7 @@ def get_transitions(
     instance_id: str,
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get all state transitions for a workflow instance."""
     try:
@@ -159,6 +161,7 @@ def get_transitions(
 def list_definitions(
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """List workflow definitions for this hotel."""
     try:
@@ -225,6 +228,7 @@ def create_definition(
 def workflow_stats(
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Return workflow KPIs — single aggregated SQL query (Sprint-248 optimization)."""
     try:
