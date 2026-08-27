@@ -2,7 +2,7 @@
 Technician Productivity Engine — Triangle Black A-069
 Answers: "Which technicians are most productive and compliant?"
 
-Uses: work_orders.assigned_to + completed_at + created_at + sla_breached
+Uses: work_orders.technician_id + completed_at + created_at + sla_breached
       employees.id + name + department
 
 Does NOT duplicate existing WO endpoints.
@@ -38,9 +38,9 @@ class TechnicianEngineService:
         """Per-technician productivity score using WO completion data."""
         rows = self._q("""
             SELECT
-                wo.assigned_to,
-                COALESCE(e.name, wo.assigned_to) AS technician_name,
-                COALESCE(e.department, 'Engineering') AS department,
+                wo.technician_id,
+                COALESCE(e.name, wo.technician_id) AS technician_name,
+                COALESCE(e.name, 'Unknown') AS emp_name, 'Engineering' AS department,
                 COUNT(wo.id) AS total_wos,
                 COUNT(wo.id) FILTER (
                     WHERE LOWER(wo.status) IN ('completed','closed')
@@ -59,12 +59,13 @@ class TechnicianEngineService:
                     AND LOWER(wo.status) IN ('completed','closed')
                 ) AS critical_completed
             FROM work_orders wo
-            LEFT JOIN employees e ON e.id::TEXT = wo.assigned_to::TEXT
-                AND e.hotel_id = :h
+            LEFT JOIN (
+                SELECT id, name, hotel_id FROM employees WHERE hotel_id = :h
+            ) e ON e.id::TEXT = wo.technician_id::TEXT
             WHERE wo.hotel_id = :h
               AND wo.deleted_at IS NULL
-              AND wo.assigned_to IS NOT NULL
-            GROUP BY wo.assigned_to, e.name, e.department
+              AND wo.technician_id IS NOT NULL
+            GROUP BY wo.technician_id, e.name, e.department
             HAVING COUNT(wo.id) >= 1
             ORDER BY completed_wos DESC
             LIMIT :lim
@@ -99,7 +100,7 @@ class TechnicianEngineService:
             )
 
             result.append({
-                "technician_id": d.get("assigned_to", ""),
+                "technician_id": d.get("technician_id", ""),
                 "name": d.get("technician_name", "Unknown"),
                 "department": d.get("department", "Engineering"),
                 "total_wos": total,
