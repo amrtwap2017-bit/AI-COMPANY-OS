@@ -20,9 +20,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
+from src.core.auth import get_current_user
 from src.core.tenant import get_hotel_id
 
-router = APIRouter(prefix="/workflow", tags=["workflow-engine"])
+router = APIRouter(prefix="/workflow", tags=["workflow-engine"], dependencies=[Depends(get_current_user)])
 
 
 def _now():
