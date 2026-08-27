@@ -39,6 +39,7 @@ def _load_flags_from_db(hotel_id: str) -> Dict[str, bool]:
     """Load feature flags from DB for a hotel. Returns defaults on error."""
     try:
         from src.core.database import SessionLocal
+        from sqlalchemy import text
         with SessionLocal() as db:
             rows = db.execute(text("""
                 SELECT ff.feature, ff.is_enabled

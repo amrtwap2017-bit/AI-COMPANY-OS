@@ -255,7 +255,9 @@ def send_quote(
                     lead_company=lead.company or "", lead_phone=lead.phone or "",
                     quote_title=quote.title, quote_description=quote.description or "",
                     items=quote.items or [], total=quote.total,
+                    status=quote.status,
                     validity_date=str(quote.validity_date)[:10] if quote.validity_date else "",
+                    created_at=quote.created_at.isoformat() if quote.created_at else "",
                     generated_by=current_user.name if hasattr(current_user, "name") else current_user.email,
                 )
                 send_quote_email(
