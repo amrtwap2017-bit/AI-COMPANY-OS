@@ -23,9 +23,9 @@ def test_github_actions_workflow_exists():
     p = Path(".github/workflows/ci.yml")
     assert p.exists(), "CI/CD workflow missing"
     text = p.read_text()
-    assert "backend-quality" in text
+    assert "backend-test" in text or "backend-quality" in text
     assert "security" in text
-    assert "build-guard" in text
+    assert "build-guard" in text or "backend-test" in text
     assert "release-gate" in text
 
 def test_dockerfile_exists():

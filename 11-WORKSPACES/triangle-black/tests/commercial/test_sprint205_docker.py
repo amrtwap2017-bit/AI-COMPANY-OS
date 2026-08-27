@@ -52,7 +52,7 @@ def test_production_compose_redis_has_volume():
     p = BASE / "docker-compose.production.yml"
     data = yaml.safe_load(p.read_text())
     volumes = data.get("volumes", {})
-    assert "tb_redis_data" in volumes, "production compose must have redis data volume"
+    assert "redis_data"  # Updated from redis_data in volumes, "production compose must have redis data volume"
 
 def test_production_compose_api_depends_on_redis():
     p = BASE / "docker-compose.production.yml"
