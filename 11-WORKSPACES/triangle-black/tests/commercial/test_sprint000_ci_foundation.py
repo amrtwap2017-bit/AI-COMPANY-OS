@@ -11,9 +11,10 @@ def test_ci_workflow_exists():
 
 def test_ci_workflow_has_required_jobs():
     text = (ROOT / ".github/workflows/ci.yml").read_text()
+    # CI has these as step names (not job names) OR job names
     for job in ["python-lint", "portal-typecheck", "portal-lint",
                 "python-test-fast", "build-guard"]:
-        assert job in text, f"Missing CI job: {job}"
+        assert job in text, f"Missing CI step/job: {job}"
 
 def test_ci_workflow_uses_postgres_service():
     text = (ROOT / ".github/workflows/ci.yml").read_text()
@@ -30,7 +31,7 @@ def test_pyproject_has_ruff_config():
 
 def test_ci_excludes_live_http_tests():
     text = (ROOT / ".github/workflows/ci.yml").read_text()
-    assert "not live_http" in text or "live_http" in text
+    assert "live_http" in text  # CI mentions live_http exclusion
 
 def test_ci_has_timeout():
     text = (ROOT / ".github/workflows/ci.yml").read_text()

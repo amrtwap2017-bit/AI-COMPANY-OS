@@ -26,7 +26,7 @@ def test_github_actions_workflow_exists():
     assert "backend-test" in text or "backend-quality" in text
     assert "security" in text
     assert "build-guard" in text or "backend-test" in text
-    assert "release-gate" in text
+    assert "release-gate" in text  # Added to CI
 
 def test_dockerfile_exists():
     p = Path("Dockerfile")
