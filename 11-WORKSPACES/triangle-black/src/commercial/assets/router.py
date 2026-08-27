@@ -27,7 +27,7 @@ def list_assets(
     category: Optional[str] = None,
     status:   Optional[str] = None,
     skip:     int = 0,
-    limit:    int = Query(default=50, le=200),
+    limit:    int = Query(default=50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     # Sprint-198: Cache-aside for assets list (TTL=300s, assets change rarely)
