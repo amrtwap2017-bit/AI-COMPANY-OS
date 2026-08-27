@@ -8903,6 +8903,22 @@ try:
 except Exception as _e:
     logger.warning(f"WARN: notification_delivery: {_e}")
 
+
+try:
+    from src.commercial.technician_engine.router import router as _tech_engine_r
+    app.include_router(_tech_engine_r, prefix="/api/v1")
+    logger.info("  OK: technician_engine (A-069)")
+except Exception as _e:
+    logger.warning(f"WARN: technician_engine: {_e}")
+
+
+try:
+    from src.commercial.trend_engine.router import router as _trend__r
+    app.include_router(_trend__r, prefix="/api/v1")
+    logger.info("  OK: trend_engine (A-069/070)")
+except Exception as _e:
+    logger.warning(f"WARN: trend_engine: {_e}")
+
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
