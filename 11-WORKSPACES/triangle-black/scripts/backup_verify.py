@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-"""
-Triangle Black — Backup Verification
-Run: .venv/bin/python scripts/backup_verify.py
-
-Verifies:
-1. Backup file exists and is readable
-2. Backup contains expected tables
-3. Key row counts match
-"""
+"""Triangle Black — Backup Verification"""
 import os, sys, gzip, subprocess
 from pathlib import Path
 from datetime import datetime
@@ -17,47 +9,65 @@ print("TRIANGLE BLACK — BACKUP VERIFICATION")
 print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 print("=" * 60)
 
-# Check for backup files
 backup_dir = Path("backups")
-if not backup_dir.exists():
-    backup_dir.mkdir()
-    print("📁 Created backups/ directory")
-
+backup_dir.mkdir(exist_ok=True)
 backups = sorted(backup_dir.glob("*.sql.gz"), reverse=True)
+
 if not backups:
-    print("⚠️  No backup files found.")
-    print("   Run: bash scripts/backup.sh")
+    print("⚠️  No backup files found. Run: bash scripts/backup.sh")
     sys.exit(0)
 
 latest = backups[0]
-size = latest.stat().st_size / (1024*1024)
-print(f"\n✅ Latest backup: {latest.name}")
-print(f"   Size: {size:.1f} MB")
-print(f"   Age: {(datetime.now().timestamp() - latest.stat().st_mtime)/3600:.1f} hours")
+size = latest.stat().st_size / (1024 * 1024)
+age_h = (datetime.now().timestamp() - latest.stat().st_mtime) / 3600
 
-# Verify backup is readable
+print(f"\n✅ Latest backup : {latest.name}")
+print(f"   Size          : {size:.1f} MB")
+print(f"   Age           : {age_h:.1f} hours")
+print(f"   Backups kept  : {len(backups)}")
+
+# Verify readable
 try:
-    with gzip.open(latest, 'rt') as f:
-        first_100 = f.read(500)
-        if "PostgreSQL" in first_100 or "CREATE" in first_100 or "INSERT" in first_100:
-            print("✅ Backup file is valid SQL")
-        else:
-            print("⚠️  Backup may be corrupted")
+    with gzip.open(latest, 'rt', errors='replace') as f:
+        content = f.read()  # read full file
+    print(f"✅ Backup readable ({len(content):,} chars)")
 except Exception as e:
-    print(f"❌ Backup verification failed: {e}")
+    print(f"❌ Cannot read backup: {e}")
     sys.exit(1)
 
-# Check key tables exist
-key_tables = ["assets", "work_orders", "suppliers", "maintenance_plans", "users"]
-try:
-    with gzip.open(latest, 'rt') as f:
-        content = f.read(50000)  # Read first 50KB
-        for table in key_tables:
-            found = f"TABLE {table}" in content or f'"{table}"' in content
-            icon = "✅" if found else "⚠️"
-            print(f"  {icon} Table '{table}': {'found' if found else 'not in preview'}")
-except Exception as e:
-    print(f"⚠️  Table check skipped: {e}")
+# Verify tables
+key_tables = ["assets","work_orders","suppliers","maintenance_plans","users",
+              "employees","invoices","purchase_orders"]
+print("\n📋 Table verification:")
+all_ok = True
+for table in key_tables:
+    found = (f'TABLE {table}' in content or
+             f'"{table}"' in content or
+             f'COPY {table}' in content or
+             f'COPY public.{table}' in content or
+             f"INSERT INTO {table}" in content or
+             f"INSERT INTO public.{table}" in content)
+    icon = "✅" if found else "⚠️"
+    if not found:
+        all_ok = False
+    print(f"  {icon} {table}")
 
-print(f"\n✅ BACKUP VERIFICATION COMPLETE")
-print(f"   Run restore with: bash scripts/restore.sh {latest}")
+# Row count estimate from COPY lines
+print("\n📊 Data size estimates:")
+for table in ["assets","work_orders","suppliers"]:
+    # Count lines between COPY ... and \. markers
+    marker = f"COPY public.{table} " if f"COPY public.{table} " in content else f"COPY {table} "
+    if marker in content:
+        start = content.index(marker)
+        end_marker = content.find('\\.', start)
+        if end_marker > 0:
+            rows = content[start:end_marker].count('\n') - 1
+            print(f"  {table}: ~{rows} rows")
+
+if all_ok:
+    print("\n✅ BACKUP FULLY VERIFIED")
+else:
+    print("\n⚠️  Some tables not found in backup preview")
+
+print(f"\n  Restore: bash scripts/restore.sh {latest}")
+print("=" * 60)

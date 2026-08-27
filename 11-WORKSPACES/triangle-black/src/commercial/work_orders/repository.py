@@ -26,7 +26,11 @@ class WorkOrderRepository:
         return self.db.query(WorkOrder).all()
 
     def get_work_order_by_id(self, work_order_id: int):
-        return self.db.query(WorkOrder).filter(WorkOrder.id == work_order_id).first()
+        return self.db.query(WorkOrder).filter(
+            WorkOrder.id == work_order_id,
+            WorkOrder.hotel_id == self.hotel_id
+        ).first() if hasattr(self, 'hotel_id') and self.hotel_id else \
+        self.db.query(WorkOrder).filter(WorkOrder.id == work_order_id).first()
 
     def update_work_order(self, work_order_id: int, work_order_data: dict):
         work_order = self.get_work_order_by_id(work_order_id)
