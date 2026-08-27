@@ -108,7 +108,7 @@ class PMEngineService:
             "overall_compliance_pct": overall_compliance,
             "total_plans": total_plans,
             "on_schedule_plans": completed_plans,  # plans not yet overdue
-            "pending_plans": total_plans - completed_plans,
+            "pending_plans": total_plans - completed_plans,  # overdue count
             "by_category": [dict(r._mapping) for r in rows],
             "asset_schedule_status": [dict(r._mapping) for r in asset_pm],
             "compliance_grade": (
@@ -301,7 +301,7 @@ class PMEngineService:
             "pm_compliance_pct": compliance["overall_compliance_pct"],
             "compliance_grade": compliance["compliance_grade"],
             "total_plans": compliance["total_plans"],
-            "completed_plans": compliance["completed_plans"],
+            "on_schedule_plans": compliance.get("on_schedule_plans", compliance.get("completed_plans", 0)),
             "total_assets": total_assets,
             "scheduled_assets": total_assets - unscheduled,
             "unscheduled_assets": unscheduled,
