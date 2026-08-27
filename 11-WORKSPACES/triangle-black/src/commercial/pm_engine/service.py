@@ -112,9 +112,10 @@ class PMEngineService:
             "by_category": [dict(r._mapping) for r in rows],
             "asset_schedule_status": [dict(r._mapping) for r in asset_pm],
             "compliance_grade": (
-                "A" if overall_compliance >= 90 else
-                "B" if overall_compliance >= 75 else
-                "C" if overall_compliance >= 60 else
+                "A+" if overall_compliance >= 90 else
+                "A" if overall_compliance >= 80 else
+                "B" if overall_compliance >= 65 else
+                "C" if overall_compliance >= 50 else
                 "D"
             )
         }
