@@ -54,10 +54,10 @@ class PMEngineService:
             SELECT
                 COALESCE(a.category, 'Uncategorized') AS category,
                 COUNT(mp.id) AS scheduled,
-                COUNT(mp.id) FILTER (WHERE LOWER(mp.status) = 'completed') AS completed,
+                COUNT(mp.id) FILTER (WHERE LOWER(mp.status) = 'active' AND (mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE)) AS completed,
                 COUNT(mp.id) FILTER (WHERE LOWER(mp.status) IN ('pending','overdue','active')) AS pending,
                 ROUND(
-                    100.0 * COUNT(mp.id) FILTER (WHERE LOWER(mp.status) = 'completed')
+                    100.0 * COUNT(mp.id) FILTER (WHERE LOWER(mp.status) = 'active' AND (mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE))
                     / NULLIF(COUNT(mp.id), 0),
                     1
                 ) AS compliance_pct
@@ -98,7 +98,7 @@ class PMEngineService:
         completed_plans = self._scalar("""
                 SELECT COUNT(mp.id) FROM maintenance_plans mp
                 JOIN assets a ON a.id = mp.asset_node_id
-                WHERE a.hotel_id = :hid AND LOWER(mp.status) = 'completed'
+                WHERE a.hotel_id = :hid AND LOWER(mp.status) = 'active' AND (mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE)
             """)
 
         overall_compliance = round(completed_plans / max(total_plans, 1) * 100, 1)
@@ -107,7 +107,7 @@ class PMEngineService:
             "hotel_id": self.hid,
             "overall_compliance_pct": overall_compliance,
             "total_plans": total_plans,
-            "completed_plans": completed_plans,
+            "on_schedule_plans": completed_plans,  # plans not yet overdue
             "pending_plans": total_plans - completed_plans,
             "by_category": [dict(r._mapping) for r in rows],
             "asset_schedule_status": [dict(r._mapping) for r in asset_pm],
