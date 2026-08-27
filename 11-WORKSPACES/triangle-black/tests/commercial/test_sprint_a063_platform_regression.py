@@ -92,7 +92,7 @@ def test_zero_build_guard_issues():
     result = subprocess.run(
         [".venv/bin/python", "-c",
          "from pathlib import Path; "
-         "text = Path('portal/globals.css').read_text(); "
+         "text = Path('portal/app/globals.css').read_text(); "
          "assert 'tb-canvas' in text, 'TBEDS missing';"
          "print('OK')"],
         capture_output=True, text=True, timeout=10
