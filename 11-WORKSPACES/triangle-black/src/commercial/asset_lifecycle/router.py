@@ -1,5 +1,5 @@
 """Asset Lifecycle Intelligence Router — Triangle Black Enterprise OS v6.0"""
-from fastapi import APIRouter, Depends
+from fastapi import Query, APIRouter, Depends
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id

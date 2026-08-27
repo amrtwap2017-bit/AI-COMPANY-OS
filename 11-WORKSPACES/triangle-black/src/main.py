@@ -8928,5 +8928,5 @@ except Exception as _e:
     logger.warning(f"WARN: predictive_engine: {_e}")
 
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
-def get_legacy_executive_dashboard():
+def get_legacy_executive_dashboard(current_user = Depends(get_current_user)):
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
