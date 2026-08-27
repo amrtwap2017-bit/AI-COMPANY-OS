@@ -40,7 +40,7 @@ class TechnicianEngineService:
             SELECT
                 wo.technician_id,
                 COALESCE(e.name, wo.technician_id) AS technician_name,
-                COALESCE(e.name, 'Unknown') AS emp_name, 'Engineering' AS department,
+                COALESCE(e.department, 'Engineering') AS department,
                 COUNT(wo.id) AS total_wos,
                 COUNT(wo.id) FILTER (
                     WHERE LOWER(wo.status) IN ('completed','closed')
@@ -59,9 +59,12 @@ class TechnicianEngineService:
                     AND LOWER(wo.status) IN ('completed','closed')
                 ) AS critical_completed
             FROM work_orders wo
-            LEFT JOIN (
-                SELECT id, name, hotel_id FROM employees WHERE hotel_id = :h
-            ) e ON e.id::TEXT = wo.technician_id::TEXT
+            LEFT JOIN employees e ON (
+                e.hotel_id = :h AND (
+                    e.id::TEXT = wo.technician_id::TEXT OR
+                    e.employee_id::TEXT = wo.technician_id::TEXT
+                )
+            )
             WHERE wo.hotel_id = :h
               AND wo.deleted_at IS NULL
               AND wo.technician_id IS NOT NULL
