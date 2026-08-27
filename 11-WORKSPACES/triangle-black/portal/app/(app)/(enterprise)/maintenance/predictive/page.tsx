@@ -1,124 +1,163 @@
 "use client";
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { KpiCard } from "@/components/ui/KpiCard";
-import { Button } from "@/components/ui/Button";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Activity, RefreshCw, AlertTriangle, TrendingUp } from "lucide-react";
+
+interface PredSummary {
+  total_assessed: number;
+  avg_predictive_score: number;
+  risk_distribution: Record<string, number>;
+  immediate_action: Array<{ asset_name: string; predictive_score: number; category: string; recommendation: string; days_to_recommended_action: number }>;
+  schedule_soon: Array<{ asset_name: string; predictive_score: number; recommendation: string }>;
+  insights: Array<{ type: string; severity: string; message: string }>;
+  top_risk_assets: Array<{ asset_name: string; predictive_score: number; risk_level: string; category: string; recommendation: string; factors: { failure_factor: number; pm_gap_factor: number; age_factor: number } }>;
+}
+
+const RISK_COLOR: Record<string,string> = {
+  CRITICAL:"#ef4444", HIGH:"#f97316", MODERATE:"#eab308", LOW:"#22c55e"
+};
+const REC_COLOR: Record<string,string> = {
+  IMMEDIATE_ACTION:"#ef4444", SCHEDULE_SOON:"#f97316",
+  MONITOR:"#eab308", MAINTAIN_SCHEDULE:"#22c55e"
+};
 
 export default function PredictiveMaintenancePage() {
-  const { data: forecastData, refetch: refetchForecast } = useQuery(
-    ["predictive-forecast"],
-    () => authFetch("/api/v1/predictive/forecast?horizon_days=30").then(r => r.json()),
-    { staleTime: 30000 }
+  const [summary, setSummary] = useState<PredSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [ts, setTs] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setTs(new Date().toLocaleString());
+    authFetch("/api/v1/predictive-engine/summary")
+      .then(r => r.json()).catch(() => null)
+      .then(d => { setSummary(d); setLoading(false); });
+  }, []);
+
+  if (loading) return (
+    <div className="tb-canvas">
+      <div className="tb-section">
+        <div className="tb-shimmer tb-shimmer-title" />
+      </div>
+    </div>
   );
 
-  const { data: anomalyData } = useQuery(
-    ["predictive-anomalies"],
-    () => authFetch("/api/v1/predictive/anomalies").then(r => r.json()),
-    { staleTime: 30000 }
-  );
-
-  const forecasts = forecastData?.forecasts || [];
-  const anomalies = anomalyData?.anomalies || [];
-  const criticalCount = forecasts.filter((f: any) => f.failure_probability_pct >= 80).length;
-  const totalExposure = forecasts.reduce((sum: number, f: any) => sum + (f.estimated_repair_cost_usd || 0), 0);
+  const riskDist = summary?.risk_distribution || {};
+  const immediate = summary?.immediate_action || [];
+  const topRisk = summary?.top_risk_assets || [];
 
   return (
-    <div className="min-h-screen bg-base p-6 md:p-8 space-y-8">
-      <div className="flex items-center justify-between border-b border-border pb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-primary flex items-center gap-2.5">
-            <Activity className="w-7 h-7 text-brand" />
-            AI Predictive Failure Forecaster
-          </h1>
-          <p className="text-sm text-secondary mt-1">
-            30-day failure probability forecasts + live anomaly detection
-          </p>
+    <div className="tb-canvas">
+      <div className="tb-section">
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+          <div>
+            <h1 className="tb-section-title">Predictive Maintenance</h1>
+            <p className="tb-detail-value">Rule-based asset failure risk prediction — {ts}</p>
+          </div>
+          {(riskDist["CRITICAL"] ?? 0) > 0 && (
+            <span className="tb-badge tb-badge-danger">
+              🔴 {riskDist["CRITICAL"]} CRITICAL
+            </span>
+          )}
         </div>
-        <Button variant="secondary" size="sm" onClick={() => refetchForecast()}>
-          <RefreshCw className="w-4 h-4 mr-1.5" /> Refresh
-        </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <KpiCard label="Assets Forecasted" value={forecasts.length} sub="In 30-day horizon" color="blue" />
-        <KpiCard label="High Risk Assets" value={criticalCount} sub="≥80% failure probability" color={criticalCount > 0 ? "amber" : "emerald"} />
-        <KpiCard label="Active Anomalies" value={anomalies.length} sub="Live sensor alerts" color={anomalies.length > 0 ? "amber" : "emerald"} status={anomalies.length > 0 ? "warning" : "ok"} />
-        <KpiCard label="Total Repair Exposure" value={`$${Number(totalExposure).toLocaleString()}`} sub="If failures not prevented" color="purple" />
+      {/* Risk Distribution KPIs */}
+      <div className="tb-section">
+        <div className="tb-grid-4 mt-3">
+          {["CRITICAL","HIGH","MODERATE","LOW"].map(level => (
+            <div key={level} className="tb-kpi" style={{ borderTop:`3px solid ${RISK_COLOR[level]}` }}>
+              <div className="tb-kpi-label">{level}</div>
+              <div className="tb-kpi-value" style={{ color: RISK_COLOR[level] }}>
+                {riskDist[level] ?? 0}
+              </div>
+              <div className="tb-detail-value">assets</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Failure Forecasts */}
-        <div className="rounded-xl border border-border bg-surface p-6 space-y-3">
-          <h2 className="text-base font-bold text-primary border-b border-divider pb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-brand" />
-            Asset Failure Forecasts (30 days)
+      {/* Immediate Action Required */}
+      {immediate.length > 0 && (
+        <div className="tb-section">
+          <h2 className="tb-section-title" style={{ color:"#ef4444" }}>
+            🚨 IMMEDIATE ACTION REQUIRED ({immediate.length} assets)
           </h2>
-          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-            {forecasts.map((f: any, i: number) => (
-              <div key={i} className="p-3 rounded-lg border border-border bg-surface-alt">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div>
-                    <p className="text-xs font-bold text-primary">{f.asset_name}</p>
-                    <p className="text-[11px] text-tertiary">{f.category} · {f.criticality}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-sm font-black ${f.failure_probability_pct >= 80 ? "text-danger-text" : f.failure_probability_pct >= 50 ? "text-warning-text" : "text-success-text"}`}>
-                      {f.failure_probability_pct}%
-                    </div>
-                    <div className="text-[10px] text-tertiary">probability</div>
-                  </div>
+          <div className="tb-table-wrap mt-3">
+            <table className="tb-table">
+              <thead>
+                <tr><th>Asset</th><th>Category</th><th>Risk Score</th><th>Days to Action</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                {immediate.map((a, i) => (
+                  <tr key={i} style={{ background: i === 0 ? "rgba(239,68,68,0.05)" : undefined }}>
+                    <td style={{ fontWeight:600 }}>{a.asset_name}</td>
+                    <td>{a.category}</td>
+                    <td style={{ color:"#ef4444", fontWeight:700 }}>{a.predictive_score?.toFixed(0)}/100</td>
+                    <td style={{ color: a.days_to_recommended_action <= 0 ? "#ef4444" : "inherit" }}>
+                      {a.days_to_recommended_action <= 0 ? "OVERDUE" : `${a.days_to_recommended_action}d`}
+                    </td>
+                    <td>
+                      <span className="tb-badge tb-badge-danger" style={{ fontSize:"0.65rem" }}>
+                        {a.recommendation?.replace("_"," ")}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Top Risk Assets */}
+      {topRisk.length > 0 && (
+        <div className="tb-section">
+          <h2 className="tb-section-title">Asset Risk Map (Top 5)</h2>
+          <div className="tb-grid-3 mt-3">
+            {topRisk.slice(0,5).map((a, i) => (
+              <div key={i} className="tb-kpi" style={{ borderLeft:`4px solid ${RISK_COLOR[a.risk_level]}` }}>
+                <div style={{ fontWeight:700, fontSize:"0.85rem", marginBottom:"0.25rem" }}>{a.asset_name}</div>
+                <div className="tb-detail-value">{a.category}</div>
+                <div style={{ margin:"0.5rem 0" }}>
+                  <span className={`tb-badge tb-badge-${
+                    a.risk_level === "CRITICAL" ? "danger" :
+                    a.risk_level === "HIGH" ? "warning" : "info"
+                  }`}>{a.risk_level}</span>
+                  <span style={{ marginLeft:"0.5rem", fontWeight:700, color: RISK_COLOR[a.risk_level] }}>
+                    {a.predictive_score?.toFixed(0)}/100
+                  </span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-surface overflow-hidden mb-2">
-                  <div
-                    className={`h-full rounded-full ${f.failure_probability_pct >= 80 ? "bg-danger" : f.failure_probability_pct >= 50 ? "bg-warning" : "bg-success"}`}
-                    style={{ width: `${f.failure_probability_pct}%` }}
-                  />
+                <div style={{ display:"flex", gap:"0.5rem", flexWrap:"wrap" }}>
+                  {Object.entries(a.factors || {}).map(([k,v]) => (
+                    <span key={k} className="tb-badge tb-badge-neutral" style={{ fontSize:"0.6rem" }}>
+                      {k.replace("_factor","")}: {Number(v).toFixed(0)}
+                    </span>
+                  ))}
                 </div>
-                <div className="flex justify-between text-[11px] font-mono text-tertiary">
-                  <span>{f.predicted_failure_window_days}d window</span>
-                  <span className="text-brand">${Number(f.estimated_repair_cost_usd || 0).toLocaleString()}</span>
-                </div>
-                <p className="text-[11px] text-secondary mt-1 italic">{f.recommended_action}</p>
               </div>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Anomaly Detection */}
-        <div className="rounded-xl border border-border bg-surface p-6 space-y-3">
-          <h2 className="text-base font-bold text-primary border-b border-divider pb-3 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-danger" />
-            Live Anomaly Detection ({anomalies.length})
-          </h2>
-          <div className="space-y-2">
-            {anomalies.length > 0 ? anomalies.map((a: any, i: number) => (
-              <div key={i} className="p-3 rounded-lg border border-danger-border bg-danger-bg">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-danger-text">{a.asset_name}</span>
-                  <StatusBadge status={a.severity} variant="danger" />
-                </div>
-                <p className="text-xs text-danger-text/80">{a.description}</p>
-                <p className="text-[11px] text-secondary mt-1.5 italic">{a.recommended_mitigation}</p>
-                <div className="flex justify-between text-[11px] font-mono text-tertiary mt-1">
-                  <span>{a.anomaly_type}</span>
-                  <span>{a.confidence_pct}% confidence</span>
-                </div>
+      {/* Insights */}
+      {(summary?.insights || []).length > 0 && (
+        <div className="tb-section">
+          <h2 className="tb-section-title">Predictive Alerts</h2>
+          <div style={{ display:"flex", flexDirection:"column", gap:"0.5rem", marginTop:"0.75rem" }}>
+            {summary!.insights.map((ins, i) => (
+              <div key={i} className={`tb-alert tb-alert-${
+                ins.severity === "CRITICAL" ? "danger" : "warning"
+              }`} style={{ display:"flex", gap:"0.75rem", alignItems:"center" }}>
+                <span className={`tb-badge tb-badge-${
+                  ins.severity === "CRITICAL" ? "danger" : "warning"
+                }`} style={{ fontSize:"0.65rem" }}>{ins.severity}</span>
+                <span>{ins.message}</span>
               </div>
-            )) : (
-              <div className="py-16 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-success-bg flex items-center justify-center mx-auto">
-                  <Activity className="w-6 h-6 text-success" />
-                </div>
-                <p className="text-sm font-semibold text-primary">All Systems Normal</p>
-                <p className="text-xs text-secondary">No anomalies detected in current telemetry stream</p>
-              </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
