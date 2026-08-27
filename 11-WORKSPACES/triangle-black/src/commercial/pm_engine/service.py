@@ -54,10 +54,10 @@ class PMEngineService:
             SELECT
                 COALESCE(a.category, 'Uncategorized') AS category,
                 COUNT(mp.id) AS scheduled,
-                COUNT(mp.id) FILTER (WHERE LOWER(mp.status) = 'active' AND (mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE)) AS completed,
+                COUNT(mp.id) FILTER (WHERE mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE) AS completed,
                 COUNT(mp.id) FILTER (WHERE LOWER(mp.status) IN ('pending','overdue','active')) AS pending,
                 ROUND(
-                    100.0 * COUNT(mp.id) FILTER (WHERE LOWER(mp.status) = 'active' AND (mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE))
+                    100.0 * COUNT(mp.id) FILTER (WHERE mp.next_due_date IS NULL OR mp.next_due_date::DATE >= CURRENT_DATE)
                     / NULLIF(COUNT(mp.id), 0),
                     1
                 ) AS compliance_pct
