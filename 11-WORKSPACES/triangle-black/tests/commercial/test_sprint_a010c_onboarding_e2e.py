@@ -179,7 +179,7 @@ def test_wrong_password_returns_401(auth_headers):
               "admin_email": email, "admin_password": "Correct123!"},
         timeout=15)
     r = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": r1.json().get("admin", {}).get("temp_password", "")},
+        json={"email": email, "password": r.json().get("admin", {}).get("temp_password", "")},
         timeout=10)
     _skip(r, "wrong-password")
     assert r.status_code in (401, 400), f"Expected 401, got {r.status_code}"
@@ -220,7 +220,7 @@ def test_new_tenant_data_isolated_from_default(auth_headers):
     new_hotel_id = r.json()["hotel_id"]
 
     r2 = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": r1.json().get("admin", {}).get("temp_password", "")}, timeout=10)
+        json={"email": email, "password": r.json().get("admin", {}).get("temp_password", "")}, timeout=10)
     _skip(r2, "isolation-login")
     token = r2.json().get("access_token", "")
 
