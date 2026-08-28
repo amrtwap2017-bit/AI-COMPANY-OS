@@ -389,6 +389,13 @@ app.include_router(actions_router,       prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(invoices_router,      prefix=API_PREFIX)
 app.include_router(hotels_router,        prefix=API_PREFIX)
+try:
+    from src.commercial.onboarding.router import router as onboarding_router
+    app.include_router(onboarding_router, prefix=API_PREFIX)
+    print('  OK: onboarding_router')
+except Exception as _e:
+    import logging; logging.getLogger('tb').warning(f'WARN: onboarding_router: {_e}')
+
 app.include_router(cache_router,              prefix=API_PREFIX)
 app.include_router(pagination_router,         prefix=API_PREFIX)
 app.include_router(email_notification_router, prefix=API_PREFIX)
