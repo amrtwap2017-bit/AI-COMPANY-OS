@@ -25,7 +25,7 @@ def _unique_email():
 
 def test_provision_returns_success():
     """New tenant provisions successfully with all required fields."""
-    r = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={
             "org_name": "Sharm Engineering Co",
             "property_name": "Red Sea Grand Hotel",
@@ -48,7 +48,7 @@ def test_provision_returns_success():
 def test_provisioned_user_can_login():
     """Admin user created during provisioning can authenticate."""
     email = _unique_email()
-    r = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Login Test Co", "property_name": "Login Hotel",
               "admin_email": email, "admin_password": "LoginTest123!"},
         timeout=15)
@@ -72,7 +72,7 @@ def test_provisioned_user_can_login():
 def test_baseline_report_scoped_to_new_tenant():
     """Baseline report returns data scoped to the provisioned tenant only."""
     email = _unique_email()
-    r = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Scope Test Co", "property_name": "Scope Hotel",
               "admin_email": email, "admin_password": "ScopeTest123!"},
         timeout=15)
@@ -102,7 +102,7 @@ def test_baseline_report_scoped_to_new_tenant():
 def test_intelligence_snapshot_accessible_after_onboarding():
     """New tenant can access intelligence snapshot immediately after provisioning."""
     email = _unique_email()
-    r = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Intel Test Co", "property_name": "Intel Hotel",
               "admin_email": email, "admin_password": "IntelTest123!"},
         timeout=15)
@@ -131,7 +131,7 @@ def test_complete_onboarding_flow():
     email = _unique_email()
 
     # Step 1: Provision
-    r1 = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r1 = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Full Flow Co", "property_name": "Full Flow Hotel",
               "admin_email": email, "admin_password": "FullFlow123!"},
         timeout=15)
@@ -174,7 +174,7 @@ def test_complete_onboarding_flow():
 def test_wrong_password_returns_401():
     """Login with wrong password returns 401."""
     email = _unique_email()
-    requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Auth Test", "property_name": "Auth Hotel",
               "admin_email": email, "admin_password": "Correct123!"},
         timeout=15)
@@ -194,13 +194,13 @@ def test_baseline_without_token_returns_401():
 
 def test_provision_missing_email_returns_error():
     """Provision without admin_email returns error."""
-    r = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Missing Email Co", "property_name": "Test Hotel"},
         timeout=15)
     _skip(r, "provision-missing-email")
     # Should either return 400 or success:false
     if r.status_code == 200:
-        assert r.json().get("success") is not True or \
+        assert r.json().get("status") != "provisioned" or \
                r.json().get("admin_email") != ""
     else:
         assert r.status_code in (400, 422)
@@ -211,9 +211,9 @@ def test_provision_missing_email_returns_error():
 def test_new_tenant_data_isolated_from_default():
     """New tenant sees zero data from default tenant's work orders."""
     email = _unique_email()
-    r = requests.post(f"{BASE}/api/v1/onboarding/provision-property",
+    r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         json={"org_name": "Isolation Co", "property_name": "Isolation Hotel",
-              "admin_email": email, "admin_password": "Isolate123!"},
+              "admin_email": email},
         timeout=15)
     _skip(r, "isolation-provision")
     assert r.status_code == 200

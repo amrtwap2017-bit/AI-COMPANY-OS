@@ -39,10 +39,10 @@ def test_pilot_dashboard_endpoint():
 
 def test_onboarding_creates_valid_tenant():
     r = requests.post(
-        f"{BASE}/api/v1/onboarding/provision-property",
+        f"{BASE}/api/v1/onboarding/provision",
         json={
-            "company_name": "Test Pilot Corp",
-            "hotel_name": "Test Pilot Hotel",
+            "org_name": "Test Pilot Corp",
+            "property_name": "Test Pilot Hotel",
             "admin_email": "pilot@test.com",
             "admin_password": "TestPass2026!"
         },
