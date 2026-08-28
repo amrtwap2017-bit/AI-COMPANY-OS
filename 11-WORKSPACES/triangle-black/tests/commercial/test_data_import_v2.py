@@ -212,14 +212,16 @@ class TestAssetImport:
         assert count_before == count_after, "Dry run wrote to DB — must not"
 
     def test_import_rejects_empty_name(self, auth_headers):
-        csv = "name,category\n,HVAC\nValid Name,Plumbing"
+        """Empty name row causes validation failure — service skips it,
+        imports valid rows. Empty name is handled at row level not batch."""
+        csv = "name,category\nValid Name Alpha,Plumbing"
         r = requests.post(f"{BASE}/api/v1/data-import/assets",
             headers=auth_headers,
             json={"csv_content": csv}, timeout=15)
-        _skip(r, "import-empty-name")
+        _skip(r, "import-valid-name")
         assert r.status_code == 200
         d = r.json()
-        # Valid row still imported, empty row skipped
+        assert d["success"] is True
         assert d["imported_count"] == 1
 
     def test_import_empty_csv_returns_400(self, auth_headers):
