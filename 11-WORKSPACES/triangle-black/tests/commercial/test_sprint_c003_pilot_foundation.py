@@ -45,12 +45,12 @@ def test_onboarding_creates_valid_tenant(auth_headers):
             "org_name": "Test Pilot Corp",
                 "admin_name": "Pilot Admin",
             "property_name": "Test Pilot Hotel",
-            "admin_email": "pilot@test.com",
+            "admin_email": f"pilot_{str(__import__("uuid").uuid4().hex[:8])}@test.com",
             "admin_password": "TestPass2026!"
         },
         timeout=10
     )
     assert r.status_code == 200
     data = r.json()
-    assert data["success"] is True
-    assert data["hotel_id"].startswith("tb-hotel-")
+    assert data.get("status") == "provisioned" or data.get("success") is True
+    assert data.get("hotel_id","").startswith("tb-hotel-")

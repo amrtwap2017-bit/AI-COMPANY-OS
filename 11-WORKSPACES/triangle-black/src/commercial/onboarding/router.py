@@ -293,7 +293,12 @@ def provision_organization(
 
     return {
         "status": "provisioned",
+        "success": True,
         "hotel_id": hotel_id,
+        "slug": hotel_id,
+        "site_id": hotel_id,
+        "ready_for_login": True,
+        "admin_email": email,
         "org_name": req.org_name.strip(),
         "property_name": req.property_name.strip(),
         "admin": {
