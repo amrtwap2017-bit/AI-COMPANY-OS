@@ -174,12 +174,13 @@ def test_complete_onboarding_flow(auth_headers):
 def test_wrong_password_returns_401(auth_headers):
     """Login with wrong password returns 401."""
     email = _unique_email()
-    requests.post(f"{BASE}/api/v1/onboarding/provision",
+    prov_r = requests.post(f"{BASE}/api/v1/onboarding/provision",
         headers=auth_headers, json={"org_name": "Auth Test", "property_name": "Auth Hotel",
-              "admin_email": email, "admin_password": "Correct123!"},
+              "admin_email": email},
         timeout=15)
+    temp_pwd = prov_r.json().get("admin", {}).get("temp_password", "") if prov_r.status_code == 200 else ""
     r = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": r.json().get("admin", {}).get("temp_password", "")},
+        json={"email": email, "password": "WrongPassword!"},
         timeout=10)
     _skip(r, "wrong-password")
     assert r.status_code in (401, 400), f"Expected 401, got {r.status_code}"
