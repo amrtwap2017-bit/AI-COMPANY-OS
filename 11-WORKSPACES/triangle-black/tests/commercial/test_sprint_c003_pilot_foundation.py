@@ -37,11 +37,13 @@ def test_pilot_dashboard_endpoint():
     assert "total_assets" in data["kpis"]
     assert "pm_compliance_pct" in data["kpis"]
 
-def test_onboarding_creates_valid_tenant():
+def test_onboarding_creates_valid_tenant(auth_headers):
     r = requests.post(
         f"{BASE}/api/v1/onboarding/provision",
+        headers=auth_headers,
         json={
             "org_name": "Test Pilot Corp",
+                "admin_name": "Pilot Admin",
             "property_name": "Test Pilot Hotel",
             "admin_email": "pilot@test.com",
             "admin_password": "TestPass2026!"

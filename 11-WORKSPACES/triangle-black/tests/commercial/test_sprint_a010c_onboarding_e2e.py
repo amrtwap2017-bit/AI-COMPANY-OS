@@ -23,10 +23,10 @@ def _unique_email():
 
 # ─── Scenario 1: Provision Success ───────────────────────────────────────────
 
-def test_provision_returns_success():
+def test_provision_returns_success(auth_headers):
     """New tenant provisions successfully with all required fields."""
     r = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={
+        headers=auth_headers, json={
             "org_name": "Sharm Engineering Co",
             "property_name": "Red Sea Grand Hotel",
             "admin_email": _unique_email(),
@@ -45,11 +45,11 @@ def test_provision_returns_success():
 
 # ─── Scenario 2: Provisioned User Can Login ──────────────────────────────────
 
-def test_provisioned_user_can_login():
+def test_provisioned_user_can_login(auth_headers):
     """Admin user created during provisioning can authenticate."""
     email = _unique_email()
     r = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Login Test Co", "property_name": "Login Hotel",
+        headers=auth_headers, json={"org_name": "Login Test Co", "property_name": "Login Hotel",
               "admin_email": email, "admin_password": "LoginTest123!"},
         timeout=15)
     _skip(r, "provision-for-login")
@@ -69,11 +69,11 @@ def test_provisioned_user_can_login():
 
 # ─── Scenario 3: Baseline Report Scoped to New Tenant ────────────────────────
 
-def test_baseline_report_scoped_to_new_tenant():
+def test_baseline_report_scoped_to_new_tenant(auth_headers):
     """Baseline report returns data scoped to the provisioned tenant only."""
     email = _unique_email()
     r = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Scope Test Co", "property_name": "Scope Hotel",
+        headers=auth_headers, json={"org_name": "Scope Test Co", "property_name": "Scope Hotel",
               "admin_email": email, "admin_password": "ScopeTest123!"},
         timeout=15)
     _skip(r, "provision-for-scope")
@@ -99,11 +99,11 @@ def test_baseline_report_scoped_to_new_tenant():
 
 # ─── Scenario 4: Intelligence Snapshot Accessible ────────────────────────────
 
-def test_intelligence_snapshot_accessible_after_onboarding():
+def test_intelligence_snapshot_accessible_after_onboarding(auth_headers):
     """New tenant can access intelligence snapshot immediately after provisioning."""
     email = _unique_email()
     r = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Intel Test Co", "property_name": "Intel Hotel",
+        headers=auth_headers, json={"org_name": "Intel Test Co", "property_name": "Intel Hotel",
               "admin_email": email, "admin_password": "IntelTest123!"},
         timeout=15)
     _skip(r, "provision-for-intel")
@@ -122,7 +122,7 @@ def test_intelligence_snapshot_accessible_after_onboarding():
 
 # ─── Scenario 5: Full End-to-End Flow ────────────────────────────────────────
 
-def test_complete_onboarding_flow():
+def test_complete_onboarding_flow(auth_headers):
     """
     Complete commercial onboarding flow:
     provision → login → baseline → risk score → insights
@@ -132,7 +132,7 @@ def test_complete_onboarding_flow():
 
     # Step 1: Provision
     r1 = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Full Flow Co", "property_name": "Full Flow Hotel",
+        headers=auth_headers, json={"org_name": "Full Flow Co", "property_name": "Full Flow Hotel",
               "admin_email": email, "admin_password": "FullFlow123!"},
         timeout=15)
     _skip(r1, "full-flow-provision")
@@ -175,7 +175,7 @@ def test_wrong_password_returns_401():
     """Login with wrong password returns 401."""
     email = _unique_email()
     requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Auth Test", "property_name": "Auth Hotel",
+        headers=auth_headers, json={"org_name": "Auth Test", "property_name": "Auth Hotel",
               "admin_email": email, "admin_password": "Correct123!"},
         timeout=15)
     r = requests.post(f"{BASE}/api/v1/auth/login/json",
@@ -192,10 +192,10 @@ def test_baseline_without_token_returns_401():
     assert r.status_code in (401, 403)
 
 
-def test_provision_missing_email_returns_error():
+def test_provision_missing_email_returns_error(auth_headers):
     """Provision without admin_email returns error."""
     r = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Missing Email Co", "property_name": "Test Hotel"},
+        headers=auth_headers, json={"org_name": "Missing Email Co", "property_name": "Test Hotel"},
         timeout=15)
     _skip(r, "provision-missing-email")
     # Should either return 400 or success:false
@@ -208,11 +208,11 @@ def test_provision_missing_email_returns_error():
 
 # ─── Tenant Isolation Verification ───────────────────────────────────────────
 
-def test_new_tenant_data_isolated_from_default():
+def test_new_tenant_data_isolated_from_default(auth_headers):
     """New tenant sees zero data from default tenant's work orders."""
     email = _unique_email()
     r = requests.post(f"{BASE}/api/v1/onboarding/provision",
-        json={"org_name": "Isolation Co", "property_name": "Isolation Hotel",
+        headers=auth_headers, json={"org_name": "Isolation Co", "property_name": "Isolation Hotel",
               "admin_email": email},
         timeout=15)
     _skip(r, "isolation-provision")
