@@ -32,7 +32,7 @@ class ProvisionRequest(BaseModel):
     org_name: str
     property_name: str
     admin_email: str
-    admin_name: str
+    admin_name: Optional[str] = "Admin"
     city: Optional[str] = ""
     country: Optional[str] = ""
 

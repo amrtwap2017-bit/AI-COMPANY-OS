@@ -56,7 +56,7 @@ def test_provisioned_user_can_login(auth_headers):
     assert r.status_code == 200
 
     r2 = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": "LoginTest123!"},
+        json={"email": email, "password": r.json().get("admin", {}).get("temp_password", "")},
         headers={"Content-Type": "application/json"}, timeout=10)
     _skip(r2, "login-provisioned")
     assert r2.status_code == 200, f"Login failed: {r2.text[:200]}"
@@ -81,7 +81,7 @@ def test_baseline_report_scoped_to_new_tenant(auth_headers):
     hotel_id = r.json().get("hotel_id")
 
     r2 = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": "ScopeTest123!"}, timeout=10)
+        json={"email": email, "password": r.json().get("admin", {}).get("temp_password", "")}, timeout=10)
     _skip(r2, "login-for-scope")
     token = r2.json().get("access_token", "")
 
@@ -110,7 +110,7 @@ def test_intelligence_snapshot_accessible_after_onboarding(auth_headers):
     assert r.status_code == 200
 
     r2 = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": "IntelTest123!"}, timeout=10)
+        json={"email": email, "password": r.json().get("admin", {}).get("temp_password", "")}, timeout=10)
     _skip(r2, "login-for-intel")
     token = r2.json().get("access_token", "")
 
@@ -142,7 +142,7 @@ def test_complete_onboarding_flow(auth_headers):
 
     # Step 2: Login
     r2 = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": "FullFlow123!"}, timeout=10)
+        json={"email": email, "password": r1.json().get("admin", {}).get("temp_password", "")}, timeout=10)
     _skip(r2, "full-flow-login")
     assert r2.status_code == 200
     token = r2.json()["access_token"]
@@ -171,7 +171,7 @@ def test_complete_onboarding_flow(auth_headers):
 
 # ─── Failure Modes ────────────────────────────────────────────────────────────
 
-def test_wrong_password_returns_401():
+def test_wrong_password_returns_401(auth_headers):
     """Login with wrong password returns 401."""
     email = _unique_email()
     requests.post(f"{BASE}/api/v1/onboarding/provision",
@@ -179,7 +179,7 @@ def test_wrong_password_returns_401():
               "admin_email": email, "admin_password": "Correct123!"},
         timeout=15)
     r = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": "WrongPassword!"},
+        json={"email": email, "password": r1.json().get("admin", {}).get("temp_password", "")},
         timeout=10)
     _skip(r, "wrong-password")
     assert r.status_code in (401, 400), f"Expected 401, got {r.status_code}"
@@ -220,7 +220,7 @@ def test_new_tenant_data_isolated_from_default(auth_headers):
     new_hotel_id = r.json()["hotel_id"]
 
     r2 = requests.post(f"{BASE}/api/v1/auth/login/json",
-        json={"email": email, "password": "Isolate123!"}, timeout=10)
+        json={"email": email, "password": r1.json().get("admin", {}).get("temp_password", "")}, timeout=10)
     _skip(r2, "isolation-login")
     token = r2.json().get("access_token", "")
 
