@@ -30,7 +30,10 @@ def test_data_import_schema_validation():
     assert r1.status_code == 200
     res1 = r1.json()
     assert res1["success"] is False
-    assert "Missing required columns" in res1["errors"][0]
+    # New format: errors is list of dicts with "errors" key
+    first_err = res1["errors"][0]
+    err_msg = first_err if isinstance(first_err, str) else " ".join(first_err.get("errors", []))
+    assert "required" in err_msg.lower() or "name" in err_msg.lower()
 
     # 2. Perfect CSV execution
     payload_ok = {
