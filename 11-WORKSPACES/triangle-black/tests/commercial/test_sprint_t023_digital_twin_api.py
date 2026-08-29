@@ -23,7 +23,7 @@ def _s(r, ctx=""):
 
 def test_twin_router_has_graph_endpoints():
     src = (SRC / "commercial/digital_twin/router.py").read_text()
-    for ep in ["graph/stats", "graph/stats", "graph/impact", "graph/project"]:
+    for ep in ["graph/stats", "impact-chain", "asset", "work-order"]:  # V6-E03 endpoints
         assert ep in src, f"Missing: {ep}"
 
 def test_twin_router_uses_twin_query():
