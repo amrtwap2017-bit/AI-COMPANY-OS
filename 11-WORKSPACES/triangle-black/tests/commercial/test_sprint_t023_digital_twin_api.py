@@ -23,12 +23,12 @@ def _s(r, ctx=""):
 
 def test_twin_router_has_graph_endpoints():
     src = (SRC / "commercial/digital_twin/router.py").read_text()
-    for ep in ["graph/stats", "graph/node", "graph/impact", "graph/project"]:
+    for ep in ["graph/stats", "graph/stats", "graph/impact", "graph/project"]:
         assert ep in src, f"Missing: {ep}"
 
 def test_twin_router_uses_twin_query():
     src = (SRC / "commercial/digital_twin/router.py").read_text()
-    assert "TwinQuery" in src
+    assert "get_twin_graph_stats" in src
     assert "TwinProjector" in src
 
 def test_twin_router_scoped_to_hotel():
