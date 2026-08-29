@@ -390,6 +390,13 @@ app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(invoices_router,      prefix=API_PREFIX)
 app.include_router(hotels_router,        prefix=API_PREFIX)
 try:
+    from src.commercial.recommendations.router import router as recommendations_router
+    app.include_router(recommendations_router, prefix=API_PREFIX)
+    print('  OK: recommendations_router')
+except Exception as _e:
+    import logging; logging.getLogger('tb').warning(f'WARN: recommendations: {_e}')
+
+try:
     from src.commercial.onboarding.router import router as onboarding_router
     app.include_router(onboarding_router, prefix=API_PREFIX)
     print('  OK: onboarding_router')
