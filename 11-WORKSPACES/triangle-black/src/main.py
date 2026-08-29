@@ -6875,6 +6875,8 @@ import secrets as _secrets_267
 @app.get("/api/v1/health", tags=["platform"])
 
 @app.get("/api/v1/health/backup", tags=["platform"])
+
+
 def health_backup():
     """Backup health status — age, size, validity."""
     try:
@@ -6882,6 +6884,32 @@ def health_backup():
         return get_backup_status()
     except Exception as e:
         return {"status": "ERROR", "healthy": False, "message": str(e)}
+
+
+@app.get("/api/v1/health/metrics", tags=["platform"])
+def health_metrics():
+    """Live platform metrics: requests, latency, cache, AI."""
+    try:
+        from src.core.observability import telemetry_store, slo_tracker
+        report = telemetry_store.get_telemetry_report()
+        report["slo_check"] = slo_tracker.check_slos()
+        return report
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/v1/slo/report", tags=["platform"])
+def slo_report():
+    """SLO report: p50/p95/p99 latency + error rates per endpoint."""
+    try:
+        from src.core.observability import slo_tracker
+        return {
+            "endpoints": slo_tracker.get_slo_report(),
+            "violations": slo_tracker.check_slos(),
+            "targets": {"availability_pct": 99.5, "p95_ms": 500},
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 def health_check():
     """Platform health check — DB + version"""
