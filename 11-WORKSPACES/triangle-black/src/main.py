@@ -75,6 +75,7 @@ from src.commercial.service_requests.router import router as service_requests_ro
 from src.commercial.service_reports.router import router as service_reports_router
 
 
+
 # ── Inventory, Procurement & Stock Control OS — Sprint 16 ────────────────────
 from src.commercial.inventory_items.models import InventoryItem  # noqa
 from src.commercial.warehouses.models import Warehouse  # noqa
@@ -373,6 +374,12 @@ def list_user_roles(_admin: str = Depends(require_admin)):
 
 
 API_PREFIX = "/api/v1"
+try:
+    from src.commercial.reports.router import router as operational_report_router
+    app.include_router(operational_report_router, prefix=API_PREFIX)
+    print('  OK: operational_report_router')
+except Exception as _e:
+    import logging as _lg; _lg.getLogger('tb').warning(f'WARN: op_reports: {_e}')
 
 app.include_router(executive_intelligence_router, prefix="/api/v1")
 app.include_router(leads_router,         prefix=API_PREFIX + "/leads")
