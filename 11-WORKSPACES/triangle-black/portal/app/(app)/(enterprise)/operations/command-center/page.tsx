@@ -78,7 +78,7 @@ export default function OperationalCommandCenterPage() {
     <div className="tb-canvas">
       {/* Header */}
       <div className="tb-section">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Operational Command Center</h1>
             <p className="tb-detail-value">
@@ -208,7 +208,7 @@ export default function OperationalCommandCenterPage() {
               <div key={i} className={`tb-alert tb-alert-${
                 ins.severity === "CRITICAL" ? "danger" :
                 ins.severity === "HIGH" ? "warning" : "info"
-              }`} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              }`} className="tb-flex-gap-3">
                 <span className={SEVERITY_CLASS[ins.severity] || "tb-badge tb-badge-neutral"}>
                   {ins.severity}
                 </span>

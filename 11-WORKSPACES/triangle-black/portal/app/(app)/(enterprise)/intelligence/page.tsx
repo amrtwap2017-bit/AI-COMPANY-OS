@@ -75,7 +75,7 @@ export default function UnifiedIntelligenceDashboard() {
     <div className="tb-canvas">
       {/* Header */}
       <div className="tb-section">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Unified Intelligence Dashboard</h1>
             <p className="tb-detail-value">
@@ -249,7 +249,7 @@ export default function UnifiedIntelligenceDashboard() {
               <div key={i} className={`tb-alert tb-alert-${
                 alert.severity.includes("CRITICAL") || alert.severity === "P0_CRITICAL" ? "danger" :
                 alert.severity.includes("HIGH") || alert.severity === "P1_HIGH" ? "warning" : "info"
-              }`} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              }`} className="tb-flex-gap-3">
                 <span className={SEV_CLASS[alert.severity] || "tb-badge tb-badge-neutral"} style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>
                   {alert.severity}
                 </span>

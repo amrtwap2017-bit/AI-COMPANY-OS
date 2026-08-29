@@ -48,7 +48,7 @@ export default function PredictiveMaintenancePage() {
   return (
     <div className="tb-canvas">
       <div className="tb-section">
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Predictive Maintenance</h1>
             <p className="tb-detail-value">Rule-based asset failure risk prediction — {ts}</p>

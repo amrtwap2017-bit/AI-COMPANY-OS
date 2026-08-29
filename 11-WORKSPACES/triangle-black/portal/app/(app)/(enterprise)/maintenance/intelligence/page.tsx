@@ -80,7 +80,7 @@ export default function MaintenanceIntelligencePage() {
     <div className="tb-canvas">
       {/* Header */}
       <div className="tb-section">
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Maintenance Intelligence</h1>
             <p className="tb-detail-value">PM compliance, scheduling and cost analysis — {ts}</p>

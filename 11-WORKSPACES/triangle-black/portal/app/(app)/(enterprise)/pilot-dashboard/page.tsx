@@ -94,7 +94,7 @@ export default function PilotCustomerDashboard() {
     <div className="tb-canvas">
       {/* Header */}
       <div className="tb-section">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Pilot Customer Dashboard</h1>
             <p className="tb-detail-value">Engineering Operations — {ts}</p>
@@ -122,7 +122,7 @@ export default function PilotCustomerDashboard() {
             alignItems: "center",
             gap: "1.5rem",
           }}>
-            <div style={{ textAlign: "center" }}>
+            <div className="tb-text-center">
               <div style={{
                 fontSize: "2.5rem",
                 fontWeight: 700,
@@ -221,7 +221,7 @@ export default function PilotCustomerDashboard() {
               <div key={i} className={`tb-alert tb-alert-${
                 alert.severity.includes("CRITICAL") ? "danger" :
                 alert.severity.includes("HIGH") ? "warning" : "info"
-              }`} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              }`} className="tb-flex-gap-3">
                 <span className={`tb-badge ${
                   alert.severity.includes("CRITICAL") ? "tb-badge-danger" :
                   alert.severity.includes("HIGH") ? "tb-badge-warning" : "tb-badge-info"

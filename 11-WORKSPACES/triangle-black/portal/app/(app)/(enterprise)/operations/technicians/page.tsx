@@ -69,7 +69,7 @@ export default function TechnicianIntelligencePage() {
     <div className="tb-canvas">
       {/* Header */}
       <div className="tb-section">
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Technician Intelligence</h1>
             <p className="tb-detail-value">Team productivity + efficiency scoring — {ts}</p>

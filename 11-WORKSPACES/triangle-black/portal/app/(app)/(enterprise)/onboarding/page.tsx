@@ -99,7 +99,7 @@ export default function OnboardingPage() {
     <div className="tb-canvas">
       {/* Header */}
       <div className="tb-section">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="tb-flex-between">
           <div>
             <h1 className="tb-section-title">Customer Onboarding</h1>
             <p className="tb-detail-value">
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
           <h2 className="tb-section-title">Current Setup Status</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.75rem" }}>
             {status.steps.map(s => (
-              <div key={s.step} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <div key={s.step} className="tb-flex-gap-3">
                 <span className={`tb-badge ${s.done ? "tb-badge-success" : "tb-badge-neutral"}`} style={{ fontSize: "0.7rem", minWidth: "60px" }}>
                   {s.done ? "✅ Done" : "⏳ Pending"}
                 </span>
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
       <div className="tb-section">
         <div style={{ display: "flex", alignItems: "center", gap: "0" }}>
           {stepLabels.map((s, i) => (
-            <div key={s.id} style={{ display: "flex", alignItems: "center" }}>
+            <div key={s.id} className="tb-flex-gap-3">
               <div style={{ textAlign: "center", padding: "0 0.5rem" }}>
                 <div style={{
                   width: "36px", height: "36px", borderRadius: "50%",
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
             <p className="tb-detail-value" style={{ marginBottom: "1.25rem" }}>
               Enter the organization and property details.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div className="tb-flex-col-gap-md">
               <div>
                 <label style={{ fontSize: "0.8rem", fontWeight: 600, display: "block", marginBottom: "0.25rem" }}>
                   Organization / Company Name *
@@ -258,7 +258,7 @@ export default function OnboardingPage() {
               Create the administrator account for this property.
               A temporary password will be generated.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div className="tb-flex-col-gap-md">
               <div>
                 <label style={{ fontSize: "0.8rem", fontWeight: 600, display: "block", marginBottom: "0.25rem" }}>
                   Admin Full Name *

@@ -1975,3 +1975,17 @@
   --color-extended-status-critical:  #EF4444;
   --color-extended-status-draft:     #9CA3AF;
 }
+
+/* V6-F04: Additional flex utilities */
+.tb-flex-col-gap-sm  { display:flex; flex-direction:column; gap:0.5rem; }
+.tb-flex-col-gap-md  { display:flex; flex-direction:column; gap:1rem; }
+.tb-flex-center-col  { display:flex; flex-direction:column; align-items:center; }
+.tb-text-center      { text-align:center; }
+.tb-fw-600           { font-weight:600; }
+.tb-fw-700           { font-weight:700; }
+.tb-fs-xs            { font-size:0.75rem; }
+.tb-fs-sm            { font-size:0.85rem; }
+.tb-mt-xs            { margin-top:0.5rem; }
+.tb-mt-sm            { margin-top:0.75rem; }
+.tb-mt-md            { margin-top:1rem; }
+.tb-mt-lg            { margin-top:1.5rem; }
