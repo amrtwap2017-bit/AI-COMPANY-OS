@@ -6873,6 +6873,16 @@ import secrets as _secrets_267
 # ── Health endpoint ───────────────────────────────────────────────────────────
 @app.get("/health", tags=["platform"], include_in_schema=True, operation_id="health_check_v2")
 @app.get("/api/v1/health", tags=["platform"])
+
+@app.get("/api/v1/health/backup", tags=["platform"])
+def health_backup():
+    """Backup health status — age, size, validity."""
+    try:
+        from src.commercial.health.backup_monitor import get_backup_status
+        return get_backup_status()
+    except Exception as e:
+        return {"status": "ERROR", "healthy": False, "message": str(e)}
+
 def health_check():
     """Platform health check — DB + version"""
     from sqlalchemy import text, create_engine
