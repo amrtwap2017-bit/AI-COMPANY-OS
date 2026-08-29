@@ -390,6 +390,13 @@ app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(invoices_router,      prefix=API_PREFIX)
 app.include_router(hotels_router,        prefix=API_PREFIX)
 try:
+    from src.commercial.notification_dispatcher.router import router as notify_router
+    app.include_router(notify_router, prefix=API_PREFIX)
+    print('  OK: notification_dispatcher_router')
+except Exception as _e:
+    import logging; logging.getLogger('tb').warning(f'WARN: notify: {_e}')
+
+try:
     from src.commercial.roi.router import router as roi_router
     app.include_router(roi_router, prefix=API_PREFIX)
     print('  OK: roi_router')

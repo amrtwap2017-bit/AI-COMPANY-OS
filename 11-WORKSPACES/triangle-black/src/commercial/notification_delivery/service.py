@@ -44,7 +44,7 @@ class NotificationDeliveryService:
             where += " AND (is_read IS NULL OR is_read = FALSE)"
         
         rows = self._q(f"""
-            SELECT id, title, message, notification_type, severity,
+            SELECT id, title, message, type, priority,
                    is_read, created_at, metadata
             FROM platform_notifications
             {where}
@@ -59,8 +59,8 @@ class NotificationDeliveryService:
                 "id": d["id"],
                 "title": d.get("title", ""),
                 "message": d.get("message", ""),
-                "type": d.get("notification_type", "INFO"),
-                "severity": d.get("severity", "LOW"),
+                "type": d.get("type", "INFO"),
+                "priority": d.get("priority", "LOW"),
                 "is_read": bool(d.get("is_read", False)),
                 "created_at": str(d.get("created_at", "")),
             })
@@ -77,7 +77,7 @@ class NotificationDeliveryService:
         )
         critical = self._scalar(
             "SELECT COUNT(*) FROM platform_notifications WHERE hotel_id=:h "
-            "AND severity IN ('CRITICAL','HIGH') "
+            "AND priority IN ('CRITICAL','HIGH') "
             "AND (is_read IS NULL OR is_read = FALSE)"
         )
         return {
@@ -115,8 +115,8 @@ class NotificationDeliveryService:
             return 0
 
     def create_alert_notification(self, title: str, message: str,
-                                   notification_type: str = "ALERT",
-                                   severity: str = "MEDIUM") -> dict:
+                                   type: str = "ALERT",
+                                   priority: str = "MEDIUM") -> dict:
         """Create a new notification (called by intelligence engines)."""
         import uuid
         notif_id = str(uuid.uuid4())
@@ -124,8 +124,8 @@ class NotificationDeliveryService:
         try:
             self.db.execute(text("""
                 INSERT INTO platform_notifications
-                  (id, hotel_id, title, message, notification_type,
-                   severity, is_read, created_at, updated_at)
+                  (id, hotel_id, title, message, type,
+                   priority, is_read, created_at, updated_at)
                 VALUES
                   (:id, :h, :title, :msg, :ntype,
                    :sev, FALSE, :now, :now)
@@ -133,7 +133,7 @@ class NotificationDeliveryService:
             """), {
                 "id": notif_id, "h": self.hid,
                 "title": title, "msg": message,
-                "ntype": notification_type, "sev": severity,
+                "ntype": type, "sev": priority,
                 "now": now,
             })
             self.db.commit()
