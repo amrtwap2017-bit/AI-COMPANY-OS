@@ -1010,7 +1010,7 @@ def get_payment_tracking_v2(limit: int = 50):
 
 
 # ── Sprint 150: WO Completion → Asset Sync ───────────────────────────────────
-@app.post("/api/v1/work-orders/{wo_id}/complete", tags=["work-orders"])
+@app.post("/api/v1/work-orders/{wo_id}/complete", tags=["work-orders"], operation_id="complete_work_order_inline")
 def complete_work_order(wo_id: str, data: dict = {}):
     """Mark WO complete and sync to asset last_maintenance_date"""
     from sqlalchemy import text, create_engine
@@ -1578,7 +1578,7 @@ def automation_status():
 
 # ── SPRINT 188: CREATE ACTION ENDPOINTS ────────────────────────────────────────
 
-@app.post("/api/v1/work-orders/", tags=["work-orders"])
+@app.post("/api/v1/work-orders/", tags=["work-orders"], operation_id="create_work_order_inline")
 def create_work_order(body: dict):
     """Create a new work order"""
     from sqlalchemy import text, create_engine
@@ -1620,7 +1620,7 @@ def create_work_order(body: dict):
         return {"id":wo_id,"status":"open","priority":priority,"title":body.get("title"),"created_at":now.isoformat()}
 
 
-@app.post("/api/v1/service-requests/", tags=["service-requests"])
+@app.post("/api/v1/service-requests/", tags=["service-requests"], operation_id="create_service_request_inline")
 def create_service_request(body: dict):
     """Create a new service request"""
     from sqlalchemy import text, create_engine
@@ -1655,7 +1655,7 @@ def create_service_request(body: dict):
         return {"id":sr_id,"status":"open","urgency":body.get("urgency"),"title":body.get("title"),"created_at":now.isoformat()}
 
 
-@app.post("/api/v1/leads/", tags=["leads"])
+@app.post("/api/v1/leads/", tags=["leads"], operation_id="create_lead_inline")
 def create_lead(body: dict):
     """Create a new lead"""
     from sqlalchemy import text, create_engine
@@ -2256,7 +2256,7 @@ def get_asset_detail(asset_id: str):
             "pm_plans": [{k: str(v) if v is not None else None for k, v in pm.items()} for pm in pms],
         }
 
-@app.get("/api/v1/maintenance/pm-plans/{plan_id}", tags=["maintenance"])
+@app.get("/api/v1/maintenance/pm-plans/{plan_id}", tags=["maintenance"], operation_id="get_pm_plan_detail_v2")
 def get_pm_plan_detail(plan_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -6857,7 +6857,7 @@ def time_tracking_summary():
 import secrets as _secrets_267
 
 # ── Health endpoint ───────────────────────────────────────────────────────────
-@app.get("/health", tags=["platform"], include_in_schema=True)
+@app.get("/health", tags=["platform"], include_in_schema=True, operation_id="health_check_v2")
 @app.get("/api/v1/health", tags=["platform"])
 def health_check():
     """Platform health check — DB + version"""
@@ -6923,7 +6923,7 @@ def _verify_inline_token(request: Request) -> dict:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 # ── User profile endpoint (alias for /auth/me accessible from inline code) ────
-@app.get("/api/v1/me", tags=["auth"])
+@app.get("/api/v1/me", tags=["auth"], operation_id="get_me_inline_v2")
 def get_me_inline(request: Request):
     """Current user profile — works with inline token validation"""
     payload = _verify_inline_token(request)
