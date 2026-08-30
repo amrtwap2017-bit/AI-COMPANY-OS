@@ -45,10 +45,10 @@ class TestPMPlansDryRun:
         from sqlalchemy import create_engine, text as sqlt
         engine = create_engine("postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black")
         with engine.connect() as conn:
-            before = conn.execute(sqlt(
-                "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h",
+            before = conn.execute(
+                sqlt("SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h"),
                 {"h": "tb-default-hotel-000000000001"}
-            )).scalar()
+            ).scalar()
 
         r = requests.post(f"{BASE}/api/v1/data-import/pm-plans?dry_run=true",
                          headers=auth_headers,
@@ -58,10 +58,10 @@ class TestPMPlansDryRun:
         assert r.json()["dry_run"] is True
 
         with engine.connect() as conn:
-            after = conn.execute(sqlt(
-                "SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h",
+            after = conn.execute(
+                sqlt("SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h"),
                 {"h": "tb-default-hotel-000000000001"}
-            )).scalar()
+            ).scalar()
         assert before == after, "Dry run must not write to DB"
 
     def test_dry_run_returns_count(self, auth_headers):
