@@ -10,7 +10,7 @@ GET  /recommendations/{id}        → full recommendation with evidence
 POST /recommendations/{id}/approve → human approves
 POST /recommendations/{id}/reject  → human rejects
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
@@ -73,6 +73,20 @@ def list_recommendations(
     return service.list_recommendations(status=status, limit=limit)
 
 
+@router.get("/effectiveness",
+            summary="AI Recommendation Effectiveness Metrics")
+def get_recommendation_effectiveness(
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    How accurate and effective are the AI recommendations?
+    Acceptance rate, outcome distribution, effectiveness rate, by director.
+    MUST be registered before /{rec_id} to prevent route shadowing.
+    """
+    return service.get_effectiveness(hotel_id=hotel_id)
+
 @router.get("/{rec_id}")
 def get_recommendation(
     rec_id: str,
@@ -119,3 +133,28 @@ def reject_recommendation(
     reviewer = getattr(current_user, "email", "system")
     reason = payload.get("reason", "Rejected by reviewer")
     return service.reject_recommendation(rec_id, reviewer, reason)
+
+@router.post("/{recommendation_id}/outcome",
+             summary="Record recommendation outcome")
+def record_recommendation_outcome(
+    recommendation_id: str,
+    payload: dict = Body(...),
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    Record what happened after an approved recommendation was acted upon.
+    outcome_type: improved | unchanged | worse | unknown
+    """
+    return service.record_outcome(
+        recommendation_id=recommendation_id,
+        hotel_id=hotel_id,
+        outcome_type=payload.get("outcome_type", "unknown"),
+        metric_key=payload.get("metric_key"),
+        metric_before=payload.get("metric_before"),
+        metric_after=payload.get("metric_after"),
+        notes=payload.get("notes"),
+        recorded_by=getattr(current_user, "email", None) or "unknown",
+    )
+

@@ -350,6 +350,219 @@ class RecommendationService:
 
     # ── SUMMARY ───────────────────────────────────────────────────────────────
 
+
+    def _ensure_outcomes_table(self) -> None:
+        """Create recommendation_outcomes table if not exists."""
+        try:
+            self.db.execute(text("""
+                CREATE TABLE IF NOT EXISTS recommendation_outcomes (
+                    id                  VARCHAR PRIMARY KEY,
+                    recommendation_id   VARCHAR NOT NULL,
+                    hotel_id            VARCHAR NOT NULL,
+                    outcome_type        VARCHAR NOT NULL,
+                    metric_key          VARCHAR,
+                    metric_before       NUMERIC,
+                    metric_after        NUMERIC,
+                    notes               TEXT,
+                    recorded_by         VARCHAR,
+                    recorded_at         TIMESTAMP DEFAULT NOW(),
+                    created_at          TIMESTAMP DEFAULT NOW()
+                )
+            """))
+            self.db.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_rec_outcomes_rec_id
+                ON recommendation_outcomes(recommendation_id)
+            """))
+            self.db.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_rec_outcomes_hotel
+                ON recommendation_outcomes(hotel_id)
+            """))
+            self.db.commit()
+        except Exception as e:
+            try: self.db.rollback()
+            except: pass
+            logger.warning(f"outcomes table ensure: {e}")
+
+    def record_outcome(self, recommendation_id: str, hotel_id: str,
+                       outcome_type: str, metric_key: str = None,
+                       metric_before: float = None, metric_after: float = None,
+                       notes: str = None, recorded_by: str = None) -> dict:
+        """
+        Record the outcome of an approved recommendation.
+        outcome_type: improved | unchanged | worse | unknown
+        """
+        import uuid as _uuid
+        VALID_OUTCOMES = {"improved", "unchanged", "worse", "unknown"}
+        if outcome_type not in VALID_OUTCOMES:
+            outcome_type = "unknown"
+
+        self._ensure_outcomes_table()
+
+        # Verify recommendation exists and belongs to hotel
+        rec = self.db.execute(text("""
+            SELECT id, status, director, recommendation
+            FROM recommendations
+            WHERE id = :rid AND hotel_id = :hid
+        """), {"rid": recommendation_id, "hid": hotel_id}).fetchone()
+
+        if not rec:
+            return {"success": False, "error": "Recommendation not found"}
+
+        outcome_id = str(_uuid.uuid4())
+        try:
+            self.db.execute(text("""
+                INSERT INTO recommendation_outcomes
+                  (id, recommendation_id, hotel_id, outcome_type,
+                   metric_key, metric_before, metric_after,
+                   notes, recorded_by, recorded_at, created_at)
+                VALUES
+                  (:id, :rid, :hid, :otype,
+                   :mkey, :mbefore, :mafter,
+                   :notes, :by, NOW(), NOW())
+            """), {
+                "id": outcome_id,
+                "rid": recommendation_id,
+                "hid": hotel_id,
+                "otype": outcome_type,
+                "mkey": metric_key,
+                "mbefore": metric_before,
+                "mafter": metric_after,
+                "notes": notes,
+                "by": recorded_by or "system",
+            })
+            self.db.commit()
+
+            improvement_pct = None
+            if metric_before and metric_after and metric_before != 0:
+                improvement_pct = round(
+                    (metric_after - metric_before) / abs(metric_before) * 100, 1
+                )
+
+            return {
+                "success": True,
+                "outcome_id": outcome_id,
+                "recommendation_id": recommendation_id,
+                "outcome_type": outcome_type,
+                "improvement_pct": improvement_pct,
+                "message": f"Outcome recorded: {outcome_type}",
+            }
+        except Exception as e:
+            try: self.db.rollback()
+            except: pass
+            logger.error(f"record_outcome failed: {e}")
+            return {"success": False, "error": str(e)[:200]}
+
+    def get_effectiveness(self, hotel_id: str) -> dict:
+        """
+        Calculate AI recommendation effectiveness metrics.
+        Answers: "How accurate are the AI recommendations?"
+        """
+        self._ensure_outcomes_table()
+
+        # Total recommendations generated
+        total = self.db.execute(text("""
+            SELECT COUNT(*) FROM recommendations WHERE hotel_id = :h
+        """), {"h": hotel_id}).scalar() or 0
+
+        # Approved (acted upon)
+        approved = self.db.execute(text("""
+            SELECT COUNT(*) FROM recommendations
+            WHERE hotel_id = :h AND status = 'approved'
+        """), {"h": hotel_id}).scalar() or 0
+
+        # Rejected
+        rejected = self.db.execute(text("""
+            SELECT COUNT(*) FROM recommendations
+            WHERE hotel_id = :h AND status = 'rejected'
+        """), {"h": hotel_id}).scalar() or 0
+
+        # Outcomes recorded
+        try:
+            outcomes = self.db.execute(text("""
+                SELECT
+                    outcome_type,
+                    COUNT(*) as cnt
+                FROM recommendation_outcomes
+                WHERE hotel_id = :h
+                GROUP BY outcome_type
+            """), {"h": hotel_id}).fetchall()
+            outcome_counts = {r[0]: int(r[1]) for r in outcomes}
+        except Exception:
+            try: self.db.rollback()
+            except: pass
+            outcome_counts = {}
+
+        total_outcomes = sum(outcome_counts.values())
+        improved = outcome_counts.get("improved", 0)
+        unchanged = outcome_counts.get("unchanged", 0)
+        worse = outcome_counts.get("worse", 0)
+        unknown = outcome_counts.get("unknown", 0)
+
+        effectiveness_rate = round(
+            improved / max(total_outcomes, 1) * 100, 1
+        ) if total_outcomes > 0 else None
+
+        # Director breakdown
+        try:
+            director_stats = self.db.execute(text("""
+                SELECT
+                    r.director,
+                    COUNT(r.id) as total,
+                    COUNT(CASE WHEN r.status='approved' THEN 1 END) as approved,
+                    ROUND(AVG(r.confidence_score)::numeric, 2) as avg_confidence
+                FROM recommendations r
+                WHERE r.hotel_id = :h
+                GROUP BY r.director
+                ORDER BY total DESC
+            """), {"h": hotel_id}).fetchall()
+            by_director = {}
+            for row in director_stats:
+                d = dict(row._mapping)
+                director = d.get("director", "unknown")
+                by_director[director] = {
+                    "total": int(d.get("total") or 0),
+                    "approved": int(d.get("approved") or 0),
+                    "approval_rate_pct": round(
+                        int(d.get("approved") or 0) /
+                        max(int(d.get("total") or 1), 1) * 100, 1
+                    ),
+                    "avg_confidence": float(d.get("avg_confidence") or 0),
+                }
+        except Exception:
+            try: self.db.rollback()
+            except: pass
+            by_director = {}
+
+        return {
+            "hotel_id": hotel_id,
+            "summary": {
+                "total_recommendations": total,
+                "acted_upon": approved,
+                "rejected": rejected,
+                "pending": total - approved - rejected,
+                "acceptance_rate_pct": round(
+                    approved / max(total, 1) * 100, 1
+                ),
+            },
+            "outcomes": {
+                "total_measured": total_outcomes,
+                "improved": improved,
+                "unchanged": unchanged,
+                "worse": worse,
+                "unknown": unknown,
+                "effectiveness_rate_pct": effectiveness_rate,
+                "measurement_coverage_pct": round(
+                    total_outcomes / max(approved, 1) * 100, 1
+                ) if approved > 0 else 0.0,
+            },
+            "by_director": by_director,
+            "governance": {
+                "human_review_required": True,
+                "all_recommendations_governed": True,
+                "model_used": "rule-based-v2-db",
+            },
+        }
+
     def get_summary(self) -> Dict[str, Any]:
         """Dashboard summary of recommendations by status and risk level."""
         try:
