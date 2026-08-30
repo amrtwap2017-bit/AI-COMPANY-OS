@@ -312,7 +312,124 @@ class DataImportService:
             return {"success": False, "dry_run": dry_run,
                     "imported_count": 0, "errors": [str(e)[:200]]}
 
-    # ── IMPORT HISTORY ───────────────────────────────────────────────────────
+    # ── IMPORT PM PLANS ─────────────────────────────────────────────────────
+
+    def import_pm_plans_csv(self, hotel_id: str, csv_content: str,
+                            dry_run: bool = False) -> dict:
+        """
+        Import PM plans from CSV.
+        Required columns: title, plan_type
+        Optional: asset_name, frequency, next_due_date, owner, notes
+
+        asset_name used to look up asset_node_id from assets table.
+        If asset_name not found: plan imported without asset link (warning).
+        """
+        import json
+        VALID_PLAN_TYPES = {"preventive", "corrective", "inspection",
+                           "statutory", "condition-based", "emergency"}
+        VALID_FREQUENCIES = {"daily", "weekly", "monthly", "quarterly",
+                            "semi-annual", "yearly", "annual", "biannual"}
+
+        headers, rows = _parse_csv(csv_content)
+        if not headers:
+            return {"success": False, "dry_run": dry_run,
+                    "imported_count": 0, "errors": ["Cannot parse CSV"]}
+
+        # Validate required columns
+        missing = [h for h in ["title", "plan_type"] if h not in headers]
+        if missing:
+            return {"success": False, "dry_run": dry_run,
+                    "imported_count": 0,
+                    "errors": [f"Missing required columns: {', '.join(missing)}"]}
+
+        imported_count = 0
+        errors = []
+        warnings = []
+
+        try:
+            for idx, row in enumerate(rows, 1):
+                title = row.get("title", "").strip()
+                plan_type = row.get("plan_type", "preventive").strip().lower()
+                asset_name = row.get("asset_name", "").strip()
+                frequency = row.get("frequency", "monthly").strip().lower()
+                next_due_date = row.get("next_due_date", "").strip()
+                owner = row.get("owner", "").strip()
+                notes = row.get("notes", "").strip()
+
+                # Validate
+                if not title:
+                    errors.append({"row": idx, "errors": ["title is required"]})
+                    continue
+                if plan_type not in VALID_PLAN_TYPES:
+                    plan_type = "preventive"  # graceful default
+                if frequency not in VALID_FREQUENCIES:
+                    frequency = "monthly"    # graceful default
+
+                # Look up asset by name
+                asset_node_id = None
+                if asset_name:
+                    try:
+                        asset_row = self.db.execute(
+                            text("SELECT id FROM assets WHERE hotel_id=:h "
+                                 "AND LOWER(name) LIKE LOWER(:n) LIMIT 1"),
+                            {"h": hotel_id, "n": f"%{asset_name}%"}
+                        ).fetchone()
+                        if asset_row:
+                            asset_node_id = asset_row[0]
+                        else:
+                            warnings.append(f"Row {idx}: asset '{asset_name}' not found — plan created unlinked")
+                    except Exception:
+                        self.db.rollback()
+
+                if not dry_run:
+                    pm_id = str(uuid.uuid4())
+                    self.db.execute(text("""
+                        INSERT INTO maintenance_plans
+                          (id, hotel_id, asset_node_id, title, plan_type,
+                           frequency, next_due_date, status, owner, notes,
+                           created_at, updated_at)
+                        VALUES
+                          (:id, :hid, :asset, :title, :plan_type,
+                           :frequency, :next_due, 'active', :owner, :notes,
+                           NOW(), NOW())
+                    """), {
+                        "id": pm_id,
+                        "hid": hotel_id,
+                        "asset": asset_node_id,
+                        "title": title,
+                        "plan_type": plan_type,
+                        "frequency": frequency,
+                        "next_due": next_due_date or None,
+                        "owner": owner or None,
+                        "notes": notes or None,
+                    })
+
+                imported_count += 1
+
+            if not dry_run:
+                self.db.commit()
+                self._record_audit(hotel_id, "pm_plans", imported_count, len(rows))
+
+            return {
+                "success": True,
+                "dry_run": dry_run,
+                "imported_count": imported_count,
+                "total_rows": len(rows),
+                "skipped_count": len(errors),
+                "warnings": warnings,
+                "errors": errors,
+            }
+
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"PM plans import failed for {hotel_id}: {e}")
+            return {
+                "success": False, "dry_run": dry_run,
+                "imported_count": 0,
+                "errors": [f"Database error: {str(e)[:200]}"],
+            }
+
+        # ── IMPORT HISTORY ───────────────────────────────────────────────────────
 
     def get_import_history(self, hotel_id: str, limit: int = 20) -> List[Dict]:
         """Return recent import audit records for this hotel."""

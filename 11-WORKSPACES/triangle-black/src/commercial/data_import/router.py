@@ -156,6 +156,39 @@ async def import_suppliers_file(
     return service.import_suppliers_csv(hotel_id, csv_content, dry_run=dry_run)
 
 
+# ── IMPORT PM PLANS ──────────────────────────────────────────────────────────
+
+@router.post("/pm-plans")
+def import_pm_plans_json(
+    payload: dict = Body(...),
+    dry_run: bool = Query(default=False),
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: DataImportService = Depends(_svc),
+):
+    """Import PM plans from CSV. Required: title, plan_type. Optional: asset_name, frequency, next_due_date, owner, notes."""
+    csv_content = payload.get("csv_content", "")
+    if not csv_content.strip():
+        raise HTTPException(400, "csv_content is required")
+    return service.import_pm_plans_csv(hotel_id, csv_content, dry_run=dry_run)
+
+
+@router.post("/upload/pm-plans")
+async def import_pm_plans_file(
+    file: UploadFile = File(...),
+    dry_run: bool = Form(default=False),
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: DataImportService = Depends(_svc),
+):
+    """Import PM plans from uploaded CSV file."""
+    content = await file.read()
+    csv_content = content.decode("utf-8-sig", errors="replace")
+    if not csv_content.strip():
+        raise HTTPException(400, "Uploaded file is empty")
+    return service.import_pm_plans_csv(hotel_id, csv_content, dry_run=dry_run)
+
+
 # ── HISTORY ───────────────────────────────────────────────────────────────────
 
 @router.get("/history")
