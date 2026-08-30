@@ -397,6 +397,13 @@ app.include_router(notifications_router, prefix=API_PREFIX)
 app.include_router(invoices_router,      prefix=API_PREFIX)
 app.include_router(hotels_router,        prefix=API_PREFIX)
 try:
+    from src.commercial.demo.router import router as commercial_demo_router
+    app.include_router(commercial_demo_router, prefix=API_PREFIX)
+    print('  OK: commercial_demo_router')
+except Exception as _e:
+    import logging; logging.getLogger('tb').warning(f'WARN: demo: {_e}')
+
+try:
     from src.commercial.data_quality.router import router as data_quality_router
     app.include_router(data_quality_router, prefix=API_PREFIX)
     print('  OK: data_quality_router')
