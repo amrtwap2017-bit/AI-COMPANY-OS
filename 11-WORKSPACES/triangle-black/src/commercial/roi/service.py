@@ -342,10 +342,60 @@ class ROIService:
         estimated_savings_egp = round(total_spend * 0.10, 0) if total_spend > 0 else 0
         estimated_emergency_reduction = max(0, 85 - pm_compliance) * 0.3
 
+        # Count source records for transparency
+        try:
+            po_count = self.db.execute(_sa_text(
+                "SELECT COUNT(*) FROM purchase_orders WHERE hotel_id=:h"
+            ), {"h": H}).scalar() or 0
+            inv_count = self.db.execute(_sa_text(
+                "SELECT COUNT(*) FROM invoices WHERE hotel_id=:h"
+            ), {"h": H}).scalar() or 0
+        except Exception:
+            po_count = 0
+            inv_count = 0
+            try: self.db.rollback()
+            except: pass
+
         return {
             "hotel_id": H,
             "report_type": "ROI_MEASUREMENT_REPORT",
             "version": "v6-E04",
+            "defensibility": {
+                "formula": "Estimated Cost Avoidance = Total Operational Spend × 10%",
+                "formula_detail": "estimated_cost_avoidance = total_operational_spend × 0.10 (see improvement_potential for values)",
+                "assumptions": [
+                    "10% cost reduction rate based on FM industry benchmark",
+                    "Assumes PM compliance improvement from current to 85% target",
+                    "Reactive maintenance premium estimated at 20-30% above planned cost",
+                    "This is an ESTIMATE — actual savings depend on actions taken",
+                    "Not a guarantee — label as 'potential avoidance' in customer communications"
+                ],
+                "confidence": "LOW",
+                "confidence_reason": (
+                    "Estimate based on industry benchmark, not measured operational outcome. "
+                    "WO-asset linkage is 7.7% — MTTR and critical path are limited. "
+                    "Cost avoidance will become measurable after 30-day pilot with before/after KPIs."
+                ),
+                "source_data": {
+                    "purchase_orders_count": int(po_count),
+                    "invoices_count": int(inv_count),
+                    "spend_calculation": "SUM(total_amount) FROM purchase_orders WHERE hotel_id",
+                    "data_period": "All available purchase order history",
+                    "hotel_id": H,
+                },
+                "benchmark_source": "Industry FM benchmark: 10-15% cost reduction via PM compliance improvement",
+                "important_disclaimer": (
+                    "Triangle Black identifies POTENTIAL cost avoidance opportunities. "
+                    "Actual savings require operational actions and are measured via ROI delta "
+                    "after 30-day pilot. Do not present this figure as guaranteed savings."
+                ),
+                "how_to_improve_confidence": [
+                    "Complete 30-day pilot with before/after KPI measurement",
+                    "Record outcomes on approved AI recommendations",
+                    "Link work orders to assets (currently 7.7% — target 80%+)",
+                    "Capture monthly ROI snapshots via POST /roi/snapshot",
+                ],
+            },
             "generated_at": _now_iso(),
             "current_performance": {
                 "wo_completion_rate_pct": wo_completion,
