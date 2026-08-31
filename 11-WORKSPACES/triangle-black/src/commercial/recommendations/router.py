@@ -73,6 +73,29 @@ def list_recommendations(
     return service.list_recommendations(status=status, limit=limit)
 
 
+@router.get("/action-queue", summary="Intelligence → Action Queue")
+def get_action_queue(
+    limit: int = 20,
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    V7-006: Intelligence → Action Queue.
+    
+    Returns pending recommendations ordered by business priority:
+      P0 = Act today (CRITICAL risk)
+      P1 = Act this week (HIGH risk)
+      P2 = Act this month
+      P3 = Plan
+    
+    Closes the intelligence loop:
+    Signal → Evidence → Recommendation → ACTION → Outcome → Learning
+    
+    All actions require human approval. This is advisory only.
+    """
+    return service.get_action_queue(hotel_id=hotel_id, limit=limit)
+
 @router.get("/effectiveness",
             summary="AI Recommendation Effectiveness Metrics")
 def get_recommendation_effectiveness(

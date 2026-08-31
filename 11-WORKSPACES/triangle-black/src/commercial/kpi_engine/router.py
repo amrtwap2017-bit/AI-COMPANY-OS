@@ -79,3 +79,16 @@ def get_kpi_trends(
     """Work order and asset trends over the last 7 days."""
     svc = KPIEngineService(db=db, hotel_id=hotel_id)
     return svc.trends()
+
+
+@router.get("/registry", summary="KPI Registry — all formulas and governance rules")
+def get_kpi_registry():
+    """
+    V7-005: Complete KPI registry.
+    Returns every KPI with: formula, source tables, confidence rules,
+    thresholds, target, and owner.
+    No authentication required — this is public metadata.
+    """
+    from src.commercial.kpi_engine.registry import get_registry
+    return get_registry()
+

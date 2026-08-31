@@ -563,6 +563,131 @@ class RecommendationService:
             },
         }
 
+
+    def get_action_queue(self, hotel_id: str, limit: int = 20) -> dict:
+        """
+        V7-006: Intelligence → Action Queue.
+        Returns actionable recommendations ordered by business priority.
+        
+        Priority scoring:
+          CRITICAL + high confidence = P0 (act today)
+          CRITICAL + medium confidence = P1 (act this week)
+          HIGH + any confidence = P2 (act this month)
+          MEDIUM = P3 (plan)
+        
+        This closes the loop:
+        Signal → Recommendation → ACTION QUEUE → Human → Outcome
+        """
+        self._ensure_table()
+        
+        # Priority mapping
+        PRIORITY = {
+            ("CRITICAL", "HIGH"): ("P0", "Act today"),
+            ("CRITICAL", "MEDIUM"): ("P0", "Act today"),
+            ("CRITICAL", "LOW"): ("P1", "Act this week"),
+            ("CRITICAL", "VERY_LOW"): ("P1", "Act this week"),
+            ("HIGH", "HIGH"): ("P1", "Act this week"),
+            ("HIGH", "MEDIUM"): ("P1", "Act this week"),
+            ("HIGH", "LOW"): ("P2", "Act this month"),
+            ("HIGH", "VERY_LOW"): ("P2", "Act this month"),
+            ("MEDIUM", "HIGH"): ("P2", "Act this month"),
+            ("MEDIUM", "MEDIUM"): ("P3", "Plan"),
+            ("MEDIUM", "LOW"): ("P3", "Plan"),
+            ("LOW", "HIGH"): ("P3", "Plan"),
+        }
+        
+        try:
+            rows = self.db.execute(text("""
+                SELECT 
+                    id, director, risk_level, risk_score,
+                    recommendation, expected_impact, action,
+                    confidence_score, generated_at, status,
+                    required_approval_role
+                FROM recommendations
+                WHERE hotel_id = :h AND status = 'pending'
+                ORDER BY 
+                    CASE risk_level 
+                        WHEN 'CRITICAL' THEN 1
+                        WHEN 'HIGH' THEN 2
+                        WHEN 'MEDIUM' THEN 3
+                        ELSE 4
+                    END,
+                    risk_score DESC,
+                    confidence_score DESC
+                LIMIT :lim
+            """), {"h": hotel_id, "lim": limit}).fetchall()
+        except Exception as e:
+            try: self.db.rollback()
+            except: pass
+            return {"hotel_id": hotel_id, "action_queue": [], "error": str(e)[:200]}
+        
+        queue = []
+        p0_count = 0
+        p1_count = 0
+        
+        for row in rows:
+            d = dict(row._mapping)
+            risk = d.get("risk_level", "MEDIUM") or "MEDIUM"
+            conf_score = float(d.get("confidence_score") or 0.5)
+            
+            # Map confidence score to level
+            if conf_score >= 0.8:
+                conf_level = "HIGH"
+            elif conf_score >= 0.6:
+                conf_level = "MEDIUM"
+            elif conf_score >= 0.3:
+                conf_level = "LOW"
+            else:
+                conf_level = "VERY_LOW"
+            
+            priority_info = PRIORITY.get(
+                (risk, conf_level),
+                ("P3", "Plan")
+            )
+            priority, timing = priority_info
+            
+            if priority == "P0":
+                p0_count += 1
+            elif priority == "P1":
+                p1_count += 1
+            
+            queue.append({
+                "recommendation_id": d.get("id"),
+                "priority": priority,
+                "timing": timing,
+                "director": d.get("director"),
+                "risk_level": risk,
+                "confidence": conf_level,
+                "confidence_score": conf_score,
+                "recommendation": d.get("recommendation"),
+                "expected_impact": d.get("expected_impact"),
+                "action": d.get("action"),
+                "approval_required": d.get("required_approval_role"),
+                "status": d.get("status"),
+                "generated_at": str(d.get("generated_at", ""))[:19],
+                "review_url": f"/recommendations/{d.get('id')}",
+            })
+        
+        # Count pending by priority
+        total_pending = len([r for r in rows])
+        
+        return {
+            "hotel_id": hotel_id,
+            "report_type": "ACTION_QUEUE",
+            "total_pending": total_pending,
+            "p0_count": p0_count,
+            "p1_count": p1_count,
+            "urgent_count": p0_count + p1_count,
+            "priority_summary": (
+                f"{p0_count} actions needed today, "
+                f"{p1_count} needed this week."
+                if p0_count + p1_count > 0 else
+                "No urgent actions. Review planned items."
+            ),
+            "governance_note": "All actions require human approval. AI advisory only.",
+            "action_queue": queue,
+        }
+
     def get_summary(self) -> Dict[str, Any]:
         """Dashboard summary of recommendations by status and risk level."""
         try:
