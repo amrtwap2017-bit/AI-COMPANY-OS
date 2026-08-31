@@ -28,7 +28,17 @@ wait_for_url() {
   local label=$2
   local elapsed=0
   while [ $elapsed -lt $MAX_WAIT ]; do
-    status=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+    local max_wait=60
+    local waited=0
+    local status="000"
+    while [ "$status" != "200" ] && [ $waited -lt $max_wait ]; do
+        status=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+        if [ "$status" = "200" ]; then
+            break
+        fi
+        sleep 2
+        waited=$((waited + 2))
+    done
     if [ "$status" != "000" ] && [ "$status" != "502" ] && [ "$status" != "503" ]; then
       ok "$label is LIVE (HTTP $status)"
       return 0
