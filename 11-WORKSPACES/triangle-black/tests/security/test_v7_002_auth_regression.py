@@ -61,3 +61,7 @@ class TestPublicEndpointsStillWork:
     def test_root_is_public(self):
         assert _status("GET", "/") in (200, 307), \
             "Root must remain public"
+
+    def test_ai_signals_requires_auth(self):
+        assert _status("GET", "/api/v1/ai/signals/summary") in (401, 403), \
+            "AI signals summary must require auth — operational intelligence data"

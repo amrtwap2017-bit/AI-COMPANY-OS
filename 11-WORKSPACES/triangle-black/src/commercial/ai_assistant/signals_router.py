@@ -3,7 +3,9 @@ from fastapi import APIRouter, Query
 from typing import Optional
 from datetime import datetime
 
-router = APIRouter(prefix="/ai", tags=["ai-signals"])
+from src.core.auth import get_current_user as _gcu
+from fastapi import Depends as _Dep
+router = APIRouter(prefix="/ai", tags=["ai-signals"], dependencies=[_Dep(_gcu)])
 
 DB_URL = "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"
 
