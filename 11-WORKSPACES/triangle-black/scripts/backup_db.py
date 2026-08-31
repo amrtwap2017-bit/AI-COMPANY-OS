@@ -31,7 +31,7 @@ def run_backup():
     output_file = BACKUP_DIR / f"tb_backup_{timestamp}_{backup_id}.sql"
 
     # Resolve database URL
-    db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/triangle_black")
+    db_url = os.environ.get("DATABASE_URL", "postgresql://ai:ai123@localhost:5432/triangle_black")
     
     print(f"  Target File: {output_file.name}")
     print(f"  Source Node: {db_url.split('@')[-1]}")
@@ -105,7 +105,7 @@ def run_backup():
                         "entity": "system_backup",
                         "eid": backup_id,
                         "action": "BACKUP_COMPLETED",
-                        "actor": "system_service",
+                        "actor_id": "system_service", "actor_name": "Backup Script",
                         "details": f"Completed database backup. File: {output_file.name}, Size: {size_kb:.1f}KB"
                     })
                     conn.commit()
