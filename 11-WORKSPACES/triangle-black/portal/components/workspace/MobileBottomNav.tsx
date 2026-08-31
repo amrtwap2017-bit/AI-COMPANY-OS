@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const NAV_ITEMS = [
   { href: "/operations/command-center", label: "Command Center", icon: "⚡" },
-                { href: /operations/work-orders", icon: "🔧", label: "Work Orders" },
+                { href: "/operations/work-orders", icon: "🔧", label: "Work Orders" },
   { href: "/operations/service-requests", icon: "🎫", label: "Requests" },
   { href: "/supply-chain/invoices", icon: "📄", label: "Invoices" },
   { href: "/reports", icon: "📊", label: "Reports" },

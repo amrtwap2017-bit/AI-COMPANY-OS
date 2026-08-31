@@ -877,7 +877,9 @@ except Exception as e:
 
 
 # Sprint 94: signals/summary alias for compatibility
-@app.get("/api/v1/ai/signals/summary", tags=["ai-signals"])
+from fastapi import Depends as _Depends, Query as _Query
+from src.core.auth import get_current_user as _get_current_user  # A-010-A auth fix
+@app.get("/api/v1/ai/signals/summary", tags=["ai-signals"], dependencies=[_Depends(_get_current_user)])
 async def signals_summary_alias():
     """Alias for /api/v1/ai/signals/v2 — backward compatibility."""
     from fastapi import Request
@@ -905,9 +907,8 @@ except Exception as e:
 from sqlalchemy import text as _text
 from src.core.database import get_db as _get_db
 from sqlalchemy.orm import Session as _Session
-from fastapi import Depends as _Depends, Query as _Query
 
-@app.get("/api/v1/stock-balances/", tags=["inventory"])
+@app.get("/api/v1/stock-balances/", tags=["inventory"], dependencies=[_Depends(_get_current_user)])
 @app.get("/api/v1/stock-balances", tags=["inventory"])
 def list_stock_balances(
     warehouse_id: str = _Query(default=None),
@@ -925,7 +926,6 @@ def list_stock_balances(
         return [dict(r._mapping) for r in rows]
     except Exception:
         return []
-from src.core.auth import get_current_user as _get_current_user  # A-010-A auth fix
 
 @app.get("/api/v1/suppliers/", tags=["suppliers"], dependencies=[_Depends(_get_current_user)])
 
@@ -937,7 +937,7 @@ def list_suppliers(limit: int = _Query(default=100), db: _Session = _Depends(_ge
     except Exception:
         return []
 
-@app.get("/api/v1/rfqs/", tags=["rfqs"])
+@app.get("/api/v1/rfqs/", tags=["rfqs"], dependencies=[_Depends(_get_current_user)])
 @app.get("/api/v1/rfqs", tags=["rfqs"])
 def list_rfqs(limit: int = _Query(default=100), db: _Session = _Depends(_get_db)):
     try:
@@ -972,7 +972,7 @@ except Exception as e:
 
 # ── Sprint 149: PM Plans + Payment Tracking ──────────────────────────────────
 
-@app.get("/api/v1/pm-plans/", tags=["maintenance"])
+@app.get("/api/v1/pm-plans/", tags=["maintenance"], dependencies=[_Depends(_get_current_user)])
 @app.get("/api/v1/pm-plans", tags=["maintenance"])
 def list_pm_plans_short(hotel_id: str = None, status: str = None, limit: int = 50):
     """Short alias for /api/v1/maintenance/pm-plans — A-001 fix"""
@@ -1023,7 +1023,7 @@ def get_pm_plan_by_id(plan_id: str):
             return dict(row._mapping) if row else {}
         except: return {}
 
-@app.get("/api/v1/payment-tracking/", tags=["finance"])
+@app.get("/api/v1/payment-tracking/", tags=["finance"], dependencies=[_Depends(_get_current_user)])
 @app.get("/api/v1/payment-tracking", tags=["finance"])
 def get_payment_tracking_v2(limit: int = 50):
     from sqlalchemy import text, create_engine
