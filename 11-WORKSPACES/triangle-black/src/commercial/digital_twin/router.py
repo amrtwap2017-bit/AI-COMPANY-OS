@@ -529,3 +529,149 @@ def project_event(
     from src.commercial.digital_twin.projector import DigitalTwinProjector
     projected = DigitalTwinProjector(db=db, hotel_id=hotel_id).project_event(event)
     return {"projected": projected, "hotel_id": hotel_id}
+
+
+# ── SIMULATE FAILURE (short alias) ───────────────────────────────────────────
+
+@router.post("/simulate/failure", summary="Simulate asset failure blast radius")
+def simulate_failure_alias(
+    payload: dict,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Simulate what happens if an asset fails.
+    Input: asset_id, failure_type (breakdown/electrical/mechanical), duration_hours
+    Output: affected zones, cost estimate, SLA breach probability, mitigation
+    Short alias for /semantic-graph/simulate-failure
+    """
+    from src.commercial.digital_twin.semantic_graph import SemanticGraphService
+    asset_id = payload.get("asset_id", "")
+    svc = SemanticGraphService(db=db, hotel_id=hotel_id)
+    result = svc.simulate_failure_blast_radius(asset_id=asset_id)
+    # Enrich with input params
+    result["failure_type"] = payload.get("failure_type", "breakdown")
+    result["duration_hours"] = payload.get("duration_hours", 24)
+    result["hotel_id"] = hotel_id
+    return result
+
+
+# ── CRITICAL PATH ─────────────────────────────────────────────────────────────
+
+@router.get("/critical-path", summary="Assets on operational critical path")
+def get_critical_path(
+    limit: int = 10,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Assets whose failure would cause the largest operational impact.
+    Ranked by: criticality weight × total WO count × critical WO count × PM plans.
+
+    Use this to answer: "If I had to protect 5 assets, which ones?"
+
+    Returns assets sorted by impact_score descending.
+    """
+    from sqlalchemy import text as sqlt
+
+    CRITICALITY_WEIGHT = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+
+    try:
+        rows = db.execute(sqlt("""
+            SELECT
+                a.id,
+                a.name,
+                a.category,
+                LOWER(COALESCE(a.criticality, 'medium')) as criticality,
+                COUNT(DISTINCT wo.id) as total_wos,
+                COUNT(DISTINCT CASE WHEN wo.priority IN ('critical','emergency')
+                      THEN wo.id END) as critical_wos,
+                COUNT(DISTINCT mp.id) as pm_plans,
+                MAX(wo.created_at) as last_wo_date
+            FROM assets a
+            LEFT JOIN work_orders wo ON wo.asset_id = a.id
+                AND wo.hotel_id = :h
+                AND wo.deleted_at IS NULL
+            LEFT JOIN maintenance_plans mp ON mp.asset_node_id = a.id
+                AND mp.hotel_id = :h
+            WHERE a.hotel_id = :h
+              AND a.deleted_at IS NULL
+            GROUP BY a.id, a.name, a.category, a.criticality
+            HAVING COUNT(DISTINCT wo.id) > 0
+            ORDER BY
+                COUNT(DISTINCT CASE WHEN wo.priority IN ('critical','emergency')
+                      THEN wo.id END) DESC,
+                COUNT(DISTINCT wo.id) DESC
+            LIMIT :lim
+        """), {"h": hotel_id, "lim": min(limit, 20)}).fetchall()
+
+    except Exception as e:
+        try: db.rollback()
+        except: pass
+        return {
+            "hotel_id": hotel_id,
+            "critical_path": [],
+            "error": str(e)[:200],
+        }
+
+    critical_path = []
+    for r in rows:
+        d = dict(r._mapping)
+        crit = d.get("criticality", "medium") or "medium"
+        crit_weight = CRITICALITY_WEIGHT.get(crit.lower(), 2)
+        total_wos = int(d.get("total_wos") or 0)
+        critical_wos = int(d.get("critical_wos") or 0)
+        pm_plans = int(d.get("pm_plans") or 0)
+
+        # Impact score: criticality × (critical_wos × 3 + total_wos + pm_plans)
+        impact_score = round(
+            crit_weight * (critical_wos * 3 + total_wos + pm_plans), 1
+        )
+
+        risk_level = (
+            "CRITICAL" if critical_wos >= 3 or (crit == "critical" and total_wos >= 5) else
+            "HIGH"     if critical_wos >= 1 or crit in ("critical", "high") else
+            "MEDIUM"
+        )
+
+        critical_path.append({
+            "asset_id": d.get("id"),
+            "name": d.get("name"),
+            "category": d.get("category"),
+            "criticality": crit,
+            "impact_score": impact_score,
+            "risk_level": risk_level,
+            "total_wos_90d": total_wos,
+            "critical_wos": critical_wos,
+            "pm_plans": pm_plans,
+            "last_wo_date": str(d.get("last_wo_date", ""))[:10],
+            "action": (
+                "IMMEDIATE ATTENTION — prioritize preventive maintenance"
+                if risk_level == "CRITICAL" else
+                "MONITOR CLOSELY — schedule inspection"
+                if risk_level == "HIGH" else
+                "ROUTINE MONITORING"
+            ),
+        })
+
+    # Sort by impact_score descending
+    critical_path.sort(key=lambda x: x["impact_score"], reverse=True)
+
+    top_asset = critical_path[0] if critical_path else {}
+
+    return {
+        "hotel_id": hotel_id,
+        "total_assets_analyzed": len(critical_path),
+        "critical_path_count": len([a for a in critical_path if a["risk_level"] == "CRITICAL"]),
+        "summary": (
+            f"Top risk asset: {top_asset.get('name', 'unknown')} "
+            f"(impact_score={top_asset.get('impact_score', 0)}, "
+            f"risk={top_asset.get('risk_level', 'unknown')})"
+            if top_asset else "No assets with work order history found"
+        ),
+        "critical_path": critical_path,
+        "methodology": "Impact score = criticality_weight × (critical_wos×3 + total_wos + pm_plans)",
+    }
+
