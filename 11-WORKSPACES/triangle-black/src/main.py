@@ -148,7 +148,7 @@ class _CorrelationIDMiddleware(_BaseHTTPMiddleware):
 app = FastAPI(
     title="Triangle Black API",
     description="Hotel Engineering Platform — Multi-Hotel",
-    version="3.0.0",
+    version="7.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -165,6 +165,7 @@ class RequestIDMiddleware(_BHTTP2):
         req_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())[:8]
         response = await call_next(request)
         response.headers["X-Request-ID"] = req_id
+        response.headers["X-API-Version"] = "7.0"
         return response
 
 app.add_middleware(RequestIDMiddleware)
@@ -496,14 +497,14 @@ def health():
     return {
         "ok": db_ok,
         "service": "triangle-black-api",
-        "version": "3.0.0",
+        "version": "7.0",
         "database": "connected" if db_ok else "unreachable",
     }
 
 
 @app.get("/")
 def root():
-    return {"service": "Triangle Black API", "version": "3.0.0", "docs": "/docs"}
+    return {"service": "Triangle Black API", "version": "7.0", "docs": "/docs"}
 
 # ── Sprint 20 Modules ─────────────────────────────────────────────────────────
     # SPRINT_269_LEGACY_DISABLED: router removed — conflicts with sprint 245-268 code
@@ -704,7 +705,7 @@ async def detailed_health():
 @app.get("/api/v1/version", tags=["system"])
 async def get_version():
     return {
-        "version": "2.0.1",
+        "version": "7.0",
         "sprint": 92,
         "platform": "Triangle Black Enterprise Operations Platform",
         "programs": 14,
@@ -794,7 +795,7 @@ async def platform_summary():
     db_ok = check_connection()
     return {
         "platform":       "Triangle Black Enterprise Operations Platform",
-        "version": "2.0.1",
+        "version": "7.0",
         "sprint": 92,
         "status":         "production-ready",
         "database":       "ok" if db_ok else "error",
