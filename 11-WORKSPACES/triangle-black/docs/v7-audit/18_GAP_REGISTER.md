@@ -27,6 +27,7 @@ Status: POPULATED FROM LIVE AUDIT
 | V7-G012 | Frontend | 215 @ts-nocheck files | grep count | Hidden TypeScript errors | V7-013 Frontend cleanup |
 | V7-G013 | UX | 1,184 inline styles | grep count | Design system inconsistency | V7-014 Design System |
 | V7-G014 | UX | Loading/empty/error states not verified | No audit exists | Blank screens for users | V7-015 UX audit |
+| V7-G025 | Security | /api/v1/ai/signals/v2 has security=NOT SET (ai_signals_v2_router) | OpenAPI spec | Low risk (v2 endpoint, internal) | V7-012 security sweep |
 | V7-G015 | Testing | No automated security regression for all endpoints | Manual only | Auth gaps go undetected | V7-012 Security |
 
 ## P2 — PRODUCT QUALITY
