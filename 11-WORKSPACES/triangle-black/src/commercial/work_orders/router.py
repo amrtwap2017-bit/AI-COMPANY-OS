@@ -165,7 +165,18 @@ def create_work_order(data: dict, db: Session = Depends(get_db)):
                      metadata={"title": data.get("title"), "priority": data.get("priority"), "type": data.get("type")})
     except Exception:
         pass
-    return get_work_order(wo_id, db)
+    # V8-004: Data quality warning — MTTR and critical path require asset linkage
+    wo_data = get_work_order(wo_id, db)
+    if not data.get("asset_id"):
+        if isinstance(wo_data, dict):
+            wo_data["data_quality_warning"] = (
+                "Work order created without asset linkage. "
+                "MTTR, critical path, and repeat failure intelligence "
+                "will not include this WO. Link to an asset to improve data accuracy. "
+                "Current WO-asset linkage: 7.7% (target: >80%)"
+            )
+            wo_data["asset_linkage_required"] = True
+    return wo_data
 
 @router.patch("/{work_order_id}", summary="Update work order")
 def update_work_order(work_order_id: str, data: dict, db: Session = Depends(get_db)):
