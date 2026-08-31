@@ -85,6 +85,12 @@ class TriangleWorkflowEngine:
         except Exception as e:
             logger.warning(f"[workflow] Failed to load definition: {e}")
 
+    def load_builtin(self, entity_type: str) -> None:
+        """V7-009: Load built-in state machine by entity type."""
+        self._transitions = BUILTIN_DEFINITIONS.get(
+            entity_type, DEFAULT_WO_TRANSITIONS
+        )
+
     def can_transition(self, from_state: str, to_state: str) -> Tuple[bool, str]:
         """
         Check if a transition from from_state to to_state is allowed.

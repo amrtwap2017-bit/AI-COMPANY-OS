@@ -302,3 +302,87 @@ def evaluate_workflow_policy(
     )
     result["hotel_id"] = hotel_id
     return result
+
+
+# ── V7-009: GOVERNED TRANSITIONS ─────────────────────────────────────────────
+
+@router.get("/instances/{instance_id}/available-transitions",
+           summary="What transitions can this actor do?")
+def get_available_transitions(
+    instance_id: str,
+    actor_role: str = "manager",
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    V7-009: Returns available workflow transitions for the current actor.
+    Filters by role — a technician sees different options than a manager.
+    Shows: requires_reason, requires_technician flags.
+    """
+    from src.commercial.workflow_engine.transition_service import GovernedTransitionService
+    svc = GovernedTransitionService(db=db, hotel_id=hotel_id)
+    return svc.get_available_transitions(instance_id=instance_id, actor_role=actor_role)
+
+
+@router.post("/instances/{instance_id}/transition",
+            summary="Execute a governed workflow state transition")
+def execute_governed_transition(
+    instance_id: str,
+    payload: dict,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    V7-009: Governed workflow transition.
+
+    Every transition is:
+    - Authenticated (who)
+    - Authorized (role check)
+    - Validated (state machine check)
+    - Audited (immutable audit trail)
+    - Recorded (workflow event)
+
+    Required: to_state
+    Optional: reason (required for: cancelled, escalated, waiting_parts)
+              entity_id (to update entity status table)
+
+    Returns: success, from_state, to_state, audited, governance
+    """
+    from src.commercial.workflow_engine.transition_service import GovernedTransitionService
+    svc = GovernedTransitionService(db=db, hotel_id=hotel_id)
+
+    actor_id = getattr(current_user, "id", "") or getattr(current_user, "sub", "unknown")
+    actor_name = getattr(current_user, "name", "") or getattr(current_user, "email", "unknown")
+    actor_role = getattr(current_user, "role", "manager") or "manager"
+
+    return svc.execute_governed_transition(
+        instance_id=instance_id,
+        to_state=payload.get("to_state", ""),
+        actor_id=actor_id,
+        actor_name=actor_name,
+        actor_role=payload.get("actor_role", actor_role),
+        reason=payload.get("reason"),
+        entity_id=payload.get("entity_id"),
+    )
+
+
+@router.get("/instances/{instance_id}/history",
+           summary="Workflow transition history with audit trail")
+def get_instance_history(
+    instance_id: str,
+    limit: int = 20,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    V7-009: Full transition history for a workflow instance.
+    Reads from the immutable audit trail in platform_audit_log.
+    Shows: who changed what state, when, with what reason.
+    """
+    from src.commercial.workflow_engine.transition_service import GovernedTransitionService
+    svc = GovernedTransitionService(db=db, hotel_id=hotel_id)
+    return svc.get_instance_history(instance_id=instance_id, limit=limit)
+
