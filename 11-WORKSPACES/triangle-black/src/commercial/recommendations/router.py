@@ -73,6 +73,49 @@ def list_recommendations(
     return service.list_recommendations(status=status, limit=limit)
 
 
+@router.get("/daily-digest", summary="AI Daily Digest — top N actionable recommendations")
+def get_daily_digest(
+    top_n: int = 5,
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    V7-007: Daily digest — top N most urgent recommendations.
+    Solves recommendation fatigue (90.4% never reviewed).
+    Shows highest-priority items only, ordered by CRITICAL + confidence.
+    Stale recommendations (>30 days) excluded.
+    """
+    return service.get_daily_digest(hotel_id=hotel_id, top_n=top_n)
+
+
+@router.get("/director-performance", summary="AI Director effectiveness metrics")
+def get_director_performance(
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    V7-007: Which AI directors produce the most accepted recommendations?
+    Shows acceptance rate, rejection rate, and effectiveness grade per director.
+    """
+    return service.get_director_performance(hotel_id=hotel_id)
+
+
+@router.post("/expire-stale", summary="Expire pending recommendations older than N days")
+def expire_stale_recommendations(
+    days: int = 30,
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    V7-007: Mark stale pending recommendations as expired.
+    Recommendations not reviewed within N days are auto-expired.
+    Preserves audit trail — does not delete.
+    """
+    return service.expire_stale_recommendations(hotel_id=hotel_id, days=days)
+
 @router.get("/action-queue", summary="Intelligence → Action Queue")
 def get_action_queue(
     limit: int = 20,

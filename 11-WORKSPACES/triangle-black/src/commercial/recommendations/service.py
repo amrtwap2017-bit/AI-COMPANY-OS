@@ -564,6 +564,251 @@ class RecommendationService:
         }
 
 
+
+    def get_daily_digest(self, hotel_id: str, top_n: int = 5) -> dict:
+        """
+        V7-007: AI Governance — Daily Digest.
+        Returns top N most actionable recommendations (not all 1,460).
+
+        Solves recommendation fatigue:
+        Instead of showing 1,460 pending items, show the 5 most important.
+        Ordered by: CRITICAL first, then highest confidence_score.
+
+        This is the primary entry point for daily AI advisory review.
+        """
+        self._ensure_table()
+
+        # Get top N by priority + confidence
+        try:
+            rows = self.db.execute(text("""
+                SELECT
+                    id, director, risk_level, risk_score,
+                    recommendation, expected_impact, action,
+                    confidence_score, generated_at, status,
+                    evidence, reasoning
+                FROM recommendations
+                WHERE hotel_id = :h AND status = 'pending'
+                  AND generated_at >= NOW() - INTERVAL '30 days'
+                ORDER BY
+                    CASE risk_level
+                        WHEN 'CRITICAL' THEN 1
+                        WHEN 'HIGH' THEN 2
+                        WHEN 'MEDIUM' THEN 3
+                        ELSE 4
+                    END,
+                    confidence_score DESC,
+                    generated_at DESC
+                LIMIT :n
+            """), {"h": hotel_id, "n": top_n}).fetchall()
+        except Exception as e:
+            try: self.db.rollback()
+            except: pass
+            return {"hotel_id": hotel_id, "digest": [], "error": str(e)[:200]}
+
+        # Count totals for context
+        total_pending = 0
+        critical_count = 0
+        stale_count = 0
+        try:
+            total_pending = self.db.execute(text(
+                "SELECT COUNT(*) FROM recommendations WHERE hotel_id=:h AND status='pending'"
+            ), {"h": hotel_id}).scalar() or 0
+            critical_count = self.db.execute(text(
+                "SELECT COUNT(*) FROM recommendations WHERE hotel_id=:h "
+                "AND status='pending' AND risk_level='CRITICAL'"
+            ), {"h": hotel_id}).scalar() or 0
+            stale_count = self.db.execute(text(
+                "SELECT COUNT(*) FROM recommendations WHERE hotel_id=:h "
+                "AND status='pending' AND generated_at < NOW() - INTERVAL '30 days'"
+            ), {"h": hotel_id}).scalar() or 0
+        except Exception:
+            try: self.db.rollback()
+            except: pass
+
+        digest = []
+        for row in rows:
+            d = dict(row._mapping)
+            conf = float(d.get("confidence_score") or 0.5)
+            conf_level = (
+                "HIGH" if conf >= 0.8 else
+                "MEDIUM" if conf >= 0.6 else
+                "LOW" if conf >= 0.3 else "VERY_LOW"
+            )
+            digest.append({
+                "recommendation_id": d.get("id"),
+                "director": d.get("director"),
+                "risk_level": d.get("risk_level"),
+                "recommendation": d.get("recommendation"),
+                "expected_impact": d.get("expected_impact"),
+                "action": d.get("action"),
+                "confidence": conf_level,
+                "confidence_score": conf,
+                "evidence_available": bool(d.get("evidence")),
+                "reasoning_available": bool(d.get("reasoning")),
+                "generated_at": str(d.get("generated_at", ""))[:19],
+                "approve_url": f"/api/v1/recommendations/{d.get('id')}/approve",
+                "reject_url": f"/api/v1/recommendations/{d.get('id')}/reject",
+                "detail_url": f"/api/v1/recommendations/{d.get('id')}",
+            })
+
+        return {
+            "hotel_id": hotel_id,
+            "report_type": "DAILY_DIGEST",
+            "digest_size": len(digest),
+            "total_pending": int(total_pending),
+            "critical_count": int(critical_count),
+            "stale_count": int(stale_count),
+            "showing_top": top_n,
+            "fatigue_note": (
+                f"Showing top {len(digest)} of {int(total_pending)} pending recommendations. "
+                f"Review daily to keep the queue actionable."
+                if int(total_pending) > top_n else
+                f"All {int(total_pending)} pending recommendations shown."
+            ),
+            "governance_note": "All items require human review before action. AI advisory only.",
+            "digest": digest,
+        }
+
+    def get_director_performance(self, hotel_id: str) -> dict:
+        """
+        V7-007: AI Director performance tracking.
+        Shows which directors generate the most accepted recommendations.
+        Helps identify which AI signals are most valuable to users.
+        """
+        self._ensure_table()
+
+        try:
+            rows = self.db.execute(text("""
+                SELECT
+                    director,
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN status='approved' THEN 1 END) as approved,
+                    COUNT(CASE WHEN status='rejected' THEN 1 END) as rejected,
+                    COUNT(CASE WHEN status='pending' THEN 1 END) as pending,
+                    ROUND(AVG(confidence_score)::numeric, 3) as avg_confidence,
+                    ROUND(AVG(risk_score)::numeric, 1) as avg_risk_score
+                FROM recommendations
+                WHERE hotel_id = :h
+                GROUP BY director
+                ORDER BY approved DESC, total DESC
+            """), {"h": hotel_id}).fetchall()
+        except Exception as e:
+            try: self.db.rollback()
+            except: pass
+            return {"hotel_id": hotel_id, "directors": [], "error": str(e)[:200]}
+
+        # Check outcome effectiveness per director
+        directors = []
+        for row in rows:
+            d = dict(row._mapping)
+            total = int(d.get("total") or 0)
+            approved = int(d.get("approved") or 0)
+            rejected = int(d.get("rejected") or 0)
+
+            acceptance_rate = round(approved / max(total, 1) * 100, 1)
+            rejection_rate = round(rejected / max(total, 1) * 100, 1)
+
+            # Count outcomes for this director
+            outcome_count = 0
+            try:
+                outcome_count = self.db.execute(text("""
+                    SELECT COUNT(*) FROM recommendation_outcomes ro
+                    JOIN recommendations r ON ro.recommendation_id = r.id
+                    WHERE r.hotel_id = :h AND r.director = :dir
+                """), {"h": hotel_id, "dir": d.get("director")}).scalar() or 0
+            except Exception:
+                try: self.db.rollback()
+                except: pass
+
+            directors.append({
+                "director": d.get("director"),
+                "total_generated": total,
+                "approved": approved,
+                "rejected": rejected,
+                "pending": int(d.get("pending") or 0),
+                "acceptance_rate_pct": acceptance_rate,
+                "rejection_rate_pct": rejection_rate,
+                "outcomes_recorded": int(outcome_count),
+                "avg_confidence": float(d.get("avg_confidence") or 0),
+                "avg_risk_score": float(d.get("avg_risk_score") or 0),
+                "effectiveness_grade": (
+                    "A" if acceptance_rate >= 50 else
+                    "B" if acceptance_rate >= 30 else
+                    "C" if acceptance_rate >= 15 else
+                    "D"
+                ),
+            })
+
+        total_generated = sum(d["total_generated"] for d in directors)
+        total_approved = sum(d["approved"] for d in directors)
+        overall_rate = round(total_approved / max(total_generated, 1) * 100, 1)
+
+        return {
+            "hotel_id": hotel_id,
+            "report_type": "DIRECTOR_PERFORMANCE",
+            "total_recommendations": total_generated,
+            "total_approved": total_approved,
+            "overall_acceptance_rate_pct": overall_rate,
+            "directors": directors,
+            "insight": (
+                "Low acceptance rate may indicate: "
+                "(1) recommendations not reaching reviewers, "
+                "(2) insufficient evidence, or "
+                "(3) recommendations not matching operational priorities."
+            ) if overall_rate < 20 else
+            "Acceptance rate is healthy. Continue monitoring.",
+        }
+
+    def expire_stale_recommendations(self, hotel_id: str, days: int = 30) -> dict:
+        """
+        V7-007: Mark stale pending recommendations as expired.
+        Recommendations older than N days that are still pending are
+        likely no longer relevant. Move to 'expired' status.
+        Note: Does NOT delete — preserves audit trail.
+        """
+        self._ensure_table()
+
+        try:
+            # Count stale items first
+            stale_count = self.db.execute(text("""
+                SELECT COUNT(*) FROM recommendations
+                WHERE hotel_id = :h AND status = 'pending'
+                AND generated_at < NOW() - INTERVAL ':days days'
+            """.replace(":days", str(days))), {"h": hotel_id}).scalar() or 0
+
+            if stale_count == 0:
+                return {
+                    "hotel_id": hotel_id,
+                    "expired": 0,
+                    "message": f"No stale recommendations (older than {days} days) found.",
+                }
+
+            # Mark as expired
+            self.db.execute(text("""
+                UPDATE recommendations
+                SET status = 'expired',
+                    review_notes = :note,
+                    reviewed_at = NOW()
+                WHERE hotel_id = :h AND status = 'pending'
+                AND generated_at < NOW() - INTERVAL ':days days'
+            """.replace(":days", str(days))), {
+                "h": hotel_id,
+                "note": f"Auto-expired after {days} days without review (V7-007 governance)"
+            })
+            self.db.commit()
+
+            return {
+                "hotel_id": hotel_id,
+                "expired": int(stale_count),
+                "days_threshold": days,
+                "message": f"Marked {stale_count} stale recommendations as expired.",
+                "note": "Expired items preserved in audit trail. Not deleted.",
+            }
+        except Exception as e:
+            try: self.db.rollback()
+            except: pass
+            return {"hotel_id": hotel_id, "expired": 0, "error": str(e)[:200]}
+
     def get_action_queue(self, hotel_id: str, limit: int = 20) -> dict:
         """
         V7-006: Intelligence → Action Queue.
