@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
 
-router = APIRouter(prefix="/predictive-maintenance", tags=["predictive-maintenance"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/predictive-maintenance", tags=["predictive-maintenance"], dependencies=[_Dep_v7(_gcu_v7)])
 
 def row_to_dict(row):
     if row is None: return {}

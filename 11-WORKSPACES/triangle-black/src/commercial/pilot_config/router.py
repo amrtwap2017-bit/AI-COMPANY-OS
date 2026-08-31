@@ -7,7 +7,9 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 
-router = APIRouter(prefix="/pilot", tags=["Pilot Configuration"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/pilot", tags=["Pilot Configuration"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/dashboard")
 def get_pilot_dashboard(

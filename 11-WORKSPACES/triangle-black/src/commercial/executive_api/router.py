@@ -6,7 +6,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from datetime import datetime
 
-router = APIRouter(prefix="/executive-v2", tags=["executive"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/executive-v2", tags=["executive"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/kpi")
 def get_executive_kpi(hotel_id: str = Depends(get_hotel_id),

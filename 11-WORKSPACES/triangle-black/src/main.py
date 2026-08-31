@@ -6592,7 +6592,7 @@ SLA_RESPONSE = {"critical":2,"high":4,"medium":8,"low":24}
 SLA_RESOLUTION = {"critical":8,"high":24,"medium":48,"low":72}
 
 @app.get("/api/v1/sla/dashboard", tags=["sla"])
-def sla_dashboard():
+def sla_dashboard(_auth=Depends(_get_current_user)):
     """SLA compliance dashboard — response + resolution rates per site"""
     import os
     from sqlalchemy import text, create_engine
@@ -6705,7 +6705,7 @@ def sla_dashboard():
         }
 
 @app.get("/api/v1/sla/breaches", tags=["sla"])
-def sla_breaches(site_id: str = None, urgency: str = None):
+def sla_breaches(site_id: str = None, urgency: str = None, _auth=Depends(_get_current_user)):
     """All active SLA breaches"""
     import os
     from sqlalchemy import text, create_engine

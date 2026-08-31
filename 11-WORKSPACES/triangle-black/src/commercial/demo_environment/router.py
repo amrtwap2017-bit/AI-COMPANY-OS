@@ -5,7 +5,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.demo_environment.service import DemoEnvironmentService
 
-router = APIRouter(prefix="/demo", tags=["Customer Demo Environment"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/demo", tags=["Customer Demo Environment"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/walkthrough")
 def get_demo_walkthrough(

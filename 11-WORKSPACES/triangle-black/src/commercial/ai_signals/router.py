@@ -5,7 +5,9 @@ from sqlalchemy import text
 from src.core.database import get_db
 import datetime
 
-router = APIRouter(prefix="/ai", tags=["ai-signals-v2"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/ai", tags=["ai-signals-v2"], dependencies=[_Dep_v7(_gcu_v7)])
 
 def safe_int(v, d=0):
     try: return int(v) if v is not None else d
