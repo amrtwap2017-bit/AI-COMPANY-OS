@@ -5,7 +5,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.asset_lifecycle.service import AssetLifecycleService
 
-router = APIRouter(prefix="/asset-lifecycle", tags=["Asset Lifecycle Intelligence"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/asset-lifecycle", tags=["Asset Lifecycle Intelligence"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/report")
 def get_lifecycle_intelligence_report(

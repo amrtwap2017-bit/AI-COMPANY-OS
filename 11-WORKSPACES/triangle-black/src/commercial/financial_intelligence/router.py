@@ -5,7 +5,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.financial_intelligence.service import FinancialIntelligenceService
 
-router = APIRouter(prefix="/financial-intelligence", tags=["Financial Intelligence"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/financial-intelligence", tags=["Financial Intelligence"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/report")
 def get_financial_intelligence_report(

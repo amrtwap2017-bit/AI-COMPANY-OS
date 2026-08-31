@@ -5,7 +5,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.risk_intelligence.service import RiskIntelligenceService
 
-router = APIRouter(prefix="/risk-intelligence", tags=["Operational Risk Intelligence"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/risk-intelligence", tags=["Operational Risk Intelligence"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/report")
 def get_unified_risk_report(

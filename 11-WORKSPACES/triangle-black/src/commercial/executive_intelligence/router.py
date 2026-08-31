@@ -7,7 +7,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.executive_intelligence.service import ExecutiveIntelligenceService
 
-router = APIRouter(prefix="/executive-intelligence", tags=["Executive Intelligence"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/executive-intelligence", tags=["Executive Intelligence"], dependencies=[_Dep_v7(_gcu_v7)])
 
 
 @router.get("/briefing")

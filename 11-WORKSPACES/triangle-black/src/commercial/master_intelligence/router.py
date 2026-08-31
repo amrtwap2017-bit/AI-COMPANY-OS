@@ -5,7 +5,9 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.master_intelligence.service import MasterIntelligenceService
 
-router = APIRouter(prefix="/intelligence", tags=["Master Intelligence Aggregator"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/intelligence", tags=["Master Intelligence Aggregator"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/snapshot")
 def get_full_intelligence_snapshot(

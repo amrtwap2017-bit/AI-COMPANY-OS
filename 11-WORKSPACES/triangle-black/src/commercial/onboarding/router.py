@@ -414,3 +414,201 @@ def onboarding_status(
         "steps": steps,
         "summary": f"{done_count}/{len(steps)} setup steps complete ({completion_pct}%)"
     }
+
+
+@router.get("/onboarding/checklist", summary="Onboarding progress checklist for new tenant")
+def get_onboarding_checklist(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    V7-003: Non-developer onboarding checklist.
+
+    Returns the complete onboarding journey with:
+    - step number and label
+    - status: COMPLETE / IN_PROGRESS / PENDING
+    - count of records in this step
+    - what to do next
+    - API endpoint to use
+
+    A non-developer can follow this checklist to fully onboard
+    without developer assistance.
+
+    Journey:
+    Step 1: Property provisioned (hotel created)
+    Step 2: Assets imported
+    Step 3: Suppliers imported
+    Step 4: PM Plans imported
+    Step 5: Data quality scored (>70%)
+    Step 6: Baseline KPI captured
+    Step 7: First AI recommendation generated
+    """
+    # V7-003: extract hotel_id from authenticated user
+    from src.core.tenant import get_hotel_id as _ghi
+    try:
+        _req_obj = type("_R", (), {"headers": {"Authorization": ""}})()
+        hotel_id = getattr(current_user, "hotel_id", None)
+        if not hotel_id:
+            from src.core.database import get_db as _gdb2
+            from sqlalchemy.orm import Session as _Sess2
+            from sqlalchemy import text as _t2
+            import os as _os2
+            _eng2 = __import__("sqlalchemy").create_engine(
+                _os2.environ.get("DATABASE_URL",
+                "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+            with _Sess2(_eng2) as _db2:
+                _row = _db2.execute(_t2(
+                    "SELECT hotel_id FROM users WHERE id=:uid LIMIT 1"
+                ), {"uid": getattr(current_user, "id", "")}).fetchone()
+                hotel_id = _row[0] if _row else "tb-default-hotel-000000000001"
+    except Exception:
+        hotel_id = "tb-default-hotel-000000000001"
+    from sqlalchemy import text as sqlt
+
+    def _count(sql, params=None):
+        try:
+            return int(db.execute(sqlt(sql), params or {"h": hotel_id}).scalar() or 0)
+        except Exception:
+            try: db.rollback()
+            except: pass
+            return 0
+
+    # Step counts
+    assets = _count("SELECT COUNT(*) FROM assets WHERE hotel_id=:h")
+    suppliers = _count("SELECT COUNT(*) FROM suppliers WHERE hotel_id=:h")
+    pm_plans = _count("SELECT COUNT(*) FROM maintenance_plans WHERE hotel_id=:h")
+    kpi_snapshots = _count("SELECT COUNT(*) FROM kpi_snapshots WHERE hotel_id=:h")
+    recommendations = _count("SELECT COUNT(*) FROM recommendations WHERE hotel_id=:h")
+
+    # Data quality score (from existing engine)
+    dq_score = 0.0
+    try:
+        from src.commercial.data_quality.service import DataQualityEngine
+        dq_svc = DataQualityEngine(db=db, hotel_id=hotel_id)
+        report = dq_svc.get_full_report()
+        dq_score = float(report.get("overall_score", 0) or 0)
+    except Exception:
+        pass
+
+    # Build checklist
+    steps = [
+        {
+            "step": 1,
+            "label": "Property Provisioned",
+            "description": "Hotel property created with admin user",
+            "status": "COMPLETE",  # If we got here, hotel exists
+            "count": 1,
+            "target": 1,
+            "action": "Already done ✅",
+            "endpoint": "POST /api/v1/onboarding/provision",
+        },
+        {
+            "step": 2,
+            "label": "Assets Imported",
+            "description": "Upload your asset register (CSV)",
+            "status": "COMPLETE" if assets >= 10 else ("IN_PROGRESS" if assets > 0 else "PENDING"),
+            "count": assets,
+            "target": 10,
+            "action": (
+                f"{assets} assets imported ✅" if assets >= 10 else
+                f"Import more assets (have {assets}, recommend 10+)"
+            ),
+            "endpoint": "POST /api/v1/data-import/assets",
+            "schema_url": "/api/v1/data-import/schema/assets",
+        },
+        {
+            "step": 3,
+            "label": "Suppliers Imported",
+            "description": "Upload your supplier/vendor list (CSV)",
+            "status": "COMPLETE" if suppliers >= 5 else ("IN_PROGRESS" if suppliers > 0 else "PENDING"),
+            "count": suppliers,
+            "target": 5,
+            "action": (
+                f"{suppliers} suppliers imported ✅" if suppliers >= 5 else
+                f"Import suppliers (have {suppliers}, recommend 5+)"
+            ),
+            "endpoint": "POST /api/v1/data-import/suppliers",
+            "schema_url": "/api/v1/data-import/schema/suppliers",
+        },
+        {
+            "step": 4,
+            "label": "PM Plans Imported",
+            "description": "Upload your preventive maintenance schedule (CSV)",
+            "status": "COMPLETE" if pm_plans >= 5 else ("IN_PROGRESS" if pm_plans > 0 else "PENDING"),
+            "count": pm_plans,
+            "target": 5,
+            "action": (
+                f"{pm_plans} PM plans imported ✅" if pm_plans >= 5 else
+                f"Import PM plans (have {pm_plans}, recommend 5+)"
+            ),
+            "endpoint": "POST /api/v1/data-import/pm-plans",
+            "schema_url": "/api/v1/data-import/schema/pm-plans",
+        },
+        {
+            "step": 5,
+            "label": "Data Quality Verified",
+            "description": "Data quality score must be > 70 to proceed",
+            "status": "COMPLETE" if dq_score >= 70 else ("IN_PROGRESS" if dq_score > 0 else "PENDING"),
+            "count": round(dq_score, 1),
+            "target": 70,
+            "action": (
+                f"Data quality {dq_score:.1f}/100 ✅" if dq_score >= 70 else
+                f"Improve data quality (score: {dq_score:.1f}/100, target: 70)"
+            ),
+            "endpoint": "GET /api/v1/data-quality/report",
+        },
+        {
+            "step": 6,
+            "label": "Baseline KPI Captured",
+            "description": "Capture initial KPI snapshot for before/after comparison",
+            "status": "COMPLETE" if kpi_snapshots > 0 else "PENDING",
+            "count": kpi_snapshots,
+            "target": 1,
+            "action": (
+                "Baseline captured ✅" if kpi_snapshots > 0 else
+                "Capture baseline: POST /api/v1/roi/snapshot"
+            ),
+            "endpoint": "POST /api/v1/roi/snapshot",
+        },
+        {
+            "step": 7,
+            "label": "First AI Advisory Generated",
+            "description": "Generate AI recommendations from your operational data",
+            "status": "COMPLETE" if recommendations > 0 else "PENDING",
+            "count": recommendations,
+            "target": 1,
+            "action": (
+                f"{recommendations} recommendations available ✅" if recommendations > 0 else
+                "Generate: POST /api/v1/recommendations/generate"
+            ),
+            "endpoint": "POST /api/v1/recommendations/generate",
+            "review_url": "/api/v1/recommendations/daily-digest",
+        },
+    ]
+
+    completed = sum(1 for s in steps if s["status"] == "COMPLETE")
+    total = len(steps)
+    pct = round(completed / total * 100)
+
+    # Find next action
+    next_step = next((s for s in steps if s["status"] != "COMPLETE"), None)
+
+    return {
+        "hotel_id": hotel_id,
+        "report_type": "ONBOARDING_CHECKLIST",
+        "completion_pct": pct,
+        "completed_steps": completed,
+        "total_steps": total,
+        "status": "COMPLETE" if completed == total else "IN_PROGRESS",
+        "next_action": next_step["action"] if next_step else "Onboarding complete! Review your AI digest.",
+        "next_endpoint": next_step.get("endpoint") if next_step else "/api/v1/recommendations/daily-digest",
+        "steps": steps,
+        "pilot_ready": completed >= 5,
+        "pilot_note": (
+            "Property is ready for 30-day pilot! "
+            "Capture baseline KPI and generate AI recommendations."
+            if completed >= 5 else
+            f"Complete steps {completed+1}–{total} to be pilot-ready."
+        ),
+    }
+

@@ -6,7 +6,9 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 
-router = APIRouter(prefix="/executive-kpi", tags=["executive-kpi"])
+from src.core.auth import get_current_user as _gcu_v7
+from fastapi import Depends as _Dep_v7
+router = APIRouter(prefix="/executive-kpi", tags=["executive-kpi"], dependencies=[_Dep_v7(_gcu_v7)])
 
 def row_to_dict(row):
     if row is None: return {}
