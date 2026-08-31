@@ -601,8 +601,7 @@ class RecommendationService:
                 SELECT 
                     id, director, risk_level, risk_score,
                     recommendation, expected_impact, action,
-                    confidence_score, generated_at, status,
-                    required_approval_role
+                    confidence_score, generated_at, status
                 FROM recommendations
                 WHERE hotel_id = :h AND status = 'pending'
                 ORDER BY 
@@ -662,7 +661,7 @@ class RecommendationService:
                 "recommendation": d.get("recommendation"),
                 "expected_impact": d.get("expected_impact"),
                 "action": d.get("action"),
-                "approval_required": d.get("required_approval_role"),
+                "approval_required": d.get("required_approval_role", "manager"),
                 "status": d.get("status"),
                 "generated_at": str(d.get("generated_at", ""))[:19],
                 "review_url": f"/recommendations/{d.get('id')}",
