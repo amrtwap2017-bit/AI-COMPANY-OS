@@ -134,7 +134,7 @@ def get_work_order(work_order_id: str, db: Session = Depends(get_db)):
     if not row: raise HTTPException(404, "Work order not found")
     return row_to_dict(row)
 
-@router.post("/", status_code=201, summary="Create work order")
+@router.post("/", status_code=201, summary="Create work order", dependencies=[Depends(get_current_user)])
 def create_work_order(data: dict, db: Session = Depends(get_db)):
     wo_id = str(uuid.uuid4())
     now   = datetime.datetime.utcnow()

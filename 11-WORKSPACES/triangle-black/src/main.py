@@ -1607,7 +1607,7 @@ def automation_status():
 
 # ── SPRINT 188: CREATE ACTION ENDPOINTS ────────────────────────────────────────
 
-@app.post("/api/v1/work-orders/", tags=["work-orders"], operation_id="create_work_order_inline")
+@app.post("/api/v1/work-orders/", tags=["work-orders"], operation_id="create_work_order_inline", dependencies=[_Depends(_get_current_user)])
 def create_work_order(body: dict):
     """Create a new work order"""
     from sqlalchemy import text, create_engine
@@ -1646,7 +1646,15 @@ def create_work_order(body: dict):
               "msg":f"Priority: {priority}","eid":wo_id,"now":now})
         db.commit()
         _notify(db, f"New Work Order: {body.get('title','')}", f"Priority: {priority} — {body.get('title','')}", "info", "work_order", wo_id)
-        return {"id":wo_id,"status":"open","priority":priority,"title":body.get("title"),"created_at":now.isoformat()}
+        result = {"id":wo_id,"status":"open","priority":priority,"title":body.get("title"),"created_at":now.isoformat()}
+        if not body.get("asset_id"):
+            result["data_quality_warning"] = (
+                "Work order created without asset linkage. "
+                "MTTR, critical path, and repeat failure intelligence "
+                "will not include this WO. Link to an asset to improve data accuracy."
+            )
+            result["asset_linkage_required"] = True
+        return result
 
 
 @app.post("/api/v1/service-requests/", tags=["service-requests"], operation_id="create_service_request_inline")
