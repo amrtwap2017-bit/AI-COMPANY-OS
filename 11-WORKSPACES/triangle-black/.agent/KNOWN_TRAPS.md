@@ -45,3 +45,18 @@
 **Rule:** When injecting imports, always scan the FULL resulting import line
          Verify: from datetime import X → X must be a datetime module member
 **Detection:** grep -rn "from datetime import.*," src/ | grep -v "timedelta\|timezone"
+
+## TRAP-011: Silent except blocks hide critical intelligence bugs
+**Confirmed incident:** attention/router.py and roi/service.py
+**Pattern:** except Exception: return [] / return 0
+             → Hides NameError, DB errors, wrong hotel_id
+             → Endpoint appears to work (200) but returns wrong data
+**Symptom:** API returns 200 but all values are 0/empty
+**Rule:** NEVER use bare except with silent returns in intelligence endpoints
+          ALWAYS log at WARNING level:
+          except Exception as e:
+              logger.warning(f"[module.func] Query failed: {e}")
+              try: db.rollback()
+              except: pass
+              return default_value
+**Detection:** grep -rn "except Exception:" src/commercial/attention/ src/commercial/roi/
