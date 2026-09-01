@@ -29,3 +29,19 @@
          → File deleted in V8 → test fails on valid production state
 **Rule:** Tests must test behavior, not file existence of implementation artifacts.
          If testing infrastructure, use abstract checks (proxy OR middleware exists).
+
+## TRAP-009: Never commit claiming success without verifying server starts
+**Confirmed incidents:** 2 (V8-S05, V8-recovery commit)
+**Pattern:** git commit message says "Server starts ✅" but curl health check was never run
+**Rule:** Before EVERY commit that touches main.py, any router, or any import:
+  curl -s http://localhost:8030/api/v1/health/live | python3 -m json.tool
+  Must show {"status": "live"} — if not → DO NOT COMMIT → fix first
+
+## TRAP-010: datetime injection creates multi-module imports
+**Confirmed incident:** pdf_export, procurement_intake
+**Pattern:** 'from datetime import datetime as _dt\n' inserted before existing import
+         creates combined line: 'from datetime import datetime as _dt, io'
+         Python reads this as importing 'io' from 'datetime' → ImportError
+**Rule:** When injecting imports, always scan the FULL resulting import line
+         Verify: from datetime import X → X must be a datetime module member
+**Detection:** grep -rn "from datetime import.*," src/ | grep -v "timedelta\|timezone"
