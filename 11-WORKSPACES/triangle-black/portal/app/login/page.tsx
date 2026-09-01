@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("amr@triangleblack.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState(process.env.NEXT_PUBLIC_DEMO_EMAIL as string ?? "");
+  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_DEMO_PASSWORD as string ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -85,7 +85,7 @@ export default function LoginPage() {
 
           <div className="mt-6 p-3.5 rounded-lg text-xs" style={{background:"#221E1B",color:"#6D5F53"}}>
             <div className="font-semibold mb-1 uppercase tracking-wider" style={{color:"#B29F8B",fontSize:"0.6875rem"}}>Quick Access</div>
-            <div>amr@triangleblack.com</div>
+            <div>{process.env.NEXT_PUBLIC_DEMO_EMAIL ?? ""}</div>
           </div>
         </div>
 
