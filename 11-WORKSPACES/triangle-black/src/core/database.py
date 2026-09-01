@@ -13,7 +13,7 @@ _DB_URL = os.environ.get(
     )
 )
 
-engine = create_engine(_DB_URL, pool_pre_ping=True, pool_size=5, max_overflow=10)
+engine = create_engine(_DB_URL, pool_pre_ping=True, pool_size=5, max_overflow=10, pool_recycle=3600)
 
 # SessionLocal for compatibility with feature_flags and legacy code
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
