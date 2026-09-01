@@ -9,7 +9,7 @@ from src.core.audit import audit_create
 
 router = APIRouter()
 
-@router.post('/', status_code=201)
+@router.post('/', status_code=201, dependencies=[Depends(get_current_user)])
 def create_lead(payload: LeadCreate, db: Session = Depends(get_db), hotel_id: str = Depends(get_hotel_id)):
     payload.hotel_id = hotel_id
     lead_repo = LeadRepository(db)
