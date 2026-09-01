@@ -1,0 +1,18 @@
+[Unit]
+Description=Triangle Black API
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=amr
+WorkingDirectory=/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black
+EnvironmentFile=/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/.env.local
+ExecStart=/home/amr/AI-COMPANY-OS/11-WORKSPACES/triangle-black/.venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8030 --workers 2 --log-level warning
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
