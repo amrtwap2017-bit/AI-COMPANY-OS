@@ -14,7 +14,7 @@ def test_ci_cd_pipeline_exists():
     ci_p = Path(".github/workflows/ci.yml")
     assert ci_p.exists(), "CI/CD pipeline missing"
     text = ci_p.read_text()
-    assert "backend-test" in text or "pytest" in text
+    assert "backend-tests" in text or "pytest" in text
 
 def test_backup_script_exists():
     assert Path("scripts/backup.sh").exists()

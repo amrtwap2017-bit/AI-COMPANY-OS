@@ -57,7 +57,7 @@ def test_a005_ci_workflow_is_valid_yaml():
     assert "name: Triangle Black CI" in text
     assert "jobs:" in text
     assert "backend-quality:" in text
-    assert "release-gate:" in text
+    assert "ci-complete:" in text
 
 def test_a006_slo_tracker_functional():
     from src.core.observability import SLOTracker
