@@ -350,9 +350,14 @@ class ROIService:
             inv_count = self.db.execute(_sa_text(
                 "SELECT COUNT(*) FROM invoices WHERE hotel_id=:h"
             ), {"h": H}).scalar() or 0
+            # Also get WO count as a proxy for operational activity
+            wo_count = self.db.execute(_sa_text(
+                "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h"
+            ), {"h": H}).scalar() or 0
         except Exception:
             po_count = 0
             inv_count = 0
+            wo_count = 0
             try: self.db.rollback()
             except: pass
 
@@ -379,9 +384,20 @@ class ROIService:
                 "source_data": {
                     "purchase_orders_count": int(po_count),
                     "invoices_count": int(inv_count),
-                    "spend_calculation": "SUM(total_amount) FROM purchase_orders WHERE hotel_id",
+                    "work_orders_count": int(wo_count) if 'wo_count' in dir() else 0,
+                    "spend_calculation": (
+                        "SUM(total_amount) FROM purchase_orders WHERE hotel_id"
+                        if po_count > 0 else
+                        "Estimated from operational spend benchmarks (no PO data)"
+                    ),
                     "data_period": "All available purchase order history",
                     "hotel_id": H,
+                    "data_quality_note": (
+                        "GOOD: Based on actual purchase orders"
+                        if po_count > 10 else
+                        "LIMITED: Few or no purchase orders found. "
+                        "Spend estimate uses industry benchmarks."
+                    ),
                 },
                 "benchmark_source": "Industry FM benchmark: 10-15% cost reduction via PM compliance improvement",
                 "important_disclaimer": (
