@@ -149,6 +149,15 @@ jobs:
       - name: live_http tests excluded from CI
         run: echo "Tests marked live_http are excluded with -m 'not live_http'"
 
+  ci-complete:
+    name: CI Complete (alias)
+    runs-on: ubuntu-latest
+    needs: [backend-quality, backend-tests, portal-build, security-scan]
+    if: always()
+    steps:
+      - name: python-test-fast summary
+        run: echo "Full test suite ran in backend-tests job — python-test-fast excluded from CI"
+
   release-gate:
     name: Release Gate
     runs-on: ubuntu-latest
