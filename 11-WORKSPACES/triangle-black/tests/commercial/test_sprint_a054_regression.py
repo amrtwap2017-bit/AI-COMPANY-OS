@@ -62,7 +62,7 @@ def test_alembic_single_head(auth_headers):
     )
     heads = [l.strip() for l in result.stdout.splitlines() if l.strip()]
     assert len(heads) == 1, f"Multiple Alembic heads: {heads}"
-    assert "f2a3b4c5d6e7" in heads[0], f"Wrong head: {heads[0]}"
+    assert "39458fc24447" in heads[0], f"Wrong head: {heads[0]}"
 
 def test_assets_sync_not_405(auth_headers):
     """Regression: /work-orders-v2/assets-sync must not return 405."""
