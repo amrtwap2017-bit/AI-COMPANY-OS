@@ -5,6 +5,7 @@ Provides job functions callable by APScheduler or any cron system.
 APScheduler integration is optional — backend starts without it.
 """
 import datetime
+from datetime import datetime as _dt
 import logging
 import uuid
 
@@ -85,7 +86,7 @@ async def job_check_reorder():
         )).fetchall()
 
         count = 0
-        now = datetime.datetime.utcnow()
+        now = _dt.utcnow()
 
         for row in rows:
             item = dict(row._mapping) if hasattr(row, "_mapping") else {}
