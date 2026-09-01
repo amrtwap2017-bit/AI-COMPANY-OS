@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -77,7 +78,7 @@ def sla_overview(hotel_id: str = Depends(get_hotel_id),
         "sla_status":           sla_status,
         "critical_open":        _safe_int(d.get("critical_open")),
         "critical_total":       _safe_int(d.get("critical_total")),
-        "generated_at":         datetime.datetime.utcnow().isoformat(),
+        "generated_at":         _dt.utcnow().isoformat(),
     }
 
 @router.get("/by-hotel", summary="SLA compliance per hotel")
@@ -118,7 +119,7 @@ def sla_by_hotel(hotel_id: str = Depends(get_hotel_id),
         hotels.append(r)
 
     return {"hotels": hotels, "total": len(hotels),
-            "generated_at": datetime.datetime.utcnow().isoformat()}
+            "generated_at": _dt.utcnow().isoformat()}
 
 @router.get("/by-priority", summary="SLA compliance by priority")
 def sla_by_priority(hotel_id: str = Depends(get_hotel_id),
@@ -155,7 +156,7 @@ def sla_by_priority(hotel_id: str = Depends(get_hotel_id),
         r["avg_resolution_hours"] = round(_safe_float(r.get("avg_hours")), 1)
         result.append(r)
 
-    return {"by_priority": result, "generated_at": datetime.datetime.utcnow().isoformat()}
+    return {"by_priority": result, "generated_at": _dt.utcnow().isoformat()}
 
 @router.get("/trends", summary="SLA trend last 6 months")
 def sla_trends(hotel_id: str = Depends(get_hotel_id),
@@ -192,4 +193,4 @@ def sla_trends(hotel_id: str = Depends(get_hotel_id),
         })
 
     return {"trends": trends, "months": len(trends),
-            "generated_at": datetime.datetime.utcnow().isoformat()}
+            "generated_at": _dt.utcnow().isoformat()}

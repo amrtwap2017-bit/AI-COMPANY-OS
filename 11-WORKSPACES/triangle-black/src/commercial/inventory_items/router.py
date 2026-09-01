@@ -80,6 +80,7 @@ def _safe_int(v):
     except: return 0
 import uuid
 import datetime
+from datetime import datetime as _dt
 
 
 # ── S74-02: Inventory Reorder Automation (Program F + I) ──────────────────────
@@ -123,7 +124,7 @@ def reorder_alerts(db: Session = Depends(get_db)):
     return {
         "alerts": alerts,
         "total": len(alerts),
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.post("/auto-reorder", summary="Create PRs for all below-minimum items")
@@ -133,7 +134,7 @@ def auto_reorder(data: dict, db: Session = Depends(get_db)):
     Called by the reorder automation engine.
     """
     requested_by = data.get("requested_by", "system_auto_reorder")
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     try:
         rows = db.execute(text("""

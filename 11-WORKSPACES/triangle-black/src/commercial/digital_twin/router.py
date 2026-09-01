@@ -10,6 +10,7 @@ All endpoints require auth.
 """
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -53,7 +54,7 @@ def get_twin_state(
     Reads from real operational DB — no technicians table dependency.
     """
     health = 100
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     H = hotel_id
 
     # Work Orders
@@ -329,7 +330,7 @@ def get_asset_impact_chain(
              "status": p.get("status","")}
             for p in pms[:3]
         ],
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
         "twin_version": "v6-E03",
     }
 
@@ -379,7 +380,7 @@ def get_asset_impact(
         "hotel_id": H,
         "connections": connections,
         "connection_count": len(connections),
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 
@@ -433,7 +434,7 @@ def get_wo_impact(
                        "priority": wo.get("priority")},
         "connections": connections,
         "connection_count": len(connections),
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 
@@ -468,7 +469,7 @@ def get_twin_graph_stats(
         "node_counts": stats,
         "total_nodes": total_nodes,
         "edge_note": "Edges computed dynamically from relationships",
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json as _json
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -66,7 +67,7 @@ def get_capacity(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(ge
             "available":         len(technicians) - at_capacity,
             "total_open_slots":  total_slots,
         },
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.post("/recommend-dispatch", summary="AI dispatch recommendation")
@@ -180,5 +181,5 @@ def daily_plan(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(get_
         "open_work_orders":    int(wo_data.get("total") or 0),
         "technicians":         tech_list,
         "unassigned_critical": unassigned_list,
-        "generated_at":        datetime.datetime.utcnow().isoformat(),
+        "generated_at":        _dt.utcnow().isoformat(),
     }

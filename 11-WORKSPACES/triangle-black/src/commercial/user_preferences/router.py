@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -55,7 +56,7 @@ def set_preference(user_id: str, key: str, data: dict, hotel_id: str = Depends(g
     elif value is not None:
         value = str(value)
 
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     db.execute(text("""
         INSERT INTO user_preferences (user_id, pref_key, pref_value, updated_at)
         VALUES (:uid, :key, :val, :now)
@@ -82,7 +83,7 @@ def set_preferences_bulk(user_id: str, data: dict, hotel_id: str = Depends(get_h
     if not prefs:
         raise HTTPException(400, "preferences dict required")
 
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     saved = []
     for key, value in prefs.items():
         if isinstance(value, (dict, list)):

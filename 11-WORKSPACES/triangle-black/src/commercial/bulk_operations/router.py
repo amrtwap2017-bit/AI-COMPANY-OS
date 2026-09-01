@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -49,7 +50,7 @@ def bulk_assign_work_orders(data: dict, hotel_id: str = Depends(get_hotel_id),
             "available": capacity_remaining,
         })
 
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     assigned = []
     failed   = []
 
@@ -108,7 +109,7 @@ def bulk_update_status(data: dict, hotel_id: str = Depends(get_hotel_id),
     if len(wo_ids) > 100:
         raise HTTPException(400, "Maximum 100 work orders per bulk update")
 
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     updated = []
     failed  = []
 
@@ -162,7 +163,7 @@ def bulk_approve_prs(data: dict, hotel_id: str = Depends(get_hotel_id),
     if len(pr_ids) > 50:
         raise HTTPException(400, "Maximum 50 PRs per bulk operation")
 
-    now     = datetime.datetime.utcnow()
+    now     = _dt.utcnow()
     approved = []
     failed   = []
 
@@ -227,5 +228,5 @@ def bulk_summary(hotel_id: str = Depends(get_hotel_id),
 
     return {
         "bulk_opportunities": results,
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }

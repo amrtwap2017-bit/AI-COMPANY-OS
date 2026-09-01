@@ -9,6 +9,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import Optional
 import datetime
+from datetime import datetime as _dt
 
 def row_to_dict(row):
     if row is None: return None
@@ -47,7 +48,7 @@ def analytics_kpis(hotel_id: str = Depends(get_hotel_id), db: Session = Depends(
             "completion_rate":       comp_rate,
             "active_technicians":    active_techs,
         },
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.get("/scorecards", summary="Enterprise scorecards")

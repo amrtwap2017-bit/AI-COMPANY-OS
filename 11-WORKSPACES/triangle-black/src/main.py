@@ -7499,79 +7499,8 @@ async def security_status(request: Request):
 # ── SPRINT 301 COMPLETE ──────────────────────────────────────────────────────
 
 
-# ============================================================
-# SPRINT 302 — PROGRAM J: GLOBAL AUTH MIDDLEWARE
-# Protects ALL mutation endpoints (POST/PATCH/DELETE/PUT)
-# Single middleware — zero existing routes modified
-# Appended after all routes — Starlette wraps entire app
-# ============================================================
 
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse as _JR302
-
-_PUBLIC_PATHS_302 = {
-    "/api/v1/auth/login",
-    "/api/v1/plans/matrix",
-    "/api/v1/commercial/assessment-request",
-    "/api/v1/onboarding/provision-property",
-    "/api/v1/client/login",
-    "/api/v1/supplier/login",
-    "/api/v1/health",
-    "/health",
-    "/api/v1/version",
-    "/",
-    "/docs",
-    "/openapi.json",
-    "/redoc",
-}
-
-_MUTATION_METHODS_302 = {"POST", "PATCH", "DELETE", "PUT"}
-
-class _TB302AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        # Pass all GET/HEAD/OPTIONS through
-        if request.method not in _MUTATION_METHODS_302:
-            return await call_next(request)
-        # Pass whitelisted public paths through
-        path = request.url.path
-        if path in _PUBLIC_PATHS_302:
-            return await call_next(request)
-        # Also pass /api/v1/auth/ prefix (login, refresh etc)
-        if path.startswith("/api/v1/auth/login"):
-            return await call_next(request)
-        # Extract token from Authorization header or cookie
-        token = ""
-        auth = request.headers.get("Authorization", "")
-        if auth.startswith("Bearer "):
-            token = auth[7:].strip()
-        if not token:
-            token = (
-                request.cookies.get("tb_token", "")
-                or request.cookies.get("tb_access_token", "")
-            )
-        if not token:
-            return _JR302(
-                {"detail": "Authentication required. Please log in.", "code": "AUTH_REQUIRED"},
-                status_code=401
-            )
-        try:
-            from src.core.auth import decode_token as _dt302
-            _dt302(token)
-            return await call_next(request)
-        except Exception:
-            return _JR302(
-                {"detail": "Invalid or expired token. Please log in again.", "code": "AUTH_INVALID"},
-                status_code=401
-            )
-
-app.add_middleware(_TB302AuthMiddleware)
-
-import logging as _log302
-_log302.getLogger("tb.security").info(
-    "Sprint 302: Auth middleware active — all mutations protected"
-)
-
-# ── SPRINT 302 COMPLETE ──────────────────────────────────────────────────────
+# V8-G026: _TB302AuthMiddleware removed — redundant with FastAPI Depends auth
 
 
 # ============================================================

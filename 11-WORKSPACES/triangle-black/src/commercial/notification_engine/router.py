@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -35,7 +36,7 @@ def _ensure_notif_table(db):
 def _generate_live_notifications(db):
     """Generate real-time notifications from operational data."""
     notifications = []
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     # Critical open WOs unassigned > 2 hours
     try:
@@ -184,7 +185,7 @@ def get_live_notifications(
         "critical":     critical,
         "high":         high,
         "notifications": notifications[:limit],
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
         "refresh_interval_seconds": 30,
     }
 

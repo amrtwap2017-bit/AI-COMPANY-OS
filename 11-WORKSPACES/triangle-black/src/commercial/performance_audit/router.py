@@ -55,7 +55,7 @@ def query_audit(hotel_id: str = Depends(get_hotel_id),
     max_ms = max(r["duration_ms"] for r in results) if results else 0
 
     return {
-        "audit_date":    datetime.datetime.utcnow().isoformat(),
+        "audit_date":    _dt.utcnow().isoformat(),
         "total_queries": len(results),
         "slow_queries":  len(slow_queries),
         "avg_ms":        avg_ms,
@@ -101,7 +101,7 @@ def table_sizes(hotel_id: str = Depends(get_hotel_id),
     return {
         "tables":      tables,
         "total_shown": len(tables),
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.get("/index-check", summary="Check for missing indexes on key columns")
@@ -161,5 +161,5 @@ def index_check(hotel_id: str = Depends(get_hotel_id),
         "missing_indexes":  len(recommendations),
         "recommendations":  recommendations,
         "existing_count":   len(idx_rows) if "idx_rows" in dir() else 0,
-        "generated_at":     datetime.datetime.utcnow().isoformat(),
+        "generated_at":     _dt.utcnow().isoformat(),
     }

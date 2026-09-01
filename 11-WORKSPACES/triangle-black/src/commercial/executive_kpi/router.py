@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -26,7 +27,7 @@ def _safe_int(v):
 @router.get("/summary", summary="Executive KPI summary")
 def kpi_summary(db: Session = Depends(get_db)):
     """Current period KPIs for CEO/COO dashboard."""
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     # Revenue this month
     rev = {}
@@ -125,7 +126,7 @@ def revenue_trend(db: Session = Depends(get_db)):
                     "invoice_count": _safe_int(row_to_dict(r).get("invoice_count"))}
                    for r in rows],
         "currency": "EGP",
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.get("/trends/operations", summary="Operations trend last 6 months")
@@ -151,7 +152,7 @@ def operations_trend(db: Session = Depends(get_db)):
                     "completed": _safe_int(row_to_dict(r).get("completed")),
                     "critical": _safe_int(row_to_dict(r).get("critical"))}
                    for r in rows],
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.get("/scorecard", summary="Executive balanced scorecard")
@@ -176,5 +177,5 @@ def executive_scorecard(db: Session = Depends(get_db)):
         "kpis":       summary,
         "rev_trend":  rev_trend.get("months", []),
         "ops_trend":  ops_trend.get("months", []),
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -176,7 +177,7 @@ def global_search(
         "total":        total,
         "entity_types": list(results.keys()),
         "results":      results,
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
 @router.get("/quick", summary="Quick search — top 3 per entity type")

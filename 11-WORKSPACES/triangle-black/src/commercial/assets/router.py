@@ -8,6 +8,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
+from datetime import datetime as _dt
 from src.core.audit import audit_create, audit_update
 
 router = APIRouter(prefix="/assets", tags=["assets"])
@@ -89,7 +90,7 @@ def get_asset(asset_id: str, db: Session = Depends(get_db)):
 @router.post("/", status_code=201, summary="Create asset")
 def create_asset(data: dict, db: Session = Depends(get_db)):
     asset_id = str(uuid.uuid4())
-    now      = datetime.datetime.utcnow()
+    now      = _dt.utcnow()
     db.execute(text(
         "INSERT INTO assets (id, hotel_id, site_id, category, name, manufacturer, model,"
         " serial_number, location_description, service_frequency, criticality, status,"
@@ -128,7 +129,7 @@ def update_asset(asset_id: str, data: dict, db: Session = Depends(get_db)):
     allowed = {"name","category","manufacturer","model","serial_number","location_description","service_frequency","criticality","status","notes"}
     updates = {k:v for k,v in data.items() if k in allowed and v is not None}
     if not updates: raise HTTPException(400, "No valid fields")
-    updates["updated_at"] = datetime.datetime.utcnow()
+    updates["updated_at"] = _dt.utcnow()
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = asset_id
     db.execute(text(f"UPDATE assets SET {set_clause} WHERE id = :id"), updates)

@@ -79,7 +79,7 @@ def payment_summary(db: Session = Depends(get_db)):
         "outstanding_egp":    round(total_invoiced - actual_collected, 2),
         "collection_rate_pct": collection_rate,
         "currency":           "EGP",
-        "generated_at":       datetime.datetime.utcnow().isoformat(),
+        "generated_at":       _dt.utcnow().isoformat(),
     }
 @router.get("/{invoice_id}")
 def get_invoice(
@@ -124,6 +124,7 @@ def delete_invoice(
     if not InvoiceRepository(db).delete_invoice(invoice_id):
         raise HTTPException(status_code=404, detail='Invoice not found')
 import uuid, datetime
+from datetime import datetime as _dt
 
 
 # ── S71-02: Invoice Payment Tracking (Program I) ──────────────────────────────
@@ -161,7 +162,7 @@ def record_payment(invoice_id: str, data: dict, db: Session = Depends(get_db)):
 
     _ensure_payment_table(db)
     payment_id = str(uuid.uuid4())
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     db.execute(text("""
         INSERT INTO invoice_payments

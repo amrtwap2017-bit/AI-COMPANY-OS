@@ -6,6 +6,7 @@ Uses FastAPI StreamingResponse with SSE protocol.
 """
 import asyncio
 import datetime
+from datetime import datetime as _dt
 import json
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -23,7 +24,7 @@ def row_to_dict(row):
 async def _generate_signals(db: Session, hotel_id: str = None):
     """Generate real-time operational signals for SSE stream."""
     signals = []
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     # Critical unassigned WOs
     try:
@@ -142,7 +143,7 @@ async def _sse_event_generator(hotel_id: str = None, interval: int = 30):
 def _generate_signals_sync(db, hotel_id=None):
     """Synchronous version of signal generation for SSE."""
     signals = []
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     queries = {
         "critical_wo":    ("critical unassigned WOs >2h",    "SELECT count(*) as cnt FROM work_orders WHERE priority='critical' AND status='open' AND technician_id IS NULL AND created_at < NOW() - INTERVAL '2 hours'"),
         "low_stock":      ("items below min stock",           "SELECT count(*) as cnt FROM inventory_items ii JOIN stock_balances sb ON sb.item_id=ii.id WHERE sb.quantity<=ii.min_stock"),

@@ -5,6 +5,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 import uuid, datetime
+from datetime import datetime as _dt
 
 router = APIRouter(prefix="/assets-v2", tags=["assets"])
 
@@ -53,7 +54,7 @@ def import_asset_csv_row(data: dict,
         site_id = site.id
 
     asset_id = str(uuid.uuid4())
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     try:
         db.execute(text("""
             INSERT INTO assets (id, hotel_id, site_id, name, category, criticality,

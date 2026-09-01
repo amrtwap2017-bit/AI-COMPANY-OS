@@ -155,7 +155,7 @@ Reply with ONLY the title, nothing else."""
 @router.post("/intake/create-wo", summary="Create work order from parsed request")
 def create_wo_from_intake(payload: dict, db: Session = Depends(get_db)):
     wo_id = str(uuid.uuid4())
-    now   = datetime.datetime.utcnow()
+    now   = _dt.utcnow()
     db.execute(text(
         "INSERT INTO work_orders (id, hotel_id, title, type, priority, status, description, asset_id, created_at, updated_at) "
         "VALUES (:id, :hotel_id, :title, :type, :priority, :status, :description, :asset_id, :created_at, :updated_at)"

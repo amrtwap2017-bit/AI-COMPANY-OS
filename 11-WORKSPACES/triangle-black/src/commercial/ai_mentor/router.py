@@ -6,6 +6,7 @@ Learns from decisions and improves recommendations.
 Context-aware guidance for procurement, maintenance, and operations.
 """
 import datetime
+from datetime import datetime as _dt
 import uuid
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -91,7 +92,7 @@ def get_guidance(
     Get AI mentor guidance for a specific context.
     Contexts: procurement | inventory | maintenance | vendor_management
     """
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     practices = BEST_PRACTICES.get(context_type, {})
 
     # Get relevant practice based on action
@@ -177,7 +178,7 @@ def record_decision(data: dict, db: Session = Depends(get_db)):
     The system learns from outcomes to improve future recommendations.
     """
     _ensure_learning_table(db)
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     decision_id = str(uuid.uuid4())
 
     db.execute(text("""
@@ -204,7 +205,7 @@ def record_decision(data: dict, db: Session = Depends(get_db)):
 def record_outcome(decision_id: str, data: dict, db: Session = Depends(get_db)):
     """Record the outcome of a previous decision - feeds the learning engine."""
     _ensure_learning_table(db)
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     outcome = data.get("outcome", "neutral")  # positive | negative | neutral
     notes   = data.get("notes", "")
@@ -271,7 +272,7 @@ def learning_insights(
             "outcomes_by_area":         outcomes_by_type,
             "insights":                 insights,
             "learning_status":          "active" if total > 0 else "gathering_data",
-            "generated_at":             datetime.datetime.utcnow().isoformat(),
+            "generated_at":             _dt.utcnow().isoformat(),
         }
     except Exception as e:
         return {"total_decisions_recorded": 0, "insights": [], "error": str(e)}

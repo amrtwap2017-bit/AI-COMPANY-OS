@@ -5,6 +5,7 @@ Completes the procurement loop:
   Receive Goods -> Inspect -> Update Stock -> Notify Requester -> Close PO
 """
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -40,7 +41,7 @@ def _notify_receipt(po_id, message, db):
             "title": "Goods Received",
             "msg":   message,
             "po_id": po_id,
-            "now":   datetime.datetime.utcnow(),
+            "now":   _dt.utcnow(),
         })
     except Exception:
         pass
@@ -64,7 +65,7 @@ def receive_goods(po_id: str, data: dict,
     if po.get("status") not in ("sent","approved","confirmed"):
         return {"success": False, "message": f"PO status is {po.get('status')} - cannot receive"}
 
-    now           = datetime.datetime.utcnow()
+    now           = _dt.utcnow()
     gr_id         = str(uuid.uuid4())
     warehouse_id  = data.get("warehouse_id", "")
     received_by   = data.get("received_by", "warehouse_team")
@@ -198,7 +199,7 @@ def partial_receive(po_id: str, data: dict,
         # Override status to partial
         db.execute(text("""
             UPDATE purchase_orders SET status = 'partial_delivery', updated_at = :now WHERE id = :id
-        """), {"now": datetime.datetime.utcnow(), "id": po_id})
+        """), {"now": _dt.utcnow(), "id": po_id})
         db.commit()
         result["po_status"] = "partial_delivery"
         result["message"]   = result["message"] + " PO remains open for remaining items."
@@ -242,7 +243,7 @@ def pending_receipts(
         "total":         len(pending),
         "overdue":       len(overdue),
         "overdue_items": overdue,
-        "generated_at":  datetime.datetime.utcnow().isoformat(),
+        "generated_at":  _dt.utcnow().isoformat(),
     }
 
 @router.get("/cycle-status/{pr_id}", summary="Complete procurement cycle status")
@@ -330,5 +331,5 @@ def cycle_status(pr_id: str,
         "total_steps":   len(steps),
         "completion_pct": round(completed / len(steps) * 100, 0),
         "is_complete":   bool(gr),
-        "generated_at":  datetime.datetime.utcnow().isoformat(),
+        "generated_at":  _dt.utcnow().isoformat(),
     }

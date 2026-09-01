@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -41,7 +42,7 @@ def record_audit(data: dict, db: Session = Depends(get_db)):
             old_value, new_value, hotel_id, metadata }
     """
     _ensure_audit_table(db)
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     audit_id = str(uuid.uuid4())
 
     db.execute(text("""
@@ -126,7 +127,7 @@ def get_recent_audit(
         return {
             "events":     [row_to_dict(r) for r in rows],
             "total":      len(rows),
-            "generated_at": datetime.datetime.utcnow().isoformat(),
+            "generated_at": _dt.utcnow().isoformat(),
         }
     except Exception as e:
         return {"events": [], "total": 0, "error": str(e)}
@@ -159,7 +160,7 @@ def audit_summary(db: Session = Depends(get_db)):
         return {
             "last_7_days":    d,
             "by_entity_type": [row_to_dict(r) for r in by_type],
-            "generated_at":   datetime.datetime.utcnow().isoformat(),
+            "generated_at":   _dt.utcnow().isoformat(),
         }
     except Exception as e:
         return {"last_7_days": {}, "by_entity_type": [], "error": str(e)}

@@ -5,6 +5,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 import uuid, datetime
+from datetime import datetime as _dt
 
 router = APIRouter(prefix="/service-requests-v2", tags=["service-requests"])
 
@@ -42,7 +43,7 @@ def generate_work_order_from_sr(sr_id: str, data: dict = None,
         if not sr:
             raise HTTPException(404, "Service request not found")
 
-        now = datetime.datetime.utcnow()
+        now = _dt.utcnow()
         wo_id = str(uuid.uuid4())
         db.execute(text("""
             INSERT INTO work_orders (id, hotel_id, title, type, priority, status,

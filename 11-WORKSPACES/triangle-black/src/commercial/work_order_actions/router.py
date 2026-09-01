@@ -6,6 +6,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.core.auth import get_current_user
 import uuid, datetime
+from datetime import datetime as _dt
 
 router = APIRouter(prefix="/work-orders-v2", tags=["work-orders"])
 
@@ -25,7 +26,7 @@ def complete_work_order(wo_id: str,
         if not wo:
             raise HTTPException(404, "Work order not found")
 
-        now = datetime.datetime.utcnow()
+        now = _dt.utcnow()
         db.execute(text(
             "UPDATE work_orders SET status='completed', completed_at=:now, updated_at=:now "
             "WHERE id=:id AND hotel_id=:hid"

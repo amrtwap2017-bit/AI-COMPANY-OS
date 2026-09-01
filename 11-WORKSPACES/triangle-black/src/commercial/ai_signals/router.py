@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
 import datetime
+from datetime import datetime as _dt
 
 from src.core.auth import get_current_user as _gcu_v7
 from fastapi import Depends as _Dep_v7
@@ -289,6 +290,6 @@ def get_signals_v2(db: Session = Depends(get_db)):
         "signals":      all_signals,
         "summary":      summary,
         "version":      "v2-cross-domain",
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
         "total":        len(all_signals),
     }

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -111,7 +112,7 @@ def get_health_scores(
     Program L — Predictive Maintenance AI.
     Returns health score for each asset with failure prediction.
     """
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     # Build asset query
     sql_where = "WHERE 1=1"
@@ -141,7 +142,7 @@ def get_health_scores(
             LIMIT 100
         """), params).fetchall()
     except Exception as e:
-        return {"assets": [], "total": 0, "generated_at": datetime.datetime.utcnow().isoformat()}
+        return {"assets": [], "total": 0, "generated_at": _dt.utcnow().isoformat()}
 
     results = []
     for row in assets:
@@ -248,7 +249,7 @@ def risk_summary(db: Session = Depends(get_db)):
         "by_category":   by_category,
         "total_assets":  len(assets),
         "at_risk_total": sum(1 for a in assets if a["health_score"] < 40),
-        "generated_at":  datetime.datetime.utcnow().isoformat(),
+        "generated_at":  _dt.utcnow().isoformat(),
     }
 
 

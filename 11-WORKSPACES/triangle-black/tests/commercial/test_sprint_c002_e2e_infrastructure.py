@@ -23,7 +23,10 @@ def test_global_setup_script_exists():
 
 def test_middleware_whitelists_marketing():
     mw_path = PROJECT_ROOT / "portal" / "middleware.ts"
-    assert mw_path.exists()
+    # V8: middleware.ts was removed in favor of proxy.ts (Next.js upgrade)
+    # middleware.ts or proxy.ts must exist
+    proxy_path = Path("portal/proxy.ts")
+    assert mw_path.exists() or proxy_path.exists(),         "Either middleware.ts or proxy.ts must exist"
     text = mw_path.read_text()
     assert "/solutions" in text, "Must whitelist /solutions"
     assert "/how-it-works" in text, "Must whitelist /how-it-works"

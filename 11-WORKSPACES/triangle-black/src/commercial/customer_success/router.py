@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -76,7 +77,7 @@ def customer_success_overview(hotel_id: str = Depends(get_hotel_id),
         "renewal_pipeline_value_egp": float(c.get("renewal_pipeline") or 0),
         "at_risk_count":             at_risk_count,
         "currency":                  "EGP",
-        "generated_at":              datetime.datetime.utcnow().isoformat(),
+        "generated_at":              _dt.utcnow().isoformat(),
     }
 
 @router.get("/renewals", summary="Contracts expiring in 90 days")
@@ -124,7 +125,7 @@ def submit_nps(data: dict, hotel_id: str = Depends(get_hotel_id),
 
     _ensure_nps_table(db)
     nps_id = str(uuid.uuid4())
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     db.execute(text("""
         INSERT INTO customer_nps (id, hotel_id, score, comment, category, surveyed_by, created_at)
@@ -174,7 +175,7 @@ def nps_summary(hotel_id: str = Depends(get_hotel_id),
         "detractors":      detractors,
         "nps_score":       nps_score,
         "scale":           "(-100 to +100)",
-        "generated_at":    datetime.datetime.utcnow().isoformat(),
+        "generated_at":    _dt.utcnow().isoformat(),
     }
 
 @router.get("/at-risk", summary="At-risk clients by critical WO count")

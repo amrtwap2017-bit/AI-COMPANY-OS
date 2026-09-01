@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -51,7 +52,7 @@ def warranty_overview(db: Session = Depends(get_db)):
         "active":             int(d.get("active") or 0),
         "expired":            int(d.get("expired") or 0),
         "expiring_30_days":   int(d.get("expiring_30") or 0),
-        "generated_at":       datetime.datetime.utcnow().isoformat(),
+        "generated_at":       _dt.utcnow().isoformat(),
     }
 
 @router.post("/", summary="Register asset warranty")
@@ -60,7 +61,7 @@ def create_warranty(data: dict, db: Session = Depends(get_db)):
     asset_id = data.get("asset_id")
     if not asset_id:
         raise HTTPException(400, "asset_id required")
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     wid = str(uuid.uuid4())
     db.execute(text("""
         INSERT INTO asset_warranties

@@ -6,6 +6,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import Optional
 import datetime
+from datetime import datetime as _dt
 
 from src.core.auth import get_current_user as _gcu_v7
 from fastapi import Depends as _Dep_v7
@@ -31,7 +32,7 @@ def get_kpis(db: Session = Depends(get_db)):
     Main KPI endpoint used by analytics pages.
     Aggregates from: work_orders, technicians, invoices, contracts, inventory.
     """
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     today_str = now.strftime("%Y-%m-%d")
 
     # Work order KPIs
@@ -150,7 +151,7 @@ def get_cashflow(months: int = Query(default=6, le=12), db: Session = Depends(ge
     Outflow: purchase_orders (received/approved)
     """
     result = []
-    now    = datetime.datetime.utcnow()
+    now    = _dt.utcnow()
 
     for i in range(months - 1, -1, -1):
         month_start = (now.replace(day=1) - datetime.timedelta(days=i * 30)).replace(
@@ -209,7 +210,7 @@ def get_cashflow(months: int = Query(default=6, le=12), db: Session = Depends(ge
 @router.get("/trends", summary="Revenue and lead trends")
 def get_trends(db: Session = Depends(get_db)):
     """Monthly revenue trend + lead conversion for the last 6 months."""
-    now    = datetime.datetime.utcnow()
+    now    = _dt.utcnow()
     result = []
 
     for i in range(5, -1, -1):
@@ -252,5 +253,5 @@ def get_trends(db: Session = Depends(get_db)):
 
     return {
         "trends":       result,
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }

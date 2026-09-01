@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -81,7 +82,7 @@ def isolation_check(hotel_id: str = Depends(get_hotel_id),
     risk_count     = sum(1 for r in results if not r.get("isolation_ok"))
 
     return {
-        "audit_date":      datetime.datetime.utcnow().isoformat(),
+        "audit_date":      _dt.utcnow().isoformat(),
         "tables_audited":  len(results),
         "fully_isolated":  isolated_count,
         "needs_attention": risk_count,
@@ -110,5 +111,5 @@ def hotel_breakdown(hotel_id: str = Depends(get_hotel_id),
 
     return {
         "breakdown":    breakdown,
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }

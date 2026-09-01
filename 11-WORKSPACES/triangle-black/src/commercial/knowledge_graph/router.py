@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -55,7 +56,7 @@ def knowledge_graph_overview(hotel_id: str = Depends(get_hotel_id),
         "vector_collections": len(tb_collections),
         "collections":      [c.get("name") for c in tb_collections],
         "status":           "operational",
-        "generated_at":     datetime.datetime.utcnow().isoformat(),
+        "generated_at":     _dt.utcnow().isoformat(),
     }
 
 @router.get("/entity/{entity_type}/{entity_id}", summary="Entity relationships")
@@ -74,7 +75,7 @@ def get_entity_relationships(
         "entity_type": entity_type,
         "entity_id":   entity_id,
         "relationships": {},
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 
     try:
@@ -251,5 +252,5 @@ def graph_stats(hotel_id: str = Depends(get_hotel_id),
         "qdrant_collections":   len(collections),
         "graph_density":        "relational",
         "knowledge_engine":     "Qdrant + PostgreSQL",
-        "generated_at":         datetime.datetime.utcnow().isoformat(),
+        "generated_at":         _dt.utcnow().isoformat(),
     }

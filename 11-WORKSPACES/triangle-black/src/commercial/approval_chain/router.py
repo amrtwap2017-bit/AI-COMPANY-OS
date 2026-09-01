@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid, datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -44,7 +45,7 @@ def _ensure_chain_table(db):
 
 def _notify(pr_id, step, action, db):
     config = APPROVAL_STEPS.get(step, {})
-    now    = datetime.datetime.utcnow()
+    now    = _dt.utcnow()
     try:
         pr_row = db.execute(
             text("SELECT title, total_amount, requested_by FROM purchase_requests WHERE id = :id"),
@@ -82,7 +83,7 @@ def init_chain(pr_id: str, db: Session = Depends(get_db)):
         raise HTTPException(404, "PR not found")
 
     _ensure_chain_table(db)
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     existing = db.execute(text(
         "SELECT count(*) as cnt FROM pr_approval_chain WHERE pr_id = :id"
@@ -125,7 +126,7 @@ def approve_step(pr_id: str, step: int, data: dict, db: Session = Depends(get_db
     approver_name = data.get("approver_name", "User")
     approver_id   = data.get("approver_id",   "portal_user")
     comment       = data.get("comment",       "Approved")
-    now           = datetime.datetime.utcnow()
+    now           = _dt.utcnow()
 
     db.execute(text("""
         UPDATE pr_approval_chain
@@ -178,7 +179,7 @@ def reject_step(pr_id: str, step: int, data: dict, db: Session = Depends(get_db)
     _ensure_chain_table(db)
     rejector = data.get("rejector_name", "User")
     reason   = data.get("reason", "Rejected")
-    now      = datetime.datetime.utcnow()
+    now      = _dt.utcnow()
 
     db.execute(text("""
         UPDATE pr_approval_chain
@@ -219,7 +220,7 @@ def generate_po(pr_id: str, data: dict, db: Session = Depends(get_db)):
     if pr.get("status") != "approved":
         raise HTTPException(400, f"PR not fully approved. Status: {pr.get('status')}")
 
-    now    = datetime.datetime.utcnow()
+    now    = _dt.utcnow()
     po_id  = str(uuid.uuid4())
     po_num = f"PO-{now.strftime('%Y%m')}-{po_id[:6].upper()}"
     vendor_id   = data.get("vendor_id", "")
@@ -319,5 +320,5 @@ def chain_status(pr_id: str, db: Session = Depends(get_db)):
         "approved_steps": approved,
         "total_steps":    len(APPROVAL_STEPS),
         "is_complete":    approved == len(APPROVAL_STEPS),
-        "generated_at":   datetime.datetime.utcnow().isoformat(),
+        "generated_at":   _dt.utcnow().isoformat(),
     }

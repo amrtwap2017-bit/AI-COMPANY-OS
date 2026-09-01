@@ -2,6 +2,7 @@ from __future__ import annotations
 import csv
 import io
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -71,7 +72,7 @@ def export_work_orders(
 
     headers = ["id","hotel_id","title","description","type","priority","status",
                "technician_id","asset_id","due_date","started_at","completed_at","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"work_orders_{now}.csv")
 
 @router.get("/assets", summary="Export assets as CSV")
@@ -101,7 +102,7 @@ def export_assets(
 
     headers = ["id","hotel_id","name","category","criticality","status","manufacturer",
                "model","serial_number","location_description","installation_date","service_frequency","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"assets_{now}.csv")
 
 @router.get("/invoices", summary="Export invoices as CSV")
@@ -129,7 +130,7 @@ def export_invoices(
         data = []
 
     headers = ["id","hotel_id","invoice_number","status","total_amount","currency","due_date","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"invoices_{now}.csv")
 
 @router.get("/leads", summary="Export leads as CSV")
@@ -156,7 +157,7 @@ def export_leads(
 
     headers = ["id","title","status","priority","source","company_name",
                "contact_email","contact_phone","expected_value","assigned_to","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"leads_{now}.csv")
 
 @router.get("/technicians", summary="Export technicians as CSV")
@@ -176,7 +177,7 @@ def export_technicians(db: Session = Depends(get_db)):
 
     headers = ["id","hotel_id","name","specializations","is_active",
                "max_work_orders","current_work_orders","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"technicians_{now}.csv")
 
 @router.get("/vendors", summary="Export vendors as CSV")
@@ -207,7 +208,7 @@ def export_vendors(
                "email","phone","city","country","is_approved","rating",
                "total_orders","on_time_delivery_pct","quality_score",
                "payment_terms","currency","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"vendors_{now}.csv")
 
 
@@ -242,7 +243,7 @@ def export_supplier_invoices(
     headers = ["id","invoice_number","vendor_name","vendor_code","status","currency",
                "subtotal","vat_amount","total_amount","amount_paid","balance_due",
                "payment_status","due_date","po_id","notes","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"supplier_invoices_{now}.csv")
 
 
@@ -276,7 +277,7 @@ def export_time_entries(
     headers = ["id","work_order_id","work_order_title","technician_id","technician_name",
                "work_type","hours_logged","hourly_rate","labor_cost","is_billable",
                "notes","start_time","end_time","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"time_entries_{now}.csv")
 
 
@@ -311,7 +312,7 @@ def export_purchase_orders(
     headers = ["id","po_number","title","vendor_name","vendor_code","status","currency",
                "subtotal","vat_amount","total_amount","payment_terms","delivery_date",
                "approved_by","approved_at","internal_notes","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"purchase_orders_{now}.csv")
 
 
@@ -340,5 +341,5 @@ def export_scope_of_work(
     headers = ["id","sow_number","title","status","type","client_name","currency",
                "labor_cost","materials_cost","overhead_pct","profit_margin_pct",
                "total_cost","estimated_days","prepared_by","approved_by","approved_at","created_at"]
-    now = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M")
+    now = _dt.utcnow().strftime("%Y%m%d_%H%M")
     return _csv_response(_make_csv(headers, data), f"scope_of_work_{now}.csv")

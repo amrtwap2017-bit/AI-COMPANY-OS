@@ -5,6 +5,7 @@ Sends operational alerts via SMTP (configurable).
 Falls back to logging if SMTP not configured.
 """
 import datetime
+from datetime import datetime as _dt
 import logging
 import os
 from fastapi import APIRouter, Depends, HTTPException
@@ -128,7 +129,7 @@ Action Required: Log in to Triangle Black → Operations → Work Orders
         "subject":    subject,
         "wo_id":      wo_id,
         "note":       "Sent via SMTP" if sent else "Logged only — configure SMTP_HOST to enable email",
-        "sent_at":    datetime.datetime.utcnow().isoformat(),
+        "sent_at":    _dt.utcnow().isoformat(),
     }
 
 @router.post("/daily-digest", summary="Send daily operations digest")
@@ -143,7 +144,7 @@ def send_daily_digest(data: dict, db: Session = Depends(get_db)):
     if not to_email:
         raise HTTPException(400, "to_email required")
 
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
 
     # Gather stats
     stats = {}

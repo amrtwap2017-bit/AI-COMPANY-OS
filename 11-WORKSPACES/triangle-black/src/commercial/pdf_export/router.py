@@ -1,5 +1,6 @@
 from __future__ import annotations
-import datetime, io
+import datetime
+from datetime import datetime as _dt, io
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response, HTMLResponse
 from sqlalchemy.orm import Session
@@ -18,7 +19,7 @@ PDF_ENGINE = "reportlab"  # auto-detected: reportlab available
 
 def _wo_html(wo: dict, hotel: dict) -> str:
     """Generate HTML for work order — used for PDF or direct HTML export."""
-    now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+    now = _dt.utcnow().strftime("%Y-%m-%d %H:%M")
     priority_color = {{
         "critical": "#dc2626", "high": "#d97706",
         "medium": "#2563eb", "low": "#64748b"
@@ -78,7 +79,7 @@ def _wo_html(wo: dict, hotel: dict) -> str:
 </html>"""
 
 def _invoice_html(inv: dict, hotel: dict) -> str:
-    now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+    now = _dt.utcnow().strftime("%Y-%m-%d %H:%M")
     amount = float(inv.get("total_amount") or 0)
     return f"""<!DOCTYPE html>
 <html>
@@ -195,7 +196,7 @@ def export_invoice(invoice_id: str, db: Session = Depends(get_db)):
 @router.get("/monthly-report", summary="Monthly operations summary HTML")
 def monthly_report(db: Session = Depends(get_db)):
     """Executive monthly report — downloadable HTML."""
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     month = now.strftime("%B %Y")
 
     stats = {{}}
@@ -287,7 +288,7 @@ def preview_work_order(wo_id: str, db: Session = Depends(get_db)):
 def preview_monthly_report(db: Session = Depends(get_db)):
     """Preview monthly report as HTML in browser — no attachment header."""
     from fastapi.responses import HTMLResponse as _HTMLResponse
-    now   = datetime.datetime.utcnow()
+    now   = _dt.utcnow()
     month = now.strftime("%B %Y")
     stats = {}
     for table, label in [

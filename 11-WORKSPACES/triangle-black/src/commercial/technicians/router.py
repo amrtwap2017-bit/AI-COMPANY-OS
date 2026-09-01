@@ -8,6 +8,7 @@ from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import Optional
 import uuid, datetime
+from datetime import datetime as _dt
 
 router = APIRouter(prefix="/technicians", tags=["technicians"])
 
@@ -47,7 +48,7 @@ def get_technician(technician_id: str, db: Session = Depends(get_db)):
 @router.post("/", status_code=201, summary="Create technician")
 def create_technician(data: dict, db: Session = Depends(get_db)):
     tech_id = str(uuid.uuid4())
-    now     = datetime.datetime.utcnow()
+    now     = _dt.utcnow()
     import json as _json
     db.execute(text(
         "INSERT INTO technicians (id, hotel_id, name, email, phone, specializations,"
@@ -76,7 +77,7 @@ def update_technician(technician_id: str, data: dict, db: Session = Depends(get_
     allowed = {"name","email","phone","specializations","max_work_orders","is_active","notes"}
     updates = {k:v for k,v in data.items() if k in allowed and v is not None}
     if not updates: raise HTTPException(400, "No valid fields")
-    updates["updated_at"] = datetime.datetime.utcnow()
+    updates["updated_at"] = _dt.utcnow()
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = technician_id
     db.execute(text(f"UPDATE technicians SET {set_clause} WHERE id = :id"), updates)

@@ -137,7 +137,7 @@ def get_work_order(work_order_id: str, db: Session = Depends(get_db)):
 @router.post("/", status_code=201, summary="Create work order", dependencies=[Depends(get_current_user)])
 def create_work_order(data: dict, db: Session = Depends(get_db)):
     wo_id = str(uuid.uuid4())
-    now   = datetime.datetime.utcnow()
+    now   = datetime.utcnow()
     db.execute(text(
         "INSERT INTO work_orders (id, hotel_id, title, description, priority, status, type,"
         " technician_id, asset_id, site_id, due_date, created_at, updated_at)"
@@ -183,7 +183,7 @@ def update_work_order(work_order_id: str, data: dict, db: Session = Depends(get_
     allowed = {"title","description","priority","status","type","technician_id","asset_id","due_date","started_at","completed_at"}
     updates = {k:v for k,v in data.items() if k in allowed and v is not None}
     if not updates: raise HTTPException(400, "No valid fields to update")
-    updates["updated_at"] = datetime.datetime.utcnow()
+    updates["updated_at"] = datetime.utcnow()
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates["id"] = work_order_id
     db.execute(text(f"UPDATE work_orders SET {set_clause} WHERE id = :id"), updates)
@@ -283,7 +283,7 @@ def transition_work_order(
         })
 
     # Build update payload
-    now     = datetime.datetime.utcnow()
+    now     = datetime.utcnow()
     updates = {
         "status":     to_state,
         "updated_at": now,

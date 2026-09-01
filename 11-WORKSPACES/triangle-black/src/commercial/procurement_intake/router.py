@@ -1,5 +1,6 @@
 from __future__ import annotations
-import uuid, datetime, json as _json, re
+import uuid, datetime
+from datetime import datetime as _dt, json as _json, re
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -101,7 +102,7 @@ def parse_request(data: dict, hotel_id: str = Depends(get_hotel_id),
         raise HTTPException(400, "raw_text is required")
 
     _ensure_intake_table(db)
-    now          = datetime.datetime.utcnow()
+    now          = _dt.utcnow()
     parsed_items = _extract_items(raw_text)
     inv_results  = []
     vendor_recs  = []
@@ -254,7 +255,7 @@ def create_pr_from_intake(data: dict, hotel_id: str = Depends(get_hotel_id),
     if not items:
         raise HTTPException(400, "items list is required")
 
-    now       = datetime.datetime.utcnow()
+    now       = _dt.utcnow()
     pr_id     = str(uuid.uuid4())
     names     = [i.get("name","item")[:30] for i in items[:3]]
     title     = "AUTO-PR: " + ", ".join(names)

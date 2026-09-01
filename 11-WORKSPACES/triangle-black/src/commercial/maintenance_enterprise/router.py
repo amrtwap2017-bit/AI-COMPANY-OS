@@ -68,7 +68,7 @@ def get_pm_plan(plan_id: str, db: Session = Depends(get_db),
 def create_pm_plan(data: dict, db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     pid = str(uuid.uuid4())
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     db.execute(text(
         "INSERT INTO maintenance_plans (id, asset_node_id, title, plan_type, frequency,"
         " next_due_date, status, owner, notes, created_at, updated_at)"

@@ -54,7 +54,7 @@ def projects_dashboard(hotel_id: str = Depends(get_hotel_id), db: Session = Depe
 def create_project(data: dict, db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)):
     pid = str(uuid.uuid4())
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     db.execute(text(
         "INSERT INTO projects (id, hotel_id, title, description, status, completion_pct,"
         " budget, manager_id, start_date, end_date, created_at, updated_at)"
@@ -141,7 +141,7 @@ def portfolio_summary(db: Session = Depends(get_db)):
         "by_status":        by_status,
         "projects":         projects_list,
         "currency":         "EGP",
-        "generated_at":     datetime.datetime.utcnow().isoformat(),
+        "generated_at":     _dt.utcnow().isoformat(),
     }
 @router.get("/{project_id}", summary="Get project")
 def get_project(project_id: str, db: Session = Depends(get_db),
@@ -291,6 +291,6 @@ def project_financials(project_id: str, db: Session = Depends(get_db)):
             "cost":     cost_status,
             "schedule": sched_status,
         },
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
     }
 

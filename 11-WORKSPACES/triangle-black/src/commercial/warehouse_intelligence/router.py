@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+from datetime import datetime as _dt
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -77,7 +78,7 @@ def stock_health(
     db: Session = Depends(get_db)
 ):
     """Complete warehouse stock health with sourcing guidance per category."""
-    now = datetime.datetime.utcnow()
+    now = _dt.utcnow()
     where  = "WHERE 1=1"
     params = {}
     if hotel_id:
@@ -99,7 +100,7 @@ def stock_health(
         return {"summary": {"critical":0,"low":0,"healthy":0,"overstocked":0,"total":0},
                 "critical_items":[],"low_stock_items":[],"overstocked":[],
                 "mentor_guidance":[{"priority":"INFO","message":"Stock data loading","action":"Retry in a moment"}],
-                "generated_at": datetime.datetime.utcnow().isoformat()}
+                "generated_at": _dt.utcnow().isoformat()}
 
     critical = []
     low      = []
@@ -211,7 +212,7 @@ def auto_reorder_plan(
     db: Session = Depends(get_db)
 ):
     """Generate complete reorder plan grouped by vendor category."""
-    now    = datetime.datetime.utcnow()
+    now    = _dt.utcnow()
     where  = "WHERE COALESCE(sb.quantity, 0) <= ii.min_stock"
     params = {}
     if hotel_id:
