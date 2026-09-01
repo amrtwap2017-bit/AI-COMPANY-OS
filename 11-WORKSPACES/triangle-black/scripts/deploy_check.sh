@@ -14,10 +14,13 @@ TESTS_PASS=$?
 echo "Checking syntax..."
 .venv/bin/python -m py_compile src/main.py && echo "✅ main.py syntax OK"
 
-# 3. TypeScript
+# 3. TypeScript (informational — Next.js manages its own types)
 echo "Checking TypeScript..."
-cd portal && npx tsc --noEmit 2>&1 | grep "error TS" | wc -l
-cd ..
+TS_ERRORS=$(cd portal && npx tsc --noEmit 2>&1 | grep "error TS" | wc -l)
+echo "TypeScript errors: $TS_ERRORS"
+if [ "$TS_ERRORS" -gt "50" ]; then
+    echo "⚠️  WARNING: High TypeScript error count ($TS_ERRORS) — investigate before deploy"
+fi
 
 # 4. Backup
 echo "Checking backup age..."
