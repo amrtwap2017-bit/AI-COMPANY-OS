@@ -1,0 +1,16 @@
+# Triangle Black — Local Development
+# Usage: docker compose -f infra/compose/base.yml -f infra/compose/local.yml up
+
+version: "3.9"
+
+services:
+  db:
+    ports:
+      - "5432:5432"  # Expose for local dev tools (DBeaver, etc.)
+
+  redis:
+    ports:
+      - "6379:6379"  # Expose for local dev inspection
+
+  # API runs locally (not in Docker for dev)
+  # Start with: bash ~/tb-start.sh

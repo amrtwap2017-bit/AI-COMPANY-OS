@@ -1,0 +1,59 @@
+# Triangle Black — Base Docker Compose Configuration
+# Common settings shared across all environments
+
+version: "3.9"
+
+x-api-base: &api-base
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+  environment:
+    - DATABASE_URL=${DATABASE_URL}
+    - TB_SECRET_KEY=${TB_SECRET_KEY}
+    - JWT_SECRET_KEY=${JWT_SECRET_KEY:-${TB_SECRET_KEY}}
+    - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+    - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    - ENVIRONMENT=${ENVIRONMENT:-production}
+    - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+    - AI_ENGINE_URL=${AI_ENGINE_URL:-http://localhost:11434}
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  # ── Database ──────────────────────────────────────────────
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tb_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-triangle_black}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tb_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # NEVER expose 5432 publicly — internal only
+
+  # ── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # NEVER expose 6379 publicly — internal only
+
+volumes:
+  pg_data:
+  redis_data:
