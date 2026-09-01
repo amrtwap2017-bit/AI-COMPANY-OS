@@ -6,6 +6,7 @@ from src.core.tenant import get_hotel_id
 from .repository import LeadRepository
 from .schemas import LeadCreate, LeadUpdate, LeadResponse
 from src.core.audit import audit_create
+from src.core.auth import get_current_user
 
 router = APIRouter()
 

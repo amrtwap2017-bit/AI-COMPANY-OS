@@ -6,7 +6,7 @@ from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
-from src.models import inventory_vendors, rfqs, rfq_vendor_quotes, purchase_orders
+# DISABLED: from src.models import inventory_vendors, rfqs, rfq_vendor_quotes, purchase_orders
 
 router = APIRouter(prefix="/supplier-portal")
 
