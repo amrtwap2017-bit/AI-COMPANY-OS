@@ -50,15 +50,15 @@ def get_attention_dashboard(
         ORDER BY created_at ASC LIMIT 10
     """)
     overdue_pm = _q("""
-        SELECT id, name, next_due_date, asset_node_id
+        SELECT id, title, next_due_date, asset_node_id
         FROM maintenance_plans WHERE hotel_id=:h
         AND next_due_date::DATE < CURRENT_DATE AND status != 'completed'
         ORDER BY next_due_date ASC LIMIT 10
     """)
     top_recs = _q("""
-        SELECT id, title, priority, recommendation_type, created_at
+        SELECT id, recommendation, risk_level, director, created_at
         FROM recommendations WHERE hotel_id=:h AND status='pending'
-        ORDER BY CASE priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
+        ORDER BY CASE risk_level WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
         created_at DESC LIMIT 5
     """)
     aging = _s("""
