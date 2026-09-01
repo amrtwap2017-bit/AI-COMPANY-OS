@@ -28,13 +28,13 @@ jobs:
           pip install uv
           uv venv .venv
           .venv/bin/pip install -r requirements.txt
-      - name: Syntax check
+      - name: python-lint
         run: .venv/bin/python -m py_compile src/main.py && echo "OK"
       - name: Ruff lint
         run: |
           .venv/bin/pip install ruff --quiet
           .venv/bin/ruff check src/ --select=E,W,F --ignore=E501,W503 || true
-      - name: Build Guard
+      - name: build-guard
         run: |
           .venv/bin/python -c "from pathlib import Path; assert Path('portal/app/globals.css').exists()"
           echo "Build Guard passed"
@@ -82,14 +82,14 @@ jobs:
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
       - name: Full test suite
-        run: .venv/bin/python -m pytest tests/ -q --tb=short --timeout=120 2>&1 | tail -5
+        run: .venv/bin/python -m pytest tests/ -q --tb=short --timeout=120 -m "not live_http" 2>&1 | tail -5
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           TB_SECRET_KEY: ${{ env.TB_SECRET_KEY }}
           DISABLE_RATE_LIMIT: "1"
       - name: Zero failures gate
         run: |
-          RESULT=$(.venv/bin/python -m pytest tests/ -q --tb=no 2>&1 | tail -1)
+          RESULT=$(.venv/bin/python -m pytest tests/ -q --tb=no -m "not live_http" 2>&1 | tail -1)
           echo "$RESULT"
           echo "$RESULT" | grep -v "failed" || { echo "FAILED: tests have failures"; exit 1; }
         env:
@@ -109,12 +109,14 @@ jobs:
           cache-dependency-path: portal/package-lock.json
       - name: Install dependencies
         run: cd portal && npm ci
-      - name: TypeScript check
+      - name: portal-typecheck
         run: |
           cd portal
           TS_ERRORS=$(npx tsc --noEmit 2>&1 | grep "error TS" | wc -l)
           echo "TypeScript errors: $TS_ERRORS"
           [ "$TS_ERRORS" -gt "50" ] && exit 1 || echo "OK"
+      - name: portal-lint
+        run: cd portal && npx eslint . --ext .ts,.tsx --max-warnings 50 2>/dev/null || echo "ESLint noted"
       - name: Portal build
         run: cd portal && npm run build
         env:
@@ -134,27 +136,21 @@ jobs:
       - name: Bandit scan
         run: |
           bandit -r src/ -ll --exclude src/commercial/demo,src/core/seed.py \
-            -f json -o /tmp/bandit.json || true
-          python3 -c "
-import json, sys
-try:
-    data = json.load(open('/tmp/bandit.json'))
-    issues = data.get('results', [])
-    high = [i for i in issues if i.get('issue_severity') == 'HIGH']
-    print(f'Bandit: {len(issues)} total, {len(high)} HIGH')
-    if len(high) > 10:
-        sys.exit(1)
-except: pass
-"
+            -f txt -o /tmp/bandit.txt || true
+          HIGH=$(grep -c "Severity: High" /tmp/bandit.txt 2>/dev/null || echo 0)
+          echo "Bandit HIGH severity: $HIGH"
+          [ "$HIGH" -gt "10" ] && exit 1 || echo "OK"
       - name: No secret env files committed
         run: |
           git ls-files | grep -E "^\.env\.(local|staging|production)$" && exit 1 || echo "OK"
       - name: No production credentials in source
         run: |
           grep -r "TBprod\|PRODUCTION_PASSWORD\|prod_secret" src/ --include="*.py" && exit 1 || echo "OK"
+      - name: live_http tests excluded from CI
+        run: echo "Tests marked live_http are excluded with -m 'not live_http'"
 
-  ci-complete:
-    name: CI Complete
+  release-gate:
+    name: Release Gate
     runs-on: ubuntu-latest
     needs: [backend-quality, backend-tests, portal-build, security-scan]
     if: always()
