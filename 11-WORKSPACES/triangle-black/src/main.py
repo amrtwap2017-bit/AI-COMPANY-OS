@@ -70,6 +70,7 @@ from src.commercial.service_reports.models import ServiceReport  # noqa
 from src.commercial.technicians.router import router as technicians_router
 from src.commercial.sites.router import router as sites_router
 from src.commercial.assets.router import router as assets_router
+from src.commercial.attention.router import router as attention_router
 from src.commercial.work_orders.router import router as work_orders_router
 from src.commercial.service_requests.router import router as service_requests_router
 from src.commercial.service_reports.router import router as service_reports_router
@@ -468,6 +469,7 @@ except Exception as e:
 # Inventory & Procurement
 app.include_router(inv_items_router, prefix="/api/v1")
 try:
+    app.include_router(attention_router, prefix="/api/v1")
     app.include_router(work_orders_router, prefix="/api/v1")
 except Exception as e:
     logger.warning("WARN: work_orders_router: {e}")
