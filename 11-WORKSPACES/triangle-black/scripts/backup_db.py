@@ -31,7 +31,7 @@ def run_backup():
     output_file = BACKUP_DIR / f"tb_backup_{timestamp}_{backup_id}.sql"
 
     # Resolve database URL
-    db_url = os.environ.get("DATABASE_URL", "postgresql://ai:ai123@localhost:5432/triangle_black")
+    db_url = os.environ.get("DATABASE_URL", os.environ.get("DATABASE_URL", "postgresql://ai:ai123@localhost:5432/triangle_black"))
     
     print(f"  Target File: {output_file.name}")
     print(f"  Source Node: {db_url.split('@')[-1]}")

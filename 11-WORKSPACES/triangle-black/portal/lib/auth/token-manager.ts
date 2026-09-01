@@ -74,8 +74,8 @@ export const tokenManager = {
     const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8030";
     try {
       const form = new URLSearchParams();
-      form.append("username", "amr@triangleblack.com");
-      form.append("password", "admin123");
+      form.append("username", "process.env.NEXT_PUBLIC_DEMO_EMAIL || """);
+      form.append("password", process.env.NEXT_PUBLIC_DEMO_PASSWORD || "");
       const res = await fetch(API + "/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
