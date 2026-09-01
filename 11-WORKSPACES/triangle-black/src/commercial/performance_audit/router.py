@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
+from datetime import datetime as _dt
 
 router = APIRouter(prefix="/performance", tags=["performance-audit"])
 

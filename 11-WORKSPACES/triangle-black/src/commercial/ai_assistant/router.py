@@ -5,6 +5,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from typing import Optional
 import json, requests, uuid, datetime
+from datetime import datetime as _dt
 
 router = APIRouter(prefix="/ai", tags=["ai-assistant"])
 

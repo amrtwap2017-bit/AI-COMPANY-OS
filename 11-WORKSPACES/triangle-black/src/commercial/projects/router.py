@@ -89,6 +89,7 @@ from uuid import uuid4
 from datetime import datetime
 from fastapi import HTTPException, Depends
 from sqlalchemy import text
+from datetime import datetime as _dt
 
 PROJECT_TRANSITIONS = {
     "planning": ["active", "cancelled"],
