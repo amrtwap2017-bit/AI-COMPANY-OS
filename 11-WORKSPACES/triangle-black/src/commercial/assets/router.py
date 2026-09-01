@@ -87,7 +87,8 @@ def get_asset(asset_id: str, db: Session = Depends(get_db)):
     if not row: raise HTTPException(404, "Asset not found")
     return row_to_dict(row)
 
-@router.post("/", status_code=201, summary="Create asset")
+@router.post("/", status_code=201, summary="Create asset", dependencies=[Depends(get_current_user)])
+
 def create_asset(data: dict, db: Session = Depends(get_db)):
     asset_id = str(uuid.uuid4())
     now      = _dt.utcnow()
@@ -124,7 +125,8 @@ def create_asset(data: dict, db: Session = Depends(get_db)):
         pass
     return get_asset(asset_id, db)
 
-@router.patch("/{asset_id}", summary="Update asset")
+@router.patch("/{asset_id}", summary="Update asset", dependencies=[Depends(get_current_user)])
+
 def update_asset(asset_id: str, data: dict, db: Session = Depends(get_db)):
     allowed = {"name","category","manufacturer","model","serial_number","location_description","service_frequency","criticality","status","notes"}
     updates = {k:v for k,v in data.items() if k in allowed and v is not None}
