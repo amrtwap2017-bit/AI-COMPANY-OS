@@ -8,8 +8,8 @@ services:
     ports:
       - "8030:8030"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/triangle_black
-      - TB_SECRET_KEY=staging-secret-key-2026
+      - DATABASE_URL=${DATABASE_URL:-postgresql+psycopg2://tb_staging:${POSTGRES_PASSWORD}@db:5432/triangle_black}
+      - TB_SECRET_KEY=${TB_SECRET_KEY}
       - DISABLE_RATE_LIMIT=0
       - ENABLE_TENANT_RATE_LIMIT=1
       - TENANT_RATE_LIMIT_MAX=500
@@ -31,11 +31,11 @@ services:
       - NEXT_PUBLIC_API_URL=http://backend:8030
 
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_DB: triangle_black
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-tb_staging}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - staging_pg_data:/var/lib/postgresql/data
     healthcheck:

@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-ai}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ai123}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB:-triangle_black}
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -45,8 +45,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432"
+    # Port 5432 NOT exposed — internal only
 
   # ─── Redis ───────────────────────────────────────────────────
   redis:
