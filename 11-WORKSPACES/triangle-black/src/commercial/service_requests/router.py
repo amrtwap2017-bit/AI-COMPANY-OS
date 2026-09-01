@@ -51,7 +51,7 @@ def get_service_request(sr_id: str, db: Session = Depends(get_db)):
 @router.post("/", status_code=201, summary="Create service request")
 def create_service_request(data: dict, db: Session = Depends(get_db)):
     sr_id = str(uuid.uuid4())
-    now   = datetime.datetime.utcnow()
+    now   = _dt.utcnow()
     db.execute(text(
         "INSERT INTO service_requests (id, hotel_id, title, description, category, urgency, status, submitted_by, contact_phone, created_at, updated_at)"
         " VALUES (:id, :hotel_id, :title, :description, :category, :urgency, :status, :submitted_by, :contact_phone, :created_at, :updated_at)"
@@ -75,7 +75,7 @@ def create_service_request(data: dict, db: Session = Depends(get_db)):
 def convert_to_work_order(sr_id: str, db: Session = Depends(get_db)):
     sr = get_service_request(sr_id, db)
     wo_id = str(uuid.uuid4())
-    now   = datetime.datetime.utcnow()
+    now   = _dt.utcnow()
     db.execute(text(
         "INSERT INTO work_orders (id, hotel_id, title, description, priority, status, type, created_at, updated_at)"
         " VALUES (:id, :hotel_id, :title, :description, :priority, :status, :type, :created_at, :updated_at)"

@@ -7,6 +7,7 @@ from src.commercial.master_intelligence.service import MasterIntelligenceService
 
 from src.core.auth import get_current_user as _gcu_v7
 from fastapi import Depends as _Dep_v7
+from datetime import datetime as _dt
 router = APIRouter(prefix="/intelligence", tags=["Master Intelligence Aggregator"], dependencies=[_Dep_v7(_gcu_v7)])
 
 @router.get("/snapshot")
@@ -100,7 +101,7 @@ def get_intelligence_summary(
     return {
         "product_name": "Triangle Black Operational Intelligence",
         "hotel_id": hotel_id,
-        "generated_at": datetime.datetime.utcnow().isoformat(),
+        "generated_at": _dt.utcnow().isoformat(),
         "pillars": {
             "asset_intelligence": {
                 "total_assets": total_assets,

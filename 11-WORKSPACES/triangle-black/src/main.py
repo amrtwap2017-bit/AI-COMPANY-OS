@@ -1048,7 +1048,7 @@ def complete_work_order(wo_id: str, data: dict = {}):
     eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
     with Session(eng) as db:
         try:
-            now = datetime.datetime.utcnow()
+            now = datetime.utcnow()
             # Update WO status
             db.execute(text("""
                 UPDATE work_orders SET status='completed', completed_at=:now,
@@ -7763,7 +7763,7 @@ def health_v2():
 
     return {
         "status": overall,
-        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "timestamp": datetime.utcnow().isoformat(),
         "version": "2.0.0-sprint329",
         "platform": "Triangle Black Enterprise MEP",
         "subsystems": {
