@@ -344,14 +344,14 @@ class ROIService:
 
         # Count source records for transparency
         try:
-            po_count = self.db.execute(_sa_text(
+            po_count = self.db.execute(text(
                 "SELECT COUNT(*) FROM purchase_orders WHERE hotel_id=:h"
             ), {"h": H}).scalar() or 0
-            inv_count = self.db.execute(_sa_text(
+            inv_count = self.db.execute(text(
                 "SELECT COUNT(*) FROM invoices WHERE hotel_id=:h"
             ), {"h": H}).scalar() or 0
             # Also get WO count as a proxy for operational activity
-            wo_count = self.db.execute(_sa_text(
+            wo_count = self.db.execute(text(
                 "SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h"
             ), {"h": H}).scalar() or 0
         except Exception:

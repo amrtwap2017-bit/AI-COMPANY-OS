@@ -20,15 +20,26 @@ def get_attention_dashboard(
     db: Session = Depends(get_db),
 ):
     H = hotel_id
+    import logging as _log_att
+    _logger_att = _log_att.getLogger("tb.attention")
+
     def _q(sql, params=None):
         try:
-            return db.execute(text(sql), params or {"h": H}).fetchall()
-        except Exception:
+            result = db.execute(text(sql), params or {"h": H}).fetchall()
+            return result
+        except Exception as _e:
+            _logger_att.warning(f"[attention._q] Query failed: {_e}")
+            try: db.rollback()
+            except: pass
             return []
     def _s(sql, params=None):
         try:
-            return db.execute(text(sql), params or {"h": H}).scalar() or 0
-        except Exception:
+            val = db.execute(text(sql), params or {"h": H}).scalar()
+            return val or 0
+        except Exception as _e:
+            _logger_att.warning(f"[attention._s] Query failed: {_e}")
+            try: db.rollback()
+            except: pass
             return 0
 
     critical_wos = _q("""
