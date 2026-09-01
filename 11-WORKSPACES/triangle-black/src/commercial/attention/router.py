@@ -34,7 +34,7 @@ def get_attention_dashboard(
     critical_wos = _q("""
         SELECT id, title, priority, status, asset_id, created_at
         FROM work_orders WHERE hotel_id=:h
-        AND priority IN ('critical','emergency')
+        AND priority IN ('critical','emergency','high','urgent')
         AND status NOT IN ('completed','cancelled','closed')
         ORDER BY created_at ASC LIMIT 10
     """)
@@ -53,12 +53,12 @@ def get_attention_dashboard(
     aging = _s("""
         SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h
         AND technician_id IS NULL
-        AND status NOT IN ('completed','cancelled','closed')
+        AND status NOT IN ('completed','cancelled','closed','done','resolved')
         AND created_at < NOW() - INTERVAL '48 hours'
     """)
     total_critical = _s("""
         SELECT COUNT(*) FROM work_orders WHERE hotel_id=:h
-        AND priority IN ('critical','emergency')
+        AND priority IN ('critical','emergency','high','urgent')
         AND status NOT IN ('completed','cancelled','closed')
     """)
     total_overdue_pm = _s("""
