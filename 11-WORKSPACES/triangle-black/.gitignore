@@ -20,3 +20,9 @@ portal/.next/
 portal/out/
 dist/
 *.egg-info/
+
+# Production secrets and certificates
+*.key
+*.pem
+*.cert
+infra/secrets/
