@@ -41,7 +41,7 @@ with engine.connect() as conn:
 
     # Get all assets
     assets = conn.execute(text("""
-        SELECT id, name, asset_type, location
+        SELECT id, name
         FROM assets WHERE hotel_id=:h AND deleted_at IS NULL
     """), {"h": H}).fetchall()
 
