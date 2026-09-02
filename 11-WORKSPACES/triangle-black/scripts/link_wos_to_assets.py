@@ -50,7 +50,7 @@ with engine.connect() as conn:
 
     # Build asset name lookup
     asset_by_name = {}
-    for a_id, a_name, a_type, a_loc in assets:
+    for a_id, a_name in assets:
         if a_name:
             asset_by_name[a_name.lower()] = a_id
             # Also index individual words (3+ chars)
