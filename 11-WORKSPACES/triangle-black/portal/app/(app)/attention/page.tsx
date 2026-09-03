@@ -187,6 +187,48 @@ export default function AttentionPage() {
           </div>
         )}
 
+        {/* Action Required Cards */}
+        {(summary.aging_unassigned_wos > 0 || summary.overdue_pm_plans > 0) && (
+          <div style={{marginBottom:24}}>
+            <h3 style={{margin:"0 0 12px",fontSize:14,color:"rgba(255,255,255,0.5)",
+              textTransform:"uppercase",letterSpacing:1}}>⚡ Actions Required</h3>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:12}}>
+              {summary.aging_unassigned_wos > 0 && (
+                <a href="/work-orders?filter=unassigned" style={{textDecoration:"none"}}>
+                  <div style={{background:"rgba(147,51,234,0.1)",border:"1px solid rgba(147,51,234,0.3)",
+                    borderRadius:12,padding:20,cursor:"pointer",transition:"all 0.2s"}}>
+                    <div style={{fontSize:13,color:"rgba(147,51,234,0.9)",fontWeight:600,marginBottom:8}}>
+                      ⏰ Assign Technicians
+                    </div>
+                    <div style={{fontSize:24,fontWeight:700,color:"white",marginBottom:4}}>
+                      {summary.aging_unassigned_wos}
+                    </div>
+                    <div style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>
+                      WOs unassigned for &gt;48h → View Unassigned
+                    </div>
+                  </div>
+                </a>
+              )}
+              {summary.overdue_pm_plans > 0 && (
+                <a href="/maintenance/pm-plans?filter=overdue" style={{textDecoration:"none"}}>
+                  <div style={{background:"rgba(234,88,12,0.1)",border:"1px solid rgba(234,88,12,0.3)",
+                    borderRadius:12,padding:20,cursor:"pointer"}}>
+                    <div style={{fontSize:13,color:"rgba(234,88,12,0.9)",fontWeight:600,marginBottom:8}}>
+                      📋 Schedule PM Plans
+                    </div>
+                    <div style={{fontSize:24,fontWeight:700,color:"white",marginBottom:4}}>
+                      {summary.overdue_pm_plans}
+                    </div>
+                    <div style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>
+                      Overdue maintenance plans → View PM Plans
+                    </div>
+                  </div>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Data Quality Notice */}
         <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
           borderRadius:12,padding:20,marginBottom:24}}>
