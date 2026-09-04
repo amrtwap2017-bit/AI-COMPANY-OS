@@ -156,8 +156,33 @@ export default function AttentionPage() {
                   }}>{rec.risk_level||"??"}</span>
                   <span style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>{rec.director}</span>
                 </div>
-                <div style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.5}}>
+                <div style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.5,marginBottom:10}}>
                   {(rec.recommendation||"").slice(0,120)}{rec.recommendation?.length > 120 ? "..." : ""}
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  <button
+                    onClick={async()=>{
+                      try{await fetch(`/api/v1/recommendations/${rec.id}/approve`,
+                        {method:"POST",headers:{"Content-Type":"application/json"},
+                         body:JSON.stringify({reviewer:"dashboard",notes:"Approved via attention dashboard"})});
+                        window.location.reload();}catch(e){}
+                    }}
+                    style={{flex:1,background:"rgba(22,163,74,0.15)",border:"1px solid rgba(22,163,74,0.4)",
+                      borderRadius:6,padding:"5px 10px",color:"#86efac",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+                    ✓ Approve
+                  </button>
+                  <button
+                    onClick={async()=>{
+                      const reason=prompt("Reason for rejection (optional):")||"Rejected via dashboard";
+                      try{await fetch(`/api/v1/recommendations/${rec.id}/reject`,
+                        {method:"POST",headers:{"Content-Type":"application/json"},
+                         body:JSON.stringify({reason})});
+                        window.location.reload();}catch(e){}
+                    }}
+                    style={{flex:1,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",
+                      borderRadius:6,padding:"5px 10px",color:"#fca5a5",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+                    ✗ Skip
+                  </button>
                 </div>
               </div>
             ))}
