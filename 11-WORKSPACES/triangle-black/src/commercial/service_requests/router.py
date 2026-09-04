@@ -49,7 +49,8 @@ def get_service_request(sr_id: str, db: Session = Depends(get_db)):
     if not row: raise HTTPException(404, "Service request not found")
     return row_to_dict(row)
 
-@router.post("/", status_code=201, summary="Create service request")
+@router.post("/", status_code=201, summary="Create service request", dependencies=[Depends(get_current_user)])
+
 def create_service_request(data: dict, db: Session = Depends(get_db)):
     sr_id = str(uuid.uuid4())
     now   = _dt.utcnow()
@@ -72,7 +73,8 @@ def create_service_request(data: dict, db: Session = Depends(get_db)):
     db.commit()
     return get_service_request(sr_id, db)
 
-@router.post("/{sr_id}/convert-to-wo", summary="Convert to work order")
+@router.post("/{sr_id}/convert-to-wo", summary="Convert to work order", dependencies=[Depends(get_current_user)])
+
 def convert_to_work_order(sr_id: str, db: Session = Depends(get_db)):
     sr = get_service_request(sr_id, db)
     wo_id = str(uuid.uuid4())
@@ -158,7 +160,8 @@ def update_service_request(
 
 
 # ── Sprint-231: SR → WO Reference Vertical Slice ──────────────────────────────
-@router.post("/{sr_id}/generate-work-order", summary="Generate Work Order from Service Request")
+@router.post("/{sr_id}/generate-work-order", summary="Generate Work Order from Service Request", dependencies=[Depends(get_current_user)])
+
 def generate_work_order_from_sr(sr_id: str, db: Session = Depends(get_db)):
     """
     Reference vertical slice endpoint: Service Request → Work Order.
