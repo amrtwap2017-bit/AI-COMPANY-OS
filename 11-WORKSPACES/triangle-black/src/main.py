@@ -1041,7 +1041,7 @@ def get_payment_tracking_v2(limit: int = 50):
 
 
 # ── Sprint 150: WO Completion → Asset Sync ───────────────────────────────────
-@app.post("/api/v1/work-orders/{wo_id}/complete", tags=["work-orders"], operation_id="complete_work_order_inline")
+@app.post("/api/v1/work-orders/{wo_id}/complete", tags=["work-orders"], operation_id="complete_work_order_inline", dependencies=[Depends(_get_current_user)])
 def complete_work_order(wo_id: str, data: dict = {}):
     """Mark WO complete and sync to asset last_maintenance_date"""
     from sqlalchemy import text, create_engine
@@ -1110,7 +1110,7 @@ def get_sr_work_order(sr_id: str):
             return dict(row._mapping) if row else {}
         except: return {}
 
-@app.post("/api/v1/service-requests/{sr_id}/create-work-order", tags=["service-requests"])
+@app.post("/api/v1/service-requests/{sr_id}/create-work-order", tags=["service-requests"], dependencies=[Depends(_get_current_user)])
 def create_wo_from_sr(sr_id: str, data: dict = {}):
     """Create a work order from a service request"""
     from sqlalchemy import text, create_engine
@@ -1659,7 +1659,9 @@ def create_work_order(body: dict):
         return result
 
 
-@app.post("/api/v1/service-requests/", tags=["service-requests"], operation_id="create_service_request_inline")
+# V8-SECURITY: DISABLED — service-requests inline POST (redundant with secured router)
+# Secured router handles this route with auth
+# @app.post("/api/v1/service-requests/", tags=["service-requests"], operation_id="create_service_request_inline")
 def create_service_request(body: dict):
     """Create a new service request"""
     from sqlalchemy import text, create_engine
@@ -1694,7 +1696,9 @@ def create_service_request(body: dict):
         return {"id":sr_id,"status":"open","urgency":body.get("urgency"),"title":body.get("title"),"created_at":now.isoformat()}
 
 
-@app.post("/api/v1/leads/", tags=["leads"], operation_id="create_lead_inline")
+# V8-SECURITY: DISABLED — leads inline POST (redundant with secured router)
+# Secured router handles this route with auth
+# @app.post("/api/v1/leads/", tags=["leads"], operation_id="create_lead_inline")
 def create_lead(body: dict):
     """Create a new lead"""
     from sqlalchemy import text, create_engine
