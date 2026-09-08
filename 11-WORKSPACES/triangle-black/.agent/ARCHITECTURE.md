@@ -1,38 +1,57 @@
-# Triangle Black — Architecture
+# TRIANGLE BLACK — ARCHITECTURE CONSTITUTION
+Version: V9
+Date: 2026-09-08
 
-## Stack
-Backend: FastAPI + Python 3.12 + SQLAlchemy + PostgreSQL
-Cache: Redis
-Auth: JWT (hotel_id in claims)
-Frontend: Next.js 14 (App Router)
-Server: port 8030 (API), port 3000 (portal)
+## ABSOLUTE RULES
 
-## Module Pattern
-src/commercial/{module}/
-  __init__.py
-  router.py    ← APIRouter with Depends(get_current_user)
-  service.py   ← Business logic, reads DB directly
+### Rule 1: No new code in main.py
+main.py is orchestration ONLY:
+- app = FastAPI(...)
+- middleware registration
+- router include_router()
+- startup/shutdown events
+- health endpoints (exception — these are infrastructure)
 
-## Router Registration
-Hotels router anchor: "app.include_router(hotels_router, prefix=API_PREFIX)"
-New routers registered via try/except pattern:
-  try:
-      from src.commercial.{mod}.router import router as {mod}_router
-      app.include_router({mod}_router, prefix=API_PREFIX)
-      print('  OK: {mod}_router')
-  except Exception as _e:
-      logger.warning(...)
+NEVER in main.py:
+- create_engine()
+- sessionmaker()
+- business logic
+- SQL queries
+- tenant resolution
+- AI logic
+- route handlers with business logic
 
-## Key Modules (V6)
-  onboarding/ — POST /onboarding/provision + validate + status
-  data_import/ — preview/validate/assets/suppliers/schema/history
-  recommendations/ — generate/list/get/approve/reject/history/summary
-  roi/ — snapshot/snapshots/delta/report
-  digital_twin/ — state/graph/impact-chain/asset-impact/wo-impact
-  ai_directors/ — maintenance/procurement/operations/executive/all/analyze
+### Rule 2: Single database connection
+ONLY src/core/database.py may call create_engine()
+All other files must use: from src.core.database import get_db, engine
 
-## Design System
-  globals.css: tb- prefix classes
-  Available: tb-canvas, tb-kpi, tb-section, tb-table, tb-badge
-  Flex: tb-flex-between, tb-flex-col, tb-flex-gap-3
-  New (V6-F04): tb-flex-col-gap-sm/md, tb-text-center, tb-mt-sm/md
+### Rule 3: Auth on every mutation
+Every @router.post, @router.patch, @router.delete, @router.put
+MUST have either:
+  current_user: User = Depends(get_current_user)
+OR:
+  dependencies=[Depends(get_current_user)]
+
+### Rule 4: hotel_id from JWT only
+hotel_id MUST come from get_hotel_id() dependency
+NEVER from request body or query params for tenant-scoped data
+
+### Rule 5: No new architectural patterns without ADR
+Create docs/adr/ADR-XXX-description.md before implementing
+
+## CANONICAL LAYERS
+
+Request → Router → ApplicationService → Repository → Database
+                ↕
+           Domain Logic
+
+## DATABASE ACCESS HIERARCHY
+
+src/core/database.py       — CANONICAL: engine, SessionLocal, get_db
+src/core/tenant.py         — CANONICAL: get_hotel_id from JWT
+src/*/repositories/*.py    — ALLOWED: use get_db
+src/*/services/*.py        — ALLOWED: use repositories
+src/*/router.py            — ALLOWED: Depends(get_db), Depends(get_hotel_id)
+src/main.py                — ALLOWED: only for health check fallback
+scripts/                   — ALLOWED: standalone scripts only
+tests/                     — ALLOWED: test fixtures only
