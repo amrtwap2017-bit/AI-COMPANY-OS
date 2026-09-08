@@ -1244,7 +1244,7 @@ def get_dashboard_summary():
 
 # ── PROGRAM 2: WORKFLOW AUTOMATION ENGINE (Sprint 169) ─────────────────────────
 
-@app.post("/api/v1/automation/run", tags=["automation"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/automation/run", tags=["automation"], dependencies=[_Depends(_get_current_user)])
 @app.get("/api/v1/automation/run", tags=["automation"])
 def run_automation_engine():
     """
@@ -1735,7 +1735,7 @@ def create_lead(body: dict):
         return {"id":lead_id,"status":"new","name":body.get("name"),"company":body.get("company"),"created_at":now.isoformat()}
 
 
-@app.post("/api/v1/purchase-requests/", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/purchase-requests/", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 def create_purchase_request(body: dict):
     """Create a new purchase request"""
     from sqlalchemy import text, create_engine
@@ -1781,7 +1781,7 @@ def create_purchase_request(body: dict):
         return {"id":pr_id,"status":"pending","pr_number":pr_num,"title":title,"requester":requester,"created_at":now.isoformat()}
 
 
-@app.post("/api/v1/work-orders/{wo_id}/status", tags=["work-orders"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/work-orders/{wo_id}/status", tags=["work-orders"], dependencies=[_Depends(_get_current_user)])
 def update_wo_status(wo_id: str, body: dict):
     """Update work order status — open/in_progress/completed/cancelled"""
     from sqlalchemy import text, create_engine
@@ -1824,7 +1824,7 @@ def update_wo_status(wo_id: str, body: dict):
         return {"id":wo_id,"status":status,"updated_at":now.isoformat()}
 
 
-@app.post("/api/v1/service-requests/{sr_id}/status", tags=["service-requests"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/service-requests/{sr_id}/status", tags=["service-requests"], dependencies=[_Depends(_get_current_user)])
 def update_sr_status(sr_id: str, body: dict):
     """Update service request status"""
     from sqlalchemy import text, create_engine
@@ -1846,7 +1846,7 @@ def update_sr_status(sr_id: str, body: dict):
         return {"id":sr_id,"status":status,"updated_at":now.isoformat()}
 
 
-@app.post("/api/v1/leads/{lead_id}/status", tags=["leads"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/leads/{lead_id}/status", tags=["leads"], dependencies=[_Depends(_get_current_user)])
 def update_lead_status(lead_id: str, body: dict):
     """Move lead through pipeline stages"""
     from sqlalchemy import text, create_engine
@@ -1866,7 +1866,7 @@ def update_lead_status(lead_id: str, body: dict):
         return {"id":lead_id,"status":status,"updated_at":now.isoformat()}
 
 
-@app.post("/api/v1/purchase-requests/{pr_id}/approve", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/purchase-requests/{pr_id}/approve", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 def approve_purchase_request(pr_id: str, body: dict):
     """Approve or reject a purchase request"""
     from sqlalchemy import text, create_engine
@@ -1953,7 +1953,7 @@ def global_search(q: str = "", limit: int = 8):
 
 # ── SPRINT 192: CONTRACT RENEWAL ENDPOINT ────────────────────────────────────
 
-@app.post("/api/v1/contracts/{contract_id}/renew", tags=["contracts"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/contracts/{contract_id}/renew", tags=["contracts"], dependencies=[_Depends(_get_current_user)])
 def renew_contract(contract_id: str, body: dict = None):
     """Create a contract renewal — extends end_date and increments renewal_count"""
     from sqlalchemy import text, create_engine
@@ -2721,7 +2721,7 @@ def list_permissions():
 
 # ── SPRINT 239: PASSWORD CHANGE ───────────────────────────────────────────────
 
-@app.post("/api/v1/auth/change-password", tags=["auth"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/auth/change-password", tags=["auth"], dependencies=[_Depends(_get_current_user)])
 def change_password(request: Request, current_password: str, new_password: str):
     """Change password for authenticated user"""
     from sqlalchemy import text, create_engine
@@ -3073,7 +3073,7 @@ def get_vendor(vendor_id: str):
             if "404" in str(e): raise
             return {"error": str(e)}
 
-@app.post("/api/v1/vendors/", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/vendors/", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def create_vendor(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3102,7 +3102,7 @@ async def create_vendor(request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.patch("/api/v1/vendors/{vendor_id}", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/vendors/{vendor_id}", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def update_vendor(vendor_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3147,7 +3147,7 @@ def get_sow_detail(sow_id: str):
             if "404" in str(e): raise
             return {"error": str(e)}
 
-@app.post("/api/v1/scope-of-work/{sow_id}/approve", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/scope-of-work/{sow_id}/approve", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def approve_sow(sow_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3168,7 +3168,7 @@ async def approve_sow(sow_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.patch("/api/v1/scope-of-work/{sow_id}", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/scope-of-work/{sow_id}", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def update_sow(sow_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3192,7 +3192,7 @@ async def update_sow(sow_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/scope-of-work/{sow_id}/boq-items", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/scope-of-work/{sow_id}/boq-items", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def add_boq_item(sow_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3256,7 +3256,7 @@ def bid_comparison(rfq_id: str):
             if "404" in str(e): raise
             return {"error": str(e)}
 
-@app.post("/api/v1/rfq/{rfq_id}/award", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/rfq/{rfq_id}/award", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def award_rfq(rfq_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3279,7 +3279,7 @@ async def award_rfq(rfq_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/purchase-orders-v2/", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/purchase-orders-v2/", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def create_po_v2(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3311,7 +3311,7 @@ async def create_po_v2(request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/purchase-orders-v2/{po_id}/line-items", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/purchase-orders-v2/{po_id}/line-items", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def add_po_line_item(po_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3350,7 +3350,7 @@ async def add_po_line_item(po_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.patch("/api/v1/purchase-orders-v2/{po_id}/line-items/{line_id}", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/purchase-orders-v2/{po_id}/line-items/{line_id}", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def update_po_line_item(po_id: str, line_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3386,7 +3386,7 @@ async def update_po_line_item(po_id: str, line_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/goods-receipt-notes/", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/goods-receipt-notes/", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 async def create_grn(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
@@ -3450,7 +3450,7 @@ def list_grns(limit: int = 50):
 
 
 
-@app.post("/api/v1/debug/upload-test", tags=["debug"], include_in_schema=False, dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/debug/upload-test", tags=["debug"], include_in_schema=False, dependencies=[_Depends(_get_current_user)])
 async def debug_upload(request: Request):
     """Debug endpoint to test multipart parsing"""
     try:
@@ -3482,7 +3482,7 @@ DOC_CATEGORIES = {
     "grn": ["delivery_note","inspection_report","packing_list","other"],
 }
 
-@app.post("/api/v1/documents/v2/upload", tags=["documents"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/documents/v2/upload", tags=["documents"], dependencies=[_Depends(_get_current_user)])
 async def upload_document(request: Request):
     """Upload a document for any entity: vendor, purchase_orders_v2, sow, grn"""
     import os, uuid
@@ -3623,7 +3623,7 @@ def view_document(doc_id: str):
         except HTTPException: raise
         except Exception as e: raise HTTPException(500, str(e))
 
-@app.delete("/api/v1/documents/v2/{doc_id}", tags=["documents"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/documents/v2/{doc_id}", tags=["documents"], dependencies=[_Depends(_get_current_user)])
 def delete_document(doc_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -3758,7 +3758,7 @@ def get_invoice(invoice_id: str):
         except HTTPException: raise
         except Exception as e: return {"error": str(e)}
 
-@app.post("/api/v1/supplier-invoices/", tags=["invoices"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/supplier-invoices/", tags=["invoices"], dependencies=[_Depends(_get_current_user)])
 async def create_invoice(request: Request):
     import os, uuid
     from sqlalchemy import text, create_engine
@@ -3807,7 +3807,7 @@ async def create_invoice(request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/supplier-invoices/{invoice_id}/match", tags=["invoices"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/supplier-invoices/{invoice_id}/match", tags=["invoices"], dependencies=[_Depends(_get_current_user)])
 def run_three_way_match(invoice_id: str):
     """Run 3-way match: Invoice vs PO vs GRN"""
     import os
@@ -3866,7 +3866,7 @@ def run_three_way_match(invoice_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/supplier-invoices/{invoice_id}/approve", tags=["invoices"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/supplier-invoices/{invoice_id}/approve", tags=["invoices"], dependencies=[_Depends(_get_current_user)])
 async def approve_invoice(invoice_id: str, request: Request):
     import os
     from sqlalchemy import text, create_engine
@@ -3890,7 +3890,7 @@ async def approve_invoice(invoice_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/supplier-invoices/{invoice_id}/pay", tags=["invoices"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/supplier-invoices/{invoice_id}/pay", tags=["invoices"], dependencies=[_Depends(_get_current_user)])
 async def record_payment(invoice_id: str, request: Request):
     import os, uuid
     from sqlalchemy import text, create_engine
@@ -3999,7 +3999,7 @@ def get_lead_portal_v2(lead_id: str):
 
 # ── SPRINT 251: UNIVERSAL DELETE ENDPOINTS ────────────────────────────────────
 
-@app.delete("/api/v1/work-orders/{wo_id}", tags=["operations"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/work-orders/{wo_id}", tags=["operations"], dependencies=[_Depends(_get_current_user)])
 
 
 # FIX: assets-sync registered BEFORE /{wo_id} DELETE to avoid 405
@@ -4020,7 +4020,7 @@ def _get_assets_sync_fix(request: Request):
     except Exception:
         return {"hotel_id": hotel_id, "synced": True, "work_order_count": 0}
 
-@app.delete("/api/v1/work-orders-v2/{wo_id}", tags=["operations"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/work-orders-v2/{wo_id}", tags=["operations"], dependencies=[_Depends(_get_current_user)])
 def delete_work_order(wo_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -4038,7 +4038,7 @@ def delete_work_order(wo_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.delete("/api/v1/service-requests/{sr_id}", tags=["operations"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/service-requests/{sr_id}", tags=["operations"], dependencies=[_Depends(_get_current_user)])
 def delete_service_request(sr_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -4053,7 +4053,7 @@ def delete_service_request(sr_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.delete("/api/v1/assets/{asset_id}", tags=["operations"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/assets/{asset_id}", tags=["operations"], dependencies=[_Depends(_get_current_user)])
 def delete_asset(asset_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -4068,7 +4068,7 @@ def delete_asset(asset_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.delete("/api/v1/vendors/v2/{vendor_id}", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/vendors/v2/{vendor_id}", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 def delete_vendor(vendor_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -4083,7 +4083,7 @@ def delete_vendor(vendor_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.delete("/api/v1/scope-of-work/v2/{sow_id}", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/scope-of-work/v2/{sow_id}", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 def delete_sow(sow_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -4098,7 +4098,7 @@ def delete_sow(sow_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.delete("/api/v1/supplier-invoices/v2/{invoice_id}", tags=["invoices"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/supplier-invoices/v2/{invoice_id}", tags=["invoices"], dependencies=[_Depends(_get_current_user)])
 def delete_invoice(invoice_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -4113,7 +4113,7 @@ def delete_invoice(invoice_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.delete("/api/v1/purchase-orders-v2/v2/{po_id}", tags=["procurement"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/purchase-orders-v2/v2/{po_id}", tags=["procurement"], dependencies=[_Depends(_get_current_user)])
 def delete_po(po_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -5307,7 +5307,7 @@ def list_notifications(limit: int = 50, unread_only: bool = False):
         except Exception as e:
             db.rollback(); return {"notifications":[],"unread_count":0,"total":0}
 
-@app.post("/api/v1/platform-notif/{notif_id}/read", tags=["notifications"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/platform-notif/{notif_id}/read", tags=["notifications"], dependencies=[_Depends(_get_current_user)])
 def mark_notification_read(notif_id: str):
     import os
     from sqlalchemy import text, create_engine
@@ -5321,7 +5321,7 @@ def mark_notification_read(notif_id: str):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/platform-notif/mark-all-read", tags=["notifications"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/platform-notif/mark-all-read", tags=["notifications"], dependencies=[_Depends(_get_current_user)])
 def mark_all_read():
     import os
     from sqlalchemy import text, create_engine
@@ -5335,7 +5335,7 @@ def mark_all_read():
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.post("/api/v1/platform-notif/generate", tags=["notifications"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/platform-notif/generate", tags=["notifications"], dependencies=[_Depends(_get_current_user)])
 def generate_notifications():
     """Auto-generate notifications from live platform data"""
     import os, uuid
@@ -5428,7 +5428,7 @@ def generate_notifications():
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.patch("/api/v1/work-orders/{wo_id}/assign", tags=["operations"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/work-orders/{wo_id}/assign", tags=["operations"], dependencies=[_Depends(_get_current_user)])
 async def assign_work_order(wo_id: str, request: Request):
     """Assign technician to work order (for Kanban dispatch)"""
     import os
@@ -5452,7 +5452,7 @@ async def assign_work_order(wo_id: str, request: Request):
         except Exception as e:
             db.rollback(); return {"error": str(e)}
 
-@app.patch("/api/v1/work-orders/{wo_id}/status", tags=["operations"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/work-orders/{wo_id}/status", tags=["operations"], dependencies=[_Depends(_get_current_user)])
 async def update_wo_status(wo_id: str, request: Request):
     """Update work order status (for Kanban dispatch)"""
     import os
@@ -5725,7 +5725,7 @@ def cash_flow():
 
 # ── SPRINT 258: CUSTOMER PORTAL API ──────────────────────────────────────────
 
-@app.post("/api/v1/client/login", tags=["client-portal"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/client/login", tags=["client-portal"])
 async def client_login(request: Request):
     """Client portal login with email + PIN"""
     import os, uuid
@@ -5830,7 +5830,7 @@ def client_work_orders(site_id: str, status: str = None, limit: int = 50):
         except Exception as e:
             db.rollback(); return []
 
-@app.post("/api/v1/client/service-requests", tags=["client-portal"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/client/service-requests", tags=["client-portal"], dependencies=[_Depends(_get_current_user)])
 async def client_create_sr(request: Request):
     """Client raises a new service request"""
     import os, uuid
@@ -5904,7 +5904,7 @@ def client_projects(site_id: str):
 
 # ── SPRINT 259: SUPPLIER PORTAL API ──────────────────────────────────────────
 
-@app.post("/api/v1/supplier/login", tags=["supplier-portal"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/supplier/login", tags=["supplier-portal"])
 async def supplier_login(request: Request):
     """Supplier portal login with email + PIN"""
     import os
@@ -6029,7 +6029,7 @@ def supplier_rfqs(vendor_id: str, limit: int = 20):
         except Exception as e:
             db.rollback(); return []
 
-@app.post("/api/v1/supplier/quotes", tags=["supplier-portal"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/supplier/quotes", tags=["supplier-portal"], dependencies=[_Depends(_get_current_user)])
 async def submit_quote(request: Request):
     """Supplier submits quotation for an RFQ"""
     import os, uuid
@@ -6172,7 +6172,7 @@ def maintenance_schedule(site_id: str = None, status: str = None, limit: int = 1
         except Exception as e:
             db.rollback(); return {"assets":[],"summary":{}}
 
-@app.post("/api/v1/pm-schedule/generate", tags=["maintenance"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/pm-schedule/generate", tags=["maintenance"], dependencies=[_Depends(_get_current_user)])
 async def generate_pm_work_orders(request: Request):
     """Auto-generate preventive maintenance WOs for overdue/due-soon assets"""
     import os, uuid
@@ -6753,7 +6753,7 @@ def sla_breaches(site_id: str = None, urgency: str = None, _auth=Depends(_get_cu
         except Exception as e:
             db.rollback(); return []
 
-@app.post("/api/v1/time-entries/", tags=["time-tracking"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/time-entries/", tags=["time-tracking"], dependencies=[_Depends(_get_current_user)])
 async def log_time(request: Request):
     """Log time entry for a work order"""
     import os, uuid
@@ -6962,7 +6962,7 @@ def health_check():
     }
 
 # ── Notification cleanup ──────────────────────────────────────────────────────
-@app.delete("/api/v1/platform-notif/cleanup", tags=["notifications"], dependencies=[Depends(get_current_user_info)])
+@app.delete("/api/v1/platform-notif/cleanup", tags=["notifications"], dependencies=[_Depends(_get_current_user)])
 def cleanup_old_notifications(days: int = 7):
     """Delete notifications older than N days"""
     from sqlalchemy import text, create_engine
@@ -7051,7 +7051,7 @@ def list_platform_users(request: Request):
             db.rollback()
             return {"error": str(e)}
 
-@app.patch("/api/v1/users/{user_id}/role", tags=["users"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/users/{user_id}/role", tags=["users"], dependencies=[_Depends(_get_current_user)])
 async def update_user_role(user_id: str, request: Request):
     """Update user role — admin only"""
     payload = _verify_inline_token(request)
@@ -7252,7 +7252,7 @@ def _require_role_301(request: Request, allowed_roles: list) -> dict:
     return payload
 
 # ── SECURED: RBAC Role Assignment (was unprotected) ─────────────────────────
-@app.patch("/api/v1/secure/rbac/users/{user_id}/role", tags=["security", "rbac"], dependencies=[Depends(get_current_user_info)])
+@app.patch("/api/v1/secure/rbac/users/{user_id}/role", tags=["security", "rbac"], dependencies=[_Depends(_get_current_user)])
 async def secure_update_user_role(user_id: str, request: Request):
     """
     SECURED version of role assignment.
@@ -7293,7 +7293,7 @@ async def secure_update_user_role(user_id: str, request: Request):
                 "updated_by": payload.get("email"), "message": "Role updated successfully"}
 
 # ── SECURED: Change Password ─────────────────────────────────────────────────
-@app.post("/api/v1/secure/auth/change-password", tags=["security", "auth"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/secure/auth/change-password", tags=["security", "auth"], dependencies=[_Depends(_get_current_user)])
 async def secure_change_password(request: Request):
     """
     SECURED password change. Requires valid token. Verifies current password.
@@ -7332,7 +7332,7 @@ async def secure_change_password(request: Request):
         return {"success": True, "message": "Password updated successfully"}
 
 # ── SECURED: SOW Approve ─────────────────────────────────────────────────────
-@app.post("/api/v1/secure/scope-of-work/{sow_id}/approve", tags=["security", "supply-chain"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/secure/scope-of-work/{sow_id}/approve", tags=["security", "supply-chain"], dependencies=[_Depends(_get_current_user)])
 async def secure_approve_sow(sow_id: str, request: Request):
     """
     SECURED SOW approval. Requires manager or admin role.
@@ -7364,7 +7364,7 @@ async def secure_approve_sow(sow_id: str, request: Request):
                 "approved_by": payload.get("email")}
 
 # ── SECURED: RFQ Award ───────────────────────────────────────────────────────
-@app.post("/api/v1/secure/rfq/{rfq_id}/award", tags=["security", "supply-chain"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/secure/rfq/{rfq_id}/award", tags=["security", "supply-chain"], dependencies=[_Depends(_get_current_user)])
 async def secure_award_rfq(rfq_id: str, request: Request):
     """
     SECURED RFQ award. Requires manager or admin role.
@@ -7401,7 +7401,7 @@ async def secure_award_rfq(rfq_id: str, request: Request):
                 "awarded_by": payload.get("email"), "status": "awarded"}
 
 # ── SECURED: PR Approve ──────────────────────────────────────────────────────
-@app.post("/api/v1/secure/purchase-requests/{pr_id}/approve", tags=["security", "supply-chain"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/secure/purchase-requests/{pr_id}/approve", tags=["security", "supply-chain"], dependencies=[_Depends(_get_current_user)])
 async def secure_approve_pr(pr_id: str, request: Request):
     """
     SECURED Purchase Request approval. Requires manager or admin.
@@ -7432,7 +7432,7 @@ async def secure_approve_pr(pr_id: str, request: Request):
                 "actioned_by": payload.get("email")}
 
 # ── SECURED: Contract Renew ──────────────────────────────────────────────────
-@app.post("/api/v1/secure/contracts/{contract_id}/renew", tags=["security", "commercial"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/secure/contracts/{contract_id}/renew", tags=["security", "commercial"], dependencies=[_Depends(_get_current_user)])
 async def secure_renew_contract(contract_id: str, request: Request):
     """
     SECURED contract renewal. Requires manager or admin.
@@ -7976,7 +7976,7 @@ def client_portal_service_requests(limit: int = _Query(default=20), db: _Session
         return [dict(r._mapping) for r in rows]
     except Exception: return []
 
-@app.post("/api/v1/client-portal/service-requests/", tags=["client-portal"], status_code=201, dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/client-portal/service-requests/", tags=["client-portal"], status_code=201, dependencies=[_Depends(_get_current_user)])
 async def client_portal_create_sr(request: Request):
     """Create service request from client portal."""
     try:
@@ -7996,7 +7996,7 @@ async def client_portal_create_sr(request: Request):
 
 
 
-@app.post("/api/v1/suppliers/", tags=["suppliers"], status_code=201, dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/suppliers/", tags=["suppliers"], status_code=201, dependencies=[_Depends(_get_current_user)])
 def create_supplier_sync(payload: dict, db: _Session = _Depends(_get_db)):
     """Create a new supplier — Sprint-051 fix (sync, proper DI)."""
     try:
@@ -8169,7 +8169,7 @@ async def cache_status_endpoint():
     from src.core.cache import cache_status
     return cache_status()
 
-@app.post("/api/v1/cache/invalidate/{hotel_id}", tags=["system"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/cache/invalidate/{hotel_id}", tags=["system"], dependencies=[_Depends(_get_current_user)])
 async def invalidate_hotel_cache(hotel_id: str):
     from src.core.cache import cache_invalidate_hotel
     cache_invalidate_hotel(hotel_id)
@@ -8189,7 +8189,7 @@ async def get_current_features(request: Request):
         "enabled_count": sum(1 for v in flags.values() if v),
     }
 
-@app.post("/api/v1/features/invalidate", tags=["saas"], dependencies=[Depends(get_current_user_info)])
+@app.post("/api/v1/features/invalidate", tags=["saas"], dependencies=[_Depends(_get_current_user)])
 async def invalidate_feature_cache(request: Request):
     """Invalidate feature flag cache for current hotel."""
     from src.core.feature_flags import invalidate_flags
