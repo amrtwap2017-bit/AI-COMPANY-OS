@@ -188,7 +188,7 @@ def _signal_pm_overdue_critical_assets(db: Session) -> list:
             EXTRACT(DAY FROM NOW() - mp.next_due_date) AS days_overdue
         FROM maintenance_plans mp
         JOIN assets a ON a.id = mp.asset_id
-        WHERE mp.next_due_date < NOW()
+        WHERE mp.next_due_date::date < CURRENT_DATE
           AND mp.status NOT IN ('completed', 'cancelled')
           AND a.criticality IN ('critical', 'high')
         ORDER BY days_overdue DESC

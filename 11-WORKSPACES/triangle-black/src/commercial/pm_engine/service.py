@@ -163,17 +163,17 @@ class PMEngineService:
                 a.name AS asset_name, a.category, a.criticality,
                 EXTRACT(DAY FROM (mp.next_due_date - NOW()))::INTEGER AS days_until_due,
                 CASE
-                    WHEN mp.next_due_date < NOW() THEN 'OVERDUE'
+                    WHEN mp.next_due_date::date < CURRENT_DATE THEN 'OVERDUE'
                     WHEN mp.next_due_date::date = CURRENT_DATE THEN 'DUE_TODAY'
-                    WHEN mp.next_due_date < NOW() + INTERVAL '7 days' THEN 'DUE_THIS_WEEK'
-                    WHEN mp.next_due_date < NOW() + INTERVAL '30 days' THEN 'DUE_THIS_MONTH'
+                    WHEN mp.next_due_date::date < CURRENT_DATE + INTERVAL '7 days' THEN 'DUE_THIS_WEEK'
+                    WHEN mp.next_due_date::date < CURRENT_DATE + INTERVAL '30 days' THEN 'DUE_THIS_MONTH'
                     ELSE 'SCHEDULED'
                 END AS schedule_status
             FROM maintenance_plans mp
             LEFT JOIN assets a ON a.id = mp.asset_node_id
             WHERE mp.hotel_id = :hid
               AND LOWER(mp.status) != 'completed'
-              AND mp.next_due_date < NOW() + INTERVAL '30 days'
+              AND mp.next_due_date::date < CURRENT_DATE + INTERVAL '30 days'
             ORDER BY mp.next_due_date ASC
             LIMIT 50
         """)
@@ -233,7 +233,7 @@ class PMEngineService:
             LEFT JOIN assets a ON a.id = mp.asset_node_id
             WHERE mp.hotel_id = :hid
               AND LOWER(mp.status) IN ('pending','overdue','active')
-              AND mp.next_due_date < NOW()
+              AND mp.next_due_date::date < CURRENT_DATE
             ORDER BY
                 CASE a.criticality WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
                 mp.next_due_date ASC

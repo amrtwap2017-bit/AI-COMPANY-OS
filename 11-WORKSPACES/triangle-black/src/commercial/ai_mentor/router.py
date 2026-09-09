@@ -148,7 +148,7 @@ def get_guidance(
             row = db.execute(text("""
                 SELECT count(*) as overdue
                 FROM maintenance_plans
-                WHERE next_due_date < NOW() AND status = 'active'
+                WHERE next_due_date::date < CURRENT_DATE AND status = 'active'
             """)).fetchone()
             overdue = _safe_int(row_to_dict(row).get("overdue"))
             if overdue > 0:

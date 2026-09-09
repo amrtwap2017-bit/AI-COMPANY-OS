@@ -38,7 +38,7 @@ def get_overdue_pm(hotel_id: str = Depends(get_hotel_id),
                    CURRENT_DATE - p.next_due_date::date AS days_overdue
             FROM pm_plans p
             JOIN assets a ON a.id = p.asset_id AND a.hotel_id = :hid
-            WHERE p.hotel_id = :hid AND p.next_due_date < NOW()
+            WHERE p.hotel_id = :hid AND p.next_due_date::date < CURRENT_DATE
               AND LOWER(p.status) = 'active'
             ORDER BY days_overdue DESC
             LIMIT 50

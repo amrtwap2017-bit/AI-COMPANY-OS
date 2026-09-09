@@ -345,7 +345,7 @@ def assign_user_role(user_id: str, role: str, _admin: str = Depends(require_admi
     if role not in valid_roles:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail=f"Invalid role. Choose from: {valid_roles}")
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             existing = db.execute(text("SELECT id FROM user_roles WHERE user_id=:uid"), {"uid": user_id}).fetchone()
@@ -365,7 +365,7 @@ def list_user_roles(_admin: str = Depends(require_admin)):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT ur.user_id, ur.role, ur.created_at FROM user_roles ur ORDER BY ur.created_at")).fetchall()
@@ -1005,7 +1005,7 @@ def get_pm_plans_v2(hotel_id: str = None, status: str = None, limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session as _S
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with _S(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM maintenance_plans ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -1019,7 +1019,7 @@ def get_pm_plan_by_id(plan_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session as _S
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with _S(eng) as db:
         try:
             row = db.execute(text("SELECT * FROM maintenance_plans WHERE id=:id"), {"id": plan_id}).fetchone()
@@ -1032,7 +1032,7 @@ def get_payment_tracking_v2(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session as _Sess
     import os
-    _eng = create_engine(os.environ.get("DATABASE_URL", "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    _eng = engine  # V9-004: use canonical engine
     with _Sess(_eng) as db:
         try:
             rows = db.execute(text("SELECT id,invoice_number,amount,status,created_at FROM invoices ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -1047,7 +1047,7 @@ def complete_work_order(wo_id: str, data: dict = {}):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os, datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             now = datetime.utcnow()
@@ -1073,7 +1073,7 @@ def sync_wo_to_assets():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             result = db.execute(text("""
@@ -1099,7 +1099,7 @@ def get_sr_work_order(sr_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session as _S
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with _S(eng) as db:
         try:
             row = db.execute(text("""
@@ -1116,7 +1116,7 @@ def create_wo_from_sr(sr_id: str, data: dict = {}):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session as _S
     import os, uuid
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with _S(eng) as db:
         try:
             sr = db.execute(text("SELECT * FROM service_requests WHERE id=:id"), {"id": sr_id}).fetchone()
@@ -1159,8 +1159,7 @@ def get_dashboard_summary():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def c(q, params=None):
             try:
@@ -1261,8 +1260,7 @@ def run_automation_engine():
     import os, uuid
     from datetime import datetime, timedelta
 
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
 
     HOTEL = "tb-default-hotel-000000000001"
     now = datetime.utcnow()
@@ -1556,8 +1554,7 @@ def automation_status():
     from sqlalchemy.orm import Session
     import os
 
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def c(q):
             try: return db.execute(text(q)).scalar() or 0
@@ -1616,7 +1613,7 @@ def create_work_order(body: dict):
     from sqlalchemy.orm import Session
     import os, uuid
     from datetime import datetime, timedelta
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         wo_id = str(uuid.uuid4())
         now   = datetime.utcnow()
@@ -1668,7 +1665,7 @@ def create_service_request(body: dict):
     from sqlalchemy.orm import Session
     import os, uuid
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         sr_id = str(uuid.uuid4())
         now   = datetime.utcnow()
@@ -1705,7 +1702,7 @@ def create_lead(body: dict):
     from sqlalchemy.orm import Session
     import os, uuid
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         lead_id = str(uuid.uuid4())
         now     = datetime.utcnow()
@@ -1742,7 +1739,7 @@ def create_purchase_request(body: dict):
     from sqlalchemy.orm import Session
     import os, uuid
     from datetime import datetime, timedelta
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         pr_id  = str(uuid.uuid4())
         now    = datetime.utcnow()
@@ -1788,7 +1785,7 @@ def update_wo_status(wo_id: str, body: dict):
     from sqlalchemy.orm import Session
     import os
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         now    = datetime.utcnow()
         status = body.get("status","open")
@@ -1831,7 +1828,7 @@ def update_sr_status(sr_id: str, body: dict):
     from sqlalchemy.orm import Session
     import os
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         now    = datetime.utcnow()
         status = body.get("status","open")
@@ -1853,7 +1850,7 @@ def update_lead_status(lead_id: str, body: dict):
     from sqlalchemy.orm import Session
     import os
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         now    = datetime.utcnow()
         status = body.get("status","new")
@@ -1873,7 +1870,7 @@ def approve_purchase_request(pr_id: str, body: dict):
     from sqlalchemy.orm import Session
     import os
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         now      = datetime.utcnow()
         action   = body.get("action","approve")
@@ -1900,8 +1897,7 @@ def global_search(q: str = "", limit: int = 8):
     from sqlalchemy.orm import Session
     import os
     
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     
     results = []
     q_like = f"%{q}%"
@@ -1962,8 +1958,7 @@ def renew_contract(contract_id: str, body: dict = None):
     from datetime import datetime, timedelta
     
     body = body or {}
-    eng  = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     
     with Session(eng) as db:
         now = datetime.utcnow()
@@ -2023,8 +2018,7 @@ def get_activity_feed(limit: int = 30, entity_id: str = None):
     from sqlalchemy.orm import Session
     import os
     
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     
     activities = []
     
@@ -2120,8 +2114,7 @@ def get_invoice_detail(invoice_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2157,8 +2150,7 @@ def get_work_order_detail(wo_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2198,8 +2190,7 @@ def get_contract_detail(contract_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2233,8 +2224,7 @@ def get_project_detail(project_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2269,8 +2259,7 @@ def get_asset_detail(asset_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2304,8 +2293,7 @@ def get_pm_plan_detail(plan_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2341,8 +2329,7 @@ def get_lead_detail(lead_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2377,8 +2364,7 @@ def get_technician_detail(tech_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2420,8 +2406,7 @@ def get_supplier_detail(supplier_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2467,7 +2452,7 @@ def contracts_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM contracts ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2481,7 +2466,7 @@ def leads_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM leads ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2495,7 +2480,7 @@ def purchase_orders_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM purchase_orders ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2509,7 +2494,7 @@ def purchase_requests_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM purchase_requests ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2523,7 +2508,7 @@ def notifications_portal(limit: int = 100):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM notifications ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2537,7 +2522,7 @@ def inventory_items_portal(limit: int = 200):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM inventory_items ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2553,7 +2538,7 @@ def sites_portal(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM sites ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2565,7 +2550,7 @@ def warehouses_portal(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM warehouses ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2577,7 +2562,7 @@ def projects_portal(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM projects ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2589,7 +2574,7 @@ def rfqs_portal(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM rfqs ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2601,7 +2586,7 @@ def goods_receipts_portal(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM goods_receipts ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2613,7 +2598,7 @@ def assets_v2_portal(limit: int = 100):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM assets ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2700,7 +2685,7 @@ def list_roles():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM roles ORDER BY level")).fetchall()
@@ -2712,7 +2697,7 @@ def list_permissions():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT r.name as role, p.resource, p.action FROM role_permissions rp JOIN roles r ON r.id=rp.role_id JOIN permissions p ON p.id=rp.permission_id ORDER BY r.level, p.resource")).fetchall()
@@ -2746,7 +2731,7 @@ def change_password(request: Request, current_password: str, new_password: str):
         from fastapi import HTTPException
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             # Get current password hash
@@ -2785,7 +2770,7 @@ def report_work_orders():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2838,7 +2823,7 @@ def report_assets():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2888,7 +2873,7 @@ def report_daily_summary():
     from sqlalchemy.orm import Session
     import os
     from datetime import datetime, timedelta
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2926,7 +2911,7 @@ def report_contracts():
     from sqlalchemy.orm import Session
     import os
     from datetime import datetime, timedelta
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, params=None):
             try:
@@ -2969,7 +2954,7 @@ def get_sow_list(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM scope_of_work ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -2981,7 +2966,7 @@ def get_vendors_list(limit: int = 100):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM vendors WHERE blacklisted=false ORDER BY rating DESC, company_name LIMIT :l"), {"l": limit}).fetchall()
@@ -2993,7 +2978,7 @@ def get_rfq_list(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM rfq_headers ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -3005,7 +2990,7 @@ def get_pos_v2_list(limit: int = 100):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -3022,7 +3007,7 @@ def get_approvals_list(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("SELECT * FROM approval_requests ORDER BY created_at DESC LIMIT :l"), {"l": limit}).fetchall()
@@ -3034,7 +3019,7 @@ def get_procurement_dashboard():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, p=None):
             try:
@@ -3058,7 +3043,7 @@ def get_vendor(vendor_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             v = db.execute(text("SELECT * FROM vendors WHERE id=:id"), {"id": vendor_id}).fetchone()
@@ -3079,7 +3064,7 @@ async def create_vendor(request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             count = db.execute(text("SELECT count(*)+1 FROM vendors")).scalar()
@@ -3108,7 +3093,7 @@ async def update_vendor(vendor_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             allowed = ["company_name","category","contact_person","email","phone","city","country",
@@ -3135,7 +3120,7 @@ def get_sow_detail(sow_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             sow = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
@@ -3153,7 +3138,7 @@ async def approve_sow(sow_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             action = body.get("action","approve")
@@ -3174,7 +3159,7 @@ async def update_sow(sow_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             allowed = ["title","description","type","status","client_name","client_email","currency",
@@ -3198,7 +3183,7 @@ async def add_boq_item(sow_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             count = db.execute(text("SELECT count(*)+1 FROM boq_items WHERE sow_id=:id"), {"id": sow_id}).scalar()
@@ -3222,7 +3207,7 @@ def bid_comparison(rfq_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rfq = db.execute(text("SELECT * FROM rfq_headers WHERE id=:id"), {"id": rfq_id}).fetchone()
@@ -3262,7 +3247,7 @@ async def award_rfq(rfq_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             vendor_id = body.get("vendor_id")
@@ -3285,7 +3270,7 @@ async def create_po_v2(request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             count = db.execute(text("SELECT count(*)+1 FROM purchase_orders_v2")).scalar()
@@ -3317,7 +3302,7 @@ async def add_po_line_item(po_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             count = db.execute(text("SELECT count(*)+1 FROM po_line_items WHERE po_id=:id"), {"id": po_id}).scalar()
@@ -3356,7 +3341,7 @@ async def update_po_line_item(po_id: str, line_id: str, request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             qty = float(body.get("quantity",1))
@@ -3392,7 +3377,7 @@ async def create_grn(request: Request):
     from sqlalchemy.orm import Session
     import os
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             count = db.execute(text("SELECT count(*)+1 FROM goods_receipt_notes")).scalar()
@@ -3434,7 +3419,7 @@ def list_grns(limit: int = 50):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -3532,7 +3517,7 @@ async def upload_document(request: Request):
     file_path = upload_dir / unique_name
     file_path.write_bytes(contents)
 
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             is_req = doc_category in REQUIRED_VENDOR_DOCS and entity_type == "vendor"
@@ -3582,7 +3567,7 @@ def list_documents(entity_type: str, entity_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -3607,7 +3592,7 @@ def view_document(doc_id: str):
     from sqlalchemy.orm import Session
     from fastapi.responses import FileResponse
     from fastapi import HTTPException
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             row = db.execute(text("SELECT file_path, file_name, mime_type FROM entity_documents WHERE id=:id"), {"id": doc_id}).fetchone()
@@ -3628,7 +3613,7 @@ def delete_document(doc_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             row = db.execute(text("SELECT file_path FROM entity_documents WHERE id=:id"), {"id": doc_id}).fetchone()
@@ -3647,7 +3632,7 @@ def vendor_doc_status(vendor_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -3681,7 +3666,7 @@ def list_invoices(status: str = None, limit: int = 50):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = "WHERE si.status=:s" if status else ""
@@ -3705,7 +3690,7 @@ def invoice_dashboard():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q):
             try: r = db.execute(text(q)).fetchone(); return dict(r._mapping) if r else {}
@@ -3729,7 +3714,7 @@ def get_invoice(invoice_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from fastapi import HTTPException
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             inv = db.execute(text("""
@@ -3764,7 +3749,7 @@ async def create_invoice(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             count = db.execute(text("SELECT count(*)+1 FROM supplier_invoices")).scalar()
@@ -3813,7 +3798,7 @@ def run_three_way_match(invoice_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             inv = db.execute(text("SELECT * FROM supplier_invoices WHERE id=:id"), {"id": invoice_id}).fetchone()
@@ -3872,7 +3857,7 @@ async def approve_invoice(invoice_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             action = body.get("action","approve")
@@ -3896,7 +3881,7 @@ async def record_payment(invoice_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             amount = float(body.get("amount", 0))
@@ -3958,7 +3943,7 @@ def leads_portal_v2(limit: int = 100):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -3986,7 +3971,7 @@ def get_lead_portal_v2(lead_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from fastapi import HTTPException
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             row = db.execute(text("SELECT * FROM leads WHERE id=:id"), {"id": lead_id}).fetchone()
@@ -4025,7 +4010,7 @@ def delete_work_order(wo_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             row = db.execute(text("SELECT id FROM work_orders WHERE id=:id"), {"id": wo_id}).fetchone()
@@ -4043,7 +4028,7 @@ def delete_service_request(sr_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("DELETE FROM service_requests WHERE id=:id"), {"id": sr_id})
@@ -4058,7 +4043,7 @@ def delete_asset(asset_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("DELETE FROM assets WHERE id=:id"), {"id": asset_id})
@@ -4073,7 +4058,7 @@ def delete_vendor(vendor_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("DELETE FROM vendors WHERE id=:id"), {"id": vendor_id})
@@ -4088,7 +4073,7 @@ def delete_sow(sow_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("DELETE FROM scope_of_work WHERE id=:id"), {"id": sow_id})
@@ -4103,7 +4088,7 @@ def delete_invoice(invoice_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("DELETE FROM supplier_invoices WHERE id=:id"), {"id": invoice_id})
@@ -4118,7 +4103,7 @@ def delete_po(po_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("DELETE FROM po_line_items WHERE po_id=:id"), {"id": po_id})
@@ -4138,7 +4123,7 @@ def executive_dashboard():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, p=None):
             try:
@@ -4374,7 +4359,7 @@ def generate_report(
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from datetime import datetime, timedelta
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def q(sql, params=None):
             try:
@@ -4856,7 +4841,7 @@ def pdf_purchase_order(po_id: str):
     from reportlab.lib.units import mm
     from reportlab.lib import colors
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         po = db.execute(text("""
             SELECT po.*, v.company_name as vendor_name, v.email as vendor_email,
@@ -4938,7 +4923,7 @@ def pdf_invoice(invoice_id: str):
     from reportlab.lib.units import mm
     from reportlab.lib import colors
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         inv = db.execute(text("""
             SELECT si.*, v.company_name as vendor_name, v.email as vendor_email, v.vendor_code
@@ -5022,7 +5007,7 @@ def pdf_sow(sow_id: str):
     from reportlab.lib.units import mm
     from reportlab.lib import colors
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         sow = db.execute(text("SELECT * FROM scope_of_work WHERE id=:id"), {"id": sow_id}).fetchone()
         if not sow: raise HTTPException(404, "SOW not found")
@@ -5102,7 +5087,7 @@ def pdf_work_order(wo_id: str):
     from reportlab.lib.units import mm
     from reportlab.lib import colors
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         wo = db.execute(text("""
             SELECT wo.*, t.name as technician_name, t.specializations,
@@ -5290,7 +5275,7 @@ def list_notifications(limit: int = 50, unread_only: bool = False):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = "WHERE is_read=false" if unread_only else ""
@@ -5312,7 +5297,7 @@ def mark_notification_read(notif_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("UPDATE notifications SET is_read=true WHERE id=:id"), {"id": notif_id})
@@ -5326,7 +5311,7 @@ def mark_all_read():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             result = db.execute(text("UPDATE notifications SET is_read=true WHERE is_read=false"))
@@ -5342,7 +5327,7 @@ def generate_notifications():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             created = 0
@@ -5435,7 +5420,7 @@ async def assign_work_order(wo_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             technician_id = body.get("technician_id")
@@ -5460,7 +5445,7 @@ async def update_wo_status(wo_id: str, request: Request):
     from sqlalchemy.orm import Session
     from datetime import datetime
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             new_status = body.get("status")
@@ -5484,7 +5469,7 @@ def dispatch_board(site_id: str = None, priority: str = None, technician_id: str
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where, params = ["1=1"], {}
@@ -5531,7 +5516,7 @@ def financial_dashboard():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, p=None):
             try:
@@ -5662,7 +5647,7 @@ def project_pl():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -5694,7 +5679,7 @@ def cash_flow():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             inflows = db.execute(text("""
@@ -5736,7 +5721,7 @@ async def client_login(request: Request):
     body = await request.json()
     email = body.get("email","").lower().strip()
     pin = str(body.get("pin","")).strip()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             client = db.execute(text("""
@@ -5780,7 +5765,7 @@ def client_dashboard(site_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, p=None):
             try: r=db.execute(text(q),p or {}).fetchone(); return dict(r._mapping) if r else {}
@@ -5809,7 +5794,7 @@ def client_work_orders(site_id: str, status: str = None, limit: int = 50):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = ["wo.site_id=:s"]
@@ -5837,7 +5822,7 @@ async def client_create_sr(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text("""
@@ -5862,7 +5847,7 @@ def client_sow_approvals(site_id: str = None, client_name: str = None):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = ["s.status IN ('approved','sent_to_client','pending_approval')"]
@@ -5887,7 +5872,7 @@ def client_projects(site_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -5915,7 +5900,7 @@ async def supplier_login(request: Request):
     body = await request.json()
     email = body.get("email","").lower().strip()
     pin = str(body.get("pin","")).strip()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             supplier = db.execute(text("""
@@ -5959,7 +5944,7 @@ def supplier_dashboard(vendor_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe(q, p=None):
             try: r=db.execute(text(q),p or {}).fetchone(); return dict(r._mapping) if r else {}
@@ -5987,7 +5972,7 @@ def supplier_purchase_orders(vendor_id: str, status: str = None, limit: int = 50
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = ["po.vendor_id=:v"]
@@ -6012,7 +5997,7 @@ def supplier_rfqs(vendor_id: str, limit: int = 20):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -6036,7 +6021,7 @@ async def submit_quote(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             qn = f"QT-{body.get('vendor_id','VND')[:4].upper()}-{uuid.uuid4().hex[:6].upper()}"
@@ -6068,7 +6053,7 @@ def supplier_invoices(vendor_id: str, limit: int = 30):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -6087,7 +6072,7 @@ def supplier_profile(vendor_id: str):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             vendor = db.execute(text("SELECT * FROM vendors WHERE id=:v"), {"v": vendor_id}).fetchone()
@@ -6127,7 +6112,7 @@ def maintenance_schedule(site_id: str = None, status: str = None, limit: int = 1
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = ["a.next_maintenance_date IS NOT NULL"]
@@ -6180,7 +6165,7 @@ async def generate_pm_work_orders(request: Request):
     from sqlalchemy.orm import Session
     from datetime import datetime, timedelta
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             # Get assets due for maintenance (overdue + due in 7 days)
@@ -6264,7 +6249,7 @@ def maintenance_calendar():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -6306,7 +6291,7 @@ def maintenance_stats():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             return {
@@ -6344,7 +6329,7 @@ def get_asset_qr(asset_id: str, size: int = 300):
     except ImportError:
         raise HTTPException(500, "qrcode/Pillow not installed. Run: pip install qrcode[pil] Pillow")
 
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         asset = db.execute(text("""
             SELECT a.id, a.name, a.category, a.location_description, a.manufacturer, a.model,
@@ -6415,7 +6400,7 @@ def get_asset_scan_data(asset_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from fastapi import HTTPException
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             asset = db.execute(text("""
@@ -6469,7 +6454,7 @@ def list_asset_qr_links(site_id: str = None, limit: int = 100):
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = "WHERE a.id IS NOT NULL"
@@ -6509,7 +6494,7 @@ def print_asset_qr_sheet(asset_id: str):
     except ImportError:
         raise HTTPException(500, "qrcode/Pillow not installed")
 
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         asset = db.execute(text("""
             SELECT a.*, s.name as site_name FROM assets a
@@ -6613,7 +6598,7 @@ def sla_dashboard(_auth=Depends(_get_current_user)):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     from datetime import datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe_list(q, p=None):
             try: return [dict(r._mapping) for r in db.execute(text(q),p or {}).fetchall()]
@@ -6725,7 +6710,7 @@ def sla_breaches(site_id: str = None, urgency: str = None, _auth=Depends(_get_cu
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where = ["sr.status NOT IN ('resolved','completed','cancelled')"]
@@ -6761,7 +6746,7 @@ async def log_time(request: Request):
     from sqlalchemy.orm import Session
     from datetime import datetime
     body = await request.json()
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             start = body.get("start_time")
@@ -6812,7 +6797,7 @@ def list_time_entries(work_order_id: str = None, technician_id: str = None, limi
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             where, params = ["1=1"], {"l": limit}
@@ -6836,7 +6821,7 @@ def time_tracking_summary():
     import os
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         def safe_list(q, p=None):
             try: return [dict(r._mapping) for r in db.execute(text(q),p or {}).fetchall()]
@@ -6947,8 +6932,7 @@ def health_check():
     import os
     db_ok = False
     try:
-        eng = create_engine(os.environ.get("DATABASE_URL",
-            "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+        eng = engine  # V9-004: use canonical engine
         with Session(eng) as db:
             db.execute(text("SELECT 1"))
             db_ok = True
@@ -6968,8 +6952,7 @@ def cleanup_old_notifications(days: int = 7):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             result = db.execute(text(
@@ -7011,8 +6994,7 @@ def get_me_inline(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             user = db.execute(text(
@@ -7039,8 +7021,7 @@ def list_platform_users(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text(
@@ -7067,8 +7048,7 @@ async def update_user_role(user_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             db.execute(text(
@@ -7091,8 +7071,7 @@ def security_audit(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL",
-        "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             users = db.execute(text("SELECT count(*) FROM users WHERE is_active=true")).scalar()
@@ -7270,7 +7249,7 @@ async def secure_update_user_role(user_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         result = db.execute(
             text("UPDATE users SET role=:role, updated_at=NOW() WHERE id=:id RETURNING id, email, role"),
@@ -7310,7 +7289,7 @@ async def secure_change_password(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os, bcrypt
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         user = db.execute(
             text("SELECT id, email, password_hash FROM users WHERE id=:id"),
@@ -7343,7 +7322,7 @@ async def secure_approve_sow(sow_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         new_status = "approved" if action == "approve" else "rejected"
         result = db.execute(
@@ -7378,7 +7357,7 @@ async def secure_award_rfq(rfq_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         result = db.execute(
             text("UPDATE rfq_headers SET status='awarded', awarded_vendor_id=:vid, updated_at=NOW() WHERE id=:id RETURNING id, rfq_number"),
@@ -7412,7 +7391,7 @@ async def secure_approve_pr(pr_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         new_status = "approved" if action == "approve" else "rejected"
         result = db.execute(
@@ -7442,7 +7421,7 @@ async def secure_renew_contract(contract_id: str, request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os, datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         contract = db.execute(
             text("SELECT id, end_date FROM contracts WHERE id=:id"),
@@ -7478,7 +7457,7 @@ async def security_status(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         recent_events = db.execute(text("""
             SELECT entity_type, action, actor_name, created_at
@@ -7568,7 +7547,7 @@ def get_current_tenant(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             tenant = db.execute(text("""
@@ -7592,7 +7571,7 @@ def list_tenants(request: Request):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -7610,7 +7589,7 @@ def get_tenant_features(tenant_id: str):
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -7640,7 +7619,7 @@ def health_triggers():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             rows = db.execute(text("""
@@ -7732,7 +7711,7 @@ def health_v2():
     from sqlalchemy import text, create_engine
     from sqlalchemy.orm import Session
     import os, datetime
-    eng = create_engine(os.environ.get("DATABASE_URL","postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+    eng = engine  # V9-004: use canonical engine
     with Session(eng) as db:
         try:
             # DB check
