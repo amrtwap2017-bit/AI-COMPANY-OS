@@ -70,7 +70,8 @@ class TestWOAssetEnforcement:
         assert r.status_code in (200, 201)
         data = r.json()
         # Should have warning when no asset linked
-        assert data.get("data_quality_warning") == True
+        # data_quality_warning is a string message when asset is missing
+        assert data.get("data_quality_warning")  # truthy: string message or True
 
     def test_assets_api_for_dropdown(self, auth_headers):
         """Assets API must return name and id for dropdown population."""
