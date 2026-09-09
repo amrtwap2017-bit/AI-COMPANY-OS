@@ -110,7 +110,7 @@ class RecommendationService:
                 "WHERE hotel_id=:hid AND director=:dir "
                 "AND status='pending' AND DATE(created_at)=CURRENT_DATE"
             ), {"hid": self.hotel_id, "dir": _director_name}).scalar() or 0
-            if _cap_count >= 50:
+            if _cap_count >= 200:  # V9-016: 200 per director per day
                 return ""  # V9-016: cap reached, skip this insertion
         except Exception:
             pass  # cap check failed — allow insert anyway
