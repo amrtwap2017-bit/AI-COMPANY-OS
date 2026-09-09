@@ -21,6 +21,8 @@ const woFields = [
   {key:"description",label:"Description",type:"textarea",required:false,placeholder:"Describe the work required..."},
   {key:"priority",label:"Priority",type:"select",required:true,defaultValue:"medium",options:[{label:"Critical",value:"critical"},{label:"High",value:"high"},{label:"Medium",value:"medium"},{label:"Low",value:"low"}] as any[]},
   {key:"type",label:"Type",type:"select",required:true,defaultValue:"corrective",options:[{label:"Corrective",value:"corrective"},{label:"Preventive",value:"preventive"},{label:"Inspection",value:"inspection"}]},
+,
+  {key:"asset_id",label:"Asset (optional)",type:"text",required:false,placeholder:"Asset ID or leave blank"}
 ];
 
 export default function WorkOrdersPage() {
