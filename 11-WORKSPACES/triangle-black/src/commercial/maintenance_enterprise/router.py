@@ -30,7 +30,7 @@ def maintenance_dashboard(hotel_id: str = Depends(get_hotel_id), db: Session = D
     in_prog_wos   = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND status='in_progress'"), h).scalar() or 0
     critical_wos  = db.execute(text("SELECT COUNT(*) FROM work_orders WHERE hotel_id=:hotel_id AND priority IN ('critical','high')"), h).scalar() or 0
     active_plans  = db.execute(text("SELECT COUNT(*) FROM maintenance_plans WHERE status='active'")).scalar() or 0
-    due_today     = db.execute(text("SELECT COUNT(*) FROM maintenance_plans WHERE next_due_date = CURRENT_DATE::text")).scalar() or 0
+    due_today     = db.execute(text("SELECT COUNT(*) FROM maintenance_plans WHERE next_due_date = CURRENT_DATE")).scalar() or 0
     return {
         "total_assets":     total_assets,
         "open_work_orders": open_wos,
@@ -138,7 +138,7 @@ def maintenance_intelligence(hotel_id: str = Depends(get_hotel_id), db: Session 
         "SELECT * FROM work_orders WHERE hotel_id=:hotel_id AND priority='critical' AND status!='completed' ORDER BY created_at DESC LIMIT 5"
     ), h).fetchall())
     overdue_plans = rows(db.execute(text(
-        "SELECT * FROM maintenance_plans WHERE next_due_date < CURRENT_DATE::text AND status='active' LIMIT 10"
+        "SELECT * FROM maintenance_plans WHERE next_due_date < CURRENT_DATE AND status='active' LIMIT 10"
     )).fetchall())
     return {
         "critical_work_orders": critical,
