@@ -109,7 +109,7 @@ class RecommendationService:
                 "AND status='pending' AND DATE(created_at)=CURRENT_DATE"
             ), {"hid": self.hotel_id, "dir": _director_name}).scalar() or 0
             if _cap_count >= 50:
-                return "cap_reached"
+                return ""  # V9-016: cap reached, skip this insertion
         except Exception:
             pass  # cap check failed — allow insert anyway
 
