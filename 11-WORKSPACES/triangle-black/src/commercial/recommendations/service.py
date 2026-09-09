@@ -82,8 +82,6 @@ class RecommendationService:
             try:
                 result = directors_svc.analyze_director(director_type, {})
                 rec_id = self._store_recommendation(result)
-                if not rec_id:  # V9-016: skip if cap reached
-                    continue
                 generated.append({
                     "id": rec_id,
                     "director": director_type,
@@ -102,19 +100,6 @@ class RecommendationService:
 
     def _store_recommendation(self, director_output: Dict[str, Any]) -> str:
         """Persist one director recommendation to the DB."""
-        # V9-016: Daily cap — max 50 pending recs per director per day
-        _director_name = director_output.get('director', 'Unknown')
-        try:
-            _cap_count = self.db.execute(text(
-                "SELECT COUNT(*) FROM recommendations "
-                "WHERE hotel_id=:hid AND director=:dir "
-                "AND status='pending' AND DATE(created_at)=CURRENT_DATE"
-            ), {"hid": self.hotel_id, "dir": _director_name}).scalar() or 0
-            if _cap_count >= 200:  # V9-016: 200 per director per day
-                return ""  # V9-016: cap reached, skip this insertion
-        except Exception:
-            pass  # cap check failed — allow insert anyway
-
         import json
         rec_id = str(uuid.uuid4())
         evidence_json = json.dumps(director_output.get("evidence", []))
