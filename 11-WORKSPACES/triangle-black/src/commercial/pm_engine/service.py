@@ -161,7 +161,7 @@ class PMEngineService:
                 mp.id, mp.title, mp.frequency, mp.next_due_date,
                 mp.status, mp.owner,
                 a.name AS asset_name, a.category, a.criticality,
-                EXTRACT(DAY FROM (mp.next_due_date - NOW()))::INTEGER AS days_until_due,
+                EXTRACT(DAY FROM (mp.next_due_date - CURRENT_DATE))::INTEGER AS days_until_due,
                 CASE
                     WHEN mp.next_due_date::date < CURRENT_DATE THEN 'OVERDUE'
                     WHEN mp.next_due_date::date = CURRENT_DATE THEN 'DUE_TODAY'
@@ -228,7 +228,7 @@ class PMEngineService:
                 mp.id, mp.title, mp.frequency, mp.next_due_date,
                 mp.owner, mp.status,
                 a.name AS asset_name, a.category, a.criticality,
-                EXTRACT(DAY FROM (NOW() - mp.next_due_date))::INTEGER AS days_overdue
+                EXTRACT(DAY FROM (CURRENT_DATE - mp.next_due_date))::INTEGER AS days_overdue
             FROM maintenance_plans mp
             LEFT JOIN assets a ON a.id = mp.asset_node_id
             WHERE mp.hotel_id = :hid
