@@ -55,11 +55,12 @@ def create_service_request(data: dict, db: Session = Depends(get_db)):
     sr_id = str(uuid.uuid4())
     now   = _dt.utcnow()
     db.execute(text(
-        "INSERT INTO service_requests (id, hotel_id, title, description, category, urgency, status, submitted_by, contact_phone, created_at, updated_at)"
-        " VALUES (:id, :hotel_id, :title, :description, :category, :urgency, :status, :submitted_by, :contact_phone, :created_at, :updated_at)"
+        "INSERT INTO service_requests (id, hotel_id, title, description, category, urgency, asset_id, status, submitted_by, contact_phone, created_at, updated_at)"
+        " VALUES (:id, :hotel_id, :title, :description, :category, :urgency, :asset_id, :status, :submitted_by, :contact_phone, :created_at, :updated_at)"
     ), {
         "id":           sr_id,
         "hotel_id":     data.get("hotel_id", "tb-default-hotel-000000000001"),
+        "asset_id":     data.get("asset_id") or None,
         "title":        data.get("title", "New Service Request"),
         "description":  data.get("description", ""),
         "category":     data.get("category", "General"),
