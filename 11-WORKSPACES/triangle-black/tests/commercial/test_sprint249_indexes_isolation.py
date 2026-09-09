@@ -38,7 +38,7 @@ def test_alembic_head_is_f2a3b4c5d6e7():
     """Verify alembic migration chain is healthy and composite index migration was applied.
 
     Originally checked for f2a3b4c5d6e7 as head. That migration has since been
-    superseded by later migrations (current head: g2h3i4j5k6l7). This test now
+    superseded by later migrations (current head: d82549b3d3c4). This test now
     verifies migration chain health rather than a pinned revision string.
     """
     import subprocess
