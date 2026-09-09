@@ -100,6 +100,24 @@ class RecommendationService:
 
     def _store_recommendation(self, director_output: Dict[str, Any]) -> str:
         """Persist one director recommendation to the DB."""
+        # V10-008: Generation-time deduplication — skip if identical rec exists today
+        import hashlib as _hlib
+        import datetime as _dt2
+        _dir = director_output.get('director', 'Unknown')
+        _rlvl = director_output.get('risk_level', 'LOW')
+        _rtxt = str(director_output.get('recommendation', ''))[:100]
+        _dup_key = _hlib.md5((_dir + ':' + _rlvl + ':' + _rtxt).encode()).hexdigest()[:16]
+        try:
+            _dup_exists = self.db.execute(text(
+                "SELECT id FROM recommendations WHERE hotel_id=:h"
+                " AND duplicate_key=:dk AND status='pending' AND DATE(created_at)=CURRENT_DATE"
+                " LIMIT 1"
+            ), {"h": self.hotel_id, "dk": _dup_key}).fetchone()
+            if _dup_exists:
+                return ''  # V10-008: duplicate — skip insert
+        except Exception:
+            pass  # dedup check failed — allow insert
+        
         import json
         rec_id = str(uuid.uuid4())
         evidence_json = json.dumps(director_output.get("evidence", []))
@@ -107,11 +125,11 @@ class RecommendationService:
 
         self.db.execute(text("""
             INSERT INTO recommendations
-              (id, hotel_id, director, audit_id, risk_level, risk_score,
+              (id, hotel_id, director, audit_id, risk_level, risk_score, duplicate_key, expiry_date, urgency_level,
                recommendation, evidence, reasoning, confidence_score,
                expected_impact, action, source_data, status, generated_at, created_at)
             VALUES
-              (:id, :hotel_id, :director, :audit_id, :risk_level, :risk_score,
+              (:id, :hotel_id, :director, :audit_id, :risk_level, :risk_score, :dup_key, :exp_date, :urg_level,
                :recommendation, :evidence, :reasoning, :confidence_score,
                :expected_impact, :action, :source_data, 'pending', :gen_at, NOW())
         """), {
@@ -129,6 +147,12 @@ class RecommendationService:
             "action": director_output.get("action", "MONITOR"),
             "source_data": source_json,
             "gen_at": _now(),
+            "dup_key": _dup_key,
+            "exp_date": (_dt2.date.today() + _dt2.timedelta(days=30)).isoformat(),
+            "urg_level": ("IMMEDIATE" if director_output.get("risk_level")=="CRITICAL"
+                          else "TODAY" if director_output.get("risk_level")=="HIGH"
+                          else "THIS_WEEK" if director_output.get("risk_level")=="MEDIUM"
+                          else "MONITOR"),
         })
         self.db.commit()
         return rec_id
