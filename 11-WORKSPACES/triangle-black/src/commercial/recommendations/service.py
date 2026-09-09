@@ -82,6 +82,8 @@ class RecommendationService:
             try:
                 result = directors_svc.analyze_director(director_type, {})
                 rec_id = self._store_recommendation(result)
+                if not rec_id:  # V9-016: skip if cap reached
+                    continue
                 generated.append({
                     "id": rec_id,
                     "director": director_type,
