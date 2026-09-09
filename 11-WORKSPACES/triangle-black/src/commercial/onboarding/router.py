@@ -453,9 +453,7 @@ def get_onboarding_checklist(
             from sqlalchemy.orm import Session as _Sess2
             from sqlalchemy import text as _t2
             import os as _os2
-            _eng2 = __import__("sqlalchemy").create_engine(
-                _os2.environ.get("DATABASE_URL",
-                "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black"))
+            _eng2 = engine  # V9-004: use canonical engine
             with _Sess2(_eng2) as _db2:
                 _row = _db2.execute(_t2(
                     "SELECT hotel_id FROM users WHERE id=:uid LIMIT 1"
