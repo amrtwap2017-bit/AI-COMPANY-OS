@@ -58,3 +58,19 @@ Status: VERIFIED from live audit
 | V9-009 | 5133 pending recs | Archived to 670 |
 | V9-015 | WO creation no asset field | Asset dropdown added |
 | V9-017 | No observability page | Health page built |
+
+
+## TypeScript Error Baseline (Sep 10, 2026)
+
+Current: 50 errors (down from 51 = net -1 from token-manager fix)
+
+| Type | Count | Origin | Action |
+|------|-------|--------|--------|
+| TS1127 | 8 | Pre-existing in engineering/ops pages (emoji in JSX) | Manual per-page fix |
+| TS17008 | 34 | Cascade from TS1127 in parent pages | Resolves with TS1127 |
+| TS1005 | 1 | token-manager.ts — FIXED | ✅ Done |
+| Other | 7 | Pre-existing in inventory/contracts/quotes | Manual per-page |
+
+Strategy: Fix individually during V11 when touching each page.
+Do NOT attempt mass automation — previous attempts increased errors.
+Production target: 0 TS errors before launch.
