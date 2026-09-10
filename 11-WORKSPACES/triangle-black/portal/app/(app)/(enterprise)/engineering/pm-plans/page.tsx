@@ -4,7 +4,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { LoadingSkeleton } from "@/components/states/PageStates";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
-const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "-"; } };
+const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function EngineeringPMPlansPage() {
   const router = useRouter();
   const { data: pmRaw }    = useQuery(["epmp-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
@@ -21,7 +21,7 @@ export default function EngineeringPMPlansPage() {
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Engineering</div>
           <h1 className="tb-hero-title">PM Plans</h1>
-          <p className="tb-hero-description">{pms.length} plans . {overdue.length} overdue . {dueWeek.length} due this week</p>
+          <p className="tb-hero-description">{pms.length} plans · {overdue.length} overdue · {dueWeek.length} due this week</p>
           <div className="tb-grid-4 mt-6">
             {[{label:"Total Plans",value:pms.length,color:"#221D1A"},{label:"Overdue",value:overdue.length,color:overdue.length>0?"#A84A3D":"#547C4D"},{label:"Due This Week",value:dueWeek.length,color:dueWeek.length>0?"#B07A2A":"#547C4D"},{label:"On Track",value:onTrack.length,color:"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
@@ -31,7 +31,7 @@ export default function EngineeringPMPlansPage() {
       </div>
       <div className="tb-canvas">
         <div className="tb-section">
-          <div className="tb-flex-between mb-4"><div className="text-sm text-secondary">{pms.length} plans</div><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link">Full View -></button></div>
+          <div className="tb-flex-between mb-4"><div className="text-sm text-secondary">{pms.length} plans</div><button onClick={()=>router.push("/maintenance/pm-plans")} className="tb-section-link">Full View →</button></div>
           <div className="space-y-2">
             {pms.slice(0,8).map((pm: any, i: any) =>{
               const due = pm.next_due_ts?new Date(pm.next_due_ts):null;
@@ -40,8 +40,8 @@ export default function EngineeringPMPlansPage() {
               const c = isOverdue?"#A84A3D":daysUntil!==null&&daysUntil<=7?"#B07A2A":"#547C4D";
               return (
                 <button key={i} onClick={()=>router.push("/maintenance/pm-plans/"+pm.id)} className="tb-action-item w-full justify-between">
-                  <div className="flex items-center gap-2 min-w-0"><span className="text-base">📅</span><div className="min-w-0"><div className="text-sm text-secondary truncate">{pm.title||"-"}</div><div className="text-xs text-tertiary">{pm.plan_type||"-"}</div></div></div>
-                  <div className="flex-shrink-0 text-right"><div className="text-xs font-bold" style={{color:c}}>{isOverdue?"OVERDUE":daysUntil!==null?daysUntil+"d":"-"}</div><div className="text-xs text-tertiary">{fmtDate(pm.next_due_ts)}</div></div>
+                  <div className="flex items-center gap-2 min-w-0"><span className="text-base">📅</span><div className="min-w-0"><div className="text-sm text-secondary truncate">{pm.title||"—"}</div><div className="text-xs text-tertiary">{pm.plan_type||"—"}</div></div></div>
+                  <div className="flex-shrink-0 text-right"><div className="text-xs font-bold" style={{color:c}}>{isOverdue?"OVERDUE":daysUntil!==null?daysUntil+"d":"—"}</div><div className="text-xs text-tertiary">{fmtDate(pm.next_due_ts)}</div></div>
                 </button>
               );
             })}
@@ -50,7 +50,7 @@ export default function EngineeringPMPlansPage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-3">Navigate</div>
           <div className="tb-grid-3">
-            {[{label:"PM Plans Full",icon:"📅",path:"/maintenance/pm-plans"},{label:"Assets",icon:"️",path:"/maintenance/assets"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a: any, i: number) =>(
+            {[{label:"PM Plans Full",icon:"📅",path:"/maintenance/pm-plans"},{label:"Assets",icon:"⚙️",path:"/maintenance/assets"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>
