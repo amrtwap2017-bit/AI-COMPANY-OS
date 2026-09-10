@@ -15,7 +15,7 @@ def _auth():
 
 def test_pilot_control_status():
     h = _auth()
-    r = requests.get(f"{BASE}/api/v1/pilot-control/status", headers=h, timeout=15)
+    r = requests.get(f"{BASE}/api/v1/pilot/status", headers=h, timeout=15)
     assert r.status_code == 200
     d = r.json()
     assert "pilots" in d

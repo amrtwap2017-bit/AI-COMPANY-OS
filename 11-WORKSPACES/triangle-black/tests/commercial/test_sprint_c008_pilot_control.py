@@ -20,12 +20,12 @@ def _auth():
     return _C["h"]
 
 def test_unauthenticated_pilot_control_rejected():
-    r = requests.get(f"{BASE}/api/v1/pilot-control/status", timeout=10)
+    r = requests.get(f"{BASE}/api/v1/pilot/status", timeout=10)
     assert r.status_code in [401, 403]
 
 def test_consolidated_pilot_status_api():
     h = _auth()
-    r = requests.get(f"{BASE}/api/v1/pilot-control/status", headers=h, timeout=10)
+    r = requests.get(f"{BASE}/api/v1/pilot/status", headers=h, timeout=10)
     assert r.status_code == 200, f"Endpoint failed: {r.text}"
     data = r.json()
 

@@ -32,7 +32,7 @@ def test_complete_intelligence_api_surface():
         "/api/v1/commercial-value/certification",
         "/api/v1/production-gate/readiness",
         "/api/v1/production-gate/pilot-summary",
-        "/api/v1/pilot-control/status",
+        "/api/v1/pilot/status",
         "/api/v1/plans/my-entitlements",
         "/api/v1/integrations/webhooks/subscriptions",
         "/api/v1/sso/config",
@@ -64,6 +64,6 @@ def test_production_platform_status():
     assert r1.status_code == 200
     assert r1.json()["failed"] == 0
 
-    r2 = requests.get(f"{BASE}/api/v1/pilot-control/status", headers=h, timeout=15)
+    r2 = requests.get(f"{BASE}/api/v1/pilot/status", headers=h, timeout=15)
     assert r2.status_code == 200
     assert len(r2.json()["pilots"]) >= 3
