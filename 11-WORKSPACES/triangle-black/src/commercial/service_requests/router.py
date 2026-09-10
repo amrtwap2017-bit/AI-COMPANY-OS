@@ -81,11 +81,12 @@ def convert_to_work_order(sr_id: str, db: Session = Depends(get_db)):
     wo_id = str(uuid.uuid4())
     now   = _dt.utcnow()
     db.execute(text(
-        "INSERT INTO work_orders (id, hotel_id, title, description, priority, status, type, created_at, updated_at)"
-        " VALUES (:id, :hotel_id, :title, :description, :priority, :status, :type, :created_at, :updated_at)"
+        "INSERT INTO work_orders (id, hotel_id, title, description, priority, status, type, asset_id, created_at, updated_at)"
+        " VALUES (:id, :hotel_id, :title, :description, :priority, :status, :type, :asset_id, :created_at, :updated_at)"
     ), {
         "id":          wo_id,
         "hotel_id":    sr.get("hotel_id"),
+            "asset_id":    sr.get("asset_id"),  # V10-Sprint-A: asset passthrough
         "title":       sr.get("title"),
         "description": sr.get("description",""),
         "priority":    sr.get("priority","medium"),
@@ -189,17 +190,18 @@ def generate_work_order_from_sr(sr_id: str, db: Session = Depends(get_db)):
     db.execute(text("""
         INSERT INTO work_orders
         (id, hotel_id, title, description, priority, status, type,
-         site_id, created_at, updated_at)
+         asset_id, site_id, created_at, updated_at)
         VALUES
         (:id, :hotel_id, :title, :description, :priority, 'open', 'corrective',
-         :site_id, :created_at, :updated_at)
+         :asset_id, :site_id, :created_at, :updated_at)
     """), {
         "id":          wo_id,
         "hotel_id":    hotel_id,
         "title":       f"[SR] {sr.get('title', 'Service Request')}",
         "description": sr.get("description") or sr.get("title", ""),
         "priority":    sr.get("urgency", "normal"),
-        "site_id":     sr.get("site_id"),
+        "asset_id":    sr.get("asset_id"),  # V10-Sprint-A: asset passthrough
+            "site_id":     sr.get("site_id"),
         "created_at":  now,
         "updated_at":  now,
     })

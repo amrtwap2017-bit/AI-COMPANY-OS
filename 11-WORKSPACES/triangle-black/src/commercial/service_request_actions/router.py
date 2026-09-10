@@ -47,12 +47,13 @@ def generate_work_order_from_sr(sr_id: str, data: dict = None,
         wo_id = str(uuid.uuid4())
         db.execute(text("""
             INSERT INTO work_orders (id, hotel_id, title, type, priority, status,
-                description, created_at, updated_at)
+                asset_id, description, created_at, updated_at)
             VALUES (:id, :hid, :title, 'corrective', :priority, 'open',
-                :desc, :now, :now)
+                :asset_id, :desc, :now, :now)
             ON CONFLICT DO NOTHING
         """), {
             "id": wo_id, "hid": hotel_id,
+            "asset_id": getattr(sr, "asset_id", None) or None,  # V10-Sprint-A
             "title": f"WO for SR: {getattr(sr, 'title', sr_id)}",
             "priority": data.get("priority", "medium"),
             "desc": f"Generated from service request {sr_id}",
