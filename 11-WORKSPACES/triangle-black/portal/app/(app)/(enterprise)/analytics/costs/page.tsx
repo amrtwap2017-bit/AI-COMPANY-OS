@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 const fmtK = (n: any) => Number(n||0)>=1000?`EGP ${(Number(n)/1000).toFixed(0)}K`:fmtEGP(n);
@@ -12,7 +13,8 @@ const WARM_COLORS = ["#B9924C","#547C4D","#A84A3D","#B07A2A","#5B7C8C","#8D7443"
 
 const WarmTooltip = ({active,payload,label}: any) => {
   if (!active||!payload?.length) return null;
-  return (
+  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
+
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label&&<div className="text-xs text-tertiary mb-1 font-semibold">{label}</div>}
       {payload.map((p: any, i: number) =>(
@@ -40,7 +42,7 @@ export default function AnalyticsCostsPage() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
 
-  const { data: finDash } = useQuery({queryKey:["costs-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => (r as any).data ?? r),staleTime:60000});
+  const { data: finDash, isLoading } = useQuery({queryKey:["costs-fin"],queryFn:()=>authFetch("/api/v1/financial/dashboard").then(r => (r as any).data ?? r),staleTime:60000});
   const { data: timeDash } = useQuery({queryKey:["costs-time"],queryFn:()=>authFetch("/api/v1/time-entries/summary").then(r => (r as any).data ?? r),staleTime:60000});
   const { data: procDash } = useQuery({queryKey:["costs-proc"],queryFn:()=>authFetch("/api/v1/procurement/dashboard").then(r => (r as any).data ?? r),staleTime:60000});
   const { data: invRaw }   = useQuery({queryKey:["costs-inv"],queryFn:()=>authFetch("/api/v1/supplier-invoices/").then(r => (r as any).data ?? r),staleTime:60000});
