@@ -1,5 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 
@@ -8,12 +9,13 @@ const fmtDate = (d: any) => { if (!d) return ""; try { return new Date(d).toLoca
 
 export default function OperationsCalendarPage() {
   const router = useRouter();
-  const { data: woRaw } = useQuery(["cal-wos"],()=>authFetch("/api/v1/work-orders/?limit=50").then(r => (r as any).data ?? r),{staleTime:30000});
+  const { data: woRaw, isLoading } = useQuery(["cal-wos"],()=>authFetch("/api/v1/work-orders/?limit=50").then(r => (r as any).data ?? r),{staleTime:30000});
   const { data: pmRaw } = useQuery(["cal-pm"],()=>authFetch("/api/v1/pm-schedule/calendar").then(r => (r as any).data ?? r),{staleTime:60000});
   const wos = toArr(woRaw).filter((w: any) =>w.due_date).slice(0,20);
   const pm = toArr(pmRaw?.events||pmRaw).slice(0,10);
 
-  return (
+  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero">
         <div className="tb-hero-inner">

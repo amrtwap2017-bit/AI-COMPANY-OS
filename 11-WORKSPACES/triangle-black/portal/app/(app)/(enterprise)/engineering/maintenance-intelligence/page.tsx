@@ -1,11 +1,12 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function MaintenanceIntelligencePage() {
   const router = useRouter();
-  const { data: assetRaw } = useQuery(["mi-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
+  const { data: assetRaw, isLoading } = useQuery(["mi-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const { data: woRaw }    = useQuery(["mi-wos"],    () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const { data: pmRaw }    = useQuery(["mi-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
   const assets = toArr(assetRaw); const wos = toArr(woRaw); const pms = toArr(pmRaw);
@@ -16,7 +17,8 @@ export default function MaintenanceIntelligencePage() {
   const assetHealth  = assets.length>0?Math.round(assets.filter((a: any) =>a.status==="Operational").length/assets.length*100):100;
   const pmCompliance = pms.length>0?Math.round((pms.length-overduePMs.length)/pms.length*100):100;
   const compRate     = wos.length>0?Math.round(wos.filter((w: any) =>w.status==="completed").length/wos.length*100):0;
-  return (
+  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">

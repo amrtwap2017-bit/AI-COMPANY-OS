@@ -1,16 +1,18 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function NewWorkOrderPage() {
   const router = useRouter();
   const { data: techRaw }  = useQuery(["nwo-techs"],  () => authFetch("/api/v1/technicians/").then(r => (r as any).data ?? r));
-  const { data: assetRaw } = useQuery(["nwo-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
+  const { data: assetRaw, isLoading } = useQuery(["nwo-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const { data: srRaw }    = useQuery(["nwo-srs"],    () => authFetch("/api/v1/service-requests/").then(r => (r as any).data ?? r));
   const techs = toArr(techRaw); const assets = toArr(assetRaw); const srs = toArr(srRaw);
   const unlinkedSRs = srs.filter((s: any) =>!s.work_order_id&&s.status==="open");
-  return (
+  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">

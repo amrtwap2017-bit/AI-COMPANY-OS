@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { tbFetch } from "@/lib/api/tb-client";
 
@@ -18,7 +19,7 @@ export default function NewWorkOrderPage() {
   });
 
   // Load assets for dropdown
-  const { data: assetRaw } = useQuery(
+  const { data: assetRaw, isLoading } = useQuery(
     ["nwo-assets"],
     () => authFetch("/api/v1/assets/?limit=200"),
     { staleTime: 60000 }
@@ -76,7 +77,8 @@ export default function NewWorkOrderPage() {
 
   const isCorrectiveWithoutAsset = form.type === "corrective" && !form.asset_id;
 
-  return (
+  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
+
     <div className="max-w-2xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-primary">New Work Order</h1>

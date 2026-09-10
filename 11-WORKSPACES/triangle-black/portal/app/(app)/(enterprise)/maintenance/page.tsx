@@ -1,11 +1,12 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 export default function MaintenancePage() {
   const router = useRouter();
-  const { data: assetRaw } = useQuery(["maint-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
+  const { data: assetRaw, isLoading } = useQuery(["maint-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const { data: pmRaw }    = useQuery(["maint-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
   const { data: woRaw }    = useQuery(["maint-wos"],    () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const assets = toArr(assetRaw); const pms = toArr(pmRaw); const wos = toArr(woRaw);
@@ -21,7 +22,8 @@ export default function MaintenancePage() {
     {label:"Dispatch",      icon:"📋", path:"/operations/dispatch",     count:null,            color:"#B07A2A"},
     {label:"Technicians",   icon:"👷", path:"/operations/technicians",  count:null,            color:"#6D5F53"},
   ];
-  return (
+  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
