@@ -97,7 +97,7 @@ export default function NewWorkOrderPage() {
             required
             value={form.title}
             onChange={(e: any) => set("title", e.target.value)}
-            placeholder="e.g. HVAC Filter Replacement - Room 301"
+            placeholder="e.g. HVAC Filter Replacement — Room 301"
             className="tb-input w-full"
           />
         </div>
@@ -132,7 +132,7 @@ export default function NewWorkOrderPage() {
           </div>
         </div>
 
-        {/* Asset selector - V9-015 */}
+        {/* Asset selector — V9-015 */}
         <div>
           <label className="block text-sm font-semibold text-primary mb-1.5">
             Asset
@@ -147,7 +147,7 @@ export default function NewWorkOrderPage() {
             onChange={(e: any) => set("asset_id", e.target.value)}
             className="tb-select w-full"
           >
-            <option value="">- Select asset (optional) -</option>
+            <option value="">— Select asset (optional) —</option>
             {assets.map((a: any) => (
               <option key={a.id} value={a.id}>
                 {a.name}{a.category ? ` (${a.category})` : ""}
@@ -171,7 +171,7 @@ export default function NewWorkOrderPage() {
             onChange={(e: any) => set("technician_id", e.target.value)}
             className="tb-select w-full"
           >
-            <option value="">- Unassigned -</option>
+            <option value="">— Unassigned —</option>
             {techs.map((t: any) => (
               <option key={t.id} value={t.id}>
                 {t.name || t.full_name || t.email || t.id}
