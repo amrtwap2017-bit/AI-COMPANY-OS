@@ -1,14 +1,12 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
-import { LoadingSkeleton } from "@/components/states/PageStates";
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function ReviewIntelligencePage() {
-  const { data: fin, isLoading } = useQuery(["ri-fin"], () => authFetch("/api/v1/financial/dashboard").then(r => (r as any).data ?? r), {staleTime:60000});
+  const { data: fin } = useQuery(["ri-fin"], () => authFetch("/api/v1/financial/dashboard").then(r => (r as any).data ?? r), {staleTime:60000});
   const { data: proc } = useQuery(["ri-proc"], () => authFetch("/api/v1/procurement/dashboard").then(r => (r as any).data ?? r), {staleTime:60000});
   const rev = fin?.revenue || {};
-  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
-
+  return (
     <div style={{minHeight:"100vh",background:"var(--color-bg)"}}>
       <div className="tb-hero"><div className="tb-hero-inner">
         <div style={{fontSize:"0.6875rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#B9924C",marginBottom:6}}>Commercial</div>

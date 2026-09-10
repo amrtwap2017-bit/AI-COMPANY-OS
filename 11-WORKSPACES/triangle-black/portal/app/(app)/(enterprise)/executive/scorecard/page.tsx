@@ -2,14 +2,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
-import { LoadingSkeleton } from "@/components/states/PageStates";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 export default function ScorecardPage() {
   const router = useRouter();
   const { data: twin }   = useQuery(["sc2-twin"],  () => authFetch("/api/v1/twin/state").then(r => (r as any).data ?? r));
   const { data: woRaw }  = useQuery(["sc2-wos"],   () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
-  const { data: invRaw, isLoading } = useQuery(["sc2-inv"],   () => authFetch("/api/v1/invoices/").then(r => (r as any).data ?? r));
+  const { data: invRaw } = useQuery(["sc2-inv"],   () => authFetch("/api/v1/invoices/").then(r => (r as any).data ?? r));
   const { data: pmRaw }  = useQuery(["sc2-pms"],   () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
   const wos = toArr(woRaw); const inv = toArr(invRaw); const pms = toArr(pmRaw);
   const score = twin?.health_score||0;
@@ -25,8 +24,7 @@ export default function ScorecardPage() {
     {label:"Asset Uptime",          value:100,       target:95,  color:"#547C4D", unit:"%",     path:"/maintenance/assets"},
     {label:"Critical WOs Open",     value:wos.filter((w: any) =>w.priority==="critical"&&w.status!=="completed").length, target:0, color:"#A84A3D", unit:"",path:"/operations/work-orders"},
   ];
-  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
-
+  return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">

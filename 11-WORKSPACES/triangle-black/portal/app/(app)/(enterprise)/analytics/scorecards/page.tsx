@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 import {
-import { LoadingSkeleton } from "@/components/states/PageStates";
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend,
 } from "recharts";
@@ -13,8 +12,7 @@ const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 
 const WarmTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
-  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
-
+  return (
     <div className="tb-section shadow-lg" style={{padding:"10px 14px"}}>
       {label && <div className="text-xs text-tertiary mb-1 font-semibold">{label}</div>}
       {payload.map((p: any, i: number) => (
@@ -32,7 +30,7 @@ export default function AnalyticsScorecards() {
   const { data: twin }     = useQuery(["sc-twin"],    () => authFetch("/api/v1/twin/state").then(r => (r as any).data ?? r));
   const { data: woRaw }    = useQuery(["sc-wos"],     () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const { data: invRaw }   = useQuery(["sc-inv"],     () => authFetch("/api/v1/invoices/").then(r => (r as any).data ?? r));
-  const { data: assetRaw, isLoading } = useQuery(["sc-assets"],  () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
+  const { data: assetRaw } = useQuery(["sc-assets"],  () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const { data: pmRaw }    = useQuery(["sc-pms"],     () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
   const { data: techRaw }  = useQuery(["sc-techs"],   () => authFetch("/api/v1/technicians/").then(r => (r as any).data ?? r));
 

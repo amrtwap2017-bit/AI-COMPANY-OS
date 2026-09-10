@@ -5,10 +5,9 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/Button";
 import { Award, RefreshCw, Download, ShieldCheck, TrendingUp, CheckCircle2 } from "lucide-react";
-import { LoadingSkeleton } from "@/components/states/PageStates";
 
 export default function ValueCertificationV2Page() {
-  const { data: report, isLoading, refetch } = useQuery(
+  const { data: report, refetch } = useQuery(
     ["commercial-value-certification-v2"],
     () => authFetch("/api/v1/commercial-value/certification").then(r => r.json()),
     { staleTime: 60000 }
@@ -18,8 +17,7 @@ export default function ValueCertificationV2Page() {
   const ops = report?.operational_achievements || {};
   const gov = report?.governance_signoff || {};
 
-  if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
-
+  return (
     <div className="min-h-screen bg-base p-6 md:p-8 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6">
         <div>
