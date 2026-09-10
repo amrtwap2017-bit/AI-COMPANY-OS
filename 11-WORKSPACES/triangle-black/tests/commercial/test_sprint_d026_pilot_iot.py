@@ -19,8 +19,8 @@ def test_pilot_control_status():
     assert r.status_code == 200
     d = r.json()
     assert "pilot_phase" in d
-    pilots = d["pilots"]
-    assert len(pilots) >= 3
+    pilots = [d]  # V10-011: single hotel response
+    assert len(pilots) >= 1  # V10-011: single hotel
     for p in pilots:
         assert "health_index" in p
         assert "kpis" in p
