@@ -23,7 +23,7 @@ export default function MaintenanceIntelligencePage() {
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
-          <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance · AI</div>
+          <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance  -  AI</div>
           <h1 className="tb-hero-title">Maintenance Intelligence</h1>
           <p className="tb-hero-description">AI-powered maintenance insights and health analysis</p>
           <div className="tb-grid-4 mt-6">

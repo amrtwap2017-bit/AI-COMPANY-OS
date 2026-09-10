@@ -43,7 +43,7 @@ export default function OperationsCalendarPage() {
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{background:color}} />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-primary truncate">{w.title}</div>
-                    <div className="text-xs text-tertiary">{w.priority} · {w.status}</div>
+                    <div className="text-xs text-tertiary">{w.priority}  -  {w.status}</div>
                   </div>
                 </button>
               );

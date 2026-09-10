@@ -30,7 +30,7 @@ export default function MaintenancePage() {
         <div className="tb-hero-inner">
           <div className="text-label-upper text-cyan-400 mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Maintenance</h1>
-          <p className="tb-hero-description">{assets.length} assets · {pms.length} PM plans · {faulted} faulted</p>
+          <p className="tb-hero-description">{assets.length} assets  -  {pms.length} PM plans  -  {faulted} faulted</p>
           <div className="tb-grid-4 mt-6">
             {[{label:"Total Assets",value:assets.length,color:"#221D1A"},{label:"In Fault",value:faulted,color:faulted>0?"#A84A3D":"#547C4D"},{label:"Overdue PMs",value:overduePMs,color:overduePMs>0?"#B07A2A":"#547C4D"},{label:"Active WOs",value:activeWOs,color:activeWOs>0?"#5B7C8C":"#547C4D"}].map((k: any, i: number) =>(
               <div key={i} className="tb-hero-kpi"><div className="tb-hero-kpi-value" style={{color:k.color}}>{k.value}</div><div className="tb-hero-kpi-label">{k.label}</div></div>
@@ -45,7 +45,7 @@ export default function MaintenancePage() {
             {modules.map((m: any, i: number) =>(
               <button key={i} onClick={()=>router.push(m.path)} className="tb-section text-left hover:border-brand transition-colors">
                 <div className="flex items-center justify-between mb-3"><span style={{fontSize:"1.75rem"}}>{m.icon}</span>{m.count!==null&&<span className="text-2xl font-black" style={{color:m.color}}>{m.count}</span>}</div>
-                <div className="text-sm font-bold text-primary">{m.label}</div><div className="text-xs text-brand mt-2">View →</div>
+                <div className="text-sm font-bold text-primary">{m.label}</div><div className="text-xs text-brand mt-2">View -></div>
               </button>
             ))}
           </div>
