@@ -50,7 +50,7 @@ class TestGenerateRecommendations:
         _skip(r, "gen-4")
         assert r.status_code == 200
         d = r.json()
-        assert d["generated_count"] == 4
+        assert d["generated_count"] <= 4  # V10-008: dedup reduces count
         directors = [rec["director"] for rec in d["recommendations"]]
         assert "maintenance" in directors
         assert "procurement" in directors
@@ -322,7 +322,7 @@ class TestIntelligenceDecisionLoop:
         if gen.status_code == 429:
             pytest.skip("Rate limited")
         assert gen.status_code == 200
-        assert gen.json()["generated_count"] == 4
+        assert gen.json()["generated_count"] <= 4  # V10-008: dedup reduces count
 
         # Step 2: Intelligence visible in list
         lst = requests.get(f"{BASE}/api/v1/recommendations/?status=pending",
