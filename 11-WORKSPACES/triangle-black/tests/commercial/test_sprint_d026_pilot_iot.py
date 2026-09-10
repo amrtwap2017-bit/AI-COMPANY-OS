@@ -18,7 +18,7 @@ def test_pilot_control_status():
     r = requests.get(f"{BASE}/api/v1/pilot/status", headers=h, timeout=15)
     assert r.status_code == 200
     d = r.json()
-    assert "pilots" in d
+    assert "pilot_phase" in d
     pilots = d["pilots"]
     assert len(pilots) >= 3
     for p in pilots:

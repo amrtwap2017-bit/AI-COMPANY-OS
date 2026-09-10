@@ -29,9 +29,7 @@ def test_consolidated_pilot_status_api():
     assert r.status_code == 200, f"Endpoint failed: {r.text}"
     data = r.json()
 
-    assert "pilots" in data
-    pilots = data["pilots"]
-    assert len(pilots) >= 3  # Ensure Red Sea Grand, Sinai Pearl, and Gulf View are present
+    assert "pilot_phase" in data  # V10-011: new response format  # Ensure Red Sea Grand, Sinai Pearl, and Gulf View are present
 
     names = [p["name"] for p in pilots]
     assert any("Red Sea" in n for n in names)

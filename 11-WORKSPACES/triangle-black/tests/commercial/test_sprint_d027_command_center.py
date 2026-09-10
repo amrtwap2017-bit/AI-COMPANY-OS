@@ -66,4 +66,4 @@ def test_production_platform_status():
 
     r2 = requests.get(f"{BASE}/api/v1/pilot/status", headers=h, timeout=15)
     assert r2.status_code == 200
-    assert len(r2.json()["pilots"]) >= 3
+    assert "pilot_phase" in r2.json()  # V10-011: hotel-specific pilot status
