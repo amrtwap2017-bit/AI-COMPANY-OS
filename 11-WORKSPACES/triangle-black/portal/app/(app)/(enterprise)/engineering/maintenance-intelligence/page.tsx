@@ -22,7 +22,7 @@ export default function MaintenanceIntelligencePage() {
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
-          <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance · AI</div>
+          <div className="text-label-upper text-cyan-400 mb-1.5">Maintenance . AI</div>
           <h1 className="tb-hero-title">Maintenance Intelligence</h1>
           <p className="tb-hero-description">AI-powered maintenance insights and health analysis</p>
           <div className="tb-grid-4 mt-6">
@@ -48,7 +48,7 @@ export default function MaintenanceIntelligencePage() {
             <div className="space-y-2">
               {faulted.slice(0,3).map((a: any, i: number) =>(
                 <button key={i} onClick={()=>router.push("/maintenance/assets/"+a.id)} className="tb-action-item w-full justify-between">
-                  <div className="flex items-center gap-2"><span>⚙️</span><span className="text-sm text-secondary truncate">{a.name}</span></div>
+                  <div className="flex items-center gap-2"><span>️</span><span className="text-sm text-secondary truncate">{a.name}</span></div>
                   <span className="tb-badge tb-badge--danger" style={{fontSize:"0.5rem"}}>FAULT</span>
                 </button>
               ))}
@@ -64,7 +64,7 @@ export default function MaintenanceIntelligencePage() {
         <div className="tb-section">
           <div className="text-label-upper text-tertiary mb-4">Navigate</div>
           <div className="tb-grid-4">
-            {[{label:"Assets",icon:"⚙️",path:"/maintenance/assets"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Asset Tree",icon:"🌳",path:"/maintenance/asset-tree"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a: any, i: number) =>(
+            {[{label:"Assets",icon:"️",path:"/maintenance/assets"},{label:"PM Plans",icon:"📅",path:"/maintenance/pm-plans"},{label:"Asset Tree",icon:"🌳",path:"/maintenance/asset-tree"},{label:"Work Orders",icon:"🔧",path:"/operations/work-orders"}].map((a: any, i: number) =>(
               <button key={i} onClick={()=>router.push(a.path)} className="tb-action-item justify-center py-4 flex-col gap-1.5 text-center">
                 <span className="text-xl">{a.icon}</span><span className="text-xs font-medium text-secondary">{a.label}</span>
               </button>

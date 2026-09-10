@@ -39,6 +39,14 @@ Status: VERIFIED from live audit
 | V10-G019 | No multi-tenant (multi-hotel) | Architecture | Revenue stage |
 | V10-G020 | Accessibility WCAG 2.2 | Audit + fix | P2 |
 
+## RESOLVED IN V10 (Sep 10, 2026)
+
+| ID | Gap | Resolution | Date |
+|----|-----|-----------|------|
+| V10-B1 | 1,373 old recs without dup_key | Archived | Sep 10 2026 |
+| V10-C1 | non_asset_reason missing from work_orders | Added VARCHAR(50) | Sep 10 2026 |
+| V10-G011 | duplicate_key missing | Added + dedup working (93 pending) | Sep 10 2026 |
+
 ## RESOLVED IN V9 (Do Not Re-Open)
 
 | ID | Gap | Resolution |

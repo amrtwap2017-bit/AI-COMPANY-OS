@@ -18,7 +18,7 @@ export default function EngineeringHubPage() {
 
   const modules = [
     {icon:"🔧",label:"Work Orders",desc:"All engineering WOs",path:"/operations/work-orders"},
-    {icon:"➕",label:"New Work Order",desc:"Create engineering WO",path:"/operations/work-orders/new"},
+    {icon:"+",label:"New Work Order",desc:"Create engineering WO",path:"/operations/work-orders/new"},
     {icon:"📅",label:"PM Plans",desc:"Preventive maintenance",path:"/engineering/pm-plans"},
     {icon:"📋",label:"Dispatch Board",desc:"Assign technicians",path:"/operations/dispatch"},
     {icon:"📜",label:"Work History",desc:"Completed WOs log",path:"/maintenance/work-history"},
