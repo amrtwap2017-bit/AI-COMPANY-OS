@@ -22,9 +22,9 @@ def test_pilot_control_status():
     pilots = [d]  # V10-011: single hotel response
     assert len(pilots) >= 1  # V10-011: single hotel
     for p in pilots:
-        assert "health_index" in p
-        assert "kpis" in p
-        assert p["kpis"]["total_assets"] >= 20
+        assert "pilot_phase" in p  # V10-011: new format
+        assert "scores" in p  # V10-011: replaces kpis
+        assert p["scores"]["data_quality_score"] >= 0
 
 def test_production_gate_readiness():
     h = _auth()
