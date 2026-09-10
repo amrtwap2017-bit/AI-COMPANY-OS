@@ -2,13 +2,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
 export default function EngineeringHubPage() {
   const router = useRouter();
-  const { data: execDash } = useQuery(["eng-exec"], () => authFetch("/api/v1/executive/dashboard").then(r => (r as any).data ?? r), {staleTime:60000});
+  const { data: execDash, isLoading } = useQuery(["eng-exec"], () => authFetch("/api/v1/executive/dashboard").then(r => (r as any).data ?? r), {staleTime:60000});
   const { data: timeDash } = useQuery(["eng-time"], () => authFetch("/api/v1/time-entries/summary").then(r => (r as any).data ?? r), {staleTime:60000});
   const { data: woRaw } = useQuery(["eng-wos"], () => authFetch("/api/v1/work-orders/?limit=10").then(r => (r as any).data ?? r), {staleTime:30000});
   const ops = execDash?.operations?.work_orders || {};
@@ -26,7 +27,8 @@ export default function EngineeringHubPage() {
     {icon:"🏭",label:"Asset Registry",desc:"All managed assets",path:"/maintenance/assets"},
   ];
 
-  return (
+  if (isLoading) return <LoadingSkeleton rows={6} message="Loading..." />;
+
     <div style={{minHeight:"100vh",background:"var(--color-bg)"}}>
       <div className="tb-hero"><div className="tb-hero-inner">
         <div style={{fontSize:"0.6875rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#B9924C",marginBottom:6}}>Engineering</div>

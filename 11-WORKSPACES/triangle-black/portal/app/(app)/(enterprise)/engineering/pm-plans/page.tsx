@@ -2,18 +2,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
+import { LoadingSkeleton } from "@/components/states/PageStates";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 export default function EngineeringPMPlansPage() {
   const router = useRouter();
   const { data: pmRaw }    = useQuery(["epmp-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));
-  const { data: assetRaw } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
+  const { data: assetRaw, isLoading } = useQuery(["epmp-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const pms = toArr(pmRaw); const assets = toArr(assetRaw);
   const now = new Date();
   const overdue = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)<now);
   const dueWeek = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>=now&&new Date(p.next_due_ts)<=new Date(now.getTime() +7*86400000));
   const onTrack = pms.filter((p: any) =>p.next_due_ts&&new Date(p.next_due_ts)>new Date(now.getTime() +7*86400000));
-  return (
+  if (isLoading) return <LoadingSkeleton rows={6} message="Loading..." />;
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #0E1A1A 100%)"}}>
         <div className="tb-hero-inner">
