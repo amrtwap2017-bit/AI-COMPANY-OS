@@ -24,6 +24,7 @@ export default function OperationsPage() {
   ];
   if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
 
+    return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
