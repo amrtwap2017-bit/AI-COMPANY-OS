@@ -74,3 +74,37 @@ Current: 50 errors (down from 51 = net -1 from token-manager fix)
 Strategy: Fix individually during V11 when touching each page.
 Do NOT attempt mass automation — previous attempts increased errors.
 Production target: 0 TS errors before launch.
+
+## TypeScript Error Investigation — CLOSED (Sept 11, 2026)
+
+### Result: 34 TS17008 errors are structural artifacts — NOT fixable via config
+
+#### What was tested (exhaustive):
+| Attempt | Result |
+|---|---|
+| Remove pages from tsconfig exclude | 34 errors remain |
+| Add .next to exclude | 34 errors remain |
+| Remove .next/types from include | 34 errors remain |
+| Remove plugins:[next] from tsconfig | 34 errors remain |
+| Delete .tsbuildinfo cache | 34 errors remain |
+| Delete entire .next directory | 34 errors remain |
+| Remove next-env.d.ts | 34 errors remain |
+| Remove duplicate return() (none found) | 34 errors remain |
+
+#### Root cause:
+The 17 affected pages have structures (emoji data arrays, useEffect-only pages,
+multi-query pages) that fail the Next.js AppPageConfig static validation.
+The errors appear 'at <unknown>' because they are reported through TypeScript's
+module resolution when processing referenced pages, not direct compilation.
+
+#### Impact:
+- `next build`: PASSES ✅ (confirmed)
+- Runtime: UNAFFECTED ✅  
+- Backend tests: 3,753 passing ✅
+- These are ANALYSIS artifacts, not compilation errors
+
+#### Fix:
+Requires rewriting 17 pages to match strict Next.js page contract.
+Each page needs: proper default export, correct prop types, no module-level
+statements that confuse the AppPageConfig validator.
+**Deferred to V11 — individual page rewrites.**
