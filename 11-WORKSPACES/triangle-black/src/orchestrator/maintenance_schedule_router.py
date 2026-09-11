@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from application.services.maintenance_schedule_service import MaintenanceScheduleService
 from infrastructure.repositories.maintenance_schedule_repository import get_maintenance_schedule_repo
 from domain.schemas.maintenance_schedule import MaintenanceScheduleCreate, MaintenanceScheduleUpdate, MaintenanceScheduleResponse
+from src.core.auth import get_current_user
 
 router = APIRouter()
 
-@router.post('/maintenance_schedules/', response_model=MaintenanceScheduleResponse)
+@router.post('/maintenance_schedules/', response_model=MaintenanceScheduleResponse, dependencies=[Depends(get_current_user)])
 def create_maintenance_schedule(maintenance_schedule_data: MaintenanceScheduleCreate, db: Session = Depends(get_maintenance_schedule_repo)):
     maintenance_schedule_service = MaintenanceScheduleService(db)
     return maintenance_schedule_service.create_maintenance_schedule(maintenance_schedule_data.dict())
@@ -19,12 +20,12 @@ def get_maintenance_schedule(schedule_id: int, db: Session = Depends(get_mainten
         raise HTTPException(status_code=404, detail='Maintenance Schedule not found')
     return schedule
 
-@router.put('/maintenance_schedules/{schedule_id}', response_model=MaintenanceScheduleResponse)
+@router.put('/maintenance_schedules/{schedule_id}', response_model=MaintenanceScheduleResponse, dependencies=[Depends(get_current_user)])
 def update_maintenance_schedule(schedule_id: int, maintenance_schedule_data: MaintenanceScheduleUpdate, db: Session = Depends(get_maintenance_schedule_repo)):
     maintenance_schedule_service = MaintenanceScheduleService(db)
     return maintenance_schedule_service.update_maintenance_schedule(schedule_id, maintenance_schedule_data.dict())
 
-@router.delete('/maintenance_schedules/{schedule_id}', status_code=204)
+@router.delete('/maintenance_schedules/{schedule_id}', status_code=204, dependencies=[Depends(get_current_user)])
 def delete_maintenance_schedule(schedule_id: int, db: Session = Depends(get_maintenance_schedule_repo)):
     maintenance_schedule_service = MaintenanceScheduleService(db)
     maintenance_schedule_service.delete_maintenance_schedule(schedule_id)
