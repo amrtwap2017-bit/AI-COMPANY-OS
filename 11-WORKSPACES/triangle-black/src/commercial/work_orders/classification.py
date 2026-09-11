@@ -13,19 +13,35 @@ from sqlalchemy import text
 FACILITY_WIDE_KEYWORDS = [
     "facility", "common area", "lobby", "corridor", "parking",
     "garden", "pool area", "general", "building", "exterior",
-    "roof", "facade", "entrance", "exit", "hallway"
+    "roof", "facade", "entrance", "exit", "hallway",
+    "ground floor", "basement", "terrace", "reception",
+    "restaurant", "kitchen", "laundry", "gym", "spa",
+    "conference", "ballroom", "banquet", "beach", "marina",
+    "landscape", "outdoor", "public area", "back of house",
+    "fire escape", "staircase", "elevator shaft", "boiler room",
+    "pump room", "electrical room", "generator room"
 ]
 
 ADMINISTRATIVE_KEYWORDS = [
     "administrative", "admin", "policy", "procedure", "training",
     "inspection report", "audit", "compliance check", "review",
-    "documentation", "meeting", "planning"
+    "documentation", "meeting", "planning",
+    "report", "update", "follow up", "follow-up", "coordination",
+    "handover", "handoff", "sign off", "signoff", "close out",
+    "warranty claim", "insurance", "certification", "permit",
+    "license", "renewal", "register", "log entry", "record"
 ]
 
 GENERAL_SERVICE_KEYWORDS = [
     "general maintenance", "routine check", "periodic",
     "service call", "follow up", "survey", "assessment",
-    "deep clean", "pest control", "fumigation"
+    "deep clean", "pest control", "fumigation",
+    "cleaning", "housekeeping", "janitorial", "sanitation",
+    "waste disposal", "garbage", "trash", "recycling",
+    "painting", "touch up", "touch-up", "refurbishment",
+    "renovation", "upgrade", "modification", "installation",
+    "commissioning", "decommissioning", "relocation",
+    "inventory check", "stock count", "meter reading"
 ]
 
 
