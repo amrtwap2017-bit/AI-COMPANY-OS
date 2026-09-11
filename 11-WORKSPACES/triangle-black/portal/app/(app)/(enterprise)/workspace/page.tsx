@@ -64,7 +64,6 @@ export default function WorkspacePage() {
     <div className="min-h-screen bg-base">
 
       <div className="tb-hero">
-  return (
         <div className="tb-hero-inner">
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div>

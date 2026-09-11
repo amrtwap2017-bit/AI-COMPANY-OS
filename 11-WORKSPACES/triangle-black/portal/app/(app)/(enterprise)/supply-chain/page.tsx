@@ -30,7 +30,6 @@ function SupplyChainHubInner() {
     <div className="min-h-screen bg-base">
       <div className="tb-hero" >
         <div className="tb-hero-inner">
-  return (
           <div className="text-label-upper text-emerald-400 mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Supply Chain</h1>
           <p className="tb-hero-description">Procurement, inventory, suppliers and logistics</p>

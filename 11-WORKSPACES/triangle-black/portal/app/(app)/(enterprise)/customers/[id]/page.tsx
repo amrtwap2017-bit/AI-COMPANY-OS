@@ -20,7 +20,6 @@ export default function CustomerDetailPage() {
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #1A0F28 100%)"}}>
         <div className="tb-hero-inner">
-  return (
           <div className="tb-flex-between gap-6">
             <div>
               <div className="text-label-upper text-purple-400 mb-1.5">Commercial · Customer</div>

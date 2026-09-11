@@ -25,11 +25,9 @@ export default function OperationsPage() {
   if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
 
   return (
-  return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">
-  return (
           <div className="text-label-upper text-cyan-400 mb-1.5">Platform</div>
           <h1 className="tb-hero-title">Operations</h1>
           <p className="tb-hero-description">{wos.length} work orders · {techs.length} technicians · {openSRs} open requests</p>

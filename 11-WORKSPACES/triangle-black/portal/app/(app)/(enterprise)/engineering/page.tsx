@@ -30,13 +30,11 @@ export default function EngineeringHubPage() {
   if (isLoading) return <LoadingSkeleton rows={6} message="Loading..." />;
 
   return (
-  return (
     <div style={{minHeight:"100vh",background:"var(--color-bg)"}}>
       <div className="tb-hero"><div className="tb-hero-inner">
         <div style={{fontSize:"0.6875rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#B9924C",marginBottom:6}}>Engineering</div>
         <h1 className="tb-hero-title">Engineering Hub</h1>
         <p className="tb-hero-description">Work orders, maintenance, assets, and field engineering</p>
-  return (
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginTop:20}}>
           {[
             {label:"Open WOs",value:ops.open_count||0,color:"#5B7C8C"},
