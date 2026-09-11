@@ -185,7 +185,7 @@ def test_alembic_migration_chain_valid(auth_headers):
     )
     heads = [l.strip() for l in result.stdout.splitlines() if l.strip()]
     assert len(heads) == 1, f"Multiple heads: {heads}"
-    assert "v10g022_non_asset_reason" in heads[0]
+    assert "v11004_rec_outcomes" in heads[0]
 
 def test_final_3000_gate(auth_headers):
     """Final gate before 3,000 test milestone."""
