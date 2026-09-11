@@ -658,3 +658,30 @@ def close_work_order(wo_id: str, db: Session = Depends(get_db)):
         "wf_transitioned":   wf_transitioned,
         "closed_at":         now.isoformat(),
     }
+
+
+# V10-DATA: WO Asset Classification endpoints
+@router.get("/classify-unlinked", summary="Classify WOs without asset linkage")
+def classify_unlinked_wos(
+    limit: int = 100,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """V10-DATA: Auto-classify WOs without asset_id using keyword patterns."""
+    from src.commercial.work_orders.classification import WOClassificationService
+    svc = WOClassificationService(db=db, hotel_id=hotel_id)
+    return svc.classify_unlinked_wos(limit=limit)
+
+
+@router.get("/linkage-summary", summary="WO to Asset linkage summary")
+def get_linkage_summary(
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """V10-DATA: WO→Asset linkage: linked + classified + unclassified."""
+    from src.commercial.work_orders.classification import WOClassificationService
+    svc = WOClassificationService(db=db, hotel_id=hotel_id)
+    return svc.get_linkage_summary()
+

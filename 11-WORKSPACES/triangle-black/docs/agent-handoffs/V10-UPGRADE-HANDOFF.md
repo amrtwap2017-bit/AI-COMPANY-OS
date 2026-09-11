@@ -20,7 +20,7 @@ Session: Full Upgrade Execution
 ## VERIFIED FINAL STATE
 
 - Tests: 3,722+ passing / 0 failing
-- TypeScript: 0 errors (TARGET ACHIEVED)
+- TypeScript: 34 errors remaining (TS17008 cascade — needs return() fix)
 - Security: All mutations authenticated
 - E2E: 5/5 golden journeys built
 - WO Classification: AUTO-APPLY live

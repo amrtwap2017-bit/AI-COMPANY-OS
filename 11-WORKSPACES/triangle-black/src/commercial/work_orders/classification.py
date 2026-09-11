@@ -52,7 +52,7 @@ class WOClassificationService:
         Returns classification suggestions for human review.
         """
         rows = self.db.execute(text("""
-            SELECT id, title, description, type, location, site_id
+            SELECT id, title, description, type, site_id
             FROM work_orders
             WHERE hotel_id = :h
               AND asset_id IS NULL
@@ -70,7 +70,7 @@ class WOClassificationService:
                 d.get("title", ""),
                 d.get("description", ""),
                 d.get("type", ""),
-                d.get("location", "")
+                d.get("site_id", "")
             )
             classified.append({
                 "id": d["id"],
