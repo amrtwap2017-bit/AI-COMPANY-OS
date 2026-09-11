@@ -9,6 +9,7 @@ from src.core.tenant import get_hotel_id
 from src.commercial.ai_gateway.gateway import AIGateway
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel
+from src.core.auth import get_current_user
 
 router = APIRouter(prefix="/api/v1/ai-gateway", tags=["AI Gateway"])
 
@@ -29,7 +30,7 @@ class MaintenanceAIRequest(BaseModel):
     history_days: int = 30
 
 
-@router.post("/request")
+@router.post("/request", dependencies=[Depends(get_current_user)])
 def make_ai_request(
     req: AIRequest,
     hotel_id: str = Depends(get_hotel_id),
@@ -50,7 +51,7 @@ def make_ai_request(
     )
 
 
-@router.post("/maintenance-recommendation")
+@router.post("/maintenance-recommendation", dependencies=[Depends(get_current_user)])
 def get_maintenance_recommendation(
     req: MaintenanceAIRequest,
     hotel_id: str = Depends(get_hotel_id),
@@ -104,7 +105,7 @@ def get_maintenance_recommendation(
     )
 
 
-@router.post("/work-order-summary")
+@router.post("/work-order-summary", dependencies=[Depends(get_current_user)])
 def get_work_order_summary(
     wo_id: str,
     hotel_id: str = Depends(get_hotel_id),

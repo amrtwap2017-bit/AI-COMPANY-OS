@@ -7,6 +7,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 import logging
+from src.core.auth import get_current_user
 
 logger = logging.getLogger("tb.approval_chain")
 router = APIRouter(prefix="/approval-chain", tags=["approval-chain"])
@@ -73,7 +74,7 @@ def _notify(pr_id, step, action, db):
     except Exception:
         pass
 
-@router.post("/init/{pr_id}", summary="Initialize 3-step approval chain")
+@router.post("/init/{pr_id}", summary="Initialize 3-step approval chain", dependencies=[Depends(get_current_user)])
 def init_chain(pr_id: str, db: Session = Depends(get_db)):
     """Initialize Purchasing -> Finance -> Requester approval chain."""
     pr_row = db.execute(
@@ -116,7 +117,7 @@ def init_chain(pr_id: str, db: Session = Depends(get_db)):
         "message":     "Chain initialized. Notification sent to Purchasing Manager.",
     }
 
-@router.post("/approve/{pr_id}/{step}", summary="Approve a chain step")
+@router.post("/approve/{pr_id}/{step}", summary="Approve a chain step", dependencies=[Depends(get_current_user)])
 def approve_step(pr_id: str, step: int, data: dict, db: Session = Depends(get_db)):
     """Approve step 1 (Purchasing), 2 (Finance), or 3 (Requester)."""
     _ensure_chain_table(db)
@@ -173,7 +174,7 @@ def approve_step(pr_id: str, step: int, data: dict, db: Session = Depends(get_db
             "message":        "ALL APPROVALS COMPLETE - Ready to generate Purchase Order.",
         }
 
-@router.post("/reject/{pr_id}/{step}", summary="Reject at any step")
+@router.post("/reject/{pr_id}/{step}", summary="Reject at any step", dependencies=[Depends(get_current_user)])
 def reject_step(pr_id: str, step: int, data: dict, db: Session = Depends(get_db)):
     """Reject PR at any step. Notifies requester."""
     _ensure_chain_table(db)
@@ -207,7 +208,7 @@ def reject_step(pr_id: str, step: int, data: dict, db: Session = Depends(get_db)
         "message": f"Rejected at Step {step} ({config.get('title','?')}) by {rejector}. Reason: {reason}",
     }
 
-@router.post("/generate-po/{pr_id}", summary="Auto-generate PO after full approval")
+@router.post("/generate-po/{pr_id}", summary="Auto-generate PO after full approval", dependencies=[Depends(get_current_user)])
 def generate_po(pr_id: str, data: dict, db: Session = Depends(get_db)):
     """Generate PO after all 3 approvals. Sends email to vendor."""
     pr_row = db.execute(

@@ -12,6 +12,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 import logging
+from src.core.auth import get_current_user
 
 logger = logging.getLogger("tb.goods_receipt")
 router = APIRouter(prefix="/goods-receipt-workflow", tags=["goods-receipt-workflow"])
@@ -46,7 +47,7 @@ def _notify_receipt(po_id, message, db):
     except Exception:
         pass
 
-@router.post("/receive/{po_id}", summary="Record goods receipt for PO")
+@router.post("/receive/{po_id}", summary="Record goods receipt for PO", dependencies=[Depends(get_current_user)])
 def receive_goods(po_id: str, data: dict,
                    hotel_id: str = Depends(get_hotel_id),
                    db: Session = Depends(get_db)):
@@ -188,7 +189,7 @@ def receive_goods(po_id: str, data: dict,
         "received_at":     now.isoformat(),
     }
 
-@router.post("/partial-receive/{po_id}", summary="Partial delivery receipt")
+@router.post("/partial-receive/{po_id}", summary="Partial delivery receipt", dependencies=[Depends(get_current_user)])
 def partial_receive(po_id: str, data: dict,
                     hotel_id: str = Depends(get_hotel_id),
                     db: Session = Depends(get_db)):

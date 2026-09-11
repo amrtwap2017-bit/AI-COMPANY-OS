@@ -7,6 +7,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from typing import List
+from src.core.auth import get_current_user
 
 router = APIRouter(prefix="/bulk", tags=["bulk-operations"])
 
@@ -15,7 +16,7 @@ def row_to_dict(row):
     if hasattr(row, "_mapping"): return dict(row._mapping)
     return {}
 
-@router.post("/work-orders/assign", summary="Bulk assign work orders to technician")
+@router.post("/work-orders/assign", summary="Bulk assign work orders to technician", dependencies=[Depends(get_current_user)])
 def bulk_assign_work_orders(data: dict, hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)):
     """
@@ -87,7 +88,7 @@ def bulk_assign_work_orders(data: dict, hotel_id: str = Depends(get_hotel_id),
         "message":           f"{len(assigned)} work orders assigned to {t.get('name')}",
     }
 
-@router.post("/work-orders/update-status", summary="Bulk update work order status")
+@router.post("/work-orders/update-status", summary="Bulk update work order status", dependencies=[Depends(get_current_user)])
 def bulk_update_status(data: dict, hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)):
     """
@@ -147,7 +148,7 @@ def bulk_update_status(data: dict, hotel_id: str = Depends(get_hotel_id),
         "message":       f"{len(updated)} work orders → {new_status}",
     }
 
-@router.post("/purchase-requests/approve", summary="Bulk approve purchase requests")
+@router.post("/purchase-requests/approve", summary="Bulk approve purchase requests", dependencies=[Depends(get_current_user)])
 def bulk_approve_prs(data: dict, hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db)):
     """
