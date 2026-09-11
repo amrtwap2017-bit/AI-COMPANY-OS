@@ -16,6 +16,7 @@ export default function OperationsCalendarPage() {
 
   if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
 
+  return (
     <div className="min-h-screen bg-base">
       <div className="tb-hero">
         <div className="tb-hero-inner">
