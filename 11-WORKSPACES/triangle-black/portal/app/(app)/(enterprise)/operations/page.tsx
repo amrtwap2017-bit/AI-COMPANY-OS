@@ -23,7 +23,7 @@ export default function OperationsPage() {
     {label:"Maintenance",      icon:"⚙️",  path:"/maintenance",                    count:null,          color:"#B07A2A"},
   ];
   if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
-
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero" style={{background:"linear-gradient(135deg, #221D1A 0%, #221D1A 100%)"}}>
         <div className="tb-hero-inner">

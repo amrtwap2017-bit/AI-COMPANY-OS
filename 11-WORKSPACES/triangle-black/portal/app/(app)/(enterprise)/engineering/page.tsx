@@ -28,7 +28,7 @@ export default function EngineeringHubPage() {
   ];
 
   if (isLoading) return <LoadingSkeleton rows={6} message="Loading..." />;
-
+
     <div style={{minHeight:"100vh",background:"var(--color-bg)"}}>
       <div className="tb-hero"><div className="tb-hero-inner">
         <div style={{fontSize:"0.6875rem",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:"#B9924C",marginBottom:6}}>Engineering</div>

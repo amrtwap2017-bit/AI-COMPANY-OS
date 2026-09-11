@@ -15,7 +15,7 @@ export default function OperationsCalendarPage() {
   const pm = toArr(pmRaw?.events||pmRaw).slice(0,10);
 
   if (isLoading) return <LoadingSkeleton rows={5} message="Loading..." />;
-
+
     <div className="min-h-screen bg-base">
       <div className="tb-hero">
         <div className="tb-hero-inner">
