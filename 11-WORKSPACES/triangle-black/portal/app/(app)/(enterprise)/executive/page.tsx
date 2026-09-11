@@ -44,6 +44,7 @@ export default function ExecutivePage() {
     <div className="min-h-screen bg-base">
       <div className="tb-hero">
         <div className="tb-hero-inner">
+  return (
           <div className="flex items-start justify-between gap-6 flex-wrap">
             <div>
               <div className="text-label-upper text-brand mb-1.5">Executive Center</div>

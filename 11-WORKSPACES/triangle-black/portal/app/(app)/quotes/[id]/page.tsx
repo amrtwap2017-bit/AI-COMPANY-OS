@@ -66,6 +66,7 @@ export default function QuoteDetailPage() {
         ← Back to Quotes
       </button>
       <div className="flex items-start justify-between mb-6">
+  return (
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{quote.title || `Quote ${id?.slice(0,8)}`}</h1>
           <p className="text-gray-500 text-sm mt-1">{quote.description}</p>

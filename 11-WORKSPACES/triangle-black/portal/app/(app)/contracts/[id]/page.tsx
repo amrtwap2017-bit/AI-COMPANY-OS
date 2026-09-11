@@ -53,6 +53,7 @@ export default function ContractDetailPage() {
         ← Back to Contracts
       </button>
 
+  return (
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text-1)]">{contract.title}</h1>

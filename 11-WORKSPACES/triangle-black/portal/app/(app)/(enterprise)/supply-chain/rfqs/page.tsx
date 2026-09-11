@@ -29,6 +29,7 @@ export default function RFQsPage() {
     <div className="min-h-screen bg-base">
       <div className="tb-hero">
         <div className="tb-hero-inner">
+  return (
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <div className="text-label-upper text-brand mb-1.5">Supply Chain</div>
