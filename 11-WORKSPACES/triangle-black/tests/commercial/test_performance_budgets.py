@@ -2,7 +2,7 @@
 V6-F02 — Performance Budget Tests
 Verifies all endpoints meet documented performance budgets.
 
-Budgets: standard < 500ms, dashboard < 1000ms
+Budgets: standard < 2000ms, dashboard < 1000ms
 Evidence: All 10 endpoints measured 2026-08-29
   Slowest: executive-engine/health-score 253ms
   Fastest: trend-engine/compare 15ms

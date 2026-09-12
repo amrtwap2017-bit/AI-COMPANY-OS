@@ -45,6 +45,42 @@ GENERAL_SERVICE_KEYWORDS = [
 ]
 
 
+# V12: Hotel engineering equipment keywords — extracted from real WO data audit
+EQUIPMENT_SPECIFIC_KEYWORDS = [
+    # Chillers and HVAC
+    "chiller", "ahu", "fcu", "hvac", "cooling tower", "condenser",
+    "compressor", "refrigerant", "evaporator", "heat exchanger",
+    "vrf", "split unit", "cassette", "fan coil",
+    # Mechanical
+    "bearing", "vibration", "shaft", "coupling", "seal", "gasket",
+    "belt", "pulley", "gearbox", "motor", "pump", "impeller",
+    "valve", "actuator", "damper",
+    # Electrical
+    "lv panel", "ups", "transformer", "switchgear", "breaker",
+    "generator", "ats", "battery", "inverter",
+    # Plumbing
+    "boiler", "hot water", "cold water", "chilled water", "cooling water",
+    "pressure vessel", "expansion tank", "water heater",
+    # Fire & Safety
+    "fire alarm", "fire pump", "sprinkler", "suppression", "smoke detector",
+    "emergency", "exit light",
+    # Elevators & Vertical
+    "elevator", "lift", "escalator", "dumbwaiter",
+    # BMS
+    "bms", "scada", "controller", "sensor", "meter",
+]
+
+LOCATION_KEYWORDS = [
+    # Room patterns
+    "room", "suite", "floor", "tower", "wing", "block", "basement",
+    "ground", "mezzanine", "roof", "plant room", "mechanical room",
+    # Hotel-specific
+    "lobby", "reception", "restaurant", "kitchen", "laundry",
+    "gym", "spa", "pool", "ballroom", "conference", "parking",
+]
+
+
+
 class WOClassificationService:
     """
     Classify work orders that lack asset_id with appropriate non_asset_reason.
@@ -160,6 +196,14 @@ class WOClassificationService:
         if any(kw in text_lower for kw in GENERAL_SERVICE_KEYWORDS):
             return ("GENERAL", "HIGH")
 
+        # Check equipment-specific keywords (HIGH confidence asset linkage needed)
+        if any(kw in text_lower for kw in EQUIPMENT_SPECIFIC_KEYWORDS):
+            return ("ASSET_REQUIRED", "HIGH")  # Should have asset — flag for linking
+        
+        # Check location keywords
+        if any(kw in text_lower for kw in LOCATION_KEYWORDS):
+            return ("LOCATION_ONLY", "HIGH")
+        
         # Location-only (has location but no asset keyword)
         if location and len(location) > 3:
             return ("LOCATION_ONLY", "MEDIUM")

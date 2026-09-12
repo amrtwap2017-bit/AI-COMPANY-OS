@@ -7,10 +7,11 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 from src.commercial.billing.service import StripeBillingService
+from src.core.auth import get_current_user
 
 router = APIRouter(prefix="/billing", tags=["Stripe Subscription Billing"])
 
-@router.post("/checkout-session")
+@router.post("/checkout-session", dependencies=[Depends(get_current_user)])
 def create_checkout_session_endpoint(
     payload: dict = Body(...),
     db: Session = Depends(get_db),
@@ -42,7 +43,7 @@ def stripe_success_callback_endpoint(
     # Redirect back to onboarding success page or workspace dashboard
     return RedirectResponse(url=f"http://localhost:3000/login?status=success&plan={plan_id}")
 
-@router.post("/webhook")
+@router.post("/webhook", dependencies=[Depends(get_current_user)])
 def stripe_webhook_endpoint(
     payload: dict = Body(...),
     db: Session = Depends(get_db)

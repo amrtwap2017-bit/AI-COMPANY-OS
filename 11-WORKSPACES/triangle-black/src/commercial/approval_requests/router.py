@@ -10,6 +10,7 @@ from sqlalchemy import text
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
 import uuid
+from src.core.auth import get_current_user
 
 router = APIRouter(prefix="/approval-requests", tags=["approval-requests"])
 
@@ -56,7 +57,7 @@ def get_approval(request_id: str, db: Session = Depends(get_db)):
     return dict(row._mapping)
 
 
-@router.post("/{request_id}/approve")
+@router.post("/{request_id}/approve", dependencies=[Depends(get_current_user)])
 def approve_request(request_id: str, payload: dict, db: Session = Depends(get_db)):
     row = db.execute(
         text("SELECT * FROM approval_requests WHERE id = :id"),
@@ -95,7 +96,7 @@ def approve_request(request_id: str, payload: dict, db: Session = Depends(get_db
     return {"status": "approved", "request_id": request_id, "document_type": doc_type, "document_id": doc_id}
 
 
-@router.post("/{request_id}/reject")
+@router.post("/{request_id}/reject", dependencies=[Depends(get_current_user)])
 def reject_request(request_id: str, payload: dict, db: Session = Depends(get_db)):
     row = db.execute(
         text("SELECT * FROM approval_requests WHERE id = :id"),

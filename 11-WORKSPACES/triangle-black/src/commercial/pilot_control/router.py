@@ -264,3 +264,37 @@ def _build_roi_narrative(actual: dict, targets: dict, baseline: dict) -> str:
     lines.append(f"Data confidence: {confidence}")
 
     return " | ".join(lines) if lines else "Operational state meets pilot targets"
+
+
+@router.get("/report/pdf", summary="Download executive pilot report as PDF")
+def download_pilot_report(
+    hotel_name: str = "Hotel Property",
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    V12-005: Generate and download executive pilot PDF report.
+    Customer-grade report with: KPIs, WO analysis, PM compliance,
+    AI recommendations summary, data quality, ROI gaps.
+    """
+    from fastapi.responses import Response
+    from src.commercial.reports.pilot_pdf_service import PilotReportService
+    
+    svc = PilotReportService(db=db, hotel_id=hotel_id)
+    try:
+        pdf_bytes = svc.generate_pilot_report(
+            hotel_name=hotel_name,
+            period_label="30-Day Engineering Intelligence Report",
+        )
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename=pilot-report-{hotel_id[:8]}.pdf",
+                "Content-Length": str(len(pdf_bytes)),
+            }
+        )
+    except Exception as e:
+        return {"error": str(e), "hint": "Ensure reportlab is installed: pip install reportlab"}
+
