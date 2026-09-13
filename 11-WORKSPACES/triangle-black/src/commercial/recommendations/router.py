@@ -224,3 +224,65 @@ def record_recommendation_outcome(
         recorded_by=getattr(current_user, "email", None) or "unknown",
     )
 
+
+# P1-A: Outcome Verification Engine
+@router.post("/{rec_id}/outcome",
+             summary="Record recommendation outcome (P1-A)")
+def record_outcome(
+    rec_id: str,
+    payload: dict,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    P1-A: Record what happened after a recommendation was acted on.
+    This builds the ROI evidence chain: Approved → Actioned → Outcome → ROI
+
+    payload:
+      outcome: "improved" | "no_change" | "declined" | "partial" | "ongoing"
+      notes: what specifically happened (free text)
+      roi_impact: EGP value of savings/cost avoidance (optional)
+    """
+    from src.commercial.recommendations.outcome_service import RecommendationOutcomeService
+    actor = getattr(current_user, "email", None) or getattr(current_user, "name", "unknown")
+    svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
+    return svc.record_outcome(
+        rec_id=rec_id,
+        outcome=payload.get("outcome", ""),
+        actor_name=actor,
+        notes=payload.get("notes", ""),
+        roi_impact=payload.get("roi_impact"),
+        outcome_type=payload.get("outcome_type"),
+    )
+
+
+@router.get("/outcomes/summary",
+            summary="Outcomes summary and ROI evidence (P1-A)")
+def get_outcomes_summary(
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """P1-A: Complete outcomes dashboard — recommendation funnel + ROI evidence."""
+    from src.commercial.recommendations.outcome_service import RecommendationOutcomeService
+    svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
+    return svc.get_outcomes_summary()
+
+
+@router.get("/actionable",
+            summary="Approved recommendations needing outcome recording (P1-A)")
+def get_actionable_recommendations(
+    limit: int = 20,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    P1-A: Returns deduplicated list of approved recommendations
+    that need outcome recording. Prioritized by risk and urgency.
+    """
+    from src.commercial.recommendations.outcome_service import RecommendationOutcomeService
+    svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
+    return svc.get_actionable_recommendations(limit=limit)
+
