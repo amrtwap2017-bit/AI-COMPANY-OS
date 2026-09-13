@@ -200,30 +200,6 @@ def reject_recommendation(
     reason = payload.get("reason", "Rejected by reviewer")
     return service.reject_recommendation(rec_id, reviewer, reason)
 
-@router.post("/{recommendation_id}/outcome",
-             summary="Record recommendation outcome")
-def record_recommendation_outcome(
-    recommendation_id: str,
-    payload: dict = Body(...),
-    hotel_id: str = Depends(get_hotel_id),
-    current_user=Depends(get_current_user),
-    service: RecommendationService = Depends(_svc),
-):
-    """
-    Record what happened after an approved recommendation was acted upon.
-    outcome_type: improved | unchanged | worse | unknown
-    """
-    return service.record_outcome(
-        recommendation_id=recommendation_id,
-        hotel_id=hotel_id,
-        outcome_type=payload.get("outcome_type", "unknown"),
-        metric_key=payload.get("metric_key"),
-        metric_before=payload.get("metric_before"),
-        metric_after=payload.get("metric_after"),
-        notes=payload.get("notes"),
-        recorded_by=getattr(current_user, "email", None) or "unknown",
-    )
-
 
 # P1-A: Outcome Verification Engine
 @router.post("/{rec_id}/outcome",
@@ -285,4 +261,29 @@ def get_actionable_recommendations(
     from src.commercial.recommendations.outcome_service import RecommendationOutcomeService
     svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
     return svc.get_actionable_recommendations(limit=limit)
+
+
+@router.post("/{recommendation_id}/outcome",
+             summary="Record recommendation outcome")
+def record_recommendation_outcome(
+    recommendation_id: str,
+    payload: dict = Body(...),
+    hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    Record what happened after an approved recommendation was acted upon.
+    outcome_type: improved | unchanged | worse | unknown
+    """
+    return service.record_outcome(
+        recommendation_id=recommendation_id,
+        hotel_id=hotel_id,
+        outcome_type=payload.get("outcome_type", "unknown"),
+        metric_key=payload.get("metric_key"),
+        metric_before=payload.get("metric_before"),
+        metric_after=payload.get("metric_after"),
+        notes=payload.get("notes"),
+        recorded_by=getattr(current_user, "email", None) or "unknown",
+    )
 
