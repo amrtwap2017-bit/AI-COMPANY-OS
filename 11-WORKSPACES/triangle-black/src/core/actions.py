@@ -28,8 +28,22 @@ from src.commercial.contracts.models import Contract
 from src.commercial.auth.models import User
 from src.core.email_service import send_quote_email
 from src.commercial.notifications.models import Notification
+import io
+from dateutil.relativedelta import relativedelta
+from sqlalchemy import func
+from fastapi.responses import StreamingResponse
+import csv
+from src.commercial.invoices.models import Invoice
 
 router = APIRouter(prefix="/actions", tags=["business-actions"])
+
+
+
+def _safe_pct(num: float, den: float) -> float:
+    """Safe percentage calculation — returns 0.0 if denominator is zero."""
+    if not den:
+        return 0.0
+    return round(num / den * 100, 1)
 
 
 def _log(db, lead_id, type, description, actor="system", hotel_id="tb-default-hotel-000000000001"):

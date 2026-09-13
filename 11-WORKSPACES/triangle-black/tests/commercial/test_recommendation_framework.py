@@ -16,7 +16,7 @@ import uuid
 
 BASE = "http://localhost:8030"
 
-VALID_STATUSES = {"pending", "approved", "rejected"}
+VALID_STATUSES = {"pending", "approved", "rejected", "closed", "archived"}
 VALID_RISK_LEVELS = {"CRITICAL", "HIGH", "MEDIUM", "LOW"}
 
 

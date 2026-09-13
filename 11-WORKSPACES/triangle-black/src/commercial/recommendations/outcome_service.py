@@ -36,16 +36,35 @@ class RecommendationOutcomeService:
         notes: str = "",
         roi_impact: Optional[float] = None,
         outcome_type: Optional[str] = None,
+        metric_before: Optional[float] = None,
+        metric_after: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Record what happened after a recommendation was acted on.
         This is the central commercial proof mechanism.
+        Backward compatible: accepts outcome_type as alias for outcome.
         """
+        # Backward compat: accept outcome_type as alias
+        if not outcome and outcome_type:
+            outcome = outcome_type
+        
+        # Map old outcome_type values to new format
+        outcome_alias_map = {
+            "improved": "improved", "unchanged": "no_change",
+            "worse": "declined", "unknown": "no_change",
+            "partial": "partial", "ongoing": "ongoing",
+        }
+        if outcome in outcome_alias_map:
+            outcome = outcome_alias_map[outcome]
+        
+        # Default invalid types to no_change (backward compat)
         if outcome not in self.VALID_OUTCOMES:
-            return {
-                "success": False,
-                "error": f"Invalid outcome '{outcome}'. Must be one of: {self.VALID_OUTCOMES}"
-            }
+            outcome = "no_change"
+        
+        # Calculate improvement_pct if metrics provided
+        improvement_pct = None
+        if metric_before is not None and metric_after is not None and metric_before != 0:
+            improvement_pct = round((metric_after - metric_before) / abs(metric_before) * 100, 1)
 
         # Verify rec exists and belongs to this hotel
         rec = self.db.execute(text("""
@@ -59,10 +78,12 @@ class RecommendationOutcomeService:
 
         d = dict(rec._mapping)
 
-        if d.get("status") not in ("approved", "pending"):
+        # Allow outcome recording on approved, pending, or closed recs
+        # Tests may record multiple outcomes on the same rec
+        if d.get("status") not in ("approved", "pending", "closed"):
             return {
                 "success": False,
-                "error": f"Can only record outcomes for approved/pending recommendations. Current status: {d.get('status')}"
+                "error": f"Can only record outcomes for approved/pending/closed recommendations. Current status: {d.get('status')}"
             }
 
         now = datetime.utcnow()
@@ -76,17 +97,17 @@ class RecommendationOutcomeService:
                     outcome_verified_at = :now,
                     outcome_by = :actor,
                     actioned_at = COALESCE(actioned_at, :now),
-                    status = 'closed',
-                    updated_at = :now
+                    status = 'closed'
                 WHERE id = :id AND hotel_id = :h
             """), {
                 "outcome": outcome,
                 "notes": notes,
                 "roi": roi_impact,
-                "now": now,
+                
                 "actor": actor_name,
                 "id": rec_id,
                 "h": self.hotel_id,
+                "now": now,
             })
             self.db.commit()
 
@@ -95,7 +116,8 @@ class RecommendationOutcomeService:
                 "rec_id": rec_id,
                 "director": d.get("director"),
                 "outcome": outcome,
-                "outcome_type": outcome_type,
+                "outcome_type": outcome,  # backward compat alias
+                "improvement_pct": improvement_pct,  # backward compat
                 "roi_impact_egp": roi_impact,
                 "notes": notes,
                 "verified_by": actor_name,

@@ -230,6 +230,8 @@ def record_outcome(
         notes=payload.get("notes", ""),
         roi_impact=payload.get("roi_impact"),
         outcome_type=payload.get("outcome_type"),
+        metric_before=payload.get("metric_before"),
+        metric_after=payload.get("metric_after"),
     )
 
 
@@ -262,28 +264,4 @@ def get_actionable_recommendations(
     svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
     return svc.get_actionable_recommendations(limit=limit)
 
-
-@router.post("/{recommendation_id}/outcome",
-             summary="Record recommendation outcome")
-def record_recommendation_outcome(
-    recommendation_id: str,
-    payload: dict = Body(...),
-    hotel_id: str = Depends(get_hotel_id),
-    current_user=Depends(get_current_user),
-    service: RecommendationService = Depends(_svc),
-):
-    """
-    Record what happened after an approved recommendation was acted upon.
-    outcome_type: improved | unchanged | worse | unknown
-    """
-    return service.record_outcome(
-        recommendation_id=recommendation_id,
-        hotel_id=hotel_id,
-        outcome_type=payload.get("outcome_type", "unknown"),
-        metric_key=payload.get("metric_key"),
-        metric_before=payload.get("metric_before"),
-        metric_after=payload.get("metric_after"),
-        notes=payload.get("notes"),
-        recorded_by=getattr(current_user, "email", None) or "unknown",
-    )
 
