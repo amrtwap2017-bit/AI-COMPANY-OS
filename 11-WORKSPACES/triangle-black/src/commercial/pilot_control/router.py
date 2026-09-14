@@ -298,3 +298,100 @@ def download_pilot_report(
     except Exception as e:
         return {"error": str(e), "hint": "Ensure reportlab is installed: pip install reportlab"}
 
+
+# CANONICAL METRIC REGISTRY — Single source of truth for all KPIs
+@router.get("/metrics/canonical", summary="All canonical metrics from metric registry")
+def get_canonical_metrics(
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    THE canonical metric endpoint.
+    All dashboards, reports, and AI must use these numbers.
+    Prevents metric drift across the platform.
+    """
+    from src.core.metric_registry import MetricService
+    svc = MetricService(db=db, hotel_id=hotel_id)
+    return svc.get_all_metrics()
+
+
+@router.get("/metrics/provenance", summary="Data provenance analysis")
+def get_data_provenance(
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Analyze data by provenance: REAL | TEST | DEMO | IMPORTED | UNKNOWN.
+    Critical for accurate KPI reporting.
+    """
+    from src.core.data_provenance import DataProvenanceService
+    svc = DataProvenanceService(db=db, hotel_id=hotel_id)
+    return {
+        "classification": svc.classify_wo_provenance(limit=3000),
+        "real_linkage": svc.get_real_wo_linkage(),
+    }
+
+
+# ATTENTION LIFECYCLE ENGINE
+@router.post("/attention/item", summary="Create attention item with lifecycle")
+def create_attention_item(
+    payload: dict,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Create a new operational attention item (P0-P3) with full lifecycle tracking."""
+    from src.commercial.attention.lifecycle import AttentionLifecycleService
+    svc = AttentionLifecycleService(db=db, hotel_id=hotel_id)
+    return svc.create_attention_item(
+        priority=payload.get("priority", "P2"),
+        title=payload.get("title", "Attention Required"),
+        description=payload.get("description", ""),
+        evidence=payload.get("evidence", ""),
+        impact=payload.get("impact", ""),
+        entity_type=payload.get("entity_type"),
+        entity_id=payload.get("entity_id"),
+        owner=payload.get("owner"),
+    )
+
+
+@router.post("/attention/item/{item_id}/transition",
+             summary="Transition attention item lifecycle state")
+def transition_attention_item(
+    item_id: str,
+    payload: dict,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """DETECTED → ACKNOWLEDGED → ASSIGNED → IN_PROGRESS → RESOLVED → VERIFIED → CLOSED"""
+    from src.commercial.attention.lifecycle import AttentionLifecycleService
+    actor = getattr(current_user, "email", None) or getattr(current_user, "name", "unknown")
+    svc = AttentionLifecycleService(db=db, hotel_id=hotel_id)
+    return svc.transition(
+        item_id=item_id,
+        new_status=payload.get("status", ""),
+        actor=actor,
+        notes=payload.get("notes", ""),
+        assigned_to=payload.get("assigned_to"),
+        resolution=payload.get("resolution"),
+    )
+
+
+@router.get("/attention/lifecycle", summary="Attention lifecycle metrics")
+def get_attention_lifecycle(
+    priority: str = None,
+    current_user=Depends(get_current_user),
+    hotel_id: str = Depends(get_hotel_id),
+    db: Session = Depends(get_db),
+):
+    """Get open attention items with their lifecycle states."""
+    from src.commercial.attention.lifecycle import AttentionLifecycleService
+    svc = AttentionLifecycleService(db=db, hotel_id=hotel_id)
+    return {
+        "open_items": svc.get_open_items(priority=priority),
+        "lifecycle_metrics": svc.get_lifecycle_metrics(),
+    }
+
