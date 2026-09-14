@@ -153,53 +153,6 @@ def get_recommendation_effectiveness(
     """
     return service.get_effectiveness(hotel_id=hotel_id)
 
-@router.get("/{rec_id}")
-def get_recommendation(
-    rec_id: str,
-    current_user=Depends(get_current_user),
-    service: RecommendationService = Depends(_svc),
-):
-    """Full recommendation with complete evidence chain and source data."""
-    rec = service.get_recommendation(rec_id)
-    if not rec:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Recommendation {rec_id} not found for this hotel"
-        )
-    return rec
-
-
-@router.post("/{rec_id}/approve")
-def approve_recommendation(
-    rec_id: str,
-    payload: dict = None,
-    current_user=Depends(get_current_user),
-    service: RecommendationService = Depends(_svc),
-):
-    """
-    Human approves recommendation.
-    Records the decision — does NOT automatically execute any action.
-    Execution is a separate, deliberate human step.
-    """
-    payload = payload or {}
-    reviewer = getattr(current_user, "email", "system")
-    notes = payload.get("notes", "")
-    return service.approve_recommendation(rec_id, reviewer, notes)
-
-
-@router.post("/{rec_id}/reject")
-def reject_recommendation(
-    rec_id: str,
-    payload: dict = None,
-    current_user=Depends(get_current_user),
-    service: RecommendationService = Depends(_svc),
-):
-    """Human rejects recommendation with reason."""
-    payload = payload or {}
-    reviewer = getattr(current_user, "email", "system")
-    reason = payload.get("reason", "Rejected by reviewer")
-    return service.reject_recommendation(rec_id, reviewer, reason)
-
 
 # P1-A: Outcome Verification Engine
 @router.post("/{rec_id}/outcome",
@@ -264,4 +217,52 @@ def get_actionable_recommendations(
     svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
     return svc.get_actionable_recommendations(limit=limit)
 
+
+
+@router.get("/{rec_id}")
+def get_recommendation(
+    rec_id: str,
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """Full recommendation with complete evidence chain and source data."""
+    rec = service.get_recommendation(rec_id)
+    if not rec:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Recommendation {rec_id} not found for this hotel"
+        )
+    return rec
+
+
+@router.post("/{rec_id}/approve")
+def approve_recommendation(
+    rec_id: str,
+    payload: dict = None,
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """
+    Human approves recommendation.
+    Records the decision — does NOT automatically execute any action.
+    Execution is a separate, deliberate human step.
+    """
+    payload = payload or {}
+    reviewer = getattr(current_user, "email", "system")
+    notes = payload.get("notes", "")
+    return service.approve_recommendation(rec_id, reviewer, notes)
+
+
+@router.post("/{rec_id}/reject")
+def reject_recommendation(
+    rec_id: str,
+    payload: dict = None,
+    current_user=Depends(get_current_user),
+    service: RecommendationService = Depends(_svc),
+):
+    """Human rejects recommendation with reason."""
+    payload = payload or {}
+    reviewer = getattr(current_user, "email", "system")
+    reason = payload.get("reason", "Rejected by reviewer")
+    return service.reject_recommendation(rec_id, reviewer, reason)
 
