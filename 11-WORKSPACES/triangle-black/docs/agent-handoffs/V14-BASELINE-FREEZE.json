@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-09-15T11:24:05.494023",
+  "hotel_id": "tb-default-hotel-000000000001",
+  "assets": 2311,
+  "wo_active": 8100,
+  "wo_archived": 574,
+  "wo_linked": 491,
+  "pm_total": 3821,
+  "pm_linked": 3108,
+  "recs_approved": 1038,
+  "recs_outcome": 59,
+  "verified_roi": 92000.0,
+  "suppliers": 2201,
+  "alembic_head": "v11004_rec_outcomes",
+  "tables": 175,
+  "git_commit": "b79b3cfd feat(P1-COMPLETE): ROI 92K EGP + pilot phase key + loading states + alert delivery"
+}
