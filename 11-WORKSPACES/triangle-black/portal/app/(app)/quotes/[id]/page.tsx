@@ -13,7 +13,7 @@ const STATUS_COLORS: Record<string, string> = {
   expired: "bg-orange-100 text-orange-700",
 };
 
-export default function QuoteDetailPage() {
+export default function QuoteDetailPage(): React.JSX.Element {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [quote, setQuote] = useState<Record<string, any> | null>(null);

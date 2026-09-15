@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
-export default function CustomerDetailPage() {
+export default function CustomerDetailPage(): React.JSX.Element {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;

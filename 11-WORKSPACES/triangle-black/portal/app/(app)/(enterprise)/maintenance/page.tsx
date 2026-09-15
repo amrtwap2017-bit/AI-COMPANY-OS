@@ -5,7 +5,7 @@ import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
-export default function MaintenancePage() {
+export default function MaintenancePage(): React.JSX.Element {
   const router = useRouter();
   const { data: assetRaw, isLoading } = useQuery(["maint-assets"], () => authFetch("/api/v1/assets/").then(r => (r as any).data ?? r));
   const { data: pmRaw }    = useQuery(["maint-pms"],    () => authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r));

@@ -27,7 +27,7 @@ const ROLE_CONFIG = {
 };
 ROLE_CONFIG.engineer = ROLE_CONFIG.agent;
 
-export default function WorkspacePage() {
+export default function WorkspacePage(): React.JSX.Element {
   const router = useRouter();
   const { user } = useAuth();
   const role = user?.role || "viewer";

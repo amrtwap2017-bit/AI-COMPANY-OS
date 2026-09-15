@@ -9,7 +9,7 @@ const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || d?.resul
 const fmtEGP = (n: any) => `EGP ${Number(n||0).toLocaleString()}`;
 const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString("en-GB"); } catch { return "—"; } };
 
-export default function ExecutivePage() {
+export default function ExecutivePage(): React.JSX.Element {
   const router = useRouter();
   const { data: twin }        = useQuery(["exe-twin"],   ()=>authFetch("/api/v1/twin/state").then(r => (r as any).data ?? r));
   const { data: dash }        = useQuery(["exe-dash"],   ()=>authFetch("/api/v1/dashboard/summary").then(r => (r as any).data ?? r),{refetchInterval:30000});

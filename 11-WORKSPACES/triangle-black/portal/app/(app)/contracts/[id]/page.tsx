@@ -12,7 +12,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-red-100 text-red-700",
 };
 
-export default function ContractDetailPage() {
+export default function ContractDetailPage(): React.JSX.Element {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [contract, setContract] = useState<Record<string, any> | null>(null);

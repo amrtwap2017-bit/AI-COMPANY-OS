@@ -112,7 +112,7 @@ jobs:
       - name: portal-typecheck
         run: |
           cd portal
-          TS_ERRORS=$(npx tsc --noEmit 2>&1 | grep "error TS" | wc -l)
+          TS_ERRORS=$(npx tsc --noEmit -p tsconfig.check.json 2>&1 | grep "error TS" | wc -l)
           echo "TypeScript errors: $TS_ERRORS"
           [ "$TS_ERRORS" -gt "50" ] && exit 1 || echo "OK"
       - name: portal-lint

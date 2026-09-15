@@ -8,7 +8,7 @@ import { LoadingSkeleton } from "@/components/states/PageStates";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
 
-export default function EngineeringHubPage() {
+export default function EngineeringHubPage(): React.JSX.Element {
   const router = useRouter();
   const { data: execDash, isLoading } = useQuery(["eng-exec"], () => authFetch("/api/v1/executive/dashboard").then(r => (r as any).data ?? r), {staleTime:60000});
   const { data: timeDash } = useQuery(["eng-time"], () => authFetch("/api/v1/time-entries/summary").then(r => (r as any).data ?? r), {staleTime:60000});

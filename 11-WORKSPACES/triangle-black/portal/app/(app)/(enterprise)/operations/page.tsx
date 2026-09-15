@@ -5,7 +5,7 @@ import { LoadingSkeleton } from "@/components/states/PageStates";
 import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
-export default function OperationsPage() {
+export default function OperationsPage(): React.JSX.Element {
   const router = useRouter();
   const { data: woRaw }   = useQuery(["ops-wos"],   () => authFetch("/api/v1/work-orders/").then(r => (r as any).data ?? r));
   const { data: techRaw, isLoading } = useQuery(["ops-techs"], () => authFetch("/api/v1/technicians/").then(r => (r as any).data ?? r));

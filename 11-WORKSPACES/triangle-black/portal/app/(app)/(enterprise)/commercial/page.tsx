@@ -5,7 +5,7 @@ import { authFetch } from "@/lib/hooks/useAuthFetch";
 import { useRouter } from "next/navigation";
 const toArr = (d: any) => Array.isArray(d) ? d : d?.items || d?.data || [];
 const fmtEGP = (n: any) => "EGP " + Number(n||0).toLocaleString();
-export default function CommercialPage() {
+export default function CommercialPage(): React.JSX.Element {
   const router = useRouter();
   const { data: leadRaw } = useQuery(["com-leads"], () => authFetch("/api/v1/leads-portal").then(r => (r as any).data ?? r));
   const { data: contRaw } = useQuery(["com-conts"], () => authFetch("/api/v1/contracts/").then(r => (r as any).data ?? r));
