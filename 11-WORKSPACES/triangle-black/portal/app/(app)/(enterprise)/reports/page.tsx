@@ -52,7 +52,7 @@ export default function ReportsPage() {
     return params.toString();
   };
 
-  const { data: reportData, isLoading: reportLoading, refetch } = useQuery(
+  const { data: reportData, isLoading, isError: reportLoading, refetch } = useQuery(
     ["report-data", selectedReport, filters],
     () => authFetch(`/api/v1/report-engine/${selectedReport}?${buildQueryString()}`).then(r => (r as any).data ?? r),
     { enabled: !!selectedReport, staleTime: 30000 }

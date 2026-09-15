@@ -10,7 +10,7 @@ function SupplyChainHubInner() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter();
   useEffect(() => { setMounted(true) }, [])
-  const { data: poRaw } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r => (r as any).data ?? r));
+  const { data: poRaw, isLoading, isError } = useQuery(["sc-hub-pos"], () => authFetch("/api/v1/purchase-orders-portal").then(r => (r as any).data ?? r));
   const { data: prRaw } = useQuery(["sc-hub-prs"], () => authFetch("/api/v1/purchase-requests-portal").then(r => (r as any).data ?? r));
   const { data: invRaw } = useQuery(["sc-hub-inv"], () => authFetch("/api/v1/inventory-items-portal").then(r => (r as any).data ?? r));
   const { data: suppRaw } = useQuery(["sc-hub-supps"], () => authFetch("/api/v1/suppliers/").then(r => (r as any).data ?? r));
@@ -26,6 +26,28 @@ function SupplyChainHubInner() {
     { label:"RFQs",               icon:"📝", path:"/supply-chain/rfqs",               count:null,        color:"#5B7C8C" },
     { label:"Stock Levels",       icon:"⚖️",  path:"/supply-chain/stock-levels",       count:null,        color:"#B07A2A" },
   ];
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-secondary text-sm">Loading supply chain data...</p>
+        </div>
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-base flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-3xl mb-3">⚠️</div>
+          <h2 className="text-primary font-bold mb-2">Error Loading Data</h2>
+          <p className="text-secondary text-sm mb-4">Failed to load supply chain data.</p>
+          <button onClick={() => window.location.reload()} className="px-4 py-2 bg-brand text-white rounded-md text-sm">Retry</button>
+        </div>
+      </div>
+    );
+  }
   if (!mounted) return null
   return (
     <div className="min-h-screen bg-base">
