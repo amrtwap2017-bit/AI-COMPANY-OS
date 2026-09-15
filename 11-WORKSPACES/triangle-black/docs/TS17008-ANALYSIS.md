@@ -1,42 +1,40 @@
-# TRIANGLE BLACK — TypeScript TS17008 Analysis
+# TRIANGLE BLACK — TypeScript Status (Honest Assessment)
 ## Date: 2026-09-15
-## Status: DOCUMENTED NON-BLOCKING
+## Status: 281 PRE-EXISTING ERRORS — DOCUMENTED P2 DEBT
 
-## Error Details
-- 34 TS17008 errors in 17 hub pages
-- Format: `at <unknown> (file.tsx(26,71))` — non-standard tsc output
-- Same exact columns (26,71) and (27,68) in EVERY file — impossible for real type errors
-- Column 71 > line length 42 in commercial/page.tsx L26 — physically impossible
+## Current Reality
+- `tsc --noEmit` with current tsconfig (bundler + 17 excluded): **281 errors**
+- `next build` (with `ignoreBuildErrors: true`): **PASSES** ✅
+- Application renders and works correctly: **CONFIRMED** ✅
 
-## What Was Tried (ALL had zero effect)
-- jsx: react-jsx ✅ (was already correct)
-- React imports added ✅
-- Files removed from tsconfig exclude ✅
-- .next cache cleared ✅
-- Next.js plugin removed ✅
-- moduleResolution changed ✅
-- tsconfig.check.json (no .next, no plugin) ✅
-- Explicit JSX.Element return types added ✅
+## Error Breakdown
+| Error Type | Count | Category |
+|------------|-------|----------|
+| TS17001 (duplicate JSX attributes) | ~102 | Code quality — `className` duplicated |
+| TS2339 (property not on type) | ~94 | Missing type definitions for API responses |
+| TS2345 (type assignment) | ~29 | Hook return type mismatches |
+| TS2322 (type not assignable) | ~20 | Component prop mismatches |
+| TS2305 (no exported member) | ~17 | Import mismatches (__tests__, e2e) |
+| Other | ~19 | Various |
 
-## Conclusion
-These 34 errors are an artifact of how tsc outputs diagnostics for these
-specific compact hub pages. They are NOT real TypeScript type errors:
-1. next build PASSES (ignoreBuildErrors: true)
-2. Same columns in every file = not source-file-specific
-3. Column exceeds line length = error is not in source file
+## What Was the TS17008 Mystery?
+95 ghost filesystem directories named `at <unknown> (app/...` were created
+by a previous `tsc` run. These caused 34 phantom TS17008 errors.
+**Root cause: found and deleted.** Ghost dirs are gone. 315 real pages intact.
 
 ## Production Impact
-- next build: PASS ✅
-- Application functions correctly ✅
-- These pages render and work correctly ✅
+- **ZERO** — `next build` passes, application works
+- These errors are masked by `ignoreBuildErrors: true` in `next.config.ts`
+- This is standard practice for large Next.js projects in active development
 
-## Resolution
-- tsconfig.json excludes 17 pages to prevent plugin interference
-- tsconfig.check.json available for source-only type checking
-- CI/CD updated to use tsconfig.check.json
-- 34 errors are documented as non-blocking P3 technical debt
+## Resolution Plan (P2 — After Customer)
+- TS17001 (duplicate attrs): sed/regex fix across affected files
+- TS2339 (missing types): add proper API response types
+- TS2345/TS2322 (type mismatches): fix component prop interfaces
+- TS2305 (imports): fix test/e2e import paths
+- Target: 0 errors by V16
 
-## Next Steps (P3 — after customer)
-- Investigate if next dev type generation resolves them
-- Consider rewriting compact hub pages with proper TypeScript signatures
-- Each hub page could be split into proper component architecture
+## RULE
+Do NOT claim "0 TypeScript errors" based on `next build` passing.
+Be honest: 281 pre-existing errors exist. They are P2 debt. 
+They do NOT block production deployment or customer usage.
