@@ -14,7 +14,7 @@ export default function PMPlansPage() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [dueFilter,  setDueFilter]  = useState("all");
 
-  const { data: raw, isLoading } = useQuery(
+  const { data: raw, isLoading, isError } = useQuery(
     ["pm-list"],()=>authFetch("/api/v1/maintenance/pm-plans/").then(r => (r as any).data ?? r),{refetchInterval:120000}
   );
   const plans = toArr(raw);
@@ -44,6 +44,19 @@ export default function PMPlansPage() {
       <div className="tb-grid-4">{[1,2,3,4].map((i: any) =><div key={i} className="tb-shimmer-block" style={{height:64}}/>)}</div>
     </div>
   );
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-base flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-3xl mb-3">⚠️</div>
+          <h2 className="text-primary font-bold mb-2">Error Loading Data</h2>
+          <p className="text-secondary text-sm mb-4">Failed to load. Please try again.</p>
+          <button onClick={() => window.location.reload()} className="px-4 py-2 bg-brand text-white rounded-md text-sm">Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-base">

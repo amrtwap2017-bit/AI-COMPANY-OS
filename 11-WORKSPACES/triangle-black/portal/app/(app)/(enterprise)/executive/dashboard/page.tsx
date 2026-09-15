@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 export default function ExecutiveDashboard() {
-  const { data: summary, isLoading, refetch } = useQuery(
+  const { data: summary, isLoading, isError, refetch } = useQuery(
     ["executive-summary-report-v2"],
     () => authFetch("/api/v1/executive/summary").then(r => r.json()),
     { staleTime: 30000 }
@@ -30,6 +30,19 @@ export default function ExecutiveDashboard() {
   const sla = summary?.sla_kpis || {};
   const risk = summary?.risk_kpis || {};
   const sup = summary?.supplier_kpis || {};
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-base flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-3xl mb-3">⚠️</div>
+          <h2 className="text-primary font-bold mb-2">Error Loading Data</h2>
+          <p className="text-secondary text-sm mb-4">Failed to load. Please try again.</p>
+          <button onClick={() => window.location.reload()} className="px-4 py-2 bg-brand text-white rounded-md text-sm">Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-base p-6 md:p-8 space-y-8">
