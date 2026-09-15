@@ -167,6 +167,18 @@ def get_outcomes_summary(
     """P1-A: Complete outcomes dashboard — recommendation funnel + ROI evidence."""
     from src.commercial.recommendations.outcome_service import RecommendationOutcomeService
     svc = RecommendationOutcomeService(db=db, hotel_id=hotel_id)
+
+    # Canonical ROI calculation — from metric registry
+    try:
+        _roi_total = db.execute(text("""
+            SELECT COALESCE(SUM(roi_impact), 0)
+            FROM recommendations
+            WHERE hotel_id = :h
+              AND roi_impact IS NOT NULL AND roi_impact > 0
+        """), {"h": hotel_id}).scalar() or 0
+    except Exception:
+        _roi_total = 0
+
     return svc.get_outcomes_summary()
 
 

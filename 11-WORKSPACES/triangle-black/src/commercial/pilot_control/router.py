@@ -35,7 +35,8 @@ def get_pilot_status(
 
     return {
         "hotel_id": hotel_id,
-        "pilot_phase": phase,
+                "phase": phase,
+                "pilot_phase": phase,
         "phase_description": {
             "data_import": "Import assets, PM plans, and WO history to unlock intelligence",
             "operational_control": "Focus on critical WOs, unassigned WOs, overdue PM",
