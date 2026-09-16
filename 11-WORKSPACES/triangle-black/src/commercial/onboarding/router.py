@@ -121,7 +121,7 @@ def _default_workflow_json(hotel_id: str) -> str:
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/onboarding/validate")
-def validate_onboarding(req: ValidateRequest, db: Session = Depends(get_db)):
+def validate_onboarding(req: ValidateRequest, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Pre-validate onboarding inputs.
     Returns: { valid: bool, issues: list }
@@ -147,6 +147,7 @@ def validate_onboarding(req: ValidateRequest, db: Session = Depends(get_db)):
 @router.post("/onboarding/provision")
 def provision_organization(
     req: ProvisionRequest,
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """

@@ -1,6 +1,7 @@
 """RBAC Router — extracted from main.py A-007"""
 from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import get_current_user
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -13,6 +14,7 @@ VALID_ROLES = ["admin","manager","engineer","technician","finance","supplier","v
 @router.post("/users/{user_id}/role")
 def assign_user_role(user_id: str, data: dict,
                      hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
                      db: Session = Depends(get_db),
                      _: dict = Depends(require_admin)):
     role = data.get("role","")

@@ -188,6 +188,7 @@ from datetime import datetime as _dt
 @router.post("/pm-plans/{plan_id}/complete")
 def complete_pm_plan(
     plan_id: str,
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """

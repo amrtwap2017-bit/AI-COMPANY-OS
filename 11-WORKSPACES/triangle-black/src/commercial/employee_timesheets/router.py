@@ -39,6 +39,7 @@ def list_timesheets(
 def create_timesheet(
     data: TimesheetCreate,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return repo.create_timesheet(db, hotel_id, data)
@@ -70,6 +71,7 @@ def update_timesheet(
     ts_id: str,
     data: TimesheetUpdate,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     entry = repo.update_timesheet(db, hotel_id, ts_id, data)
@@ -83,6 +85,7 @@ def approve_timesheet(
     ts_id: str,
     data: TimesheetApprove,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     entry = repo.approve_timesheet(db, hotel_id, ts_id, data.approved_by)
@@ -96,6 +99,7 @@ def reject_timesheet(
     ts_id: str,
     data: TimesheetReject,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     entry = repo.reject_timesheet(db, hotel_id, ts_id, data.approved_by, data.rejection_reason)

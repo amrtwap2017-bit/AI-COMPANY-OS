@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import get_current_user
 from src.core.auth import require_manager
 from sqlalchemy.orm import Session
 from src.core.database import get_db
@@ -55,6 +56,7 @@ def update_employee(
     emp_id: str,
     payload: EmployeeUpdate,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     obj = EmployeeRepository(db).update(emp_id, payload.model_dump(exclude_none=True), hotel_id)
@@ -70,6 +72,7 @@ def update_employee(
 def delete_employee(
     emp_id: str,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if not EmployeeRepository(db).delete(emp_id, hotel_id):
