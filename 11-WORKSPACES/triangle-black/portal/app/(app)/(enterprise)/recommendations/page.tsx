@@ -167,6 +167,38 @@ export default function RecommendationsPage(): React.JSX.Element {
                   <p className="text-tertiary text-xs mb-3 italic">{rec.evidence}</p>
                 )}
 
+
+                {rec.status === "approved" && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-xs text-tertiary mb-2">Record what happened:</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {["improved", "partial", "no_change", "declined"].map((ot) => (
+                        <button
+                          key={ot}
+                          onClick={() => {
+                            const notes = prompt(`Notes for "${ot}" outcome (optional):`);
+                            fetch(`/api/v1/recommendations/${rec.id}/outcome`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json",
+                                "Authorization": `Bearer ${localStorage.getItem("tb_access_token")}` },
+                              body: JSON.stringify({ outcome_type: ot, notes: notes || "",
+                                metric_key: "operational_metric" })
+                            }).then(() => queryClient.invalidateQueries({ queryKey: ["recommendations"] }));
+                          }}
+                          className={`text-xs px-2 py-1 rounded border transition-colors cursor-pointer ${
+                            ot === "improved" ? "border-green-600 text-green-400 hover:bg-green-600/20" :
+                            ot === "partial" ? "border-yellow-600 text-yellow-400 hover:bg-yellow-600/20" :
+                            "border-red-600/50 text-red-400/70 hover:bg-red-600/10"
+                          }`}
+                        >
+                          {ot === "improved" ? "✅ Improved" :
+                           ot === "partial" ? "⚠️ Partial" :
+                           ot === "no_change" ? "➡️ No Change" : "❌ Declined"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {rec.status === "pending" && (
                   <div className="flex gap-3 mt-4 pt-3 border-t border-border">
                     <button
