@@ -13,15 +13,15 @@ export default defineConfig({
     timeout: 15000,
   },
   webServer: {
-    command: 'npx next dev --port 3000',
-    url: 'http://localhost:3000',
+    command: 'npx next dev --port 3099',
+    url: 'http://localhost:3099',
     reuseExistingServer: true,
     timeout: 120000,
     stdout: 'pipe',
     stderr: 'pipe',
   },
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3099',
     trace: 'on-first-retry',
     navigationTimeout: 60000,
   },
