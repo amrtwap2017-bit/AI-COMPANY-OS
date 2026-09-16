@@ -111,6 +111,25 @@ class RecommendationOutcomeService:
             })
             self.db.commit()
 
+            # AUTO-CREATE L0 EVIDENCE RECORD (non-blocking)
+            try:
+                from src.commercial.evidence_ledger.service import EvidenceLedgerService
+                _ev = EvidenceLedgerService(db=self.db, hotel_id=self.hotel_id)
+                _ev.record_evidence(
+                    metric_name=f"rec_outcome_{outcome}",
+                    evidence_level=0,
+                    baseline_value=metric_before,
+                    observed_value=metric_after,
+                    financial_value=float(roi_impact) if roi_impact else 0.0,
+                    recommendation_id=rec_id,
+                    notes=notes or f"Auto: recommendation outcome={outcome}",
+                    approved_by=actor_name,
+                    confidence="HIGH" if outcome == "improved" else "MEDIUM",
+                )
+            except Exception:
+                pass  # Evidence must NEVER block outcome recording
+
+
             return {
                 "success": True,
                 "rec_id": rec_id,
