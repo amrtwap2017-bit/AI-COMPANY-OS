@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 # ── Sprint-041: Supplier Create ───────────────────────────────────────────────
 @router.post("/", status_code=201, summary="Create supplier")
-def create_supplier(data: dict, db: Session = Depends(get_db),
+def create_supplier(data: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db),
                     hotel_id: str = Depends(get_hotel_id)):
     """Create a new supplier."""
     from sqlalchemy import text as _t
@@ -145,6 +145,7 @@ def get_supplier(
 def update_supplier(
     supplier_id: str,
     data: dict,
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update supplier fields."""
