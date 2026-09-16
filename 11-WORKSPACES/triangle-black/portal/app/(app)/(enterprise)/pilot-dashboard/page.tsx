@@ -253,5 +253,23 @@ export default function PilotCustomerDashboard() {
         </div>
       )}
     </div>
+
+      {/* GAP-004: Evidence ROI Hierarchy Widget */}
+      <div className="tb-section mt-6">
+        <div className="text-label-upper text-tertiary mb-4">ROI Evidence Hierarchy</div>
+        <div className="grid grid-cols-2 gap-4 mb-3">
+          <div className="tb-section" style={{borderLeft:"3px solid #6D5F53"}}>
+            <div className="text-xs text-tertiary uppercase tracking-wider mb-1">🔵 Internal (L0-2)</div>
+            <div className="text-xl font-black text-muted">Calculated in app</div>
+            <div className="text-xs text-tertiary mt-1">Platform validation only — NOT customer proof</div>
+          </div>
+          <div className="tb-section" style={{borderLeft:"3px solid #27AE60"}}>
+            <div className="text-xs text-tertiary uppercase tracking-wider mb-1">✅ Customer Verified (L3+)</div>
+            <div className="text-xl font-black" style={{color:"#27AE60"}}>0 EGP verified</div>
+            <div className="text-xs text-tertiary mt-1">Safe for executive reports</div>
+          </div>
+        </div>
+        <p className="text-xs text-tertiary">Only Customer Verified (L3+) ROI appears in executive reports and customer proposals</p>
+      </div>
   );
 }
