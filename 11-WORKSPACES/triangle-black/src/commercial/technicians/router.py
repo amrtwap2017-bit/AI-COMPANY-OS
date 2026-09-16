@@ -46,7 +46,8 @@ def get_technician(technician_id: str, db: Session = Depends(get_db)):
     return row_to_dict(row)
 
 @router.post("/", status_code=201, summary="Create technician")
-def create_technician(data: dict, db: Session = Depends(get_db)):
+def create_technician(data: dict, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     tech_id = str(uuid.uuid4())
     now     = _dt.utcnow()
     import json as _json
@@ -73,7 +74,8 @@ def create_technician(data: dict, db: Session = Depends(get_db)):
     return get_technician(tech_id, db)
 
 @router.patch("/{technician_id}", summary="Update technician")
-def update_technician(technician_id: str, data: dict, db: Session = Depends(get_db)):
+def update_technician(technician_id: str, data: dict, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     allowed = {"name","email","phone","specializations","max_work_orders","is_active","notes"}
     updates = {k:v for k,v in data.items() if k in allowed and v is not None}
     if not updates: raise HTTPException(400, "No valid fields")

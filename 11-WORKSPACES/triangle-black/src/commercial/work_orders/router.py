@@ -135,7 +135,8 @@ def get_work_order(work_order_id: str, db: Session = Depends(get_db)):
     return row_to_dict(row)
 
 @router.post("/", status_code=201, summary="Create work order", dependencies=[Depends(get_current_user)])
-def create_work_order(data: dict, db: Session = Depends(get_db)):
+def create_work_order(data: dict, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     wo_id = str(uuid.uuid4())
     now   = datetime.utcnow()
     db.execute(text(
@@ -179,7 +180,8 @@ def create_work_order(data: dict, db: Session = Depends(get_db)):
     return wo_data
 
 @router.patch("/{work_order_id}", summary="Update work order")
-def update_work_order(work_order_id: str, data: dict, db: Session = Depends(get_db)):
+def update_work_order(work_order_id: str, data: dict, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     allowed = {"title","description","priority","status","type","technician_id","asset_id","due_date","started_at","completed_at"}
     updates = {k:v for k,v in data.items() if k in allowed and v is not None}
     if not updates: raise HTTPException(400, "No valid fields to update")
@@ -196,7 +198,8 @@ def update_work_order(work_order_id: str, data: dict, db: Session = Depends(get_
     return get_work_order(work_order_id, db)
 
 @router.delete("/{work_order_id}", status_code=204, summary="Delete work order")
-def delete_work_order(work_order_id: str, db: Session = Depends(get_db)):
+def delete_work_order(work_order_id: str, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     db.execute(text("DELETE FROM work_orders WHERE id = :id"), {"id": work_order_id})
     db.commit()
     try:
@@ -251,6 +254,7 @@ def transition_work_order(
     work_order_id: str,
     data: dict,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Transition a work order to a new state.
@@ -383,7 +387,8 @@ import uuid as _uuid2
 
 
 @router.post("/{wo_id}/complete", summary="Complete work order and auto-create draft invoice")
-def complete_work_order(wo_id: str, db: Session = Depends(get_db)):
+def complete_work_order(wo_id: str, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     """
     Mark WO as completed. Auto-create a draft invoice (idempotent).
     No hotel_id required — uses hotel_id from the WO record itself.
@@ -550,7 +555,8 @@ def complete_work_order(wo_id: str, db: Session = Depends(get_db)):
 
 # ── Sprint-235: WO → Service Report → Close (Reference Vertical Slice) ────────
 @router.post("/{wo_id}/close", summary="Close work order with service report")
-def close_work_order(wo_id: str, db: Session = Depends(get_db)):
+def close_work_order(wo_id: str, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     """
     Close a completed work order. Creates a service report record.
     Part of the SR→WO→ServiceReport→Close reference vertical slice.

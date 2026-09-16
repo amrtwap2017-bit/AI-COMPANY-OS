@@ -147,7 +147,8 @@ def _ensure_payment_table(db):
     db.commit()
 
 @router.post("/{invoice_id}/payment", summary="Record invoice payment")
-def record_payment(invoice_id: str, data: dict, db: Session = Depends(get_db)):
+def record_payment(invoice_id: str, data: dict, current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)):
     """Record a payment against an invoice. Partial payments supported."""
     row = db.execute(
         text("SELECT * FROM invoices WHERE id = :id"), {"id": invoice_id}
