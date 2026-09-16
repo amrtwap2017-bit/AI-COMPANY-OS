@@ -107,6 +107,7 @@ from src.commercial.hotels.router import router as hotels_router
 from src.commercial.cache.router import router as cache_router
 from src.commercial.pagination.router import router as pagination_router
 from src.commercial.email_notifications.router import router as email_notification_router
+from src.commercial.evidence_ledger.router import router as evidence_ledger_router
 
 
 
@@ -429,6 +430,7 @@ except Exception as _e:
 try:
     from src.commercial.recommendations.router import router as recommendations_router
     app.include_router(recommendations_router, prefix=API_PREFIX)
+    app.include_router(evidence_ledger_router, prefix=API_PREFIX)
     print('  OK: recommendations_router')
 except Exception as _e:
     import logging; logging.getLogger('tb').warning(f'WARN: recommendations: {_e}')
