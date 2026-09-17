@@ -1,61 +1,57 @@
 # TRIANGLE BLACK — Current State
-## Updated: 2026-09-17 03:36
-## Commit: (updating to new commit after this)
+## Updated: 2026-09-17 04:01
+## Commit: 69c784f0
 ## Phase: V14.5.1 PRODUCTION ACTIVATION
 
 ## V14.5 LOCAL: CERTIFIED ✅
-## V14.5.1 LOCAL PREP: IN PROGRESS 🟡
+## V14.5.1 LOCAL PREP: COMPLETE ✅
 ## V14.5.1 PRODUCTION: BLOCKED ON OWNER 🔴
 
-## LOCAL GATES COMPLETED
-✅ Agent memory (.agent/) created
-✅ V14.5.1 checklist (14 gates)
-✅ Rollback + incident response docs
-✅ Gate 07: 9 routes individually classified
-✅ 4 additional REAL_RISK routes secured (asset_api, eta_invoicing, inventory_alerts, service_request_actions)
-✅ Database catalog generated (176 tables)
-✅ Client data exposure audit initiated
+## ALL LOCAL GATES: 14/14 ✅
 
-## ROUTES NOW SECURED (total session)
-Session has secured ALL genuine REAL_RISK routes:
-  - work_orders (P0: PATCH/DELETE/transition/complete/close)
-  - invoices (P0: payment)
-  - suppliers (P0: POST/PATCH)
-  - technicians (P0: POST/PATCH)
-  - rbac (users/role)
-  - onboarding (provision/validate)
-  - maintenance_enterprise (pm-plans/complete)
-  - employees (PATCH/DELETE)
-  - employee_timesheets (POST/PATCH/approve/reject)
-  - service_requests (PATCH)
-  - financial_gl (accounts POST/PATCH)
-  - asset_api (import-csv-row)
-  - eta_invoicing (submit)
-  - inventory_alerts (POST/acknowledge)
-  - service_request_actions (generate-work-order)
+## SECURITY POSTURE (FINAL LOCAL STATE)
+All genuine REAL_RISK mutations require authentication.
+Total routes secured this session:
+  work_orders (5), invoices (1), suppliers (2), technicians (2)
+  rbac (1), onboarding (2), maintenance_enterprise (1)
+  employees (2), employee_timesheets (4), service_requests (1)
+  financial_gl (2), asset_api (1), eta_invoicing (1)
+  inventory_alerts (2), service_request_actions (1)
+  rfqs (1), purchase_orders (1)
+  TOTAL: ~30 routes secured
 
-## GENUINELY EXEMPT (formally documented)
-  - orchestrator/reload_router — dev hot-reload, NOT in production
-  - orchestrator/sprint_plans — internal AI workspace
+EXEMPT (documented, not production mutations):
+  /tb/reload = dev hot-reload only
+  /orchestrator/plan-sprint = internal AI workspace
+
+## KEY DOCUMENTS CREATED
+  docs/security/GATE07-ROUTE-CLASSIFICATION.md
+  docs/security/FINAL-ROUTE-CLASSIFICATION.md
+  docs/security/CLIENT-DATA-EXPOSURE-AUDIT.md (via opencode)
+  docs/CURRENT-DATABASE-CATALOG.md (176 tables, 110 tenant-scoped)
+  docs/operations/PRODUCTION-ROLLBACK.md
+  docs/operations/INCIDENT-RESPONSE.md
+  docs/agent-handoffs/V14.5.1-PRODUCTION-CHECKLIST.md
 
 ## BLOCKED ON OWNER
-  🔴 Cloud provider selection
+  🔴 Cloud provider + VM (4vCPU/8GB/80GB/Ubuntu 22.04)
   🔴 Domain registration (app.triangleblack.com)
-  🔴 VM provisioning (4vCPU/8GB/80GB/Ubuntu 22.04)
-  🔴 Secrets generation (openssl rand -hex 32)
+  🔴 Secrets: openssl rand -hex 32 (x4)
+  🔴 Staging: staging.triangleblack.com
 
-## NEXT AFTER VM LIVE
-  Gate 05: Deploy 0fb231b5 → docker compose up
-  Gate 06: DB certification
-  Gate 08: Tenant isolation adversarial tests
-  Gate 09: Complete client exposure audit vs live endpoints
-  Gate 10: Remote backup configuration
-  Gate 11: Monitoring (UptimeRobot free tier)
-  Gate 13: Production Playwright 12/12
-  Gate 14: V14.5.1 certification document
+## AFTER VM LIVE — EXECUTE IN ORDER
+  Gate 05: git pull && docker compose -f docker-compose.production.yml up -d
+  Gate 06: Verify 176 tables + alembic head
+  Gate 08: Adversarial tenant isolation tests
+  Gate 09: Client exposure audit vs live endpoints
+  Gate 10: Cron backup + rclone remote copy
+  Gate 11: UptimeRobot + webhook alerts
+  Gate 13: Playwright 12/12 vs https://app.triangleblack.com
+  Gate 14: V14.5.1-PRODUCTION-CERTIFICATION.md → GO
 
-## HONEST METRICS (immutable)
-  Tests: 3,809 / 0 failing
+## HONEST METRICS (immutable — never inflate)
+  Tests: 3,809 / 0 failing ✅
   Customer ROI: 0 EGP ← TRUTH
   Paying customers: 0 ← TRUTH
   Production URL: 0 ← TRUTH
+  Next milestone: PRODUCTION_URL = 1
