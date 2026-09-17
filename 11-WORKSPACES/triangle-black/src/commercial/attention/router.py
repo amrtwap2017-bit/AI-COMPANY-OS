@@ -11,6 +11,54 @@ from src.core.auth import get_current_user
 from src.core.tenant import get_hotel_id
 from datetime import datetime as _dt
 
+
+
+# SLA target minutes per priority
+_SLA_TARGETS = {"P0": 15, "P1": 60, "P2": 240, "P3": 1440,
+                "CRITICAL": 15, "HIGH": 60, "MEDIUM": 240, "LOW": 1440}
+
+def _enrich_with_sla(items: list, created_field: str = "created_at") -> list:
+    """Add SLA tracking fields to attention items."""
+    from datetime import datetime, timezone
+    now = datetime.utcnow()
+    enriched = []
+    for item in items:
+        if not isinstance(item, dict):
+            enriched.append(item)
+            continue
+        priority = str(item.get("urgency", item.get("priority", "P2"))).upper()
+        sla_target = _SLA_TARGETS.get(priority, 240)
+        
+        # Parse created_at
+        created_str = item.get(created_field, item.get("created_at", ""))
+        minutes_elapsed = 0
+        if created_str:
+            try:
+                if isinstance(created_str, str):
+                    from datetime import datetime as dt
+                    created_dt = dt.fromisoformat(created_str.replace("Z",""))
+                    minutes_elapsed = (now - created_dt).total_seconds() / 60
+            except Exception:
+                pass
+        
+        pct = (minutes_elapsed / sla_target * 100) if sla_target > 0 else 0
+        if pct >= 100:
+            sla_status = "breached"
+        elif pct >= 75:
+            sla_status = "at_risk"
+        else:
+            sla_status = "on_track"
+        
+        enriched.append({
+            **item,
+            "sla_target_minutes": sla_target,
+            "minutes_elapsed": round(minutes_elapsed, 1),
+            "sla_pct_used": round(min(pct, 100), 1),
+            "sla_status": sla_status,
+            "sla_breached": sla_status == "breached",
+        })
+    return enriched
+
 router = APIRouter(prefix="/attention", tags=["attention"])
 
 @router.get("/", summary="What needs attention today?")

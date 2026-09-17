@@ -267,40 +267,50 @@ def _build_roi_narrative(actual: dict, targets: dict, baseline: dict) -> str:
     return " | ".join(lines) if lines else "Operational state meets pilot targets"
 
 
-@router.get("/report/pdf", summary="Download executive pilot report as PDF")
+
+@router.get("/report/pdf", summary="Executive Pilot Report PDF")
 def download_pilot_report(
-    hotel_name: str = "Hotel Property",
     current_user=Depends(get_current_user),
     hotel_id: str = Depends(get_hotel_id),
     db: Session = Depends(get_db),
 ):
     """
-    V12-005: Generate and download executive pilot PDF report.
-    Customer-grade report with: KPIs, WO analysis, PM compliance,
-    AI recommendations summary, data quality, ROI gaps.
+    Generate executive PDF report: baseline, KPIs, recommendations, ROI.
+    Internal ROI clearly labeled as INTERNAL. Customer-verified as VERIFIED (L3+).
     """
-    from fastapi.responses import Response
-    from src.commercial.reports.pilot_pdf_service import PilotReportService
-    
-    svc = PilotReportService(db=db, hotel_id=hotel_id)
+    from io import BytesIO
+    from datetime import datetime
     try:
-        pdf_bytes = svc.generate_pilot_report(
-            hotel_name=hotel_name,
-            period_label="30-Day Engineering Intelligence Report",
-        )
-        return Response(
-            content=pdf_bytes,
+        from src.commercial.reports.service import ReportGeneratorService
+        svc = ReportGeneratorService(db=db, hotel_id=hotel_id)
+        pdf_bytes = svc.generate_pdf()
+        buf = BytesIO(pdf_bytes)
+        buf.seek(0)
+        from fastapi.responses import StreamingResponse
+        return StreamingResponse(
+            buf,
             media_type="application/pdf",
-            headers={
-                "Content-Disposition": f"attachment; filename=pilot-report-{hotel_id[:8]}.pdf",
-                "Content-Length": str(len(pdf_bytes)),
-            }
+            headers={"Content-Disposition": f"attachment; filename=triangle-black-pilot-{datetime.utcnow().strftime('%Y%m%d')}.pdf"}
         )
     except Exception as e:
-        return {"error": str(e), "hint": "Ensure reportlab is installed: pip install reportlab"}
+        # Fallback to pilot PDF service
+        try:
+            from src.commercial.reports.pilot_pdf_service import PilotPdfService
+            svc2 = PilotPdfService(db=db, hotel_id=hotel_id)
+            pdf_bytes = svc2.generate_pilot_report()
+            buf = BytesIO(pdf_bytes)
+            buf.seek(0)
+            from fastapi.responses import StreamingResponse
+            return StreamingResponse(
+                buf,
+                media_type="application/pdf",
+                headers={"Content-Disposition": f"attachment; filename=triangle-black-pilot-report.pdf"}
+            )
+        except Exception as e2:
+            from fastapi import HTTPException
+            raise HTTPException(500, f"PDF generation failed: {str(e)[:100]}")
 
 
-# CANONICAL METRIC REGISTRY — Single source of truth for all KPIs
 @router.get("/metrics/canonical", summary="All canonical metrics from metric registry")
 def get_canonical_metrics(
     current_user=Depends(get_current_user),
