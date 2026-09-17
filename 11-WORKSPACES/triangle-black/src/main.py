@@ -910,7 +910,8 @@ except Exception as e:
 
 # ── Stock Balances direct endpoint ──────────────────────────────────────────
 from sqlalchemy import text as _text
-from src.core.database import get_db as _get_db
+from src.core.database import get_db
+from src.core.startup_validation import validate_critical_routes as _get_db
 from sqlalchemy.orm import Session as _Session
 
 @app.get("/api/v1/stock-balances/", tags=["inventory"], dependencies=[_Depends(_get_current_user)])
