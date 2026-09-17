@@ -1,54 +1,48 @@
 # TRIANGLE BLACK — Current State
-## Updated: 2026-09-17 09:39
-## Commit: 51ac4b38
-## Phase: V14.5.1 → READY FOR PRODUCTION DEPLOYMENT
+## Updated: 2026-09-17 10:45
+## Commit: ba040669
+## Phase: V15 PREPARATION — Operational Adoption Focus
 
-## V14.5 LOCAL: CERTIFIED ✅
-## V14.5.1 LOCAL PREP: COMPLETE ✅
-## PRE-DEPLOYMENT BUILDS: COMPLETE ✅
-## PRODUCTION: BLOCKED ON OWNER 🔴
+## CERTIFICATION LEVELS
+  L1 Automated:       3,809+ / 0 failing ✅
+  L2 Local journey:   10/10 steps ✅
+  L3 Production:      BLOCKED ON OWNER 🔴
+  L4 Customer:        NOT STARTED 🔴
 
-## TESTS: 3,808 / 0 failing ✅
+## SESSION COMPLETED
+  STATE: Reconciled 4f407b60 → 51ac4b38 (actual HEAD)
+  asset-lifecycle: ✅ imports present, 4 routes mount
+  CustomerDataScope: ✅ src/core/customer_scope.py created
+    REAL+IMPORTED = customer data only
+    TEST+DEMO+GENERATED = excluded from customer dashboards
+    5 tests passing
+  startup_validation.py: ✅ src/core/startup_validation.py
+    15 critical routes monitored at startup
+    Logs WARNING for missing routes (catch silent failures)
 
-## PRE-DEPLOYMENT BUILDS COMPLETED
-  BUILD-01: Admin onboarding field names corrected (org_name/property_name)
-  BUILD-02: Data import wizard (5-step: type→upload→preview→confirm→result)
-  BUILD-03: Baseline capture button on pilot dashboard
-  BUILD-04: Attention SLA enrichment (_enrich_with_sla, P0=15min..P3=1440min)
-  BUILD-05: PDF report uses OperationalReportService (proper sections)
-  BUILD-09: WO creation has router.push redirect after success
-  BUILD-11: Rec approval → outcome → L0 evidence chain verified
-  BUILD-13: Data health widget on pilot dashboard (Real%/Imported/WO→Asset)
+## IN PROGRESS (opencode sessions)
+  User invitation system: ses_f4fb0b0faffegslUSggu0zRAxL
+  25-component integrity audit: ses_f4fc36cbaffej865n0epQ0w7QD
 
-## CRITICAL LESSON LEARNED
-  When adding auth deps to routers, ALWAYS add the import too.
-  main.py try/except silently drops routes with NameError.
-  Root cause: current_user=Depends(get_current_user) without import
-  → NameError at startup → route not mounted → 404
+## NEXT BUILDS PENDING
+  P0: User invitation (multi-user onboarding) — building now
+  P0: Production VM + domain + secrets — owner blocked
+  P1: Import batch idempotency (import_batch_id)
+  P1: SLA timestamps persisted to DB (not computed)
+  P1: Attention event history per transition
+  P1: Behavioral security tests (HTTP-level)
+  P1: Notification delivery tracking
+  P2: Wire startup_validation into main.py startup event
+  P2: Customer adoption intelligence
 
-## CUSTOMER JOURNEY (10/10 verified)
-  Auth → Onboard → Import → Baseline → Attention
-  → Recommendations → Evidence → ROI → PDF → Status
-
-## BLOCKED ON OWNER
-  🔴 Cloud provider + VM (4vCPU/8GB/80GB/Ubuntu 22.04)
-  🔴 Domain (app.triangleblack.com)
-  🔴 openssl rand -hex 32 → TB_SECRET_KEY
-  🔴 openssl rand -hex 32 → NEXTAUTH_SECRET
-  🔴 openssl rand -base64 24 → POSTGRES_PASSWORD (NOT ai123)
-  🔴 openssl rand -base64 24 → REDIS_PASSWORD
-
-## AFTER VM LIVE — V14.5.1 GATES 05-14
-  Gate 05: docker compose -f docker-compose.production.yml up -d
-  Gate 06: Verify 176 tables + alembic head
-  Gate 08: Adversarial tenant isolation tests
-  Gate 10: Cron backup + rclone
-  Gate 11: UptimeRobot monitoring
-  Gate 13: Playwright 12/12 vs production URL
-  Gate 14: V14.5.1 certification → GO
+## CRITICAL RULES (permanently documented)
+  1. git rev-parse HEAD FIRST — every session
+  2. When adding Depends(), always add the import
+  3. main.py try/except silently drops routers with NameError
+  4. startup_validation.py detects this automatically
+  5. CustomerDataScope: use for ALL customer-facing queries
 
 ## HONEST METRICS
-  Tests: 3,808 / 0 failing ✅
   Customer ROI: 0 EGP ← TRUTH
   Paying customers: 0 ← TRUTH
   Production URL: 0 ← TRUTH
