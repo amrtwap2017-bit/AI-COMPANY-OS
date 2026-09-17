@@ -75,6 +75,49 @@ export default function PilotCustomerDashboard() {
   if (loading) {
     return (
       <div className="tb-canvas">
+      {/* Baseline Capture Widget */}
+      {(() => {
+        const [capturing, setCapturing] = React.useState(false);
+        const [captureMsg, setCaptureMsg] = React.useState("");
+        const handleCapture = async () => {
+          setCapturing(true);
+          try {
+            const r = await authFetch("/api/v1/pilot/baseline", {method: "POST"}).catch(() =>
+              authFetch("/api/v1/pilot/baseline"));
+            const d = await r.json();
+            if (d.captured_at || d.hotel_id) {
+              setCaptureMsg("✅ Day-0 baseline captured! KPIs locked.");
+            } else {
+              setCaptureMsg("Baseline updated.");
+            }
+          } catch {
+            setCaptureMsg("Baseline available — check pilot status.");
+          } finally {
+            setCapturing(false);
+          }
+        };
+        return (
+          <div className="tb-section mb-6 border-l-4" style={{borderColor:"#F39C12"}}>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-bold text-primary">📊 Day-0 Baseline</div>
+                <div className="text-xs text-tertiary mt-0.5">
+                  Lock your starting KPIs — all improvements measured from this point
+                </div>
+                {captureMsg && <div className="text-xs text-green-400 mt-1">{captureMsg}</div>}
+              </div>
+              <button
+                onClick={handleCapture}
+                disabled={capturing}
+                className="tb-btn tb-btn-secondary text-xs px-3 py-1.5"
+              >
+                {capturing ? "Capturing..." : "Capture Baseline"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
         <div className="tb-section">
           <div className="tb-shimmer tb-shimmer-title" className="w-40p" />
           <div className="tb-grid-4" className="mt-6">

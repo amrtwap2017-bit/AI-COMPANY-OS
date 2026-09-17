@@ -15,8 +15,8 @@ export default function OnboardingWizardPage() {
   const [result, setResult] = useState<any>(null);
 
   // Form State
-  const [companyName, setCompanyName] = useState("");
-  const [hotelName, setHotelName] = useState("");
+  const [orgName, setOrgName] = useState("");
+  const [propertyName, setPropertyName] = useState("");
   const [brand, setBrand] = useState("");
   const [siteName, setSiteName] = useState("");
   const [adminName, setAdminName] = useState("");
@@ -31,8 +31,8 @@ export default function OnboardingWizardPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          company_name: companyName,
-          hotel_name: hotelName,
+          org_name: orgName,
+          property_name: propertyName,
           brand: brand || "Hospitality Luxury",
           site_name: siteName || "Main Property",
           admin_name: adminName,
@@ -97,15 +97,15 @@ export default function OnboardingWizardPage() {
             <Input
               label="Corporate Company / Holding Name"
               placeholder="e.g. Red Sea Luxury Resorts LLC"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
               required
             />
             <Input
               label="Hotel / Property Name"
               placeholder="e.g. Sharm Grand Plaza Resort"
-              value={hotelName}
-              onChange={(e) => setHotelName(e.target.value)}
+              value={propertyName}
+              onChange={(e) => setPropertyName(e.target.value)}
               required
             />
             <Input
@@ -116,7 +116,7 @@ export default function OnboardingWizardPage() {
             />
             <div className="pt-4 flex justify-end">
               <Button
-                disabled={!companyName.trim() || !hotelName.trim()}
+                disabled={!orgName.trim() || !propertyName.trim()}
                 onClick={() => setStep(2)}
               >
                 Continue to Site Setup <ArrowRight className="w-4 h-4 ml-1.5" />
