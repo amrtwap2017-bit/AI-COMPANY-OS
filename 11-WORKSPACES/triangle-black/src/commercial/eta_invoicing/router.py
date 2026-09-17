@@ -29,7 +29,7 @@ def list_invoices(hotel_id: str = Depends(get_hotel_id), skip: int = 0, limit: i
     ).order_by(ETAInvoice.created_at.desc()).offset(skip).limit(limit).all()
 
 @router.post("/submit", response_model=ETAInvoiceResponse)
-async def submit_invoice(payload: ETAInvoiceSubmit, hotel_id: str = Depends(get_hotel_id),
+async def submit_invoice(payload: ETAInvoiceSubmit, current_user=Depends(get_current_user), hotel_id: str = Depends(get_hotel_id),
                          db: Session = Depends(get_db)):
     data = payload.model_dump()
     data["hotel_name"] = "Triangle Black Hotel"
