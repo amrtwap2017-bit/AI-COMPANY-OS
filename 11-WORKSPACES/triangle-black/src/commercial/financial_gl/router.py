@@ -144,6 +144,7 @@ def list_chart_accounts(
 def create_chart_account(
     data: AccountCreate,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return create_account(db, hotel_id, data)
@@ -166,6 +167,7 @@ def update_chart_account(
     account_id: str,
     data: AccountUpdate,
     hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     acc = update_account(db, hotel_id, account_id, data)

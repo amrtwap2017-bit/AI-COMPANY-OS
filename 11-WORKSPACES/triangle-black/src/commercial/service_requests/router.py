@@ -130,6 +130,7 @@ def convert_to_work_order(sr_id: str, db: Session = Depends(get_db)):
 def update_service_request(
     sr_id: str,
     data: dict,
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Update SR status, urgency, resolution notes."""
