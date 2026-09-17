@@ -1,5 +1,6 @@
 """Asset API Router — extracted from main.py A-007 batch 5"""
 from fastapi import APIRouter, Depends, HTTPException, Query
+from src.core.auth import get_current_user
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -34,6 +35,7 @@ def get_critical_assets_summary(hotel_id: str = Depends(get_hotel_id),
 @router.post("/import-csv-row")
 def import_asset_csv_row(data: dict,
                           hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
                           db: Session = Depends(get_db)):
     """
     Import a single asset row from CSV — A-009 domain rule fix.

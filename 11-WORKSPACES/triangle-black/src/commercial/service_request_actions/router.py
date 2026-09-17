@@ -1,5 +1,6 @@
 """Service Request Actions Router — extracted from main.py A-007 batch 3"""
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import get_current_user
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from src.core.database import get_db
@@ -33,6 +34,7 @@ def get_sr_work_order(sr_id: str, hotel_id: str = Depends(get_hotel_id),
 @router.post("/{sr_id}/generate-work-order")
 def generate_work_order_from_sr(sr_id: str, data: dict = None,
                                 hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
                                 db: Session = Depends(get_db)):
     """Generate a work order from a service request."""
     data = data or {}

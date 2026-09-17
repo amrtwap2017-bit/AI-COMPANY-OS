@@ -59,6 +59,7 @@ async def submit_invoice(payload: ETAInvoiceSubmit, hotel_id: str = Depends(get_
 
 @router.get("/invoices/{invoice_id}", response_model=ETAInvoiceResponse)
 def get_invoice(invoice_id: str, hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
                 db: Session = Depends(get_db)):
     obj = db.query(ETAInvoice).filter(
         ETAInvoice.id == invoice_id, ETAInvoice.hotel_id == hotel_id).first()

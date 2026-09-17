@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import get_current_user
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
@@ -9,6 +10,7 @@ router = APIRouter()
 
 @router.post('/alerts/', response_model=InventoryAlertResponse, status_code=201)
 def create_alert(alert_data: InventoryAlertCreate, hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)):
     alert_repo = InventoryAlertRepository(db)
     return alert_repo.create_alert(alert_data.dict())
@@ -22,6 +24,7 @@ def get_alerts(hotel_id: str = Depends(get_hotel_id),
 
 @router.post('/alerts/{id}/acknowledge/', response_model=InventoryAlertResponse, status_code=201)
 def acknowledge_alert(id: int, hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)):
     alert_repo = InventoryAlertRepository(db)
     alert = alert_repo.acknowledge_alert(id)
