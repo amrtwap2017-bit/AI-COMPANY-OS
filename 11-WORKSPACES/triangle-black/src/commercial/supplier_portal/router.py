@@ -2,6 +2,7 @@ from __future__ import annotations
 import uuid
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import get_current_user
 from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 from src.core.database import get_db
@@ -75,6 +76,7 @@ def get_supplier_rfqs(vendor_id: int, hotel_id: str = Depends(get_hotel_id),
 
 @router.post("/vendors/{vendor_id}/quote")
 def post_supplier_quote(vendor_id: int, data: Dict[str, Any], hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)):
     try:
         quote_query = text("""

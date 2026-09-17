@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id
-from src.core.auth import require_vendor
+from src.core.auth import require_vendor, get_current_user
 from .models import RFQ, PurchaseOrder
 from .repository import RFQRepository, PurchaseOrderRepository
 from .schemas import RFQCreate, RFQUpdate, RFQResponse, PurchaseOrderCreate, PurchaseOrderUpdate, PurchaseOrderResponse
@@ -23,6 +23,7 @@ def list_rfqs_for_vendor(hotel_id: str = Depends(get_hotel_id),
 
 @router.post('/rfqs/{id}/quote', response_model=PurchaseOrderResponse, status_code=201)
 def submit_quote(id: str, payload: PurchaseOrderCreate, hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db), _: User = Depends(require_vendor)):
     po_repo = PurchaseOrderRepository(db)
     rfq = rfq_repo.get_rfq_by_id(id)
@@ -44,6 +45,7 @@ def list_poes_for_vendor(hotel_id: str = Depends(get_hotel_id),
 
 @router.patch('/purchase-orders/{id}/deliver', status_code=204)
 def confirm_delivery(id: str, hotel_id: str = Depends(get_hotel_id),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db), _: User = Depends(require_vendor)):
     po_repo = PurchaseOrderRepository(db)
     po = po_repo.get_po_by_id(id)
