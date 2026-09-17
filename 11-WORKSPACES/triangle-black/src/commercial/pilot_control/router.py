@@ -281,7 +281,7 @@ def download_pilot_report(
     from io import BytesIO
     from datetime import datetime
     try:
-        from src.commercial.reports.service import ReportGeneratorService
+        from src.commercial.reports.service import OperationalReportService as ReportGeneratorService
         svc = ReportGeneratorService(db=db, hotel_id=hotel_id)
         pdf_bytes = svc.generate_pdf()
         buf = BytesIO(pdf_bytes)

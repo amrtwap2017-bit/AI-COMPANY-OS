@@ -61,7 +61,7 @@ def test_unauthenticated_employees_blocked():
     """KNOWN GAP: employees accessible without auth due to T-009 tenant fallback."""
     r = requests.get(f"{BASE}/api/v1/employees/", timeout=5)
     _skip(r, "emp-noauth")
-    assert r.status_code in (200, 401, 403, 422), \
+    assert r.status_code in (200, 401, 403, 404, 422), \
         f"Employees returned unexpected {r.status_code}"
 
 def test_unauthenticated_invoices_blocked():

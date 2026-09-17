@@ -9,6 +9,7 @@ POST   /api/v1/timesheets/{id}/reject
 GET    /api/v1/timesheets/employee/{employee_id}/summary
 """
 from fastapi import APIRouter, Depends, HTTPException
+from src.core.auth import get_current_user
 from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.tenant import get_hotel_id

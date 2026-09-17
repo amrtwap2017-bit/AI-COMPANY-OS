@@ -313,6 +313,53 @@ export default function PilotCustomerDashboard() {
           </div>
         </div>
         <p className="text-xs text-tertiary">Only Customer Verified (L3+) ROI appears in executive reports and customer proposals</p>
-      </div>
+  
+      {/* Data Health Widget — BUILD-13 */}
+      {(() => {
+        const [health, setHealth] = React.useState<any>(null);
+        React.useEffect(() => {
+          authFetch("/api/v1/pilot/metrics/provenance")
+            .then(r => r.json())
+            .then(setHealth)
+            .catch(() => {});
+        }, []);
+        if (!health) return null;
+        const cls = health.classification || {};
+        const lnk = health.real_linkage || {};
+        const total = cls.total_sampled || 0;
+        const real = cls.real_count || 0;
+        const imported = cls.imported_count || 0;
+        const linkagePct = lnk.wo_asset_linkage_pct || 0;
+        const qualityScore = total > 0 ? Math.round((real / total) * 100) : 0;
+        return (
+          <div className="tb-section mt-4">
+            <div className="text-label-upper text-tertiary mb-3">📊 Data Health</div>
+            <div className="grid grid-cols-3 gap-4 mb-3">
+              <div className="text-center">
+                <div className={`text-2xl font-black ${qualityScore >= 70 ? 'text-green-400' : qualityScore >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {qualityScore}%
+                </div>
+                <div className="text-xs text-tertiary mt-1">Real data</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-black text-blue-400">{imported}</div>
+                <div className="text-xs text-tertiary mt-1">Imported</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-2xl font-black ${linkagePct >= 70 ? 'text-green-400' : 'text-yellow-400'}`}>
+                  {typeof linkagePct === 'number' ? linkagePct.toFixed(0) : linkagePct}%
+                </div>
+                <div className="text-xs text-tertiary mt-1">WO→Asset</div>
+              </div>
+            </div>
+            <div className="flex justify-between text-xs text-tertiary border-t border-border pt-2">
+              <span>REAL: {real} | IMPORTED: {imported} | TOTAL: {total}</span>
+              <a href="/administration/data-import" className="text-brand hover:underline">Import more →</a>
+            </div>
+          </div>
+        );
+      })()}
+
+    </div>
   );
 }
