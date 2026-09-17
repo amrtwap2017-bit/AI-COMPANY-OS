@@ -278,6 +278,7 @@ export const enterpriseCenters: NavCenter[] = [
       { label: "Hotels & Sites",          href: "/administration/hotels",            icon: "Building2" },
       { label: "Onboarding Wizard",       href: "/administration/onboarding",        icon: "Zap" },
       { label: "Data Import",             href: "/administration/data-import",       icon: "HardDrive" },
+      { label: "ROI Evidence",           href: "/evidence",                         icon: "BarChart3" },
       { label: "Pilot Control Room",      href: "/administration/pilot-control-v2",  icon: "Layers" },
       { label: "Platform Monitoring",     href: "/administration/platform-monitoring",icon: "MonitorCheck" },
       { label: "Value Certification",     href: "/administration/value-certification-v2", icon: "Award" },

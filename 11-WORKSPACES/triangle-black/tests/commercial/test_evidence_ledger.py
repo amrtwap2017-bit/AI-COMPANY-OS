@@ -21,6 +21,27 @@ class TestEvidenceLedgerAuth:
         assert r.status_code in (401, 403)
 
 class TestEvidenceLedgerCore:
+    def teardown_method(self, method):
+        """Clean up test evidence records after each test."""
+        import requests, os
+        try:
+            from sqlalchemy import create_engine, text
+            db_url = os.environ.get("DATABASE_URL",
+                "postgresql+psycopg2://ai:ai123@localhost:5432/triangle_black")
+            engine = create_engine(db_url)
+            with engine.connect() as conn:
+                conn.execute(text("""
+                    UPDATE evidence_records
+                    SET evidence_level = 0, evidence_label = 'INTERNAL',
+                        customer_verified = FALSE,
+                        notes = CONCAT('[TEST-CLEANUP] ', COALESCE(notes, ''))
+                    WHERE evidence_level >= 3
+                    AND notes ILIKE '%Customer confirmed chiller%'
+                """))
+                conn.commit()
+        except Exception:
+            pass  # teardown must never fail tests
+
     def test_record_internal_evidence(self, auth_headers):
         r = requests.post(f"{BASE}/api/v1/evidence/", headers=auth_headers, json={
             "metric_name": "pm_compliance_rate",
