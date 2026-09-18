@@ -108,6 +108,7 @@ from src.commercial.cache.router import router as cache_router
 from src.commercial.pagination.router import router as pagination_router
 from src.commercial.email_notifications.router import router as email_notification_router
 from src.commercial.evidence_ledger.router import router as evidence_ledger_router
+from src.commercial.user_management.router import router as user_management_router
 
 
 
@@ -431,6 +432,7 @@ try:
     from src.commercial.recommendations.router import router as recommendations_router
     app.include_router(recommendations_router, prefix=API_PREFIX)
     app.include_router(evidence_ledger_router, prefix=API_PREFIX)
+    app.include_router(user_management_router, prefix=API_PREFIX)
     print('  OK: recommendations_router')
 except Exception as _e:
     import logging; logging.getLogger('tb').warning(f'WARN: recommendations: {_e}')
@@ -910,8 +912,7 @@ except Exception as e:
 
 # ── Stock Balances direct endpoint ──────────────────────────────────────────
 from sqlalchemy import text as _text
-from src.core.database import get_db
-from src.core.startup_validation import validate_critical_routes as _get_db
+from src.core.database import get_db as _get_db
 from sqlalchemy.orm import Session as _Session
 
 @app.get("/api/v1/stock-balances/", tags=["inventory"], dependencies=[_Depends(_get_current_user)])

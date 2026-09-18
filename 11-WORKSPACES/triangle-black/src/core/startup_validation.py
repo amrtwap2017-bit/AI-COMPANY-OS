@@ -43,6 +43,8 @@ CRITICAL_ROUTES = [
     # Employees (previously silently failed)
     ("GET", "/api/v1/employees/", "Employees"),
     ("GET", "/api/v1/timesheets/", "Timesheets"),
+    # User management (invitation)
+    ("POST", "/api/v1/users/invite", "User invitation"),
     # Health
     ("GET", "/api/v1/health/live", "Health live"),
 ]
