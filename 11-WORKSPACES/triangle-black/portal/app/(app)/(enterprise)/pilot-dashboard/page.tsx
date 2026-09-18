@@ -295,7 +295,6 @@ export default function PilotCustomerDashboard() {
           </div>
         </div>
       )}
-    </div>
 
       {/* GAP-004: Evidence ROI Hierarchy Widget */}
       <div className="tb-section mt-6">
@@ -359,6 +358,10 @@ export default function PilotCustomerDashboard() {
           </div>
         );
       })()}
+
+    </div>
+  );
+}
 
     </div>
   );
