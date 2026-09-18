@@ -109,6 +109,7 @@ from src.commercial.pagination.router import router as pagination_router
 from src.commercial.email_notifications.router import router as email_notification_router
 from src.commercial.evidence_ledger.router import router as evidence_ledger_router
 from src.commercial.attention_sla.router import router as attention_sla_router
+from src.commercial.import_tracking.router import router as import_tracking_router
 from src.commercial.user_management.router import router as user_management_router
 
 
@@ -434,6 +435,7 @@ try:
     app.include_router(recommendations_router, prefix=API_PREFIX)
     app.include_router(evidence_ledger_router, prefix=API_PREFIX)
     app.include_router(attention_sla_router, prefix=API_PREFIX)
+    app.include_router(import_tracking_router, prefix=API_PREFIX)
     app.include_router(user_management_router, prefix=API_PREFIX)
     print('  OK: recommendations_router')
 except Exception as _e:
