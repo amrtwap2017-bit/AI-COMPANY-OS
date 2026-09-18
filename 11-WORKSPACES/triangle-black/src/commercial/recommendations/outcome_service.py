@@ -130,6 +130,19 @@ class RecommendationOutcomeService:
                 pass  # Evidence must NEVER block outcome recording
 
 
+
+            # AUTO-RECORD ADOPTION EVENT (non-blocking — after commit)
+            try:
+                from src.commercial.adoption.service import AdoptionService
+                _adopt_svc = AdoptionService(db=self.db, hotel_id=self.hotel_id)
+                _adopt_svc.record_event(
+                    event_type="OUTCOME_RECORDED",
+                    entity_type="recommendation",
+                    entity_id=rec_id,
+                )
+            except Exception:
+                pass  # Adoption tracking must NEVER block outcome recording
+
             return {
                 "success": True,
                 "rec_id": rec_id,

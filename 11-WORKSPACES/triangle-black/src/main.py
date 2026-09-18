@@ -8950,3 +8950,21 @@ except Exception as _e:
 @app.get("/api/v1/executive-dashboard/", tags=["executive"])
 def get_legacy_executive_dashboard():
     return {"hotel_id": "tb-default-hotel-000000000001", "status": "active"}
+
+# ── STARTUP ROUTE VALIDATION ──────────────────────────────────────────────────
+# Checks that all critical routes mounted successfully after startup
+# Catches silent NameError → router not mounted → 404 failures
+try:
+    import importlib as _imp_lib
+    _sv_mod = _imp_lib.import_module("src.core.startup_validation")
+    _route_result = _sv_mod.validate_critical_routes(app)
+    if _route_result.get("missing_count", 0) > 0:
+        import logging as _log
+        _log.getLogger("tb.startup").error(
+            f"STARTUP: {_route_result['missing_count']} critical routes missing! "
+            f"Check for import errors in router files."
+        )
+except Exception as _sv_err:
+    import logging as _log
+    _log.getLogger("tb.startup").warning(f"Startup validation skipped: {_sv_err}")
+

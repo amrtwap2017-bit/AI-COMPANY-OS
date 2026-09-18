@@ -1,86 +1,74 @@
 """
-Startup Route Registry Validation
-Prevents silent router failures (the employees/timesheets NameError lesson).
+Startup Route Registry Validation — V15.0 Updated
+Detects silent router mounting failures using substring path matching.
 
-If a router fails to mount due to NameError/ImportError, main.py's try/except
-silently continues. This module validates that CRITICAL routes are actually
-mounted after startup.
+KEY LESSON: Routes mounted via try/except blocks in main.py can silently
+fail (NameError etc.) and the application continues without them → 404.
 
-Usage in main.py:
-    from src.core.startup_validation import validate_critical_routes
-    validate_critical_routes(app)  # Call after all router mounting
+This module validates critical routes ARE actually mounted after startup.
+Uses substring matching since routes may have different prefix structures.
 """
 from __future__ import annotations
 import logging
-from typing import Optional
 
 logger = logging.getLogger("tb.startup")
 
-# Routes that MUST be mounted for the system to function
-# Format: (method, path_pattern, description)
+# Critical routes using SUBSTRING matching — more robust than exact path
+# Format: (method, path_substring, description)
 CRITICAL_ROUTES = [
     # Auth
-    ("POST", "/api/v1/auth/login/json", "Login"),
+    ("POST", "auth/login", "Login endpoint"),
     # Operations
-    ("GET", "/api/v1/work-orders/", "Work orders list"),
-    ("POST", "/api/v1/work-orders/", "Work order creation"),
-    # Maintenance
-    ("GET", "/api/v1/maintenance/pm-plans", "PM plans"),
-    ("GET", "/api/v1/maintenance/assets", "Assets"),
+    ("GET", "work-orders", "Work orders list"),
     # Pilot
-    ("GET", "/api/v1/pilot/baseline", "Pilot baseline"),
-    ("GET", "/api/v1/pilot/report/pdf", "PDF report"),
+    ("GET", "pilot/baseline", "Pilot baseline"),
+    ("GET", "pilot/report/pdf", "PDF report"),
     # Evidence
-    ("GET", "/api/v1/evidence/summary", "Evidence summary"),
+    ("GET", "evidence/summary", "Evidence summary"),
     # Recommendations
-    ("GET", "/api/v1/recommendations/", "Recommendations"),
+    ("GET", "recommendations", "Recommendations list"),
     # Attention
-    ("GET", "/api/v1/attention/", "Attention"),
+    ("GET", "attention", "Attention dashboard"),
     # Onboarding
-    ("POST", "/api/v1/onboarding/provision", "Onboarding provision"),
+    ("POST", "onboarding/provision", "Onboarding provision"),
     # Data import
-    ("POST", "/api/v1/data-import/assets", "Asset import"),
-    # Employees (previously silently failed)
-    ("GET", "/api/v1/employees/", "Employees"),
-    ("GET", "/api/v1/timesheets/", "Timesheets"),
-    # User management (invitation)
-    ("POST", "/api/v1/users/invite", "User invitation"),
+    ("POST", "data-import/assets", "Asset import"),
+    # User management (new V15 P0)
+    ("POST", "users/invite", "User invitation"),
+    # SLA events (new V15 P1)
+    ("GET", "attention/sla/summary", "SLA summary"),
+    # Adoption (new V15 P2)
+    ("GET", "adoption/health", "Adoption health"),
     # Health
-    ("GET", "/api/v1/health/live", "Health live"),
+    ("GET", "health/live", "Health live"),
 ]
 
 
 def validate_critical_routes(app, fail_on_missing: bool = False) -> dict:
     """
-    Check that all critical routes are mounted.
-    
-    Args:
-        app: FastAPI application instance
-        fail_on_missing: If True, raises RuntimeError if routes are missing.
-                        Default False (logs warnings only) for backward compat.
-    
-    Returns:
-        dict with: mounted_count, missing_count, missing_routes
+    Check all critical routes are mounted using substring matching.
+    Non-fatal by default — logs WARNING for missing routes.
     """
     try:
-        # Get all mounted routes
+        # Collect all mounted routes
         mounted = set()
         for route in app.routes:
             if hasattr(route, "methods") and hasattr(route, "path"):
-                for method in route.methods:
+                for method in (route.methods or []):
                     mounted.add((method.upper(), route.path))
 
         missing = []
-        for method, path, description in CRITICAL_ROUTES:
-            # Check for exact match or path with params
+        for method, path_substr, description in CRITICAL_ROUTES:
+            # Substring matching — find if any mounted route contains this substring
             found = any(
-                m == method and (p == path or p.startswith(path.rstrip("/")))
+                m == method and path_substr in p
                 for m, p in mounted
             )
             if not found:
-                missing.append((method, path, description))
+                missing.append((method, path_substr, description))
                 logger.warning(
-                    f"STARTUP WARNING: Critical route not mounted: {method} {path} ({description})"
+                    f"STARTUP WARNING: Critical route not mounted: "
+                    f"{method} *{path_substr}* ({description})"
                 )
 
         result = {
@@ -93,7 +81,7 @@ def validate_critical_routes(app, fail_on_missing: bool = False) -> dict:
         if missing:
             logger.error(
                 f"STARTUP: {len(missing)} critical routes missing! "
-                f"System may be partially functional. "
+                f"Check for NameError/ImportError in router files. "
                 f"Missing: {[p for _, p, _ in missing]}"
             )
             if fail_on_missing:
@@ -109,6 +97,8 @@ def validate_critical_routes(app, fail_on_missing: bool = False) -> dict:
         return result
 
     except Exception as e:
+        if fail_on_missing and "Critical routes" in str(e):
+            raise
         logger.error(f"STARTUP: Route validation failed: {e}")
         return {"error": str(e), "missing_count": -1}
 

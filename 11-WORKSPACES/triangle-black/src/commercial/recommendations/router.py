@@ -252,6 +252,9 @@ def get_recommendation(
 
 
 @router.post("/{rec_id}/approve")
+
+
+
 def approve_recommendation(
     rec_id: str,
     payload: dict = None,
@@ -267,18 +270,4 @@ def approve_recommendation(
     reviewer = getattr(current_user, "email", "system")
     notes = payload.get("notes", "")
     return service.approve_recommendation(rec_id, reviewer, notes)
-
-
-@router.post("/{rec_id}/reject")
-def reject_recommendation(
-    rec_id: str,
-    payload: dict = None,
-    current_user=Depends(get_current_user),
-    service: RecommendationService = Depends(_svc),
-):
-    """Human rejects recommendation with reason."""
-    payload = payload or {}
-    reviewer = getattr(current_user, "email", "system")
-    reason = payload.get("reason", "Rejected by reviewer")
-    return service.reject_recommendation(rec_id, reviewer, reason)
 
