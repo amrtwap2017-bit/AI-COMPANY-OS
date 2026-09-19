@@ -251,6 +251,180 @@ class PilotReportService:
             'footer', parent=body_style, fontSize=8, textColor=HexColor("#888888")
         )))
 
+
+        # ─── Section 6: Adoption Intelligence ───────────────────────────────
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Section 6: Operational Adoption", heading_style))
+        story.append(Paragraph(
+            "Measures how actively the engineering team is using the Triangle Black platform. "
+            "Adoption is a leading indicator of operational value delivery.",
+            body_style
+        ))
+
+        try:
+            from src.commercial.adoption.service import AdoptionService
+            _adopt = AdoptionService(db=self.db, hotel_id=self.hotel_id)
+            adopt_data = _adopt.get_adoption_health(days=30)
+            score = adopt_data.get("health_score", 0)
+            label = adopt_data.get("health_label", "UNKNOWN")
+            active_users = adopt_data.get("active_users", 0)
+            by_event = adopt_data.get("by_event", {})
+
+            adopt_table_data = [
+                ["Metric", "Value", "Interpretation"],
+                ["Adoption Score", f"{score}/100", label],
+                ["Active Users (30d)", str(active_users), "Engineers using system"],
+                ["WOs Created", str(by_event.get("WO_CREATED", {}).get("event_count", 0)), "Operational engagement"],
+                ["Recommendations Reviewed", str(by_event.get("REC_VIEWED", {}).get("event_count", 0)), "Intelligence engagement"],
+                ["Recommendations Approved", str(by_event.get("REC_APPROVED", {}).get("event_count", 0)), "Human decisions made"],
+                ["Outcomes Recorded", str(by_event.get("OUTCOME_RECORDED", {}).get("event_count", 0)), "Value loop closed"],
+            ]
+            adopt_table = Table(adopt_table_data, colWidths=[180, 100, 200])
+            adopt_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1B3A6B")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8F9FA")]),
+                ("ALIGN", (1, 0), (1, -1), "CENTER"),
+            ]))
+            story.append(adopt_table)
+        except Exception:
+            story.append(Paragraph(
+                "Adoption data not available for this reporting period.",
+                body_style
+            ))
+
+        # ─── Section 7: Financial Impact ────────────────────────────────────
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Section 7: Financial Impact", heading_style))
+        story.append(Paragraph(
+            "Financial impact is reported only when customer-verified evidence exists (Level 3+). "
+            "Internal calculations are shown separately and clearly marked as unverified.",
+            body_style
+        ))
+
+        try:
+            data = self._get_report_data()
+            evidence = data.get("evidence_summary", {})
+            total_l3_l4 = evidence.get("customer_verified_count", 0)
+            total_roi = evidence.get("verified_roi_egp", 0.0)
+            internal_roi = evidence.get("internal_calculated_roi", 0.0)
+
+            fin_table_data = [
+                ["Evidence Level", "Count", "Financial Value (EGP)", "Verification"],
+                ["L3 — Customer Confirmed", str(total_l3_l4),
+                 f"EGP {total_roi:,.0f}" if total_roi else "Pending", "Customer verified"],
+                ["L1/L2 — System/Operator", str(evidence.get("system_measured_count", 0)),
+                 f"EGP {internal_roi:,.0f}" if internal_roi else "Calculated",
+                 "⚠️ NOT customer verified"],
+                ["L0 — Internal Estimate", str(evidence.get("generated_count", 0)),
+                 "—", "⚠️ Internal only"],
+            ]
+            fin_table = Table(fin_table_data, colWidths=[160, 70, 160, 130])
+            fin_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1B3A6B")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8F9FA")]),
+            ]))
+            story.append(fin_table)
+
+            if total_roi > 0:
+                story.append(Spacer(1, 6))
+                story.append(Paragraph(
+                    f"<b>Customer-Verified Financial Impact: EGP {total_roi:,.0f}</b> "
+                    f"(Level 3+ evidence, {total_l3_l4} verified outcomes)",
+                    body_style
+                ))
+            else:
+                story.append(Spacer(1, 6))
+                story.append(Paragraph(
+                    "No customer-verified financial impact recorded yet. "
+                    "Pending customer confirmation of operational outcomes.",
+                    body_style
+                ))
+        except Exception:
+            story.append(Paragraph(
+                "Financial impact data not yet available. "
+                "Record outcomes and customer verification to populate this section.",
+                body_style
+            ))
+
+        # ─── Section 8: Next 30 Days ─────────────────────────────────────────
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Section 8: Recommended Next 30 Days", heading_style))
+        story.append(Paragraph(
+            "Priority actions for the next operational period, based on current pilot evidence.",
+            body_style
+        ))
+
+        try:
+            data = self._get_report_data() if "data" not in dir() else data
+            open_critical = data.get("attention_summary", {}).get("critical_open", 0)
+            pm_overdue = data.get("pm_summary", {}).get("overdue_count", 0)
+            pending_recs = data.get("recommendation_summary", {}).get("pending_count", 0)
+
+            next_actions = []
+            priority = 1
+
+            if open_critical > 0:
+                next_actions.append([
+                    str(priority), "CRITICAL",
+                    f"Resolve {open_critical} open critical attention items",
+                    "Engineering Manager"
+                ])
+                priority += 1
+
+            if pm_overdue > 0:
+                next_actions.append([
+                    str(priority), "HIGH",
+                    f"Complete {pm_overdue} overdue PM tasks",
+                    "Chief Engineer"
+                ])
+                priority += 1
+
+            if pending_recs > 0:
+                next_actions.append([
+                    str(priority), "MEDIUM",
+                    f"Review and decide on {pending_recs} pending AI recommendations",
+                    "Engineering Director"
+                ])
+                priority += 1
+
+            next_actions.extend([
+                [str(priority), "STANDARD", "Continue daily WO management via portal", "All Engineers"],
+                [str(priority+1), "STANDARD", "Verify and confirm operational outcomes", "Engineering Manager"],
+                [str(priority+2), "STANDARD", "Run weekly data quality review", "Data Champion"],
+            ])
+
+            next_table_data = [["#", "Priority", "Action", "Owner"]] + next_actions
+            next_table = Table(next_table_data, colWidths=[25, 70, 280, 145])
+            next_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1B3A6B")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8F9FA")]),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ]))
+            story.append(next_table)
+        except Exception:
+            next_items = [
+                "• Resolve all open critical attention items",
+                "• Complete overdue PM tasks",
+                "• Review and approve pending recommendations",
+                "• Continue daily operational workflow",
+                "• Record and verify operational outcomes",
+                "• Confirm customer-verified financial impacts",
+            ]
+            for item in next_items:
+                story.append(Paragraph(item, body_style))
+
         doc.build(story)
         buffer.seek(0)
         return buffer.read()
