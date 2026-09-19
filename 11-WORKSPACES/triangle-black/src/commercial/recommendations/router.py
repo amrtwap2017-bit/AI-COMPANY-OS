@@ -13,6 +13,7 @@ POST /recommendations/{id}/reject  → human rejects
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from src.core.database import get_db
+from src.core.customer_scope import CustomerDataScope
 from src.core.tenant import get_hotel_id
 from src.core.auth import get_current_user
 from src.commercial.recommendations.service import RecommendationService
