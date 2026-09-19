@@ -782,7 +782,7 @@ def create_agent_action(
 @router.post("/leads/{lead_id}/note")
 def add_note(
     lead_id: str,
-    payload: AddNoteIn,
+    payload: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_agent),
     hotel_id: str = Depends(get_hotel_id),
