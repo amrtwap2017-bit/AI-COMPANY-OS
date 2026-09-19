@@ -1258,6 +1258,10 @@ def get_dashboard_summary():
 @app.post("/api/v1/automation/run", tags=["automation"], dependencies=[_Depends(_get_current_user)])
 @app.get("/api/v1/automation/run", tags=["automation"])
 def run_automation_engine():
+    _env = __import__("os").getenv("ENVIRONMENT", "dev")
+    if _env == "production":
+        from fastapi import HTTPException
+        raise HTTPException(403, "Not available in production")
     """
     Workflow Automation Engine — runs all 5 business workflows:
     WF-01: Overdue PM Plans → auto-create Work Orders
